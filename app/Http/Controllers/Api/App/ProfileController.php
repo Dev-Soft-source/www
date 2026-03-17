@@ -96,7 +96,7 @@ class ProfileController extends Controller
             });
         })->count();
 
-        $passenger_driven = Ride::where('status', '!=', 2)->where('added_by', $user_id)
+        $passenger_driven = Ride::notCancelled()->where('added_by', $user_id)
             ->where(function ($query) {
                 $query->whereDate('rides.date', '<', now()->toDateString())
                     ->orWhere(function ($query) {
@@ -110,7 +110,7 @@ class ProfileController extends Controller
             })
             ->sum();
 
-        $rides_taken = Ride::where('status', '!=', 2)->where('added_by', $user_id)
+        $rides_taken = Ride::notCancelled()->where('added_by', $user_id)
             ->where(function ($query) {
                 $query->whereDate('rides.date', '<', now()->toDateString())
                     ->orWhere(function ($query) {
@@ -354,7 +354,7 @@ class ProfileController extends Controller
             })
             ->sum();
 
-            $ride->driver->rides_taken = Ride::where('status', '!=', 2)->where('added_by', $driver_id)
+            $ride->driver->rides_taken = Ride::notCancelled()->where('added_by', $driver_id)
                 ->where(function ($query) {
                     $query->whereDate('rides.date', '<', now()->toDateString())
                         ->orWhere(function ($query) {
@@ -469,7 +469,7 @@ class ProfileController extends Controller
 
             // Calculate passenger_driven
             $user->passenger_driven = Ride::where('added_by', $user_id)
-                ->where('status', '!=', 2)
+                ->notCancelled()
                 ->where(function ($query) {
                     $query->whereDate('completed_date', '<=', now()->toDateString())
                         ->orWhere(function ($query) {
@@ -483,7 +483,7 @@ class ProfileController extends Controller
                 })
                 ->sum();
 
-            $user->rides_taken = Ride::where('status', '!=', 2)->where('added_by', $user_id)
+            $user->rides_taken = Ride::notCancelled()->where('added_by', $user_id)
                 ->where(function ($query) {
                     $query->whereDate('rides.date', '<', now()->toDateString())
                         ->orWhere(function ($query) {

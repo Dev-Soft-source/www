@@ -151,10 +151,10 @@ return [
         'model' => [
             'required' => '型号为必填项。',
         ],
-        'type' => [
+        'vehicle_type' => [
             'required' => '车辆类型为必填项。',
         ],
-        'liscense_no' => [
+        'license_no' => [
             'required' => '车牌号为必填项。',
             'max' => '车牌号长度必须少于 8 个字符。',
         ],
@@ -166,7 +166,7 @@ return [
             'required' => '年份为必填项。',
             'max' => '年份长度必须少于 4 个字符。',
         ],
-        'car_type' => [
+        'power_type' => [
             'required' => '动力类型为必填项。',
         ],
         'primary_vehicle' => [
@@ -373,15 +373,15 @@ return [
         ],
         'dr_amount.gt' => '金额必须大于 0。',
     ],
-    
+
     'attributes' => [
         'make' => '品牌',
         'model' => '型号',
-        'type' => '车辆类型',
+        'vehicle_type' => '车辆类型',
         'color' => '颜色',
         'year' => '年份',
-        'liscense_no' => '车牌号',
-        'car_type' => '动力类型',
+        'license_no' => '车牌号',
+        'power_type' => '动力类型',
         'primary_vehicle' => '主要车辆',
         'image' => '车辆照片',
         'email' => '电子邮箱地址',

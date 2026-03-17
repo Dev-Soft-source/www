@@ -26,7 +26,7 @@ class RideController extends Controller
                             });
                     })
                     // ->orWhere('suspand', 1)
-                    ->where('status', 2);
+                    ->cancelled();
                 })->with(['rideDetail' => function($q){
                     $q->where('default_ride','1');
                 }])
@@ -36,7 +36,7 @@ class RideController extends Controller
             else if($request->input('s')=='1')
                 $rides = Ride::
             // where('suspand', 0)->
-                    where('status', '!=', 2)
+                    notCancelled()
                     ->where(function ($query) {
                         $query->where(function ($query) {
                             $query->whereDate('completed_date', '>=', now()->toDateString())
@@ -73,7 +73,7 @@ class RideController extends Controller
     public function cancelRide($id, Ride $ride)
     {
         $result = Ride::whereId($id)->update([
-            'status' => 2,
+            'status' => Ride::STATUS_CANCELLED,
         ]);
 
         if ($result) {

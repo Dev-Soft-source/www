@@ -46,8 +46,8 @@ class UserBirthdayWishCron extends Command
     {
         $today = Carbon::today();
 
-        User::whereNull('deleted_at')
-            ->where('email_notification', 1)
+        User::active()
+            ->emailNotificationsEnabled()
             ->chunk(100, function ($users) use ($today) {
                 foreach ($users as $user) {
                     try {
@@ -68,7 +68,7 @@ class UserBirthdayWishCron extends Command
                 }
             });
 
-        User::whereNull('deleted_at')
+        User::active()
             ->chunk(100, function ($users) use ($today) {
                 foreach ($users as $user) {
                     try {

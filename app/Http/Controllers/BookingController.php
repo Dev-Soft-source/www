@@ -218,10 +218,8 @@ class BookingController extends Controller
                 // Compute Pink Ride and Extra Care flags BEFORE replacing features with names
                 $featureIds = array_filter(explode('=', $ride->features ?? ''));
 
-                $pinkRideId = optional($postRidePage->features_option1 ?? null)->features_setting_id ?? ($postRidePage->features_option1 ?? null);
-                $isPinkRide = $pinkRideId && !empty($featureIds) && in_array((string)$pinkRideId, $featureIds);
-                $extraCareId = optional($postRidePage->features_option2 ?? null)->features_setting_id ?? ($postRidePage->features_option2 ?? null);
-                $isExtraCareRide = $extraCareId && !empty($featureIds) && in_array((string)$extraCareId, $featureIds);
+                $isPinkRide = $ride->isPinkRide();
+                $isExtraCareRide = $ride->isExtraCareRide();
                 // Short-Distance Ride: price per seat from RideDetail <= $15, no booking fee (same logic as ride_detail)
                 $pricePerSeat = (float) ($ride->rideDetail->first()?->price ?? 0);
                 $isShortDistanceRide = $pricePerSeat > 0 && $pricePerSeat <= 15;
@@ -924,7 +922,7 @@ class BookingController extends Controller
             }
 
             // For passengers booking Pink Rides, require government ID (check all possible ID fields)
-            if ($pinkRideSetting && $pinkRideSetting->driver_license === '1') {
+            if ($pinkRideSetting && $pinkRideSetting->requiresDriverLicense()) {
                 $hasGovernmentId = !empty($user->government_id) || !empty($user->government_issued_id) || !empty($user->driver_license_upload);
                 if (!$hasGovernmentId) {
                     return redirect()->back()->with(['failure' => 'A government-issued photo ID is required to book Pink Rides. Please upload your government ID or driver\'s license in your profile.']);
@@ -935,7 +933,7 @@ class BookingController extends Controller
         // Check if ride has Extra Care feature (feature ID 2)
         if (in_array('2', $featuresArray)) {
             // For passengers booking Extra Care Rides, require government ID (check all possible ID fields)
-            if ($folkRideSetting && $folkRideSetting->driver_license === '1') {
+            if ($folkRideSetting && $folkRideSetting->requiresDriverLicense()) {
                 $hasGovernmentId = !empty($user->government_id) || !empty($user->government_issued_id) || !empty($user->driver_license_upload);
                 if (!$hasGovernmentId) {
                     return redirect()->back()->with(['failure' => 'A government-issued photo ID is required to book Extra Care Rides. Please upload your government ID or driver\'s license in your profile.']);
@@ -4011,7 +4009,7 @@ class BookingController extends Controller
             }
 
             // For passengers booking Pink Rides, require government ID (check all possible ID fields)
-            if ($pinkRideSetting && $pinkRideSetting->driver_license === '1') {
+            if ($pinkRideSetting && $pinkRideSetting->requiresDriverLicense()) {
                 $hasGovernmentId = !empty($user->government_id) || !empty($user->government_issued_id) || !empty($user->driver_license_upload);
                 if (!$hasGovernmentId) {
                     return redirect()->back()->with(['failure' => 'A government-issued photo ID is required to book Pink Rides. Please upload your government ID or driver\'s license in your profile.']);
@@ -4022,7 +4020,7 @@ class BookingController extends Controller
         // Check if ride has Extra Care feature (feature ID 2)
         if (in_array('2', $featuresArray)) {
             // For passengers booking Extra Care Rides, require government ID (check all possible ID fields)
-            if ($folkRideSetting && $folkRideSetting->driver_license === '1') {
+            if ($folkRideSetting && $folkRideSetting->requiresDriverLicense()) {
                 $hasGovernmentId = !empty($user->government_id) || !empty($user->government_issued_id) || !empty($user->driver_license_upload);
                 if (!$hasGovernmentId) {
                     return redirect()->back()->with(['failure' => 'A government-issued photo ID is required to book Extra Care Rides. Please upload your government ID or driver\'s license in your profile.']);

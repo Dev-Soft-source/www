@@ -11,7 +11,7 @@ use App\Models\Language;
 use App\Models\ChatsPageSettingDetail;
 use App\Models\SuccessMessagesSettingDetail;
 use App\Models\Notification;
-use App\Models\Rating;
+use App\Models\Ride;
 use App\Models\PostRidePageSettingDetail;
 use App\Models\FindRidePageSettingDetail;
 use App\Models\FeaturesSetting;
@@ -311,5 +311,104 @@ class Controller extends BaseController
         }
 
         return $postRidePage;
+    }
+
+    protected function getSearchOptionGroups($selectedLangId, $defaultLangId)
+    {
+        $groupFeatureIds = [
+            'features' => array_merge(range(1, 20), [47]),
+            'luggage_size' => range(26, 30),
+            'smoking_allowed' => [21, 22],
+            'pets_allowed' => range(23, 25),
+            'payment_method' => range(33, 35),
+            'vehicle_type' => range(38, 46),
+        ];
+
+        $featureIds = collect($groupFeatureIds)->flatten()->unique()->values()->all();
+
+        $featureSlugs = FeaturesSetting::query()
+            ->whereIn('id', $featureIds)
+            ->pluck('slug', 'id');
+
+        $details = FeaturesSettingDetail::query()
+            ->whereIn('features_setting_id', $featureIds)
+            ->whereIn('language_id', array_unique(array_filter([$selectedLangId, $defaultLangId])))
+            ->get()
+            ->groupBy('features_setting_id');
+
+        $groups = collect($groupFeatureIds)->map(function ($ids, $code) use ($details, $featureSlugs, $selectedLangId, $defaultLangId) {
+            $options = collect($ids)
+                ->map(function ($id) use ($details, $featureSlugs, $selectedLangId, $defaultLangId) {
+                    $selected = $details->get($id, collect())
+                        ->firstWhere('language_id', $selectedLangId);
+                    $fallback = $details->get($id, collect())
+                        ->firstWhere('language_id', $defaultLangId);
+                    $detail = $selected ?: $fallback;
+
+                    if (!$detail) {
+                        return null;
+                    }
+
+                    return (object) [
+                        'id' => $id,
+                        'features_setting_id' => $id,
+                        'code' => $featureSlugs->get($id) ?: (string) $id,
+                        'slug' => $featureSlugs->get($id),
+                        'icon' => $detail->icon ?? $fallback?->icon,
+                        'display_label' => $detail->name ?? $fallback?->name ?? $featureSlugs->get($id) ?? (string) $id,
+                        'display_description' => $detail->display_tooltip ?? $fallback?->display_tooltip,
+                    ];
+                })
+                ->filter()
+                ->values();
+
+            return (object) [
+                'code' => $code,
+                'options' => $options,
+            ];
+        })->keyBy('code');
+
+        if ($groups->has('payment_method')) {
+            $groups->put('booking_method', $groups->get('payment_method'));
+        }
+
+        if ($groups->has('features')) {
+            $groups->put('preference', $groups->get('features'));
+        }
+
+        return $groups;
+    }
+
+    protected function extractIntermediateStopsForForm(Ride $ride): array
+    {
+        $originLabel = $ride->detail->departure ?? '';
+        $destinationLabel = $ride->detail->destination ?? '';
+
+        return $ride->rideStops
+            ->filter(function ($stop) use ($originLabel, $destinationLabel) {
+                $label = trim((string) $stop->label);
+
+                if ($label === '') {
+                    return false;
+                }
+
+                return !in_array(
+                    strtolower($label),
+                    [strtolower($originLabel), strtolower($destinationLabel)]
+                );
+            })
+            ->map(fn($stop) => [
+                'label' => $stop->label,
+                'city_id' => $stop->city_id,
+                'departure_at' => !empty($stop->departure_at)
+                    ? Carbon::parse($stop->departure_at)->format('Y-m-d H:i')
+                    : null,
+                'price_delta_minor' => $stop->price_delta_minor,
+                'is_pickup' => $stop->is_pickup,
+                'is_dropoff' => $stop->is_dropoff,
+                'pickup_dropoff_location' => $stop->pickup_dropoff_location,
+            ])
+            ->values()
+            ->toArray();
     }
 }

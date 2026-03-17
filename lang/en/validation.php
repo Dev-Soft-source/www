@@ -128,7 +128,7 @@ return
 		'prohibits' => 'The :attribute field prohibits :other from being present.',
 		'regex' => 'The :attribute field format is invalid.',
 		'required' => 'This field is required.',
-		
+
 		'required_array_keys' => 'The :attribute field must contain entries for: :values.',
 		'required_if' => 'The :attribute field is required when :other is :value.',
 		'required_if_accepted' => 'The :attribute field is required when :other is accepted.',
@@ -162,10 +162,10 @@ return
 			'model' => [
 				'required' => 'The model is required.',
 			],
-			'type' => [
+			'vehicle_type' => [
 				'required' => 'The vehicle type is required.',
 			],
-			'liscense_no' => [
+			'license_no' => [
 				'required' => 'The license number is required.',
 				'max' => 'The license number must be less than 8 characters.',
 			],
@@ -177,7 +177,7 @@ return
 				'required' => 'The year is required.',
 				'max' => 'The year must be less than 4 characters.',
 			],
-			'car_type' => [
+			'power_type' => [
 				'required' => 'The car type is required.',
 			],
 			'primary_vehicle' => [
@@ -192,12 +192,24 @@ return
 			'city_not_in_record' => [
 				'message' => 'We could not find this city name in our records, please double-check the spelling.',
 			],
-			'from' => [
+///////////// todo
+			'origin.label' => [
 				'required' => 'The origin is required.',
 			],
-			'to' => [
+			'destination.label' => [
 				'required' => 'The destination is required.',
 			],
+			'date' => [
+				'required' => 'The date is required.',
+			],
+			'price_minor' => [
+				'required' => 'The price is required.',
+				'gt' => 'The price must be greater than 0.',
+			],
+			'stops.*.label' => ['required_with' => 'Stop location is required for each stop.'],
+			'stops.*.departure_at' => ['required_with' => 'Departure time is required for each stop.'],
+    		'stops.*.pickup_dropoff_location.required_with' => 'Pickup/Dropoff location is required.',
+///
 			'pickup' => [
 				'required' => 'The pickup is required.',
 			],
@@ -403,26 +415,26 @@ return
 				'max' => 'The phone number must be less than 20 characters.',
 				'unique' => 'The phone number has already been taken.',
 			],
-		'message' =>
-		[
-			'required' => 'The message is required.',
-		],
-		'student_card' =>
-		[
-			'required' => 'The student card is required.',
-			'mimes' => 'The image must be a file of type: jpeg, png, jpg, gif, pdf.',
-			'max' => 'The image must be less than 10MB.',
-		],
+			'message' =>
+			[
+				'required' => 'The message is required.',
+			],
+			'student_card' =>
+			[
+				'required' => 'The student card is required.',
+				'mimes' => 'The image must be a file of type: jpeg, png, jpg, gif, pdf.',
+				'max' => 'The image must be less than 10MB.',
+			],
 		],
 		'attributes' =>
 		[
 			'make' => 'Make',
 			'model' => 'Model',
-			'type' => 'Vehicle Type',
+			'vehicle_type' => 'Vehicle Type',
 			'color' => 'Color',
 			'year' => 'Year',
-			'liscense_no' => 'License Plate Number',
-			'car_type' => 'Power Source',
+			'license_no' => 'License Plate Number',
+			'power_type' => 'Power Source',
 			'primary_vehicle' => 'Primary Vehicle',
 			'image' => 'Vehicle Photo',
 			'email' => 'Email Address',

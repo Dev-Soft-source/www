@@ -151,10 +151,10 @@ return [
         'model' => [
             'required' => 'Kinakailangan ang modelo.',
         ],
-        'type' => [
+        'vehicle_type' => [
             'required' => 'Kinakailangan ang uri ng sasakyan.',
         ],
-        'liscense_no' => [
+        'license_no' => [
             'required' => 'Kinakailangan ang numero ng plaka.',
             'max' => 'Ang numero ng plaka ay dapat na mas mababa sa 8 karakter.',
         ],
@@ -166,7 +166,7 @@ return [
             'required' => 'Kinakailangan ang taon.',
             'max' => 'Ang taon ay dapat na mas mababa sa 4 na karakter.',
         ],
-        'car_type' => [
+        'power_type' => [
             'required' => 'Kinakailangan ang pinagmumulan ng lakas (fuel).',
         ],
         'primary_vehicle' => [
@@ -377,11 +377,11 @@ return [
     'attributes' => [
         'make' => 'Gawa',
         'model' => 'Modelo',
-        'type' => 'Uri ng Sasakyan',
+        'vehicle_type' => 'Uri ng Sasakyan',
         'color' => 'Kulay',
         'year' => 'Taon',
-        'liscense_no' => 'Numero ng Plaka',
-        'car_type' => 'Pinagmumulan ng Lakas',
+        'license_no' => 'Numero ng Plaka',
+        'power_type' => 'Pinagmumulan ng Lakas',
         'primary_vehicle' => 'Pangunahing Sasakyan',
         'image' => 'Larawan ng Sasakyan',
         'email' => 'Email Address',

@@ -95,7 +95,7 @@ class NoShowController extends Controller
         if ($user) {
             if ($request->restriction == '1') {
                 $rides = Ride::where('added_by', $user->id)
-                    ->where('status', '!=', 2)
+                    ->notCancelled()
                     ->where(function ($query) {
                         $query->where(function ($query) {
                             $query->whereDate('date', '>', now()->toDateString())

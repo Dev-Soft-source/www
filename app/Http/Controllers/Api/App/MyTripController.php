@@ -430,9 +430,7 @@ class MyTripController extends Controller
             $bookedSeats = $booking->ride->bookings()
                 ->where('status', '<>', 3)
                 ->where('status', '<>', 4)
-                ->whereHas('passenger', function($query) {
-                    $query->whereNull('deleted_at');
-                })
+                ->withActivePassenger()
                 ->sum('seats');
             $booking->ride->seats_left = intval($booking->ride->seats) - intval($bookedSeats);
     
@@ -1012,9 +1010,7 @@ class MyTripController extends Controller
             $bookedSeats = $booking->ride->bookings()
                 ->where('status', '<>', 3)
                 ->where('status', '<>', 4)
-                ->whereHas('passenger', function($query) {
-                    $query->whereNull('deleted_at');
-                })
+                ->withActivePassenger()
                 ->sum('seats');
             $booking->ride->seats_left = intval($booking->ride->seats) - intval($bookedSeats);
 
@@ -1195,7 +1191,7 @@ class MyTripController extends Controller
             ->where('status', 4)
             ->whereHas('ride', function ($query) {
                 $query->whereHas('driver', function ($query) {
-                    $query->whereNull('deleted_at'); // Exclude soft-deleted drivers
+                    $query->active(); // Exclude soft-deleted drivers
                 });
             })
             ->with(['ride.vehicle','ride' => function ($query) {
@@ -1569,9 +1565,7 @@ class MyTripController extends Controller
             $bookedSeats = $booking->ride->bookings()
                 ->where('status', '<>', 3)
                 ->where('status', '<>', 4)
-                ->whereHas('passenger', function($query) {
-                    $query->whereNull('deleted_at');
-                })
+                ->withActivePassenger()
                 ->sum('seats');
             $booking->ride->seats_left = intval($booking->ride->seats) - intval($bookedSeats);
 
@@ -2974,9 +2968,7 @@ class MyTripController extends Controller
             $bookedSeats = $booking->ride->bookings()
                 ->where('status', '<>', 3)
                 ->where('status', '<>', 4)
-                ->whereHas('passenger', function($query) {
-                    $query->whereNull('deleted_at');
-                })
+                ->withActivePassenger()
                 ->sum('seats');
             $booking->ride->seats_left = intval($booking->ride->seats) - intval($bookedSeats);
 

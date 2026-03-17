@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\Concerns\HasOptionGroups;
@@ -16,9 +18,14 @@ class Ride extends Model
 {
     use HasFactory, HasOptionGroups;
 
+    public const PINK_RIDE_FEATURE_ID = '1';
+    public const EXTRA_CARE_RIDE_FEATURE_ID = '2';
+    public const STATUS_ACTIVE = 1;
+    public const STATUS_CANCELLED = 2;
+
     protected $fillable = ['random_id','departure','departure_lat','departure_lng','departure_place','departure_route','departure_zipcode','departure_city','departure_state','departure_state_short','departure_country',
         'destination','destination_lat','destination_lng','destination_place','destination_route','destination_zipcode','destination_city','destination_state','destination_state_short','destination_country',
-        'total_distance','total_time','date','time','completed_date','completed_time','recurring','recurring_type','recurring_trips','recurring_id','details','seats','skip_vehicle','add_vehicle','added_vehicle','vehicle_id','make','model','vehicle_type','year','color','license_no','car_type','car_image','car_image_original','smoke','animal_friendly','features',
+        'total_distance','total_time','date','time','completed_date','completed_time','recurring','recurring_type','recurring_trips','recurring_id','details','seats','vehicle_mode','skip_vehicle','add_vehicle','added_vehicle','vehicle_id','make','model','vehicle_type','year','color','license_no','car_type','car_image','car_image_original','smoke','animal_friendly','features',
         'booking_method','booking_type','max_back_seats','luggage','accept_more_luggage','open_customized','price','payment_method','notes','added_by','until_date','until_limit','pickup','dropoff','middle_seats','back_seats',
         'status', 'added_on', 'remove_car_image'];
 
@@ -38,9 +45,31 @@ class Ride extends Model
     function bookings(){
         return $this->hasMany(Booking::class, 'ride_id');
     }
+    
+    function detail(){
+        return $this->hasOne(RideDetail::class, 'ride_id');
+    }
+
+    public static function statusLabels(): array
+    {
+        return [
+            self::STATUS_ACTIVE => 'active',
+            self::STATUS_CANCELLED => 'cancelled',
+        ];
+    }
 
     function rideDetail(){
         return $this->hasMany(RideDetail::class, 'ride_id', 'id');
+    }
+
+    public function rideStops()
+    {
+        return $this->hasMany(RideStop::class, 'ride_id')->orderBy('stop_order');
+    }
+
+    public function rideStopSegments()
+    {
+        return $this->hasMany(RideStopSegment::class, 'ride_id');
     }
 
     function defaultRideDetail(){
@@ -49,6 +78,21 @@ class Ride extends Model
 
     function MoreRideDetail(){
         return $this->hasMany(RideDetail::class, 'ride_id', 'id')->where('default_ride', '0');
+    }
+
+    public function scopeActiveStatus($query)
+    {
+        return $query->where('status', self::STATUS_ACTIVE);
+    }
+
+    public function scopeCancelled($query)
+    {
+        return $query->where('status', self::STATUS_CANCELLED);
+    }
+
+    public function scopeNotCancelled($query)
+    {
+        return $query->where('status', '!=', self::STATUS_CANCELLED);
     }
 
     function ratings(){
@@ -246,12 +290,12 @@ class Ride extends Model
 
     public function isPinkRide(): bool
     {
-        return !empty($this->pink_ride);
+        return in_array(self::PINK_RIDE_FEATURE_ID, $this->normalizeFeatureIds($this->features), true);
     }
 
     public function isExtraCareRide(): bool
     {
-        return !empty($this->extra_care_ride);
+        return in_array(self::EXTRA_CARE_RIDE_FEATURE_ID, $this->normalizeFeatureIds($this->features), true);
     }
 
     public function pricePerSeat(): float
@@ -264,6 +308,290 @@ class Ride extends Model
         $pricePerSeat = $this->pricePerSeat();
 
         return $pricePerSeat > 0 && $pricePerSeat <= 15;
+    }
+
+    public static function searchRides(array $filters, ?User $user = null): LengthAwarePaginator
+    {
+        $query = static::query()
+            ->with([
+                'driver',
+                'vehicle',
+                'bookings',
+                'rideStops' => fn ($q) => $q->orderBy('stop_order'),
+                'rideStopSegments',
+                'rideDetail',
+                'pendingSeatDetail',
+            ])
+            ->notCancelled()
+            ->where(function ($q) {
+                $q->whereDate('date', '>', now()->toDateString())
+                    ->orWhere(function ($sameDay) {
+                        $sameDay->whereDate('date', now()->toDateString())
+                            ->whereTime('time', '>=', now()->toTimeString());
+                    });
+            });
+
+        if ($user) {
+            $query->where('added_by', '!=', (int) $user->id);
+        }
+
+        if (!empty($filters['exclude_admin_deactive'])) {
+            $query->where('suspand', '!=', 1);
+        }
+
+        if (!empty($filters['require_vehicle'])) {
+            $query->whereNotNull('vehicle_id');
+        }
+
+        if (!empty($filters['excluded_driver_ids']) && is_array($filters['excluded_driver_ids'])) {
+            $query->whereNotIn('added_by', array_map('intval', $filters['excluded_driver_ids']));
+        }
+
+        static::applyOrderedStopFilters($query, $filters);
+        static::applyKeywordFilters($query, trim((string) ($filters['keyword'] ?? '')));
+        static::applyRideFilters($query, $filters);
+
+        if (!empty($filters['departure_date'])) {
+            $date = (string) $filters['departure_date'];
+            $query->where(function (Builder $dateQuery) use ($date) {
+                $dateQuery->whereDate('date', $date)
+                    ->orWhereHas('rideStops', function (Builder $stopQuery) use ($date) {
+                        $stopQuery->whereDate('departure_at', $date);
+                    });
+            });
+        }
+
+        $sort = (string) ($filters['sort'] ?? 'soonest');
+        if ($sort === 'latest_added') {
+            $query->orderByDesc('id');
+        } else {
+            $query->orderBy('date', 'asc')
+                ->orderBy('time', 'asc')
+                ->orderByDesc('id');
+        }
+
+        $perPage = max(1, (int) ($filters['per_page'] ?? 20));
+        $rides = $query->paginate($perPage);
+
+        $rides->getCollection()->transform(function (self $ride) {
+            $orderedStops = $ride->rideStops->sortBy('stop_order')->values();
+            $firstStop = $orderedStops->first();
+            $lastStop = $orderedStops->last();
+            $departureAt = $firstStop?->departure_at ?: trim(($ride->date ?? '') . ' ' . ($ride->time ?? ''));
+            $priceMinor = (int) round(((float) ($ride->pricePerSeat())) * 100);
+
+            $ride->setRelation('stops', $orderedStops);
+            $ride->setRelation('route', (object) [
+                'origin_label' => $firstStop?->label ?: $ride->departure,
+                'destination_label' => $lastStop?->label ?: $ride->destination,
+            ]);
+            $ride->setRelation('options', collect());
+
+            $ride->meta = [
+                'pickup_location' => $ride->pickup,
+                'dropoff_location' => $ride->dropoff,
+            ];
+            $ride->departure_at = $departureAt ?: null;
+            $ride->price_minor = $priceMinor;
+            $ride->price_per_seat_minor = $priceMinor;
+            $ride->currency = 'USD';
+            $ride->seats_total = (int) ($ride->seats ?? 0);
+            $ride->seats_available = $ride->pendingSeatDetail->count() ?: max(0, (int) ($ride->seats ?? 0));
+            $ride->detail_route = 'ride_detail';
+            $ride->detail_query = [
+                'departure' => $firstStop?->label ?: $ride->departure,
+                'destination' => $lastStop?->label ?: $ride->destination,
+            ];
+
+            return $ride;
+        });
+
+        return $rides;
+    }
+
+    protected static function applyOrderedStopFilters(Builder $query, array $filters): void
+    {
+        $fromCityId = $filters['origin_city_id'] ?? null;
+        $toCityId = $filters['destination_city_id'] ?? null;
+        $fromLabel = trim((string) ($filters['origin_label'] ?? ''));
+        $toLabel = trim((string) ($filters['destination_label'] ?? ''));
+
+        $hasFrom = !empty($fromCityId) || $fromLabel !== '';
+        $hasTo = !empty($toCityId) || $toLabel !== '';
+
+        if ($hasFrom && $hasTo) {
+            $query->where(function (Builder $rideQuery) use ($fromCityId, $toCityId, $fromLabel, $toLabel) {
+                $rideQuery->whereExists(function ($sub) use ($fromCityId, $toCityId, $fromLabel, $toLabel) {
+                    $sub->select(DB::raw(1))
+                        ->from('ride_stops as s_from')
+                        ->join('ride_stops as s_to', function ($join) {
+                            $join->on('s_to.ride_id', '=', 's_from.ride_id')
+                                ->whereColumn('s_from.stop_order', '<', 's_to.stop_order');
+                        })
+                        ->whereColumn('s_from.ride_id', 'rides.id');
+
+                    static::applyStopMatchToQuery($sub, 's_from', $fromCityId, $fromLabel);
+                    static::applyStopMatchToQuery($sub, 's_to', $toCityId, $toLabel);
+                })->orWhereHas('rideDetail', function (Builder $detailQuery) use ($fromLabel, $toLabel) {
+                    $detailQuery->where('departure', 'like', '%' . $fromLabel . '%')
+                        ->where('destination', 'like', '%' . $toLabel . '%');
+                });
+            });
+
+            return;
+        }
+
+        if ($hasFrom) {
+            $query->where(function (Builder $rideQuery) use ($fromCityId, $fromLabel) {
+                $rideQuery->whereHas('rideStops', function (Builder $stopQuery) use ($fromCityId, $fromLabel) {
+                    static::applyStopMatchToQuery($stopQuery, 'ride_stops', $fromCityId, $fromLabel);
+                })->orWhere('departure_city', 'like', '%' . $fromLabel . '%')
+                    ->orWhere('departure', 'like', '%' . $fromLabel . '%');
+            });
+        }
+
+        if ($hasTo) {
+            $query->where(function (Builder $rideQuery) use ($toCityId, $toLabel) {
+                $rideQuery->whereHas('rideStops', function (Builder $stopQuery) use ($toCityId, $toLabel) {
+                    static::applyStopMatchToQuery($stopQuery, 'ride_stops', $toCityId, $toLabel);
+                })->orWhere('destination_city', 'like', '%' . $toLabel . '%')
+                    ->orWhere('destination', 'like', '%' . $toLabel . '%');
+            });
+        }
+    }
+
+    protected static function applyKeywordFilters(Builder $query, string $keyword): void
+    {
+        if ($keyword === '') {
+            return;
+        }
+
+        $query->where(function (Builder $keywordQuery) use ($keyword) {
+            $keywordQuery->where('pickup', 'like', '%' . $keyword . '%')
+                ->orWhere('dropoff', 'like', '%' . $keyword . '%')
+                ->orWhere('details', 'like', '%' . $keyword . '%')
+                ->orWhere('notes', 'like', '%' . $keyword . '%')
+                ->orWhere('departure', 'like', '%' . $keyword . '%')
+                ->orWhere('destination', 'like', '%' . $keyword . '%')
+                ->orWhereHas('rideStops', function (Builder $stopQuery) use ($keyword) {
+                    $stopQuery->where('label', 'like', '%' . $keyword . '%')
+                        ->orWhere('pickup_dropoff_location', 'like', '%' . $keyword . '%');
+                })
+                ->orWhereHas('rideDetail', function (Builder $detailQuery) use ($keyword) {
+                    $detailQuery->where('departure', 'like', '%' . $keyword . '%')
+                        ->orWhere('destination', 'like', '%' . $keyword . '%')
+                        ->orWhere('pickup', 'like', '%' . $keyword . '%')
+                        ->orWhere('dropoff', 'like', '%' . $keyword . '%');
+                });
+        });
+    }
+
+    protected static function applyRideFilters(Builder $query, array $filters): void
+    {
+        if (!empty($filters['driver_age'])) {
+            $query->whereHas('driver', function (Builder $driverQuery) use ($filters) {
+                $driverQuery->whereRaw('YEAR(CURDATE()) - YEAR(STR_TO_DATE(dob, "%M %d, %Y")) >= ?', [(int) $filters['driver_age']]);
+            });
+        }
+
+        if (!empty($filters['driver_phone'])) {
+            $query->whereHas('driver', function (Builder $driverQuery) {
+                $driverQuery->where('phone', '!=', '');
+            });
+        }
+
+        if (!empty($filters['driver_name'])) {
+            $name = trim((string) $filters['driver_name']);
+            $query->whereHas('driver', function (Builder $driverQuery) use ($name) {
+                $driverQuery->where(function (Builder $nameQuery) use ($name) {
+                    $nameQuery->where('first_name', 'like', '%' . $name . '%')
+                        ->orWhere('last_name', 'like', '%' . $name . '%')
+                        ->orWhere('name', 'like', '%' . $name . '%');
+                });
+            });
+        }
+
+        if (!empty($filters['booking_method'])) {
+            $query->where('booking_method', $filters['booking_method']);
+        }
+
+        if (!empty($filters['vehicle_type'])) {
+            $query->where('vehicle_type', self::normalizeRideVehicleTypeId($filters['vehicle_type']));
+        }
+
+        if (!empty($filters['luggage_size'])) {
+            $query->where('luggage', $filters['luggage_size']);
+        }
+
+        if (!empty($filters['smoking_allowed'])) {
+            $query->where('smoke', $filters['smoking_allowed']);
+        }
+
+        if (!empty($filters['pets_allowed'])) {
+            $query->where('animal_friendly', $filters['pets_allowed']);
+        }
+
+        if (!empty($filters['women_only'])) {
+            $query->whereRaw("FIND_IN_SET(?, REPLACE(features, '=', ','))", [self::PINK_RIDE_FEATURE_ID]);
+        }
+
+        if (!empty($filters['extra_care'])) {
+            $query->whereRaw("FIND_IN_SET(?, REPLACE(features, '=', ','))", [self::EXTRA_CARE_RIDE_FEATURE_ID]);
+        }
+
+        if (!empty($filters['ride_option_ids']) && is_array($filters['ride_option_ids'])) {
+            foreach ($filters['ride_option_ids'] as $featureId) {
+                $query->whereRaw("FIND_IN_SET(?, REPLACE(features, '=', ','))", [(int) $featureId]);
+            }
+        }
+
+        if (!empty($filters['hide_full_rides'])) {
+            $query->whereHas('pendingSeatDetail');
+        }
+
+        if (!empty($filters['driver_rating'])) {
+            $query->whereRaw(
+                'COALESCE((SELECT AVG(ratings.average_rating) FROM ratings INNER JOIN rides AS driver_rides ON driver_rides.id = ratings.ride_id WHERE ratings.status = 1 AND ratings.type = 1 AND driver_rides.added_by = rides.added_by), 0) >= ?',
+                [(float) $filters['driver_rating']]
+            );
+        }
+    }
+
+    protected static function applyStopMatchToQuery($query, string $table, $cityId, string $label): void
+    {
+        $query->where(function ($stopQuery) use ($table, $cityId, $label) {
+            if (!empty($cityId)) {
+                $stopQuery->where($table . '.city_id', $cityId);
+            }
+
+            if ($label !== '') {
+                $method = !empty($cityId) ? 'orWhere' : 'where';
+                $stopQuery->{$method}($table . '.label', 'like', '%' . $label . '%');
+            }
+        });
+    }
+
+    protected function normalizeFeatureIds($features = null): array
+    {
+        $features = $features ?? $this->features;
+
+        if (is_string($features)) {
+            $features = explode('=', $features);
+        }
+
+        if (!is_array($features)) {
+            return [];
+        }
+
+        return array_values(array_filter(array_map(function ($feature) {
+            if ($feature === null) {
+                return null;
+            }
+
+            $feature = trim((string) $feature);
+
+            return $feature === '' ? null : $feature;
+        }, $features), fn ($feature) => $feature !== null));
     }
 
     protected static function booted()

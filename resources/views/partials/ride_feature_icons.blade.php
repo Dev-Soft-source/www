@@ -5,7 +5,9 @@
 @endphp
 
 @foreach (($featureOptions ?? collect()) as $featureOption)
-    @if (in_array((string) $featureOption['id'], $selectedFeatureIds, true) && !empty($featureOption['icon']))
+    @if (in_array((string) $featureOption['id'], $selectedFeatureIds, true) 
+    // && !empty($featureOption['icon'])
+    )
         <img
             class="{{ $iconClass }}"
             src="{{ asset('home_page_icons/' . $featureOption['icon']) }}"

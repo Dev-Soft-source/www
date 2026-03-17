@@ -151,10 +151,10 @@ return [
         'model' => [
             'required' => 'حقل الموديل مطلوب.',
         ],
-        'type' => [
+        'vehicle_type' => [
             'required' => 'حقل نوع المركبة مطلوب.',
         ],
-        'liscense_no' => [
+        'license_no' => [
             'required' => 'حقل رقم اللوحة مطلوب.',
             'max' => 'يجب أن يحتوي رقم اللوحة على أقل من 8 أحرف.',
         ],
@@ -166,7 +166,7 @@ return [
             'required' => 'حقل السنة مطلوب.',
             'max' => 'يجب ألا تزيد السنة عن 4 أحرف.',
         ],
-        'car_type' => [
+        'power_type' => [
             'required' => 'حقل مصدر الطاقة مطلوب.',
         ],
         'primary_vehicle' => [
@@ -378,11 +378,11 @@ return [
     'attributes' => [
         'make' => 'الشركة المصنعة',
         'model' => 'الموديل',
-        'type' => 'نوع المركبة',
+        'vehicle_type' => 'نوع المركبة',
         'color' => 'اللون',
         'year' => 'السنة',
-        'liscense_no' => 'رقم اللوحة',
-        'car_type' => 'مصدر الطاقة',
+        'license_no' => 'رقم اللوحة',
+        'power_type' => 'مصدر الطاقة',
         'primary_vehicle' => 'المركبة الأساسية',
         'image' => 'صورة المركبة',
         'email' => 'البريد الإلكتروني',

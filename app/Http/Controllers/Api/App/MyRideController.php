@@ -66,7 +66,7 @@ class MyRideController extends Controller
                 });
             })
             ->whereHas('driver', function ($query) {
-                $query->whereNull('deleted_at'); // Exclude soft-deleted drivers
+                $query->active(); // Exclude soft-deleted drivers
             })
             ->with(['rideDetail' => function($q){
                 $q->where('default_ride','1');
@@ -442,9 +442,7 @@ class MyRideController extends Controller
             $bookedSeats = $ride->bookings()
                 ->where('status', '<>', 3)
                 ->where('status', '<>', 4)
-                ->whereHas('passenger', function($query) {
-                    $query->whereNull('deleted_at');
-                })
+                ->withActivePassenger()
                 ->sum('seats');
             $ride->seats_left = intval($ride->seats) - intval($bookedSeats);
 
@@ -690,7 +688,7 @@ class MyRideController extends Controller
                 });
             })
             ->whereHas('driver', function ($query) {
-                $query->whereNull('deleted_at'); // Exclude soft-deleted drivers
+                $query->active(); // Exclude soft-deleted drivers
             })
             ->with(['rideDetail' => function($q){
                 $q->where('default_ride','1');
@@ -1066,9 +1064,7 @@ class MyRideController extends Controller
             $bookedSeats = $ride->bookings()
                 ->where('status', '<>', 3)
                 ->where('status', '<>', 4)
-                ->whereHas('passenger', function($query) {
-                    $query->whereNull('deleted_at');
-                })
+                ->withActivePassenger()
                 ->sum('seats');
             $ride->seats_left = intval($ride->seats) - intval($bookedSeats);
 
@@ -1284,7 +1280,7 @@ class MyRideController extends Controller
             ->where('status', 2)
             ->where(function ($query) {
                 $query->whereHas('driver', function ($query) {
-                    $query->whereNull('deleted_at'); // Exclude soft-deleted drivers
+                    $query->active(); // Exclude soft-deleted drivers
                 });
             })
             ->with(['vehicle','driver' => function ($query) {
@@ -1661,9 +1657,7 @@ class MyRideController extends Controller
             $bookedSeats = $ride->bookings()
                 ->where('status', '<>', 3)
                 ->where('status', '<>', 4)
-                ->whereHas('passenger', function($query) {
-                    $query->whereNull('deleted_at');
-                })
+                ->withActivePassenger()
                 ->sum('seats');
             $ride->seats_left = intval($ride->seats) - intval($bookedSeats);
 
@@ -1859,9 +1853,7 @@ class MyRideController extends Controller
         $ride = Ride::where('id', $request->id)->first();
         if ($ride) {
             $bookings = Booking::where('ride_id', $ride->id)->where('status', 1)
-                ->whereHas('passenger', function ($query) {
-                    $query->whereNull('deleted_at');
-                })
+                ->withActivePassenger()
                 ->with(['passenger' => function ($query) {
                     $query->select('id', 'first_name', 'last_name', 'gender', 'dob', 'profile_image');
                 }])
@@ -2486,9 +2478,7 @@ class MyRideController extends Controller
                 $bookedSeats = $ride->bookings()
                     ->where('status', '<>', 3)
                     ->where('status', '<>', 4)
-                    ->whereHas('passenger', function($query) {
-                        $query->whereNull('deleted_at');
-                    })
+                    ->withActivePassenger()
                     ->sum('seats');
                 $ride->seats_left = intval($ride->seats) - intval($bookedSeats);
 

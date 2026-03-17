@@ -61,6 +61,7 @@ use App\Http\Controllers\TestEmailController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\VerifyDriverController;
 use App\Http\Controllers\VerifyStudentController;
+use App\Http\Controllers\PxRideWebController;
 use App\Models\Booking;
 use Illuminate\Support\Facades\Route;
 use Twilio\Rest\Client;
@@ -294,12 +295,12 @@ Route::post('{lang?}/step5-5-send-verification-whatsapp', [Step5to5Controller::c
 Route::get('{lang?}/students', [StudentController::class, 'index'])->name('students');
 Route::get('{lang?}/drivers', [DriverController::class, 'index'])->name('drivers');
 Route::get('{lang?}/passenger', [PassengerController::class, 'index'])->name('passengers');
-Route::get('{lang?}/search-rides', [RideController::class, 'SearchRide'])->name('search_ride');
-Route::get('{lang?}/pink-rides', [PinkRideController::class, 'SearchRide'])->name('pink_ride');
-Route::get('{lang?}/extra-plus-rides', [FolkRideController::class, 'SearchRide'])->name('folk_ride');
-Route::get('{lang?}/proximalocal-rides', [ProximaLocalRideController::class, 'SearchRide'])->name('proximalocal_ride');
-Route::get('{lang?}/ride/{departure}/to/{destination}/{id}', [RideController::class, 'RideDetail'])->name('ride_detail');
-Route::get('{lang?}/my-ride/{departure}/to/{destination}/{id}', [MyRideController::class, 'MyRideDetail'])->name('my_ride_detail');
+// Route::get('{lang?}/search-rides', [RideController::class, 'SearchRide'])->name('search_ride');
+// Route::get('{lang?}/pink-rides', [PinkRideController::class, 'SearchRide'])->name('pink_ride');
+// Route::get('{lang?}/extra-plus-rides', [FolkRideController::class, 'SearchRide'])->name('folk_ride');
+// Route::get('{lang?}/proximalocal-rides', [ProximaLocalRideController::class, 'SearchRide'])->name('proximalocal_ride');
+Route::get('{lang?}/ride/{id}', [RideController::class, 'RideDetail'])->name('ride_detail');
+Route::get('{lang?}/my-ride/{id}', [MyRideController::class, 'MyRideDetail'])->middleware('auth')->name('my_ride_detail');
 Route::get('{lang?}/my-co-passengers/{departure}/to/{destination}/{id}', [RideController::class, 'MyCoPassengers'])->name('my_co_passengers');
 Route::get('{lang?}/my-passengers/{departure}/to/{destination}/{id}', [MyRideController::class, 'MyPassengers'])->name('my_passengers');
 Route::get('{lang?}/review/{id}', [ReviewController::class, 'reviewIndex'])->name('review.index');
@@ -314,11 +315,14 @@ Route::get('{lang?}/edit-booking/{id}', [BookingController::class, 'edit'])->nam
 Route::get('{lang?}/cancel-booking/{id}', [BookingController::class, 'cancel'])->middleware('auth')->name('booking.cancel');
 Route::get('{lang?}/accept-booking-request/{id}/{email}', [BookingController::class, 'AcceptBookingRequest'])->name('accept_booking_request');
 Route::get('{lang?}/reject-booking-request/{id}/{email}', [BookingController::class, 'RejectBookingRequest'])->name('reject_booking_request');
+
 Route::get('{lang?}/post-ride', [RideController::class, 'PostRide'])->name('post_ride')->middleware('auth');
-Route::get('{lang?}/edit-ride/{id}', [RideController::class, 'EditRide'])->name('edit_ride')->middleware('auth');
-Route::put('{lang?}/update-ride/{ride_id}', [RideController::class, 'UpdateRide'])->name('update_ride')->middleware('auth');
-Route::get('{lang?}/post-ride/{id}', [RideController::class, 'CopyRide'])->name('copy_ride')->middleware('auth');
+Route::get('{lang?}/copy-post-ride/{id}', [RideController::class, 'CopyRide'])->name('copy_ride')->middleware('auth');
 Route::get('{lang?}/repost-ride/{id}', [RideController::class, 'RepostRide'])->name('repost_ride')->middleware('auth');
+Route::post('post-ride', [RideController::class, 'PostRideStore'])->name('post_ride.store')->middleware('auth');
+Route::get('{lang?}/edit-ride/{id}', [RideController::class, 'EditRide'])->name('edit_ride')->middleware('auth');
+Route::put('{lang?}/update-ride/{ride_id}', [RideController::class, 'PostRideUpdate'])->name('update_ride')->middleware('auth');
+
 Route::get('{lang?}/post-ride-again', [PostRideAgainController::class, 'CurrentRides'])->name('post_ride_again')->middleware('auth');
 Route::get('{lang?}/post-ride-again-completed', [PostRideAgainController::class, 'PastRides'])->name('post_ride_again_completed')->middleware('auth');
 Route::get('{lang?}/post-ride-again-cancelled', [PostRideAgainController::class, 'CancelledRides'])->name('post_ride_again_cancelled')->middleware('auth');
@@ -436,7 +440,7 @@ Route::post('payout/store', [PayoutController::class, 'store'])->name('payout.st
 Route::post('payout/verifyBank', [PayoutController::class, 'verifyBank'])->name('payout.verifyBank');
 Route::post('profile/vehicle/store', [ProfileVehicleController::class, 'store'])->name('profile.vehicle.store');
 Route::post('get-states-by-country', [CountryStateCityController::class, 'getState']);
-Route::post('post-ride', [RideController::class, 'PostRideStore'])->name('post_ride.store')->middleware('auth');
+
 Route::post('add-new-spots', [RideController::class, 'addNewSpots'])->name('post_ride.add_new_spot')->middleware('auth');
 Route::post('delete-spots', [RideController::class, 'deleteSpots'])->name('post_ride.delete_spot')->middleware('auth');
 Route::post('instant-booking/{id}', [BookingController::class, 'instantBooking'])->middleware('auth')->name('instant_booking');
@@ -505,6 +509,14 @@ Route::patch('/fcm-token', [HomeController::class, 'updateToken'])->name('fcmTok
 Route::get('/admin/{any}', [HomeController::class, 'redirectToAdminDashboard'])
     ->middleware(['admin.auth'])
     ->where('any', '.*');
+// new logic for px post ride
+Route::post('{lang?}/post-ride/segment-distance-estimates', [RideController::class, 'segmentDistanceEstimates'])->name('post_ride.segment_distance_estimates')->middleware('auth');
+Route::get('{lang?}/search-rides', [PxRideWebController::class, 'search'])->name('search_ride');
+Route::get('{lang?}/search-extra-care-rides', [PxRideWebController::class, 'folk_ride_search'])->name('folk_ride');
+Route::get('{lang?}/search-pink-rides', [PxRideWebController::class, 'pink_ride_search'])->name('pink_ride');
+Route::get('{lang?}/search-proximalocal-ride', [PxRideWebController::class, 'proximalocal_ride_search'])->name('proximalocal_ride');
+
+
 
 
 
@@ -542,52 +554,3 @@ Route::get('/sitemap.xml', function () {
     ])->header('Content-Type', 'application/xml');
 });
 
-
-// Route::get('send-notification', function () {
-//     $fcmService = new FCMService();
-//     $message = 'You got a new notification';
-//     $body = $message;
-
-//     $user_id = auth()->user()->id;
-//     $fcm_tokens = FCMToken::where('user_id',$user_id)->get();
-
-//     foreach ($fcm_tokens as $fcm_token) {
-//         $fcmService->sendNotification($fcm_token->token, $body);
-//     }
-
-//     return 'message sent';
-// });
-
-// Route::get('create-stripe-acc', function () {
-//     \Stripe\Stripe::setApiKey(env('STRIPE_SECRET'));
-
-//     $customer = \Stripe\Customer::create([
-//         'email' => 'info@xelent.io',
-//         'name' => 'Xelent solution',
-//     ]);
-
-//     Log::info('stripe customer id = ' . $customer->id);
-
-//     $paymentMethod = \Stripe\PaymentMethod::create([
-//         'type' => 'card',
-//         'card' => [
-//             'number' => '4000056655665556',
-//             'exp_month' => '12',
-//             'exp_year' => '2029',
-//             'cvc' => '1234',
-//             ],
-//         'billing_details' => [
-//             'name' => 'Xelent Solutions',
-//             ],
-//             ]);
-
-//             // Attach the PaymentMethod to the customer
-//     \Stripe\PaymentMethod::attach(
-//         $paymentMethod->id,
-//         ['customer' => $customer->id]
-//         );
-
-//         $stripe_payment_method_id = $paymentMethod->id;
-//         Log::info('stripe payment method id = ' . $stripe_payment_method_id);
-
-// });

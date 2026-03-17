@@ -3,175 +3,284 @@
 @section('style')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
-        .features_tooltiptext::after {
-            content: "";
-            border-width: 10px;
-            border-style: solid;
-            border-color: #ef4444 transparent transparent transparent;
-            position: absolute;
-            bottom: -20px;
-            /* left: 4rem; */
+        #px-segment-distance-loader {
+            display: none;
         }
 
-        .luggage_tooltiptext::after {
-            content: "";
-            border-width: 10px;
-            border-style: solid;
-            border-color: #ef4444 transparent transparent transparent;
-            position: absolute;
-            bottom: -20px;
-            /* left: 4rem; */
+        #px-segment-distance-loader.is-active {
+            display: block;
         }
 
-        .payment_tooltiptext::after {
-            content: "";
-            border-width: 10px;
-            border-style: solid;
-            border-color: #ef4444 transparent transparent transparent;
-            position: absolute;
-            bottom: -20px;
-            /* left: 4rem; */
-        }
-
-        /* Extra small devices */
-        @media only screen and (max-width: 375px) {
-            .tooltip_width {
-                width: 16.5rem;
-            }
-
-            .tooltip_position {
-                right: 13rem;
-                top: -7.5rem;
-            }
-
-            .luggage_tooltiptext::after {
-                right: 3.3rem;
-            }
-
-            .payment_tooltiptext_position {
-                top: -6.3rem;
-            }
-        }
-
-        @media only screen and (min-width:376px) and (max-width: 639px) {
-            .tooltip_width {
-                width: 20rem;
-            }
-
-            .tooltip_position {
-                right: 16.5rem;
-                top: -6.5rem;
-            }
-
-            .luggage_tooltiptext::after {
-                right: 3.3rem;
-            }
-        }
-
-        @media only screen and (max-width: 767px) {
-            .features_tooltiptext::after {
-                content: "";
-                border-width: 10px;
-                border-style: solid;
-                border-color: transparent transparent #ef4444 transparent;
-                position: absolute;
-                top: -20px;
-                bottom: auto;
-                left: 5.8rem;
-            }
-        }
-
-        /* Stops Along the Way – collapsible header and smooth slide panel (same as edit_ride) */
-        .add-more-spots-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .px-top-progress-track {
+            height: 4px;
             width: 100%;
-            text-align: left;
-            cursor: pointer;
-            border: none;
-            transition: opacity 0.2s ease, background-color 0.2s ease;
-        }
-
-        .add-more-spots-header:hover {
-            opacity: 0.95;
-        }
-
-        .add-more-spots-chevron {
-            flex-shrink: 0;
-            width: 1.5rem;
-            height: 1.5rem;
-            margin-left: 0.5rem;
-            transition: transform 0.35s ease-out;
-        }
-
-        .add-more-spots-header[aria-expanded="false"] .add-more-spots-chevron {
-            transform: rotate(-90deg);
-        }
-
-        .add-more-spots-panel {
             overflow: hidden;
-            transition: height 0.35s ease-out;
+            background: rgba(17, 24, 39, 0.12);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+        }
+
+        .px-top-progress-bar {
+            height: 100%;
+            width: 35%;
+            background: #10b981;
+            animation: pxTopProgressSlide 1.1s ease-in-out infinite;
+            will-change: transform;
+        }
+
+        @keyframes pxTopProgressSlide {
+            0% {
+                transform: translateX(-120%);
+            }
+
+            100% {
+                transform: translateX(320%);
+            }
         }
     </style>
 @endsection
 
 @section('content')
 
-    {{-- Early function definitions to prevent "not defined" errors on page load --}}
-    <script>
-        // Placeholder functions that will be properly initialized after jQuery loads
-        function fromInput(index) {
-            // Will be overwritten when full script loads
-            if (typeof $ !== 'undefined' && typeof debounce !== 'undefined') {
-                debounce(function() {
-                    let searchTerm = $('#from_spot_' + index).val();
-                    if (searchTerm.length >= 2) {
-                        let searchData = $('#to_spot_' + index).val();
-                        if (typeof fetchCities !== 'undefined') {
-                            fetchCities(searchTerm, searchData, 'from_spot', index);
-                        }
-                    }
-                }, 500)();
+    @php
+
+        $isEditMode = isset($ride) && isset($isEditMode) && $isEditMode;
+        $isCopyMode = isset($ride) && isset($isCopyMode) && $isCopyMode;
+        $isRepostMode = isset($ride) && isset($isRepostMode) && $isRepostMode;
+        $prefillRide = $isEditMode || $isCopyMode || $isRepostMode ? $ride : null;
+
+        if ($prefillRide) {
+
+            $rideDetail = $prefillRide->detail;
+            
+            // Populate origin data
+            if (!old('origin.label') && $rideDetail) {
+                $oldOriginLabel = $rideDetail->departure;
+                $oldOriginCityId = $rideDetail->origin_city_id;
+            } else {
+                $oldOriginLabel = old('origin.label');
+                $oldOriginCityId = old('origin.city_id');
+            }
+
+            // Populate destination data
+            if (!old('destination.label') && $rideDetail) {
+                $oldDestinationLabel = $rideDetail->destination;
+                $oldDestinationCityId = $rideDetail->destination_city_id;
+            } else {
+                $oldDestinationLabel = old('destination.label');
+                $oldDestinationCityId = old('destination.city_id');
+            }
+
+            // Populate pickup/dropoff locations
+            $oldPickupLocation = old('origin.pickup_location', $rideDetail->pickup ?? '');
+            $oldDropoffLocation = old('destination.dropoff_location', $rideDetail->dropoff ?? '');
+
+            // Populate departure_at
+            if($isCopyMode){
+                $oldDepartureDate = old('date', '');
+                $oldDepartureTime = old('time', '');
+            }else{
+                $oldDepartureDate = old('date', $rideDetail->date);
+                $oldDepartureTime = old('time', $rideDetail->time);
+            }
+            
+            // Populate stops (excluding origin and destination - already filtered in controller)
+            $oldStops = old('stops', $prefillRide->intermediate_stops);
+
+            $oldDestinationPriceDeltaMinor = old('price_minor');
+            if (
+                $oldDestinationPriceDeltaMinor === null &&
+                isset($prefillRide->rideStops) &&
+                $prefillRide->rideStops->isNotEmpty()
+            ) {
+                $destinationStop = $prefillRide->rideStops->sortBy('stop_order')->last();
+                $oldDestinationPriceDeltaMinor = $destinationStop ? $destinationStop->price_delta_minor ?? 0 : 0;
+            }
+
+            // Populate other fields
+            $oldSeatsTotal = old('seats_total', $prefillRide->seats);
+            $oldPriceMinor = old('price_minor', $prefillRide->price_minor);
+            $oldVehicleId = old('vehicle_id', $prefillRide->vehicle_id);
+            $oldNotes = old('notes', $prefillRide->notes);
+            $oldStatus = old('status', $isCopyMode ? 'published' : $prefillRide->status);
+            $oldVisibility = old('visibility', $prefillRide->visibility);
+            $oldPaymentMethod = old('payment_method', $prefillRide->payment_method);
+            $oldBookingMethod = old('booking_method', $prefillRide->booking_method);
+            $oldSmokingAllowed = old('smoke', $prefillRide->smoking_allowed);
+            $oldPetsAllowed = old('animal_friendly', $prefillRide->pets_allowed);
+            $oldLuggageSize = old('luggage', $prefillRide->luggage);
+            $oldAcceptMoreLuggage = old('accept_more_luggage', $prefillRide->meta['accept_more_luggage'] ?? false);
+            $oldIsRecurring = old('recurring', $prefillRide->recurring);
+            $oldRecurringType = old('recurring_type', $prefillRide->recurring_type);
+            $oldRecurringTrips = old('recurring_trips', $prefillRide->recurring_trips);
+            $oldSelectedFeatures = old('features', explode('=', $prefillRide->features ?? ''));
+
+            // Determine vehicle mode
+            if ($prefillRide->vehicle_id) {
+                $oldVehicleMode = old('vehicle_mode', 'existing');
+            } else {
+                $oldVehicleMode = old('vehicle_mode', 'skip');
+            }
+        } else {
+            // Create mode - use old() values
+            $oldOriginLabel = old('origin.label');
+            $oldOriginCityId = old('origin.city_id');
+            $oldDestinationLabel = old('destination.label');
+            $oldDestinationCityId = old('destination.city_id');
+            $oldPickupLocation = old('origin.pickup_location');
+            $oldDropoffLocation = old('destination.dropoff_location');
+            $oldDepartureDate = old('date', '');
+            $oldDepartureTime = old('time', '');
+            $oldStops = old('stops', []);
+            $oldDestinationPriceDeltaMinor = old('price_minor');
+            $oldSeatsTotal = old('seats_total');
+            $oldPriceMinor = old('price_minor');
+            $oldVehicleId = old('vehicle_id');
+            $oldNotes = old('notes');
+            $oldStatus = old('status', 'published');
+            $oldVisibility = old('visibility', 'public');
+            $oldPaymentMethod = old('payment_method');
+            $oldBookingMethod = old('booking_method');
+            $oldSmokingAllowed = old('smoke');
+            $oldPetsAllowed = old('animal_friendly');
+            $oldLuggageSize = old('luggage');
+            $oldAcceptMoreLuggage = old('accept_more_luggage', false);
+            $oldIsRecurring = old('recurring', false);
+            $oldRecurringType = old('recurring_type', '');
+            $oldRecurringTrips = old('recurring_trips', 0);
+            $oldSelectedFeatures = old('features', []);
+            $oldVehicleMode = old('vehicle_mode', 'existing');
+        }
+
+        $stopsExpanded = !empty($oldStops);
+        if (!$stopsExpanded && $errors->any()) {
+            foreach ($errors->keys() as $errorKey) {
+                if (str_starts_with($errorKey, 'stops')) {
+                    $stopsExpanded = true;
+                    break;
+                }
             }
         }
 
-        function toInput(index) {
-            // Will be overwritten when full script loads
-            if (typeof $ !== 'undefined' && typeof debounce !== 'undefined') {
-                debounce(function() {
-                    let searchTerm = $('#to_spot_' + index).val();
-                    if (searchTerm.length >= 2) {
-                        let searchData = $('#from_spot_' + index).val();
-                        if (typeof fetchCities !== 'undefined') {
-                            fetchCities(searchTerm, searchData, 'to_spot', index);
-                        }
-                    }
-                }, 500)();
+        $oldDepartureDateDisplay = old('date');
+        $oldDepartureTimeDisplay = old('time');
+
+        if (
+            ($oldDepartureDateDisplay === null || $oldDepartureDateDisplay === '') &&
+            !empty($oldDepartureAtFormatted)
+        ) {
+            try {
+                $dt = \Illuminate\Support\Carbon::parse($oldDepartureAtFormatted);
+                $oldDepartureDateDisplay = $dt->format('F j, Y');
+                $oldDepartureTimeDisplay = $dt->format('h:i A');
+            } catch (\Throwable $e) {
+                // Keep existing fallback values if parsing fails.
             }
         }
-    
 
-        document.addEventListener('DOMContentLoaded', function() {
-            var fromEl = document.getElementById('from_spot_0');
-            var toEl = document.getElementById('to_spot_0');
-            var fromError = document.getElementById('from-server-error');
-            var toError = document.getElementById('to-server-error');
-            function hideFromError() { if (fromError) fromError.classList.add('hidden'); }
-            function hideToError() { if (toError) toError.classList.add('hidden'); }
-            if (fromError) fromEl.addEventListener('input', hideFromError);
-            if (toError) toEl.addEventListener('input', hideToError);
+        if (!empty($oldDepartureDateDisplay)) {
+            try {
+                $oldDepartureDateDisplay = \Illuminate\Support\Carbon::parse($oldDepartureDateDisplay)->format(
+                    'F j, Y',
+                );
+            } catch (\Throwable $e) {
+                // Leave user-entered value as-is if it cannot be parsed.
+            }
+        }
+
+        if (!empty($oldDepartureTimeDisplay)) {
+            try {
+                $oldDepartureTimeDisplay = \Illuminate\Support\Carbon::parse($oldDepartureTimeDisplay)->format('h:i A');
+            } catch (\Throwable $e) {
+                // Leave user-entered value as-is if it cannot be parsed.
+            }
+        }
+
+        $oldPriceMajorDisplay =
+            $oldPriceMinor !== null && $oldPriceMinor !== ''
+                ? number_format(((int) $oldPriceMinor) / 100, 2, '.', '')
+                : '';
+
+        $oldSegmentPrices = old('meta.segment_prices', $prefillRide->meta['segment_prices'] ?? []);
+        if (!is_array($oldSegmentPrices)) {
+            $oldSegmentPrices = [];
+        }
+
+        if (empty($oldSegmentPrices)) {
+            $oldStopFrom = old('stop_from', []);
+            $oldStopTo = old('stop_to', []);
+            $oldStopPriceMinor = old('stop_price_minor', []);
+
+            if (is_array($oldStopFrom) && is_array($oldStopTo) && is_array($oldStopPriceMinor)) {
+                $derivedSegmentPrices = [];
+                foreach ($oldStopFrom as $segmentIndex => $fromLabel) {
+                    $toLabel = $oldStopTo[$segmentIndex] ?? null;
+                    $priceMinor = $oldStopPriceMinor[$segmentIndex] ?? null;
+
+                    if ($fromLabel === null || $toLabel === null || $priceMinor === null) {
+                        continue;
+                    }
+
+                    $derivedSegmentPrices[] = [
+                        'from_label' => (string) $fromLabel,
+                        'to_label' => (string) $toLabel,
+                        'price_minor' => (int) $priceMinor,
+                    ];
+                }
+
+                $oldSegmentPrices = $derivedSegmentPrices;
+            }
+        }
+
+        if (
+            empty($oldSegmentPrices) &&
+            // $isEditMode &&
+            isset($prefillRide->rideStopSegments) &&
+            $prefillRide->rideStopSegments->isNotEmpty()
+        ) {
+            $oldSegmentPrices = $prefillRide->rideStopSegments
+                ->filter(function ($segment) {
+                    return $segment->fromStop && $segment->toStop;
+                })
+                ->sortBy(function ($segment) {
+                    return [
+                        (int) ($segment->fromStop->stop_order ?? 0),
+                        (int) ($segment->toStop->stop_order ?? 0),
+                    ];
+                })
+                ->values()
+                ->map(function ($segment) {
+                    return [
+                        'from_index' => max(0, (int) ($segment->fromStop->stop_order ?? 1) - 1),
+                        'to_index' => max(0, (int) ($segment->toStop->stop_order ?? 1) - 1),
+                        'from_label' => (string) ($segment->fromStop->label ?? ''),
+                        'to_label' => (string) ($segment->toStop->label ?? ''),
+                        'price_minor' => (int) ($segment->price_minor ?? 0),
+                    ];
+                })
+                ->all();
+        }
+
+        $hasInitialValidStops = collect($oldStops)->contains(function ($stop) {
+            return !empty(trim((string) ($stop['label'] ?? ''))) && !empty($stop['city_id']);
         });
-    </script>
+        $showSegmentPriceMode = $hasInitialValidStops || !empty($oldSegmentPrices);
+
+
+        // Check if pink_rides and extra_care_rides are initially checked
+        $pinkRideChecked = false;
+        $extraCareRideChecked = false;
+
+    @endphp
 
     <div class="container px-4 mx-auto my-14 page-post_a_ride">
+
         @if (session('error'))
-            <div id="myModal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div id="errorModal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                 <div onclick="closeModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
                 <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                     <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                         <div
-                            class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
+                            class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border1">
                             <button type="button" onclick="closeModal()"
                                 class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -179,16 +288,11 @@
                                         d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>
-                            <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                            <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-10 sm:pb-4">
                                 <div class="sm:flex sm:items-start justify-center">
-                                    <!-- <div
-                                        class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                            <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                        </svg>
-                                    </div> -->
+                                    <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ff0000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 10V13" stroke="#db0000" stroke-width="2" stroke-linecap="round"></path> <path d="M12 16V15.9888" stroke="#db0000" stroke-width="2" stroke-linecap="round"></path> <path d="M10.2518 5.147L3.6508 17.0287C2.91021 18.3618 3.87415 20 5.39912 20H18.6011C20.126 20 21.09 18.3618 20.3494 17.0287L13.7484 5.147C12.9864 3.77538 11.0138 3.77538 10.2518 5.147Z" stroke="#db0000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
                                 </div>
-                                <div class="text-center sm:mt-0 sm:text-left">
+                                <div class="text-center">
                                     <div class="">
                                         <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4"
                                             id="modal-title">{!! session('heading') !!}</h3>
@@ -200,534 +304,132 @@
                             </div>
                             <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                                 <button type="button" onclick="closeModal()"
-                                    class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 w-auto">
-                                    Close
-                                </button>
-                                {{-- <a href=""
-                                class="inline-flex w-full justinline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">Close</a> --}}
+                                    class="button-exp-fill">{{ $siteText['close_btn_text'] }}</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         @endif
-        @if (session('price_warning'))
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const warning = @json(session('price_warning'));
-                    if (warning) {
-                        showPriceWarningModal(function() {
-                            // User clicked "Keep Current Price" - submit the form
-                            console.log('User chose to keep current price, submitting form');
-                            const formElement = document.getElementById('post-ride-form') || document.querySelector(
-                                'form');
-                            if (formElement) {
-                                // Create a hidden input to bypass validation on next submit
-                                const bypassInput = document.createElement('input');
-                                bypassInput.type = 'hidden';
-                                bypassInput.name = 'bypass_price_validation';
-                                bypassInput.value = '1';
-                                formElement.appendChild(bypassInput);
-                                // Remove the event listener to prevent re-validation
-                                const newForm = formElement.cloneNode(true);
-                                formElement.parentNode.replaceChild(newForm, formElement);
-                                // Submit the form
-                                newForm.submit();
-                            }
-                        });
-                    }
-                });
-            </script>
-        @endif
-        @if (session('message'))
-            <div id="myModal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                <div onclick="closeModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-                <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                    <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                        <div
-                            class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                            <button type="button" onclick="closeModal()"
-                                class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
-                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                            <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
-                                <div class="sm:flex sm:items-start justify-center">
-                                    <!-- <div
-                                        class="mx-auto h-16 w-16 flex items-center justify-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                        </svg>
-                                    </div> -->
-                                </div>
-                                <div class="text-center sm:mt-0 sm:text-left">
-                                    <div class="">
-                                        <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4"
-                                            id="modal-title">{!! session('heading') !!}</h3>
-                                    </div>
-                                    <div class="mt-2 w-full">
-                                        <p class="can-exp-p text-center">{!! session('message') !!}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                                @if (session('id'))
-                                    <a href="{{ route('repost_ride', ['lang' => $selectedLanguage->abbreviation, 'id' => session('id')]) }}"
-                                        class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-fit">
-                                        @isset($postRidePage->post_return_ride_label)
-                                            {{ $postRidePage->post_return_ride_label }}
-                                        @endisset
-                                    </a>
-                                @endif
-                                <a href="" class="button-exp-fill">Close</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
+        @if (($routeType ?? '') !== 'edit')
+            <div class="flex justify-end md:items-center">
+                <a href="{{ $isNewForm && ($routeType ?? '') === 'create' ? route('post_ride_again_completed', ['lang' => optional($selectedLanguage)->abbreviation]) : route('post_ride_again', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
+                    class="button-exp-green-fill">
+                    {{ $postRidePage->post_arrived_again_label ?? 'Repost a Previous Ride' }}
+                </a>
             </div>
         @endif
-        <div id="myModal" class="hidden relative z-50" id="Extra+-ride-modal" aria-labelledby="modal-title" role="dialog"
-            aria-modal="true">
-            <div onclick="closeModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                    <div
-                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                        <button type="button" onclick="closeExtraCareRideModal()"
-                            class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
-                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                        <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                            <div class="sm:flex sm:items-start justify-center">
-                                <!-- <div
-                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-green-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                    </svg>
-                                </div> -->
-                            </div>
-                            <div class="text-center sm:mt-0 sm:text-left">
-                                <div class="">
-                                    <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4"
-                                        id="modal-title">{!! session('heading') !!}</h3>
-                                </div>
-                                <div class="mt-2 w-full">
-                                    {{-- <p class="can-exp-p text-center">{!! session('message') !!}</p> --}}
-                                    <p class="can-exp-p text-center">
-                                        {{ $postRideSubDetailPage->extra_care_popup_eligible_text ?? '' }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                            @if (session('id'))
-                                <a href="{{ route('repost_ride', ['lang' => $selectedLanguage->abbreviation, 'id' => session('id')]) }}"
-                                    class="inline-flex w-full justify-center rounded bg-greenXS px-3 py-2 font-FuturaMdCnBT text-lg text-white whitespace-nowrap hover:text-white hover:shadow-lg shadow-sm hover:bg-greenXS sm:ml-3 sm:w-fit">Repost
-                                    ride</a>
-                            @endif
-                            <button type="button" onclick="closeExtraCareRideModal()"
-                                class="button-exp-fill">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Modal: Address required for Pink or Extra+ Ride --}}
-        <div id="pink-extra-address-required-modal" class="hidden fixed inset-0 z-50"
-            aria-labelledby="pink-extra-address-modal-title" role="dialog" aria-modal="true">
-            <div onclick="closePinkExtraAddressRequiredModal()"
-                class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                    <div
-                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                        <button type="button" onclick="closePinkExtraAddressRequiredModal()"
-                            class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
-                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                        <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                            <h3 class="font-FuturaMdCnBT text-gray-800 mb-4" id="pink-extra-address-modal-title">Action
-                                Required</h3>
-                            <p class="text-gray-800 text-base text-left">To post a Pink or Extra+ Ride, we need your
-                                residential address on file. Please add it in <a
-                                    href="{{ route('profile.edit', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}"
-                                    class="underline font-medium hover:no-underline text-blue-600">Dashboard → Edit
-                                    Profile</a>.</p>
-                            <div class="mt-6 flex flex-wrap gap-2 justify-center">
-                                <button type="button" onclick="closePinkExtraAddressRequiredModal()"
-                                    class="button-exp-fill font-FuturaMdCnBT">Close</button>
-                                <a href="{{ route('profile.edit', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}"
-                                    class="button-exp-fill bg-primary hover:bg-primary font-FuturaMdCnBT no-underline">Edit
-                                    Profile</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal for 5+ seats warning -->
-        <div id="seatsWarningModal" class="hidden fixed inset-0 z-50" aria-labelledby="seats-modal-title" role="dialog"
-            aria-modal="true">
-            <div onclick="closeSeatsWarningModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity">
-            </div>
-            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                    <div
-                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                        <button type="button" onclick="closeSeatsWarningModal()"
-                            class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
-                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                        <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
-                            <div class="text-center sm:mt-0 sm:text-left">
-                                <div class="">
-                                    <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4"
-                                        id="seats-modal-title">{{ optional($postRidePage)->seats_warning_modal_heading ?? 'Heads up for 5+ seats' }}</h3>
-                                </div>
-                                <div class="mt-2 w-full">
-                                    <p class="can-exp-p text-center">{{ optional($postRidePage)->seats_warning_modal_paragraph ?? 'Please note that for large vehicles, your total trip collection must stay within non-commercial limits. To keep this a standard carpool, we suggest a lower price per seat. By law, total contributions cannot exceed the standard reimbursement limit ($0.72/km).' }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="px-4 pb-6 pt-4 flex items-center space-x-2  justify-center">
-                            <button type="button" onclick="closeSeatsWarningModal()" class="button-exp-fill">{{ optional($postRidePage)->seats_warning_modal_got_it_btn ?? 'Got it' }}</button>
-                            <button type="button"
-                                onclick="window.location.href='{{ route('cost_sharing_policy', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}'"
-                                class="button-exp-no-fill inline-block text-center">{{ optional($postRidePage)->seats_warning_modal_learn_more_btn ?? 'Learn more about limits' }}</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal for Price Error (Exceeds $0.72/km per seat) -->
-        <div id="priceErrorModal" class="hidden fixed inset-0 z-50" aria-labelledby="price-error-modal-title"
-            role="dialog" aria-modal="true">
-            <div onclick="closePriceErrorModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity">
-            </div>
-            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                    <div
-                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                        <button type="button" onclick="closePriceErrorModal()"
-                            class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
-                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                        <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
-                            <div class="text-center sm:mt-0 sm:text-left">
-                                <div class="">
-                                    <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4"
-                                        id="priceErrorHeading">{{ optional($postRidePage)->price_error_heading ?? 'Price Limit Exceeded' }}</h3>
-                                </div>
-                                <div class="mt-2 w-full">
-                                    <p class="can-exp-p text-center mb-3" id="priceErrorParagraph1"></p>
-                                    <p class="can-exp-p text-center mb-3" id="priceErrorParagraph2"></p>
-                                    <p class="can-exp-p text-center" id="priceErrorParagraph3"></p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                            <button type="button" id="priceErrorAdjustBtn" onclick="adjustPriceFromError()"
-                                class="button-exp-fill">{{ optional($postRidePage)->price_error_adjust_btn_label ?? 'Adjust Price' }}</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal for Price Warning (Exceeds $0.66/km per seat but <= $0.72/km per seat) -->
-        <div id="priceWarningModal" class="hidden fixed inset-0 z-50" aria-labelledby="price-warning-modal-title"
-            role="dialog" aria-modal="true">
-            <div onclick="closePriceWarningModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity">
-            </div>
-            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                    <div
-                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                        <button type="button" onclick="closePriceWarningModal()"
-                            class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
-                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                        <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
-                            <div class="text-center sm:mt-0 sm:text-left">
-                                <div class="">
-                                    <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4">{{ optional($postRidePage)->price_warning_heading ??  'Recommended
-                                        Contribution Limit'}}</h3>
-                                </div>
-                                <div class="mt-2 w-full">
-                                    <p class="can-exp-p text-center mb-3" id="priceWarningParagraph1"></p>
-                                    <p class="can-exp-p text-center" id="priceWarningParagraph2"></p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                            <button type="button" id="priceWarningAdjustBtn"
-                                onclick="adjustPriceFromWarning(); return false;" class="button-exp-fill">{{ optional($postRidePage)->price_warning_adjust_btn_label ?? 'Adjust Price' }}</button>
-                            <button type="button" id="priceWarningContinue" class="button-exp-fill">{{ optional($postRidePage)->price_warning_keep_current_btn_label ?? 'Keep Current Price' }}</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="flex justify-end md:items-center">
-            <a href="{{ $isNewForm && ($routeType ?? '') === 'create' ? route('post_ride_again_completed', ['lang' => optional($selectedLanguage)->abbreviation]) : route('post_ride_again', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
-                class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS">
-                @isset($postRidePage->post_arrived_again_label)
-                    {{ $postRidePage->post_arrived_again_label }}
-                @endisset
-            </a>
-        </div>
         <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row justify-between md:items-center">
             <h1>
-                @isset($postRidePage->main_heading)
-                    {{ $postRidePage->main_heading }}
-                @endisset
+                @if(($routeType) == 'edit')
+                Edit a Ride
+                @elseif($routeType == 'copy')
+                {{ $postRidePage->main_heading ?? 'Post a Ride' }} <span class="text-gray-400 text-xl">COPY RIDE</span>
+                @elseif($routeType == 'repost')
+                Repost a Ride
+                @else
+                {{ $postRidePage->main_heading ?? 'Post a Ride' }}
+                @endif
             </h1>
             <p>
-                <span class="text-red-500">*
-                    {{ $postRideSubDetailPage->feilds_required_text ?? 'Indicates required fields' }} </span>
+                <span class="text-red-500">* {{ $postRideSubDetailPage->feilds_required_text ?? 'Indicates required fields' }} </span>
             </p>
         </div>
-        <form method="POST" action="{{ route('post_ride.store') }}" enctype="multipart/form-data" id="post-ride-form">
+        <form method="POST"
+            action="{{ ($routeType ?? '') === 'edit' ? route('update_ride', ['lang' => optional($selectedLanguage)->abbreviation, 'ride_id' => $ride->id]) : route('post_ride.store') }}"
+            enctype="multipart/form-data" id="post-ride-form">
             @csrf
-            <div class="">
+            @if (($routeType ?? '') === 'edit')
+                @method('PUT')
+            @endif
+            
                 <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                     <h3 class="text-2xl bg-primary text-white py-2 px-4">
-                        @isset($postRidePage->ride_info_heading)
-                            {{ $postRidePage->ride_info_heading }}
-                        @endisset
+                        {{ $postRidePage->ride_info_heading ?? 'Ride Info' }}
                     </h3>
                     <div class="bg-white p-4 space-y-3">
                         <div class="flex flex-col md:flex-row justify-between items-start">
-                            <div class="w-full md:w-[45%] mb-4 relative">
-                                <div>
-                                    <label for="from" class="block mb-2 text-gray-900">
-                                        @isset($postRidePage->from_label)
-                                            {{ $postRidePage->from_label }}
-                                        @endisset
-                                        <span class="text-red-500">*</span>
-                                    </label>
-                                    <div class="relative mt-2">
-                                        <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                            <img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6"
-                                                alt="">
-                                        </div>
-
-                                        @php
-                                            // Controller already swaps departure/destination for repost, so just use the ride properties as-is
-                                            $departure =
-                                                isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0])
-                                                    ? $ride->defaultRideDetail[0]->departure
-                                                    : '';
-                                            $destination =
-                                                isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0])
-                                                    ? $ride->defaultRideDetail[0]->destination
-                                                    : '';
-                                        @endphp
-
-                                        <input type="text" id="from_spot_0" name="from"
-                                            value="{{ old('from', $departure) }}" autocomplete="off"
-                                            class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2"
-                                            @isset($postRidePage->from_placeholder)
-                                                placeholder="{{ $postRidePage->from_placeholder }}"
-                                            @endisset>
-                                        <div class="absolute hidden mt-1 z-10 left-0 top-full" id="fromInputError">
-                                            <div
-                                                class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    @error('from')
-                                    <div class="absolute mt-1 z-10" id="from-server-error">
-                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} </div>
-                                    </div>
-                                    @enderror
-                                </div>
+                            <div class="w-full md:w-[45%] ">
+                                <label class="block text-sm mb-4 required">{{ $postRidePage->from_label }}</label>
+                                @livewire(
+                                    'px.city-autocomplete',
+                                    [
+                                        'field' => 'origin',
+                                        'placeholder' => $postRidePage->from_placeholder,
+                                        'initialLabel' => $oldOriginLabel ?? old('origin.label'),
+                                        'initialCityId' => $oldOriginCityId ?? old('origin.city_id'),
+                                    ],
+                                    key('px-origin-city-autocomplete')
+                                )
+                                @error('origin.label')
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="w-full md:w-[10%] md:mt-10 flex justify-center items-start">
                                 <button type="button" onclick="swapLocations()">
                                     <img src="{{ asset('assets/arrow.png') }}" class="w-10 h-10 mx-auto" alt="">
                                 </button>
                             </div>
-                            <div class="w-full md:w-[45%] mb-4 relative">
-                                <div>
-                                    <label for="to" class="block mb-2 text-gray-900">
-                                        @isset($postRidePage->to_label)
-                                            {{ $postRidePage->to_label }}
-                                        @endisset
-                                        <span class="text-red-500">*</span>
-                                    </label>
-                                    <div class="relative mt-2">
-                                        <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                            <img src="{{ asset('images/new-21-search-bar-to.png') }}" class="w-auto h-6"
-                                                alt="">
-                                        </div>
-                                        <input type="text" id="to_spot_0" name="to"
-                                            value="{{ old('to', $destination) }}" autocomplete="off"
-                                            class="bg-gray-100 border pl-7 border-gray-200 text-base lg:text-lg text-gray-900  rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5"
-                                            @isset($postRidePage->to_placeholder)
-                                                placeholder="{{ $postRidePage->to_placeholder }}"
-                                            @endisset>
-                                        <div class="absolute hidden mt-1 z-10 left-0 top-full" id="toInputError">
-                                            <div
-                                                class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    @error('to')
-                                    <div class="absolute mt-1 z-10" id="to-server-error">
-                                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} </div>
-                                    </div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Delete Stop confirmation modal --}}
-                        <div id="delete-stop-modal-post" class="relative z-50 hidden"
-                            aria-labelledby="delete-stop-modal-title-post" role="dialog" aria-modal="true">
-                            <div id="delete-stop-modal-backdrop-post" onclick="closeDeleteStopModalPostRide()"
-                                class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-                            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                                <div
-                                    class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                                    <div
-                                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                                        <button type="button" onclick="closeDeleteStopModalPostRide()"
-                                            class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
-                                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                                                stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M6 18L18 6M6 6l12 12"></path>
-                                            </svg>
-                                        </button>
-                                        <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                                            <div class="text-center sm:mt-0 sm:text-left">
-                                                <div class="mt-2 w-full">
-                                                    <p id="delete-stop-modal-title-post"
-                                                        class="can-exp-p text-center text-xl">Delete Stop?</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div
-                                            class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                                            <button type="button" id="delete-stop-no-post"
-                                                class="w-24 bg-blue-600 p-2 rounded-md text-white hover:bg-blue-700">No</button>
-                                            <button type="button" id="delete-stop-yes-post"
-                                                class="w-24 bg-red-600 p-2 rounded-md text-white hover:bg-red-700">Yes</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex items-end flex-col md:flex-row justify-between mt-4">
-                            <div class="w-full md:w-[45%] mb-4">
-                                <label for="pickup_location" class="block mb-2 text-gray-900">
-                                    @isset($postRidePage->pick_up_label)
-                                        {{ $postRidePage->pick_up_label }}
-                                    @endisset
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <textarea id="pickup_location" rows="5" name="pickup"
-                                    class="block p-2.5 w-full text-gray-900 bg-gray-100 rounded border border-gray-200 text-base lg:text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
-                                    @isset($postRidePage->pick_up_placeholder)
-                                    placeholder="{{ $postRidePage->pick_up_placeholder }}"
-                                @endisset>{{ old('pickup', optional($ride)->pickup) }}</textarea>
-                                @error('pickup')
-                                <div class="absolute mt-1 z-10">
-                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} </div>
-                                </div>
+                            <div class="w-full md:w-[45%] ">
+                                <label class="block text-sm mb-4 required">{{ $postRidePage->to_label }}</label>
+                                @livewire(
+                                    'px.city-autocomplete',
+                                    [
+                                        'field' => 'destination',
+                                        'placeholder' => $postRidePage->to_placeholder,
+                                        'initialLabel' => $oldDestinationLabel ?? old('destination.label'),
+                                        'initialCityId' => $oldDestinationCityId ?? old('destination.city_id'),
+                                    ],
+                                    key('px-destination-city-autocomplete')
+                                )
+                                @error('destination.label')
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="w-full md:w-[45%] mb-4">
-                                <label for="dropoff_location"class="block mb-2 text-gray-900">
-                                    @isset($postRidePage->drop_off_label)
-                                        {{ $postRidePage->drop_off_label }}
-                                    @endisset
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <textarea id="dropoff_location" rows="5" name="dropoff"
-                                    class="block p-2.5 w-full text-gray-900 bg-gray-100 rounded border border-gray-200 text-base lg:text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
-                                    @isset($postRidePage->drop_off_placeholder)
-                                    placeholder="{{ $postRidePage->drop_off_placeholder }}"
-                                @endisset>{{ old('dropoff', optional($ride)->dropoff) }}</textarea>
+                        </div>
+
+                        <div class="flex flex-col md:flex-row justify-between mt-4">
+                            <div class="w-full md:w-[45%]">
+                                <label class="block text-sm mb-4 required">{{ $postRidePage->pick_up_label }}</label>
+                                <textarea name="pickup" rows="4" class="w-full rounded border-gray-300" autocomplete="off"
+                                    placeholder="{{ $postRidePage->pick_up_placeholder }}">{{ $oldPickupLocation ?? old('pickup') }}</textarea>
+                                @error('pickup')
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="w-full md:w-[45%]">
+                                <label class="block text-sm mb-4 required">{{ $postRidePage->drop_off_label }}</label>
+                                <textarea name="dropoff" rows="4" class="w-full rounded border-gray-300" autocomplete="off"
+                                    placeholder="{{ $postRidePage->drop_off_placeholder }}">{{ $oldDropoffLocation ?? old('dropoff') }}</textarea>
                                 @error('dropoff')
-                                <div class="absolute mt-1 z-10">
-                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }} </div>
-                                </div>
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
 
                         <div>
-                            <label for="date_time" class="block text-gray-900">
-                                @isset($postRidePage->date_time_label)
-                                    {{ $postRidePage->date_time_label }}
-                                @endisset
-                                <span class="text-red-500">*</span>
+                            <label for="date_time" class="block text-gray-900 required">
+                                {{ $postRidePage->date_time_label ?? 'Date and Time' }}
                             </label>
-                            <div
-                                class="flex flex-col sm:flex-col md:flex-row lg:flow-row items-start mb-4 justify-between">
+                            <div class="flex flex-col sm:flex-col md:flex-row lg:flow-row items-start mb-4 justify-between">
                                 <div class="w-full md:w-[45%] mb-4">
                                     <div class="relative mt-2">
                                         <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                fill="currentColor" class="bi bi-calendar-event" viewBox="0 0 16 16">
-                                                <path
-                                                    d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z" />
-                                                <path
-                                                    d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z" />
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                                fill="currentColor" aria-hidden="true">
+                                                <path fill="#888888" fill-rule="evenodd"
+                                                    d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                                    clip-rule="evenodd" />
                                             </svg>
                                         </div>
-                                        @php
-                                            $dateValue = old('date');
-                                            if (
-                                                empty($dateValue) &&
-                                                ($routeType ?? '') === 'copy' &&
-                                                isset($ride) &&
-                                                $ride
-                                            ) {
-                                                $copyDate =
-                                                    $ride->date ??
-                                                    (isset($ride->defaultRideDetail[0])
-                                                        ? $ride->defaultRideDetail[0]->date
-                                                        : null);
-                                                if ($copyDate) {
-                                                    $dateValue = \Carbon\Carbon::parse($copyDate)->format('F d, Y');
-                                                }
-                                            }
-                                        @endphp
-                                        <input type="text" id="dateInput" name="date" value="2026-03-16"
-                                            class="bg-gray-100 border pl-7 border-gray-200 text-base lg:text-lg text-gray-900  rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5"
-                                            placeholder="">
+                                        <input id="departure-at-date" name="date" value="{{ $oldDepartureDate }}"
+                                            type="text"
+                                            class="bg-gray-100 border pl-10 border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5"
+                                            placeholder="" autocomplete="off">
                                     </div>
                                     @error('date')
-                                        <div class="absolute mt-1 z-10">
-                                            <div
-                                                class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                                {{ $message }}</div>
-                                        </div>
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="w-full md:w-[10%] md:mt-4 text-center">
@@ -746,313 +448,61 @@
                                                     d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                         </div>
-                                        @php
-                                            $timeValue = old('time');
-                                            if (
-                                                $timeValue === null &&
-                                                ($routeType ?? '') !== '' &&
-                                                in_array($routeType ?? '', ['repost', 'copy']) &&
-                                                isset($ride) &&
-                                                $ride &&
-                                                !empty($ride->time)
-                                            ) {
-                                                $timeValue = \Carbon\Carbon::parse($ride->time)->format('H:i');
-                                            }
-                                            if (
-                                                ($timeValue === null || $timeValue === '') &&
-                                                ($routeType ?? '') !== '' &&
-                                                in_array($routeType ?? '', ['repost', 'copy']) &&
-                                                isset($ride) &&
-                                                $ride &&
-                                                !empty($ride->time)
-                                            ) {
-                                                $timeValue = \Carbon\Carbon::parse($ride->time)->format('H:i');
-                                            }
-                                        @endphp
-                                        <input type="text" id="timeInput" name="time"
-                                            value="{{ $timeValue ?? '' }}"
+                                        <input type="text" id="departure-at-time" name="time"
+                                            value="{{ $oldDepartureTime }}"
                                             class="bg-gray-100 border pl-10 border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5"
-                                            placeholder="">
+                                            placeholder="" autocomplete="off">
                                     </div>
                                     @error('time')
-                                        <div class="absolute mt-1 z-10">
-                                            <div
-                                                class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                                {{ $message }}</div>
-                                        </div>
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                     @enderror
                                 </div>
                             </div>
                         </div>
-
-                        {{-- Stops Along the Way (Optional) – repopulate from old() or ride data (for repost/copy) so segment price UI shows correctly --}}
-                        @php
-                            $stopsForDisplayPost = [];
-                            $segmentPricesForPost = [];
-                            $stopPickupDropoffForDisplayPost = [];
-                            $routeTypeLocal = $routeType ?? '';
-                            $chainSegmentsPost = [];
-                            if (null !== old('stop_spot_display') && is_array(old('stop_spot_display'))) {
-                                $stopsForDisplayPost = old('stop_spot_display');
-                            } elseif (
-                                null !== old('to_spot') &&
-                                is_array(old('to_spot')) &&
-                                count(old('to_spot')) > 0
-                            ) {
-                                $toSpotsPost = old('to_spot');
-                                $nPost = count($toSpotsPost) - 1;
-                                for ($i = 0; $i < $nPost; $i++) {
-                                    $stopsForDisplayPost[] = $toSpotsPost[$i];
-                                }
-                            } elseif (
-                                in_array($routeTypeLocal, ['repost', 'copy'], true) &&
-                                isset($ride) &&
-                                $ride &&
-                                $ride->MoreRideDetail &&
-                                $ride->MoreRideDetail->count() > 0
-                            ) {
-                                // Build ordered chain from origin to destination for repost/copy using only actual route segments
-                                $defaultDetail = $ride->defaultRideDetail->first();
-                                $originText =
-                                    $defaultDetail && $defaultDetail->departure
-                                        ? $defaultDetail->departure
-                                        : $ride->rideDetail->first()->departure ?? '';
-                                $destinationText =
-                                    $defaultDetail && $defaultDetail->destination
-                                        ? $defaultDetail->destination
-                                        : $ride->rideDetail->last()->destination ?? '';
-
-                                $details = $ride->MoreRideDetail->sortBy('id')->values();
-                                $orderedPoints = collect([$originText]);
-                                $current = $originText;
-                                $remaining = $details;
-                                $chainSegmentsPost = [];
-
-                                while ($current !== $destinationText && $remaining->isNotEmpty()) {
-                                    $nextSegment = $remaining->first(function ($d) use ($current) {
-                                        return (string) $d->departure === (string) $current;
-                                    });
-                                    if (!$nextSegment) {
-                                        break;
-                                    }
-                                    $chainSegmentsPost[] = $nextSegment;
-                                    $orderedPoints->push($nextSegment->destination);
-                                    $current = $nextSegment->destination;
-                                    $remaining = $remaining->filter(function ($d) use ($nextSegment) {
-                                        return $d->id != $nextSegment->id;
-                                    });
-                                }
-
-                                // Intermediate stops (exclude origin and destination)
-                                $chainStops =
-                                    $orderedPoints->count() > 2
-                                        ? $orderedPoints->slice(1, $orderedPoints->count() - 2)->values()
-                                        : collect();
-
-                                foreach ($chainStops as $stop) {
-                                    $stopsForDisplayPost[] = $stop;
-                                }
-
-                                // Consecutive segment prices
-                                foreach ($chainSegmentsPost as $seg) {
-                                    $segmentPricesForPost[] = $seg->price ?? '';
-                                }
-                            }
-
-                            // Build pickup/dropoff notes for each stop
-                            if (null !== old('stop_pickup_dropoff') && is_array(old('stop_pickup_dropoff'))) {
-                                $stopPickupDropoffForDisplayPost = old('stop_pickup_dropoff');
-                            } elseif (
-                                in_array($routeTypeLocal, ['repost', 'copy'], true) &&
-                                !empty($chainSegmentsPost)
-                            ) {
-                                foreach ($chainSegmentsPost as $index => $seg) {
-                                    if ($index >= count($stopsForDisplayPost)) {
-                                        break;
-                                    }
-                                    $stopPickupDropoffForDisplayPost[] = $seg->dropoff ?? '';
-                                }
-                            }
-                            // Build stop dates for display (repost/copy or old input)
-                            $stopDatesForDisplayPost = [];
-                            if (null !== old('stop_date') && is_array(old('stop_date'))) {
-                                $stopDatesForDisplayPost = old('stop_date');
-                            } elseif (!empty($chainSegmentsPost)) {
-                                foreach ($chainSegmentsPost as $seg) {
-                                    $stopDatesForDisplayPost[] = $seg->date ? \Carbon\Carbon::parse($seg->date)->format('F d, Y') : '';
-                                }
-                            }
-                            // Normalize lengths
-                            $realStopsPost = array_values(
-                                array_filter($stopsForDisplayPost, function ($s) {
-                                    return trim((string) $s) !== '';
-                                }),
-                            );
-                            if (count($stopPickupDropoffForDisplayPost) !== count($stopsForDisplayPost)) {
-                                $stopPickupDropoffForDisplayPost = array_pad(
-                                    $stopPickupDropoffForDisplayPost,
-                                    count($stopsForDisplayPost),
-                                    '',
-                                );
-                            }
-                            if (count($stopDatesForDisplayPost) !== count($stopsForDisplayPost)) {
-                                $stopDatesForDisplayPost = array_pad($stopDatesForDisplayPost, count($stopsForDisplayPost), '');
-                            }
-                            $hasStopsPost = count($realStopsPost) > 0;
-                        @endphp
-                        <div class="bg-white rounded-lg overflow-hidden shadow-3xl mt-4" id="stops-section-wrapper"
-                            data-segment-ids="[]">
-                            <button type="button" id="add-more-spots-toggle"
-                                class="add-more-spots-header text-2xl bg-primary text-white py-2 px-4 w-full"
-                                aria-expanded="{{ $hasStopsPost ? 'true' : 'false' }}"
-                                aria-controls="add-more-spots-panel" onclick="toggleAddMoreSpots(this)">
-                                <h3 class="text-2xl">@if(isset($postRidePage->stop_along_the_way_label)){{ $postRidePage->stop_along_the_way_label }}@elseif(isset($postRidePage->add_more_from_to)){{ $postRidePage->add_more_from_to }}@else Stops Along the Way (Optional) @endif</h3>
-                                <svg class="add-more-spots-chevron text-white" xmlns="http://www.w3.org/2000/svg"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7" />
+                        <div class="bg-white rounded-lg shadow-3xl mt-6">
+                            <button type="button" id="px-stops-toggle"
+                                class="bg-primary rounded-lg text-white w-full flex items-center justify-between text-left px-4 py-2"
+                                aria-expanded="{{ $stopsExpanded ? 'true' : 'false' }}" aria-controls="stops-content">
+                                <h3 class="text-2xl">
+                                    {{ $postRidePage->stop_along_the_way_label ?? 'Stops Along the Way' }}
+                                </h3>
+                                <svg id="px-stops-chevron"
+                                    class="w-5 h-5 text-white transition-transform {{ $stopsExpanded ? 'rotate-180' : '' }}"
+                                    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd"
+                                        d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.51a.75.75 0 01-1.08 0l-4.25-4.51a.75.75 0 01.02-1.06z"
+                                        clip-rule="evenodd" />
                                 </svg>
                             </button>
-                            <div id="add-more-spots-panel" class="add-more-spots-panel" role="region"
-                                aria-labelledby="add-more-spots-toggle"
-                                style="{{ $hasStopsPost ? 'height: auto;' : 'height: 0;' }}">
-                                <div class="add-more-spots-panel-inner bg-white p-4">
-                                    <div class="flex items-center gap-2 mb-3">
-                                        <h4 class="text-gray-900 text-xl font-medium">
-                                            {{ $postRidePage->from_label ?? 'From' }}: </h4>
-                                        <span id="stops-origin-label"
-                                            class="text-gray-900 text-primary lg:text-lg"></span>
-                                    </div>
-                                    <h4 class="text-xl font-medium text-gray-900 mt-4 mb-3">{{ $postRidePage->stop_along_the_way_label ?? 'Stops Along the Way' }}: <span class="text-red-500">*</span></h4>
-                                    <div class="space-y-3 mb-4" id="stops-rows-container">
-                                        @if ($hasStopsPost)
-                                            @foreach ($stopsForDisplayPost as $idx => $stopValue)
-                                                @php $renderIndex = $idx + 1; @endphp
-                                                <div class="flex items-center gap-3 stop-row flex-nowrap"
-                                                    data-stop-index="{{ $renderIndex }}">
-                                                    <div class="flex flex-row gap-2 items-stretch flex-1 min-w-0 flex-nowrap">
-                                                        {{-- 1) Stop city --}}
-                                                        <div class="relative flex-1 min-w-0 shrink">
-                                                            <div
-                                                                class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                                                <img src="{{ asset('assets/search-bar-from.png') }}"
-                                                                    class="w-auto h-6" alt="">
-                                                            </div>
-                                                            <input type="text" name="stop_spot_display[]"
-                                                                data-stop-index="{{ $renderIndex }}"
-                                                                id="stop_spot_{{ $renderIndex }}"
-                                                                value="{{ $stopValue }}" autocomplete="off"
-                                                                class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
-                                                                placeholder="{{ $postRidePage->stop_placeholder ?? '' }}">
-                                                            <div class="absolute hidden mt-1 z-10 left-0 top-full"
-                                                                id="stopInputError_{{ $renderIndex }}">
-                                                                <div
-                                                                    class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        {{-- 2) Pick up / drop off (text) --}}
-                                                        <div class="relative flex-1 min-w-0 shrink">
-                                                            <textarea name="stop_pickup_dropoff[]" data-stop-index="{{ $renderIndex }}"
-                                                                id="stop_pickup_dropoff_{{ $renderIndex }}" rows="1"
-                                                                placeholder="{{ $postRidePage->pickup_off_placeholder ?? 'pick up / drop off' }}"
-                                                                class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none">{{ old('stop_pickup_dropoff.' . $idx, $stopPickupDropoffForDisplayPost[$idx] ?? '') }}</textarea>
-                                                            <div class="absolute hidden mt-1 z-10 left-0 top-full"
-                                                                id="stopPickupDropoffError_{{ $renderIndex }}">
-                                                                <div
-                                                                    class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        {{-- 3) Date --}}
-                                                        <div class="w-32 sm:w-40 md:w-44 lg:w-48 shrink-0">
-                                                            <div class="relative">
-                                                                <div
-                                                                    class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                                        viewBox="0 0 24 24" stroke-width="1.5"
-                                                                        stroke="currentColor" class="w-6 h-6">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                                            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                                                                    </svg>
-                                                                </div>
-                                                                <input type="text" name="stop_date[]"
-                                                                    id="stop_date_{{ $renderIndex }}"
-                                                                    value="{{ old('stop_date.' . $idx, $stopDatesForDisplayPost[$idx] ?? '') }}"
-                                                                    class="bg-gray-100 border pl-10 border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
-                                                                    placeholder="">
-                                                                <div class="absolute hidden mt-1 z-10 left-0 top-full"
-                                                                    id="stopDateError_{{ $renderIndex }}">
-                                                                    <div
-                                                                        class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        {{-- 4) Time --}}
-                                                        <div class="w-32 sm:w-40 md:w-44 lg:w-48 shrink-0">
-                                                            <div class="relative">
-                                                                <div
-                                                                    class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                                        viewBox="0 0 24 24" stroke-width="1.5"
-                                                                        stroke="currentColor" class="w-6 h-6">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                                            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                    </svg>
-                                                                </div>
-                                                                <input type="text" name="stop_time[]"
-                                                                    id="stop_time_{{ $renderIndex }}"
-                                                                    class="bg-gray-100 border pl-10 border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
-                                                                    placeholder="">
-                                                                <div class="absolute hidden mt-1 z-10 left-0 top-full"
-                                                                    id="stopTimeError_{{ $renderIndex }}">
-                                                                    <div
-                                                                        class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <button type="button"
-                                                        class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400"
-                                                        onclick="confirmDeleteStopPostRide(this)" title="Delete stop"
-                                                        aria-label="Delete stop">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                            viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                            class="w-6 h-6">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                d="M6 18L18 6M6 6l12 12" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            @endforeach
-                                        @endif
-                                    </div>
-                                    <button type="button" onclick="addStopRowPostRide();" class="button-exp-fill flex-shrink-0 whitespace-nowrap mb-4">{{ $postRidePage->add_stop_btn_label ?? '+ Add Stop' }}</button>
-                                    <div class="flex items-center gap-2 mb-3">
-                                        <h4 class="text-gray-900 text-xl font-medium">
-                                            {{ $postRidePage->to_label ?? 'To' }}: </h4>
-                                        <span id="stops-destination-label"
-                                            class="text-gray-900 text-primary lg:text-lg"></span>
-                                    </div>
-                                    <div id="stops-segments-hidden" class="hidden"></div>
-                                </div>
+
+                            <div id="px-stops-content" class="px-4 py-4 {{ $stopsExpanded ? '' : 'hidden' }}">
+                                @livewire(
+                                    'px.stops-repeater',
+                                    [
+                                        'initialStops' => $oldStops,
+                                        'originLabel' => $oldOriginLabel ?? old('from', ''),
+                                        'destinationLabel' => $oldDestinationLabel ?? old('to', ''),
+                                        'addStopBtnLabel' => $postRidePage->add_stop_btn_label ?? 'Add Stop',
+                                        'stopAlongTheWayLabel' => $postRidePage->stops_along_the_way_label ?? 'Stop Along the Way',
+                                        'stopsDeleteConfirmText' => $postRidePage->stops_remove_confirm_text ?? 'Are you sure you want to delete this stop row?',
+                                    ],
+                                    key('px-stops-repeater')
+                                )
                             </div>
                         </div>
 
                         <div class="flex items-center mb-4">
-                            <input id="recurring_trip" type="checkbox" name="recurring" value="1"
-                                {{ old('recurring') === '1' ? 'checked' : '' }}
+                            <input id="px-is-recurring" type="checkbox" name="recurring" value="1"
+                                {{ (string) ($oldIsRecurring ? '1' : '0') === '1' ? 'checked' : '' }}
                                 class="w-4 h-4 text-blue-600 cursor-pointer bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                            <label for="recurring_trip" class="ml-2 text-gray-900">
+                            <label for="px-is-recurring" class="ml-2 text-gray-900">
                                 @isset($postRidePage->recurring_label)
                                     {{ $postRidePage->recurring_label }}
                                 @endisset
                             </label>
                         </div>
 
-                        <div id="recurringtripDetails">
+                        <div id="px-recurring-fields">
                             <div class="flex items-start flex-col md:flex-row mb-4 justify-between">
                                 <div class="w-full md:w-[45%] mb-4">
                                     <label for="recurring_type" class="block mb-2 text-gray-900">
@@ -1064,25 +514,21 @@
                                     <div class="relative mt-2">
                                         <select id="type" name="recurring_type"
                                             class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
-                                            <option value="" {{ old('recurring_type') === '' ? 'selected' : '' }}>
+                                            <option value="" {{ ($oldRecurringType ?? '') === '' ? 'selected' : '' }}>
                                                 Select
                                             </option>
                                             <option value="Daily"
-                                                {{ old('recurring_type') === 'Daily' ? 'selected' : '' }}>
+                                                {{ ($oldRecurringType ?? '') === 'Daily' ? 'selected' : '' }}>
                                                 Daily
                                             </option>
                                             <option value="Weekly"
-                                                {{ old('recurring_type') === 'Weekly' ? 'selected' : '' }}>
+                                                {{ ($oldRecurringType ?? '') === 'Weekly' ? 'selected' : '' }}>
                                                 Weekly
                                             </option>
                                         </select>
                                     </div>
                                     @error('recurring_type')
-                                        <div class="absolute mt-1 z-10">
-                                            <div
-                                                class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                                {{ $message }}</div>
-                                        </div>
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="w-full md:w-[10%] hidden md:block mt-12 text-center">
@@ -1099,18 +545,14 @@
                                     </label>
                                     <div class="relative mt-2">
                                         <input type="number" min="1" max="10" name="recurring_trips"
-                                            value="{{ old('recurring_trips') }}"
+                                            value="{{ $oldRecurringTrips }}"
                                             @isset($postRidePage->recurring_trips_placeholder)
                                                 placeholder="{{ $postRidePage->recurring_trips_placeholder }}"
                                             @endisset
                                             class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
                                     </div>
                                     @error('recurring_trips')
-                                        <div class="absolute mt-1 z-10">
-                                            <div
-                                                class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                                {{ $message }}</div>
-                                        </div>
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                     @enderror
                                 </div>
                             </div>
@@ -1132,11 +574,7 @@
                                     placeholder="{{ $postRidePage->meeting_drop_off_description_placeholder }}"
                                 @endisset>{{ old('details', optional($ride)->details) }}</textarea>
                             @error('details')
-                                <div class="absolute mt-1 z-10">
-                                    <div
-                                        class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                        {{ $message }}</div>
-                                </div>
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
                             @enderror
                         </div>
                     </div>
@@ -1145,39 +583,48 @@
                 <div class="mt-6">
                     <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                         <div class="text-2xl bg-primary text-white py-2 px-4">
-                            <label for="no_of_seats" class="text-lg lg:text-3xl font-FuturaMdCnBT mb-2">
-                                <h3 class="text-2xl">
-                                    @isset($postRidePage->seats_label)
-                                        {{ $postRidePage->seats_label }}
-                                    @endisset
-                                    <span class="text-white">*</span>
-                                </h3>
-                            </label>
+                            <h3 class="text-2xl">
+                                @isset($postRidePage->seats_label)
+                                    {{ $postRidePage->seats_label }}
+                                @endisset
+                                <span class="text-white">*</span>
+                            </h3>
                         </div>
                         <div class="bg-white p-4">
                             <div class="relative">
                                 <div class="flex items-center flex-wrap gap-2 mt-2">
                                     @for ($i = 1; $i <= 7; $i++)
-                                    <div class="relative">
-                                        <label class="cursor-pointer inline-block" for="number-of-seat-{{ $i }}">
-                                            <input id="number-of-seat-{{ $i }}" name="seats" type="radio" value="{{ $i }}" class="hidden" {{ old('seats', optional($ride)->seats) == $i ? 'checked' : '' }} onchange="seat_selected(this)" data-parsley-required="true" data-parsley-trigger="blur focusout change" data-parsley-required-message="Please select the available seats." data-parsley-errors-container="#parsley-seats-error">
-                                            <span class="relative inline-block w-6 h-6 md:w-8 md:h-8">
-                                                <img src="{{ old('seats', optional($ride)->seats) >= $i ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}" class="w-8 h-8 object-cover cursor-pointer seat-image seat-unselect-{{ $i }}" alt="">
-                                                <span class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $i }} {{ old('seats', optional($ride)->seats) >= $i ? 'text-green-300' : '' }}">{{ $i }}</span>
-                                            </span>
-                                        </label>
-                                    </div>
+                                        <div class="relative">
+                                            <label class="cursor-pointer inline-block"
+                                                for="number-of-seat-{{ $i }}">
+                                                <input id="number-of-seat-{{ $i }}" name="seats_total"
+                                                    type="radio" value="{{ $i }}" class="hidden"
+                                                    @checked((string) ($oldSeatsTotal ?? old('seats_total', '1')) === (string) $i) onchange="seat_selected(this)"
+                                                    data-parsley-required="true"
+                                                    data-parsley-trigger="blur focusout change"
+                                                    data-parsley-required-message="Please select the available seats."
+                                                    data-parsley-errors-container="#parsley-seats-error">
+                                                <span class="relative inline-block w-6 h-6 md:w-8 md:h-8">
+                                                    <img src="{{ (int) ($oldSeatsTotal ?? old('seats_total', 0)) >= $i ? asset('assets/seat-hover-1.png') : asset('assets/seat.png') }}"
+                                                        class="w-8 h-8 object-cover cursor-pointer seat-image seat-unselect-{{ $i }}"
+                                                        alt="">
+                                                    <span
+                                                        class="absolute mt-2 inset-0 flex items-center justify-center text-sm seat-number seat-number-{{ $i }} {{ (int) ($oldSeatsTotal ?? old('seats_total', 0)) >= $i ? 'text-green-300' : '' }}">{{ $i }}</span>
+                                                </span>
+                                            </label>
+                                        </div>
                                     @endfor
                                 </div>
                                 @error('seats')
-                                <div id="seats-server-error" class="mt-1 z-10 w-full">
-                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
-                                </div>
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                @enderror
+                                @error('seats_total')
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-6 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 mt-6 gap-4">
                                 <div>
-                                    <label for="pickup_location" class="text-gray-900 mb-2">
+                                    <label for="" class="text-gray-900 mb-2">
                                         @isset($postRidePage->seats_middle_label)
                                             {{ $postRidePage->seats_middle_label }}
                                         @endisset
@@ -1207,11 +654,7 @@
                                         </li>
                                     </ul>
                                     @error('middle_seats')
-                                        <div class="absolute mt-1 z-10">
-                                            <div
-                                                class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                                {{ $message }}</div>
-                                        </div>
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div>
@@ -1245,111 +688,65 @@
                                         </li>
                                     </ul>
                                     @error('back_seats')
-                                        <div class="absolute mt-1 z-10">
-                                            <div
-                                                class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                                {{ $message }}</div>
-                                        </div>
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                     @enderror
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <input type="hidden" name="duration" id="px-duration-input" value="{{ old('duration', 0) }}" />
+
+                <div id="px-segment-distance-loader" class="fixed top-0 left-0 right-0 z-50 pointer-events-none" aria-hidden="true">
+                    <div class="px-top-progress-track">
+                        <div class="px-top-progress-bar"></div>
+                    </div>
+                </div>
 
                 <div class="mt-6 bg-white rounded-lg overflow-visible shadow-3xl">
                     <div class="text-2xl bg-primary text-white py-2 px-4 rounded-t-lg">
                         <h3 class="text-2xl">
-                            @isset($postRidePage->price_payment_heading)
-                                {{ $postRidePage->price_payment_heading }}
-                            @endisset
+                            {{ $postRidePage->price_payment_heading ?? 'Price and Payment Method' }}
                             <span class="text-white">*</span>
                         </h3>
                     </div>
-                    <div id="post-ride-price-section" class="bg-white p-4 rounded-b-lg">
-
-                        <div id="single-price-block">
-                            <div>
-                                <label for="" class=" text-gray-700 font-medium">
-                                    @isset($postRidePage->price_per_seat_label)
-                                        {{ $postRidePage->price_per_seat_label }}
-                                    @endisset
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <div class="relative mt-2">
-                                    <span class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                        <svg fill="currentColor" width="800px" height="800px" viewBox="0 0 32 32"
-                                            class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg">
-                                            <path
-                                                d="M 15 3 L 15 5.09375 C 12.164063 5.570313 10 8.050781 10 11 C 10 12.777344 10.832031 14.148438 11.9375 15.03125 C 13.042969 15.914063 14.375 16.40625 15.625 16.90625 C 16.875 17.40625 18.042969 17.914063 18.8125 18.53125 C 19.582031 19.148438 20 19.773438 20 21 C 20 23.15625 18.207031 25 16 25 C 13.78125 25 12 23.21875 12 21 L 12 20 L 10 20 L 10 21 C 10 23.964844 12.164063 26.429688 15 26.90625 L 15 29 L 17 29 L 17 26.90625 C 19.84375 26.425781 22 23.925781 22 21 C 22 19.21875 21.167969 17.855469 20.0625 16.96875 C 18.957031 16.082031 17.625 15.5625 16.375 15.0625 C 15.125 14.5625 13.957031 14.082031 13.1875 13.46875 C 12.417969 12.855469 12 12.21875 12 11 C 12 8.808594 13.785156 7 16 7 C 18.21875 7 20 8.78125 20 11 L 20 12 L 22 12 L 22 11 C 22 8.035156 19.835938 5.570313 17 5.09375 L 17 3 Z" />
-                                        </svg>
-                                    </span>
-                                    @php
-                                        $defaultPrice =
-                                            isset($ride->defaultRideDetail) && isset($ride->defaultRideDetail[0])
-                                                ? $ride->defaultRideDetail[0]->price
-                                                : '';
-                                    @endphp
-                                    <input type="number" step="any" name="price" autocomplete="off" id="priceData0"  placeholder=""
-                                        value="{{ old('price', $defaultPrice) }}"
-                                        class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2" />
-                                </div>
-
-                                @error('price')
-                                    <div id="price-error-message" class="absolute mt-1 z-10">
-                                        <div
-                                            class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                            {{ $message }}</div>
-                                    </div>
-                                @enderror
-                                <div id="price-client-error" class="absolute hidden mt-1 z-10 mb-2">
-                                    <div
-                                        class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                        Please enter the full route price.</div>
-                                </div>
-                            </div>
+                    <div class="bg-white p-4 rounded-b-lg">
+                        <label id="px-price-label" class=" text-gray-700 font-medium required">
+                            {{ $postRidePage->price_per_seat_label ?? 'Price per Seat' }}
+                        </label>
+                        <div id="px-price-single-wrap" class="{{ $showSegmentPriceMode ? 'hidden' : '' }}">
+                            <input id="px-price-minor-input" name="{{ $showSegmentPriceMode ? '' : 'price_minor' }}" value="{{ $oldPriceMajorDisplay }}"
+                                type="number" min="0" step="0.01" class="w-full rounded border-gray-300"
+                                {{ $showSegmentPriceMode ? 'disabled' : '' }}
+                                placeholder="e.g. 25.00">
+                            <p id="px-price-single-expected" class="mt-2 text-xs text-gray-500 hidden"></p>
+                            @error('price_minor')
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                            @enderror
                         </div>
-                        <div id="stops-segment-prices-dynamic" style="display: none;" data-bookings-readonly="0"
-                            data-initial-segment-prices='@json($segmentPricesForPost ?? [])'>
-                            <p class="text-gray-700 font-medium mt-2 mb-1">Full route price</p>
-                            <div class="relative">
-                                <div class="relative mt-2 mb-2">
-                                    <span class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                        <svg fill="currentColor" width="800px" height="800px" viewBox="0 0 32 32"
-                                            class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg">
-                                            <path
-                                                d="M 15 3 L 15 5.09375 C 12.164063 5.570313 10 8.050781 10 11 C 10 12.777344 10.832031 14.148438 11.9375 15.03125 C 13.042969 15.914063 14.375 16.40625 15.625 16.90625 C 16.875 17.40625 18.042969 17.914063 18.8125 18.53125 C 19.582031 19.148438 20 19.773438 20 21 C 20 23.15625 18.207031 25 16 25 C 13.78125 25 12 23.21875 12 21 L 12 20 L 10 20 L 10 21 C 10 23.964844 12.164063 26.429688 15 26.90625 L 15 29 L 17 29 L 17 26.90625 C 19.84375 26.425781 22 23.925781 22 21 C 22 19.21875 21.167969 17.855469 20.0625 16.96875 C 18.957031 16.082031 17.625 15.5625 16.375 15.0625 C 15.125 14.5625 13.957031 14.082031 13.1875 13.46875 C 12.417969 12.855469 12 12.21875 12 11 C 12 8.808594 13.785156 7 16 7 C 18.21875 7 20 8.78125 20 11 L 20 12 L 22 12 L 22 11 C 22 8.035156 19.835938 5.570313 17 5.09375 L 17 3 Z" />
-                                        </svg>
-                                    </span>
-                                    <input type="number" step="any" id="priceData0DynamicInput" placeholder=""
-                                        value="{{ old('price', '') }}"
-                                        class="full-route-price-input bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2" />
-                                </div>
-                                <div id="full-route-tooltip-container-dynamic"
-                                    class="absolute hidden top-full left-1/2 -translate-x-1/2 mt-1 z-10">
-                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                        The full-route price can't be higher than the total of all route
-                                        sections.<br>
-                                        You can lower the full-route price or adjust section prices.
-                                    </div>
-                                </div>
+                        <div id="px-price-segments-wrap" class="{{ $showSegmentPriceMode ? '' : 'hidden' }} space-y-3">
+                            <div id="px-price-segments-list" class="space-y-2"></div>
+                            <div
+                                class="flex items-center justify-between rounded-md bg-gray-50 border border-gray-200 px-3 py-2">
+                                <span class="text-gray-700">Parent route price per seat</span>
+                                <span id="px-price-segments-total" class="text-gray-900">0.00</span>
                             </div>
-                            <p class="text-gray-700 font-medium mt-2 mb-1">Total price (all sections)</p>
-                            <div class="relative mt-2 mb-4">
-                                <span
-                                    class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none text-gray-500 font-medium">
-                                    <svg fill="currentColor" width="800px" height="800px" viewBox="0 0 32 32"
-                                        class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M 15 3 L 15 5.09375 C 12.164063 5.570313 10 8.050781 10 11 C 10 12.777344 10.832031 14.148438 11.9375 15.03125 C 13.042969 15.914063 14.375 16.40625 15.625 16.90625 C 16.875 17.40625 18.042969 17.914063 18.8125 18.53125 C 19.582031 19.148438 20 19.773438 20 21 C 20 23.15625 18.207031 25 16 25 C 13.78125 25 12 23.21875 12 21 L 12 20 L 10 20 L 10 21 C 10 23.964844 12.164063 26.429688 15 26.90625 L 15 29 L 17 29 L 17 26.90625 C 19.84375 26.425781 22 23.925781 22 21 C 22 19.21875 21.167969 17.855469 20.0625 16.96875 C 18.957031 16.082031 17.625 15.5625 16.375 15.0625 C 15.125 14.5625 13.957031 14.082031 13.1875 13.46875 C 12.417969 12.855469 12 12.21875 12 11 C 12 8.808594 13.785156 7 16 7 C 18.21875 7 20 8.78125 20 11 L 20 12 L 22 12 L 22 11 C 22 8.035156 19.835938 5.570313 17 5.09375 L 17 3 Z" />
-                                    </svg>
-                                </span>
-                                <input type="text" id="segment-total-price-input-dynamic" readonly placeholder="0.00"
-                                    value="0.00"
-                                    class="bg-gray-200 border border-gray-300 pl-7 text-gray-700 text-base lg:text-lg rounded block w-full p-2.5 mt-2 cursor-default" />
-                            </div>
-                            <div id="segment-price-rows-dynamic"></div>
+                            <input type="hidden" id="px-price-minor-hidden"
+                                name="{{ $showSegmentPriceMode ? 'price_minor' : '' }}"
+                                value="{{ (int) ($oldPriceMinor ?? old('price_minor', 0)) }}">
+                            <input type="hidden" id="px-destination-price-delta-initial"
+                                value="{{ $oldDestinationPriceDeltaMinor ?? old('destination.price_delta_minor', 0) }}">
+                            <script type="application/json" id="px-initial-segment-prices-json">{!! json_encode(array_values($oldSegmentPrices), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
+                            <input type="hidden" name="distance_meters" id="px-distance-meters-input"
+                                value="{{ old('distance_meters', '') }}">
+                            @error('price_minor')
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                            @enderror
                         </div>
+                        @error('stops.*.price_delta_minor')
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                        @enderror
+
                         <div class="mt-6">
                             <label for="" class="block mb-2 font-medium text-gray-900">
                                 @isset($postRidePage->payment_methods_label)
@@ -1362,7 +759,7 @@
                                     <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
                                         <input id="cash" name="payment_method" type="radio"
                                             value="{{ $postRidePage->payment_methods_option1->features_setting_id }}"
-                                            {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option1->features_setting_id ? 'checked' : '' }}
+                                            {{ $oldPaymentMethod == $postRidePage->payment_methods_option1->features_setting_id ? 'checked' : '' }}
                                             class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
                                         <label for="cash"
                                             class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
@@ -1391,7 +788,7 @@
                                     <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
                                         <input id="online" name="payment_method" type="radio"
                                             value="{{ $postRidePage->payment_methods_option2->features_setting_id }}"
-                                            {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option2->features_setting_id ? 'checked' : '' }}
+                                            {{ $oldPaymentMethod == $postRidePage->payment_methods_option2->features_setting_id ? 'checked' : '' }}
                                             class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
                                         <label for="online"
                                             class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
@@ -1420,7 +817,7 @@
                                     <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
                                         <input id="secured" name="payment_method" type="radio"
                                             value="{{ $postRidePage->payment_methods_option3->features_setting_id }}"
-                                            {{ old('payment_method', $ride->payment_method) == $postRidePage->payment_methods_option3->features_setting_id ? 'checked' : '' }}
+                                            {{ $oldPaymentMethod == $postRidePage->payment_methods_option3->features_setting_id ? 'checked' : '' }}
                                             class="h-5 w-5 rounded border border-gray-200 bg-white cursor-pointer text-indigo-600 focus:ring-indigo-600">
                                         <label for="secured"
                                             class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
@@ -1447,90 +844,80 @@
                                 @endif
                             </div>
                             @error('payment_method')
-                                <div class="absolute mt-1 z-10">
-                                    <div
-                                        class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                        {{ $message }}</div>
-                                </div>
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
                             @enderror
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-6 ">
-                    <div class=" mt-6">
-                        <div class="bg-white rounded-lg shadow-3xl">
-                            <div class="text-2xl bg-primary rounded-t-lg text-white py-2 px-4">
-                                <h3 class="text-2xl">
-                                    @isset($postRidePage->booking_label)
-                                        {{ $postRidePage->booking_label }}
-                                    @endisset
-                                    <span class="text-white">*</span>
-                                </h3>
-                            </div>
-                            <div class="bg-white p-4">
-                                <ul class="grid w-full gap-6 md:grid-cols-2">
-                                    @if ($postRidePage->booking_option1?->features_setting_id)
-                                        <li>
-                                            <input type="radio" id="instant-booking" name="booking_method"
-                                                value="{{ $postRidePage->booking_option1->features_setting_id }}"
-                                                {{ old('booking_method', $ride->booking_method) == $postRidePage->booking_option1->features_setting_id ? 'checked' : '' }}
-                                                class="hidden peer">
-                                            <label for="instant-booking"
-                                                class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
-                                                <img class="w-12 h-12"
-                                                    src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
-                                                    alt="">
-                                                <span class="font-medium text-xl">
-                                                    {{ $postRidePage->booking_option1->name }}
-                                                </span>
-                                                <span class="inline-flex cursor-help"
-                                                    data-tippy-content="{{ $postRidePage->booking_option1_tooltip ?? '' }}">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                        fill="currentColor" class="bi bi-info-circle-fill text-black"
-                                                        viewBox="0 0 16 16">
-                                                        <path
-                                                            d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                                                    </svg>
-                                                </span>
-                                            </label>
-                                        </li>
-                                    @endif
-                                    @if ($postRidePage->booking_option2?->features_setting_id)
-                                        <li>
-                                            <input type="radio" id="manual-approval" name="booking_method"
-                                                value="{{ $postRidePage->booking_option2->features_setting_id }}"
-                                                {{ old('booking_method', $ride->booking_method) == $postRidePage->booking_option2->features_setting_id ? 'checked' : '' }}
-                                                class="hidden peer">
-                                            <label for="manual-approval"
-                                                class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
-                                                <img class="w-12 h-12"
-                                                    src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
-                                                    alt="">
-                                                <span class="font-medium text-xl">
-                                                    {{ $postRidePage->booking_option2->name }}
-                                                </span>
-                                                <span class="inline-flex cursor-help"
-                                                    data-tippy-content="{{ $postRidePage->booking_option2_tooltip ?? '' }}">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                        fill="currentColor" class="bi bi-info-circle-fill text-black"
-                                                        viewBox="0 0 16 16">
-                                                        <path
-                                                            d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                                                    </svg>
-                                                </span>
-                                            </label>
-                                        </li>
-                                    @endif
-                                </ul>
-                                @error('booking_method')
-                                    <div class="absolute mt-1 z-10">
-                                        <div
-                                            class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                            {{ $message }}</div>
-                                    </div>
-                                @enderror
-                            </div>
+                <div class="mt-6">
+                    <div class="bg-white rounded-lg shadow-3xl">
+                        <div class="text-2xl bg-primary rounded-t-lg text-white py-2 px-4">
+                            <h3 class="text-2xl">
+                                @isset($postRidePage->booking_label)
+                                    {{ $postRidePage->booking_label }}
+                                @endisset
+                                <span class="text-white">*</span>
+                            </h3>
+                        </div>
+                        <div class="bg-white p-4">
+                            <ul class="grid w-full gap-6 md:grid-cols-2">
+                                @if ($postRidePage->booking_option1?->features_setting_id)
+                                    <li>
+                                        <input type="radio" id="instant-booking" name="booking_method"
+                                            value="{{ $postRidePage->booking_option1->features_setting_id }}"
+                                            {{ $oldBookingMethod == $postRidePage->booking_option1->features_setting_id ? 'checked' : '' }}
+                                            class="hidden peer">
+                                        <label for="instant-booking"
+                                            class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
+                                            <img class="w-12 h-12"
+                                                src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
+                                                alt="">
+                                            <span class="font-medium text-xl">
+                                                {{ $postRidePage->booking_option1->name }}
+                                            </span>
+                                            <span class="inline-flex cursor-help"
+                                                data-tippy-content="{{ $postRidePage->booking_option1_tooltip ?? '' }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                    fill="currentColor" class="bi bi-info-circle-fill text-black"
+                                                    viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                </svg>
+                                            </span>
+                                        </label>
+                                    </li>
+                                @endif
+                                @if ($postRidePage->booking_option2?->features_setting_id)
+                                    <li>
+                                        <input type="radio" id="manual-approval" name="booking_method"
+                                            value="{{ $postRidePage->booking_option2->features_setting_id }}"
+                                            {{ $oldBookingMethod == $postRidePage->booking_option2->features_setting_id ? 'checked' : '' }}
+                                            class="hidden peer">
+                                        <label for="manual-approval"
+                                            class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
+                                            <img class="w-12 h-12"
+                                                src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
+                                                alt="">
+                                            <span class="font-medium text-xl">
+                                                {{ $postRidePage->booking_option2->name }}
+                                            </span>
+                                            <span class="inline-flex cursor-help"
+                                                data-tippy-content="{{ $postRidePage->booking_option2_tooltip ?? '' }}">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                    fill="currentColor" class="bi bi-info-circle-fill text-black"
+                                                    viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                </svg>
+                                            </span>
+                                        </label>
+                                    </li>
+                                @endif
+                            </ul>
+                            @error('booking_method')
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
                 </div>
@@ -1578,17 +965,11 @@
                                 @endif
                             </div>
                             @error('booking_type')
-                                <div class="absolute mt-1 z-10">
-                                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                        {{ $message }}</div>
-                                </div>
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
                             @enderror
                         </div>
                     </div>
                 </div>
-
-
-                
 
                 <div class="mt-6">
                     <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
@@ -1602,335 +983,174 @@
                         </div>
                         <div class="bg-white p-4">
                             <div class="flex flex-col sm:flex-col md:flex-row justify-between mb-4">
-                                <div>
-                                    <input id="skip" type="checkbox" name="skip_vehicle" value="1"
-                                        {{ old('skip_vehicle', $ride->skip_vehicle) == '1' ? 'checked' : '' }}
-                                        class="w-4 h-4 text-blue-600 cursor-pointer bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                                    <label for="skip" class="ml-2  text-gray-900">
-                                        @isset($postRidePage->skip_label)
-                                            {{ $postRidePage->skip_label }}
-                                        @endisset
-                                    </label>
-                                </div>
-                                <div>
-                                    <input id="add" type="checkbox" name="add_vehicle" value="1"
-                                        {{ old('add_vehicle') == '1' ? 'checked' : '' }}
-                                        class="w-4 h-4 text-blue-600 cursor-pointer bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                                    <label for="add" class="ml-2  text-gray-900">
-                                        @isset($postRidePage->add_vehicle_label)
-                                            {{ $postRidePage->add_vehicle_label }}
-                                        @endisset
-                                    </label>
-                                </div>
                                 @php
-                                    $defaultAddedVehicle =
-                                        $ride->added_vehicle ??
-                                        ($ride->add_vehicle ??
-                                            ($vehicles->firstWhere('primary_vehicle', '1') ? '1' : '0'));
+                                    $oldVehicleMode = old('vehicle_mode') ?? 'existing';
                                 @endphp
-                                <div class="{{ $vehicles->count() > '0' ? '' : 'hidden' }}">
-                                    <input id="added" type="checkbox" name="added_vehicle" value="1"
-                                        {{ old('added_vehicle', $defaultAddedVehicle) == '1' ? 'checked' : '' }}
-                                        class="w-4 h-4 text-blue-600 cursor-pointer bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-                                    <label for="added" class="ml-2  text-gray-900">
-                                        @isset($postRidePage->existing_label)
-                                            {{ $postRidePage->existing_label }}
-                                        @endisset
+                                <div class="flex flex-wrap items-center gap-12">
+                                    <label class="inline-flex items-center gap-2 text-sm">
+                                        <input type="radio" name="vehicle_mode" value="skip"
+                                            class="rounded border-gray-300" @checked($oldVehicleMode === 'skip')>
+                                        {{ $postRidePage->skip_label ?? 'Skip This Time' }}
+                                    </label>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-12">
+                                    <label class="inline-flex items-center gap-2 text-sm">
+                                        <input type="radio" name="vehicle_mode" value="add_new"
+                                            class="rounded border-gray-300" @checked($oldVehicleMode === 'add_new')>
+                                        {{ $postRidePage->add_vehicle_label ?? 'Add New Vehicle' }}
+                                    </label>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-12">
+                                    <label class="inline-flex items-center gap-2 text-sm">
+                                        <input type="radio" name="vehicle_mode" value="existing"
+                                            class="rounded border-gray-300" @checked($oldVehicleMode === 'existing')>
+                                        {{ $postRidePage->existing_label ?? 'Existing' }}
                                     </label>
                                 </div>
                             </div>
-                            @error('vehicle_selection')
-                                <div class="absolute mt-1 z-10">
-                                    <div
-                                        class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                        {{ $message }}</div>
-                                </div>
-                            @enderror
-                            <div id="skipVehicle">
-                                <div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4">
-                                    <div class="md:col-span-2">
-                                        <label for="make"
-                                            class="text-gray-900 mb-2">
-                                            @isset($vehiclePage->make_label)
-                                                {{ $vehiclePage->make_label }}
-                                            @endisset
-                                            <span class="text-red-500">*</span>
-                                        </label>
-                                        <div class="mt-2">
-                                            <input type="text" name="make" id=""
-                                                @if ($errors->count() > 0)
-                                                    value="{{ old('make', $ride->make) }}"
-                                                @else
-                                                    value="{{ $ride->make }}"
-                                                @endif
-                                                @isset($postRidePage->make_placeholder)
-                                                    placeholder="{{ $postRidePage->make_placeholder }}"
-                                                @endisset
-                                                class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
-                                        </div>
-                                        @error('make')
-                                          <div class="absolute mt-1 z-10">
-                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
-                                          </div>
-                                        @enderror
-                                    </div>
-                                    <div class="md:col-span-2">
-                                        <label for="modal"
-                                            class="text-gray-900 mb-2">
-                                            @isset($vehiclePage->model_label)
-                                                {{ $vehiclePage->model_label }}
-                                            @endisset
-                                            <span class="text-red-500">*</span>
-                                        </label>
-                                        <div class="mt-2">
-                                            <input type="text" name="model" id=""
-                                                @if ($errors->count() > 0)
-                                                    value="{{ old('model', $ride->model) }}"
-                                                @else
-                                                    value="{{ $ride->model }}"
-                                                @endif
-                                                @isset($vehiclePage->model_placeholder)
-                                                    placeholder="{{ $vehiclePage->model_placeholder }}"
-                                                @endisset
-                                                class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
-                                        </div>
-                                        @error('model')
-                                          <div class="absolute mt-1 z-10">
-                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
-                                          </div>
-                                        @enderror
-                                    </div>
-                                    <div class="md:col-span-2">
-                                        <label for="type" class="text-gray-900 mb-2">
-                                            @isset($vehiclePage->vehicle_type_label)
-                                                {{ $vehiclePage->vehicle_type_label }}
-                                            @endisset
-                                            <span class="text-red-500">*</span>
-                                        </label>
-                                        <div class="mt-2">
-                                            <select id="type" name="vehicle_type"
-                                                class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
 
-                                                <option {{ old('vehicle_type', $ride->vehicle_type) == '' ? 'selected' : '' }} value="">
-                                                    @isset($vehiclePage->vehicle_type_placeholder)
-                                                        {{ $vehiclePage->vehicle_type_placeholder }}
-                                                    @endisset
-                                                </option>
-
-                                                @foreach (($vehicleTypes ?? collect()) as $vehicleType)
-                                                    <option value="{{ $vehicleType['id'] }}" {{ (string) old('vehicle_type', $ride->vehicle_type) === (string) $vehicleType['id'] ? 'selected' : '' }}>
-                                                        {{ $vehicleType['label'] }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        @error('vehicle_type')
-                                          <div class="absolute mt-1 z-10">
-                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
-                                          </div>
-                                        @enderror
-                                    </div>
-                                    <div class="">
-                                        <label for="type" class="text-gray-900 mb-2">
-                                            @isset($vehiclePage->year_label)
-                                                {{ $vehiclePage->year_label }}
-                                            @endisset
-                                            <span class="text-red-500">*</span>
-                                        </label>
-                                        <div class="mt-2">
-                                            <input type="text" name="year" id="" placeholder=""
-                                                @if ($errors->count() > 0)
-                                                    value="{{ old('year', $ride->year) }}"
-                                                @else
-                                                    value="{{ $ride->year }}"
-                                                @endif
-                                                class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
-                                        </div>
-                                        @error('year')
-                                          <div class="absolute mt-1 z-10">
-                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
-                                          </div>
-                                        @enderror
-                                    </div>
-                                    <div class="">
-                                        <label for="color"
-                                            class="text-gray-900 mb-2">
-                                            @isset($vehiclePage->color_label)
-                                                {{ $vehiclePage->color_label }}
-                                            @endisset
-                                            <span class="text-red-500">*</span>
-                                        </label>
-                                        <div class="mt-2">
-                                            <input type="text" name="color" id="" placeholder=""
-                                                @if ($errors->count() > 0)
-                                                    value="{{ old('color', $ride->color) }}"
-                                                @else
-                                                    value="{{ $ride->color }}"
-                                                @endif
-                                                class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
-                                        </div>
-                                        @error('color')
-                                          <div class="absolute mt-1 z-10">
-                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
-                                          </div>
-                                        @enderror
-                                    </div>
-                                    <div class="md:col-span-2">
-                                        <label for="modal" class="text-gray-900 mb-2">
-                                            @isset($vehiclePage->license_plate_number_label)
-                                                {{ $vehiclePage->license_plate_number_label }}
-                                            @endisset
-                                            <span class="text-red-500">*</span>
-                                        </label>
-                                        <div class="mt-2">
-                                            <input type="text" name="license_no" id="" placeholder=""
-                                                @if ($errors->count() > 0)
-                                                    value="{{ old('license_no', $ride->license_no) }}"
-                                                @else
-                                                    value="{{ $ride->license_no }}"
-                                                @endif
-                                                class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
-                                        </div>
-                                        @error('license_no')
-                                          <div class="absolute mt-1 z-10">
-                                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
-                                          </div>
-                                        @enderror
-                                    </div>
-                                    <div class="md:col-span-4">
-                                        <label for="modal" class="text-gray-900 mb-2">
-                                            {{ $vehiclePage->fuel_label }}
-                                            <span class="text-red-500">*</span>
-                                        </label>
-                                        <div class=" flex items-center">
-                                            @isset($vehiclePage->electric_checkbox_label)
-                                                <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                                                    <input id="" name="car_type" type="radio" value="{{ $vehiclePage->electric_checkbox_label }}"
-                                                        {{ old('car_type', $ride->car_type) == $vehiclePage->electric_checkbox_label ? 'checked' : '' }}
-                                                        class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
-                                                    <label for="" class="block text-gray-900">
-                                                        {{ $vehiclePage->electric_checkbox_label }}
-                                                    </label>
-                                                </div>
-                                            @endisset
-                                            @isset($vehiclePage->hybrid_checkbox_label)
-                                                <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                                                    <input id="" name="car_type" type="radio" value="{{  $vehiclePage->hybrid_checkbox_label }}"
-                                                    {{ old('car_type', $ride->car_type) == $vehiclePage->hybrid_checkbox_label ? 'checked' : '' }}
-                                                        class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
-                                                    <label for="" class="block text-gray-900">
-                                                        {{ $vehiclePage->hybrid_checkbox_label }}
-                                                    </label>
-                                                </div>
-                                            @endisset
-                                            @isset($vehiclePage->gas_checkbox_label)
-                                                <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                                                    <input id="" name="car_type" type="radio" value="{{ $vehiclePage->gas_checkbox_label }}"
-                                                        {{ old('car_type', $ride->car_type) == $vehiclePage->gas_checkbox_label || ( empty(old('car_type'))) ? 'checked' : '' }}
-                                                        class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
-                                                    <label for="" class="block text-gray-900">
-                                                        {{ $vehiclePage->gas_checkbox_label }}
-                                                    </label>
-                                                </div>
-                                            @endisset
-                                        </div>
-                                        @error('car_type')
-                                            <div class="absolute mt-1 z-10">
-                                                <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">{{ $message }}</div>
-                                            </div>
-                                        @enderror
-                                    </div>
-                                    <div class="md:col-span-4">
-                                        <div id="">
-                                            {{-- <label for="car-photo" class="text-gray-900 mb-2">
-                                                Car Photo
-                                            </label> --}}
-                                            <div class="md:col-span-2 mt-2">
-                                                <label for="dropzone-file"
-                                                    class="flex flex-col items-center justify-center w-full h-auto border-2 border-gray-300 border-dashed rounded cursor-pointer bg-gray-100 hover:bg-gray-100">
-                                                    <div class="flex flex-col items-center justify-center pt-5 pb-6 p-4">
-                                                        @if (session('uploaded_image'))
-                                                            <img id="profile-image"
-                                                                class="w-40 h-40 object-contain mb-4 cursor-pointer"
-                                                                src="{{ asset('car_images/' . session('uploaded_image')) }}"
-                                                                alt="Uploaded Image">
-                                                        @elseif ($ride->car_image)
-                                                            <img id="profile-image"
-                                                                class="w-40 h-40 object-contain mb-4 cursor-pointer"
-                                                                src="{{ $ride->car_image }}">
-                                                        @else
-                                                            <img id="profile-image"
-                                                                class="w-12 h-12 object-contain mb-4 cursor-pointer"
-                                                                src="{{ asset('assets/image-placeholder.png') }}">
-                                                        @endif
-                                                        <p class="text-sm lg:text-lg text-gray-900">
-                                                            {{ $vehiclePage->image_description_label ?? 'Upload car photo' }}
-                                                            <!-- <span class="font-semibold text-primary">Choose file</span> -->
-                                                        </p>
-                                                        <p class="text-sm lg:text-base text-gray-900 font-normal">
-                                                            {{ $vehiclePage->images_option_placeholder ?? 'JPEG, JPG, PNG, GIF - 10MB max.' }}
-                                                        </p>
-                                                    </div>
-                                                    <input id="dropzone-file" name="image" type="file"
-                                                        onchange="previewImage(this)" class="hidden" />
-                                                    @if (session('uploaded_image'))
-                                                        <input type="hidden" name="existing_image"
-                                                            value="{{ session('uploaded_image') }}">
-                                                    @elseif ($ride->car_image)
-                                                        @php
-                                                            $imageName = basename($ride->car_image);
-                                                        @endphp
-                                                        <input type="hidden" name="existing_image"
-                                                            value="{{ $imageName }}">
-                                                    @endif
-                                                    @error('image')
-                                                        @if ($message !== 'The image is not uploaded yet')
-                                                            <p class="text-red-500 text-base">{{ $message }}</p>
-                                                        @endif
-                                                    @enderror
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div id="showVehicles" class="md:col-span-2 group">
-                                <label for="type" class="text-gray-900 mb-2">
-                                    {{ $vehiclePage->vehicle_type_label ?? 'Select vehicle' }} <span
-                                        class="text-red-500">*</span>
-                                </label>
-                                <div class="mt-2">
-                                    @php
-                                        $selectedVehicleId = old('vehicle_id', $ride->vehicle_id ?? null);
-                                        if ($selectedVehicleId === '' || $selectedVehicleId === null) {
-                                            $primaryVehicle = $vehicles->firstWhere('primary_vehicle', '1');
-                                            if ($primaryVehicle) {
-                                                $selectedVehicleId = $primaryVehicle->id;
-                                            }
-                                        }
-                                    @endphp
-                                    <select id="type" name="vehicle_id"
-                                        class="bg-white border border-gray-300 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2 block w-full p-2.5">
-                                        <option value=""
-                                            {{ $selectedVehicleId === '' || $selectedVehicleId === null ? 'selected' : '' }}>
-                                            {{ $vehiclePage->vehicle_type_placeholder ?? 'Select' }}
+                            <div id="px-vehicle-existing-fields"
+                                class="md:col-span-2 mt-8 {{ $oldVehicleMode !== 'existing' ? 'hidden' : '' }}">
+                                <label
+                                    class="block text-sm mb-4 required">{{ $vehiclePage->vehicle_type_label ?? 'Select vehicle' }}</label>
+                                <select name="vehicle_id" class="w-full rounded border-gray-300">
+                                    <option value="">{{ $vehiclePage->vehicle_type_placeholder ?? 'Select' }}
+                                    </option>
+                                    @foreach ($vehicles as $vehicle)
+                                        <option value="{{ $vehicle->id }}" @selected((string) old('vehicle_id', $oldVehicleId) === (string) $vehicle->id)>
+                                            {{ $vehicle->make }} / {{ $vehicle->model }} / {{ $vehicle->year }}
+                                            @if ($vehicle->type_label)
+                                                / {{ $vehicle->type_label }}
+                                            @endif
                                         </option>
-                                        @foreach ($vehicles as $vehicle)
-                                            <option value="{{ $vehicle->id }}"
-                                                {{ (string) $selectedVehicleId === (string) $vehicle->id ? 'selected' : '' }}>
-                                                {{ $vehicle->make }} / {{ $vehicle->model }} / {{ $vehicle->year }}
-                                                @if ($vehicle->type_label)
-                                                    / {{ $vehicle->type_label }}
-                                                @endif
+                                    @endforeach
+                                </select>
+                                @error('vehicle_id')
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div id="px-vehicle-new-fields"
+                                class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 {{ $oldVehicleMode !== 'add_new' ? 'hidden' : '' }}">
+                                <div>
+                                    <label class="block text-sm mb-2 required">{{ $vehiclePage->make_label }}</label>
+                                    <input name="make" value="{{ old('make') }}"
+                                        placeholder="{{ $vehiclePage->make_placeholder }}" type="text"
+                                        class="w-full rounded border-gray-300">
+                                    @error('make')
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-2 required">{{ $vehiclePage->model_label }}</label>
+                                    <input name="model" value="{{ old('model') }}"
+                                        placeholder="{{ $vehiclePage->model_placeholder }}" type="text"
+                                        class="w-full rounded border-gray-300">
+                                    @error('model')
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm mb-2 required">{{ $vehiclePage->vehicle_type_label }}</label>
+                                    <select name="vehicle_type" class="w-full rounded border-gray-300">
+                                        <option value="">{{ $vehiclePage->vehicle_type_placeholder }}</option>
+                                        @foreach ($vehicleTypes ?? collect() as $vehicleType)
+                                            <option value="{{ $vehicleType['id'] }}" @selected(old('vehicle_type') === $vehicleType['id'])>
+                                                {{ $vehicleType['label'] }} @selected(old('vehicle_type') === $vehicleType['id'])
                                             </option>
                                         @endforeach
                                     </select>
-                                    @error('vehicle_id')
-                                        <div class="absolute mt-1 z-10">
-                                            <div
-                                                class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                                {{ $message }}</div>
+                                    @error('vehicle_type')
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-2 required">{{ $vehiclePage->year_label }}</label>
+                                    <input name="year" value="{{ old('year') }}" placeholder="2026"
+                                        maxlength="4" type="text" class="w-full rounded border-gray-300">
+                                    @error('year')
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-2 required">{{ $vehiclePage->color_label }}</label>
+                                    <input name="color" value="{{ old('color') }}" maxlength="15" type="text"
+                                        class="w-full rounded border-gray-300">
+                                    @error('color')
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-sm mb-2 required">{{ $vehiclePage->license_plate_number_label }}</label>
+                                    <input name="license_no" value="{{ old('license_no') }}" maxlength="8"
+                                        type="text" class="w-full rounded border-gray-300">
+                                    @error('license_no')
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-sm mb-2 required">{{ $vehiclePage->fuel_label }}</label>
+                                    <div class="flex flex-wrap items-center gap-4 mt-2">
+                                        <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
+                                            <input id="" name="power_type" type="radio"
+                                                value="{{ $vehiclePage->electric_checkbox_label }}"
+                                                {{ old('power_type', $ride->power_type) == $vehiclePage->electric_checkbox_label ? 'checked' : '' }}
+                                                class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                            <label for="" class="block text-gray-900">
+                                                {{ $vehiclePage->electric_checkbox_label }}
+                                            </label>
                                         </div>
+                                        <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
+                                            <input id="" name="power_type" type="radio"
+                                                value="{{ $vehiclePage->hybrid_checkbox_label }}"
+                                                {{ old('power_type', $ride->power_type) == $vehiclePage->hybrid_checkbox_label ? 'checked' : '' }}
+                                                class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                            <label for="" class="block text-gray-900">
+                                                {{ $vehiclePage->hybrid_checkbox_label }}
+                                            </label>
+                                        </div>
+                                        <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
+                                            <input id="" name="power_type" type="radio"
+                                                value="{{ $vehiclePage->gas_checkbox_label }}"
+                                                {{ old('power_type', $ride->power_type) == $vehiclePage->gas_checkbox_label || empty(old('power_type')) ? 'checked' : '' }}
+                                                class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                            <label for="" class="block text-gray-900">
+                                                {{ $vehiclePage->gas_checkbox_label }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                    @error('power_type')
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm mb-2 required"></label>
+                                    <label for="dropzone-file"
+                                        class="flex flex-col items-center justify-center w-full h-auto border-2 border-gray-300 border-dashed rounded cursor-pointer bg-gray-100 hover:bg-gray-100">
+                                        <div class="flex flex-col items-center justify-center pt-5 pb-6 p-4">
+                                            @if ($ride->car_image)
+                                                <img id="profile-image"
+                                                    class="w-40 h-40 object-contain mb-4 cursor-pointer"
+                                                    src="{{ $ride->car_image }}">
+                                            @else
+                                                <img id="profile-image"
+                                                    class="w-12 h-12 object-contain mb-4 cursor-pointer"
+                                                    src="{{ asset('assets/image-placeholder.png') }}">
+                                            @endif
+                                            <p class="text-sm lg:text-lg text-gray-900">
+                                                {{ $vehiclePage->image_description_label ?? 'Upload car photo' }}
+                                            </p>
+                                            <p class="text-sm lg:text-base text-gray-900 font-normal">
+                                                {{ $vehiclePage->images_option_placeholder ?? 'JPEG, JPG, PNG, GIF - 10MB max.' }}
+                                            </p>
+                                        </div>
+                                        <input id="dropzone-file" name="vehicle_image" type="file"
+                                            onchange="previewImage(this)" class="hidden" />
+                                    </label>
+                                    @error('vehicle_image')
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                     @enderror
                                 </div>
                             </div>
@@ -1951,7 +1171,6 @@
                         <div class="border rounded-md divide-y">
                             @if ($postRidePage->luggage_option1?->features_setting_id)
                                 @php
-                                    $luggageVal = old('luggage', $ride->luggage);
                                     $luggageFirstId = $postRidePage->luggage_option1->features_setting_id;
                                 @endphp
                                 <div class="flex items-center gap-4 p-3">
@@ -1960,7 +1179,7 @@
                                         <input id="{{ $postRidePage->luggage_option1->features_setting_id }}"
                                             type="radio" name="luggage"
                                             value="{{ $postRidePage->luggage_option1->features_setting_id }}"
-                                            {{ ($luggageVal && $luggageVal == $luggageFirstId) || !$luggageVal ? 'checked' : '' }}
+                                            {{ ($oldLuggageSize && $oldLuggageSize == $luggageFirstId) || !$oldLuggageSize ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         @isset($postRidePage->luggage_option1->icon)
                                             <img class="w-10 h-10"
@@ -1990,7 +1209,7 @@
                                             id="{{ $postRidePage->luggage_option2->features_setting_id }}"
                                             name="luggage"
                                             value="{{ $postRidePage->luggage_option2->features_setting_id }}"
-                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option2->features_setting_id ? 'checked' : '' }}
+                                            {{ $oldLuggageSize == $postRidePage->luggage_option2->features_setting_id ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         @isset($postRidePage->luggage_option2->icon)
                                             <img class="w-10 h-10"
@@ -2020,7 +1239,7 @@
                                             id="{{ $postRidePage->luggage_option3->features_setting_id }}"
                                             name="luggage"
                                             value="{{ $postRidePage->luggage_option3->features_setting_id }}"
-                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option3->features_setting_id ? 'checked' : '' }}
+                                            {{ $oldLuggageSize == $postRidePage->luggage_option3->features_setting_id ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         @isset($postRidePage->luggage_option3->icon)
                                             <img class="w-10 h-10"
@@ -2050,7 +1269,7 @@
                                             id="{{ $postRidePage->luggage_option4->features_setting_id }}"
                                             name="luggage"
                                             value="{{ $postRidePage->luggage_option4->features_setting_id }}"
-                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option4->features_setting_id ? 'checked' : '' }}
+                                            {{ $oldLuggageSize == $postRidePage->luggage_option4->features_setting_id ? 'checked' : '' }}
                                             class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                         @isset($postRidePage->luggage_option4->icon)
                                             <img class="w-10 h-10"
@@ -2080,7 +1299,7 @@
                                             id="{{ $postRidePage->luggage_option5->features_setting_id }}"
                                             name="luggage"
                                             value="{{ $postRidePage->luggage_option5->features_setting_id }}"
-                                            {{ old('luggage', $ride->luggage) == $postRidePage->luggage_option5->features_setting_id ? 'checked' : '' }}
+                                            {{ $oldLuggageSize == $postRidePage->luggage_option5->features_setting_id ? 'checked' : '' }}
                                             class="w-4 h-4 mt-2 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
                                         @isset($postRidePage->luggage_option5->icon)
                                             <img class="w-10 h-10"
@@ -2096,9 +1315,9 @@
                                                 <small>{{ $postRidePage->luggage_option5_label }}</small>
                                                 <span class="inline-flex cursor-help items-center"
                                                     data-tippy-content="{{ $postRidePage->luggage_option5_tooltip ?? '' }}">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16"
-                                                        height="16" fill="currentColor"
-                                                        class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                        fill="currentColor" class="bi bi-info-circle-fill text-black"
+                                                        viewBox="0 0 16 16">
                                                         <path
                                                             d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
                                                     </svg>
@@ -2107,3412 +1326,2374 @@
                                         </div>
                                     </label>
                                 </div>
-                            @endisset
-                    </div>
-                    @error('luggage')
-                        <div class="absolute mt-1 z-10">
-                            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                                {{ $message }}</div>
+                            @endif
                         </div>
-                    @enderror
-                    <div class="mt-6 space-y-2">
-                        <div class="flex items-start">
-                            <input id="heating" type="checkbox" name="accept_more_luggage" value="1"
-                                {{ old('accept_more_luggage', $ride->accept_more_luggage) == '1' ? 'checked' : '' }}
-                                class="w-4 h-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                            <label for="heating" class="ml-2 font-normal text-gray-900 flex space-x-1">
-                                <span class="">
-                                    @isset($postRidePage->luggage_checkbox_label1)
-                                        {{ $postRidePage->luggage_checkbox_label1 }}
-                                    @endisset
-                                </span>
-                            </label>
-                        </div>
-                        {{-- <div class="flex items-start">
-                                <input id="heating" type="checkbox" name="open_customized" value="1"
-                                    {{ old('open_customized', $ride->open_customized) == '1' ? 'checked' : '' }}
+                        @error('luggage')
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                        @enderror
+                        <div class="mt-6 space-y-2">
+                            <div class="flex items-start">
+                                <input id="heating" type="checkbox" name="accept_more_luggage" value="1"
+                                    {{ old('accept_more_luggage', $ride->accept_more_luggage) == '1' ? 'checked' : '' }}
                                     class="w-4 h-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                <label for="heating"
-                                    class="ml-2 font-normal text-gray-900 flex space-x-1">
+                                <label for="heating" class="ml-2 font-normal text-gray-900 flex space-x-1">
                                     <span class="">
-                                        @isset($postRidePage->luggage_checkbox_label2)
-                                            {{ $postRidePage->luggage_checkbox_label2 }}
+                                        @isset($postRidePage->luggage_checkbox_label1)
+                                            {{ $postRidePage->luggage_checkbox_label1 }}
                                         @endisset
-                                        <sup class="text-red-500">*</sup>
                                     </span>
                                 </label>
-                            </div> --}}
-                    </div>
-
-                </div>
-            </div>
-
-            <div class="mt-6 bg-white rounded-lg overflow-hidden shadow-3xl">
-                <div class="text-2xl bg-primary text-white py-2 px-4">
-                    <h3 class="text-2xl">
-                        @isset($postRidePage->smoking_label)
-                            {{ $postRidePage->smoking_label }}
-                        @endisset
-                        <span class="text-white">*</span>
-                    </h3>
-                </div>
-                <div class="bg-white p-4">
-                    <div class="border rounded-md overflow-hidden divide-y">
-                        @if ($postRidePage->smoking_option1?->features_setting_id)
-                            <div class="flex items-center gap-4 p-3 w-full">
-                                <label for="{{ $postRidePage->smoking_option1->features_setting_id }}"
-                                    class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
-                                    <input id="{{ $postRidePage->smoking_option1->features_setting_id }}"
-                                        name="smoke" type="radio"
-                                        value="{{ $postRidePage->smoking_option1->features_setting_id }}"
-                                        {{ $isNewForm ? (old('smoke', $user->smoke) == $postRidePage->smoking_option1->features_setting_id ? 'checked' : (21 == $postRidePage->smoking_option1->features_setting_id ? 'checked' : '')) : (old('smoke', $ride->smoke) == $postRidePage->smoking_option1->features_setting_id ? 'checked' : '') }}
-                                        class="h-4 w-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-
-                                    <span class="">
-                                        {{ $postRidePage->smoking_option1->name }}
-                                    </span>
-                                </label>
-
                             </div>
-                        @endif
-                        @if ($postRidePage->smoking_option2?->features_setting_id)
-                            <div class="flex items-center gap-4 p-3">
-                                <label for="{{ $postRidePage->smoking_option2->features_setting_id }}"
-                                    class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
-                                    <input id="{{ $postRidePage->smoking_option2->features_setting_id }}"
-                                        name="smoke" type="radio"
-                                        value="{{ $postRidePage->smoking_option2->features_setting_id }}"
-                                        {{ $isNewForm ? (old('smoke', $user->smoke) == $postRidePage->smoking_option2->features_setting_id ? 'checked' : '') : (old('smoke', $ride->smoke) == $postRidePage->smoking_option2->features_setting_id ? 'checked' : '') }}
-                                        class="h-4 w-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                    {{ $postRidePage->smoking_option2->name }}
-                                </label>
-                            </div>
-                        @endisset
-                </div>
-                @error('smoke')
-                    <div class="absolute mt-1 z-10">
-                        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                            {{ $message }}</div>
+                        </div>
                     </div>
-                @enderror
-            </div>
-        </div>
-
-        <div class="mt-6 bg-white rounded-lg overflow-hidden shadow-3xl">
-            <div class="text-2xl bg-primary text-white py-2 px-4">
-                <h3 class="text-2xl">
-                    @isset($postRidePage->animals_label)
-                        {{ $postRidePage->animals_label }}
-                    @endisset
-                    <span class="text-white">*</span>
-                </h3>
-            </div>
-            <div class="bg-white p-4">
-                <div class="border rounded-md overflow-hidden divide-y">
-                    @if ($postRidePage->animals_option1?->features_setting_id)
-                        <div class="flex items-center gap-4 p-3">
-                            <label for="{{ $postRidePage->animals_option1->features_setting_id }}"
-                                class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
-                                <input id="{{ $postRidePage->animals_option1->features_setting_id }}"
-                                    name="animal_friendly" type="radio"
-                                    value="{{ $postRidePage->animals_option1->features_setting_id }}"
-                                    {{ $isNewForm ? (old('animal_friendly') == $postRidePage->animals_option1->features_setting_id ? 'checked' : (23 == $postRidePage->animals_option1->features_setting_id ? 'checked' : '')) : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option1->features_setting_id ? 'checked' : '') }}
-                                    class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                {{ $postRidePage->animals_option1->name }}
-                            </label>
-                        </div>
-                    @endif
-                    @if ($postRidePage->animals_option2?->features_setting_id)
-                        <div class="flex items-center gap-4 p-3">
-                            <label for="{{ $postRidePage->animals_option2->features_setting_id }}"
-                                class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
-                                <input id="{{ $postRidePage->animals_option2->features_setting_id }}"
-                                    name="animal_friendly" type="radio"
-                                    value="{{ $postRidePage->animals_option2->features_setting_id }}"
-                                    {{ $isNewForm ? (old('animal_friendly') == $postRidePage->animals_option2->features_setting_id ? 'checked' : '') : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option2->features_setting_id ? 'checked' : '') }}
-                                    class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                {{ $postRidePage->animals_option2->name }}
-                            </label>
-                        </div>
-                    @endif
-                    @if ($postRidePage->animals_option3?->features_setting_id)
-                        <div class="flex items-center gap-4 p-3">
-                            <label for="{{ $postRidePage->animals_option3->features_setting_id }}"
-                                class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
-                                <input id="{{ $postRidePage->animals_option3->features_setting_id }}"
-                                    name="animal_friendly" type="radio"
-                                    value="{{ $postRidePage->animals_option3->features_setting_id }}"
-                                    {{ $isNewForm ? (old('animal_friendly') == $postRidePage->animals_option3->features_setting_id ? 'checked' : '') : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option3->features_setting_id ? 'checked' : '') }}
-                                    class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                {{ $postRidePage->animals_option3->name }}
-                            </label>
-                        </div>
-                    @endisset
-            </div>
-            @error('animal_friendly')
-                <div class="absolute mt-1 z-10">
-                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                        {{ $message }}</div>
                 </div>
-            @enderror
-        </div>
-    </div>
 
-    <div class="mt-6">
-        <div class="bg-white rounded-lg shadow-3xl">
-            <div class="text-2xl bg-primary rounded-t-lg text-white py-2 px-4">
-                <h3 class="text-2xl">
-                    @isset($postRidePage->preferences_label)
-                        {{ $postRidePage->preferences_label }}
-                    @endisset
-                </h3>
-            </div>
-            <div class="bg-white p-4">
-                @php
-                    $selectedFeatures = old('features');
+                <div class="mt-6 bg-white rounded-lg overflow-hidden shadow-3xl">
+                    <div class="text-2xl bg-primary text-white py-2 px-4">
+                        <h3 class="text-2xl">
+                            @isset($postRidePage->smoking_label)
+                                {{ $postRidePage->smoking_label }}
+                            @endisset
+                            <span class="text-white">*</span>
+                        </h3>
+                    </div>
+                    <div class="bg-white p-4">
+                        <div class="border rounded-md overflow-hidden divide-y">
+                            @if ($postRidePage->smoking_option1?->features_setting_id)
+                                <div class="flex items-center gap-4 p-3 w-full">
+                                    <label for="{{ $postRidePage->smoking_option1->features_setting_id }}"
+                                        class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
+                                        <input id="{{ $postRidePage->smoking_option1->features_setting_id }}"
+                                            name="smoke" type="radio"
+                                            value="{{ $postRidePage->smoking_option1->features_setting_id }}"
+                                            {{ $isNewForm ? ($oldSmokingAllowed == $postRidePage->smoking_option1->features_setting_id ? 'checked' : (21 == $postRidePage->smoking_option1->features_setting_id ? 'checked' : '')) : (old('smoke', $ride->smoke) == $postRidePage->smoking_option1->features_setting_id ? 'checked' : '') }}
+                                            class="h-4 w-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
 
-                    if (!$selectedFeatures && !$isNewForm) {
-                        $selectedFeatures = explode('=', $ride->features ?? '');
-                    }
+                                        <span class="">
+                                            {{ $postRidePage->smoking_option1->name }}
+                                        </span>
+                                    </label>
 
-                    $selectedFeatures = $selectedFeatures ?? [];
-                @endphp
-                <div class="space-y-2">
-
-                    @foreach ($featureOptions as $featureOption)
-
-                        @php
-                            $disabled = false;
-                            $tooltipText = null;
-
-                            if ($featureOption['slug'] === 'pink_rides') {
-                                $disabled = !$user->canUsePinkRide($pinkRideSetting);
-                                $tooltipText = $user->pinkRideTooltip($postRidePage, $pinkRideSetting);
-                            }
-
-                            if ($featureOption['slug'] === 'extra_care_rides') {
-                                $disabled = !$user->canUseExtraRide(
-                                    $setting,
-                                    $overallRating ?? null,
-                                    $totalRides ?? null,
-                                    $noShowsCount ?? null,
-                                    $cancellationCount ?? null,
-                                    $noshows ?? null,
-                                );
-
-                                $tooltipText = $user->extraRideTooltip(
-                                    $postRidePage,
-                                    $setting,
-                                    $overallRating ?? null,
-                                    $totalRides ?? null,
-                                    $noShowsCount ?? null,
-                                    $cancellationCount ?? null,
-                                    $noshows ?? null,
-                                );
-                            }
-                        @endphp
-
-                        <div class="flex items-start">
-
-                        <input
-                            id="{{ $featureOption['slug'] }}"
-                            type="checkbox"
-                            name="features[]"
-                            value="{{ $featureOption['id'] }}"
-                            @checked(in_array($featureOption['id'], $selectedFeatures))
-                            @disabled($disabled)
-                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                        >
-
-                        <label for="{{ $featureOption['slug'] }}" class="ml-2 font-normal text-gray-900 flex space-x-1">
-
-                        <span @class([
-                            'text-pink-500 font-medium' => $featureOption['slug'] === 'pink_rides',
-                            'text-green-500 font-medium' => $featureOption['slug'] === 'extra_care_rides',
-                            'line-through' => $disabled,
-                        ])>
-                            {{ $featureOption['label'] }}
-                        </span>
-                        @if ($tooltipText)
-                        <span class="inline-flex cursor-help" data-tippy-content="{{ $tooltipText }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16">
-                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                            </svg>
-                        </span>
-                        @endif
-                        </label>
+                                </div>
+                            @endif
+                            @if ($postRidePage->smoking_option2?->features_setting_id)
+                                <div class="flex items-center gap-4 p-3">
+                                    <label for="{{ $postRidePage->smoking_option2->features_setting_id }}"
+                                        class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
+                                        <input id="{{ $postRidePage->smoking_option2->features_setting_id }}"
+                                            name="smoke" type="radio"
+                                            value="{{ $postRidePage->smoking_option2->features_setting_id }}"
+                                            {{ $isNewForm ? ($oldSmokingAllowed == $postRidePage->smoking_option2->features_setting_id ? 'checked' : '') : (old('smoke', $ride->smoke) == $postRidePage->smoking_option2->features_setting_id ? 'checked' : '') }}
+                                            class="h-4 w-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        {{ $postRidePage->smoking_option2->name }}
+                                    </label>
+                                </div>
+                            @endif
                         </div>
+                        @error('smoke')
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
 
-                        @endforeach
+                <div class="mt-6 bg-white rounded-lg overflow-hidden shadow-3xl">
+                    <div class="text-2xl bg-primary text-white py-2 px-4">
+                        <h3 class="text-2xl">
+                            @isset($postRidePage->animals_label)
+                                {{ $postRidePage->animals_label }}
+                            @endisset
+                            <span class="text-white">*</span>
+                        </h3>
+                    </div>
+                    <div class="bg-white p-4">
+                        <div class="border rounded-md overflow-hidden divide-y">
+                            @if ($postRidePage->animals_option1?->features_setting_id)
+                                <div class="flex items-center gap-4 p-3">
+                                    <label for="{{ $postRidePage->animals_option1->features_setting_id }}"
+                                        class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
+                                        <input id="{{ $postRidePage->animals_option1->features_setting_id }}"
+                                            name="animal_friendly" type="radio"
+                                            value="{{ $postRidePage->animals_option1->features_setting_id }}"
+                                            {{ $isNewForm ? ($oldPetsAllowed == $postRidePage->animals_option1->features_setting_id ? 'checked' : (23 == $postRidePage->animals_option1->features_setting_id ? 'checked' : '')) : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option1->features_setting_id ? 'checked' : '') }}
+                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        {{ $postRidePage->animals_option1->name }}
+                                    </label>
+                                </div>
+                            @endif
+                            @if ($postRidePage->animals_option2?->features_setting_id)
+                                <div class="flex items-center gap-4 p-3">
+                                    <label for="{{ $postRidePage->animals_option2->features_setting_id }}"
+                                        class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
+                                        <input id="{{ $postRidePage->animals_option2->features_setting_id }}"
+                                            name="animal_friendly" type="radio"
+                                            value="{{ $postRidePage->animals_option2->features_setting_id }}"
+                                            {{ $isNewForm ? ($oldPetsAllowed == $postRidePage->animals_option2->features_setting_id ? 'checked' : '') : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option2->features_setting_id ? 'checked' : '') }}
+                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        {{ $postRidePage->animals_option2->name }}
+                                    </label>
+                                </div>
+                            @endif
+                            @if ($postRidePage->animals_option3?->features_setting_id)
+                                <div class="flex items-center gap-4 p-3">
+                                    <label for="{{ $postRidePage->animals_option3->features_setting_id }}"
+                                        class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
+                                        <input id="{{ $postRidePage->animals_option3->features_setting_id }}"
+                                            name="animal_friendly" type="radio"
+                                            value="{{ $postRidePage->animals_option3->features_setting_id }}"
+                                            {{ $isNewForm ? ($oldPetsAllowed == $postRidePage->animals_option3->features_setting_id ? 'checked' : '') : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option3->features_setting_id ? 'checked' : '') }}
+                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                        {{ $postRidePage->animals_option3->name }}
+                                    </label>
+                                </div>
+                            @endif
+                        </div>
+                        @error('animal_friendly')
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
 
+                <div class="mt-6">
+                    <div class="bg-white rounded-lg shadow-3xl">
+                        <div class="text-2xl bg-primary rounded-t-lg text-white py-2 px-4">
+                            <h3 class="text-2xl">
+                                @isset($postRidePage->preferences_label)
+                                    {{ $postRidePage->preferences_label }}
+                                @endisset
+                            </h3>
+                        </div>
+                        <div class="bg-white p-4">
+                            <div class="space-y-2">
+                                @foreach ($featureOptions as $featureOption)
+                                    @php
+                                        $disabled = false;
+                                        $tooltipText = null;
+                                        $data_ride_option_code = '';
 
+                                        if ($featureOption['slug'] === 'pink_rides') {
+                                            $disabled = !$user->canUsePinkRide();
+                                            $tooltipText = $user->pinkRideTooltip($postRidePage);
+                                            $data_ride_option_code = 'pink_rides';
+                                            $pinkRideChecked = in_array($featureOption['id'], $oldSelectedFeatures);
+                                        }
 
-        </div>
-    </div>
-</div>
-</div>
+                                        if ($featureOption['slug'] === 'extra_care_rides') {
+                                            $disabled = !$user->canUseExtraRide(
+                                                $setting ?? null,
+                                                $overallRating ?? null,
+                                                $totalRides ?? null,
+                                                $noShowsCount ?? null,
+                                                $cancellationCount ?? null,
+                                                $noshows ?? null,
+                                            );
 
-</div>
-<div class="">
-<div class="mt-6">
+                                            $tooltipText = $user->extraRideTooltip(
+                                                $postRidePage,
+                                                $setting ?? null,
+                                                $overallRating ?? null,
+                                                $totalRides ?? null,
+                                                $noShowsCount ?? null,
+                                                $cancellationCount ?? null,
+                                                $noshows ?? null,
+                                            );
 
-<div class=" mt-6">
-    <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
-        <div class="text-2xl bg-primary text-white py-2 px-4">
-            <label for="more" class="">
-                <h3 class="text-2xl">
-                    @isset($postRidePage->anything_to_add_label)
-                        {{ $postRidePage->anything_to_add_label }}
-                    @endisset
-                </h3>
-            </label>
-        </div>
-        <div class="bg-white p-4">
-            <textarea id="more" rows="5" name="notes"
-                class="block p-2.5 w-full mt-2 text-gray-900 bg-gray-100 text-base lg:text-lg rounded border border-gray-200 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
-                @isset($postRidePage->anything_to_add_placeholder)
+                                            $extraCareRideChecked = in_array($featureOption['id'], $oldSelectedFeatures);
+
+                                            $data_ride_option_code = 'extra_care_rides';
+                                        }
+                                    @endphp
+
+                                    <div class="flex items-start">
+
+                                        <input id="{{ $featureOption['slug'] }}" type="checkbox" name="features[]"
+                                            value="{{ $featureOption['id'] }}" @checked(in_array($featureOption['id'], $oldSelectedFeatures))
+                                            @disabled($disabled)
+                                            data-ride-option-code="{{$data_ride_option_code}}"
+                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+
+                                        <label for="{{ $featureOption['slug'] }}"
+                                            class="ml-2 font-normal text-gray-900 flex space-x-1">
+
+                                            <span @class([
+                                                'text-pink-500 font-medium' => $featureOption['slug'] === 'pink_rides',
+                                                'text-green-500 font-medium' =>
+                                                    $featureOption['slug'] === 'extra_care_rides',
+                                                'line-through' => $disabled,
+                                            ])>
+                                                {{ $featureOption['label'] }}
+                                            </span>
+                                            @if ($tooltipText)
+                                                <span class="inline-flex cursor-help"
+                                                    data-tippy-content="{{ $tooltipText }}">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                        fill="currentColor" class="bi bi-info-circle-fill text-black"
+                                                        viewBox="0 0 16 16">
+                                                        <path
+                                                            d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                    </svg>
+                                                </span>
+                                            @endif
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="">
+                    <div class="mt-6">
+
+                        <div class=" mt-6">
+                            <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
+                                <div class="text-2xl bg-primary text-white py-2 px-4">
+                                    <label for="more" class="">
+                                        <h3 class="text-2xl">
+                                            @isset($postRidePage->anything_to_add_label)
+                                                {{ $postRidePage->anything_to_add_label }}
+                                            @endisset
+                                        </h3>
+                                    </label>
+                                </div>
+                                <div class="bg-white p-4">
+                                    <textarea id="more" rows="5" name="notes"
+                                        class="block p-2.5 w-full mt-2 text-gray-900 bg-gray-100 text-base lg:text-lg rounded border border-gray-200 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
+                                        @isset($postRidePage->anything_to_add_placeholder)
                                     placeholder="{{ $postRidePage->anything_to_add_placeholder }}"
                                 @endisset>{{ old('notes', $ride->notes) }}</textarea>
-            @error('notes')
-                <div class="absolute mt-1 z-10">
-                    <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
-                        {{ $message }}</div>
+                                    @error('notes')
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6">
+                            <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
+                                <div class="text-2xl bg-primary text-white py-2 px-4">
+                                    <h3 class="text-2xl">
+                                        @isset($postRidePage->disclaimers_label)
+                                            {{ $postRidePage->disclaimers_label }}
+                                        @endisset
+                                        <span class="text-white">*</span>
+                                    </h3>
+                                </div>
+                                <div class="bg-white p-4">
+                                    @isset($postRidePage->disclaimers_description)
+                                        {!! str_replace(
+                                            '<ol>',
+                                            '<ol class="list-decimal list-inside">',
+                                            str_replace(
+                                                '<li>',
+                                                '<li class="border-b border-gray-300 text-base lg:text-lg last:border-b-0 py-3">',
+                                                $postRidePage->disclaimers_description,
+                                            ),
+                                        ) !!}
+                                    @endisset
+                                </div>
+                                @php
+                                    $pinkFeatureId =
+                                        collect($featureOptions ?? [])->firstWhere('slug', 'pink_rides')['id'] ?? null;
+                                    $extraCareFeatureId =
+                                        collect($featureOptions ?? [])->firstWhere('slug', 'extra_care_rides')['id'] ??
+                                        null;
+                                    $featuresArray = $isNewForm
+                                        ? old('features', [])
+                                        : (old('features') ?:
+                                        (isset($ride->features)
+                                            ? explode('=', $ride->features)
+                                            : []));
+                                    $pinkRideChecked =
+                                        $pinkFeatureId &&
+                                        is_array($featuresArray) &&
+                                        in_array($pinkFeatureId, $featuresArray);
+                                    $extraCareRideChecked =
+                                        $extraCareFeatureId &&
+                                        is_array($featuresArray) &&
+                                        in_array($extraCareFeatureId, $featuresArray);
+                                @endphp
+                                <div id="pink-ride-disclaimer"
+                                    class="bg-white px-4 border-t border-gray-200 {{ $pinkRideChecked ? '' : 'hidden' }}">
+                                    <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
+                                        <span>5. </span>
+                                        {{ $postRidePage->pink_ride_disclaimer_text }}
+                                    </p>
+                                </div>
+                                <div id="extra-care-ride-disclaimer"
+                                    class="bg-white px-4 border-t border-gray-200 {{ $extraCareRideChecked ? '' : 'hidden' }}">
+                                    <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
+                                        <!-- {{ $postRidePage->extra_care_ride_disclaimer_text ?? 'I understand that this is an Extra+ Ride, exclusive to members with highest review score. I will adhere to its standards' }} -->
+                                        <span
+                                            id="extra-care-disclaimer-number">{{ $pinkRideChecked ? '6.' : '5.' }}</span>
+                                        {{ $postRidePage->extra_care_ride_disclaimer_text }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+
+                            <div class="flex items-start my-4">
+                                <input type="hidden" name="agree_terms" value="0">
+                                <input id="agree_terms" type="checkbox" name="agree_terms" value="1"
+                                    {{ old('agree_terms') == '1' ? 'checked' : '' }}
+                                    class="w-4 h-4 mt-3 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
+                                <label for="agree_terms"
+                                    class="ml-2 font-normal text-gray-900 flex text-md items-center space-x-0.5">
+                                    @isset($postRidePage->agree_terms_label)
+                                        {!! $postRidePage->agree_terms_label !!}
+                                    @endisset
+                                    <span class="text-red-500">*</span>
+                                </label>
+                            </div>
+                            @error('agree_terms')
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                            @enderror
+                            <div class="hidden lg:flex justify-center items-center mt-8">
+                                <button
+                                    class="post-ride-submit-btn bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS disabled:opacity-70 disabled:cursor-not-allowed"
+                                    type="submit">
+                                    @if (in_array(($routeType ?? ''), ['repost', 'edit'], true))
+                                        {{ $postRidePage->update_ride_label ?? 'Update Ride' }}
+                                    @else
+                                        @isset($postRidePage->submit_button_label)
+                                            {{ $postRidePage->submit_button_label }}
+                                        @endisset
+                                    @endif
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex lg:hidden justify-center items-center mt-8">
+                        <button
+                            class="post-ride-submit-btn bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS disabled:opacity-70 disabled:cursor-not-allowed"
+                            type="submit">
+                            @if (in_array(($routeType ?? ''), ['repost', 'edit'], true))
+                                {{ $postRidePage->update_ride_label ?? 'Update Ride' }}
+                            @else
+                                @isset($postRidePage->submit_button_label)
+                                    {{ $postRidePage->submit_button_label }}
+                                @endisset
+                            @endif
+                        </button>
+                    </div>
                 </div>
-            @enderror
-        </div>
-    </div>
-</div>
+        </form>
 
-<div class="mt-6">
-    <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
-        <div class="text-2xl bg-primary text-white py-2 px-4">
-            <h3 class="text-2xl">
-                @isset($postRidePage->disclaimers_label)
-                    {{ $postRidePage->disclaimers_label }}
-                @endisset
-                <span class="text-white">*</span>
-            </h3>
-        </div>
-        <div class="bg-white p-4">
-            @isset($postRidePage->disclaimers_description)
-                {!! str_replace(
-                    '<ol>',
-                    '<ol class="list-decimal list-inside">',
-                    str_replace(
-                        '<li>',
-                        '<li class="border-b border-gray-300 text-base lg:text-lg last:border-b-0 py-3">',
-                        $postRidePage->disclaimers_description,
-                    ),
-                ) !!}
-            @endisset
-        </div>
-        @php
-            $pinkFeatureId = collect($featureOptions ?? [])->firstWhere('slug', 'pink_rides')['id'] ?? null;
-            $extraCareFeatureId = collect($featureOptions ?? [])->firstWhere('slug', 'extra_care_rides')['id'] ?? null;
-            $featuresArray = $isNewForm
-                ? old('features', [])
-                : (old('features') ?:
-                (isset($ride->features)
-                    ? explode('=', $ride->features)
-                    : []));
-            $pinkRideChecked = $pinkFeatureId && is_array($featuresArray) && in_array($pinkFeatureId, $featuresArray);
-            $extraCareRideChecked = $extraCareFeatureId && is_array($featuresArray) && in_array($extraCareFeatureId, $featuresArray);
-        @endphp
-        <div id="pink-ride-disclaimer"
-            class="bg-white p-4 border-t border-gray-200 {{ $pinkRideChecked ? '' : 'hidden' }}">
-            <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
-                <!-- {{ $postRidePage->pink_ride_disclaimer_text ?? 'I understand that this is a Pink Ride, exclusive to female members. I will not send a male driver in my place and will not accept any male passengers over 12 years old, even if the booking is made by a female.' }} -->
-                5. I understand that this is a Pink Ride, exclusive to female members. I will not send a
-                male driver in my place and will not accept any male passengers over 12 years old, even if
-                the booking is made by a female.
-            </p>
-        </div>
-        <div id="Extra+-ride-disclaimer"
-            class="bg-white p-4 border-t border-gray-200 {{ $extraCareRideChecked ? '' : 'hidden' }}">
-            <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
-                <!-- {{ $postRidePage->extra_care_ride_disclaimer_text ?? 'I understand that this is an Extra+ Ride, exclusive to members with highest review score. I will adhere to its standards' }} -->
-                <span id="extra-care-disclaimer-number">{{ $pinkRideChecked ? '6.' : '5.' }}</span>
-                I understand that this is an Extra+ Ride, exclusively for members with top-tier review
-                ratings. I commit to upholding the exceptional professionalism and courtesy that earned me
-                this rating, keeping my vehicle immaculate, driving safely and smoothly as always, and
-                ensuring a calm, respectful environment by preventing any passenger disputes.
-            </p>
-        </div>
     </div>
-</div>
 
-<div class="mt-4">
+    @php
+        $projectTimezone = config('app.timezone');
+        if(empty($projectToday)){
+            // in case ofnot repost
+            $projectNow = \Carbon\Carbon::now($projectTimezone);
+            $projectToday = $projectNow->format('Y-m-d');
+        }
+    @endphp
 
-    <div class="flex items-start my-4">
-        <input type="hidden" name="agree_terms" value="0">
-        <input id="agree_terms" type="checkbox" name="agree_terms" value="1"
-            {{ old('agree_terms') == '1' ? 'checked' : '' }}
-            class="w-4 h-4 mt-3 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
-        <label for="agree_terms"
-            class="ml-2 font-normal text-gray-900 flex text-md items-center space-x-0.5">
-            @isset($postRidePage->agree_terms_label)
-                {!! $postRidePage->agree_terms_label !!}
-            @endisset
-            <span class="text-red-500">*</span>
-        </label>
-    </div>
-    <div id="agree_terms_client_error" class="hidden absolute mt-1 z-10">
-        <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">Please
-            check this box to continue.</div>
-    </div>
-    @error('agree_terms')
-        <div class="absolute mt-1 z-10">
-            <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"> {{ $postRidePage->agree_term_error ?? 'Please accept our Terms and Conditions' }}</div>
+    <!-- Modal for 5+ seats warning -->
+    <div id="pxSeatsWarningModal" class="hidden fixed inset-0 z-50" aria-labelledby="px-seats-modal-title"
+        role="dialog" aria-modal="true">
+        <div onclick="closePxSeatsWarningModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity">
         </div>
-    @enderror
-    <div class="hidden lg:flex justify-center items-center mt-8">
-        <button
-            class="post-ride-submit-btn bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS disabled:opacity-70 disabled:cursor-not-allowed"
-            type="submit">
-            @if (($routeType ?? '') === 'repost')
-            {{ $postRidePage->update_ride_label ?? 'Update Ride' }}
-            @else
-                @isset($postRidePage->submit_button_label)
-                    {{ $postRidePage->submit_button_label }}
-                @endisset
-            @endif
-        </button>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div
+                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                    <button type="button" onclick="closePxSeatsWarningModal()"
+                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <div class="">
+                                <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4"
+                                    id="px-seats-modal-title">{{ $postRidePage->seats_warning_modal_heading ?? 'Heads up for 5+ seats' }}</h3>
+                            </div>
+                            <div class="mt-2 w-full">
+                                <p class="can-exp-p text-center">{{ $postRidePage->seats_warning_modal_paragraph ?? 'Please note that for large vehicles, your total trip collection must stay within non-commercial limits. To keep this a standard carpool, we suggest a lower price per seat. By law, total contributions cannot exceed the standard reimbursement limit ($0.72/km).' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 flex items-center space-x-2 justify-center">
+                        <button type="button" onclick="closePxSeatsWarningModal()" class="button-exp-fill">{{ $postRidePage->seats_warning_modal_got_it_btn ?? 'Got it' }}</button>
+                        <button type="button"
+                            onclick="window.location.href='{{ route('cost_sharing_policy', ['lang' => optional($selectedLanguage)->abbreviation ?? 'en']) }}'"
+                            class="button-exp-no-fill inline-block text-center">{{ $postRidePage->seats_warning_modal_learn_more_btn ?? 'Learn more about limits' }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
-</div>
-<div class="flex lg:hidden justify-center items-center mt-8">
-<button
-    class="post-ride-submit-btn bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS disabled:opacity-70 disabled:cursor-not-allowed"
-    type="submit">
-    @if (($routeType ?? '') === 'repost')
-        {{ $postRidePage->update_ride_label ?? 'Update Ride' }}
-    @else
-        @isset($postRidePage->submit_button_label)
-            {{ $postRidePage->submit_button_label }}
-        @endisset
-    @endif
-</button>
-</div>
-</form>
-</div>
 
-@php
-    $projectTimezone = config('app.timezone');
-    $projectOffset = \Carbon\Carbon::now($projectTimezone)->offsetHours;
-@endphp
+    <!-- Modal for Price Error (Exceeds $0.72/km per seat) -->
+    <div id="pxPriceErrorModal" class="hidden fixed inset-0 z-50" aria-labelledby="px-price-error-modal-title"
+        role="dialog" aria-modal="true">
+        <div onclick="closePxPriceErrorModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div
+                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                    <button type="button" onclick="closePxPriceErrorModal()"
+                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <div class="">
+                                <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4"
+                                    id="pxPriceErrorHeading">{{ $postRidePage->price_error_heading ?? 'Price Limit Exceeded' }}</h3>
+                            </div>
+                            <div class="mt-2 w-full">
+                                <p class="can-exp-p text-center mb-3" id="pxPriceErrorParagraph1"></p>
+                                <p class="can-exp-p text-center mb-3" id="pxPriceErrorParagraph2"></p>
+                                <p class="can-exp-p text-center" id="pxPriceErrorParagraph3"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
+                        <button type="button" id="pxPriceErrorAdjustBtn" onclick="adjustPxPriceFromError()"
+                            class="button-exp-fill">{{ $postRidePage->price_error_adjust_btn_label ?? 'Adjust Price' }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Validation Error -->
+    <div id="pxValidationErrorModal" class="hidden fixed inset-0 z-50" aria-labelledby="px-validation-error-modal-title"
+        role="dialog" aria-modal="true">
+        <div onclick="closePxValidationErrorModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity">
+        </div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div
+                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                    <button type="button" onclick="closePxValidationErrorModal()"
+                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <div class="mx-auto h-16 w-16 flex items-center justify-center mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="2" stroke="currentColor" class="w-12 h-12 text-red-500">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4"
+                                id="pxValidationErrorHeading">Validation Failed</h3>
+                            <div class="mt-2 w-full">
+                                <p class="can-exp-p text-center text-gray-700" id="pxValidationErrorParagraph"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 flex items-center justify-center sm:px-6">
+                        <button type="button" onclick="closePxValidationErrorModal()"
+                            class="button-exp-fill">{{ $siteText['close_btn_text'] ?? 'Close' }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Price Warning (Exceeds $0.66/km per seat but <= $0.72/km per seat) -->
+    <div id="pxPriceWarningModal" class="hidden fixed inset-0 z-50" aria-labelledby="px-price-warning-modal-title"
+        role="dialog" aria-modal="true">
+        <div onclick="closePxPriceWarningModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity">
+        </div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div
+                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                    <button type="button" onclick="closePxPriceWarningModal()"
+                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
+                        <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
+                            <div class="">
+                                <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4">{{ $postRidePage->price_warning_heading ??  'Recommended Contribution Limit'}}</h3>
+                            </div>
+                            <div class="mt-2 w-full">
+                                <p class="can-exp-p text-center mb-3" id="pxPriceWarningParagraph1"></p>
+                                <p class="can-exp-p text-center" id="pxPriceWarningParagraph2"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
+                        <button type="button" id="pxPriceWarningAdjustBtn"
+                            onclick="adjustPxPriceFromWarning(); return false;" class="button-exp-fill">{{ $postRidePage->price_warning_adjust_btn_label ?? 'Adjust Price' }}</button>
+                        <button type="button" id="pxPriceWarningContinue" class="button-exp-fill">{{ $postRidePage->price_warning_keep_current_btn_label ?? 'Keep Current Price' }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 @endsection
 
 @section('script')
-{{-- <script async
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAadtOhXUj_mb2QWOD1mCPYPRujBiQO4nE&libraries=places&callback=initMap">
-</script> --}}
 
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-<script>
-    // Google Places (from/to) – used when API loads
-    var selectedFromPlace = null;
-    var selectedToPlace = null;
-    var geocoderPostRide = null;
-    var fromAutocompletePostRide = null;
-    var toAutocompletePostRide = null;
-    var isSettingPlaceValuePostRide = false;
-    var isSelectingFromDropdownPostRide = false;
-    var errorFromRequiredPostRide = 'The origin is required';
-    var errorToRequiredPostRide = 'The destination is required';
-    var errorCityMissingPostRide = 'We could not find this city name in our records, please double-check the spelling.';
+    <script>
+        // Swap origin and destination values
+        function swapLocations() {
+            // Find Livewire components by their wire:id
+            const originComponent = document.querySelector('input[name="origin[label]"]')?.closest('[wire\\:id]');
+            const destinationComponent = document.querySelector('input[name="destination[label]"]')?.closest('[wire\\:id]');
 
-    // Define the handler function
-    function extraCareRideModal(parms) {
-        document.getElementById('Extra+-ride-modal').classList.remove('hidden');
-    }
+            // Get origin and destination city_id hidden inputs
+            const originCityIdInput = document.querySelector('input[name="origin[city_id]"]');
+            const destinationCityIdInput = document.querySelector('input[name="destination[city_id]"]');
 
-    function closeExtraCareRideModal(parms) {
-        document.getElementById('Extra+-ride-modal').classList.add('hidden');
-    }
+            // Get origin pickup_location and destination dropoff_location textareas
+            const originPickupTextarea = document.querySelector('textarea[name="origin[pickup_location]"]');
+            const destinationDropoffTextarea = document.querySelector('textarea[name="destination[dropoff_location]"]');
 
-    function showPinkExtraAddressRequiredModal() {
-        var el = document.getElementById('pink-extra-address-required-modal');
-        if (el) el.classList.remove('hidden');
-    }
+            // Get current city IDs
+            const originCityId = originCityIdInput ? parseInt(originCityIdInput.value) : null;
+            const destinationCityId = destinationCityIdInput ? parseInt(destinationCityIdInput.value) : null;
 
-    function closePinkExtraAddressRequiredModal() {
-        var el = document.getElementById('pink-extra-address-required-modal');
-        if (el) el.classList.add('hidden');
-    }
+            // Swap city IDs using Livewire's selectCity method
+            if (window.Livewire && originComponent && destinationComponent) {
+                const originWireId = originComponent.getAttribute('wire:id');
+                const destinationWireId = destinationComponent.getAttribute('wire:id');
 
+                if (originWireId && destinationWireId) {
+                    try {
+                        const originLivewire = window.Livewire.find(originWireId);
+                        const destinationLivewire = window.Livewire.find(destinationWireId);
 
-    function hideTooltip(parms) {
-        // Hide validation tooltips (wrapper is parent of .tooltip-error)
-        if (parms === 'label') return;
-        var $el = $(this);
-        var $wrappers = $el.parent().find('.tooltip-error').parent();
-        if ($wrappers.length === 0) $wrappers = $el.parent().parent().find('.tooltip-error').parent();
-        if ($wrappers.length === 0) $wrappers = $el.parent().parent().parent().find('.tooltip-error').parent();
-        // Do not hide From/To tooltips when the user is typing in another field (they have their own input/focus handlers)
-        if (this.id !== 'from_spot_0' && this.id !== 'to_spot_0') {
-            $wrappers = $wrappers.not('#fromInputError, #toInputError');
+                        // Swap city selections
+                        if (destinationCityId && originLivewire) {
+                            originLivewire.call('selectCity', destinationCityId);
+                        }
+                        if (originCityId && destinationLivewire) {
+                            destinationLivewire.call('selectCity', originCityId);
+                        }
+
+                        // If one is null, clear the other
+                        if (!destinationCityId && originLivewire) {
+                            originLivewire.set('query', '');
+                            originLivewire.set('cityId', null);
+                        }
+                        if (!originCityId && destinationLivewire) {
+                            destinationLivewire.set('query', '');
+                            destinationLivewire.set('cityId', null);
+                        }
+                    } catch (e) {
+                        
+                        // Fallback: try direct input manipulation
+                        const originInput = originComponent.querySelector('input[name="origin[label]"]');
+                        const destinationInput = destinationComponent.querySelector('input[name="destination[label]"]');
+                        if (originInput && destinationInput) {
+                            const temp = originInput.value;
+                            originInput.value = destinationInput.value;
+                            destinationInput.value = temp;
+                            originInput.dispatchEvent(new Event('input', {
+                                bubbles: true
+                            }));
+                            destinationInput.dispatchEvent(new Event('input', {
+                                bubbles: true
+                            }));
+                        }
+                    }
+                }
+            } else {
+                // Fallback: direct input manipulation if Livewire is not available
+                const originInput = document.querySelector('input[name="origin[label]"]');
+                const destinationInput = document.querySelector('input[name="destination[label]"]');
+                if (originInput && destinationInput) {
+                    const temp = originInput.value;
+                    originInput.value = destinationInput.value;
+                    destinationInput.value = temp;
+                    originInput.dispatchEvent(new Event('input', {
+                        bubbles: true
+                    }));
+                    destinationInput.dispatchEvent(new Event('input', {
+                        bubbles: true
+                    }));
+                }
+            }
+
+            // Swap pickup/dropoff location values
+            if (originPickupTextarea && destinationDropoffTextarea) {
+                const tempLocation = originPickupTextarea.value;
+                originPickupTextarea.value = destinationDropoffTextarea.value;
+                destinationDropoffTextarea.value = tempLocation;
+
+                // Trigger input event
+                originPickupTextarea.dispatchEvent(new Event('input', {
+                    bubbles: true,
+                    cancelable: true
+                }));
+                destinationDropoffTextarea.dispatchEvent(new Event('input', {
+                    bubbles: true,
+                    cancelable: true
+                }));
+            }
         }
-        // Do not hide stop tooltips when the user is in another field (same as From/To — only hide when interacting with that stop's input)
-        var currentStopIndex = null;
-        if (this.id && this.id.indexOf('stop_spot_') === 0) currentStopIndex = this.id.replace('stop_spot_', '');
-        else {
-            var dataIdx = this.getAttribute('data-stop-index');
-            if (dataIdx !== null && dataIdx !== '') currentStopIndex = dataIdx;
-        }
-        $wrappers = $wrappers.filter(function() {
-            var id = this.id;
-            if (!id || id.indexOf('stopInputError_') !== 0) return true;
-            var stopIdx = id.replace('stopInputError_', '');
-            return currentStopIndex !== null && String(stopIdx) === String(currentStopIndex);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // Toggle vehicle form sections based on selected vehicle mode.
+            const vehicleModeInputs = document.querySelectorAll('input[name="vehicle_mode"]');
+            const existingVehicleFields = document.getElementById('px-vehicle-existing-fields');
+            const newVehicleFields = document.getElementById('px-vehicle-new-fields');
+
+            function setSectionEnabled(container, enabled) {
+                if (!container) return;
+                container.classList.toggle('hidden', !enabled);
+                const fields = container.querySelectorAll('input, select, textarea');
+                fields.forEach((field) => {
+                    field.disabled = !enabled;
+                });
+            }
+
+            function syncVehicleMode() {
+                const selected = document.querySelector('input[name="vehicle_mode"]:checked')?.value || 'skip';
+                setSectionEnabled(existingVehicleFields, selected === 'existing');
+                setSectionEnabled(newVehicleFields, selected === 'add_new');
+            }
+
+            vehicleModeInputs.forEach((input) => {
+                input.addEventListener('change', syncVehicleMode);
+            });
+            syncVehicleMode();
+
+            // Expand/collapse ordered intermediate stops panel.
+            const stopsToggle = document.getElementById('px-stops-toggle');
+            const stopsContent = document.getElementById('px-stops-content');
+            const stopsChevron = document.getElementById('px-stops-chevron');
+
+            if (stopsToggle && stopsContent && stopsChevron) {
+                stopsToggle.addEventListener('click', function() {
+                    const expanded = stopsToggle.getAttribute('aria-expanded') === 'true';
+                    const nextExpanded = !expanded;
+                    stopsToggle.setAttribute('aria-expanded', nextExpanded ? 'true' : 'false');
+                    stopsContent.classList.toggle('hidden', !nextExpanded);
+                    stopsChevron.classList.toggle('rotate-180', nextExpanded);
+                });
+            }
+
+            // Enable recurring inputs only when recurring trip is checked.
+            const recurringToggle = document.getElementById('px-is-recurring');
+            const recurringFields = document.getElementById('px-recurring-fields');
+            const recurringInputs = recurringFields ? recurringFields.querySelectorAll('select, input, textarea') :
+                [];
+
+            function syncRecurringState() {
+                if (!recurringToggle || !recurringFields) return;
+                const enabled = recurringToggle.checked;
+
+                // Show/hide the recurring fields block
+                recurringFields.classList.toggle('hidden', !enabled);
+                recurringFields.classList.toggle('opacity-60', !enabled);
+
+                // Enable/disable inner inputs so they don't submit when hidden
+                recurringInputs.forEach((el) => {
+                    el.disabled = !enabled;
+                    // If you ever want hard required on these, uncomment:
+                    // if (el.name === 'recurring_frequency' || el.name === 'recurring_trips') {
+                    //     el.required = enabled;
+                    // }
+                });
+            }
+
+            if (recurringToggle) {
+                recurringToggle.addEventListener('change', syncRecurringState);
+                syncRecurringState();
+            }
+
+            // Seat visual selector: highlight all seats up to selected total.
+            window.showPxSeatsWarningModal = function() {
+                openModalById('pxSeatsWarningModal');
+            };
+
+            window.closePxSeatsWarningModal = function() {
+                closeModalById('pxSeatsWarningModal');
+            };
+
+            window.seat_selected = function(th, showWarning = true) {
+                const seat = parseInt(th?.value || '0', 10);
+                const maxSeats = 7;
+
+                for (let i = 1; i <= maxSeats; i++) {
+                    const image = document.querySelector('.seat-image.seat-unselect-' + i);
+                    const number = document.querySelector('.seat-number.seat-number-' + i);
+                    const selected = i <= seat;
+
+                    if (image) {
+                        image.src = selected ? '{{ asset('assets/seat-hover-1.png') }}' :
+                            '{{ asset('assets/seat.png') }}';
+                    }
+                    if (number) {
+                        number.classList.toggle('text-green-300', selected);
+                    }
+                }
+
+                if (showWarning && seat >= 5) {
+                    window.showPxSeatsWarningModal();
+                }
+            };
+            window.seat_selected(document.querySelector('input[name="seats_total"]:checked'), false);
+
+            const postRideForm = document.querySelector('form[action*="px.post_ride.store"]') || document
+                .querySelector('form[action*="px.post_ride.update"]') || document.querySelector('form');
+            const priceLabel = document.getElementById('px-price-label');
+            const priceSingleWrap = document.getElementById('px-price-single-wrap');
+            const priceSegmentsWrap = document.getElementById('px-price-segments-wrap');
+            const priceSegmentsList = document.getElementById('px-price-segments-list');
+            const priceSegmentsTotal = document.getElementById('px-price-segments-total');
+            const priceMinorInput = document.getElementById('px-price-minor-input');
+            const priceSingleExpected = document.getElementById('px-price-single-expected');
+            const priceMinorHiddenInput = document.getElementById('px-price-minor-hidden');
+            const destinationPriceDeltaInitialInput = document.getElementById('px-destination-price-delta-initial');
+            const initialSegmentPricesJson = document.getElementById('px-initial-segment-prices-json');
+            const segmentDistanceLoader = document.getElementById('px-segment-distance-loader');
+            const distanceMetersInput = document.getElementById('px-distance-meters-input');
+            const durationInput = document.getElementById('px-duration-input');
+            const segmentDistanceEstimateUrl = @json(route('post_ride.segment_distance_estimates', ['lang' => optional($selectedLanguage)->abbreviation]));
+            let lastPxPriceValidationSignature = null;
+            const initialSegmentPrices = (() => {
+                if (!initialSegmentPricesJson) return [];
+                try {
+                    const parsed = JSON.parse(initialSegmentPricesJson.textContent || '[]');
+                    return Array.isArray(parsed) ? parsed : [];
+                } catch (error) {
+                    return [];
+                }
+            })();
+            const initialDistanceMeters = Number.parseInt(distanceMetersInput?.value || '0', 10) || 0;
+            const initialDurationSeconds = Number.parseInt(durationInput?.value || '0', 10) || 0;
+            const shouldPreferInitialSegmentMode = initialSegmentPrices.length > 0;
+            let segmentDistanceState = {
+                key: '',
+                pendingKey: '',
+                legDistancesMeters: [],
+                legDurationsSeconds: [],
+                segmentDistancesMeters: {},
+                segmentDurationsSeconds: {},
+                totalDistanceMeters: initialDistanceMeters,
+                totalDurationSeconds: initialDurationSeconds,
+            };
+            let segmentDistanceDebounceTimer = null;
+
+            function getSelectedCurrencySymbol() {
+                return '$';
+            }
+
+            function setSegmentDistanceLoading(isLoading) {
+                if (!segmentDistanceLoader) {
+                    return;
+                }
+
+                segmentDistanceLoader.classList.toggle('is-active', isLoading);
+                segmentDistanceLoader.setAttribute('aria-hidden', isLoading ? 'false' : 'true');
+            }
+
+            function toMinorInt(value) {
+                const parsed = parseInt((value ?? '').toString().trim(), 10);
+                return Number.isNaN(parsed) || parsed < 0 ? 0 : parsed;
+            }
+
+            function toMinorFromMajor(value) {
+                const normalized = (value ?? '').toString().trim().replace(',', '.');
+                const parsed = parseFloat(normalized);
+                if (!Number.isFinite(parsed) || parsed < 0) {
+                    return 0;
+                }
+                return Math.round(parsed * 100);
+            }
+
+            function toMajorFromMinor(minorValue) {
+                return (toMinorInt(minorValue) / 100).toFixed(2);
+            }
+
+            function getFirstInputValueByName(name) {
+                const direct = document.querySelector(`input[name="${name}"]`);
+                if (direct) {
+                    return direct.value.trim();
+                }
+                const anyInput = Array.from(document.querySelectorAll('input[type="text"],input[type="hidden"]'))
+                    .find((input) => input.name && input.name.includes(name));
+                return anyInput ? anyInput.value.trim() : '';
+            }
+
+            function getStopsData() {
+                const stopLabelInputs = document.querySelectorAll('input[name^="stops["][name$="[label]"]');
+                const stopCityIdInputs = document.querySelectorAll('input[name^="stops["][name$="[city_id]"]');
+                const stopIsPickupInputs = document.querySelectorAll('input[name^="stops["][name$="[is_pickup]"]');
+                const stopIsDropoffInputs = document.querySelectorAll(
+                    'input[name^="stops["][name$="[is_dropoff]"]');
+                const stopPriceDeltaInputs = document.querySelectorAll(
+                    'input[name^="stops["][name$="[price_delta_minor]"]');
+                const stopsData = new Map();
+
+                stopLabelInputs.forEach(function(input) {
+                    const match = input.name.match(/^stops\[(\d+)\]\[label\]$/);
+                    if (!match) return;
+                    const index = parseInt(match[1], 10);
+                    if (!stopsData.has(index)) {
+                        stopsData.set(index, {});
+                    }
+                    stopsData.get(index).label = input.value.trim();
+                });
+
+                stopCityIdInputs.forEach(function(input) {
+                    const match = input.name.match(/^stops\[(\d+)\]\[city_id\]$/);
+                    if (!match) return;
+                    const index = parseInt(match[1], 10);
+                    if (!stopsData.has(index)) {
+                        stopsData.set(index, {});
+                    }
+                    stopsData.get(index).cityId = input.value.trim();
+                });
+
+                stopIsPickupInputs.forEach(function(input) {
+                    const match = input.name.match(/^stops\[(\d+)\]\[is_pickup\]$/);
+                    if (!match) return;
+                    const index = parseInt(match[1], 10);
+                    if (!stopsData.has(index)) {
+                        stopsData.set(index, {});
+                    }
+                    stopsData.get(index).isPickup = input.value;
+                });
+
+                stopIsDropoffInputs.forEach(function(input) {
+                    const match = input.name.match(/^stops\[(\d+)\]\[is_dropoff\]$/);
+                    if (!match) return;
+                    const index = parseInt(match[1], 10);
+                    if (!stopsData.has(index)) {
+                        stopsData.set(index, {});
+                    }
+                    stopsData.get(index).isDropoff = input.value;
+                });
+
+                stopPriceDeltaInputs.forEach(function(input) {
+                    const match = input.name.match(/^stops\[(\d+)\]\[price_delta_minor\]$/);
+                    if (!match) return;
+                    const index = parseInt(match[1], 10);
+                    if (!stopsData.has(index)) {
+                        stopsData.set(index, {});
+                    }
+                    stopsData.get(index).priceDeltaMinor = toMinorInt(input.value);
+                });
+
+                return Array.from(stopsData.keys())
+                    .sort((a, b) => a - b)
+                    .map((index) => ({
+                        index,
+                        ...stopsData.get(index)
+                    }));
+            }
+
+            function getValidStopsData() {
+                return getStopsData().filter((stop) => stop.label && stop.cityId);
+            }
+
+            function hasValidCityId(fieldName) {
+                const cityIdValue = getFirstInputValueByName(fieldName);
+                if (cityIdValue === '') {
+                    return false;
+                }
+
+                const parsed = Number.parseInt(cityIdValue, 10);
+                return !Number.isNaN(parsed) && parsed > 0;
+            }
+
+            function canRequestDistanceEstimates(validStops) {
+                if (!hasValidCityId('origin[city_id]') || !hasValidCityId('destination[city_id]')) {
+                    return false;
+                }
+
+                return validStops.every((stop) => {
+                    const parsed = Number.parseInt(stop.cityId || '0', 10);
+                    return !Number.isNaN(parsed) && parsed > 0;
+                });
+            }
+
+            function getSegmentPriceKey(fromIndex, toIndex) {
+                return `${fromIndex}:${toIndex}`;
+            }
+
+            function getInitialSegmentPriceMap() {
+                const priceMap = new Map();
+                initialSegmentPrices.forEach((segmentPrice) => {
+                    const fromIndex = Number.parseInt(segmentPrice?.from_index ?? '', 10);
+                    const toIndex = Number.parseInt(segmentPrice?.to_index ?? '', 10);
+                    const priceMinor = toMinorInt(segmentPrice?.price_minor ?? 0);
+                    if (!Number.isNaN(fromIndex) && !Number.isNaN(toIndex) && toIndex > fromIndex) {
+                        priceMap.set(getSegmentPriceKey(fromIndex, toIndex), priceMinor);
+                    }
+                });
+                return priceMap;
+            }
+
+            function getInitialSegmentPriceMinorByLabels(fromLabel, toLabel) {
+                const normalizedFrom = (fromLabel ?? '').toString().trim().toLowerCase();
+                const normalizedTo = (toLabel ?? '').toString().trim().toLowerCase();
+                if (!normalizedFrom || !normalizedTo) {
+                    return null;
+                }
+
+                const match = initialSegmentPrices.find((segmentPrice) => {
+                    const itemFrom = (segmentPrice?.from_label ?? '').toString().trim().toLowerCase();
+                    const itemTo = (segmentPrice?.to_label ?? '').toString().trim().toLowerCase();
+                    return itemFrom === normalizedFrom && itemTo === normalizedTo;
+                });
+
+                if (!match) {
+                    return null;
+                }
+
+                return toMinorInt(match?.price_minor ?? 0);
+            }
+
+            function getAllRoutePoints(validStops) {
+                const originLabel = getFirstInputValueByName('origin[label]') || 'Origin';
+                const destinationLabel = getFirstInputValueByName('destination[label]') || 'Destination';
+
+                return [{
+                        index: 0,
+                        label: originLabel
+                    },
+                    ...validStops.map((stop, idx) => ({
+                        index: idx + 1,
+                        label: stop.label || `Stop ${idx + 1}`,
+                        stopIndex: stop.index
+                    })),
+                    {
+                        index: validStops.length + 1,
+                        label: destinationLabel
+                    }
+                ];
+            }
+
+            function getPointLabelsForDistance(points) {
+                return points
+                    .map((point) => (point?.label ?? '').toString().trim())
+                    .filter((label) => label !== '');
+            }
+
+            function getDistanceRequestKey(points) {
+                return getPointLabelsForDistance(points).join('||');
+            }
+
+            function buildLegacyAdjacentPriceMap(validStops, points) {
+                const adjacentPriceMap = new Map();
+                validStops.forEach((stop, idx) => {
+                    adjacentPriceMap.set(getSegmentPriceKey(idx, idx + 1), toMinorInt(stop
+                    .priceDeltaMinor));
+                });
+
+                const destinationDeltaMinor = toMinorInt(destinationPriceDeltaInitialInput?.value ?? 0);
+                if (points.length >= 2) {
+                    adjacentPriceMap.set(
+                        getSegmentPriceKey(points.length - 2, points.length - 1),
+                        destinationDeltaMinor
+                    );
+                }
+
+                return adjacentPriceMap;
+            }
+
+            function resolveDefaultSegmentPriceMinor(fromIndex, toIndex, configuredPrices, adjacentPrices,
+                parentPriceMinor) {
+                const configuredPrice = configuredPrices.get(getSegmentPriceKey(fromIndex, toIndex));
+                if (configuredPrice !== undefined) {
+                    return configuredPrice;
+                }
+
+                let adjacentSum = 0;
+                let hasAllAdjacentPrices = true;
+                for (let idx = fromIndex; idx < toIndex; idx++) {
+                    const adjacentPrice = adjacentPrices.get(getSegmentPriceKey(idx, idx + 1));
+                    if (adjacentPrice === undefined) {
+                        hasAllAdjacentPrices = false;
+                        break;
+                    }
+                    adjacentSum += adjacentPrice;
+                }
+
+                if (hasAllAdjacentPrices && adjacentSum > 0) {
+                    return adjacentSum;
+                }
+
+                if (fromIndex === 0 && parentPriceMinor > 0) {
+                    return parentPriceMinor;
+                }
+
+                return 0;
+            }
+
+            function getSelectedSeatsTotal() {
+                const selectedSeatsInput = document.querySelector('input[name="seats_total"]:checked');
+                const selectedSeats = selectedSeatsInput ? Number.parseInt(selectedSeatsInput.value || '0', 10) : 0;
+                return Number.isNaN(selectedSeats) || selectedSeats <= 0 ? 0 : selectedSeats;
+            }
+
+            function calculateExpectedSegmentPriceMinor(distanceMeters, seatsTotal) {
+                const normalizedDistanceMeters = Math.max(0, Number.parseInt(distanceMeters || '0', 10) || 0);
+                const normalizedSeatsTotal = Math.max(0, Number.parseInt(seatsTotal || '0', 10) || 0);
+
+                if (normalizedDistanceMeters <= 0 || normalizedSeatsTotal <= 0) {
+                    return {
+                        suggestedMinor: 0,
+                        maxMinor: 0,
+                    };
+                }
+
+                const distanceKm = normalizedDistanceMeters / 1000;
+                const suggestedMajor = (distanceKm * SOFT_WARNING_CAP) / normalizedSeatsTotal;
+                const maxMajor = (distanceKm * ERROR_TRIGGERING_CAP) / normalizedSeatsTotal;
+
+                return {
+                    suggestedMinor: Math.round(suggestedMajor * 100),
+                    maxMinor: Math.round(maxMajor * 100),
+                };
+            }
+
+            function getSegmentDistanceMeters(fromIndex, toIndex) {
+                const segmentDistancesMeters = segmentDistanceState &&
+                    segmentDistanceState.segmentDistancesMeters &&
+                    typeof segmentDistanceState.segmentDistancesMeters === 'object' ?
+                    segmentDistanceState.segmentDistancesMeters :
+                    {};
+
+                return Number.parseInt(segmentDistancesMeters[`${fromIndex}:${toIndex}`] || '0', 10) || 0;
+            }
+
+            function refreshExpectedSegmentPriceHints() {
+                if (!priceSegmentsList) {
+                    return;
+                }
+
+                const allSegmentInputs = Array.from(priceSegmentsList.querySelectorAll('.px-segment-price-input'));
+                if (allSegmentInputs.length === 0) {
+                    return;
+                }
+
+                const seatsTotal = getSelectedSeatsTotal();
+
+                allSegmentInputs.forEach((input) => {
+                    const fromIndex = Number.parseInt(input.getAttribute('data-from-index') || '-1', 10);
+                    const toIndex = Number.parseInt(input.getAttribute('data-to-index') || '-1', 10);
+                    const hint = input.parentElement?.querySelector('.px-segment-price-expected');
+                    if (Number.isNaN(fromIndex) || Number.isNaN(toIndex) || !hint) {
+                        return;
+                    }
+
+                    let suggestedMinor = 0;
+                    let maxMinor = 0;
+                    let distanceSuffix = 'distance unavailable';
+
+                    const segmentDistanceMeters = getSegmentDistanceMeters(fromIndex, toIndex);
+                    input.setAttribute('data-distance-meters', String(segmentDistanceMeters));
+                    if (segmentDistanceMeters > 0) {
+                        const priceEstimate = calculateExpectedSegmentPriceMinor(segmentDistanceMeters,
+                            seatsTotal);
+                        suggestedMinor = priceEstimate.suggestedMinor;
+                        maxMinor = priceEstimate.maxMinor;
+                        distanceSuffix = `${(segmentDistanceMeters / 1000).toFixed(1)} km`;
+                    }
+
+                    const suggestedMajor = toMajorFromMinor(suggestedMinor);
+                    const maxMajor = toMajorFromMinor(maxMinor);
+                    hint.textContent =
+                        `Suggested: ${getSelectedCurrencySymbol()}${suggestedMajor} | Max: ${getSelectedCurrencySymbol()}${maxMajor} (${distanceSuffix})`;
+                });
+            }
+
+            function refreshSingleRouteExpectedPriceHint() {
+                if (!priceSingleExpected) {
+                    return;
+                }
+
+                const originLabel = getFirstInputValueByName('origin[label]');
+                const destinationLabel = getFirstInputValueByName('destination[label]');
+                const seatsTotal = getSelectedSeatsTotal();
+                const totalDistanceMeters = toMinorInt(segmentDistanceState.totalDistanceMeters);
+
+                if (!originLabel || !destinationLabel || seatsTotal <= 0) {
+                    priceSingleExpected.classList.add('hidden');
+                    priceSingleExpected.textContent = '';
+                    return;
+                }
+
+                if (totalDistanceMeters <= 0) {
+                    priceSingleExpected.classList.remove('hidden');
+                    priceSingleExpected.textContent = 'Suggested/Max price will appear when distance is available.';
+                    return;
+                }
+
+                const priceEstimate = calculateExpectedSegmentPriceMinor(totalDistanceMeters, seatsTotal);
+                const suggestedMajor = toMajorFromMinor(priceEstimate.suggestedMinor);
+                const maxMajor = toMajorFromMinor(priceEstimate.maxMinor);
+                const distanceKm = (totalDistanceMeters / 1000).toFixed(1);
+
+                priceSingleExpected.classList.remove('hidden');
+                priceSingleExpected.textContent =
+                    `Suggested: ${getSelectedCurrencySymbol()}${suggestedMajor} | Max: ${getSelectedCurrencySymbol()}${maxMajor} (${distanceKm} km)`;
+            }
+
+            async function requestSegmentDistanceEstimates(points) {
+                const pointLabels = getPointLabelsForDistance(points);
+                const requestKey = pointLabels.join('||');
+
+                if (pointLabels.length < 2) {
+                    segmentDistanceState = {
+                        key: '',
+                        pendingKey: '',
+                        legDistancesMeters: [],
+                        legDurationsSeconds: [],
+                        segmentDistancesMeters: {},
+                        segmentDurationsSeconds: {},
+                        totalDistanceMeters: 0,
+                        totalDurationSeconds: 0,
+                    };
+                    window.pxRideDistanceKm = null;
+                    const distanceMetersInput = document.getElementById('px-distance-meters-input');
+                    const durationInput = document.getElementById('px-duration-input');
+                    if (distanceMetersInput) {
+                        distanceMetersInput.value = '';
+                    }
+                    if (durationInput) {
+                        durationInput.value = '0';
+                    }
+                    refreshExpectedSegmentPriceHints();
+                    refreshSingleRouteExpectedPriceHint();
+                    return;
+                }
+
+                if (segmentDistanceState.key === requestKey || segmentDistanceState.pendingKey === requestKey) {
+                    refreshExpectedSegmentPriceHints();
+                    return;
+                }
+
+                segmentDistanceState.pendingKey = requestKey;
+                setSegmentDistanceLoading(true);
+
+                const csrfToken = postRideForm?.querySelector('input[name="_token"]')?.value || '';
+
+                try {
+                    const response = await fetch(segmentDistanceEstimateUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                        },
+                        body: JSON.stringify({
+                            point_labels: pointLabels,
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Distance estimate request failed: ${response.status}`);
+                    }
+
+                    const payload = await response.json();
+                    if (segmentDistanceState.pendingKey !== requestKey) {
+                        return;
+                    }
+
+                    segmentDistanceState = {
+                        key: requestKey,
+                        pendingKey: '',
+                        legDistancesMeters: Array.isArray(payload.leg_distances_meters) ? payload
+                            .leg_distances_meters : [],
+                        legDurationsSeconds: Array.isArray(payload.leg_durations_seconds) ? payload
+                            .leg_durations_seconds : [],
+                        segmentDistancesMeters: payload.segment_distances_meters && typeof payload
+                            .segment_distances_meters === 'object' ?
+                            payload.segment_distances_meters :
+                            {},
+                        segmentDurationsSeconds: payload.segment_durations_seconds && typeof payload
+                            .segment_durations_seconds === 'object' ?
+                            payload.segment_durations_seconds :
+                            {},
+                        totalDistanceMeters: Number.parseInt(payload.total_distance_meters || '0', 10) || 0,
+                        totalDurationSeconds: Number.parseInt(payload.total_duration_seconds || '0', 10) || 0,
+                    };
+
+                    if (segmentDistanceState.totalDistanceMeters > 0) {
+                        window.pxRideDistanceKm = segmentDistanceState.totalDistanceMeters / 1000;
+                        const distanceMetersInput = document.getElementById('px-distance-meters-input');
+                        if (distanceMetersInput) {
+                            distanceMetersInput.value = String(segmentDistanceState.totalDistanceMeters);
+                        }
+                    }
+                    const durationInput = document.getElementById('px-duration-input');
+                    if (durationInput) {
+                        durationInput.value = String(segmentDistanceState.totalDurationSeconds);
+                    }
+                } catch (error) {
+                    if (segmentDistanceState.pendingKey === requestKey) {
+                        segmentDistanceState.pendingKey = '';
+                    }
+                    console.warn('PX segment distance estimates failed', error);
+                } finally {
+                    setSegmentDistanceLoading(false);
+                    refreshExpectedSegmentPriceHints();
+                    refreshSingleRouteExpectedPriceHint();
+                }
+            }
+
+            function scheduleSegmentDistanceEstimates(points) {
+                if (segmentDistanceDebounceTimer) {
+                    clearTimeout(segmentDistanceDebounceTimer);
+                }
+
+                segmentDistanceDebounceTimer = setTimeout(() => {
+                    requestSegmentDistanceEstimates(points);
+                }, 350);
+            }
+
+            function syncSegmentPriceTotal() {
+                if (!priceSegmentsList || !priceMinorHiddenInput) return;
+
+                const parentSegmentInput = priceSegmentsList.querySelector(
+                    '.px-segment-price-input[data-parent-segment="1"]'
+                );
+                const parentPriceMinor = parentSegmentInput ? toMinorFromMajor(parentSegmentInput.value) : 0;
+                priceMinorHiddenInput.value = String(parentPriceMinor);
+                if (priceSegmentsTotal) {
+                    priceSegmentsTotal.textContent = toMajorFromMinor(parentPriceMinor);
+                }
+                refreshExpectedSegmentPriceHints();
+                refreshSingleRouteExpectedPriceHint();
+                maybeShowPxLivePriceAlert();
+            }
+
+            function syncStopPriceDeltaInputsFromSegmentRows() {
+                if (!priceSegmentsList) return;
+                const segmentInputs = priceSegmentsList.querySelectorAll(
+                    '.px-segment-price-input[data-adjacent-stop-index]');
+                segmentInputs.forEach((input) => {
+                    const stopIndex = input.getAttribute('data-adjacent-stop-index');
+                    if (stopIndex === null || stopIndex === '') {
+                        return;
+                    }
+                    const hiddenStopPrice = document.querySelector(
+                        `input[name="stops[${stopIndex}][price_delta_minor]"]`);
+                    if (hiddenStopPrice) {
+                        hiddenStopPrice.value = String(toMinorFromMajor(input.value));
+                    }
+                });
+            }
+
+            function syncPriceInputMode() {
+                if (!priceLabel || !priceSingleWrap || !priceSegmentsWrap || !priceMinorInput || !
+                    priceMinorHiddenInput || !priceSegmentsList) {
+                    return;
+                }
+
+                const validStops = getValidStopsData();
+                const hasValidStops = validStops.length > 0;
+                const canEstimateDistance = canRequestDistanceEstimates(validStops);
+                const hasRestoredSegmentState = shouldPreferInitialSegmentMode && initialSegmentPrices.length > 0;
+
+                if (!hasValidStops && !hasRestoredSegmentState) {
+                    const points = getAllRoutePoints(validStops);
+                    if (canEstimateDistance) {
+                        scheduleSegmentDistanceEstimates(points);
+                    } else {
+                        segmentDistanceState = {
+                            key: '',
+                            pendingKey: '',
+                            legDistancesMeters: [],
+                            legDurationsSeconds: [],
+                            segmentDistancesMeters: {},
+                            segmentDurationsSeconds: {},
+                            totalDistanceMeters: 0,
+                            totalDurationSeconds: 0,
+                        };
+                        window.pxRideDistanceKm = null;
+                        if (distanceMetersInput) {
+                            distanceMetersInput.value = '';
+                        }
+                        if (durationInput) {
+                            durationInput.value = '0';
+                        }
+                    }
+                    priceLabel.textContent = 'Price per Seat';
+                    priceSingleWrap.classList.remove('hidden');
+                    priceSegmentsWrap.classList.add('hidden');
+                    priceSegmentsList.innerHTML = '';
+                    priceMinorInput.disabled = false;
+                    priceMinorInput.name = 'price_minor';
+                    priceMinorHiddenInput.name = '';
+                    refreshSingleRouteExpectedPriceHint();
+                    return;
+                }
+
+                const points = getAllRoutePoints(validStops);
+                if (canEstimateDistance) {
+                    scheduleSegmentDistanceEstimates(points);
+                } else if (!hasRestoredSegmentState) {
+                    segmentDistanceState = {
+                        key: '',
+                        pendingKey: '',
+                        legDistancesMeters: [],
+                        legDurationsSeconds: [],
+                        segmentDistancesMeters: {},
+                        segmentDurationsSeconds: {},
+                        totalDistanceMeters: 0,
+                        totalDurationSeconds: 0,
+                    };
+                    window.pxRideDistanceKm = null;
+                    if (distanceMetersInput) {
+                        distanceMetersInput.value = '';
+                    }
+                    if (durationInput) {
+                        durationInput.value = '0';
+                    }
+                }
+
+                priceLabel.textContent = 'Price per Seat (all route sections)';
+                priceSingleWrap.classList.add('hidden');
+                priceSegmentsWrap.classList.remove('hidden');
+                priceMinorInput.disabled = true;
+                priceMinorInput.name = '';
+                priceMinorHiddenInput.name = 'price_minor';
+
+                const previousValues = new Map();
+                Array.from(priceSegmentsList.querySelectorAll('.px-segment-price-input')).forEach((input) => {
+                    const fromIndex = input.getAttribute('data-from-index');
+                    const toIndex = input.getAttribute('data-to-index');
+                    if (fromIndex === null || toIndex === null) {
+                        return;
+                    }
+                    previousValues.set(
+                        getSegmentPriceKey(Number.parseInt(fromIndex, 10), Number.parseInt(toIndex,
+                        10)),
+                        toMinorFromMajor(input.value)
+                    );
+                });
+
+                const configuredPrices = getInitialSegmentPriceMap();
+                const adjacentPrices = buildLegacyAdjacentPriceMap(validStops, points);
+                const baseTotalMinor = priceMinorHiddenInput.value ?
+                    toMinorInt(priceMinorHiddenInput.value) :
+                    toMinorFromMajor(priceMinorInput.value);
+                priceSegmentsList.innerHTML = '';
+
+                for (let fromIndex = 0; fromIndex < points.length - 1; fromIndex++) {
+                    const group = document.createElement('div');
+                    group.className = 'rounded-md border border-gray-200 bg-gray-50 p-3 space-y-2';
+
+                    const groupTitle = document.createElement('div');
+                    groupTitle.className = 'text-sm font-semibold text-gray-700';
+                    groupTitle.textContent = `From ${points[fromIndex].label}`;
+                    group.appendChild(groupTitle);
+
+                    for (let toIndex = fromIndex + 1; toIndex < points.length; toIndex++) {
+                        const from = points[fromIndex].label || 'Point A';
+                        const to = points[toIndex].label || 'Point B';
+                        const previousKey = getSegmentPriceKey(fromIndex, toIndex);
+                        let initialMinor = previousValues.has(previousKey) ?
+                            previousValues.get(previousKey) :
+                            resolveDefaultSegmentPriceMinor(fromIndex, toIndex, configuredPrices, adjacentPrices,
+                                baseTotalMinor);
+
+                        if (!previousValues.has(previousKey)) {
+                            const initialMinorByLabels = getInitialSegmentPriceMinorByLabels(from, to);
+                            if (initialMinorByLabels !== null) {
+                                initialMinor = initialMinorByLabels;
+                            }
+                        }
+
+                        if (fromIndex === 0 && toIndex === points.length - 1 && initialMinor <= 0 &&
+                            baseTotalMinor > 0) {
+                            initialMinor = baseTotalMinor;
+                        }
+
+                        const row = document.createElement('div');
+                        row.className = 'grid grid-cols-1 md:grid-cols-2 gap-3 items-end';
+
+                        const routeLabelWrap = document.createElement('div');
+                        const routeLabel = document.createElement('label');
+                        routeLabel.className = 'block text-primary text-gray-700';
+                        routeLabel.textContent = `${from} \u2192 ${to}`;
+                        routeLabelWrap.appendChild(routeLabel);
+
+                        const expectedHint = document.createElement('p');
+                        expectedHint.className = 'px-segment-price-expected text-xs text-gray-500 mt-1';
+                        expectedHint.textContent = `Expected: ${getSelectedCurrencySymbol()}0.00`;
+                        routeLabelWrap.appendChild(expectedHint);
+
+                        const priceInput = document.createElement('input');
+                        priceInput.type = 'number';
+                        priceInput.min = '0';
+                        priceInput.step = '0.01';
+                        priceInput.value = toMajorFromMinor(initialMinor);
+                        priceInput.className = 'px-segment-price-input w-full rounded border-gray-300';
+                        priceInput.placeholder = `e.g. ${getSelectedCurrencySymbol()}12.00`;
+                        priceInput.setAttribute('data-from-index', String(fromIndex));
+                        priceInput.setAttribute('data-to-index', String(toIndex));
+                        priceInput.setAttribute('data-distance-meters', '0');
+
+                        if (toIndex === fromIndex + 1 && toIndex <= validStops.length) {
+                            priceInput.setAttribute('data-adjacent-stop-index', String(validStops[toIndex - 1]
+                                .index));
+                        }
+
+                        if (fromIndex === 0 && toIndex === points.length - 1) {
+                            priceInput.setAttribute('data-parent-segment', '1');
+                        }
+
+                        const stopFromInput = document.createElement('input');
+                        stopFromInput.type = 'hidden';
+                        stopFromInput.name = 'stop_from[]';
+                        stopFromInput.value = from;
+
+                        const stopToInput = document.createElement('input');
+                        stopToInput.type = 'hidden';
+                        stopToInput.name = 'stop_to[]';
+                        stopToInput.value = to;
+
+                        const stopPriceInput = document.createElement('input');
+                        stopPriceInput.type = 'hidden';
+                        stopPriceInput.name = 'stop_price_minor[]';
+                        stopPriceInput.value = String(initialMinor);
+
+                        priceInput.addEventListener('input', function() {
+                            stopPriceInput.value = String(toMinorFromMajor(priceInput.value));
+                            syncStopPriceDeltaInputsFromSegmentRows();
+                            syncSegmentPriceTotal();
+                            maybeShowPxLivePriceAlert(false, priceInput);
+                        });
+
+                        priceInput.addEventListener('blur', function() {
+                            maybeShowPxLivePriceAlert(true, priceInput);
+                        });
+
+                        row.appendChild(routeLabelWrap);
+                        row.appendChild(priceInput);
+                        row.appendChild(stopFromInput);
+                        row.appendChild(stopToInput);
+                        row.appendChild(stopPriceInput);
+                        group.appendChild(row);
+                    }
+
+                    priceSegmentsList.appendChild(group);
+                }
+
+                syncStopPriceDeltaInputsFromSegmentRows();
+                syncSegmentPriceTotal();
+                refreshExpectedSegmentPriceHints();
+            }
+
+            if (priceMinorInput) {
+                priceMinorInput.addEventListener('input', function() {
+                    if (priceMinorHiddenInput) {
+                        priceMinorHiddenInput.value = String(toMinorFromMajor(priceMinorInput.value));
+                    }
+                    maybeShowPxLivePriceAlert();
+                });
+                priceMinorInput.addEventListener('blur', function() {
+                    maybeShowPxLivePriceAlert(true);
+                });
+            }
+
+            document.addEventListener('input', function(event) {
+                const target = event.target;
+                if (!(target instanceof HTMLInputElement)) {
+                    return;
+                }
+                if (target.name && (
+                        target.name.includes('origin[label]') ||
+                        target.name.includes('destination[label]') ||
+                        target.name.match(/^stops\[\d+\]\[(label|city_id|price_delta_minor)\]$/)
+                    )) {
+                    syncPriceInputMode();
+                }
+            });
+
+            document.addEventListener('change', function(event) {
+                const target = event.target;
+                if (!(target instanceof HTMLInputElement)) {
+                    return;
+                }
+
+                if (target.name === 'seats_total') {
+                    refreshExpectedSegmentPriceHints();
+                    refreshSingleRouteExpectedPriceHint();
+                    maybeShowPxLivePriceAlert();
+                }
+            });
+
+            if (window.Livewire && typeof window.Livewire.hook === 'function') {
+                window.Livewire.hook('message.processed', function() {
+                    setTimeout(syncPriceInputMode, 60);
+                });
+            }
+
+            syncPriceInputMode();
+            setTimeout(syncPriceInputMode, 150);
+            setTimeout(syncPriceInputMode, 400);
+
+            // Filter out empty stops before form submission
+            if (postRideForm) {
+                postRideForm.addEventListener('submit', function(event) {
+                    // Check if bypass flag is already set (user already saw warning and chose to continue)
+                    const bypassInput = postRideForm.querySelector('input[name="bypass_price_validation"]');
+                    if (bypassInput && bypassInput.value === '1') {
+                        console.log('PX Price validation bypassed - user already confirmed');
+                        // Continue with normal form submission
+                    } else {
+                        const submitValidation = getPxSubmitValidationResult();
+
+                        console.log('PX Form submission validation:', submitValidation);
+
+                        if (submitValidation.type === 'error') {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            event.stopImmediatePropagation();
+                            showPxPriceErrorModal(
+                                submitValidation.maxPricePerSeat,
+                                submitValidation.routeLabel
+                            );
+                            return false;
+                        }
+
+                        if (submitValidation.type === 'warning') {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            event.stopImmediatePropagation();
+                            console.log('Showing PX soft warning modal');
+                            showPxPriceWarningModal(function() {
+                                const bypassInput = document.createElement('input');
+                                bypassInput.type = 'hidden';
+                                bypassInput.name = 'bypass_price_validation';
+                                bypassInput.value = '1';
+                                postRideForm.appendChild(bypassInput);
+                                const newForm = postRideForm.cloneNode(true);
+                                postRideForm.parentNode.replaceChild(newForm, postRideForm);
+                                newForm.submit();
+                            }, submitValidation.routeLabel, submitValidation.softWarningPrice);
+                            return false;
+                        }
+                    }
+
+                    if (priceMinorInput && !priceMinorInput.disabled) {
+                        priceMinorInput.value = String(toMinorFromMajor(priceMinorInput.value));
+                    }
+                    const durationInput = document.getElementById('px-duration-input');
+                    if (durationInput) {
+                        durationInput.value = String(Number.parseInt(segmentDistanceState.totalDurationSeconds || '0', 10) || 0);
+                    }
+                    syncStopPriceDeltaInputsFromSegmentRows();
+                    syncSegmentPriceTotal();
+
+                    const stopLabelInputs = document.querySelectorAll(
+                        'input[name^="stops["][name$="[label]"]');
+                    const stopCityIdInputs = document.querySelectorAll(
+                        'input[name^="stops["][name$="[city_id]"]');
+                    const stopIsPickupInputs = document.querySelectorAll(
+                        'input[name^="stops["][name$="[is_pickup]"]');
+                    const stopIsDropoffInputs = document.querySelectorAll(
+                        'input[name^="stops["][name$="[is_dropoff]"]');
+                    const stopPriceDeltaInputs = document.querySelectorAll(
+                        'input[name^="stops["][name$="[price_delta_minor]"]');
+                    const existingDestinationPriceDeltaInput = postRideForm.querySelector(
+                        'input[name="destination[price_delta_minor]"][data-generated="1"]');
+                    if (existingDestinationPriceDeltaInput) {
+                        existingDestinationPriceDeltaInput.remove();
+                    }
+                    postRideForm.querySelectorAll('input[data-generated-segment-price="1"]').forEach((
+                        input) => {
+                            input.remove();
+                        });
+
+                    const validStops = getValidStopsData().map((stop) => ({
+                        label: stop.label,
+                        cityId: stop.cityId,
+                        isPickup: stop.isPickup || '1',
+                        isDropoff: stop.isDropoff || '1',
+                        priceDeltaMinor: toMinorInt(stop.priceDeltaMinor),
+                    }));
+
+                    // Source-of-truth for stop leg prices: visible segment rows.
+                    // Map first N segment rows to N intermediate stops (in route order).
+                    if (priceSegmentsList && validStops.length > 0) {
+                        const adjacentSegmentInputs = Array.from(
+                            priceSegmentsList.querySelectorAll(
+                                '.px-segment-price-input[data-adjacent-stop-index]')
+                        );
+                        adjacentSegmentInputs.forEach((input) => {
+                            const stopIndex = input.getAttribute('data-adjacent-stop-index');
+                            if (stopIndex === null || stopIndex === '') {
+                                return;
+                            }
+                            const matchingStop = validStops.find((stop) => String(stop.index) ===
+                                String(stopIndex));
+                            if (matchingStop) {
+                                matchingStop.priceDeltaMinor = toMinorFromMajor(input.value);
+                            }
+                        });
+
+                        const allSegmentInputs = Array.from(priceSegmentsList.querySelectorAll(
+                            '.px-segment-price-input'));
+                        const lastAdjacentSegmentInput = allSegmentInputs.find((input) => {
+                            const fromIndex = Number.parseInt(input.getAttribute(
+                                'data-from-index') || '-1', 10);
+                            const toIndex = Number.parseInt(input.getAttribute('data-to-index') ||
+                                '-1', 10);
+                            const pointCount = validStops.length + 2;
+                            return fromIndex === pointCount - 2 && toIndex === pointCount - 1;
+                        });
+
+                        if (lastAdjacentSegmentInput) {
+                            const destinationPriceDeltaInput = document.createElement('input');
+                            destinationPriceDeltaInput.type = 'hidden';
+                            destinationPriceDeltaInput.name = 'destination[price_delta_minor]';
+                            destinationPriceDeltaInput.value = String(toMinorFromMajor(
+                                lastAdjacentSegmentInput
+                                .value));
+                            destinationPriceDeltaInput.setAttribute('data-generated', '1');
+                            postRideForm.appendChild(destinationPriceDeltaInput);
+                        }
+
+                        allSegmentInputs.forEach((input, index) => {
+                            const fromIndex = input.getAttribute('data-from-index');
+                            const toIndex = input.getAttribute('data-to-index');
+                            if (fromIndex === null || toIndex === null) {
+                                return;
+                            }
+
+                            const priceMinor = toMinorFromMajor(input.value);
+                            [
+                                ['from_index', fromIndex],
+                                ['to_index', toIndex],
+                                ['price_minor', String(priceMinor)],
+                            ].forEach(([field, value]) => {
+                                const hiddenInput = document.createElement('input');
+                                hiddenInput.type = 'hidden';
+                                hiddenInput.name =
+                                    `meta[segment_prices][${index}][${field}]`;
+                                hiddenInput.value = value;
+                                hiddenInput.setAttribute('data-generated-segment-price',
+                                    '1');
+                                postRideForm.appendChild(hiddenInput);
+                            });
+                        });
+                    }
+
+                    // Remove all existing stop inputs
+                    stopLabelInputs.forEach(function(input) {
+                        input.remove();
+                    });
+                    stopCityIdInputs.forEach(function(input) {
+                        input.remove();
+                    });
+                    stopIsPickupInputs.forEach(function(input) {
+                        input.remove();
+                    });
+                    stopIsDropoffInputs.forEach(function(input) {
+                        input.remove();
+                    });
+                    stopPriceDeltaInputs.forEach(function(input) {
+                        input.remove();
+                    });
+
+                    // Add back only valid stops with sequential indices
+                    validStops.forEach(function(stop, newIndex) {
+                        const labelInput = document.createElement('input');
+                        labelInput.type = 'text';
+                        labelInput.name = `stops[${newIndex}][label]`;
+                        labelInput.value = stop.label;
+                        labelInput.style.display = 'none';
+                        postRideForm.appendChild(labelInput);
+
+                        const cityIdInput = document.createElement('input');
+                        cityIdInput.type = 'hidden';
+                        cityIdInput.name = `stops[${newIndex}][city_id]`;
+                        cityIdInput.value = stop.cityId;
+                        postRideForm.appendChild(cityIdInput);
+
+                        const isPickupInput = document.createElement('input');
+                        isPickupInput.type = 'hidden';
+                        isPickupInput.name = `stops[${newIndex}][is_pickup]`;
+                        isPickupInput.value = stop.isPickup;
+                        postRideForm.appendChild(isPickupInput);
+
+                        const isDropoffInput = document.createElement('input');
+                        isDropoffInput.type = 'hidden';
+                        isDropoffInput.name = `stops[${newIndex}][is_dropoff]`;
+                        isDropoffInput.value = stop.isDropoff;
+                        postRideForm.appendChild(isDropoffInput);
+
+                        const priceDeltaInput = document.createElement('input');
+                        priceDeltaInput.type = 'hidden';
+                        priceDeltaInput.name = `stops[${newIndex}][price_delta_minor]`;
+                        priceDeltaInput.value = String(stop.priceDeltaMinor);
+                        postRideForm.appendChild(priceDeltaInput);
+                    });
+                });
+            }
+
+            // Hide field tooltip error when user clicks/focuses inside its parent container.
+            function hideTooltipInParent(eventTarget) {
+                if (!(eventTarget instanceof HTMLElement) || !postRideForm) return;
+                let node = eventTarget.closest('div, section, label');
+
+                // Walk up until form root and remove tooltips that belong to the current field
+                while (node && node !== postRideForm) {
+                    // Check for tooltip as a direct child
+                    const tooltipInChildren = Array.from(node.children).find((child) =>
+                        child instanceof HTMLElement && child.classList.contains('tooltip-error')
+                    );
+                    if (tooltipInChildren) {
+                        tooltipInChildren.remove();
+                        return;
+                    }
+
+                    // Check for tooltip as a sibling (for cases like terms checkbox where error is sibling of label)
+                    if (node.parentElement) {
+                        const tooltipSibling = Array.from(node.parentElement.children).find((sibling) =>
+                            sibling instanceof HTMLElement &&
+                            sibling.classList.contains('tooltip-error') &&
+                            sibling !== node
+                        );
+                        if (tooltipSibling) {
+                            tooltipSibling.remove();
+                            return;
+                        }
+                    }
+                    node = node.parentElement?.closest('div, section') || null;
+                }
+            }
+
+            if (postRideForm) {
+                postRideForm.addEventListener('click', function(event) {
+                    hideTooltipInParent(event.target);
+                });
+                postRideForm.addEventListener('focusin', function(event) {
+                    hideTooltipInParent(event.target);
+                });
+            }
+
+            // Initialize departure date/time pickers. according to 'America/New_York'
+            const departureDateInput = document.getElementById('departure-at-date');
+            const departureTimeInput = document.getElementById('departure-at-time');
+            const projectTimezone = @json($projectTimezone);
+            const projectToday = flatpickr.parseDate(@json($projectToday), 'Y-m-d');
+            
+            if (typeof flatpickr !== 'undefined') {
+                if (departureDateInput) {
+                    flatpickr(departureDateInput, {
+                        dateFormat: 'F j, Y',
+                        minDate: projectToday,
+                        disableMobile: true,
+                    });
+                }
+
+                if (departureTimeInput) {
+                    const departureTimePicker = flatpickr(departureTimeInput, {
+                        enableTime: true,
+                        noCalendar: true,
+                        dateFormat: 'H:i', // 24-hour format for backend (stored value)
+                        altInput: true,
+                        altFormat: 'H:i', // Display 24-hour in the time area
+                        time_24hr: false, // Show 24-hour in picker to match display
+                        disableMobile: true,
+                        clickOpens: false, // We handle open/close so second click on time area closes
+                    });
+
+                    // show/hide timepicker when click on here
+                    var timeWrapper = departureTimeInput.closest('.relative') || departureTimeInput.parentElement;
+                    if (timeWrapper) {
+                        timeWrapper.addEventListener('click', function(e) {
+                            if (e.target.closest('.flatpickr-calendar')) return;
+                            if (!departureTimeInput._flatpickr) return;
+                            if (departureTimePicker.isOpen) {
+                                departureTimePicker.close();
+                                e.stopPropagation();
+                                e.preventDefault();
+                                e.stopImmediatePropagation();
+                                return;
+                            }
+                        }, true);
+                        timeWrapper.addEventListener('click', function(e) {
+                            if (e.target.closest('.flatpickr-calendar')) return;
+                            if (!departureTimeInput._flatpickr) return;
+                            if (!departureTimeInput._flatpickr.input.value) {
+                                const projectTime = getCurrentProjectTime();
+                                const [hours, minutes] = projectTime.split(':');
+                                const date = new Date();
+                                date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                                departureTimeInput._flatpickr.setDate(date, true);
+                            }
+                            departureTimePicker.open();
+                        }, false);
+                    } else {
+                        departureTimeInput.addEventListener('click', function() {
+                            if (!departureTimeInput._flatpickr) return;
+                            if (departureTimePicker.isOpen) { departureTimePicker.close(); return; }
+                            if (!departureTimeInput._flatpickr.input.value) {
+                                const projectTime = getCurrentProjectTime();
+                                const [hours, minutes] = projectTime.split(':');
+                                const date = new Date();
+                                date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                                departureTimeInput._flatpickr.setDate(date, true);
+                            }
+                            departureTimePicker.open();
+                        });
+                    }
+                }
+
+            }
+
+            function getCurrentProjectTime() {
+                const formatter = new Intl.DateTimeFormat('en-GB', {
+                    timeZone: projectTimezone,
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hourCycle: 'h23',
+                });
+                const parts = formatter.formatToParts(new Date());
+                const hours = parts.find((part) => part.type === 'hour')?.value ?? '00';
+                const minutes = parts.find((part) => part.type === 'minute')?.value ?? '00';
+
+                return `${hours}:${minutes}`;
+            }
+
+            // Client-side image preview for "add new vehicle" upload.
+            const vehicleImageInput = document.getElementById('dropzone-file');
+            const vehicleImagePreview = document.getElementById('px-vehicle-image-preview');
+            if (vehicleImageInput && vehicleImagePreview) {
+                vehicleImageInput.addEventListener('change', function(event) {
+                    const file = event.target.files && event.target.files[0];
+                    if (!file) {
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        vehicleImagePreview.src = e.target?.result || '';
+                        vehicleImagePreview.classList.remove('w-12', 'h-12');
+                        vehicleImagePreview.classList.add('w-40', 'h-40');
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            // Toggle Pink Ride and Extra+ Ride disclaimers based on checkbox state
+            function updateRideDisclaimers() {
+                const pinkRideCheckbox = document.querySelector('input[data-ride-option-code="pink_rides"]');
+                const extraCareCheckbox = document.querySelector('input[data-ride-option-code="extra_care_rides"]');
+                const pinkRideDisclaimer = document.getElementById('pink-ride-disclaimer');
+                const extraCareDisclaimer = document.getElementById('extra-care-ride-disclaimer');
+                const extraCareNumber = document.getElementById('extra-care-disclaimer-number');
+
+
+                if (!pinkRideCheckbox || !extraCareCheckbox || !pinkRideDisclaimer || !extraCareDisclaimer || !
+                    extraCareNumber) {
+                    return;
+                }
+
+                const isPinkRideChecked = pinkRideCheckbox.checked;
+                const isExtraCareChecked = extraCareCheckbox.checked;
+
+                toggleElementHidden(pinkRideDisclaimer, !isPinkRideChecked);
+                toggleElementHidden(extraCareDisclaimer, !isExtraCareChecked);
+
+                // Update numbering: if pink ride is checked, extra+ is 6, otherwise 5
+                if (isExtraCareChecked) {
+                    extraCareNumber.textContent = isPinkRideChecked ? '6.' : '5.';
+                }
+            }
+
+            
+            // Add event listeners to feature option checkboxes
+            document.addEventListener('change', function(event) {
+                const target = event.target;
+                if (target && target.hasAttribute('data-ride-option-code')) {
+                    const optionCode = target.getAttribute('data-ride-option-code');
+                    
+                    if (optionCode === 'pink_rides' || optionCode === 'extra_care_rides') {
+                        updateRideDisclaimers();
+                    }
+                }
+            });
+
+            // Initialize disclaimers on page load
+            updateRideDisclaimers();
+
+            // Handle server-side validation error (from validation redirect)
+            @if (session('validation_error') && session('validation_heading'))
+                const validationError = {
+                    message: @json(session('validation_error')),
+                    heading: @json(session('validation_heading', 'Validation Failed'))
+                };
+                if (validationError.message && validationError.heading) {
+                    showPxValidationErrorModal(validationError.heading, validationError.message);
+                }
+            @endif
+
+            // Handle server-side price error (from validation redirect)
+            @if (session('error') && session('max_price_per_seat'))
+                const serverError = {
+                    message: @json(session('error')),
+                    heading: @json(session('heading', 'Price Limit Exceeded')),
+                    maxPricePerSeat: parseFloat(@json(session('max_price_per_seat')))
+                };
+                if (serverError.message && serverError.maxPricePerSeat) {
+                    // Show the error modal first (this sets default content)
+                    showPxPriceErrorModal(serverError.maxPricePerSeat);
+
+                    // Then update with server-side message and heading
+                    const errorHeading = document.getElementById('pxPriceErrorHeading');
+                    if (errorHeading && serverError.heading) {
+                        errorHeading.textContent = serverError.heading;
+                    }
+                    const errorPara1 = document.getElementById('pxPriceErrorParagraph1');
+                    if (errorPara1 && serverError.message) {
+                        errorPara1.textContent = serverError.message;
+                    }
+                }
+            @endif
+
+            // Handle server-side price warning (from validation redirect)
+            @if (session('price_warning'))
+                const priceWarning = @json(session('price_warning'));
+                if (priceWarning && priceWarning.message) {
+                    showPxPriceWarningModal(function() {
+                        // User clicked "Keep Current Price" - submit the form with bypass flag
+                        const bypassInput = document.createElement('input');
+                        bypassInput.type = 'hidden';
+                        bypassInput.name = 'bypass_price_validation';
+                        bypassInput.value = '1';
+                        postRideForm.appendChild(bypassInput);
+
+                        // Remove the event listener to prevent re-validation
+                        const newForm = postRideForm.cloneNode(true);
+                        postRideForm.parentNode.replaceChild(newForm, postRideForm);
+                        // Submit the form
+                        newForm.submit();
+                    });
+                }
+            @endif
+
+            // Scroll to first error on page load if validation errors exist
+            const firstError = document.querySelector('.tooltip-error');
+            if (firstError) {
+                // Find the parent container that contains the error (usually a form field wrapper)
+                let errorContainer = firstError.closest('div');
+
+                // Walk up to find a meaningful container (section or field wrapper)
+                while (errorContainer && errorContainer !== postRideForm) {
+                    // Check if this container is a section or has a meaningful structure
+                    if (errorContainer.tagName === 'SECTION' ||
+                        errorContainer.querySelector('input, select, textarea, label')) {
+                        break;
+                    }
+                    errorContainer = errorContainer.parentElement;
+                }
+
+                // Scroll to the error container or the error itself
+                const scrollTarget = errorContainer || firstError;
+                scrollTarget.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+
         });
-        if ($wrappers.length > 0) $wrappers.addClass('hidden');
-    }
 
-    const inputs = document.querySelectorAll('input, textarea');
-    inputs.forEach(input => {
-        input.addEventListener('input', hideTooltip); // no parameter on input typing
-    });
+        // Cost-sharing cap validation constants
+        const ERROR_TRIGGERING_CAP = 0.72; // $0.72 per km - BLOCK if exceeded
+        const SOFT_WARNING_CAP = 0.66; // $0.66 per km - WARN but ALLOW
 
-    const labels = document.querySelectorAll('label');
-    labels.forEach(input => {
-        input.addEventListener('click', function(e) {
-            hideTooltip.call(this, 'label'); // pass 'testing' on label click
-        });
-    });
+        // Store distance globally when available (from Google API calculation)
+        window.pxRideDistanceKm = null;
+        let lastPxPriceValidationInput = null;
+        const acknowledgedPxWarningSignatures = new Set();
 
-    function closeModal() {
-        // Hide all modals
-        document.querySelectorAll('.relative.z-50').forEach(modal => {
-            modal.style.display = 'none';
-        });
+        function setModalVisibility(modalId, isVisible) {
+            const modal = document.getElementById(modalId);
+            if (!modal) {
+                return null;
+            }
 
-        // Also remove any session messages from the URL
-        if (window.history.replaceState) {
-            const cleanUrl = window.location.href.split('?')[0];
-            window.history.replaceState({}, document.title, cleanUrl);
+            modal.classList.toggle('hidden', !isVisible);
+            modal.style.display = isVisible ? 'block' : 'none';
+            return modal;
         }
-    }
-    document.addEventListener('click', function(event) {
-        if (event.target.classList.contains('fixed') && event.target.classList.contains('inset-0')) {
-            closeModal();
+
+        function openModalById(modalId) {
+            return setModalVisibility(modalId, true);
         }
-    });
 
-    // Close modal with Escape key
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            closeModal();
+        function closeModalById(modalId) {
+            return setModalVisibility(modalId, false);
         }
-    });
 
-    function scrollToFirstError() {
-        const errorInner = document.querySelectorAll('.tooltip-error');
-        const wrappers = Array.from(errorInner).map(el => el.parentElement).filter(Boolean);
+        function setElementText(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = value;
+            }
+        }
 
-        let firstVisible = null;
-        wrappers.forEach(el => {
-            if (firstVisible || !el) return;
-            if (el.classList.contains('hidden')) return;
-            const rect = el.getBoundingClientRect();
-            if (rect.width > 0 && rect.height > 0) firstVisible = el;
-        });
+        function toggleElementHidden(element, isHidden) {
+            if (element) {
+                element.classList.toggle('hidden', isHidden);
+            }
+        }
 
-        if (firstVisible) {
-            firstVisible.scrollIntoView({
+        function focusPxPriceInput(targetInput = null) {
+            const priceInput = targetInput instanceof HTMLElement ? targetInput : document.getElementById(
+                'px-price-minor-input');
+            if (!priceInput) {
+                return;
+            }
+
+            priceInput.scrollIntoView({
                 behavior: 'smooth',
                 block: 'center'
             });
-            const rel = firstVisible.closest('.relative');
-            const relatedInput = rel ? rel.querySelector('input, select, textarea') : firstVisible
-                .previousElementSibling?.querySelector('input, select, textarea');
-            if (relatedInput) relatedInput.focus();
+            setTimeout(() => {
+                priceInput.focus();
+                priceInput.select();
+            }, 300);
         }
-    }
 
-    // Add a small delay to ensure dynamic content is loaded
-    document.addEventListener('DOMContentLoaded', function() {
-        @if ($errors->any() || session('error'))
-            setTimeout(scrollToFirstError, 300);
-        @endif
-    });
+        // Function to validate price per seat
+        // Formula: (Distance × Cap) ÷ Seats = Max price per seat
+        function validatePxPricePerSeat(priceMinor, distanceKm, seats) {
+            if (!priceMinor || !distanceKm || !seats || distanceKm <= 0 || priceMinor <= 0 || seats <= 0) {
+                console.log('PX Price validation skipped - missing data:', {
+                    priceMinor,
+                    distanceKm,
+                    seats
+                });
+                return {
+                    valid: true,
+                    type: null
+                };
+            }
 
-    // Cost-sharing cap validation constants
-    const ERROR_TRIGGERING_CAP = 0.72; // $0.72 per km - BLOCK if exceeded
-    const SOFT_WARNING_CAP = 0.66; // $0.66 per km - WARN but ALLOW
+            // Convert price from minor units (cents) to major units (dollars)
+            const pricePerSeat = parseFloat(priceMinor) / 100;
+            const distance = parseFloat(distanceKm);
+            const numSeats = parseInt(seats);
 
-    // Store distance globally when fetched
-    window.rideDistance = null;
+            // Calculate max allowed price per seat using Error-Triggering Cap: $0.72/km
+            const maxPricePerSeat = (distance * ERROR_TRIGGERING_CAP) / numSeats;
 
-    // Function to validate price per seat
-    // Formula: (Distance × Cap) ÷ Seats = Max price per seat
-    function validatePricePerSeat(price, distance, seats) {
-        if (!price || !distance || !seats || distance <= 0 || price <= 0 || seats <= 0) {
-            console.log('Validation skipped - missing data:', {
-                price,
-                distance,
-                seats
+            // Calculate soft warning price per seat: $0.66/km
+            const softWarningPricePerSeat = (distance * SOFT_WARNING_CAP) / numSeats;
+
+            console.log('PX Price validation calculations:', {
+                pricePerSeat: pricePerSeat,
+                distanceKm: distance,
+                numSeats: numSeats,
+                maxPricePerSeat: maxPricePerSeat,
+                softWarningPricePerSeat: softWarningPricePerSeat,
+                exceedsMax: pricePerSeat > maxPricePerSeat,
+                exceedsSoftWarning: pricePerSeat > softWarningPricePerSeat
             });
+
+            // Error-Triggering Cap: $0.72 per km - BLOCK if exceeded
+            if (pricePerSeat > maxPricePerSeat) {
+                console.log('PX ERROR CAP TRIGGERED');
+                return {
+                    valid: false,
+                    type: 'error',
+                    maxPricePerSeat: maxPricePerSeat.toFixed(2)
+                };
+            }
+
+            // Soft Warning Cap: $0.66 per km - WARN but ALLOW
+            if (pricePerSeat > softWarningPricePerSeat) {
+                console.log('PX SOFT WARNING CAP TRIGGERED');
+                return {
+                    valid: true,
+                    type: 'warning',
+                    softWarningPrice: softWarningPricePerSeat.toFixed(2)
+                };
+            }
+
+            console.log('PX No warning or error - price is within limits');
             return {
                 valid: true,
                 type: null
             };
         }
 
-        const pricePerSeat = parseFloat(price);
-        const distanceKm = parseFloat(distance);
-        const numSeats = parseInt(seats);
+        function buildPxPriceValidationContext(priceMinor, seatsTotal, distanceMeters, routeLabel) {
+            const parsedDistanceMeters = Number.parseInt(distanceMeters || '0', 10) || 0;
 
-        // Calculate max allowed price per seat using Error-Triggering Cap: $0.72/km
-        const maxPricePerSeat = (distanceKm * ERROR_TRIGGERING_CAP) / numSeats;
-
-        // Calculate soft warning price per seat: $0.66/km
-        const softWarningPricePerSeat = (distanceKm * SOFT_WARNING_CAP) / numSeats;
-
-        console.log('Price validation calculations:', {
-            pricePerSeat: pricePerSeat,
-            distanceKm: distanceKm,
-            numSeats: numSeats,
-            maxPricePerSeat: maxPricePerSeat,
-            softWarningPricePerSeat: softWarningPricePerSeat,
-            exceedsMax: pricePerSeat > maxPricePerSeat,
-            exceedsSoftWarning: pricePerSeat > softWarningPricePerSeat
-        });
-
-        // Error-Triggering Cap: $0.72 per km - BLOCK if exceeded
-        if (pricePerSeat > maxPricePerSeat) {
-            console.log('ERROR CAP TRIGGERED');
             return {
-                valid: false,
-                type: 'error',
-                maxPricePerSeat: maxPricePerSeat.toFixed(2)
+                priceMinor: Number.isNaN(priceMinor) ? 0 : priceMinor,
+                seatsTotal: Number.isNaN(seatsTotal) ? 0 : seatsTotal,
+                distanceKm: parsedDistanceMeters > 0 ? parsedDistanceMeters / 1000 : null,
+                routeLabel,
             };
         }
 
-        // Soft Warning Cap: $0.66 per km - WARN but ALLOW
-        // Check if price is ABOVE (greater than) the soft warning cap
-        // Note: If price equals soft warning, no warning is shown (user requirement: "above")
-        if (pricePerSeat > softWarningPricePerSeat) {
-            console.log('SOFT WARNING CAP TRIGGERED - Price exceeds soft warning');
-            console.log('Price per seat:', pricePerSeat, '> Soft warning:', softWarningPricePerSeat);
-            return {
-                valid: true,
-                type: 'warning',
-                softWarningPrice: softWarningPricePerSeat.toFixed(2)
-            };
+        function getCurrentPxPriceValidationContext(sourceInput = null) {
+            const selectedSeatsInput = document.querySelector('input[name="seats_total"]:checked');
+            const seatsTotal = selectedSeatsInput ? parseInt(selectedSeatsInput.value || '0', 10) : 0;
+
+            if (sourceInput instanceof HTMLInputElement && sourceInput.classList.contains('px-segment-price-input')) {
+                const distanceMeters = Number.parseInt(sourceInput.getAttribute('data-distance-meters') || '0', 10) || 0;
+                const routeLabel = sourceInput.parentElement?.querySelector('label')?.textContent?.trim() || 'this segment';
+                const normalizedPrice = (sourceInput.value ?? '').toString().trim().replace(',', '.');
+                const parsedPrice = parseFloat(normalizedPrice);
+                const priceMinor = Number.isFinite(parsedPrice) && parsedPrice >= 0 ? Math.round(parsedPrice * 100) : 0;
+
+                return buildPxPriceValidationContext(
+                    priceMinor,
+                    seatsTotal,
+                    distanceMeters,
+                    routeLabel
+                );
+            }
+
+            const priceMinorInput = document.getElementById('px-price-minor-input');
+            const priceMinorHiddenInput = document.getElementById('px-price-minor-hidden');
+            const distanceMetersInput = document.getElementById('px-distance-meters-input');
+            const priceMinor = priceMinorHiddenInput && priceMinorHiddenInput.name === 'price_minor' ?
+                parseInt(priceMinorHiddenInput.value || '0', 10) :
+                (priceMinorInput ? Math.round((parseFloat(priceMinorInput.value || '0') || 0) * 100) : 0);
+
+            let distanceMeters = 0;
+            if (distanceMetersInput && distanceMetersInput.value) {
+                distanceMeters = parseInt(distanceMetersInput.value || '0', 10) || 0;
+            } else if (window.pxRideDistanceKm) {
+                distanceMeters = Math.round((parseFloat(window.pxRideDistanceKm) || 0) * 1000);
+            }
+
+            return buildPxPriceValidationContext(priceMinor, seatsTotal, distanceMeters, 'this trip');
         }
 
-        console.log('No warning or error - price is within limits');
-        return {
-            valid: true,
-            type: null
-        };
-    }
+        function maybeShowPxLivePriceAlert(force = false, sourceInput = null) {
+            lastPxPriceValidationInput = sourceInput instanceof HTMLElement ? sourceInput : document.getElementById(
+                'px-price-minor-input');
+            const {
+                priceMinor,
+                seatsTotal,
+                distanceKm,
+                routeLabel
+            } = getCurrentPxPriceValidationContext(sourceInput);
 
-    var priceErrorParagraph1 = @json(optional($postRidePage)->carpool_regulation_limit_message ?? 'To comply with Canadian and Quebec carpooling regulations, the total amount collected for a trip cannot exceed the official 2026 reimbursement rate of $0.72/km.');
-    var priceErrorParagraph2Template = @json(optional($postRidePage)->max_price_per_seat_message ?? 'The maximum allowed for this trip is $:max_per_seat per seat.');
-    var priceErrorParagraph3 = @json(optional($postRidePage)->non_commercial_carpool_requirement_message ?? 'This limit is mandatory to ensure your ride is classified as a non-commercial carpool, protecting your insurance coverage and maintaining the cost-sharing status of your contributions.');
-
-    var priceWarningParagraph1 = @json(optional($postRidePage)->price_above_reimbursement_warning ?? 'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Québec.');
-    var priceWarningParagraph2 = @json(optional($postRidePage)->price_reduction_suggestion_message ?? 'While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.');
-
-    // Function to show error modal (Price Limit Exceeded)
-    function showPriceErrorModal(maxPricePerSeat) {
-        const modal = document.getElementById('priceErrorModal');
-        if (modal) {
-            document.getElementById('priceErrorParagraph1').textContent = priceErrorParagraph1;
-            document.getElementById('priceErrorParagraph2').textContent =
-                (priceErrorParagraph2Template || '').replace(/:max_per_seat/g, maxPricePerSeat);
-            document.getElementById('priceErrorParagraph3').textContent = priceErrorParagraph3;
-
-            modal.classList.remove('hidden');
-            modal.style.display = 'block';
-        }
-    }
-
-    // Function to show warning modal (Recommended Contribution Limit)
-    function showPriceWarningModal(callback) {
-        console.log('showPriceWarningModal called');
-        const modal = document.getElementById('priceWarningModal');
-        if (!modal) {
-            console.error('Price warning modal not found!');
-            return;
-        }
-
-        // Set the two paragraphs as specified
-        const para1 = document.getElementById('priceWarningParagraph1');
-        const para2 = document.getElementById('priceWarningParagraph2');
-
-        if (para1) {
-            para1.textContent = priceWarningParagraph1;
-                
-        }
-        if (para2) {
-            para2.textContent = priceWarningParagraph2;
-        }
-
-        // Show the modal - ensure it's visible
-        // Remove hidden class and set display with !important to override Tailwind CSS
-        modal.classList.remove('hidden');
-        modal.style.setProperty('display', 'block', 'important');
-        modal.style.setProperty('visibility', 'visible', 'important');
-        modal.style.setProperty('opacity', '1', 'important');
-        modal.style.setProperty('z-index', '50', 'important');
-
-        console.log('Modal should be visible now', {
-            hasClassHidden: modal.classList.contains('hidden'),
-            display: modal.style.display,
-            computedDisplay: window.getComputedStyle(modal).display,
-            visibility: window.getComputedStyle(modal).visibility
-        });
-
-        // Wire "Keep Current Price" button: set onclick directly so it works every time (cloning would drop the handler on reopen)
-        const continueBtn = document.getElementById('priceWarningContinue');
-        if (continueBtn) {
-            continueBtn.onclick = function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                modal.classList.add('hidden');
-                modal.style.setProperty('display', 'none', 'important');
-                if (typeof callback === 'function') {
-                    callback();
-                }
-            };
-        } else {
-            console.error('Continue button not found!');
-        }
-    }
-
-    // Get the active price input (single or full-route in segment mode)
-    function getActivePriceInput() {
-        const dynamicBlock = document.getElementById('stops-segment-prices-dynamic');
-        const isSegmentMode = dynamicBlock && dynamicBlock.offsetParent !== null && dynamicBlock.style.display !== 'none';
-        if (isSegmentMode) {
-            return document.getElementById('priceData0DynamicInput');
-        }
-        return document.getElementById('priceData0');
-    }
-
-    // When modal was triggered by a segment (stop) price, focus that input on "Adjust Price"
-    window.lastSegmentPriceInputForModal = null;
-
-    // Function to adjust price (focus on price input field)
-    function adjustPriceFromError() {
-        const modal = document.getElementById('priceErrorModal');
-        if (modal) {
-            modal.classList.add('hidden');
-            modal.style.display = 'none';
-        }
-        const priceInput = window.lastSegmentPriceInputForModal || getActivePriceInput();
-        window.lastSegmentPriceInputForModal = null;
-        if (priceInput) {
-            priceInput.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            });
-            setTimeout(() => {
-                priceInput.focus();
-                priceInput.select();
-            }, 300);
-        }
-    }
-
-    // Function to adjust price from warning (focus on price input field)
-    // This should NOT submit the form - just close popup and focus on price field
-    function adjustPriceFromWarning() {
-        console.log('Adjust Price clicked - closing modal and focusing on price field (NOT submitting form)');
-        const modal = document.getElementById('priceWarningModal');
-        if (modal) {
-            modal.classList.add('hidden');
-            modal.style.display = 'none';
-        }
-        const priceInput = window.lastSegmentPriceInputForModal || getActivePriceInput();
-        window.lastSegmentPriceInputForModal = null;
-        if (priceInput) {
-            priceInput.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            });
-            setTimeout(() => {
-                priceInput.focus();
-                priceInput.select();
-            }, 300);
-        }
-        return false;
-    }
-
-    function closePriceErrorModal() {
-        const modal = document.getElementById('priceErrorModal');
-        if (modal) {
-            modal.classList.add('hidden');
-            modal.style.display = 'none';
-        }
-    }
-
-    function closePriceWarningModal() {
-        const modal = document.getElementById('priceWarningModal');
-        if (modal) {
-            modal.classList.add('hidden');
-            modal.style.display = 'none';
-        }
-    }
-
-    // Validate a single segment (stop) price against that segment's route distance; show error/warning popup if exceeded.
-    function runSegmentPriceValidationOnInput(segmentInputEl) {
-        if (!segmentInputEl || segmentInputEl.name !== 'price_spot_display[]') return;
-        const price = parseFloat(segmentInputEl.value);
-        if (!price || price <= 0) return;
-        const from = segmentInputEl.getAttribute('data-segment-from');
-        const to = segmentInputEl.getAttribute('data-segment-to');
-        if (!from || !to) return;
-        const seatsInput = document.querySelector('input[name="seats"]:checked');
-        const seats = seatsInput ? parseInt(seatsInput.value) : 0;
-        if (!seats || seats <= 0) return;
-
-        function doValidate(distanceKm) {
-            if (!distanceKm || distanceKm <= 0) return;
-            const validation = validatePricePerSeat(price, distanceKm, seats);
-            if (!validation.valid) {
-                window.lastSegmentPriceInputForModal = segmentInputEl;
-                showPriceErrorModal(validation.maxPricePerSeat);
+            if (!priceMinor || !seatsTotal || !distanceKm || distanceKm <= 0) {
+                lastPxPriceValidationSignature = null;
                 return;
             }
+
+            const validation = validatePxPricePerSeat(priceMinor, distanceKm, seatsTotal);
+
+            if (!validation.type) {
+                lastPxPriceValidationSignature = null;
+                return;
+            }
+
+            const signature = JSON.stringify({
+                type: validation.type,
+                routeLabel,
+                priceMinor,
+                seatsTotal,
+                distanceKm: Number(distanceKm).toFixed(2),
+                maxPricePerSeat: validation.maxPricePerSeat ?? null,
+                softWarningPrice: validation.softWarningPrice ?? null,
+            });
+
+            if (!force && lastPxPriceValidationSignature === signature) {
+                return;
+            }
+
+            if (validation.type === 'warning' && acknowledgedPxWarningSignatures.has(signature)) {
+                lastPxPriceValidationSignature = signature;
+                return;
+            }
+
+            lastPxPriceValidationSignature = signature;
+
+            if (!force) {
+                return;
+            }
+
+            if (validation.type === 'error') {
+                showPxPriceErrorModal(validation.maxPricePerSeat, routeLabel);
+                return;
+            }
+
             if (validation.type === 'warning') {
-                window.lastSegmentPriceInputForModal = segmentInputEl;
-                showPriceWarningModal(function() {
-                    closePriceWarningModal();
+                showPxPriceWarningModal(function() {
+                    closeModalById('pxPriceWarningModal');
+                }, routeLabel, validation.softWarningPrice);
+            }
+        }
+
+        function getPxSubmitValidationResult() {
+            const segmentInputs = Array.from(document.querySelectorAll('.px-segment-price-input'));
+            const contexts = [];
+
+            if (segmentInputs.length > 0 && priceSegmentsWrap && !priceSegmentsWrap.classList.contains('hidden')) {
+                segmentInputs.forEach((input) => {
+                    contexts.push(getCurrentPxPriceValidationContext(input));
                 });
-            }
-        }
-
-        const cachedDist = segmentInputEl.getAttribute('data-segment-distance');
-        if (cachedDist) {
-            const distanceKm = parseFloat(cachedDist);
-            doValidate(distanceKm);
-            return;
-        }
-        if (typeof $ === 'undefined') return;
-        $.ajax({
-            url: '{{ url("get-cities-distance") }}',
-            type: 'POST',
-            data: {
-                search: from,
-                searchData: to,
-                _token: '{{ csrf_token() }}'
-            },
-            dataType: 'json',
-            success: function(result) {
-                const distanceValue = result.distance || (result.data && result.data.distance) || null;
-                if (distanceValue && parseFloat(distanceValue) > 0) {
-                    const distanceKm = parseFloat(distanceValue);
-                    segmentInputEl.setAttribute('data-segment-distance', distanceKm);
-                    doValidate(distanceKm);
-                }
-            }
-        });
-    }
-
-    // Handle form submission errors
-    // Wait for DOM to be ready
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('post-ride-form') || document.querySelector(
-            'form[method="POST"]') || document.querySelector('form');
-        if (!form) {
-            console.error('Form not found!');
-            return;
-        }
-
-        // Prevent Enter key from submitting the form (allow Enter in textareas for new lines)
-        form.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
-                e.preventDefault();
-            }
-        });
-
-        // Prevent double submit: disable submit buttons on submit, re-enable only if validation fails
-        function disablePostRideSubmitButtons() {
-            form.querySelectorAll('.post-ride-submit-btn').forEach(function(btn) {
-                btn.disabled = true;
-            });
-        }
-
-        function enablePostRideSubmitButtons() {
-            form.querySelectorAll('.post-ride-submit-btn').forEach(function(btn) {
-                btn.disabled = false;
-            });
-        }
-
-        // When driver inputs an exceeded price, show the error or warning popup (Exceeds $0.72/km or $0.66–$0.72/km).
-        // In segment mode: validate segment total first; if none, validate full-route field. Otherwise single price.
-        function runPriceValidationOnInput() {
-            const dynamicBlock = document.getElementById('stops-segment-prices-dynamic');
-            const isSegmentMode = dynamicBlock && dynamicBlock.offsetParent !== null && dynamicBlock.style.display !== 'none';
-            const priceInput = document.getElementById('priceData0');
-            const dynamicPriceInput = document.getElementById('priceData0DynamicInput');
-            // In segment mode the full-route input gets id="priceData0", so resolve by class when needed
-            const fullRouteInput = dynamicPriceInput || (dynamicBlock ? dynamicBlock.querySelector('.full-route-price-input') : null) || priceInput;
-            let price = null;
-            if (isSegmentMode) {
-                const segmentTotalEl = document.getElementById('segment-total-price-input-dynamic');
-                let segmentTotal = 0;
-                if (segmentTotalEl && segmentTotalEl.value) {
-                    segmentTotal = parseFloat(segmentTotalEl.value) || 0;
-                }
-                if (segmentTotal <= 0 && dynamicBlock) {
-                    const segmentInputs = dynamicBlock.querySelectorAll('input[name="price_spot_display[]"]');
-                    segmentInputs.forEach(function(inp) {
-                        const v = parseFloat(inp.value);
-                        if (!isNaN(v)) segmentTotal += v;
-                    });
-                }
-                if (segmentTotal > 0) {
-                    price = segmentTotal;
-                } else if (fullRouteInput && fullRouteInput.value) {
-                    const fullRoutePrice = parseFloat(fullRouteInput.value);
-                    const seatsInput = document.querySelector('input[name="seats"]:checked');
-                    const seatsVal = seatsInput ? parseInt(seatsInput.value) : 0;
-                    price = (seatsVal > 0 && !isNaN(fullRoutePrice)) ? fullRoutePrice / seatsVal : null;
-                }
-            } else if (priceInput && priceInput.value) {
-                price = parseFloat(priceInput.value);
-            }
-            if (!price || price <= 0) return;
-            let distance = null;
-            const distSource = priceInput || fullRouteInput;
-            if (distSource && typeof $ !== 'undefined') {
-                distance = $(distSource).data('distance') || window.rideDistance;
             } else {
-                distance = window.rideDistance;
+                contexts.push(getCurrentPxPriceValidationContext());
             }
-            if (!distance || distance <= 0) {
-                const distanceInput = document.querySelector('input[name="distance"], input[id*="distance"]');
-                if (distanceInput && distanceInput.value) {
-                    distance = parseFloat(distanceInput.value);
+
+            let firstWarning = null;
+
+            for (const context of contexts) {
+                if (!context.priceMinor || !context.seatsTotal || !context.distanceKm || context.distanceKm <= 0) {
+                    continue;
                 }
-            }
-            const seatsInput = document.querySelector('input[name="seats"]:checked');
-            const seats = seatsInput ? parseInt(seatsInput.value) : 0;
-            if (!distance || distance <= 0 || !seats || seats <= 0) return;
-            const validation = validatePricePerSeat(price, distance, seats);
-            if (!validation.valid) {
-                if (window.lastSegmentPriceInputForModal !== undefined) window.lastSegmentPriceInputForModal = null;
-                showPriceErrorModal(validation.maxPricePerSeat);
-                return;
-            }
-            if (validation.type === 'warning') {
-                if (window.lastSegmentPriceInputForModal !== undefined) window.lastSegmentPriceInputForModal = null;
-                showPriceWarningModal(function() {
-                    closePriceWarningModal();
-                });
-            }
-        }
 
-        var priceValidationDebounce = null;
-        function schedulePriceValidationOnInput() {
-            if (priceValidationDebounce) clearTimeout(priceValidationDebounce);
-            priceValidationDebounce = setTimeout(runPriceValidationOnInput, 600);
-        }
+                const validation = validatePxPricePerSeat(
+                    context.priceMinor,
+                    context.distanceKm,
+                    context.seatsTotal
+                );
 
-        var segmentPriceValidationDebounce = null;
-        function scheduleSegmentPriceValidationOnInput(segmentInputEl) {
-            if (segmentPriceValidationDebounce) clearTimeout(segmentPriceValidationDebounce);
-            segmentPriceValidationDebounce = setTimeout(function() {
-                if (typeof runSegmentPriceValidationOnInput === 'function') runSegmentPriceValidationOnInput(segmentInputEl);
-            }, 600);
-        }
-
-        const priceInputEl = document.getElementById('priceData0');
-        if (priceInputEl) {
-            priceInputEl.addEventListener('input', schedulePriceValidationOnInput);
-            priceInputEl.addEventListener('change', runPriceValidationOnInput);
-        }
-        const dynamicPriceInputEl = document.getElementById('priceData0DynamicInput');
-        if (dynamicPriceInputEl) {
-            dynamicPriceInputEl.addEventListener('input', schedulePriceValidationOnInput);
-            dynamicPriceInputEl.addEventListener('change', runPriceValidationOnInput);
-        }
-
-        // Time-order check: show/hide stop time tooltips when origin or stop date/time changes (real-time).
-        function checkTimeOrderPostRide() {
-            function getDt(dateEl, timeEl) {
-                if (!dateEl || !timeEl) return null;
-                try {
-                    var d = null, t = null;
-                    if (dateEl._flatpickr && dateEl._flatpickr.selectedDates && dateEl._flatpickr.selectedDates[0]) {
-                        d = dateEl._flatpickr.selectedDates[0];
-                    } else if (dateEl.value && dateEl.value.trim()) {
-                        d = new Date(dateEl.value.trim());
-                        if (isNaN(d.getTime())) return null;
-                    } else return null;
-                    if (timeEl._flatpickr && timeEl._flatpickr.selectedDates && timeEl._flatpickr.selectedDates[0]) {
-                        t = timeEl._flatpickr.selectedDates[0];
-                    } else if (timeEl.value && timeEl.value.trim()) {
-                        var timeStr = timeEl.value.trim();
-                        var match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(am|pm)?$/i);
-                        var h = 0, m = 0;
-                        if (match) {
-                            h = parseInt(match[1], 10);
-                            m = parseInt(match[2], 10);
-                            if (match[3] && match[3].toLowerCase() === 'pm' && h < 12) h += 12;
-                            if (match[3] && match[3].toLowerCase() === 'am' && h === 12) h = 0;
-                        } else return null;
-                        t = new Date(d);
-                        t.setHours(h, m, 0, 0);
-                    } else return null;
-                    if (!(d instanceof Date) || !(t instanceof Date)) return null;
-                    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), t.getHours(), t.getMinutes(), 0);
-                } catch (err) { return null; }
-            }
-            var originDateEl = document.getElementById('dateInput');
-            var originTimeEl = document.getElementById('timeInput');
-            var originDt = getDt(originDateEl, originTimeEl);
-            var container = document.getElementById('stops-rows-container');
-            if (!container) return;
-            var stopRows = container.querySelectorAll('.stop-row');
-            stopRows.forEach(function(row) {
-                var dataIndex = row.getAttribute('data-stop-index');
-                var timeErr = dataIndex ? document.getElementById('stopTimeError_' + dataIndex) : null;
-                if (timeErr) timeErr.classList.add('hidden');
-            });
-            if (!originDt) return;
-            var prevDt = originDt;
-            stopRows.forEach(function(row) {
-                var cityInp = row.querySelector('input[name="stop_spot_display[]"]');
-                var cityVal = cityInp ? (cityInp.value || '').trim() : '';
-                if (!cityVal) return;
-                var dateInp = row.querySelector('input[name="stop_date[]"]');
-                var timeInp = row.querySelector('input[name="stop_time[]"]');
-                var stopDt = getDt(dateInp, timeInp);
-                if (stopDt !== null && stopDt < prevDt) {
-                    var dataIndex = row.getAttribute('data-stop-index');
-                    var timeErr = dataIndex ? document.getElementById('stopTimeError_' + dataIndex) : null;
-                    if (timeErr) {
-                        var te = timeErr.querySelector('.tooltip-error');
-                        if (te) te.textContent = prevDt === originDt ? 'Stop time cannot be before the origin departure time.' : 'Stop time cannot be before the previous stop time.';
-                        timeErr.classList.remove('hidden');
-                    }
-                } else if (stopDt !== null) {
-                    prevDt = stopDt;
+                if (!validation.valid) {
+                    return {
+                        type: 'error',
+                        routeLabel: context.routeLabel,
+                        maxPricePerSeat: validation.maxPricePerSeat,
+                    };
                 }
-            });
-        }
 
-        // When driver edits any segment (stop) price: update total, run full-total validation, and run per-segment validation (popup for individual route distance)
-        form.addEventListener('input', function(e) {
-            if (e.target && e.target.name === 'price_spot_display[]') {
-                if (typeof updateSegmentTotalPricePostRide === 'function') updateSegmentTotalPricePostRide();
-                schedulePriceValidationOnInput();
-                scheduleSegmentPriceValidationOnInput(e.target);
-            }
-            if (e.target && (e.target.classList.contains('full-route-price-input') || e.target.id === 'priceData0DynamicInput')) {
-                schedulePriceValidationOnInput();
-            }
-            if (e.target && (e.target.name === 'stop_date[]' || e.target.name === 'stop_time[]')) {
-                if (typeof checkTimeOrderPostRide === 'function') checkTimeOrderPostRide();
-            }
-            if (e.target && e.target.name === 'stop_pickup_dropoff[]') {
-                var id = e.target.id || '';
-                var idx = id.indexOf('stop_pickup_dropoff_') === 0 ? id.replace('stop_pickup_dropoff_', '') : '';
-                if (idx) {
-                    var errEl = document.getElementById('stopPickupDropoffError_' + idx);
-                    if (errEl) errEl.classList.add('hidden');
+                if (validation.type === 'warning' && firstWarning === null) {
+                    firstWarning = {
+                        type: 'warning',
+                        routeLabel: context.routeLabel,
+                        softWarningPrice: validation.softWarningPrice,
+                    };
                 }
             }
-        });
-        form.addEventListener('change', function(e) {
-            if (e.target && e.target.name === 'price_spot_display[]') {
-                if (typeof updateSegmentTotalPricePostRide === 'function') updateSegmentTotalPricePostRide();
-                runPriceValidationOnInput();
-                if (typeof runSegmentPriceValidationOnInput === 'function') runSegmentPriceValidationOnInput(e.target);
-            }
-            if (e.target && (e.target.classList.contains('full-route-price-input') || e.target.id === 'priceData0DynamicInput')) {
-                runPriceValidationOnInput();
-            }
-            if (e.target && (e.target.name === 'stop_date[]' || e.target.name === 'stop_time[]')) {
-                if (typeof checkTimeOrderPostRide === 'function') checkTimeOrderPostRide();
-            }
-            if (e.target && e.target.name === 'stop_pickup_dropoff[]') {
-                var id = e.target.id || '';
-                var idx = id.indexOf('stop_pickup_dropoff_') === 0 ? id.replace('stop_pickup_dropoff_', '') : '';
-                if (idx) {
-                    var errEl = document.getElementById('stopPickupDropoffError_' + idx);
-                    if (errEl) errEl.classList.add('hidden');
-                }
-            }
-        });
 
-        // Add our submit handler with capture phase to run first
-        form.addEventListener('submit', function(e) {
-            disablePostRideSubmitButtons();
-            try {
-                console.log('Form submit event triggered - starting validation');
-                var hasAnyValidationError = false;
-                var firstErrorElement = null;
-
-                // 1. Block submit if From/To tooltip errors are visible
-                var fromInputError = document.getElementById('fromInputError');
-                var toInputError = document.getElementById('toInputError');
-                if (fromInputError && !fromInputError.classList.contains('hidden')) {
-                    hasAnyValidationError = true;
-                    if (!firstErrorElement) firstErrorElement = document.getElementById('from_spot_0');
-                }
-                if (toInputError && !toInputError.classList.contains('hidden')) {
-                    hasAnyValidationError = true;
-                    if (!firstErrorElement) firstErrorElement = document.getElementById('to_spot_0');
-                }
-
-                // 3. Validate stop inputs
-                var stopsContainer = document.getElementById('stops-rows-container');
-                var stopInputs = stopsContainer ? stopsContainer.querySelectorAll(
-                    'input[name="stop_spot_display[]"]') : [];
-                var firstInvalidStop = null;
-                var stopInvalid = false;
-                stopInputs.forEach(function(inp) {
-                    var err = typeof getStopErrorElementPostRide === 'function' ?
-                        getStopErrorElementPostRide(inp) : null;
-                    if (err) err.classList.add('hidden');
-                    if (!inp.value || !inp.value.trim()) {
-                        stopInvalid = true;
-                        if (err) {
-                            var te = err.querySelector('.tooltip-error');
-                            if (te) te.textContent = 'Please enter or select a city.';
-                            err.classList.remove('hidden');
-                        }
-                        if (!firstInvalidStop) firstInvalidStop = inp;
-                    }
-                });
-                if (stopInvalid) {
-                    hasAnyValidationError = true;
-                    if (!firstErrorElement) firstErrorElement = firstInvalidStop;
-                }
-
-                // 3b. Validate stop date, time, and pickup/dropoff when stop city is filled
-                var stopRows = stopsContainer ? stopsContainer.querySelectorAll('.stop-row') : [];
-                stopRows.forEach(function(row) {
-                    var dataIndex = row.getAttribute('data-stop-index');
-                    var dateErr = dataIndex ? document.getElementById('stopDateError_' + dataIndex) : null;
-                    var timeErr = dataIndex ? document.getElementById('stopTimeError_' + dataIndex) : null;
-                    var pickupDropoffErr = dataIndex ? document.getElementById('stopPickupDropoffError_' + dataIndex) : null;
-                    if (dateErr) dateErr.classList.add('hidden');
-                    if (timeErr) timeErr.classList.add('hidden');
-                    if (pickupDropoffErr) pickupDropoffErr.classList.add('hidden');
-                });
-                stopRows.forEach(function(row) {
-                    var cityInp = row.querySelector('input[name="stop_spot_display[]"]');
-                    var dateInp = row.querySelector('input[name="stop_date[]"]');
-                    var timeInp = row.querySelector('input[name="stop_time[]"]');
-                    var pickupDropoffInp = row.querySelector('textarea[name="stop_pickup_dropoff[]"]');
-                    var cityVal = cityInp ? (cityInp.value || '').trim() : '';
-                    if (!cityVal) return;
-                    var dataIndex = row.getAttribute('data-stop-index');
-                    var dateErr = dataIndex ? document.getElementById('stopDateError_' + dataIndex) : null;
-                    var timeErr = dataIndex ? document.getElementById('stopTimeError_' + dataIndex) : null;
-                    var pickupDropoffErr = dataIndex ? document.getElementById('stopPickupDropoffError_' + dataIndex) : null;
-                    var dateVal = dateInp ? (dateInp.value || '').trim() : '';
-                    var timeVal = timeInp ? (timeInp.value || '').trim() : '';
-                    var pickupDropoffVal = pickupDropoffInp ? (pickupDropoffInp.value || '').trim() : '';
-                    if (!pickupDropoffVal) {
-                        hasAnyValidationError = true;
-                        if (pickupDropoffErr) {
-                            var pd = pickupDropoffErr.querySelector('.tooltip-error');
-                            if (pd) pd.textContent = 'Please enter pick up / drop off details.';
-                            pickupDropoffErr.classList.remove('hidden');
-                        }
-                        if (!firstErrorElement && pickupDropoffInp) firstErrorElement = pickupDropoffInp;
-                    }
-                    if (!dateVal) {
-                        hasAnyValidationError = true;
-                        if (dateErr) {
-                            var dt = dateErr.querySelector('.tooltip-error');
-                            if (dt) dt.textContent = 'Please enter the stop date.';
-                            dateErr.classList.remove('hidden');
-                        }
-                        if (!firstErrorElement && dateInp) firstErrorElement = dateInp;
-                    }
-                    if (!timeVal) {
-                        hasAnyValidationError = true;
-                        if (timeErr) {
-                            var tt = timeErr.querySelector('.tooltip-error');
-                            if (tt) tt.textContent = 'Please enter the stop time.';
-                            timeErr.classList.remove('hidden');
-                        }
-                        if (!firstErrorElement && timeInp) firstErrorElement = timeInp;
-                    }
-                });
-
-                // 3c. Time order: origin time <= first stop <= next stop <= ... (destination implied). Stop time cannot be before origin; each stop time cannot be before the previous.
-                var originDateEl = document.getElementById('dateInput');
-                var originTimeEl = document.getElementById('timeInput');
-                function getDateTimeFromInputs(dateEl, timeEl) {
-                    if (!dateEl || !timeEl) return null;
-                    try {
-                        var d = null, t = null;
-                        if (dateEl._flatpickr && dateEl._flatpickr.selectedDates && dateEl._flatpickr.selectedDates[0]) {
-                            d = dateEl._flatpickr.selectedDates[0];
-                        } else if (dateEl.value && dateEl.value.trim()) {
-                            d = new Date(dateEl.value.trim());
-                            if (isNaN(d.getTime())) return null;
-                        } else return null;
-                        if (timeEl._flatpickr && timeEl._flatpickr.selectedDates && timeEl._flatpickr.selectedDates[0]) {
-                            t = timeEl._flatpickr.selectedDates[0];
-                        } else if (timeEl.value && timeEl.value.trim()) {
-                            var timeStr = timeEl.value.trim();
-                            var match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(am|pm)?$/i);
-                            var h = 0, m = 0;
-                            if (match) {
-                                h = parseInt(match[1], 10);
-                                m = parseInt(match[2], 10);
-                                if (match[3] && match[3].toLowerCase() === 'pm' && h < 12) h += 12;
-                                if (match[3] && match[3].toLowerCase() === 'am' && h === 12) h = 0;
-                            } else return null;
-                                t = new Date(d);
-                                t.setHours(h, m, 0, 0);
-                        } else return null;
-                        if (!(d instanceof Date) || !(t instanceof Date)) return null;
-                        return new Date(d.getFullYear(), d.getMonth(), d.getDate(), t.getHours(), t.getMinutes(), 0);
-                    } catch (e) { return null; }
-                }
-                var originDt = getDateTimeFromInputs(originDateEl, originTimeEl);
-                if (originDt) {
-                    var prevDt = originDt;
-                    stopRows.forEach(function(row) {
-                        var cityInp = row.querySelector('input[name="stop_spot_display[]"]');
-                        var cityVal = cityInp ? (cityInp.value || '').trim() : '';
-                        if (!cityVal) return;
-                        var dateInp = row.querySelector('input[name="stop_date[]"]');
-                        var timeInp = row.querySelector('input[name="stop_time[]"]');
-                        var stopDt = getDateTimeFromInputs(dateInp, timeInp);
-                        if (stopDt !== null && stopDt < prevDt) {
-                            hasAnyValidationError = true;
-                            var dataIndex = row.getAttribute('data-stop-index');
-                            var timeErr = dataIndex ? document.getElementById('stopTimeError_' + dataIndex) : null;
-                            if (timeErr) {
-                                var te = timeErr.querySelector('.tooltip-error');
-                                if (te) te.textContent = prevDt === originDt ? 'Stop time cannot be before the origin departure time.' : 'Stop time cannot be before the previous stop time.';
-                                timeErr.classList.remove('hidden');
-                            }
-                            if (!firstErrorElement && timeInp) firstErrorElement = timeInp;
-                        } else if (stopDt !== null) {
-                            prevDt = stopDt;
-                        }
-                    });
-                }
-
-                // 4. Check HTML5 validation (date, time, seats, required fields, etc.) so we show all errors
-                // Use the first *visible* invalid element so we don't scroll to hidden sections (e.g. recurring_trips when Recurring is unchecked)
-                var firstHtml5Invalid = null;
-                var recurringDetails = document.getElementById('recurringtripDetails');
-                var invalidEls = this.querySelectorAll('input:invalid, select:invalid, textarea:invalid');
-                for (var i = 0; i < invalidEls.length; i++) {
-                    var el = invalidEls[i];
-                    if (el.offsetParent === null) continue;
-                    if (recurringDetails && recurringDetails.contains(el) && recurringDetails.style.display === 'none') continue;
-                    firstHtml5Invalid = el;
-                    break;
-                }
-                if (!firstHtml5Invalid) firstHtml5Invalid = this.querySelector(':invalid');
-                if (firstHtml5Invalid) hasAnyValidationError = true;
-                if (firstHtml5Invalid && !firstErrorElement) firstErrorElement = firstHtml5Invalid;
-
-                // 5. If any validation failed: prevent submit, scroll to first error, re-enable will happen in finally
-                if (hasAnyValidationError) {
-                    e.preventDefault();
-                    var scrollTarget = firstErrorElement || document.getElementById('from_spot_0');
-                    if (scrollTarget) {
-                        // When error is in a stop row, scroll to the row so the whole line and tooltips are visible
-                        var stopRow = scrollTarget.closest ? scrollTarget.closest('.stop-row') : null;
-                        var elementToScroll = (stopRow && scrollTarget.name && (
-                            scrollTarget.name === 'stop_spot_display[]' ||
-                            scrollTarget.name === 'stop_pickup_dropoff[]' ||
-                            scrollTarget.name === 'stop_date[]' ||
-                            scrollTarget.name === 'stop_time[]'
-                        )) ? stopRow : scrollTarget;
-                        elementToScroll.scrollIntoView({
-                            behavior: 'smooth',
-                            block: elementToScroll === document.getElementById(
-                                'post-ride-price-section') ? 'start' : 'center'
-                        });
-                        if (firstHtml5Invalid && scrollTarget === firstHtml5Invalid) scrollTarget.focus();
-                        else if (scrollTarget.focus) scrollTarget.focus();
-                    }
-                    return;
-                }
-
-                // Check if validation should be bypassed (user clicked "Keep Current Price")
-                const bypassInput = this.querySelector('input[name="bypass_price_validation"]');
-                if (bypassInput && bypassInput.value === '1') {
-                    console.log('Bypassing price validation - user chose to keep current price');
-                    return; // Allow form to submit normally
-                }
-
-                // First check HTML5 validation
-                const firstInvalid = this.querySelector(':invalid');
-                if (firstInvalid) {
-                    e.preventDefault();
-                    firstInvalid.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
-                    firstInvalid.focus();
-                    return;
-                }
-
-                // Validate price per seat before submission (same as runPriceValidationOnInput: single, full-route, or segment total)
-                const priceInput = document.getElementById('priceData0');
-                const dynamicBlockSubmit = document.getElementById('stops-segment-prices-dynamic');
-                const isSegmentModeSubmit = dynamicBlockSubmit && dynamicBlockSubmit.offsetParent !== null && dynamicBlockSubmit.style.display !== 'none';
-                const dynamicPriceInputSubmit = document.getElementById('priceData0DynamicInput');
-
-                let price = null;
-                if (isSegmentModeSubmit) {
-                    const segmentTotalEl = document.getElementById('segment-total-price-input-dynamic');
-                    let segmentTotal = 0;
-                    if (segmentTotalEl && segmentTotalEl.value) {
-                        segmentTotal = parseFloat(segmentTotalEl.value) || 0;
-                    }
-                    if (segmentTotal <= 0 && dynamicBlockSubmit) {
-                        dynamicBlockSubmit.querySelectorAll('input[name="price_spot_display[]"]').forEach(function(inp) {
-                            const v = parseFloat(inp.value);
-                            if (!isNaN(v)) segmentTotal += v;
-                        });
-                    }
-                    if (segmentTotal > 0) {
-                        price = segmentTotal;
-                    } else if (dynamicPriceInputSubmit && dynamicPriceInputSubmit.value) {
-                        const fullRoutePrice = parseFloat(dynamicPriceInputSubmit.value);
-                        const seatsForPrice = document.querySelector('input[name="seats"]:checked');
-                        const s = seatsForPrice ? parseInt(seatsForPrice.value) : 1;
-                        price = s > 0 ? fullRoutePrice / s : fullRoutePrice;
-                    }
-                }
-                if (price == null && priceInput && priceInput.value) {
-                    price = parseFloat(priceInput.value);
-                }
-
-                // Get distance - try from data attribute first, then global variable
-                let distance = null;
-                const distSource = priceInput || dynamicPriceInputSubmit;
-                if (distSource && typeof $ !== 'undefined') {
-                    distance = $(distSource).data('distance') || window.rideDistance;
-                } else {
-                    distance = window.rideDistance;
-                }
-                if (!distance || distance <= 0) {
-                    const distanceInput = document.querySelector(
-                        'input[name="distance"], input[id*="distance"]');
-                    if (distanceInput && distanceInput.value) {
-                        distance = parseFloat(distanceInput.value);
-                    }
-                }
-
-                // Get number of seats
-                let seats = null;
-                const seatsInput = document.querySelector('input[name="seats"]:checked');
-                if (seatsInput) {
-                    seats = parseInt(seatsInput.value);
-                }
-
-                // Debug logging
-                console.log('Form submission validation:', {
-                    price: price,
-                    distance: distance,
-                    seats: seats,
-                    isSegmentMode: isSegmentModeSubmit,
-                    hasPriceInput: !!priceInput,
-                    hasSeatsInput: !!seatsInput,
-                    windowRideDistance: window.rideDistance
-                });
-
-                // If we have price, distance, and seats, validate
-                if (price && price > 0 && distance && distance > 0 && seats && seats > 0) {
-                    const validation = validatePricePerSeat(price, distance, seats);
-
-                    console.log('Price validation result:', validation);
-
-                    if (!validation.valid) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        e.stopImmediatePropagation();
-                        showPriceErrorModal(validation.maxPricePerSeat);
-                        return false;
-                    }
-
-                    if (validation.type === 'warning') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        e.stopImmediatePropagation();
-                        console.log('Showing soft warning modal - validation type is warning');
-                        showPriceWarningModal(function() {
-                            // User clicked "Keep Current Price" - submit the form
-                            console.log('User chose to keep current price, submitting form');
-                            const formElement = document.getElementById('post-ride-form') ||
-                                document.querySelector('form');
-                            if (formElement) {
-                                // Create a hidden input to bypass validation on next submit
-                                const bypassInput = document.createElement('input');
-                                bypassInput.type = 'hidden';
-                                bypassInput.name = 'bypass_price_validation';
-                                bypassInput.value = '1';
-                                formElement.appendChild(bypassInput);
-                                // Remove the event listener to prevent re-validation
-                                const newForm = formElement.cloneNode(true);
-                                formElement.parentNode.replaceChild(newForm, formElement);
-                                // Submit the form
-                                newForm.submit();
-                            }
-                        });
-                        return false;
-                    }
-                } else {
-                    console.warn('Skipping price validation - missing required data:', {
-                        hasPrice: !!price && price > 0,
-                        hasDistance: !!distance && distance > 0,
-                        hasSeats: !!seats && seats > 0,
-                        priceValue: price,
-                        distanceValue: distance,
-                        seatsValue: seats
-                    });
-
-                    // If we have price and seats but no distance, we need to fetch it before allowing submission
-                    if (price && price > 0 && seats && seats > 0 && (!distance || distance <= 0)) {
-                        const fromInput = document.getElementById('from_spot_0') || document
-                            .querySelector('input[name="from"]');
-                        const toInput = document.getElementById('to_spot_0') || document.querySelector(
-                            'input[name="to"]');
-
-                        if (fromInput && toInput && fromInput.value && toInput.value) {
-                            console.log('Distance missing - attempting to fetch before validation');
-                            // Prevent form submission and fetch distance
-                            e.preventDefault();
-                            e.stopPropagation();
-
-                            // Fetch distance asynchronously
-                            if (typeof $ !== 'undefined') {
-                                $.ajax({
-                                    url: "{{ url('get-cities-distance') }}",
-                                    type: "POST",
-                                    data: {
-                                        search: fromInput.value,
-                                        searchData: toInput.value,
-                                        _token: '{{ csrf_token() }}'
-                                    },
-                                    dataType: 'json',
-                                    success: function(result) {
-                                        console.log('Distance fetch response:', result);
-                                        // Check if distance exists in response (could be result.distance or result.data.distance)
-                                        const distanceValue = result.distance || (result
-                                            .data && result.data.distance) || null;
-
-                                        if (distanceValue) {
-                                            const distanceKm = parseFloat(distanceValue);
-                                            if (!isNaN(distanceKm) && distanceKm > 0) {
-                                                window.rideDistance = distanceKm;
-                                                // Store in price input data attribute as well
-                                                if (priceInput && typeof $ !==
-                                                    'undefined') {
-                                                    $(priceInput).data('distance',
-                                                        distanceKm);
-                                                }
-                                                console.log(
-                                                    'Distance fetched successfully:',
-                                                    distanceKm, 'km');
-
-                                                // Now validate with the fetched distance
-                                                const validation = validatePricePerSeat(
-                                                    price, distanceKm, seats);
-                                                console.log(
-                                                    'Price validation result after fetching distance:',
-                                                    validation);
-
-                                                if (!validation.valid) {
-                                                    showPriceErrorModal(validation
-                                                        .maxPricePerSeat);
-                                                    return;
-                                                }
-
-                                                if (validation.type === 'warning') {
-                                                    showPriceWarningModal(function() {
-                                                        const formElement = document
-                                                            .getElementById(
-                                                                'post-ride-form') ||
-                                                            document.querySelector(
-                                                                'form');
-                                                        if (formElement) {
-                                                            const bypassInput =
-                                                                document
-                                                                .createElement(
-                                                                    'input');
-                                                            bypassInput.type =
-                                                                'hidden';
-                                                            bypassInput.name =
-                                                                'bypass_price_validation';
-                                                            bypassInput.value = '1';
-                                                            formElement.appendChild(
-                                                                bypassInput);
-                                                            formElement.submit();
-                                                        }
-                                                    });
-                                                    return;
-                                                }
-
-                                                // No warning/error - submit form
-                                                const formElement = document.getElementById(
-                                                        'post-ride-form') || document
-                                                    .querySelector('form');
-                                                if (formElement) {
-                                                    formElement.submit();
-                                                }
-                                            } else {
-                                                console.error(
-                                                    'Invalid distance value received:',
-                                                    distanceValue);
-                                                // If distance is invalid, let backend handle it
-                                                const formElement = document.getElementById(
-                                                        'post-ride-form') || document
-                                                    .querySelector('form');
-                                                if (formElement) {
-                                                    alert(formElement.value);
-                                                    formElement.submit();
-                                                }
-                                            }
-                                        } else {
-                                            // Distance might be 0 or missing - check the actual value
-                                            const distanceValue = result.distance || (result
-                                                .data && result.data.distance);
-                                            if (distanceValue === 0 || distanceValue ===
-                                                null || distanceValue === undefined) {
-                                                console.warn(
-                                                    'Distance is 0 or missing in API response. This might indicate invalid locations or API error.'
-                                                    );
-                                                console.log('Full API response:', result);
-                                            } else {
-                                                console.error(
-                                                    'Distance fetch failed - unexpected response structure. Response:',
-                                                    result);
-                                            }
-                                            // If we can't get valid distance, let backend handle validation
-                                            const formElement = document.getElementById(
-                                                    'post-ride-form') || document
-                                                .querySelector('form');
-                                            if (formElement) {
-                                                formElement.submit();
-                                            }
-                                        }
-                                    },
-                                    error: function(xhr, status, error) {
-                                        console.error('Error fetching distance:', error);
-                                        // On error, let backend handle validation
-                                        const formElement = document.getElementById(
-                                            'post-ride-form') || document.querySelector(
-                                            'form');
-                                        if (formElement) {
-                                            formElement.submit();
-                                        }
-                                    }
-                                });
-                            } else {
-                                console.error(
-                                    'jQuery not available - cannot fetch distance. Allowing backend validation.'
-                                    );
-                                // If jQuery is not available, let backend handle it
-                            }
-                            return false;
-                        }
-                    }
-                }
-
-            } finally {
-                if (e.defaultPrevented) enablePostRideSubmitButtons();
-            }
-        }, true); // Use capture phase to run before other handlers
-    });
-
-    function swapLocations() {
-        const fromValue = document.getElementById('from_spot_0').value;
-        const toValue = document.getElementById('to_spot_0').value;
-        document.getElementById('from_spot_0').value = toValue;
-        document.getElementById('to_spot_0').value = fromValue;
-        var tempPlace = selectedFromPlace;
-        selectedFromPlace = selectedToPlace;
-        selectedToPlace = tempPlace;
-    }
-
-    window.initPostRidePlaces = function() {
-        if (typeof google === 'undefined' || !google.maps || !google.maps.places) return;
-        geocoderPostRide = new google.maps.Geocoder();
-        var fromInput = document.getElementById('from_spot_0');
-        var toInput = document.getElementById('to_spot_0');
-        if (!fromInput || !toInput) return;
-        fromAutocompletePostRide = new google.maps.places.Autocomplete(fromInput, {
-            componentRestrictions: {
-                country: 'ca'
-            },
-            types: ['(cities)'],
-            fields: ['address_components', 'formatted_address', 'name', 'place_id']
-        });
-        toAutocompletePostRide = new google.maps.places.Autocomplete(toInput, {
-            componentRestrictions: {
-                country: 'ca'
-            },
-            types: ['(cities)'],
-            fields: ['address_components', 'formatted_address', 'name', 'place_id']
-        });
-        fromAutocompletePostRide.addListener('place_changed', function() {
-            var place = fromAutocompletePostRide.getPlace();
-            if (place.address_components && place.place_id) {
-                isSettingPlaceValuePostRide = true;
-                isSelectingFromDropdownPostRide = true;
-                var formatted = formatPlaceAddressPostRide(place);
-                selectedFromPlace = {
-                    place_id: place.place_id,
-                    formatted_address: formatted,
-                    value: formatted
-                };
-                fromInput.value = formatted;
-                var err = document.getElementById('fromInputError');
-                if (err) err.classList.add('hidden');
-                if (typeof fetchAndStoreDistance === 'function') setTimeout(function() {
-                    fetchAndStoreDistance(0);
-                }, 300);
-                if (typeof updateStopsOriginDestinationLabelsPostRide === 'function')
-                    updateStopsOriginDestinationLabelsPostRide();
-                setTimeout(function() {
-                    isSettingPlaceValuePostRide = false;
-                    isSelectingFromDropdownPostRide = false;
-                }, 100);
-            }
-        });
-        toAutocompletePostRide.addListener('place_changed', function() {
-            var place = toAutocompletePostRide.getPlace();
-            if (place.address_components && place.place_id) {
-                isSettingPlaceValuePostRide = true;
-                isSelectingFromDropdownPostRide = true;
-                var formatted = formatPlaceAddressPostRide(place);
-                selectedToPlace = {
-                    place_id: place.place_id,
-                    formatted_address: formatted,
-                    value: formatted
-                };
-                toInput.value = formatted;
-                var err = document.getElementById('toInputError');
-                if (err) err.classList.add('hidden');
-                if (typeof fetchAndStoreDistance === 'function') setTimeout(function() {
-                    fetchAndStoreDistance(0);
-                }, 300);
-                if (typeof updateStopsOriginDestinationLabelsPostRide === 'function')
-                    updateStopsOriginDestinationLabelsPostRide();
-                setTimeout(function() {
-                    isSettingPlaceValuePostRide = false;
-                    isSelectingFromDropdownPostRide = false;
-                }, 100);
-            }
-        });
-        fromInput.addEventListener('input', function() {
-            if (!isSettingPlaceValuePostRide && selectedFromPlace && this.value.trim() !== selectedFromPlace
-                .value) selectedFromPlace = null;
-            if (typeof updateStopsOriginDestinationLabelsPostRide === 'function')
-                updateStopsOriginDestinationLabelsPostRide();
-            if (this.value.trim() !== '') {
-                var el = document.getElementById('fromInputError');
-                if (el) el.classList.add('hidden');
-            }
-        });
-        toInput.addEventListener('input', function() {
-            if (!isSettingPlaceValuePostRide && selectedToPlace && this.value.trim() !== selectedToPlace
-                .value) selectedToPlace = null;
-            if (typeof updateStopsOriginDestinationLabelsPostRide === 'function')
-                updateStopsOriginDestinationLabelsPostRide();
-            if (this.value.trim() !== '') {
-                var el = document.getElementById('toInputError');
-                if (el) el.classList.add('hidden');
-            }
-        });
-        fromInput.addEventListener('focus', function() {
-            var el = document.getElementById('fromInputError');
-            if (el) el.classList.add('hidden');
-        });
-        toInput.addEventListener('focus', function() {
-            var el = document.getElementById('toInputError');
-            if (el) el.classList.add('hidden');
-        });
-        // Enter: resolve typed city (autocomplete logic like search_ride.blade.php)
-        fromInput.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                resolveTypedCityValuePostRide(this.value, 'from');
-            }
-        });
-        toInput.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                resolveTypedCityValuePostRide(this.value, 'to');
-            }
-        });
-        fromInput.addEventListener('blur', function() {
-            if (isSettingPlaceValuePostRide || isSelectingFromDropdownPostRide) return;
-            var self = this;
-            setTimeout(function() {
-                if (isSettingPlaceValuePostRide || isSelectingFromDropdownPostRide) return;
-                var currentValue = self.value.trim();
-                var fromInputError = document.getElementById('fromInputError');
-                if (currentValue !== '' && (!selectedFromPlace || currentValue !== selectedFromPlace
-                        .value)) {
-                    resolveTypedCityValuePostRide(currentValue, 'from').then(function() {
-                        currentValue = self.value.trim();
-                        if (currentValue === '' || !selectedFromPlace || currentValue !==
-                            selectedFromPlace.value) {
-                            selectedFromPlace = null;
-                            if (currentValue !== '' && fromInputError) {
-                                var te = fromInputError.querySelector('.tooltip-error');
-                                if (te) te.textContent = errorCityMissingPostRide;
-                                fromInputError.classList.remove('hidden');
-                            }
-                            // do not hide fromInputError here when user left the field (blur); only hide when they interact with From (input/focus/place_changed/Enter)
-                        } else {
-                            // resolved and valid: still do not hide on blur so tooltip does not disappear when driver types in another input
-                        }
-                        if (typeof fetchAndStoreDistance === 'function' && toInput &&
-                            toInput.value) fetchAndStoreDistance(0);
-                    });
-                } else {
-                    if (currentValue === '' || !selectedFromPlace || currentValue !==
-                            selectedFromPlace.value) {
-                        selectedFromPlace = null;
-                        if (currentValue !== '' && fromInputError) {
-                            var te = fromInputError.querySelector('.tooltip-error');
-                            if (te) te.textContent = currentValue === '' ?
-                                errorFromRequiredPostRide : errorCityMissingPostRide;
-                            fromInputError.classList.remove('hidden');
-                        }
-                    }
-                    // do not hide fromInputError on blur when user switched to another field
-                    if (typeof fetchAndStoreDistance === 'function' && toInput && toInput.value)
-                        fetchAndStoreDistance(0);
-                }
-            }, 200);
-        });
-        toInput.addEventListener('blur', function() {
-            if (isSettingPlaceValuePostRide || isSelectingFromDropdownPostRide) return;
-            var self = this;
-            setTimeout(function() {
-                if (isSettingPlaceValuePostRide || isSelectingFromDropdownPostRide) return;
-                var currentValue = self.value.trim();
-                var toInputError = document.getElementById('toInputError');
-                if (currentValue !== '' && (!selectedToPlace || currentValue !== selectedToPlace
-                        .value)) {
-                    resolveTypedCityValuePostRide(currentValue, 'to').then(function() {
-                        currentValue = self.value.trim();
-                        if (currentValue === '' || !selectedToPlace || currentValue !==
-                            selectedToPlace.value) {
-                            selectedToPlace = null;
-                            if (currentValue !== '' && toInputError) {
-                                var te = toInputError.querySelector('.tooltip-error');
-                                if (te) te.textContent = errorCityMissingPostRide;
-                                toInputError.classList.remove('hidden');
-                            }
-                            // do not hide toInputError on blur so tooltip does not disappear when driver types in another input
-                        } else {
-                            // resolved and valid: still do not hide on blur
-                        }
-                        if (typeof fetchAndStoreDistance === 'function' && fromInput &&
-                            fromInput.value) fetchAndStoreDistance(0);
-                    });
-                } else {
-                    if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace
-                        .value) {
-                        selectedToPlace = null;
-                        if (currentValue !== '' && toInputError) {
-                            var te = toInputError.querySelector('.tooltip-error');
-                            if (te) te.textContent = currentValue === '' ? errorToRequiredPostRide :
-                                errorCityMissingPostRide;
-                            toInputError.classList.remove('hidden');
-                        }
-                    }
-                    // do not hide toInputError on blur when user switched to another field
-                    if (typeof fetchAndStoreDistance === 'function' && fromInput && fromInput.value)
-                        fetchAndStoreDistance(0);
-                }
-            }, 200);
-        });
-        document.addEventListener('mousedown', function(e) {
-            if (e.target.closest('.pac-container')) isSelectingFromDropdownPostRide = true;
-            else setTimeout(function() {
-                isSelectingFromDropdownPostRide = false;
-            }, 50);
-        });
-
-        // Attach Google Places Autocomplete to all existing stop inputs (server-rendered rows)
-        document.querySelectorAll('input[name="stop_spot_display[]"]').forEach(function(inp) {
-            if (inp.id && inp.id.indexOf('stop_spot_') === 0 && !inp.getAttribute(
-                    'data-autocomplete-attached')) {
-                attachStopAutocompletePostRide(inp);
-            }
-        });
-    };
-
-    function getStopErrorElementPostRide(inputEl) {
-        if (!inputEl) return null;
-        var id = inputEl.id || '';
-        var dataIndex = inputEl.getAttribute('data-stop-index');
-        var index = dataIndex || (id.indexOf('stop_spot_') === 0 ? id.replace('stop_spot_', '') : null);
-        return index ? document.getElementById('stopInputError_' + index) : null;
-    }
-
-    function attachStopAutocompletePostRide(inputElement) {
-        if (!inputElement || typeof google === 'undefined' || !google.maps || !google.maps.places) return;
-        if (inputElement.getAttribute('data-autocomplete-attached')) return;
-        inputElement.setAttribute('data-autocomplete-attached', '1');
-        inputElement.setAttribute('autocomplete', 'off');
-        var autocomplete = new google.maps.places.Autocomplete(inputElement, {
-            componentRestrictions: {
-                country: 'ca'
-            },
-            types: ['(cities)'],
-            fields: ['address_components', 'formatted_address', 'name', 'place_id']
-        });
-        autocomplete.addListener('place_changed', function() {
-            var place = autocomplete.getPlace();
-            if (place.address_components && place.place_id) {
-                var formatted = typeof formatPlaceAddressPostRide === 'function' ? formatPlaceAddressPostRide(
-                    place) : (place.formatted_address || place.name || '');
-                if (formatted) inputElement.value = formatted;
-                var err = getStopErrorElementPostRide(inputElement);
-                if (err) err.classList.add('hidden');
-                if (typeof updateStopsOriginDestinationLabelsPostRide === 'function')
-                    updateStopsOriginDestinationLabelsPostRide();
-                if (typeof syncSegmentPricesUIPostRide === 'function') syncSegmentPricesUIPostRide();
-            }
-        });
-        inputElement.addEventListener('focus', function() {
-            var err = getStopErrorElementPostRide(inputElement);
-            if (err) err.classList.add('hidden');
-        });
-        // Enter: resolve typed city (autocomplete logic like search_ride.blade.php)
-        inputElement.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                if (typeof resolveTypedCityValueForStopPostRide === 'function') {
-                    resolveTypedCityValueForStopPostRide(this);
-                }
-            }
-        });
-        inputElement.addEventListener('blur', function() {
-            if (isSettingPlaceValuePostRide || isSelectingFromDropdownPostRide) return;
-            var self = this;
-            setTimeout(function() {
-                if (isSettingPlaceValuePostRide || isSelectingFromDropdownPostRide) return;
-                var currentValue = self.value.trim();
-                var err = getStopErrorElementPostRide(self);
-                if (currentValue === '') {
-                    if (err) err.classList.add('hidden');
-                    return;
-                }
-                if (typeof resolveTypedCityValueForStopPostRide === 'function') {
-                    resolveTypedCityValueForStopPostRide(self);
-                }
-            }, 200);
-        });
-    }
-
-    function formatPlaceAddressPostRide(place) {
-        var city = '',
-            province = '',
-            country = 'Canada';
-        if (!place.address_components) return place.name || place.formatted_address || '';
-        for (var i = 0; i < place.address_components.length; i++) {
-            var c = place.address_components[i],
-                t = c.types;
-            if (!city && (t.indexOf('locality') !== -1 || t.indexOf('administrative_area_level_2') !== -1)) city = c
-                .long_name;
-            if (!province && t.indexOf('administrative_area_level_1') !== -1) province = c.short_name;
-            if (t.indexOf('country') !== -1) country = c.long_name;
-        }
-        if (!city && place.name) {
-            var p = place.name.split(',').map(function(s) {
-                return s.trim();
-            });
-            if (p[0]) city = p[0];
-            if (p[1] && p[1].length <= 3 && !province) province = p[1].toUpperCase();
-        }
-        if (!city && place.formatted_address) {
-            var a = place.formatted_address.split(',').map(function(s) {
-                return s.trim();
-            });
-            if (a[0]) city = a[0];
-        }
-        var out = city || '';
-        if (province) out += (out ? ', ' : '') + province;
-        if (country && out) out += ', ' + country;
-        return out || place.name || place.formatted_address || '';
-    }
-
-    function resolveTypedCityValuePostRide(rawValue, target) {
-        var value = (rawValue || '').trim();
-        if (!value || !geocoderPostRide) return Promise.resolve(false);
-        var inputId = target === 'from' ? 'from_spot_0' : 'to_spot_0';
-        var input = document.getElementById(inputId);
-        return new Promise(function(resolve) {
-            geocoderPostRide.geocode({
-                address: value,
-                componentRestrictions: {
-                    country: 'CA'
-                }
-            }, function(response, status) {
-                if (status !== 'OK' || !response || !response.length) {
-                    resolve(false);
-                    return;
-                }
-                var result = null;
-                for (var i = 0; i < response.length; i++) {
-                    var item = response[i];
-                    if (item.address_components && item.address_components.some(function(comp) {
-                            return comp.types.indexOf('locality') !== -1 || comp.types.indexOf(
-                                'administrative_area_level_2') !== -1;
-                        })) {
-                        result = item;
-                        break;
-                    }
-                }
-                if (!result) {
-                    resolve(false);
-                    return;
-                }
-                var formatted = formatPlaceAddressPostRide(result);
-                if (!formatted) {
-                    resolve(false);
-                    return;
-                }
-                isSettingPlaceValuePostRide = true;
-                var sel = {
-                    place_id: result.place_id,
-                    formatted_address: formatted,
-                    value: formatted
-                };
-                if (target === 'from') selectedFromPlace = sel;
-                else selectedToPlace = sel;
-                if (input) input.value = formatted;
-                var err = document.getElementById(target === 'from' ? 'fromInputError' :
-                'toInputError');
-                if (err) err.classList.add('hidden');
-                setTimeout(function() {
-                    isSettingPlaceValuePostRide = false;
-                }, 100);
-                resolve(true);
-            });
-        });
-    }
-
-    function resolveTypedCityValueForStopPostRide(inputElement) {
-        var value = (inputElement && inputElement.value) ? inputElement.value.trim() : '';
-        var err = getStopErrorElementPostRide(inputElement);
-        if (!value) {
-            if (err) err.classList.add('hidden');
-            return Promise.resolve(true);
-        }
-        if (!geocoderPostRide) {
-            if (err) {
-                var te = err.querySelector('.tooltip-error');
-                if (te) te.textContent = typeof errorCityMissingPostRide !== 'undefined' ? errorCityMissingPostRide :
-                    'We could not find this city. Please double-check the spelling.';
-                err.classList.remove('hidden');
-            }
-            return Promise.resolve(false);
-        }
-        return new Promise(function(resolve) {
-            geocoderPostRide.geocode({
-                address: value,
-                componentRestrictions: {
-                    country: 'CA'
-                }
-            }, function(response, status) {
-                if (status !== 'OK' || !response || !response.length) {
-                    if (err) {
-                        var te = err.querySelector('.tooltip-error');
-                        if (te) te.textContent = typeof errorCityMissingPostRide !== 'undefined' ?
-                            errorCityMissingPostRide :
-                            'We could not find this city. Please double-check the spelling.';
-                        err.classList.remove('hidden');
-                    }
-                    resolve(false);
-                    return;
-                }
-                var result = null;
-                for (var i = 0; i < response.length; i++) {
-                    var item = response[i];
-                    if (item.address_components && item.address_components.some(function(comp) {
-                            return comp.types.indexOf('locality') !== -1 || comp.types.indexOf(
-                                'administrative_area_level_2') !== -1;
-                        })) {
-                        result = item;
-                        break;
-                    }
-                }
-                if (!result) {
-                    if (err) {
-                        var te = err.querySelector('.tooltip-error');
-                        if (te) te.textContent = typeof errorCityMissingPostRide !== 'undefined' ?
-                            errorCityMissingPostRide :
-                            'We could not find this city. Please double-check the spelling.';
-                        err.classList.remove('hidden');
-                    }
-                    resolve(false);
-                    return;
-                }
-                var formatted = formatPlaceAddressPostRide(result);
-                if (!formatted) {
-                    if (err) {
-                        var te = err.querySelector('.tooltip-error');
-                        if (te) te.textContent = typeof errorCityMissingPostRide !== 'undefined' ?
-                            errorCityMissingPostRide :
-                            'We could not find this city. Please double-check the spelling.';
-                        err.classList.remove('hidden');
-                    }
-                    resolve(false);
-                    return;
-                }
-                isSettingPlaceValuePostRide = true;
-                inputElement.value = formatted;
-                if (err) err.classList.add('hidden');
-                if (typeof updateStopsOriginDestinationLabelsPostRide === 'function')
-                    updateStopsOriginDestinationLabelsPostRide();
-                if (typeof syncSegmentPricesUIPostRide === 'function') syncSegmentPricesUIPostRide();
-                setTimeout(function() {
-                    isSettingPlaceValuePostRide = false;
-                }, 100);
-                resolve(true);
-            });
-        });
-    }
-
-    const dateInput = document.getElementById('dateInput');
-    const timeInput = document.getElementById('timeInput');
-
-    const projectOffset = {{ $projectOffset }};
-
-    function getCurrentProjectTime() {
-        const now = new Date();
-
-        // System ka UTC offset (minutes me)
-        const localOffset = now.getTimezoneOffset();
-
-        // Laravel se aane wala offset hours me hota hai, isko minutes me convert karein
-        const laravelOffsetMinutes = projectOffset * 60;
-
-        // Adjust UTC time Laravel ke time zone ke mutabiq
-        now.setMinutes(now.getMinutes() + localOffset + laravelOffsetMinutes);
-
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-
-        return `${hours}:${minutes}`;
-    }
-
-    // Retrieve old values from Laravel's old() function
-
-    var rideDate = "";
-    var rideTime = "";
-    if (('{{ $routeType ?? '' }}' == "repost" || '{{ $routeType ?? '' }}' == "copy") &&
-        {{ isset($ride) && $ride ? 'true' : 'false' }}) {
-        rideTime = '{{ optional($ride)->time ? \Carbon\Carbon::parse(optional($ride)->time)->format('H:i') : '' }}';
-    }
-    if ('{{ $routeType ?? '' }}' == "copy" && {{ isset($ride) && $ride ? 'true' : 'false' }}) {
-        @php
-            $copyDate = optional($ride)->date ?? (isset($ride->defaultRideDetail[0]) ? $ride->defaultRideDetail[0]->date : null);
-        @endphp
-        rideDate = '{{ $copyDate ? \Carbon\Carbon::parse($copyDate)->format('F d, Y') : '' }}';
-    }
-    const oldDate = (rideDate && rideDate !== "") ? rideDate : '{{ old('date') }}';
-    const oldTime = rideTime == "" ? '{{ old('time') }}' : rideTime;
-
-    // Initialize the date picker
-    flatpickr(dateInput, {
-        dateFormat: 'F d, Y',
-        minDate: 'today', // Restrict to future dates only
-        // defaultDate: (oldDate && oldDate !== '') ? oldDate : 'today', // Set default date to today
-        disableMobile: true,
-        onChange: function(selectedDates, dateStr, instance) {
-            // Update minTime based on whether the selected date is today or a future date
-            const isToday = instance.latestSelectedDateObj ? instance.latestSelectedDateObj
-            .toDateString() === new Date().toDateString() : false;
-
-            const minTime = isToday ? getCurrentProjectTime() : '00:00';
-
-            // Update minTime dynamically without destroying the entire instance
-            timeInput._flatpickr.set('minTime', minTime);
-
-            // If the date is today, set the time input value to the current time
-            if (isToday) {
-                const utcTime = getCurrentProjectTime();
-                // Convert 24-hour to Date object for flatpickr
-                const [hours, minutes] = utcTime.split(':');
-                const date = new Date();
-                date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-                timeInput._flatpickr.setDate(date, true);
-            }
-            if (typeof checkTimeOrderPostRide === 'function') checkTimeOrderPostRide();
-        },
-    });
-    if (rideDate && rideDate !== "" && dateInput._flatpickr) {
-        setTimeout(function() {
-            try {
-                dateInput._flatpickr.setDate(rideDate, true);
-            } catch (e) {
-                /* ignore if date is invalid or past */ }
-        }, 10);
-    }
-
-    // Main time input: display 24-hour format (e.g. 14:30), no AM/PM
-    function formatTimeDisplay24(date) {
-        const h = date.getHours();
-        const m = date.getMinutes();
-        return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
-    }
-    // Stop time inputs: 12-hour with am/pm (e.g. 9:30 am, 2:30 pm)
-    function formatTimeDisplay(date) {
-        const hours = date.getHours();
-        const minutes = date.getMinutes();
-        const mins = minutes < 10 ? '0' + minutes : String(minutes);
-        if (hours < 12) {
-            const h = hours === 0 ? 12 : hours;
-            return h + ':' + mins + ' am';
-        } else {
-            const h = hours === 12 ? 12 : hours;
-            return h + ':' + mins;
-        }
-    }
-    const timePicker = flatpickr(timeInput, {
-        enableTime: true,
-        noCalendar: true,
-        dateFormat: 'H:i', // 24-hour format for backend (stored value)
-        altInput: true,
-        altFormat: 'H:i', // Display 24-hour in the time area
-        time_24hr: false, // Show 24-hour in picker to match display
-        disableMobile: true,
-        minTime: getCurrentProjectTime(), // Set min time to current time
-        defaultDate: oldTime || '',
-        minuteIncrement: 1, // Set minute increment to 1
-        clickOpens: false, // We handle open/close so second click on time area closes
-        onChange: function(selectedDates) {
-            if (selectedDates.length && timeInput._flatpickr.altInput) {
-                timeInput._flatpickr.altInput.value = formatTimeDisplay(selectedDates[0]);
-            }
-            if (typeof checkTimeOrderPostRide === 'function') checkTimeOrderPostRide();
-        },
-        onValueUpdate: function(selectedDates) {
-            if (selectedDates.length && timeInput._flatpickr.altInput) {
-                timeInput._flatpickr.altInput.value = formatTimeDisplay(selectedDates[0]);
-            }
-            if (typeof checkTimeOrderPostRide === 'function') checkTimeOrderPostRide();
-        },
-        onClose: function(selectedDates) {
-            if (selectedDates.length && timeInput._flatpickr.altInput) {
-                timeInput._flatpickr.altInput.value = formatTimeDisplay(selectedDates[0]);
-            }
-            if (typeof checkTimeOrderPostRide === 'function') checkTimeOrderPostRide();
-        }
-    });
-    setTimeout(function() {
-        if (timePicker.selectedDates.length && timePicker.altInput) {
-            timePicker.altInput.value = formatTimeDisplay(timePicker.selectedDates[0]);
-        }
-    }, 0);
-
-    // Shared initializer for stop time inputs (same behavior/style as main time input: first click opens, second click closes)
-    function initStopDatePicker(el) {
-        if (!el) return;
-        try {
-            if (el._flatpickr) {
-                el._flatpickr.destroy();
-            }
-        } catch (e) {
-            // ignore
-        }
-        flatpickr(el, {
-            dateFormat: 'F d, Y',
-            minDate: 'today',
-            disableMobile: true,
-            onChange: function() {
-                if (typeof checkTimeOrderPostRide === 'function') checkTimeOrderPostRide();
-            },
-        });
-    }
-
-    function initStopTimePicker(el) {
-        if (!el) return;
-        try {
-            if (el._flatpickr) {
-                el._flatpickr.destroy();
-            }
-        } catch (e) {
-            // ignore
-        }
-        const existingVal = el.value || '';
-        // Need a valid default time so the picker (and AM/PM) works; empty default can break AM/PM
-        const defaultTime = existingVal && String(existingVal).trim() ? existingVal : getCurrentProjectTime();
-        const picker = flatpickr(el, {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: 'H:i',
-            altInput: true,
-            altFormat: 'H:i',
-            time_24hr: false,
-            disableMobile: true,
-            minuteIncrement: 1,
-            clickOpens: false,
-            onChange: function() {
-                if (typeof checkTimeOrderPostRide === 'function') checkTimeOrderPostRide();
-            },
-        });
-        // If there is already a selected date, ensure display is formatted
-        setTimeout(function() {
-            if (picker.selectedDates.length && picker.altInput) {
-                picker.altInput.value = formatTimeDisplay(picker.selectedDates[0]);
-            }
-        }, 0);
-        // Time area: first click opens, second click (same area) closes. Use wrapper so clock icon zone counts too.
-        var stopTimeWrapper = el.closest('.relative') || el.parentElement;
-        if (stopTimeWrapper) {
-            stopTimeWrapper.addEventListener('click', function(e) {
-                if (e.target.closest('.flatpickr-calendar')) return;
-                if (!el._flatpickr) return;
-                if (picker.isOpen) {
-                    picker.close();
-                    e.stopPropagation();
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    return;
-                }
-            }, true);
-            stopTimeWrapper.addEventListener('click', function(e) {
-                if (e.target.closest('.flatpickr-calendar')) return;
-                if (!el._flatpickr) return;
-                if (!el._flatpickr.input.value) {
-                    const projectTime = getCurrentProjectTime();
-                    const [hours, minutes] = projectTime.split(':');
-                    const d = new Date();
-                    d.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
-                    el._flatpickr.setDate(d, true);
-                }
-                picker.open();
-            }, false);
-        } else {
-            el.addEventListener('click', function() {
-                if (!el._flatpickr) return;
-                if (picker.isOpen) { picker.close(); return; }
-                if (!el._flatpickr.input.value) {
-                    const projectTime = getCurrentProjectTime();
-                    const [hours, minutes] = projectTime.split(':');
-                    const d = new Date();
-                    d.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
-                    el._flatpickr.setDate(d, true);
-                }
-                picker.open();
-            });
-        }
-    }
-
-    // Initialize all existing stop time inputs on page load
-    document.querySelectorAll('input[name="stop_time[]"]').forEach(function(el) {
-        initStopTimePicker(el);
-    });
-    // Initialize all existing stop date inputs on page load
-    document.querySelectorAll('input[name="stop_date[]"]').forEach(function(el) {
-        initStopDatePicker(el);
-    });
-
-    // Time area: first click opens dropdown, second click (same area) closes it. Use wrapper so clock icon zone counts too.
-    var timeWrapper = timeInput.closest('.relative') || timeInput.parentElement;
-    if (timeWrapper) {
-        timeWrapper.addEventListener('click', function(e) {
-            if (e.target.closest('.flatpickr-calendar')) return;
-            if (!timeInput._flatpickr) return;
-            if (timePicker.isOpen) {
-                timePicker.close();
-                e.stopPropagation();
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                return;
-            }
-        }, true);
-        timeWrapper.addEventListener('click', function(e) {
-            if (e.target.closest('.flatpickr-calendar')) return;
-            if (!timeInput._flatpickr) return;
-            if (!timeInput._flatpickr.input.value) {
-                const projectTime = getCurrentProjectTime();
-                const [hours, minutes] = projectTime.split(':');
-                const date = new Date();
-                date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-                timeInput._flatpickr.setDate(date, true);
-            }
-            timePicker.open();
-        }, false);
-    } else {
-        timeInput.addEventListener('click', function() {
-            if (!timeInput._flatpickr) return;
-            if (timePicker.isOpen) { timePicker.close(); return; }
-            if (!timeInput._flatpickr.input.value) {
-                const projectTime = getCurrentProjectTime();
-                const [hours, minutes] = projectTime.split(':');
-                const date = new Date();
-                date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-                timeInput._flatpickr.setDate(date, true);
-            }
-            timePicker.open();
-        });
-    }
-
-    function seat_selected(th) {
-        var seat = parseInt($(th).val());
-        var seatsError = document.getElementById('seats-server-error');
-        if (seatsError) seatsError.classList.add('hidden');
-
-        for (i = 1; i <= seat; i++) {
-            // Change the image source for selected seats
-            $(".seat-image.seat-unselect-" + i).attr('src', '{{ asset('assets/seat-hover-1.png') }}');
-            $(".seat-number.seat-number-" + i).addClass('text-green-300');
-            $("#number-of-seat-cross-" + i).hide();
-        }
-
-        for (i = parseInt(seat) + 1; i <= 7; i++) {
-            if (seat == 7) continue;
-            // Change the image source back to unselected for remaining seats
-            $(".seat-image.seat-unselect-" + i).attr('src', '{{ asset('assets/seat.png') }}');
-            $(".seat-number.seat-number-" + i).removeClass('text-green-300');
-            $("#number-of-seat-cross-" + i).show();
-        }
-
-        // Show warning popup for 5+ seats
-        if (seat == 5 || seat == 6 || seat == 7) {
-            const modal = document.getElementById('seatsWarningModal');
-            if (modal) {
-                modal.classList.remove('hidden');
-                modal.style.display = 'block';
-            }
-        }
-    }
-
-    function closeSeatsWarningModal() {
-        const modal = document.getElementById('seatsWarningModal');
-        if (modal) {
-            modal.classList.add('hidden');
-            modal.style.display = 'none';
-        }
-    }
-
-    const profileImage = document.getElementById('profile-image');
-
-    function previewImage(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-
-            reader.onload = function(e) {
-                profileImage.src = e.target.result;
-                $('#profile-image').addClass('w-40');
-                $('#profile-image').addClass('h-40');
+            return firstWarning ?? {
+                type: null,
             };
-
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        // Get the checkbox element
-        var skipCheckbox = document.getElementById('skip');
-        var addCheckbox = document.getElementById('add');
-        var addedCheckbox = document.getElementById('added');
-        var recurringTripCheckbox = document.getElementById('recurring_trip');
-
-        // Get the disclaimer div
-        var skipVehicle = document.getElementById('skipVehicle');
-        var showVehicles = document.getElementById('showVehicles');
-        var recurringtripDetails = document.getElementById('recurringtripDetails');
-
-        // Array of all checkboxes for mutual exclusivity
-        var checkboxes = [skipCheckbox, addCheckbox, addedCheckbox];
-
-        // Function to uncheck other checkboxes when one is checked
-        function handleCheckboxChange(checkedCheckbox) {
-            checkboxes.forEach(function(checkbox) {
-                if (checkbox !== checkedCheckbox) {
-                    checkbox.checked = false; // Uncheck all other checkboxes
-                }
-            });
         }
 
-        // Add an event listener to the checkbox
-        skipCheckbox.addEventListener('change', function() {
-            handleCheckboxChange(skipCheckbox);
-            // If the checkbox is checked, show the disclaimer; otherwise, hide it
-            skipVehicle.style.display = 'none';
-            showVehicles.style.display = 'none';
-        });
-        addCheckbox.addEventListener('change', function() {
-            handleCheckboxChange(addCheckbox);
-            // If the checkbox is checked, show the disclaimer; otherwise, hide it
-            skipVehicle.style.display = this.checked ? 'block' : 'none';
-            showVehicles.style.display = 'none';
-
-            // Enable vehicle fields and set required when add checkbox is checked
-            const vehicleFields = skipVehicle.querySelectorAll(
-                'input[name="make"], input[name="model"], select[name="vehicle_type"], input[name="year"], input[name="color"], input[name="license_no"], input[name="car_type"]'
-                );
-            vehicleFields.forEach(function(field) {
-                if (this.checked) {
-                    field.removeAttribute('disabled');
-                    field.setAttribute('required', 'required');
-                } else {
-                    field.removeAttribute('required');
-                }
-            }.bind(this));
-        });
-        addedCheckbox.addEventListener('change', function() {
-            handleCheckboxChange(addedCheckbox);
-            // If the checkbox is checked, show the disclaimer; otherwise, hide it
-            showVehicles.style.display = this.checked ? 'block' : 'none';
-            skipVehicle.style.display = 'none';
-
-            // Remove required from vehicle fields when using existing vehicle
-            const vehicleFields = skipVehicle.querySelectorAll(
-                'input[name="make"], input[name="model"], select[name="vehicle_type"], input[name="year"], input[name="color"], input[name="license_no"], input[name="car_type"]'
-                );
-            vehicleFields.forEach(function(field) {
-                field.removeAttribute('required');
-            });
-        });
-        recurringTripCheckbox.addEventListener('change', function() {
-            // If the checkbox is checked, show the recurring details; otherwise, hide it
-            recurringtripDetails.style.display = this.checked ? 'block' : 'none';
-        });
-
-        // Initial check when the page loads
-        skipVehicle.style.display = addCheckbox.checked ? 'block' : 'none';
-        showVehicles.style.display = addedCheckbox.checked ? 'block' : 'none';
-        recurringtripDetails.style.display = recurringTripCheckbox.checked ? 'block' : 'none';
-
-        // Set initial required state for vehicle fields
-        const vehicleFields = skipVehicle.querySelectorAll(
-            'input[name="make"], input[name="model"], select[name="vehicle_type"], input[name="year"], input[name="color"], input[name="license_no"], input[name="car_type"]'
+        // Function to show error modal (Price Limit Exceeded)
+        function showPxPriceErrorModal(maxPricePerSeat, routeLabel = 'this trip') {
+            setElementText('pxPriceErrorParagraph1',
+                priceErrorParagraph1
             );
-        vehicleFields.forEach(function(field) {
-            if (addCheckbox.checked) {
-                field.removeAttribute('disabled');
-                field.setAttribute('required', 'required');
-            } else {
-                field.removeAttribute('required');
-            }
-        });
-    });
-
-    function debounce(func, delay) {
-        let timer;
-        return function(...args) {
-            clearTimeout(timer);
-            timer = setTimeout(() => {
-                func.apply(this, args);
-            }, delay);
-        };
-    }
-
-    // Function to fetch cities based on search input
-    function fetchCities(searchTerm, searchData, fieldId, fieldIndex) {
-        // Get the state_id (if required) or set it to null or default
-        let stateId = 0; // You can adjust this if you need to pass state_id
-        let url = '{{ url('get-cities-by-state') }}';
-        let params = {
-            state_id: stateId,
-            search: searchTerm,
-            searchData: searchData
-        };
-
-        $.ajax({
-            url: "{{ url('get-cities-by-state') }}",
-            type: "POST",
-            data: {
-                search: searchTerm,
-                _token: '{{ csrf_token() }}'
-            },
-            dataType: 'json',
-            success: function(result) {
-                let suggestionsContainer = $('#' + fieldId + '_suggestions' + fieldIndex + '');
-                suggestionsContainer.empty(); // Clear previous suggestions
-
-                $.each(result.cities, function(key, value) {
-                    // Create a list item for each city
-                    let displayText =
-                        `${value.name}, ${value.state.abrv}, ${value.state.country.name}`;
-
-                    let suggestionItem = $(
-                            '<div class="suggestion-item p-2 hover:bg-gray-200 cursor-pointer"></div>'
-                            )
-                        .text(displayText)
-                        .on('click', function() {
-                            $('#' + fieldId + '_' + fieldIndex + '').val(displayText);
-                            if (fieldId !== 'stop_spot') {
-                                fromToInputChange(fieldIndex);
-                            }
-                            suggestionsContainer.empty();
-                        });
-
-                    suggestionsContainer.append(suggestionItem);
-                });
-            }
-        });
-    }
-
-
-    // Function to fetch recommended price based on search input
-    function fetchRecommendedPrice(searchTerm, searchData, index) {
-        let stateId = 0;
-        let url = '{{ url('get-cities-distance') }}';
-        let params = {
-            search: searchTerm,
-            searchData: searchData
-        };
-
-        $.ajax({
-            url: "{{ url('get-cities-distance') }}",
-            type: "POST",
-            data: {
-                search: searchTerm,
-                searchData: searchData,
-                _token: '{{ csrf_token() }}'
-            },
-            dataType: 'json',
-            success: function(result) {
-                debugger;
-                $("#priceData" + index + "").val(result.pricePerKm);
-                // Store distance for price validation (globally and on input)
-                // Check both result.distance and result.data.distance for compatibility
-                const distanceValue = result.distance || (result.data && result.data.distance) || null;
-                if (distanceValue && parseFloat(distanceValue) > 0) {
-                    const distanceKm = parseFloat(distanceValue);
-                    $("#priceData" + index + "").data('distance', distanceKm);
-                    window.rideDistance = distanceKm; // Store globally for validation
-                    console.log('Distance stored for validation:', distanceKm, 'km');
-                } else {
-                    const distanceValue = result.distance || (result.data && result.data.distance);
-                    if (distanceValue === 0) {
-                        console.warn('Distance is 0 - locations might be invalid or same city');
-                    } else {
-                        console.warn('No valid distance returned from API. Response:', result);
-                    }
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error fetching distance in fetchRecommendedPrice:', error, xhr);
-            }
-        });
-    }
-
-    const closeModalBtn = document.getElementById('close-modal');
-    if (closeModalBtn) {
-        closeModalBtn.addEventListener('click', function() {
-            const modal = document.querySelector('.relative.z-50');
-            if (modal) {
-                modal.style.display = 'none'; // Hide the modal
-            }
-        });
-    }
-
-    function fromInput(index) {
-        debounce(function() {
-            let searchTerm = $('#from_spot_' + index).val();
-            if (searchTerm.length >= 2) {
-                let searchData = $('#to_spot_' + index).val();
-                fetchCities(searchTerm, searchData, 'from_spot', index);
-            }
-        }, 500)();
-    }
-
-    function toInput(index) {
-        debounce(function() {
-            let searchTerm = $('#to_spot_' + index).val();
-            if (searchTerm.length >= 2) {
-                let searchData = $('#from_spot_' + index).val();
-                fetchCities(searchTerm, searchData, 'to_spot', index);
-            }
-        }, 500)();
-    }
-
-    function fromToInputChange(index) {
-        let searchTerm = $('#to_spot_' + index + '').val();
-        let searchData = $('#from_spot_' + index + '').val();
-        if (searchTerm != "" && searchData != "") {
-            fetchRecommendedPrice(searchTerm, searchData, index);
+            setElementText('pxPriceErrorParagraph2',
+                (priceErrorParagraph2Template || '').replace(/:max_per_seat/g, maxPricePerSeat)
+            );
+            setElementText('pxPriceErrorParagraph3',
+                priceErrorParagraph3
+            );
+            openModalById('pxPriceErrorModal');
         }
-    }
 
-    function stopInput(index) {
-        debounce(function() {
-            let searchTerm = $('#stop_spot_' + index).val();
-            if (searchTerm.length >= 2 && typeof fetchCities !== 'undefined') {
-                fetchCities(searchTerm, '', 'stop_spot', index);
+        // Function to show warning modal (Recommended Contribution Limit)
+        function showPxPriceWarningModal(callback, routeLabel = 'this trip', softWarningPrice = null) {
+            const modal = document.getElementById('pxPriceWarningModal');
+            if (!modal) {
+                console.error('PX Price warning modal not found!');
+                return;
             }
-        }, 500)();
-    }
 
-    function toggleAddMoreSpots(button) {
-        var panel = document.getElementById('add-more-spots-panel');
-        if (!panel) return;
-        var isOpen = button.getAttribute('aria-expanded') === 'true';
-        if (isOpen) {
-            panel.style.height = panel.scrollHeight + 'px';
-            panel.offsetHeight;
-            panel.style.height = '0';
-            button.setAttribute('aria-expanded', 'false');
-        } else {
-            panel.style.height = panel.scrollHeight + 'px';
-            button.setAttribute('aria-expanded', 'true');
-            panel.addEventListener('transitionend', function onEnd() {
-                panel.removeEventListener('transitionend', onEnd);
-                if (button.getAttribute('aria-expanded') === 'true') {
-                    panel.style.height = 'auto';
-                }
-            }, {
-                once: true
-            });
-        }
-    }
+            const para1 = document.getElementById('pxPriceWarningParagraph1');
+            const para2 = document.getElementById('pxPriceWarningParagraph2');
 
-    var deleteStopTargetRowPost = null;
+            if (para1) {
+                para1.textContent = priceWarningParagraph1;
+            }
+            if (para2) {
+                para2.textContent = softWarningPrice ?
+                    'We suggest keeping this segment at or below $' + softWarningPrice + ' per seat.' :
+                    priceWarningParagraph2;
+            }
 
-    function addStopRowPostRide() {
-        var container = document.getElementById('stops-rows-container');
-        if (!container) return;
-        var rows = container.querySelectorAll('.stop-row');
-        var nextIndex = 1;
-        rows.forEach(function(r) {
-            var idx = parseInt(r.getAttribute('data-stop-index'), 10);
-            if (!isNaN(idx)) nextIndex = Math.max(nextIndex, idx + 1);
-        });
-        var row = document.createElement('div');
-        row.className = 'flex items-center gap-3 stop-row flex-nowrap';
-        row.setAttribute('data-stop-index', nextIndex);
-        row.innerHTML = '<div class="flex flex-row gap-2 items-stretch flex-1 min-w-0 flex-nowrap">' +
-            '<div class="relative flex-1 min-w-0 shrink">' +
-            '<div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none"><img src="{{ asset('assets/search-bar-from.png') }}" class="w-auto h-6" alt=""></div>' +
-            '<input type="text" name="stop_spot_display[]" data-stop-index="' + nextIndex + '" id="stop_spot_' +
-            nextIndex +
-            '" value="" autocomplete="off" class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5" placeholder="">' +
-            '<div class="absolute hidden mt-1 z-10 left-0 top-full" id="stopInputError_' + nextIndex +
-            '"><div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div></div>' +
-            '</div>' +
-            '<div class="relative flex-1 min-w-0 shrink">' +
-            '<textarea name="stop_pickup_dropoff[]" data-stop-index="' + nextIndex + '" id="stop_pickup_dropoff_' +
-            nextIndex +
-            '" rows="1" placeholder="pick up / drop off" class="bg-gray-100 border border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none"></textarea>' +
-            '<div class="absolute hidden mt-1 z-10 left-0 top-full" id="stopPickupDropoffError_' + nextIndex + '">' +
-            '<div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>' +
-            '</div>' +
-            '</div>' +
-            '<div class="w-32 sm:w-40 md:w-44 lg:w-48 shrink-0">' +
-            '<div class="relative">' +
-            '<div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">' +
-            '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">' +
-            '<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />' +
-            '</svg>' +
-            '</div>' +
-            '<input type="text" name="stop_date[]" id="stop_date_' + nextIndex +
-            '" value="" class="bg-gray-100 border pl-10 border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5" placeholder="">' +
-            '<div class="absolute hidden mt-1 z-10 left-0 top-full" id="stopDateError_' + nextIndex + '">' +
-            '<div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>' +
-            '</div>' +
-            '</div>' +
-            '</div>' +
-            '<div class="w-32 sm:w-40 md:w-44 lg:w-48 shrink-0">' +
-            '<div class="relative">' +
-            '<div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">' +
-            '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">' +
-            '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />' +
-            '</svg>' +
-            '</div>' +
-            '<input type="text" name="stop_time[]" id="stop_time_' + nextIndex +
-            '" value="" class="bg-gray-100 border pl-10 border-gray-200 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5" placeholder="">' +
-            '<div class="absolute hidden mt-1 z-10 left-0 top-full" id="stopTimeError_' + nextIndex + '">' +
-            '<div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>' +
-            '</div>' +
-            '</div>' +
-            '</div>' +
-            '</div>' +
-            '<button type="button" class="stop-delete-btn flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded focus:outline-none focus:ring-2 focus:ring-red-400" onclick="confirmDeleteStopPostRide(this)" title="Delete stop" aria-label="Delete stop">' +
-            '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>' +
-            '</button>';
-        container.appendChild(row);
-        var newStopInput = document.getElementById('stop_spot_' + nextIndex);
-        if (newStopInput && typeof attachStopAutocompletePostRide === 'function') {
-            attachStopAutocompletePostRide(newStopInput);
-        }
-        var newStopDateInput = document.getElementById('stop_date_' + nextIndex);
-        if (newStopDateInput && typeof initStopDatePicker === 'function') {
-            initStopDatePicker(newStopDateInput);
-        }
-        // Initialize time picker for the new stop time input (same behavior as main time input)
-        var newStopTimeInput = document.getElementById('stop_time_' + nextIndex);
-        if (newStopTimeInput && typeof initStopTimePicker === 'function') {
-            initStopTimePicker(newStopTimeInput);
-        }
-        updateStopsOriginDestinationLabelsPostRide();
-        if (typeof syncSegmentPricesUIPostRide === 'function') {
-            syncSegmentPricesUIPostRide();
-        }
-    }
-
-    function confirmDeleteStopPostRide(btn) {
-        var row = btn && btn.closest('.stop-row');
-        if (!row) return;
-        deleteStopTargetRowPost = row;
-        var modal = document.getElementById('delete-stop-modal-post');
-        if (modal) {
             modal.classList.remove('hidden');
             modal.style.display = 'block';
-        }
-    }
 
-    function closeDeleteStopModalPostRide() {
-        var modal = document.getElementById('delete-stop-modal-post');
-        if (modal) {
-            modal.classList.add('hidden');
-            modal.style.display = 'none';
-        }
-        deleteStopTargetRowPost = null;
-    }
-
-    function deleteStopRowConfirmedPostRide() {
-        if (deleteStopTargetRowPost && deleteStopTargetRowPost.parentNode) {
-            deleteStopTargetRowPost.remove();
-            updateStopsOriginDestinationLabelsPostRide();
-            if (typeof syncSegmentPricesUIPostRide === 'function') syncSegmentPricesUIPostRide();
-        }
-        closeDeleteStopModalPostRide();
-    }
-
-    function updateStopsOriginDestinationLabelsPostRide() {
-        var fromEl = document.getElementById('from_spot_0');
-        var toEl = document.getElementById('to_spot_0');
-        var originLabel = document.getElementById('stops-origin-label');
-        var destLabel = document.getElementById('stops-destination-label');
-        if (originLabel) originLabel.textContent = (fromEl && fromEl.value) ? fromEl.value.trim() : '';
-        if (destLabel) destLabel.textContent = (toEl && toEl.value) ? toEl.value.trim() : '';
-    }
-
-    function updateSegmentTotalPricePostRide() {
-        var container = document.getElementById('stops-segment-prices-dynamic');
-        var totalInput = document.getElementById('segment-total-price-input-dynamic');
-        if (!container || !totalInput) return;
-        var inputs = container.querySelectorAll('input[name="price_spot_display[]"]');
-        var sum = 0;
-        inputs.forEach(function(inp) {
-            var v = parseFloat(inp.value);
-            if (!isNaN(v)) sum += v;
-        });
-        totalInput.value = sum.toFixed(2);
-        var priceEl = document.querySelector('input[name="price"]');
-        if (priceEl && priceEl.value && parseFloat(priceEl.value) > 0) {
-            var errDiv = document.getElementById('price-error-message');
-            if (errDiv) errDiv.style.display = 'none';
-        }
-        checkFullRouteVsTotalPostRide();
-    }
-
-    function checkFullRouteVsTotalPostRide() {
-        var container = document.getElementById('stops-segment-prices-dynamic');
-        if (!container) return;
-        var fullRouteInput = container.querySelector('input[name="price"]') || container.querySelector(
-            '.full-route-price-input');
-        var totalInput = container.querySelector('#segment-total-price-input-dynamic');
-        var tooltip = container.querySelector('#full-route-tooltip-container-dynamic');
-        if (!fullRouteInput || !totalInput) return;
-        if (container.style.display === 'none' || !container.offsetParent) return;
-        var fullVal = parseFloat(fullRouteInput.value);
-        var totalVal = parseFloat(totalInput.value);
-        if (isNaN(fullVal)) fullVal = 0;
-        if (isNaN(totalVal)) totalVal = 0;
-        if (tooltip) {
-            if (fullVal > totalVal) {
-                tooltip.classList.remove('hidden');
-            } else {
-                tooltip.classList.add('hidden');
-            }
-        }
-    }
-
-    function syncSegmentPricesUIPostRide() {
-        var singleBlock = document.getElementById('single-price-block');
-        var dynamicBlock = document.getElementById('stops-segment-prices-dynamic');
-        if (!dynamicBlock) return;
-        var stopsContainer = document.getElementById('stops-rows-container');
-        if (!stopsContainer) return;
-        var stopInputs = stopsContainer.querySelectorAll('input[name="stop_spot_display[]"]');
-        var stops = [];
-        stopInputs.forEach(function(inp) {
-            var v = (inp.value && inp.value.trim) ? inp.value.trim() : '';
-            if (v) stops.push(v);
-        });
-        var origin = '';
-        var destination = '';
-        var originEl = document.getElementById('from_spot_0');
-        var destEl = document.getElementById('to_spot_0');
-        if (originEl) origin = originEl.value ? originEl.value.trim() : '';
-        if (destEl) destination = destEl.value ? destEl.value.trim() : '';
-        var mainPrice = '0';
-        var singlePriceInput = singleBlock ? singleBlock.querySelector('input[type="number"]') : null;
-        var dynFullRouteInput = dynamicBlock.querySelector('.full-route-price-input');
-        var priceInputWithName = document.querySelector('#post-ride-price-section input[name="price"]');
-        if (priceInputWithName && priceInputWithName.value !== '') mainPrice = priceInputWithName.value;
-        else if (singlePriceInput && singlePriceInput.value !== '') mainPrice = singlePriceInput.value;
-        else if (dynFullRouteInput && dynFullRouteInput.value !== '') mainPrice = dynFullRouteInput.value;
-        else if (singlePriceInput) mainPrice = singlePriceInput.value !== '' ? singlePriceInput.value : '0';
-        if (stops.length === 0) {
-            if (singleBlock) singleBlock.style.display = '';
-            dynamicBlock.style.display = 'none';
-            if (dynFullRouteInput) {
-                dynFullRouteInput.removeAttribute('name');
-                dynFullRouteInput.id = 'priceData0DynamicInput';
-            }
-            if (singlePriceInput) {
-                singlePriceInput.setAttribute('name', 'price');
-                singlePriceInput.id = 'priceData0';
-            }
-            var rowsDyn = document.getElementById('segment-price-rows-dynamic');
-            if (rowsDyn) rowsDyn.innerHTML = '';            
-            return;
-        }
-        if (singleBlock) singleBlock.style.display = 'none';
-        if (singlePriceInput) {
-            singlePriceInput.removeAttribute('name');
-            singlePriceInput.id = 'priceData0Backup';
-        }
-        if (dynFullRouteInput) {
-            dynFullRouteInput.setAttribute('name', 'price');
-            dynFullRouteInput.value = mainPrice;
-            dynFullRouteInput.id = 'priceData0';
-        }
-        dynamicBlock.style.display = '';
-        var points = [origin].concat(stops).concat([destination]);
-        var numPoints = points.length;
-        var segments = [];
-        for (var i = 0; i < numPoints - 1; i++) {
-            segments.push({
-                from: points[i],
-                to: points[i + 1]
-            });
-        }
-        var rowsEl = document.getElementById('segment-price-rows-dynamic');
-        if (!rowsEl) return;
-        var existingInputs = rowsEl.querySelectorAll('input[name="price_spot_display[]"]');
-        var existingValues = [];
-        existingInputs.forEach(function(inp) {
-            existingValues.push(inp.value);
-        });
-        rowsEl.innerHTML = '';
-
-        // Initial per-segment prices from server (used on first load for repost/copy)
-        var initialPrices = [];
-        var initialAttr = dynamicBlock.getAttribute('data-initial-segment-prices');
-        if (initialAttr) {
-            try {
-                initialPrices = JSON.parse(initialAttr);
-            } catch (e) {
-                initialPrices = [];
-            }
-        }
-        var svgPath =
-            'M 15 3 L 15 5.09375 C 12.164063 5.570313 10 8.050781 10 11 C 10 12.777344 10.832031 14.148438 11.9375 15.03125 C 13.042969 15.914063 14.375 16.40625 15.625 16.90625 C 16.875 17.40625 18.042969 17.914063 18.8125 18.53125 C 19.582031 19.148438 20 19.773438 20 21 C 20 23.15625 18.207031 25 16 25 C 13.78125 25 12 23.21875 12 21 L 12 20 L 10 20 L 10 21 C 10 23.964844 12.164063 26.429688 15 26.90625 L 15 29 L 17 29 L 17 26.90625 C 19.84375 26.425781 22 23.925781 22 21 C 22 19.21875 21.167969 17.855469 20.0625 16.96875 C 18.957031 16.082031 17.625 15.5625 16.375 15.0625 C 15.125 14.5625 13.957031 14.082031 13.1875 13.46875 C 12.417969 12.855469 12 12.21875 12 11 C 12 8.808594 13.785156 7 16 7 C 18.21875 7 20 8.78125 20 11 L 20 12 L 22 12 L 22 11 C 22 8.035156 19.835938 5.570313 17 5.09375 L 17 3 Z';
-        for (var j = 0; j < segments.length; j++) {
-            var seg = segments[j];
-            var row = document.createElement('div');
-            row.className = 'mt-4 segment-price-row-dynamic';
-            var defaultValue = mainPrice;
-            if (existingValues[j] !== undefined && existingValues[j] !== '') {
-                defaultValue = existingValues[j];
-            } else if (initialPrices[j] !== undefined && initialPrices[j] !== null && initialPrices[j] !== '') {
-                defaultValue = initialPrices[j];
-            }
-            var fromAttr = (seg.from || '').replace(/"/g, '&quot;');
-            var toAttr = (seg.to || '').replace(/"/g, '&quot;');
-            row.innerHTML = '<p class="text-gray-700 font-medium mb-1 segment-label">' + (seg.from + ' \u2192 ' + seg
-                    .to) + '</p>' +
-                '<div class="relative mt-2">' +
-                '<span class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">' +
-                '<svg fill="currentColor" width="800px" height="800px" viewBox="0 0 32 32" class="w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg"><path d="' +
-                svgPath + '"/></svg></span>' +
-                '<input type="number" step="any" name="price_spot_display[]" placeholder="" value="' + defaultValue +
-                '" data-segment-from="' + fromAttr + '" data-segment-to="' + toAttr + '" ' +
-                'class="bg-gray-100 border border-gray-200 pl-7 text-gray-900 text-base lg:text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 mt-2"/>' +
-                '</div>';
-            rowsEl.appendChild(row);
-        }
-        updateSegmentTotalPricePostRide();
-        checkFullRouteVsTotalPostRide();
-    }
-
-    (function() {
-        var dynamicBlock = document.getElementById('stops-segment-prices-dynamic');
-        if (dynamicBlock) {
-            dynamicBlock.addEventListener('input', function(e) {
-                if (e.target && e.target.name === 'price_spot_display[]') {
-                    if (typeof updateSegmentTotalPricePostRide === 'function')
-                        updateSegmentTotalPricePostRide();
-                }
-                if (e.target && (e.target.name === 'price' || e.target.id === 'priceData0DynamicInput' || e
-                        .target.classList.contains('full-route-price-input'))) {
-                    if (typeof checkFullRouteVsTotalPostRide === 'function')
-                checkFullRouteVsTotalPostRide();
-                    if (e.target.value && parseFloat(e.target.value) > 0) {
-                        var errDiv = document.getElementById('price-error-message');
-                        if (errDiv) errDiv.style.display = 'none';
-                        var clientErr = document.getElementById('price-client-error');
-                        if (clientErr) clientErr.classList.add('hidden');
+            // Set up continue button callback
+            const continueBtn = document.getElementById('pxPriceWarningContinue');
+            if (continueBtn) {
+                continueBtn.onclick = function() {
+                    if (lastPxPriceValidationSignature) {
+                        acknowledgedPxWarningSignatures.add(lastPxPriceValidationSignature);
                     }
-                }
-            });
-            dynamicBlock.addEventListener('change', function(e) {
-                if (e.target && e.target.name === 'price_spot_display[]') {
-                    if (typeof updateSegmentTotalPricePostRide === 'function')
-                        updateSegmentTotalPricePostRide();
-                }
-                if (e.target && (e.target.name === 'price' || e.target.id === 'priceData0DynamicInput' || e
-                        .target.classList.contains('full-route-price-input'))) {
-                    if (typeof checkFullRouteVsTotalPostRide === 'function')
-                checkFullRouteVsTotalPostRide();
-                    if (e.target.value && parseFloat(e.target.value) > 0) {
-                        var errDiv = document.getElementById('price-error-message');
-                        if (errDiv) errDiv.style.display = 'none';
-                        var clientErr = document.getElementById('price-client-error');
-                        if (clientErr) clientErr.classList.add('hidden');
+                    const activePostRideForm = document.querySelector('form[action*="px.post_ride.store"]') ||
+                        document.querySelector('form[action*="px.post_ride.update"]') ||
+                        document.querySelector('form');
+                    if (!activePostRideForm || !activePostRideForm.querySelector(
+                            'input[name="bypass_price_validation"]')) {
+                        focusPxPriceInput(lastPxPriceValidationInput);
                     }
-                }
-            });
-        }
-    })();
-
-    function buildStopsSegmentsForSubmitPostRide() {
-        var form = document.getElementById('post-ride-form');
-        var container = document.getElementById('stops-rows-container');
-        var hiddenContainer = document.getElementById('stops-segments-hidden');
-        if (!form || !container || !hiddenContainer) return;
-        var origin = (document.getElementById('from_spot_0') || form.querySelector('input[name="from"]')) ? (document
-            .getElementById('from_spot_0') || form.querySelector('input[name="from"]')).value : '';
-        var destination = (document.getElementById('to_spot_0') || form.querySelector('input[name="to"]')) ? (document
-            .getElementById('to_spot_0') || form.querySelector('input[name="to"]')).value : '';
-        var mainPrice = '0';
-        var dynamicBlock = document.getElementById('stops-segment-prices-dynamic');
-        var priceInput = (dynamicBlock && dynamicBlock.style.display !== 'none' && dynamicBlock.offsetParent !== null) ?
-            (dynamicBlock.querySelector('input[name="price"]') || dynamicBlock.querySelector(
-            '.full-route-price-input')) :
-            (document.getElementById('priceData0') || form.querySelector('input[name="price"]'));
-        if (priceInput) mainPrice = priceInput.value !== '' ? priceInput.value : '0';
-        var segmentPriceInputs = form.querySelectorAll('input[name="price_spot_display[]"]');
-        var stopInputs = container.querySelectorAll('input[name="stop_spot_display[]"]');
-        var stops = [];
-        stopInputs.forEach(function(inp) {
-            var v = inp.value ? inp.value.trim() : '';
-            if (v) stops.push(v);
-        });
-        hiddenContainer.innerHTML = '';
-        if (stops.length === 0) return;
-        var n = stops.length;
-        for (var i = 0; i <= n; i++) {
-            var fromVal = (i === 0) ? origin : stops[i - 1];
-            var toVal = (i === n) ? destination : stops[i];
-            if (!fromVal || !toVal) continue;
-            var segPrice = mainPrice;
-            if (segmentPriceInputs.length > i && segmentPriceInputs[i].value !== '') {
-                segPrice = segmentPriceInputs[i].value;
-            }
-            var inpFrom = document.createElement('input');
-            inpFrom.type = 'hidden';
-            inpFrom.name = 'from_spot[]';
-            inpFrom.value = fromVal;
-            var inpTo = document.createElement('input');
-            inpTo.type = 'hidden';
-            inpTo.name = 'to_spot[]';
-            inpTo.value = toVal;
-            var inpPrice = document.createElement('input');
-            inpPrice.type = 'hidden';
-            inpPrice.name = 'price_spot[]';
-            inpPrice.value = segPrice;
-            hiddenContainer.appendChild(inpFrom);
-            hiddenContainer.appendChild(inpTo);
-            hiddenContainer.appendChild(inpPrice);
-        }
-    }
-
-    // Function to fetch and store distance when both from and to are available
-    function fetchAndStoreDistance(index) {
-        const fromInput = $('#from_spot_' + index);
-        const toInput = $('#to_spot_' + index);
-
-        if (fromInput.length && toInput.length && fromInput.val() && toInput.val()) {
-            if (typeof $ !== 'undefined') {
-                $.ajax({
-                    url: "{{ url('get-cities-distance') }}",
-                    type: "POST",
-                    data: {
-                        search: fromInput.val(),
-                        searchData: toInput.val(),
-                        _token: '{{ csrf_token() }}'
-                    },
-                    dataType: 'json',
-                    success: function(result) {
-                        const distanceValue = result.distance || (result.data && result.data.distance) ||
-                            null;
-                        if (distanceValue && parseFloat(distanceValue) > 0) {
-                            const distanceKm = parseFloat(distanceValue);
-                            window.rideDistance = distanceKm;
-                            // Store in price input data attribute as well
-                            const priceInput = $('#priceData' + index);
-                            if (priceInput.length) {
-                                priceInput.data('distance', distanceKm);
-                            }
-                            console.log('Distance fetched and stored:', distanceKm, 'km');
-                        } else {
-                            console.warn('No valid distance returned. Response:', result);
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error fetching distance:', error);
-                    }
-                });
-            }
-        }
-    }
-
-    // Add event listeners to fetch distance when from/to fields change
-    document.addEventListener('DOMContentLoaded', function() {
-        // Listen for changes on from_spot_0 and to_spot_0
-        const fromInput0 = document.getElementById('from_spot_0');
-        const toInput0 = document.getElementById('to_spot_0');
-
-        if (fromInput0) {
-            fromInput0.addEventListener('blur', function() {
-                setTimeout(() => {
-                    if (toInput0 && toInput0.value) {
-                        fetchAndStoreDistance(0);
-                    }
-                }, 500);
-            });
-            fromInput0.addEventListener('input', function() {
-                if (typeof updateStopsOriginDestinationLabelsPostRide === 'function')
-                    updateStopsOriginDestinationLabelsPostRide();
-            });
-        }
-
-        if (toInput0) {
-            toInput0.addEventListener('blur', function() {
-                setTimeout(() => {
-                    if (fromInput0 && fromInput0.value) {
-                        fetchAndStoreDistance(0);
-                    }
-                }, 500);
-            });
-            toInput0.addEventListener('input', function() {
-                if (typeof updateStopsOriginDestinationLabelsPostRide === 'function')
-                    updateStopsOriginDestinationLabelsPostRide();
-            });
-        }
-        if (typeof updateStopsOriginDestinationLabelsPostRide === 'function')
-            updateStopsOriginDestinationLabelsPostRide();
-        if (typeof syncSegmentPricesUIPostRide === 'function') syncSegmentPricesUIPostRide();
-        var deleteStopYes = document.getElementById('delete-stop-yes-post');
-        var deleteStopNo = document.getElementById('delete-stop-no-post');
-        if (deleteStopYes) deleteStopYes.addEventListener('click', deleteStopRowConfirmedPostRide);
-        if (deleteStopNo) deleteStopNo.addEventListener('click', closeDeleteStopModalPostRide);
-        var deleteStopBackdrop = document.getElementById('delete-stop-modal-backdrop-post');
-        if (deleteStopBackdrop) deleteStopBackdrop.addEventListener('click', closeDeleteStopModalPostRide);
-        var stopsContainerPost = document.getElementById('stops-rows-container');
-        if (stopsContainerPost) {
-            stopsContainerPost.addEventListener('input', function(e) {
-                if (e.target && e.target.name === 'stop_spot_display[]' &&
-                    typeof syncSegmentPricesUIPostRide === 'function') syncSegmentPricesUIPostRide();
-            });
-            stopsContainerPost.addEventListener('change', function(e) {
-                if (e.target && e.target.name === 'stop_spot_display[]' &&
-                    typeof syncSegmentPricesUIPostRide === 'function') syncSegmentPricesUIPostRide();
-            });
-        }
-        var priceSectionPost = document.getElementById('post-ride-price-section');
-        if (priceSectionPost) {
-            priceSectionPost.addEventListener('focus', function(e) {
-                var inp = e.target;
-                if (inp && !inp.readOnly && (inp.name === 'price' || inp.classList.contains(
-                        'full-route-price-input') || inp.name === 'price_spot_display[]')) {
-                    var val = inp.value;
-                    if (val !== '' && (parseFloat(val) === 0 || val === '0' || val === '0.0' || val ===
-                            '0.00')) {
-                        inp.value = '';
-                    }
-                }
-            }, true);
-            priceSectionPost.addEventListener('input', function(e) {
-                if (e.target && e.target.classList && e.target.classList.contains(
-                        'full-route-price-input') && typeof checkFullRouteVsTotalPostRide ===
-                    'function') checkFullRouteVsTotalPostRide();
-                if (e.target && (e.target.name === 'price' || e.target.classList.contains(
-                        'full-route-price-input') || e.target.name === 'price_spot_display[]')) {
-                    var clientErr = document.getElementById('price-client-error');
-                    if (clientErr) clientErr.classList.add('hidden');
-                }
-            });
-            priceSectionPost.addEventListener('change', function(e) {
-                if (e.target && e.target.classList && e.target.classList.contains(
-                        'full-route-price-input') && typeof checkFullRouteVsTotalPostRide ===
-                    'function') checkFullRouteVsTotalPostRide();
-                if (e.target && (e.target.name === 'price' || e.target.classList.contains(
-                        'full-route-price-input') || e.target.name === 'price_spot_display[]')) {
-                    var clientErr = document.getElementById('price-client-error');
-                    if (clientErr) clientErr.classList.add('hidden');
-                }
-            });
-        }
-    });
-
-
-    function addNewRow() {
-        var oldIndex = parseInt($("#rowCount").val());
-        if ($("#from_spot_" + oldIndex + "").val() == "") {
-            alert("Please select from spot");
-            return;
-        } else if ($("#to_spot_" + oldIndex + "").val() == "") {
-            alert("Please select to spot");
-            return;
-        }
-        // else if($("#priceData"+oldIndex+"").val() == ""){
-        //     alert("Please select price spot");
-        //     return;
-        // }
-        var from_city = $("#from_spot_" + oldIndex + "").val()
-        var to_city = $("#to_spot_" + oldIndex + "").val()
-        var price = $("#price_" + oldIndex + "").val()
-        var index = parseInt($("#rowCount").val() + 1);
-        $.ajax({
-            url: "{{ url('add-new-spots') }}",
-            type: "POST",
-            data: {
-                from_spot: from_city,
-                to_spot: to_city,
-                price: price,
-                index: index,
-                _token: '{{ csrf_token() }}'
-            },
-            dataType: 'json',
-            success: function(result) {
-                console.log(result);
-                if (result.status === 'error') {
-                    console.log(result);
-                    if (result.errors.from_spot) {
-                        console.log(result);
-                        // $('#from_spot_' + index + '_error').text(result.errors.from_spot[0]).show();
-                        $('.to_spot_error_' + oldIndex).removeClass('hidden');
-                        $('.to_spot_error_message').text(result.errors.to_spot[0]);
-
-                    }
-                    if (result.errors.to_spot) {
-                        // Display error for to_spot
-                        $('.from_spot_error_' + oldIndex).removeClass('hidden');
-                        $('.from_spot_error_message').text(result.errors.from_spot[0]);
-                    }
-
-                    if (result.errors.price) {
-                        console.log(result.errors.price[0]);
-                        // Display error for to_spot
-                        $('.price_' + oldIndex).removeClass('hidden');
-                        $('.price_message').text(result.errors.price[0]);
-                    }
-                } else {
-                    $('.from_spot_error_' + oldIndex).addClass('hidden');
-                    $('.to_spot_error_' + oldIndex).addClass('hidden');
-
-                    $(".appendNewRow").append(result.spotHtml);
-                    $("#rowCount").val(index);
-                }
-
-            }
-        });
-    }
-
-    function removeRow(index, rideDetailId) {
-        if (index != 1) {
-            $(".remove-row" + index + "").remove();
-        }
-
-    }
-
-    function closeModal() {
-        const modal = document.getElementById('myModal');
-        if (modal) {
-            modal.classList.add('hidden');
-        }
-    }
-
-    // Helper function to show tooltip on a field
-    function showFieldTooltip(field, message) {
-        if (!field) return;
-
-        // Remove existing tooltip if any
-        removeFieldTooltip(field);
-
-        // Add error styling
-        field.classList.add('validation-error-border', 'border-red-500', 'ring-red-500');
-
-        // Create tooltip element
-        const tooltip = document.createElement('div');
-        tooltip.className = 'validation-tooltip';
-        tooltip.innerHTML = `
-            <div class="validation-tooltip-arrow"></div>
-            <div class="validation-tooltip-content">${message}</div>
-        `;
-
-        // Insert tooltip after the field
-        field.parentNode.insertBefore(tooltip, field.nextSibling);
-    }
-
-    // Helper function to remove tooltip from a field
-    function removeFieldTooltip(field) {
-        if (!field) return;
-        field.classList.remove('validation-error-border', 'border-red-500', 'ring-red-500');
-        const existingTooltip = field.parentNode.querySelector('.validation-tooltip');
-        if (existingTooltip) {
-            existingTooltip.remove();
-        }
-    }
-
-    // Clear tooltip when user focuses, starts typing or changes value
-    function setupTooltipClearOnInput() {
-        document.querySelectorAll('input, select, textarea').forEach(field => {
-            field.addEventListener('focus', function() {
-                removeFieldTooltip(this);
-            });
-            field.addEventListener('input', function() {
-                removeFieldTooltip(this);
-            });
-            field.addEventListener('change', function() {
-                removeFieldTooltip(this);
-            });
-        });
-    }
-
-    // Initialize tooltip clear listeners
-    document.addEventListener('DOMContentLoaded', setupTooltipClearOnInput);
-
-    // Form validation before submission
-    function validatePostRideForm() {
-        let isValid = true;
-        let firstErrorField = null;
-
-        // Get required field values
-        const fromSpot = document.getElementById('from_spot_0');
-        const toSpot = document.getElementById('to_spot_0');
-        const dateInput = document.querySelector('input[name="departure_date"]');
-        const timeInput = document.querySelector('input[name="departure_time"]');
-        const seatsInput = document.querySelector('select[name="max_passengers"], input[name="max_passengers"]');
-        const priceInput = document.getElementById('priceData0');
-        const makeInput = document.querySelector('input[name="make"]');
-        const modelInput = document.querySelector('input[name="model"]');
-        const typeInput = document.querySelector('select[name="vehicle_type"]');
-
-        // Clear all previous tooltips
-        document.querySelectorAll('.validation-tooltip').forEach(el => el.remove());
-        document.querySelectorAll('.validation-error-border').forEach(el => {
-            el.classList.remove('validation-error-border', 'border-red-500', 'ring-red-500');
-        });
-
-        // Validate From location
-        if (!fromSpot || !fromSpot.value.trim()) {
-            isValid = false;
-            showFieldTooltip(fromSpot, 'From location is required');
-            if (!firstErrorField) firstErrorField = fromSpot;
-        }
-
-        // Validate To location
-        if (!toSpot || !toSpot.value.trim()) {
-            isValid = false;
-            showFieldTooltip(toSpot, 'To location is required');
-            if (!firstErrorField) firstErrorField = toSpot;
-        }
-
-        // Validate Date
-        if (!dateInput || !dateInput.value.trim()) {
-            isValid = false;
-            showFieldTooltip(dateInput, 'Departure date is required');
-            if (!firstErrorField) firstErrorField = dateInput;
-        }
-
-        // Validate Time
-        if (!timeInput || !timeInput.value.trim()) {
-            isValid = false;
-            showFieldTooltip(timeInput, 'Departure time is required');
-            if (!firstErrorField) firstErrorField = timeInput;
-        }
-
-        // Validate Seats
-        if (!seatsInput || !seatsInput.value.trim()) {
-            isValid = false;
-            showFieldTooltip(seatsInput, 'Number of seats is required');
-            if (!firstErrorField) firstErrorField = seatsInput;
-        }
-
-        // Validate Price
-        if (!priceInput || !priceInput.value.trim()) {
-            isValid = false;
-            showFieldTooltip(priceInput, 'Price is required');
-            if (!firstErrorField) firstErrorField = priceInput;
-        }
-
-        // Validate Make
-        if (!makeInput || !makeInput.value.trim()) {
-            isValid = false;
-            showFieldTooltip(makeInput, 'Vehicle make is required');
-            if (!firstErrorField) firstErrorField = makeInput;
-        }
-
-        // Validate Model
-        if (!modelInput || !modelInput.value.trim()) {
-            isValid = false;
-            showFieldTooltip(modelInput, 'Vehicle model is required');
-            if (!firstErrorField) firstErrorField = modelInput;
-        }
-
-        // Validate Vehicle Type
-        if (!typeInput || !typeInput.value.trim()) {
-            isValid = false;
-            showFieldTooltip(typeInput, 'Vehicle type is required');
-            if (!firstErrorField) firstErrorField = typeInput;
-        }
-
-        // Validate Terms & Conditions checkbox
-        const agreeTermsCheckbox = document.getElementById('agree_terms');
-        if (agreeTermsCheckbox && !agreeTermsCheckbox.checked) {
-            isValid = false;
-            // Just highlight the checkbox, no tooltip
-            agreeTermsCheckbox.classList.add('validation-error-border', 'ring-2', 'ring-red-500');
-            if (!firstErrorField) firstErrorField = agreeTermsCheckbox;
-        }
-
-        // Scroll to first error field
-        if (!isValid && firstErrorField) {
-            firstErrorField.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            });
-            if (firstErrorField.type !== 'checkbox') {
-                firstErrorField.focus();
+                    if (callback) callback();
+                };
             }
         }
 
-        return isValid;
-    }
-
-    // Helper function to show tooltip on checkbox
-    function showCheckboxTooltip(checkbox, message) {
-        if (!checkbox) return;
-
-        // Remove existing tooltip if any
-        removeCheckboxTooltip(checkbox);
-
-        // Add error styling to checkbox
-        checkbox.classList.add('validation-error-border', 'ring-2', 'ring-red-500');
-
-        // Create tooltip element
-        const tooltip = document.createElement('div');
-        tooltip.className = 'validation-tooltip checkbox-tooltip';
-        tooltip.innerHTML = `
-            <div class="validation-tooltip-arrow"></div>
-            <div class="validation-tooltip-content">${message}</div>
-        `;
-
-        // Insert tooltip after the checkbox's parent container
-        const container = checkbox.closest('.flex') || checkbox.parentNode;
-        container.parentNode.insertBefore(tooltip, container.nextSibling);
-    }
-
-    // Helper function to remove tooltip from checkbox
-    function removeCheckboxTooltip(checkbox) {
-        if (!checkbox) return;
-        checkbox.classList.remove('validation-error-border', 'ring-2', 'ring-red-500');
-        const container = checkbox.closest('.flex') || checkbox.parentNode;
-        if (!container) return;
-        // Look for the tooltip as the next sibling of the container
-        let nextEl = container.nextElementSibling;
-        if (nextEl && nextEl.classList.contains('checkbox-tooltip')) {
-            nextEl.remove();
-        }
-    }
-
-    // Add focus/change listener to agree_terms checkbox
-    document.addEventListener('DOMContentLoaded', function() {
-        const agreeTermsCheckbox = document.getElementById('agree_terms');
-        if (agreeTermsCheckbox) {
-            agreeTermsCheckbox.addEventListener('change', function() {
-                // Remove highlight when checkbox is checked
-                this.classList.remove('validation-error-border', 'ring-2', 'ring-red-500');
-            });
+        // Function to adjust price from error (focus on price input field)
+        function adjustPxPriceFromError() {
+            closeModalById('pxPriceErrorModal');
+            focusPxPriceInput(lastPxPriceValidationInput);
         }
 
-        // Toggle Pink Ride disclaimer when Pink Ride checkbox is checked/unchecked
-        const pinkRideCheckbox = document.getElementById('pink_rides');
-        const pinkRideDisclaimer = document.getElementById('pink-ride-disclaimer');
-        const extraCareDisclaimerNumber = document.getElementById('extra-care-disclaimer-number');
-        if (pinkRideCheckbox && pinkRideDisclaimer) {
-            pinkRideCheckbox.addEventListener('change', function() {
-                pinkRideDisclaimer.classList.toggle('hidden', !this.checked);
-                // Update Extra+ disclaimer number: 6 when Pink Ride is checked, 5 when not
-                if (extraCareDisclaimerNumber) {
-                    extraCareDisclaimerNumber.textContent = this.checked ? '6.' : '5.';
-                }
-            });
+        // Function to adjust price from warning (focus on price input field)
+        function adjustPxPriceFromWarning() {
+            console.log('Adjust PX Price clicked - closing modal and focusing on price field');
+            closeModalById('pxPriceWarningModal');
+            focusPxPriceInput(lastPxPriceValidationInput);
+            return false;
         }
 
-        // Toggle Extra+ Ride disclaimer when Extra+ checkbox is checked/unchecked
-        const extraCareRideCheckbox = document.getElementById('extra_care_rides');
-        const extraCareRideDisclaimer = document.getElementById('Extra+-ride-disclaimer');
-        if (extraCareRideCheckbox && extraCareRideDisclaimer) {
-            extraCareRideCheckbox.addEventListener('change', function() {
-                console.log('ddddd');
-                
-                extraCareRideDisclaimer.classList.toggle('hidden', !this.checked);
-            });
+        function showPxValidationErrorModal(heading, message) {
+            setElementText('pxValidationErrorHeading', heading);
+            setElementText('pxValidationErrorParagraph', message);
+            openModalById('pxValidationErrorModal');
         }
-    });
-</script>
-<script
-    src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_API_KEY') }}&libraries=places&callback=initPostRidePlaces"
-    async defer></script>
 
-<style>
-.validation-tooltip {
-position: relative;
-margin-top: 4px;
-}
+        function closePxPriceErrorModal() {
+            closeModalById('pxPriceErrorModal');
+        }
 
-.validation-tooltip-arrow {
-width: 0;
-height: 0;
-border-left: 8px solid transparent;
-border-right: 8px solid transparent;
-border-bottom: 8px solid #ef4444;
-margin-left: 10px;
-}
+        function closePxPriceWarningModal() {
+            closeModalById('pxPriceWarningModal');
+        }
 
-.validation-tooltip-content {
-background-color: #ef4444;
-color: white;
-padding: 6px 12px;
-border-radius: 4px;
-font-size: 14px;
-display: inline-block;
-}
+        function closePxValidationErrorModal() {
+            closeModalById('pxValidationErrorModal');
+        }
 
-.validation-error-border {
-border-color: #ef4444 !important;
-}
-</style>
-@endsection
-<style>
-.flatpickr-time input {
-font-size: 18px !important;
-}
-</style>
+        function closeModal(){
+            const modal = document.getElementById('errorModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        var priceErrorParagraph1 = @json(optional($postRidePage)->carpool_regulation_limit_message ?? 'To comply with Canadian and Quebec carpooling regulations, the total amount collected for a trip cannot exceed the official 2026 reimbursement rate of $0.72/km.');
+        var priceErrorParagraph2Template = @json(optional($postRidePage)->max_price_per_seat_message ?? 'The maximum allowed for this trip is $:max_per_seat per seat.');
+        var priceErrorParagraph3 = @json(optional($postRidePage)->non_commercial_carpool_requirement_message ?? 'This limit is mandatory to ensure your ride is classified as a non-commercial carpool, protecting your insurance coverage and maintaining the cost-sharing status of your contributions.');
+
+        var priceWarningParagraph1 = @json(optional($postRidePage)->price_above_reimbursement_warning ?? 'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Québec.');
+        var priceWarningParagraph2 = @json(optional($postRidePage)->price_reduction_suggestion_message ?? 'While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.');
+
+    </script>
+

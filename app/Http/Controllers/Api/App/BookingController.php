@@ -102,9 +102,7 @@ class BookingController extends Controller
                 $query->select('id', 'ride_id', 'seats', 'user_id', 'type', 'secured_cash_attempt_count', 'tax_amount', 'ride_detail_id', 'departure', 'destination', 'price')
                     ->where('status', '<>', 3)
                     ->where('status', '<>', 4)
-                    ->whereHas('passenger', function ($query) {
-                        $query->whereNull('deleted_at');
-                    })
+                    ->withActivePassenger()
                     ->with('transaction_no_coffee_sum')
                     ->with(['passenger' => function ($query) {
                         // Select specific columns from passenger
@@ -143,9 +141,7 @@ class BookingController extends Controller
             $bookedSeats = $ride->bookings()
                 ->where('status', '<>', 3)
                 ->where('status', '<>', 4)
-                ->whereHas('passenger', function($query) {
-                    $query->whereNull('deleted_at');
-                })
+                ->withActivePassenger()
                 ->sum('seats');
             $ride->seats_left = intval($ride->seats) - intval($bookedSeats);
             

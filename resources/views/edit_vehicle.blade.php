@@ -58,32 +58,32 @@
                             @endisset
                             <span class="text-red-500">*</span></label>
 
-                        <select id="type" name="type"
+                        <select id="type" name="vehicle_type"
                             class="block mt-1 border w-full rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
-                            <option value="" {{ old('type') === '' ? 'selected' : '' }}>
+                            <option value="" {{ old('vehicle_type') === '' ? 'selected' : '' }}>
                                 {{ $myVehiclePage->vehicle_type_placeholder ?? "Select" }}
                             </option>
                             @foreach (($vehicleTypes ?? collect()) as $vehicleType)
-                            <option value="{{ $vehicleType['id'] }}" {{ (int) old('type', optional($vehicle)->type) === $vehicleType['id'] ? 'selected' : '' }}>
+                            <option value="{{ $vehicleType['id'] }}" {{ (int) old('vehicle_type', optional($vehicle)->type) === $vehicleType['id'] ? 'selected' : '' }}>
                                 {{ $vehicleType['label'] }}
                             </option>
                         @endforeach
                         </select>
-                        @error('type')
+                        @error('vehicle_type')
                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="">
-                        <label for="liscense_no">
+                        <label for="license_no">
                             @isset($myVehiclePage->license_plate_number_label)
                                 {{ $myVehiclePage->license_plate_number_label }}
                             @endisset
                             <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" name="liscense_no" id="liscense_no" maxlength="8" autocomplete="off"
-                            value="{{ old('liscense_no', optional($vehicle)->liscense_no) }}"
+                        <input type="text" name="license_no" id="license_no" maxlength="8" autocomplete="off"
+                            value="{{ old('license_no', optional($vehicle)->license_no) }}"
                             class="block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
-                        @error('liscense_no')
+                        @error('license_no')
                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
@@ -117,7 +117,7 @@
                         @enderror
                     </div>
                     <div>
-                        <label for="car_type" class="text-gray-900 mb-2">
+                        <label for="power_type" class="text-gray-900 mb-2">
                             @isset($myVehiclePage->fuel_label)
                                 {{ $myVehiclePage->fuel_label }}
                             @endisset
@@ -125,31 +125,31 @@
                         </label>
                         <div class="mt-2 flex items-center gap-2">
                             <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                                <input id="car_type_electric" name="car_type" type="radio" value="Electric"
-                                    {{ old('car_type', optional($vehicle)->car_type) === 'Electric' ? 'checked' : '' }}
+                                <input id="power_type_electric" name="power_type" type="radio" value="Electric"
+                                    {{ old('power_type', optional($vehicle)->power_type) === 'Electric' ? 'checked' : '' }}
                                     class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-sky-600 focus:ring-sky-600">
-                                <label for="car_type_electric" class="block text-gray-900">
+                                <label for="power_type_electric" class="block text-gray-900">
                                     {{ $myVehiclePage->electric_checkbox_label ?? 'Electric' }}
                                 </label>
                             </div>
                             <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                                <input id="car_type_hybrid" name="car_type" type="radio" value="Hybrid"
-                                    {{ old('car_type', optional($vehicle)->car_type) === 'Hybrid' ? 'checked' : '' }}
+                                <input id="power_type_hybrid" name="power_type" type="radio" value="Hybrid"
+                                    {{ old('power_type', optional($vehicle)->power_type) === 'Hybrid' ? 'checked' : '' }}
                                     class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-sky-600 focus:ring-sky-600">
-                                <label for="car_type_hybrid" class="block text-gray-900">
+                                <label for="power_type_hybrid" class="block text-gray-900">
                                     {{ $myVehiclePage->hybrid_checkbox_label ?? 'Hybrid' }}
                                 </label>
                             </div>
                             <div class="flex items-center space-x-1.5 lg:space-x-3 mb-2 mr-2 lg:mr-2">
-                                <input id="car_type_gas" name="car_type" type="radio" value="Gas"
-                                    {{ old('car_type', optional($vehicle)->car_type) === 'Gas' ? 'checked' : '' }}
+                                <input id="power_type_gas" name="power_type" type="radio" value="Gas"
+                                    {{ old('power_type', optional($vehicle)->power_type) === 'Gas' ? 'checked' : '' }}
                                     class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-sky-600 focus:ring-sky-600">
-                                <label for="car_type_gas" class="block text-gray-900">
+                                <label for="power_type_gas" class="block text-gray-900">
                                     {{ $myVehiclePage->gas_checkbox_label ?? 'Gas' }}
                                 </label>
                             </div>
                         </div>
-                        @error('car_type')
+                        @error('power_type')
                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
@@ -205,7 +205,7 @@
                                     </p>
                                 </div>
                             </div>
-                            <input id="dropzone-file" name="image" type="file" onchange="previewImage(this)" accept="image/*"
+                            <input id="dropzone-file" name="vehicle_image" type="file" onchange="previewImage(this)" accept="image/*"
                                 class="hidden" />
                             @if (session('uploaded_image'))
                                 <input type="hidden" name="existing_image" value="{{ session('uploaded_image') }}">
@@ -219,7 +219,7 @@
                                 <input id="existing_image" type="hidden" name="existing_image"
                                     value="{{ $imageName }}">
                             @endif
-                            @error('image')
+                            @error('vehicle_image')
                                 @if ($message !== 'The image is not uploaded yet' && $message !== 'The image failed to upload')
                                     <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                 @endif

@@ -93,8 +93,9 @@
                                 <option value="" {{ old('type') === '' ? 'selected' : '' }}>
                                     {{ $step3Page->vehicle_type_placeholder ?? 'Select' }}
                                 </option>
-                                @foreach (($vehicleTypes ?? collect()) as $vehicleType)
-                                    <option value="{{ $vehicleType['id'] }}" {{ (string) old('type', '') === (string) $vehicleType['id'] ? 'selected' : '' }}>
+                                @foreach ($vehicleTypes ?? collect() as $vehicleType)
+                                    <option value="{{ $vehicleType['id'] }}"
+                                        {{ (string) old('type', '') === (string) $vehicleType['id'] ? 'selected' : '' }}>
                                         {{ $vehicleType['label'] }}
                                     </option>
                                 @endforeach
@@ -135,9 +136,9 @@
                                 @endisset
                                 <span class="text-red-500">*</span>
                             </label>
-                            <input type="text" name="liscense_no" value="{{ old('liscense_no') }}"
+                            <input type="text" name="license_no" value="{{ old('license_no') }}"
                                 class="font-FuturaMdCnBT block mt-1 border p-1.5 w-full rounded text-base border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
-                            @error('liscense_no')
+                            @error('license_no')
                                 <div class="relative tooltip -bottom-4 group-hover:flex">
                                     <div role="tooltip"
                                         class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
@@ -350,11 +351,8 @@
         </div>
     </div>
 
-    <x-image-size-error-modal
-        title="Upload Error"
-        button-label="{{ $siteText['close_btn_text'] ?? 'Close' }}"
-        modal-border-class="modal-border1"
-    />
+    <x-image-size-error-modal title="Upload Error" button-label="{{ $siteText['close_btn_text'] ?? 'Close' }}"
+        modal-border-class="modal-border1" />
 @endsection
 
 @section('script')
@@ -372,7 +370,7 @@
 
         let hasVehiclePhoto = false;
         const vehiclePhotoPlaceholderUrl = "{{ asset('assets/image-placeholder.png') }}";
-        
+
         function updateRemoveVehiclePhotoButtonVisibility() {
             const profileImageEl = document.getElementById('profile-image');
             const btn = document.getElementById('remove-vehicle-photo-btn');
@@ -442,7 +440,7 @@
             const modelEl = document.querySelector('input[name="model"]');
             const typeEl = document.querySelector('select[name="type"]');
             const colorEl = document.querySelector('input[name="color"]');
-            const licenseEl = document.querySelector('input[name="liscense_no"]');
+            const licenseEl = document.querySelector('input[name="license_no"]');
             const yearEl = document.querySelector('input[name="year"]');
             const carType = document.querySelector('input[name="car_type"]:checked');
 
@@ -497,7 +495,7 @@
                 'input[name="model"]',
                 'select[name="type"]',
                 'input[name="color"]',
-                'input[name="liscense_no"]',
+                'input[name="license_no"]',
                 'input[name="year"]',
                 'input[name="car_type"]'
             ];
@@ -535,12 +533,13 @@
                 const model = document.querySelector('input[name="model"]').value.trim();
                 const type = document.querySelector('select[name="type"]').value;
                 const color = document.querySelector('input[name="color"]').value.trim();
-                const licenseNo = document.querySelector('input[name="liscense_no"]').value.trim();
+                const licenseNo = document.querySelector('input[name="license_no"]').value.trim();
                 const year = document.querySelector('input[name="year"]').value.trim();
                 const carType = document.querySelector('input[name="car_type"]:checked');
                 const fileInput = document.getElementById('dropzone-file');
 
-                if (fileInput && fileInput.files.length && fileInput.files[0].size > ({{ env('MAX_IMAGE_SIZE', 10) }} * 1024 * 1024)) {
+                if (fileInput && fileInput.files.length && fileInput.files[0].size > (
+                        {{ env('MAX_IMAGE_SIZE', 10) }} * 1024 * 1024)) {
                     e.preventDefault();
                     showImageSizeErrorModal();
                     fileInput.scrollIntoView({

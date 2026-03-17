@@ -210,11 +210,6 @@
                                                     @endphp
                                                     @if ($defaultDetail)
                                                     <div class="relative even:bg-gray-200 odd:bg-white">
-                                                        {{-- <div class="absolute right-4 top-8">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 -mt-4 cursor-pointer ride-remove-btn" data-ride-id="29">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                    </svg>
-                                                </div> --}}
                                                         <a class=""
                                                             href="{{ route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $from, 'destination' => $to, 'id' => $ride->id]) }}">
                                                             <div class="rounded-lg shadow-3xl border-[3px] border-solid border-gray-100 "
@@ -253,7 +248,7 @@
                                                                     class="flex flex-col md:flex-row justify-between px-4">
                                                                     <div class="w-full md:w-2/3 order-2 md:order-1">
                                                                         <div class="relative mt-5 text-left">
-                                                                            <div class="flex items-center relative">
+                                                                            <div class="items-center relative">
                                                                                 <div
                                                                                     class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
                                                                                     <span
@@ -281,7 +276,33 @@
                                                                                         </p>
                                                                                     </div>
                                                                                 </div>
+                                                                                @if ($ride->rideStops->isNotEmpty() && $ride->rideStops->count() > 2)
+                                                                                    <div class="ml-12 md:ml-20 flex">
+                                                                                        <p class="font-bold text-xl text-black">Stops on the way</p>
+                                                                                        <ul class="flex flex-col gap-2 text-sm ml-4 mt-1 mb-4">
+                                                                                            @foreach ($ride->rideStops as $stop)
+                                                                                                @continue($loop->first || $loop->last)
+                                                                                                <li
+                                                                                                    class="flex items-center px-2 py-0.5 rounded border border-gray-300 bg-gray-50 text-gray-700">
+                                                                                                    <span class="h-4 w-4 inline-flex mr-2">
+                                                                                                        <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"
+                                                                                                            fill="#000000">
+                                                                                                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                                                                                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
+                                                                                                                stroke-linejoin="round"></g>
+                                                                                                            <g id="SVGRepo_iconCarrier">
+                                                                                                                <path fill="#666666"
+                                                                                                                    d="M256 17.108c-75.73 0-137.122 61.392-137.122 137.122.055 23.25 6.022 46.107 11.58 56.262L256 494.892l119.982-274.244h-.063c11.27-20.324 17.188-43.18 17.202-66.418C393.122 78.5 331.73 17.108 256 17.108zm0 68.56a68.56 68.56 0 0 1 68.56 68.562A68.56 68.56 0 0 1 256 222.79a68.56 68.56 0 0 1-68.56-68.56A68.56 68.56 0 0 1 256 85.67z">
+                                                                                                                </path>
+                                                                                                            </g>
+                                                                                                        </svg>
+                                                                                                    </span>{{ $stop->label }}</li>
+                                                                                            @endforeach
+                                                                                        </ul>
+                                                                                    </div>
+                                                                                @endif
                                                                             </div>
+
 
                                                                             <div class="flex items-center relative">
                                                                                 <div
@@ -407,72 +428,10 @@
                                                                 </div>
                                                                 <div
                                                                     class="border-t border-gray-300 no-scrollbar overflow-x-auto flex items-center space-x-2 p-4">
-                                                                    @if ($ride->booking_method == $postRidePage->booking_option1->features_setting_id)
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
-                                                                            alt="">
-                                                                    @elseif ($ride->booking_method == $postRidePage->booking_option2->features_setting_id)
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
-                                                                            alt="">
-                                                                    @endif
-                                                                    @if ($ride->payment_method == $postRidePage->payment_methods_option1->features_setting_id)
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->payment_methods_option1->icon) }}"
-                                                                            alt="">
-                                                                    @elseif ($ride->payment_method == $postRidePage->payment_methods_option2->features_setting_id)
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->payment_methods_option2->icon) }}"
-                                                                            alt="">
-                                                                    @elseif ($ride->payment_method == $postRidePage->payment_methods_option3->features_setting_id)
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->payment_methods_option3->icon) }}"
-                                                                            alt="">
-                                                                    @endif
-                                                                    @if ($ride->smoke == $postRidePage->smoking_option1->features_setting_id)
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->smoking_option1->icon) }}"
-                                                                            alt="">
-                                                                    @elseif ($ride->smoke == $postRidePage->smoking_option2->features_setting_id)
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->smoking_option2->icon) }}"
-                                                                            alt="">
-                                                                    @endif
-                                                                    @if ($ride->animal_friendly == $postRidePage->animals_option1->features_setting_id)
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->animals_option1->icon) }}"
-                                                                            alt="">
-                                                                    @elseif ($ride->animal_friendly == $postRidePage->animals_option2->features_setting_id)
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->animals_option2->icon) }}"
-                                                                            alt="">
-                                                                    @elseif ($ride->animal_friendly == $postRidePage->animals_option3->features_setting_id)
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->animals_option3->icon) }}"
-                                                                            alt="">
-                                                                    @endif
-                                                                    @if ($ride->luggage == $postRidePage->luggage_option1->features_setting_id)
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->luggage_option1->icon) }}"
-                                                                            alt="">
-                                                                    @elseif ($ride->luggage == $postRidePage->luggage_option2->features_setting_id)
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->luggage_option2->icon) }}"
-                                                                            alt="">
-                                                                    @elseif ($ride->luggage == $postRidePage->luggage_option3->features_setting_id)
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->luggage_option3->icon) }}"
-                                                                            alt="">
-                                                                    @elseif ($ride->luggage == $postRidePage->luggage_option4->features_setting_id)
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->luggage_option4->icon) }}"
-                                                                            alt="">
-                                                                    @elseif ($ride->luggage == $postRidePage->luggage_option5->features_setting_id)
-                                                                        <img class="w-8 h-8"
-                                                                            src="{{ asset('home_page_icons/' . $postRidePage->luggage_option5->icon) }}"
-                                                                            alt="">
-                                                                    @endif
-                                                                    
+                                                                    @include('partials.ride_preference_icons', [
+                                                                        'ride' => $ride,
+                                                                        'searchOptionGroups' => $searchOptionGroups,
+                                                                    ])
                                                                     @include('partials.ride_feature_icons', [
                                                                         'rideFeatures' => $ride->features,
                                                                     ])

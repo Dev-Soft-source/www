@@ -151,10 +151,10 @@ return [
         'model' => [
             'required' => 'ماڈل ضروری ہے۔',
         ],
-        'type' => [
+        'vehicle_type' => [
             'required' => 'گاڑی کی قسم ضروری ہے۔',
         ],
-        'liscense_no' => [
+        'license_no' => [
             'required' => 'لائسنس پلیٹ نمبر ضروری ہے۔',
             'max' => 'لائسنس پلیٹ نمبر 8 حروف سے کم ہونا چاہیے۔',
         ],
@@ -166,7 +166,7 @@ return [
             'required' => 'سال ضروری ہے۔',
             'max' => 'سال 4 حروف سے کم ہونا چاہیے۔',
         ],
-        'car_type' => [
+        'power_type' => [
             'required' => 'توانائی کا ذریعہ ضروری ہے۔',
         ],
         'primary_vehicle' => [
@@ -377,11 +377,11 @@ return [
     'attributes' => [
         'make' => 'برانڈ',
         'model' => 'ماڈل',
-        'type' => 'گاڑی کی قسم',
+        'vehicle_type' => 'گاڑی کی قسم',
         'color' => 'رنگ',
         'year' => 'سال',
-        'liscense_no' => 'لائسنس پلیٹ نمبر',
-        'car_type' => 'توانائی کا ذریعہ',
+        'license_no' => 'لائسنس پلیٹ نمبر',
+        'power_type' => 'توانائی کا ذریعہ',
         'primary_vehicle' => 'بنیادی گاڑی',
         'image' => 'گاڑی کی تصویر',
         'email' => 'ای میل ایڈریس',

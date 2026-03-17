@@ -49,7 +49,9 @@ class SignupController extends Controller
         $messages = $this->successMessage;
 
         // Check if email exists and account is closed - allow re-registration
-        $existingUser = User::where('email', $request->email)->whereNull('deleted_at')->first();
+        $existingUser = User::active()
+            ->where('email', $request->email)
+            ->first();
         if ($existingUser && $existingUser->closed === '1') {
             // Allow closed accounts to re-register - bypass unique validation
             $emailRule = 'required|string|email|max:255';
@@ -94,7 +96,10 @@ class SignupController extends Controller
         ]);
 
         // Check if user exists with closed account - update instead of create
-        $existingClosedUser = User::where('email', $request->email)->where('closed', '1')->whereNull('deleted_at')->first();
+        $existingClosedUser = User::active()
+            ->where('email', $request->email)
+            ->closed()
+            ->first();
 
         $ip = request()->ip();
 

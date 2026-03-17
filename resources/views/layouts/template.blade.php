@@ -18,6 +18,7 @@
     <!-- Styles -->
     <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ filemtime(public_path('css/app.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/front.css') }}?v={{ filemtime(public_path('css/front.css')) }}">
+    @livewireStyles
 
     @yield('style')
     <style>
@@ -341,6 +342,7 @@
     </div>
     <div class="hidden opacity-25 fixed inset-0 z-40 bg-black" id="logout-modal-backdrop"></div>
 
+    @livewireScripts
     <script src="https://unpkg.com/@popperjs/core@2.9.1/dist/umd/popper.min.js" charset="utf-8"></script>
     <script type="text/javascript">
         function toggleModal(modalID) {

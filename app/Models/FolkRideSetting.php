@@ -19,4 +19,19 @@ class FolkRideSetting extends Model
         'driver_license',
         'extra_rides_trip_limit',
     ];
+
+    public function requiresVerifiedPhone(): bool
+    {
+        return (string) $this->verfiy_phone === '1';
+    }
+
+    public function requiresVerifiedEmail(): bool
+    {
+        return (string) $this->verify_email === '1';
+    }
+
+    public function requiresDriverLicense(): bool
+    {
+        return (string) $this->driver_license === '1';
+    }
 }

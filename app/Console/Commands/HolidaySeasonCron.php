@@ -50,8 +50,8 @@ class HolidaySeasonCron extends Command
         }
 
         // Send to all active users with email notifications enabled
-        User::whereNull('deleted_at')
-            ->where('email_notification', 1)
+        User::active()
+            ->emailNotificationsEnabled()
             ->chunk(100, function ($users) {
                 foreach ($users as $user) {
                     try {
@@ -67,7 +67,7 @@ class HolidaySeasonCron extends Command
                 }
             });
             
-        User::whereNull('deleted_at')
+        User::active()
             ->chunk(100, function ($users) {
                 foreach ($users as $user) {
                     try {

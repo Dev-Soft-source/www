@@ -44,7 +44,7 @@ class HomeController extends Controller
 {
     public function index($lang = null)
     {
-        $rides = Ride::with(['defaultRideDetail'])->latest('added_on')->where('status', '!=', 2)->where('suspand', '!=', 1)->take(4)->get();
+        $rides = Ride::with(['defaultRideDetail'])->latest('added_on')->notCancelled()->where('suspand', '!=', 1)->take(4)->get();
         
         $latestFilteredReviews = Rating::latest('added_on')->where('is_disply', 1)->get();
         

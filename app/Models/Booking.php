@@ -9,8 +9,25 @@ class Booking extends Model
 {
     use HasFactory;
 
+    public const STATUS_REQUESTED = 0;
+    public const STATUS_BOOKED = 1;
+    public const STATUS_COMPLETED = 2;
+    public const STATUS_DECLINED = 3;
+    public const STATUS_CANCELLED = 4;
+
     public $timestamps  = false;
     protected $fillable = ['user_id', 'ride_id', 'seats', 'type', 'booked_on', 'status', 'booking_credit', 'fare', 'secured_cash', 'secured_cash_code', 'expires_at', 'removed_permanently', 'uuid', 'block_days', 'block_date_time', 'tax_amount', 'ride_detail_id', 'departure', 'destination', 'price', 'conversation_sid', 'participant_sid', 'phone_number'];
+
+    public static function statusLabels(): array
+    {
+        return [
+            self::STATUS_REQUESTED => 'requested',
+            self::STATUS_BOOKED => 'booked',
+            self::STATUS_COMPLETED => 'completed',
+            self::STATUS_DECLINED => 'declined',
+            self::STATUS_CANCELLED => 'cancelled',
+        ];
+    }
 
 
     public function passenger()
@@ -78,5 +95,20 @@ class Booking extends Model
     public function seatDetail()
     {
         return $this->hasMany(SeatDetail::class, 'booking_id');
+    }
+
+    public function scopeBookedOrCompleted($query)
+    {
+        return $query->whereIn('status', [
+            self::STATUS_BOOKED,
+            self::STATUS_COMPLETED,
+        ]);
+    }
+
+    public function scopeWithActivePassenger($query)
+    {
+        return $query->whereHas('passenger', function ($passengerQuery) {
+            $passengerQuery->withoutTrashed();
+        });
     }
 }

@@ -3,6 +3,11 @@
     margin-bottom: 25px;
 }
 
+.required::after {
+    content: " *";
+    color: #ef4444;
+}
+
 
 /* hover tooltip */
 .tippy-box[data-theme~='custom'] {
@@ -38,6 +43,99 @@
     color: #c75b5b;
 }
 
+/* city search */
+.px-search-shell {
+    border: 2px solid #1677e6;
+    border-radius: 18px;
+    background: #fff;
+    overflow: visible;
+    /* box-shadow: 0 6px 18px rgba(15, 53, 110, 0.16); */
+}
+
+.px-search-segment {
+    min-height: 56px;
+}
+
+.px-search-divider {
+    position: relative;
+}
+
+.px-search-divider::after {
+    content: "";
+    position: absolute;
+    top: 12px;
+    right: 0;
+    width: 1px;
+    height: calc(100% - 24px);
+    background: #d8deea;
+}
+
+.px-search-submit {
+    min-height: 56px;
+    background: #1677e6;
+    border-radius: 0 14px 14px 0;
+}
+
+.px-search-submit:hover {
+    background: #0f67ca;
+}
+
+@media (max-width: 767px) {
+    .px-search-shell {
+        display: block;
+        border-radius: 20px;
+        overflow: visible;
+        border-width: 2px;
+        background: #f3f4f6;
+        box-shadow: 0 10px 24px rgba(15, 53, 110, 0.14);
+    }
+
+    .px-search-segment {
+        min-height: 64px;
+        background: transparent;
+        display: flex;
+        align-items: center;
+    }
+
+    .px-search-shell>div:not(:last-child) {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .px-search-shell>div:last-child {
+        margin-top: 0;
+    }
+
+    .px-search-divider {
+        border-bottom: 1px solid #d8deea;
+    }
+
+    .px-search-shell .px-search-segment>.h-full,
+    .px-search-shell .px-search-segment>.relative {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+    }
+
+    .px-search-shell .px-search-segment input {
+        min-height: 64px;
+    }
+
+    .px-search-shell .md\:w-\[4\%\] {
+        display: none;
+    }
+
+    .px-search-submit {
+        min-height: 58px;
+        border-radius: 0 0 18px 18px;
+    }
+
+    .px-search-divider::after {
+        display: none;
+    }
+}
+
 
 /* error tooltip css */
 .tooltip-error {
@@ -56,6 +154,7 @@
     transform-origin: top center;
     animation: tooltipErrorIn 0.28s ease-out forwards;
     /* min-width: max-content; */
+    z-index: 9999;
 }
 
 .tooltip-error::before {

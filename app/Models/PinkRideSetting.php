@@ -18,4 +18,24 @@ class PinkRideSetting extends Model
         'verify_email',
         'driver_license',
     ];
+
+    public function requiresFemaleDriver(): bool
+    {
+        return (string) $this->female === '1';
+    }
+
+    public function requiresVerifiedPhone(): bool
+    {
+        return (string) $this->verfiy_phone === '1';
+    }
+
+    public function requiresVerifiedEmail(): bool
+    {
+        return (string) $this->verify_email === '1';
+    }
+
+    public function requiresDriverLicense(): bool
+    {
+        return (string) $this->driver_license === '1';
+    }
 }

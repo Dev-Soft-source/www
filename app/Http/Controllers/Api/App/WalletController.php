@@ -50,7 +50,7 @@ class WalletController extends Controller
                         });
                 })
                 ->whereHas('driver', function ($query) {
-                    $query->whereNull('deleted_at'); // Exclude soft-deleted drivers
+                    $query->active(); // Exclude soft-deleted drivers
                 });
             })
             ->with(['ride' => function ($query) {

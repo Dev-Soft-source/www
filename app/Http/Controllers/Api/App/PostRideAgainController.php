@@ -19,7 +19,7 @@ class PostRideAgainController extends Controller
         $user_id = $user->id;
 
         $rides = Ride::where('added_by', $user_id)
-            ->where('status', '!=', 2)
+            ->notCancelled()
             ->where(function ($query) {
                 $query->where(function ($query) {
                     $query->whereDate('completed_date', '>=', now()->toDateString())
@@ -58,7 +58,7 @@ class PostRideAgainController extends Controller
         $user_id = $user->id;
 
         $rides = Ride::where('added_by', $user_id)
-            ->where('status', '!=', 2)
+            ->notCancelled()
             ->where(function ($query) {
                 $query->where(function ($query) {
                     $query->whereDate('completed_date', '<=', now()->toDateString())
@@ -83,7 +83,7 @@ class PostRideAgainController extends Controller
         $user_id = $user->id;
 
         $rides = Ride::where('added_by', $user_id)
-            ->where('status', 2)
+            ->cancelled()
             ->with(['rideDetail' => function($q){
                 $q->where('default_ride','1');
             }])

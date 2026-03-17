@@ -24,10 +24,11 @@ class ProfileVehicleController extends Controller
 {
     use StatusResponser;
 
-    public function index(Request $request){
+    public function index(Request $request)
+    {
         $user = Auth::guard('sanctum')->user();
         $user_id = $user->id;
-        $vehicles = Vehicle::where('user_id',$user_id)->orderBy('primary_vehicle', 'desc')->orderBy('id', 'desc')->get();
+        $vehicles = Vehicle::where('user_id', $user_id)->orderBy('primary_vehicle', 'desc')->orderBy('id', 'desc')->get();
 
         $vehicleSettingPage = null;
         if ($request->lang_id && $request->lang_id != 0) {
@@ -52,7 +53,8 @@ class ProfileVehicleController extends Controller
         return $this->successResponse($data, 'Get vehicles successfully');
     }
 
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         $message = null;
         $selectedLanguage = app()->getLocale();
         if ($selectedLanguage) {
@@ -77,14 +79,14 @@ class ProfileVehicleController extends Controller
             'make' => 'required',
             'model' => 'required',
             'type' => 'required|integer|exists:features_setting_detail,features_setting_id',
-            'liscense_no' => 'required|max:8',
+            'license_no' => 'required|max:8',
             'color' => 'required|max:15',
             'year' => 'required|max:4',
             'car_type' => 'required',
             'image' => 'file|mimes:jpeg,png,gif|max:10240',
         ], $customMessages);
 
-        
+
         $user = Auth::guard('sanctum')->user();
 
         $primaryVehicle = 0;
@@ -105,25 +107,24 @@ class ProfileVehicleController extends Controller
             $file = $request->file('image');
             $filename = $file->getClientOriginalName();
             $destination_path = public_path('/car_images');
-            $file->move($destination_path,$filename);
+            $file->move($destination_path, $filename);
 
             $fileOriginal = $request->file('original_image');
             $filenameOriginal = $fileOriginal->getClientOriginalName();
             $destination_path = public_path('/car_images');
-            $fileOriginal->move($destination_path,$filenameOriginal);
-
+            $fileOriginal->move($destination_path, $filenameOriginal);
         } else {
             $filename = '';
             $filenameOriginal = "";
         }
 
-        
+
         $vehicle = Vehicle::create([
             'user_id' => $user->id,
             'make' => $request->make,
             'model' => $request->model,
             'type' => Vehicle::normalizeVehicleTypeId($request->type),
-            'liscense_no' => $request->liscense_no,
+            'license_no' => $request->license_no,
             'color' => $request->color,
             'year' => $request->year,
             'car_type' => $request->car_type,
@@ -139,55 +140,57 @@ class ProfileVehicleController extends Controller
             ];
             Mail::to($user->email)->send(new NewVehicleAddedMail($emailData));
         }
-         $notification = Notification::create([
-        'type' => null, 
-        'receiver_id' => $user->id,
-        'posted_by' => $user->id, 
-        'message' => getNotificationMessageText(
-            'vehicle_added_to_profile',
-            $user,
-            [],
-            'A new vehicle added to your profile'
-        ),
-        'status' => 'completed',
-        'notification_type' => 'vehicle'
-    ]);
-    
-    // Send push notification
-    $fcmService = new FCMService();
-    $fcm_tokens = FCMToken::where('user_id', $user->id)->get();
-    $body = $notification->message;
+        $notification = Notification::create([
+            'type' => null,
+            'receiver_id' => $user->id,
+            'posted_by' => $user->id,
+            'message' => getNotificationMessageText(
+                'vehicle_added_to_profile',
+                $user,
+                [],
+                'A new vehicle added to your profile'
+            ),
+            'status' => 'completed',
+            'notification_type' => 'vehicle'
+        ]);
 
-    $fcmToken = $user->mobile_fcm_token;
-    if ($fcmToken) {
-        $fcmService->sendNotification($fcmToken, $body);
-    }
+        // Send push notification
+        $fcmService = new FCMService();
+        $fcm_tokens = FCMToken::where('user_id', $user->id)->get();
+        $body = $notification->message;
 
-    foreach ($fcm_tokens as $fcm_token) {
-        try {
-            $fcmService->sendNotification($fcm_token->token, $body);
-        } catch (\Exception $e) {
-            Log::error("FCM Notification failed for token: $fcm_token->token, Error: " . $e->getMessage());
+        $fcmToken = $user->mobile_fcm_token;
+        if ($fcmToken) {
+            $fcmService->sendNotification($fcmToken, $body);
         }
-    }
+
+        foreach ($fcm_tokens as $fcm_token) {
+            try {
+                $fcmService->sendNotification($fcm_token->token, $body);
+            } catch (\Exception $e) {
+                Log::error("FCM Notification failed for token: $fcm_token->token, Error: " . $e->getMessage());
+            }
+        }
 
         $data = ['vehicle' => $vehicle];
         return $this->successResponse($data, strip_tags($message->vehicle_add_message));
     }
 
-    public function edit(Request $request){
+    public function edit(Request $request)
+    {
         $vehicle = Vehicle::whereId($request->id)->first();
 
         $data = ['vehicle' => $vehicle];
         return $this->successResponse($data, 'Get vehicle successfully');
     }
 
-    public function update(Request $request){
+    public function update(Request $request)
+    {
         $validated = $request->validate([
             'make' => 'required',
             'model' => 'required',
             'type' => 'required|integer|exists:features_setting_detail,features_setting_id',
-            'liscense_no' => 'required|max:8',
+            'license_no' => 'required|max:8',
             'color' => 'required|max:15',
             'year' => 'required|max:4',
             'car_type' => 'required',
@@ -196,7 +199,7 @@ class ProfileVehicleController extends Controller
         $user = Auth::guard('sanctum')->user();
         $primaryVehicle = 0;
 
-        if(isset($request->primary_vehicle) && $request->primary_vehicle != ""){
+        if (isset($request->primary_vehicle) && $request->primary_vehicle != "") {
             // Only update vehicles belonging to this user (not all vehicles)
             DB::table('vehicles')->where('user_id', $user->id)->update(['primary_vehicle' => 0]);
             $primaryVehicle = 1;
@@ -240,7 +243,7 @@ class ProfileVehicleController extends Controller
             'make' => $request->make,
             'model' => $request->model,
             'type' => Vehicle::normalizeVehicleTypeId($request->type),
-            'liscense_no' => $request->liscense_no,
+            'license_no' => $request->license_no,
             'color' => $request->color,
             'year' => $request->year,
             'car_type' => $request->car_type,
@@ -258,12 +261,12 @@ class ProfileVehicleController extends Controller
             $file = $request->file('image');
             $filename = $file->getClientOriginalName();
             $destination_path = public_path('/car_images');
-            $file->move($destination_path,$filename);
+            $file->move($destination_path, $filename);
 
             $fileOriginal = $request->file('original_image');
             $filenameOriginal = $fileOriginal->getClientOriginalName();
             $destination_path = public_path('/car_images');
-            $fileOriginal->move($destination_path,$filenameOriginal);
+            $fileOriginal->move($destination_path, $filenameOriginal);
 
             Vehicle::whereId($request->id)->update([
                 'image' => $filename,
@@ -324,38 +327,38 @@ class ProfileVehicleController extends Controller
                 Mail::to($user->email)->send(new VehicleRemovedEmail($emailData));
             }
 
-               $notification = Notification::create([
-            'type' => null, 
-            'category' => 'system',
-            'receiver_id' => $user->id,
-            'posted_by' => $user->id, 
-            'message' => getNotificationMessageText(
-                'vehicle_removed_from_profile',
-                $user,
-                [],
-                'Vehicle removed from your profile'
-            ),
-            'status' => 'completed',
-            'notification_type' => 'vehicle'
-        ]);
-        
-        // Send push notification
-        $fcmService = new FCMService();
-        $fcm_tokens = FCMToken::where('user_id', $user->id)->get();
-        $body = $notification->message;
+            $notification = Notification::create([
+                'type' => null,
+                'category' => 'system',
+                'receiver_id' => $user->id,
+                'posted_by' => $user->id,
+                'message' => getNotificationMessageText(
+                    'vehicle_removed_from_profile',
+                    $user,
+                    [],
+                    'Vehicle removed from your profile'
+                ),
+                'status' => 'completed',
+                'notification_type' => 'vehicle'
+            ]);
 
-        $fcmToken = $user->mobile_fcm_token;
-        if ($fcmToken) {
-            $fcmService->sendNotification($fcmToken, $body);
-        }
+            // Send push notification
+            $fcmService = new FCMService();
+            $fcm_tokens = FCMToken::where('user_id', $user->id)->get();
+            $body = $notification->message;
 
-        foreach ($fcm_tokens as $fcm_token) {
-            try {
-                $fcmService->sendNotification($fcm_token->token, $body);
-            } catch (\Exception $e) {
-                Log::error("FCM Notification failed for token: $fcm_token->token, Error: " . $e->getMessage());
+            $fcmToken = $user->mobile_fcm_token;
+            if ($fcmToken) {
+                $fcmService->sendNotification($fcmToken, $body);
             }
-        }
+
+            foreach ($fcm_tokens as $fcm_token) {
+                try {
+                    $fcmService->sendNotification($fcm_token->token, $body);
+                } catch (\Exception $e) {
+                    Log::error("FCM Notification failed for token: $fcm_token->token, Error: " . $e->getMessage());
+                }
+            }
 
             $selectedLanguage = app()->getLocale();
             if ($selectedLanguage) {

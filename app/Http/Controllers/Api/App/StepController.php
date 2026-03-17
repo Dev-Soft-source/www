@@ -24,7 +24,8 @@ class StepController extends Controller
 {
     use StatusResponser;
 
-    public function step1to5(Request $request){
+    public function step1to5(Request $request)
+    {
         $user_id = Auth::guard('sanctum')->user()->id;
 
         $request->validate([
@@ -35,7 +36,7 @@ class StepController extends Controller
             'country' => 'required',
             'state' => 'nullable',
             'city' => 'nullable',
-            'zipcode' => 'required|string|max:'. (request()->input('country') == 39 ? 7 : 10),
+            'zipcode' => 'required|string|max:' . (request()->input('country') == 39 ? 7 : 10),
             'about' => 'required|max:300',
         ]);
 
@@ -79,15 +80,25 @@ class StepController extends Controller
         ]);
 
         $user = User::whereId($user_id)->first();
-        
+
         $defaultLangId = Language::where('is_default', '1')->value('id');
 
-        $data = ['first_name' => $user->first_name, 'last_name' => $user->last_name, 'gender' => ucfirst($user->gender), 'profile_image' => $user->profile_image, 'email' => $user->email,
-        'about' => $user->about, 'step' => $user->step, 'id' => $user->id, 'langId' => isset($user->lang_id) ? $user->lang_id : $defaultLangId];
+        $data = [
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'gender' => ucfirst($user->gender),
+            'profile_image' => $user->profile_image,
+            'email' => $user->email,
+            'about' => $user->about,
+            'step' => $user->step,
+            'id' => $user->id,
+            'langId' => isset($user->lang_id) ? $user->lang_id : $defaultLangId
+        ];
         return $this->successResponse($data, 'Step 1 completed successfully');
     }
 
-    public function step2to5(Request $request){
+    public function step2to5(Request $request)
+    {
         $user_id = Auth::guard('sanctum')->user()->id;
 
         $skip = $request->filled('skip') ? $request->skip : '0';
@@ -115,14 +126,15 @@ class StepController extends Controller
         ]);
 
         $user = User::whereId($user_id)->first();
-        
+
         $defaultLangId = Language::where('is_default', '1')->value('id');
 
         $data = ['first_name' => $user->first_name, 'last_name' => $user->last_name, 'gender' => ucfirst($user->gender), 'profile_image' => $user->profile_image, 'email' => $user->email, 'step' => $user->step, 'id' => $user->id, 'langId' => isset($user->lang_id) ? $user->lang_id : $defaultLangId];
         return $this->successResponse($data, 'Step 2 completed successfully');
     }
 
-    public function step3to5(Request $request){
+    public function step3to5(Request $request)
+    {
         $user_id = Auth::guard('sanctum')->user()->id;
         $skip = $request->filled('skip') ? $request->skip : '0';
         $skip_vehicle = $request->filled('skip_vehicle') ? $request->skip_vehicle : '0';
@@ -132,7 +144,7 @@ class StepController extends Controller
             'max' => 'Can not upload image size greater than 10MB',
         ];
 
-        if($skip == "1"){
+        if ($skip == "1") {
 
             User::whereId($user_id)->update([
                 'step' => '4',
@@ -142,8 +154,7 @@ class StepController extends Controller
             $defaultLangId = Language::where('is_default', '1')->value('id');
             $data = ['first_name' => $user->first_name, 'last_name' => $user->last_name, 'gender' => ucfirst($user->gender), 'profile_image' => $user->profile_image, 'email' => $user->email, 'step' => $user->step, 'id' => $user->id, 'langId' => isset($user->lang_id) ? $user->lang_id : $defaultLangId];
             return $this->successResponse($data, 'Step 3 completed successfully');
-
-        }else if($skip_vehicle == "0"){
+        } else if ($skip_vehicle == "0") {
             $request->validate([
                 'make' => 'required',
                 'model' => 'required',
@@ -155,25 +166,25 @@ class StepController extends Controller
                 'driver_liscense' => 'nullable|file|mimes:pdf,jpeg,png|max:10240',
                 'image' => 'nullable|file|mimes:jpeg,png|max:10240',
             ], $customMessages);
-        }else if($skip_license == "0"){
+        } else if ($skip_license == "0") {
             $request->validate([
                 'driver_liscense' => 'required|file|mimes:pdf,jpeg,png|max:10240',
             ], $customMessages);
         }
 
 
-        
+
 
         if (isset($request->driver_liscense) && $request->hasFile('driver_liscense')) {
             $file = $request->file('driver_liscense');
             $filename = $file->getClientOriginalName();
             $destination_path = public_path('/driver_liscenses');
-            $file->move($destination_path,$filename);
+            $file->move($destination_path, $filename);
 
             $fileOriginal = $request->file('driver_license_original_upload');
             $filenameOriginal = $fileOriginal->getClientOriginalName();
             $destination_path = public_path('/driver_liscenses');
-            $fileOriginal->move($destination_path,$filenameOriginal);
+            $fileOriginal->move($destination_path, $filenameOriginal);
 
             User::whereId($user_id)->update([
                 'driver_liscense' => $filename,
@@ -191,18 +202,18 @@ class StepController extends Controller
             $file = $request->file('image');
             $filename = $file->getClientOriginalName();
             $destination_path = public_path('/car_images');
-            $file->move($destination_path,$filename);
+            $file->move($destination_path, $filename);
         } else {
             $filename = '';
         }
-        
+
         if ($skip_vehicle == '0') {
             Vehicle::create([
                 'user_id' => $user_id,
                 'make' => $request->make,
                 'model' => $request->model,
                 'type' => Vehicle::normalizeVehicleTypeId($request->type),
-                'liscense_no' => $request->license_no,
+                'license_no' => $request->license_no,
                 'color' => $request->color,
                 'year' => $request->year,
                 'car_type' => $request->car_type,
@@ -211,14 +222,15 @@ class StepController extends Controller
         }
 
         $user = User::whereId($user_id)->first();
-        
+
         $defaultLangId = Language::where('is_default', '1')->value('id');
 
         $data = ['first_name' => $user->first_name, 'last_name' => $user->last_name, 'gender' => ucfirst($user->gender), 'profile_image' => $user->profile_image, 'email' => $user->email, 'step' => $user->step, 'id' => $user->id, 'langId' => isset($user->lang_id) ? $user->lang_id : $defaultLangId];
         return $this->successResponse($data, 'Step 3 completed successfully');
     }
 
-    public function online_status(Request $request){
+    public function online_status(Request $request)
+    {
         $user_id = Auth::guard('sanctum')->user()->id;
 
         $request->validate([
@@ -239,7 +251,7 @@ class StepController extends Controller
     {
         $step1Page = null;
         if ($request->lang_id && $request->lang_id != 0) {
-            
+
             $selectedLanguage = Language::where('id', $request->lang_id)->first();
             // Retrieve the Step1PageSettingDetail associated with the selected language
             $step1Page = Step1PageSettingDetail::where('language_id', $request->lang_id)->first();
@@ -255,7 +267,7 @@ class StepController extends Controller
         } else {
             $locale = 'en';
         }
-        
+
         App::setLocale($locale);
 
         $validationMessages = [
@@ -275,7 +287,7 @@ class StepController extends Controller
     {
         $step2Page = null;
         if ($request->lang_id && $request->lang_id != 0) {
-            
+
             $selectedLanguage = Language::where('id', $request->lang_id)->first();
             // Retrieve the Step2PageSettingDetail associated with the selected language
             $step2Page = Step2PageSettingDetail::where('language_id', $request->lang_id)->first();
@@ -291,7 +303,7 @@ class StepController extends Controller
         } else {
             $locale = 'en';
         }
-        
+
         App::setLocale($locale);
 
         $validationMessages = [
@@ -309,7 +321,7 @@ class StepController extends Controller
     {
         $step3Page = null;
         if ($request->lang_id && $request->lang_id != 0) {
-            
+
             $selectedLanguage = Language::where('id', $request->lang_id)->first();
             // Retrieve the Step3PageSettingDetail associated with the selected language
             $step3Page = Step3PageSettingDetail::where('language_id', $request->lang_id)->first();
@@ -327,7 +339,7 @@ class StepController extends Controller
         } else {
             $locale = 'en';
         }
-        
+
         App::setLocale($locale);
 
         $validationMessages = [
@@ -337,7 +349,7 @@ class StepController extends Controller
             'max.file' => trans('validation.max.file'),
         ];
 
-        $data = ['step3Page' => $step3Page, 'step4Page' => $step4Page, 'validationMessages' => $validationMessages]; 
+        $data = ['step3Page' => $step3Page, 'step4Page' => $step4Page, 'validationMessages' => $validationMessages];
         return $this->successResponse($data, 'Step3 page get successfully');
     }
 
@@ -362,7 +374,7 @@ class StepController extends Controller
         } else {
             $locale = 'en';
         }
-        
+
         App::setLocale($locale);
 
         $validationMessages = [

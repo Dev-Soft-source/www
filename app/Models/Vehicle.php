@@ -12,7 +12,7 @@ class Vehicle extends Model
     use HasFactory;
     public $timestamps = false;
 
-    protected $fillable = ['user_id','make','model','type','liscense_no','color','year','car_type','image', 'original_image','remove_image','added_on','primary_vehicle'];
+    protected $fillable = ['user_id', 'make', 'model', 'type', 'license_no', 'color', 'year', 'car_type', 'image', 'original_image', 'remove_image', 'added_on', 'primary_vehicle'];
     protected $casts = [
         'type' => 'integer',
     ];
@@ -79,7 +79,7 @@ class Vehicle extends Model
         $detail = FeaturesSettingDetail::where('features_setting_id', $typeId)
             ->whereIn('language_id', array_filter([$selectedLanguage?->id, $defaultLanguageId]))
             ->get()
-            ->sortByDesc(fn ($item) => (int) ($selectedLanguage && $item->language_id == $selectedLanguage->id))
+            ->sortByDesc(fn($item) => (int) ($selectedLanguage && $item->language_id == $selectedLanguage->id))
             ->first();
 
         return $detail?->name;

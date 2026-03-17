@@ -20,12 +20,7 @@
                         </button>
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
-                                <!-- <div
-                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                    </svg>
-                                </div> -->
+
                             </div>
                             <div class="text-center w-full mt-4">
                                 <p class="can-exp-p text-center">{!! session('message') !!}</p>
@@ -89,11 +84,7 @@
                         class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
-                                <!-- <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                    </svg>
-                                </div> -->
+
                             </div>
                             <div class="text-center mt-4">
 
@@ -321,9 +312,8 @@
                                 $current = $nextSegment->destination;
                                 $remaining = $remaining->filter(fn($d) => $d->id != $nextSegment->id);
                             }
-                            $stops = $orderedPoints->count() > 2
-                                ? $orderedPoints->slice(1, $orderedPoints->count() - 2)->values()
-                                : collect();
+
+                            
                         @endphp
                         <div class="w-full md:w-2/3 order-2 md:order-1">
                             @if ($origin || $destination)
@@ -362,8 +352,11 @@
                                                         @endisset
                                                     </p>
                                                     <ul class="list-disc list-inside space-y-1 ml-6 text-gray-900 text-base md:text-lg">
-                                                        @foreach ($stops as $stop)
-                                                            <li class="text-primary font-FuturaMdCnBT text-xl md:text-2xl">{{ $stop }}</li>
+                                                    @foreach ($ride->rideStops as $stop)
+                                                    @continue($loop->first || $loop->last)
+                                                            <li class="text-primary font-FuturaMdCnBT text-xl md:text-2xl">
+                                                                {{ $stop->label ?? '' }}
+                                                            </li>
                                                         @endforeach
                                                     </ul>
                                                 </div>

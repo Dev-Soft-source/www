@@ -13,7 +13,7 @@ class PostRideAgainController extends Controller
 {
     public function CurrentRides($lang = null){
         $rides = Ride::where('added_by', auth()->user()->id)
-            ->where('status', '!=', 2)
+            ->notCancelled()
             ->where(function ($query) {
                 $query->where(function ($query) {
                     $query->whereDate('completed_date', '>=', now()->toDateString())
@@ -75,7 +75,7 @@ class PostRideAgainController extends Controller
 
     public function PastRides($lang = null){
         $rides = Ride::where('added_by',auth()->user()->id)
-            ->where('status', '!=', 2)
+            ->notCancelled()
             ->where(function ($query) {
                 $query->where(function ($query) {
                     $query->whereDate('completed_date', '<=', now()->toDateString())
@@ -138,7 +138,7 @@ class PostRideAgainController extends Controller
 
     public function CancelledRides($lang = null){
         $rides = Ride::where('added_by',auth()->user()->id)
-            ->where('status', 2)
+            ->cancelled()
             ->orderBy('id', 'desc')
             ->paginate(6);
 

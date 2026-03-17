@@ -151,10 +151,10 @@ return [
         'model' => [
             'required' => 'Le modèle est obligatoire.',
         ],
-        'type' => [
+        'vehicle_type' => [
             'required' => 'Le type de véhicule est obligatoire.',
         ],
-        'liscense_no' => [
+        'license_no' => [
             'required' => 'Le numéro de plaque est obligatoire.',
             'max' => 'Le numéro de plaque doit contenir moins de 8 caractères.',
         ],
@@ -166,7 +166,7 @@ return [
             'required' => "L'année est obligatoire.",
             'max' => "L'année doit contenir moins de 4 caractères.",
         ],
-        'car_type' => [
+        'power_type' => [
             'required' => 'La source d’énergie est obligatoire.',
         ],
         'primary_vehicle' => [
@@ -377,11 +377,11 @@ return [
     'attributes' => [
         'make' => 'Marque',
         'model' => 'Modèle',
-        'type' => 'Type de véhicule',
+        'vehicle_type' => 'Type de véhicule',
         'color' => 'Couleur',
         'year' => 'Année',
-        'liscense_no' => 'Numéro de plaque',
-        'car_type' => 'Source d’énergie',
+        'license_no' => 'Numéro de plaque',
+        'power_type' => 'Source d’énergie',
         'primary_vehicle' => 'Véhicule principal',
         'image' => 'Photo du véhicule',
         'email' => 'Adresse e-mail',

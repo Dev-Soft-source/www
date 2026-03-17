@@ -23,7 +23,7 @@ return new class extends Migration
                 ->onUpdate('cascade');
             $table->string('model');
             $table->string('type');
-            $table->string('liscense_no');
+            $table->string('license_no');
             $table->string('color');
             $table->string('year');
             $table->string('image');

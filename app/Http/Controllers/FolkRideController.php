@@ -83,7 +83,7 @@ class FolkRideController extends Controller
                         $q->where('departure','like', '%'.$from.'%')
                         ->where('destination','like', '%'.$to.'%');
                     }])
-                ->where('status', '!=', 2)
+                ->notCancelled()
                 ->where('suspand', '!=', 1)
                 ->where('vehicle_id', '!=', null);
 
@@ -102,7 +102,7 @@ class FolkRideController extends Controller
                         $q->where('departure','like', '%'.$from.'%')
                         ->where('destination','like', '%'.$to.'%');
                     }])
-                ->where('status', '!=', 2)
+                ->notCancelled()
                 ->where('suspand', '!=', 1)
                 ->where('vehicle_id', '!=', null);
 

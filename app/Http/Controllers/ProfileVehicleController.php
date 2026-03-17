@@ -32,16 +32,18 @@ class ProfileVehicleController extends Controller
         $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-    
+
         if (auth()->user()) {
             $user_id = auth()->user()->id;
             $vehicles = Vehicle::where('user_id', $user_id)->orderBy('id', 'desc')->get();
 
             return view('profile_vehicle', [
-                'vehicles' => $vehicles, 'reviewSetting' => $reviewSetting, 
-                'ProfilePage' => $ProfilePage, 'ProfileSetting' => $ProfileSetting, 
+                'vehicles' => $vehicles,
+                'reviewSetting' => $reviewSetting,
+                'ProfilePage' => $ProfilePage,
+                'ProfileSetting' => $ProfileSetting,
                 'myVehiclePage' => $myVehiclePage
-                ]);
+            ]);
         } else {
             return redirect()->route('home', ['lang' => $this->selectedLanguage->abbreviation]);
         }
@@ -64,66 +66,29 @@ class ProfileVehicleController extends Controller
         }
 
         return view('create_vehicle', [
-            'reviewSetting' => $reviewSetting, 'ProfilePage' => $ProfilePage, 
+            'reviewSetting' => $reviewSetting,
+            'ProfilePage' => $ProfilePage,
             'ProfileSetting' => $ProfileSetting,
-            'myVehiclePage' => $myVehiclePage, 'userVehicleCount' => $userVehicleCount,
+            'myVehiclePage' => $myVehiclePage,
+            'userVehicleCount' => $userVehicleCount,
             'vehicleTypes' => $vehicleTypes,
         ]);
     }
 
     public function store(Request $request)
     {
-        $message = null;
-        $myVehiclePage = null;
-        $niceNames = [];
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('vehicle_add_message', 'image_size_error_message')->first();
-                $myVehiclePage = MyVehicleSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                // $niceNames = [
-                //     'make' => isset($myVehiclePage->make_error) ? $myVehiclePage->make_error : '',
-                //     'model' => isset($myVehiclePage->model_error) ? $myVehiclePage->model_error : '',
-                //     'type' => isset($myVehiclePage->vehicle_type_error) ? $myVehiclePage->vehicle_type_error : '',
-                //     'liscense_no' => isset($myVehiclePage->color_error) ? $myVehiclePage->color_error : '',
-                //     'color' => isset($myVehiclePage->license_error) ? $myVehiclePage->license_error : '',
-                //     'year' => isset($myVehiclePage->year_error) ? $myVehiclePage->year_error : '',
-                //     'car_type' => isset($myVehiclePage->fuel_error) ? $myVehiclePage->fuel_error : '',
-                //     'primary_vehicle' => isset($myVehiclePage->set_primary_error) ? $myVehiclePage->set_primary_error : '',
-                //     'image' => isset($myVehiclePage->photo_error) ? $myVehiclePage->photo_error : '',
-                // ];
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('vehicle_add_message', 'image_size_error_message')->first();
-                $myVehiclePage = MyVehicleSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                // $niceNames = [
-                //     'make' => isset($myVehiclePage->make_error) ? $myVehiclePage->make_error : '',
-                //     'model' => isset($myVehiclePage->model_error) ? $myVehiclePage->model_error : '',
-                //     'type' => isset($myVehiclePage->vehicle_type_error) ? $myVehiclePage->vehicle_type_error : '',
-                //     'liscense_no' => isset($myVehiclePage->color_error) ? $myVehiclePage->color_error : '',
-                //     'color' => isset($myVehiclePage->license_error) ? $myVehiclePage->license_error : '',
-                //     'year' => isset($myVehiclePage->year_error) ? $myVehiclePage->year_error : '',
-                //     'car_type' => isset($myVehiclePage->fuel_error) ? $myVehiclePage->fuel_error : '',
-                //     'primary_vehicle' => isset($myVehiclePage->set_primary_error) ? $myVehiclePage->set_primary_error : '',
-                //     'image' => isset($myVehiclePage->photo_error) ? $myVehiclePage->photo_error : '',
-                // ];
-            }
-        }
+        $message = $this->successMessage;
 
         $validator = Validator::make($request->all(), [
             'make' => 'required',
             'model' => 'required',
-            'type' => 'required|integer|exists:features_setting_detail,features_setting_id',
-            'liscense_no' => 'required|max:8',
+            'vehicle_type' => 'required|integer|exists:features_setting_detail,features_setting_id',
+            'license_no' => 'required|max:8',
             'color' => 'required|max:15',
             'year' => 'required|max:4',
-            'car_type' => 'required',
+            'power_type' => 'required',
             'primary_vehicle' => 'required',
-            'image' => 'required_without:existing_image|image|mimes:jpeg,png,jpg,gif|max:10240',
+            'vehicle_image' => 'required_without:existing_image|image|mimes:jpeg,png,jpg,gif|max:10240',
         ], [], []);
 
         if ($validator->fails()) {
@@ -169,10 +134,10 @@ class ProfileVehicleController extends Controller
             'make' => $request->make,
             'model' => $request->model,
             'type' => Vehicle::normalizeVehicleTypeId($request->type),
-            'liscense_no' => $request->liscense_no,
+            'license_no' => $request->license_no,
             'color' => $request->color,
             'year' => $request->year,
-            'car_type' => $request->car_type,
+            'power_type' => $request->power_type,
             'primary_vehicle' => $primaryVehicleValue,
             'image' => $filename,
             'original_image' => $filename,
@@ -258,7 +223,7 @@ class ProfileVehicleController extends Controller
             'mimes' => 'The :attribute must be a file of type: jpeg, png',
             'uploaded' => 'The image is not uploaded yet',
             'image.max' => 'Can not upload image size greater than 10MB',
-            'liscense_no.max' => 'License plate number cannot exceed 8 characters.',
+            'license_no.max' => 'License plate number cannot exceed 8 characters.',
             'color.max' => 'Color cannot exceed 15 characters.',
             'year.max' => 'Year cannot exceed 4 characters.',
         ];
@@ -274,12 +239,12 @@ class ProfileVehicleController extends Controller
         $validator = Validator::make($request->all(), [
             'make' => 'required',
             'model' => 'required',
-            'type' => 'required|integer|exists:features_setting_detail,features_setting_id',
-            'liscense_no' => 'required|max:8',
+            'vehicle_type' => 'required|integer|exists:features_setting_detail,features_setting_id',
+            'license_no' => 'required|max:8',
             'color' => 'required|max:15',
             'year' => 'required|max:4',
             'primary_vehicle' => 'required',
-            'car_type' => 'required',
+            'power_type' => 'required',
             'image' => 'required_without:existing_image|image|mimes:jpeg,png,jpg,gif|max:10240'
             // 'image' => $vehicle->image || $request->filled('remove_image') ? 'nullable|file|mimes:jpeg,png,jpg,gif|max:10240' : 'required|file|mimes:jpeg,png,jpg,gif|max:10240',
         ], $customMessages);
@@ -338,7 +303,7 @@ class ProfileVehicleController extends Controller
             'make' => $request->make,
             'model' => $request->model,
             'type' => Vehicle::normalizeVehicleTypeId($request->type),
-            'liscense_no' => $request->liscense_no,
+            'license_no' => $request->license_no,
             'color' => $request->color,
             'year' => $request->year,
             'car_type' => $request->car_type,
@@ -380,7 +345,7 @@ class ProfileVehicleController extends Controller
     {
         // todo: if the vehicle is primary and there are other vehicles, set the first remaining vehicle as primary after deletion
         // todo: if there is no vehicle left after deletion, do step3 = 0 for the user
-        
+
         // $user_id = auth()->user()->id;
         $user = auth()->user();
         $user_id = $user->id;
@@ -480,6 +445,4 @@ class ProfileVehicleController extends Controller
             return redirect()->route('profile.vehicle', ['lang' => $selectedLanguage->abbreviation])->with('message', $message->vehicle_removed_message);
         }
     }
-
-    
 }
