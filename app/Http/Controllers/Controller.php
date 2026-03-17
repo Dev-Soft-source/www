@@ -286,7 +286,7 @@ class Controller extends BaseController
     protected function getFeatureOptionIds(): array
     {
         // id is refered to db
-        return array_merge(range(1, 20), [47]);
+        return array_merge(range(1, 16), [47]);
     }
 
     protected function hydrateLegacyFeatureOptions($postRidePage)
@@ -317,7 +317,7 @@ class Controller extends BaseController
     protected function getSearchOptionGroups($selectedLangId, $defaultLangId)
     {
         $groupFeatureIds = [
-            'features' => array_merge(range(1, 20), [47]),
+            'features' => array_merge(range(1, 16), [47]),
             'luggage_size' => range(26, 30),
             'smoking_allowed' => [21, 22],
             'pets_allowed' => range(23, 25),

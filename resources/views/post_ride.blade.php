@@ -36,6 +36,24 @@
                 transform: translateX(320%);
             }
         }
+
+        /* Shared style for all checkbox & radio inputs */
+        .form-check-input {
+            margin-top: 0; /* mt-2 */
+            width: 1.25rem;       /* w-4 */
+            height: 1.25rem;      /* h-4 */
+            cursor: pointer;
+            background-color: #ffffff; /* bg-white */
+            border-width: 1px;
+            border-color: #d1d5db;     /* border-gray-300 */
+            border-radius: 0.25rem;    /* rounded */
+        }
+
+        .form-check-input:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); /* approx focus:ring-blue-500 focus:ring-2 */
+        }
     </style>
 @endsection
 
@@ -494,7 +512,7 @@
                         <div class="flex items-center mb-4">
                             <input id="px-is-recurring" type="checkbox" name="recurring" value="1"
                                 {{ (string) ($oldIsRecurring ? '1' : '0') === '1' ? 'checked' : '' }}
-                                class="w-4 h-4 text-blue-600 cursor-pointer bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                class="form-check-input">
                             <label for="px-is-recurring" class="ml-2 text-gray-900">
                                 @isset($postRidePage->recurring_label)
                                     {{ $postRidePage->recurring_label }}
@@ -760,7 +778,7 @@
                                         <input id="cash" name="payment_method" type="radio"
                                             value="{{ $postRidePage->payment_methods_option1->features_setting_id }}"
                                             {{ $oldPaymentMethod == $postRidePage->payment_methods_option1->features_setting_id ? 'checked' : '' }}
-                                            class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                            class="form-check-input">
                                         <label for="cash"
                                             class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
                                             @isset($postRidePage->payment_methods_option1->icon)
@@ -789,7 +807,7 @@
                                         <input id="online" name="payment_method" type="radio"
                                             value="{{ $postRidePage->payment_methods_option2->features_setting_id }}"
                                             {{ $oldPaymentMethod == $postRidePage->payment_methods_option2->features_setting_id ? 'checked' : '' }}
-                                            class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                            class="form-check-input">
                                         <label for="online"
                                             class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
                                             @isset($postRidePage->payment_methods_option2->icon)
@@ -818,7 +836,7 @@
                                         <input id="secured" name="payment_method" type="radio"
                                             value="{{ $postRidePage->payment_methods_option3->features_setting_id }}"
                                             {{ $oldPaymentMethod == $postRidePage->payment_methods_option3->features_setting_id ? 'checked' : '' }}
-                                            class="h-5 w-5 rounded border border-gray-200 bg-white cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                            class="form-check-input">
                                         <label for="secured"
                                             class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
                                             @isset($postRidePage->payment_methods_option3->icon)
@@ -940,7 +958,7 @@
                                         <input id="standard" name="booking_type" type="radio"
                                             value="{{ $postRidePage->cancellation_policy_label1->features_setting_id }}"
                                             {{ old('booking_type', $ride->booking_type) == $postRidePage->cancellation_policy_label1->features_setting_id || empty(old('booking_type')) ? 'checked' : '' }}
-                                            class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                            class="form-check-input">
                                         <label for="standard"
                                             class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
                                             <span class="">
@@ -954,7 +972,7 @@
                                         <input id="firm" name="booking_type" type="radio"
                                             value="{{ $postRidePage->cancellation_policy_label2->features_setting_id }}"
                                             {{ old('booking_type', $ride->booking_type) == $postRidePage->cancellation_policy_label2->features_setting_id ? 'checked' : '' }}
-                                            class="h-5 w-5 rounded bg-white border border-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                            class="form-check-input">
                                         <label for="firm"
                                             class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
                                             <span class="">
@@ -989,21 +1007,21 @@
                                 <div class="flex flex-wrap items-center gap-12">
                                     <label class="inline-flex items-center gap-2 text-sm">
                                         <input type="radio" name="vehicle_mode" value="skip"
-                                            class="rounded border-gray-300" @checked($oldVehicleMode === 'skip')>
+                                            class="form-check-input" @checked($oldVehicleMode === 'skip')>
                                         {{ $postRidePage->skip_label ?? 'Skip This Time' }}
                                     </label>
                                 </div>
                                 <div class="flex flex-wrap items-center gap-12">
                                     <label class="inline-flex items-center gap-2 text-sm">
                                         <input type="radio" name="vehicle_mode" value="add_new"
-                                            class="rounded border-gray-300" @checked($oldVehicleMode === 'add_new')>
+                                            class="form-check-input" @checked($oldVehicleMode === 'add_new')>
                                         {{ $postRidePage->add_vehicle_label ?? 'Add New Vehicle' }}
                                     </label>
                                 </div>
                                 <div class="flex flex-wrap items-center gap-12">
                                     <label class="inline-flex items-center gap-2 text-sm">
                                         <input type="radio" name="vehicle_mode" value="existing"
-                                            class="rounded border-gray-300" @checked($oldVehicleMode === 'existing')>
+                                            class="form-check-input" @checked($oldVehicleMode === 'existing')>
                                         {{ $postRidePage->existing_label ?? 'Existing' }}
                                     </label>
                                 </div>
@@ -1097,7 +1115,7 @@
                                             <input id="" name="power_type" type="radio"
                                                 value="{{ $vehiclePage->electric_checkbox_label }}"
                                                 {{ old('power_type', $ride->power_type) == $vehiclePage->electric_checkbox_label ? 'checked' : '' }}
-                                                class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                                class="form-check-input">
                                             <label for="" class="block text-gray-900">
                                                 {{ $vehiclePage->electric_checkbox_label }}
                                             </label>
@@ -1106,7 +1124,7 @@
                                             <input id="" name="power_type" type="radio"
                                                 value="{{ $vehiclePage->hybrid_checkbox_label }}"
                                                 {{ old('power_type', $ride->power_type) == $vehiclePage->hybrid_checkbox_label ? 'checked' : '' }}
-                                                class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                                class="form-check-input">
                                             <label for="" class="block text-gray-900">
                                                 {{ $vehiclePage->hybrid_checkbox_label }}
                                             </label>
@@ -1115,7 +1133,7 @@
                                             <input id="" name="power_type" type="radio"
                                                 value="{{ $vehiclePage->gas_checkbox_label }}"
                                                 {{ old('power_type', $ride->power_type) == $vehiclePage->gas_checkbox_label || empty(old('power_type')) ? 'checked' : '' }}
-                                                class="h-5 w-5 border-gray-300 bg-gray-200 cursor-pointer text-indigo-600 focus:ring-indigo-600">
+                                                class="form-check-input">
                                             <label for="" class="block text-gray-900">
                                                 {{ $vehiclePage->gas_checkbox_label }}
                                             </label>
@@ -1180,7 +1198,7 @@
                                             type="radio" name="luggage"
                                             value="{{ $postRidePage->luggage_option1->features_setting_id }}"
                                             {{ ($oldLuggageSize && $oldLuggageSize == $luggageFirstId) || !$oldLuggageSize ? 'checked' : '' }}
-                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="form-check-input">
                                         @isset($postRidePage->luggage_option1->icon)
                                             <img class="w-10 h-10"
                                                 src="{{ asset('home_page_icons/' . $postRidePage->luggage_option1->icon) }}"
@@ -1210,7 +1228,7 @@
                                             name="luggage"
                                             value="{{ $postRidePage->luggage_option2->features_setting_id }}"
                                             {{ $oldLuggageSize == $postRidePage->luggage_option2->features_setting_id ? 'checked' : '' }}
-                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="form-check-input">
                                         @isset($postRidePage->luggage_option2->icon)
                                             <img class="w-10 h-10"
                                                 src="{{ asset('home_page_icons/' . $postRidePage->luggage_option2->icon) }}"
@@ -1240,7 +1258,7 @@
                                             name="luggage"
                                             value="{{ $postRidePage->luggage_option3->features_setting_id }}"
                                             {{ $oldLuggageSize == $postRidePage->luggage_option3->features_setting_id ? 'checked' : '' }}
-                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="form-check-input">
                                         @isset($postRidePage->luggage_option3->icon)
                                             <img class="w-10 h-10"
                                                 src="{{ asset('home_page_icons/' . $postRidePage->luggage_option3->icon) }}"
@@ -1270,7 +1288,7 @@
                                             name="luggage"
                                             value="{{ $postRidePage->luggage_option4->features_setting_id }}"
                                             {{ $oldLuggageSize == $postRidePage->luggage_option4->features_setting_id ? 'checked' : '' }}
-                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="form-check-input">
                                         @isset($postRidePage->luggage_option4->icon)
                                             <img class="w-10 h-10"
                                                 src="{{ asset('home_page_icons/' . $postRidePage->luggage_option4->icon) }}"
@@ -1294,13 +1312,13 @@
                             @if ($postRidePage->luggage_option5?->features_setting_id)
                                 <div class="flex items-center gap-4 p-3">
                                     <label for="{{ $postRidePage->luggage_option5->features_setting_id }}"
-                                        class="font-normal text-gray-900 flex items-start space-x-1 gap-2 w-full">
+                                        class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
                                         <input type="radio"
                                             id="{{ $postRidePage->luggage_option5->features_setting_id }}"
                                             name="luggage"
                                             value="{{ $postRidePage->luggage_option5->features_setting_id }}"
                                             {{ $oldLuggageSize == $postRidePage->luggage_option5->features_setting_id ? 'checked' : '' }}
-                                            class="w-4 h-4 mt-2 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="form-check-input">
                                         @isset($postRidePage->luggage_option5->icon)
                                             <img class="w-10 h-10"
                                                 src="{{ asset('home_page_icons/' . $postRidePage->luggage_option5->icon) }}"
@@ -1332,10 +1350,10 @@
                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                         <div class="mt-6 space-y-2">
-                            <div class="flex items-start">
+                            <div class="flex items-center">
                                 <input id="heating" type="checkbox" name="accept_more_luggage" value="1"
                                     {{ old('accept_more_luggage', $ride->accept_more_luggage) == '1' ? 'checked' : '' }}
-                                    class="w-4 h-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                    class="form-check-input mt-1">
                                 <label for="heating" class="ml-2 font-normal text-gray-900 flex space-x-1">
                                     <span class="">
                                         @isset($postRidePage->luggage_checkbox_label1)
@@ -1367,7 +1385,7 @@
                                             name="smoke" type="radio"
                                             value="{{ $postRidePage->smoking_option1->features_setting_id }}"
                                             {{ $isNewForm ? ($oldSmokingAllowed == $postRidePage->smoking_option1->features_setting_id ? 'checked' : (21 == $postRidePage->smoking_option1->features_setting_id ? 'checked' : '')) : (old('smoke', $ride->smoke) == $postRidePage->smoking_option1->features_setting_id ? 'checked' : '') }}
-                                            class="h-4 w-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="form-check-input">
 
                                         <span class="">
                                             {{ $postRidePage->smoking_option1->name }}
@@ -1384,7 +1402,7 @@
                                             name="smoke" type="radio"
                                             value="{{ $postRidePage->smoking_option2->features_setting_id }}"
                                             {{ $isNewForm ? ($oldSmokingAllowed == $postRidePage->smoking_option2->features_setting_id ? 'checked' : '') : (old('smoke', $ride->smoke) == $postRidePage->smoking_option2->features_setting_id ? 'checked' : '') }}
-                                            class="h-4 w-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="form-check-input">
                                         {{ $postRidePage->smoking_option2->name }}
                                     </label>
                                 </div>
@@ -1415,7 +1433,7 @@
                                             name="animal_friendly" type="radio"
                                             value="{{ $postRidePage->animals_option1->features_setting_id }}"
                                             {{ $isNewForm ? ($oldPetsAllowed == $postRidePage->animals_option1->features_setting_id ? 'checked' : (23 == $postRidePage->animals_option1->features_setting_id ? 'checked' : '')) : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option1->features_setting_id ? 'checked' : '') }}
-                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="form-check-input">
                                         {{ $postRidePage->animals_option1->name }}
                                     </label>
                                 </div>
@@ -1428,7 +1446,7 @@
                                             name="animal_friendly" type="radio"
                                             value="{{ $postRidePage->animals_option2->features_setting_id }}"
                                             {{ $isNewForm ? ($oldPetsAllowed == $postRidePage->animals_option2->features_setting_id ? 'checked' : '') : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option2->features_setting_id ? 'checked' : '') }}
-                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="form-check-input">
                                         {{ $postRidePage->animals_option2->name }}
                                     </label>
                                 </div>
@@ -1441,7 +1459,7 @@
                                             name="animal_friendly" type="radio"
                                             value="{{ $postRidePage->animals_option3->features_setting_id }}"
                                             {{ $isNewForm ? ($oldPetsAllowed == $postRidePage->animals_option3->features_setting_id ? 'checked' : '') : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option3->features_setting_id ? 'checked' : '') }}
-                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                            class="form-check-input">
                                         {{ $postRidePage->animals_option3->name }}
                                     </label>
                                 </div>
@@ -1503,13 +1521,13 @@
                                         }
                                     @endphp
 
-                                    <div class="flex items-start">
+                                    <div class="flex items-center">
 
                                         <input id="{{ $featureOption['slug'] }}" type="checkbox" name="features[]"
                                             value="{{ $featureOption['id'] }}" @checked(in_array($featureOption['id'], $oldSelectedFeatures))
                                             @disabled($disabled)
                                             data-ride-option-code="{{$data_ride_option_code}}"
-                                            class="mt-2 w-4 h-4 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                                            class="form-check-input">
 
                                         <label for="{{ $featureOption['slug'] }}"
                                             class="ml-2 font-normal text-gray-900 flex space-x-1">
@@ -1633,11 +1651,11 @@
 
                         <div class="mt-4">
 
-                            <div class="flex items-start my-4">
+                            <div class="flex items-center my-4">
                                 <input type="hidden" name="agree_terms" value="0">
                                 <input id="agree_terms" type="checkbox" name="agree_terms" value="1"
                                     {{ old('agree_terms') == '1' ? 'checked' : '' }}
-                                    class="w-4 h-4 mt-3 text-blue-600 cursor-pointer bg-white border-gray-500 rounded focus:ring-blue-500  focus:ring-2">
+                                    class="form-check-input mt-3">
                                 <label for="agree_terms"
                                     class="ml-2 font-normal text-gray-900 flex text-md items-center space-x-0.5">
                                     @isset($postRidePage->agree_terms_label)
