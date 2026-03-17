@@ -950,7 +950,7 @@ class BookingController extends Controller
         $request->merge(['booking_credit' => $adjustedBookingCredit]);
 
         $bookings = Booking::where('ride_id', $id)->where('status', '!=', '3')->where('status', '!=', '4')->get();
-        $errorMsg = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->first();
+        $errorMsg = $this->successMessage;
 
         $seatsBooked = $bookings->sum('seats') + $request->seats;
         if ($seatsBooked > $ride->seats) {

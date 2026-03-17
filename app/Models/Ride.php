@@ -297,10 +297,15 @@ class Ride extends Model
     {
         return in_array(self::EXTRA_CARE_RIDE_FEATURE_ID, $this->normalizeFeatureIds($this->features), true);
     }
+    
+    public function isPinkExtraCareRide(): bool
+    {
+        return $this->isExtraCareRide() && $this->isPinkRide();
+    }
 
     public function pricePerSeat(): float
     {
-        return (float) ($this->rideDetail->first()?->price ?? 0);
+        return (float) ($this->rideDetail->first()?->price/100 ?? 0);
     }
 
     public function isShortDistanceRide(): bool

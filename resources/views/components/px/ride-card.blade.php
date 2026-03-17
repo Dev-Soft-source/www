@@ -110,9 +110,30 @@
     $waitingBookingRequestsCount = $ride->relationLoaded('bookings')
         ? (int) $ride->bookings->where('status', 'waiting')->count()
         : (int) $ride->bookings()->where('status', 'waiting')->count();
+
+
 @endphp
 
-<div class="{{ $wrapperClass }}">
+@php
+
+    $classes = 'rounded-lg shadow-3xl border-[3px] border-solid';
+    $wrapperStart = '';
+    $wrapperEnd = '';
+
+    if ($ride->isPinkExtraCareRide()) {
+        $wrapperStart = '<div class="rounded-lg border-[3px] border-solid border-green-500 p-[2px] shadow-3xl">';
+        $wrapperEnd = '</div>';
+        $classes .= ' border-pink-500';
+    } elseif ($ride->isPinkRide()) {
+        $classes .= ' border-pink-500';
+    } elseif ($ride->isExtraCareRide()) {
+        $classes .= ' border-green-500';
+    } elseif ($ride->isShortDistanceRide()) {
+        $classes .= ' border-blue-500';
+    }
+@endphp
+{!! $wrapperStart !!}
+<div class="{{ $wrapperClass }} {{ $classes }}" id="ride-{{ $ride->id }}">
     @php
         $detailParams = array_merge(
             [
@@ -338,3 +359,4 @@
         </div>
     </a>
 </div>
+{!! $wrapperEnd !!}

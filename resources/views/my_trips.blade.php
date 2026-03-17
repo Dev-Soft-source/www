@@ -211,7 +211,7 @@
                                                                         </div>
                                                                         <div class="mt-4 order-1 md:order-2">
                                                                             <p class="text-xl font-semibold text-primary">
-                                                                                ${{ number_format(floatval($booking->price), 2) }}
+                                                                                ${{ number_format(floatval($booking->price / 100), 2) }}
                                                                                 <small>
                                                                                     @isset($rideDetailPage->card_section_per_seat)
                                                                                         {{ $rideDetailPage->card_section_per_seat }}
