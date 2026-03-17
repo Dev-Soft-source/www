@@ -503,6 +503,8 @@
                                         'addStopBtnLabel' => $postRidePage->add_stop_btn_label ?? 'Add Stop',
                                         'stopAlongTheWayLabel' => $postRidePage->stops_along_the_way_label ?? 'Stop Along the Way',
                                         'stopsDeleteConfirmText' => $postRidePage->stops_remove_confirm_text ?? 'Are you sure you want to delete this stop row?',
+                                        'removeBtnText' => $siteText['remove_btn_text'],
+                                        'cancelBtnText' => $siteText['cancel_btn_text'],
                                     ],
                                     key('px-stops-repeater')
                                 )
@@ -562,7 +564,7 @@
                                         <span class="text-red-500">*</span>
                                     </label>
                                     <div class="relative mt-2">
-                                        <input type="number" min="1" max="10" name="recurring_trips"
+                                        <input type="number" min="0" max="10" name="recurring_trips"
                                             value="{{ $oldRecurringTrips }}"
                                             @isset($postRidePage->recurring_trips_placeholder)
                                                 placeholder="{{ $postRidePage->recurring_trips_placeholder }}"
@@ -745,7 +747,7 @@
                         <div id="px-price-segments-wrap" class="{{ $showSegmentPriceMode ? '' : 'hidden' }} space-y-3">
                             <div id="px-price-segments-list" class="space-y-2"></div>
                             <div
-                                class="flex items-center justify-between rounded-md bg-gray-50 border border-gray-200 px-3 py-2">
+                                class="flex items-center justify-between rounded-md bg-gray-50 border border-gray-200 px-3 py-2 hidden">
                                 <span class="text-gray-700">Parent route price per seat</span>
                                 <span id="px-price-segments-total" class="text-gray-900">0.00</span>
                             </div>
@@ -2651,7 +2653,7 @@
                             durationInput.value = '0';
                         }
                     }
-                    priceLabel.textContent = 'Price per Seat';
+                    // priceLabel.textContent = 'Price per Seat';
                     priceSingleWrap.classList.remove('hidden');
                     priceSegmentsWrap.classList.add('hidden');
                     priceSegmentsList.innerHTML = '';
@@ -2685,7 +2687,7 @@
                     }
                 }
 
-                priceLabel.textContent = 'Price per Seat (all route sections)';
+                // priceLabel.textContent = 'Price per Seat (all route sections)';
                 priceSingleWrap.classList.add('hidden');
                 priceSegmentsWrap.classList.remove('hidden');
                 priceMinorInput.disabled = true;
@@ -2717,10 +2719,10 @@
                     const group = document.createElement('div');
                     group.className = 'rounded-md border border-gray-200 bg-gray-50 p-3 space-y-2';
 
-                    const groupTitle = document.createElement('div');
-                    groupTitle.className = 'text-sm font-semibold text-gray-700';
-                    groupTitle.textContent = `From ${points[fromIndex].label}`;
-                    group.appendChild(groupTitle);
+                    // const groupTitle = document.createElement('div');
+                    // groupTitle.className = 'text-sm font-semibold text-gray-700';
+                    // groupTitle.textContent = `From ${points[fromIndex].label}`;
+                    // group.appendChild(groupTitle);
 
                     for (let toIndex = fromIndex + 1; toIndex < points.length; toIndex++) {
                         const from = points[fromIndex].label || 'Point A';
@@ -2744,7 +2746,7 @@
                         }
 
                         const row = document.createElement('div');
-                        row.className = 'grid grid-cols-1 md:grid-cols-2 gap-3 items-end';
+                        row.className = 'grid grid-cols-1 md:grid-cols-2 gap-3 items-center';
 
                         const routeLabelWrap = document.createElement('div');
                         const routeLabel = document.createElement('label');
@@ -2877,6 +2879,8 @@
                         console.log('PX Price validation bypassed - user already confirmed');
                         // Continue with normal form submission
                     } else {
+                        
+                        
                         const submitValidation = getPxSubmitValidationResult();
 
                         console.log('PX Form submission validation:', submitValidation);
@@ -3312,30 +3316,6 @@
                     });
                 }
             @endif
-
-            // Scroll to first error on page load if validation errors exist
-            const firstError = document.querySelector('.tooltip-error');
-            if (firstError) {
-                // Find the parent container that contains the error (usually a form field wrapper)
-                let errorContainer = firstError.closest('div');
-
-                // Walk up to find a meaningful container (section or field wrapper)
-                while (errorContainer && errorContainer !== postRideForm) {
-                    // Check if this container is a section or has a meaningful structure
-                    if (errorContainer.tagName === 'SECTION' ||
-                        errorContainer.querySelector('input, select, textarea, label')) {
-                        break;
-                    }
-                    errorContainer = errorContainer.parentElement;
-                }
-
-                // Scroll to the error container or the error itself
-                const scrollTarget = errorContainer || firstError;
-                scrollTarget.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
-                });
-            }
 
         });
 

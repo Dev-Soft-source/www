@@ -181,6 +181,22 @@ return [
         'city_not_in_record' => [
             'message' => 'لم نتمكن من العثور على اسم هذه المدينة في سجلاتنا، يرجى التحقق من التهجئة.',
         ],
+        'origin.label' => [
+            'required' => 'نقطة الانطلاق مطلوبة.',
+        ],
+        'destination.label' => [
+            'required' => 'نقطة الوصول مطلوبة.',
+        ],
+        'date' => [
+            'required' => 'التاريخ مطلوب.',
+        ],
+        'price_minor' => [
+            'required' => 'السعر مطلوب.',
+            'gt' => 'يجب أن يكون السعر أكبر من 0.',
+        ],
+        'stops.*.label' => ['required_with' => 'موقع التوقف مطلوب لكل توقف.'],
+        'stops.*.departure_at' => ['required_with' => 'وقت المغادرة مطلوب لكل توقف.'],
+        'stops.*.pickup_dropoff_location.required_with' => 'موقع الاستلام/التسليم مطلوب.',
         'from' => [
             'required' => 'حقل نقطة الانطلاق مطلوب.',
         ],

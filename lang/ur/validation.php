@@ -181,6 +181,22 @@ return [
         'city_not_in_record' => [
             'message' => 'ہم اپنے ریکارڈ میں اس شہر کا نام نہیں ڈھونڈ سکے، براہ کرم ہجے کو دوبارہ چیک کریں۔',
         ],
+        'origin.label' => [
+            'required' => 'روانگی کا مقام ضروری ہے۔',
+        ],
+        'destination.label' => [
+            'required' => 'منزل کا مقام ضروری ہے۔',
+        ],
+        'date' => [
+            'required' => 'تاریخ ضروری ہے۔',
+        ],
+        'price_minor' => [
+            'required' => 'قیمت ضروری ہے۔',
+            'gt' => 'قیمت 0 سے زیادہ ہونی چاہیے۔',
+        ],
+        'stops.*.label' => ['required_with' => 'ہر اسٹاپ کے لیے اسٹاپ کا مقام ضروری ہے۔'],
+        'stops.*.departure_at' => ['required_with' => 'ہر اسٹاپ کے لیے روانگی کا وقت ضروری ہے۔'],
+        'stops.*.pickup_dropoff_location.required_with' => 'پک اپ/ڈراپ آف کا مقام ضروری ہے۔',
         'from' => [
             'required' => 'روانگی کا مقام ضروری ہے۔',
         ],

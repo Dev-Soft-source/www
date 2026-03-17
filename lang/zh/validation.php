@@ -181,6 +181,23 @@ return [
         'city_not_in_record' => [
             'message' => '我们在记录中找不到该城市名称，请再次检查拼写。',
         ],
+        'origin.label' => [
+            'required' => '出发地点为必填项。',
+        ],
+        'destination.label' => [
+            'required' => '目的地为必填项。',
+        ],
+        'date' => [
+            'required' => '日期为必填项。',
+        ],
+        'price_minor' => [
+            'required' => '价格为必填项。',
+            'gt' => '价格必须大于 0。',
+        ],
+        'stops.*.label' => ['required_with' => '每个停靠站的停靠位置为必填项。'],
+        'stops.*.departure_at' => ['required_with' => '每个停靠站的出发时间为必填项。'],
+        'stops.*.pickup_dropoff_location' => ['required_with' => '上下车地点为必填项。']
+        ,
         'from' => [
             'required' => '出发地点为必填项。',
         ],

@@ -179,8 +179,24 @@ return [
             'max' => 'La photo du véhicule doit être inférieure à 10 Mo.',
         ],
         'city_not_in_record' => [
-            'message' => "Nous n'avons pas trouvé ce nom de ville dans nos enregistrements, veuillez vérifier l’orthographe.",
+            'message' => "Nous n'avons pas trouvé ce nom de ville dans nos enregistrements, veuillez vérifier l'orthographe.",
         ],
+        'origin.label' => [
+            'required' => "L'origine est obligatoire.",
+        ],
+        'destination.label' => [
+            'required' => 'La destination est obligatoire.',
+        ],
+        'date' => [
+            'required' => 'La date est obligatoire.',
+        ],
+        'price_minor' => [
+            'required' => 'Le prix est obligatoire.',
+            'gt' => 'Le prix doit être supérieur à 0.',
+        ],
+        'stops.*.label' => ['required_with' => 'L\'emplacement de l\'arrêt est obligatoire pour chaque arrêt.'],
+        'stops.*.departure_at' => ['required_with' => 'L\'heure de départ est obligatoire pour chaque arrêt.'],
+        'stops.*.pickup_dropoff_location.required_with' => 'L\'emplacement de prise en charge/dépose est obligatoire.',
         'from' => [
             'required' => "L'origine est obligatoire.",
         ],

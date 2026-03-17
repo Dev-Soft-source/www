@@ -13,8 +13,11 @@ class StopsRepeater extends Component
     public ?string $stopAlongTheWayLabel = '';
     public ?string $addStopBtnLabel = '';
     public ?string $stopsDeleteConfirmText = '';
+    public ?string $removeBtnText = '';
+    public ?string $cancelBtnText = '';
 
-    public function mount(array $initialStops = [], ?string $originLabel = '', ?string $destinationLabel = '', ?string $addStopBtnLabel = '', ?string $stopAlongTheWayLabel = '', ?string $stopsDeleteConfirmText = ''): void
+    public function mount(array $initialStops = [], ?string $originLabel = '', ?string $destinationLabel = '', 
+    ?string $addStopBtnLabel = '', ?string $stopAlongTheWayLabel = '', ?string $stopsDeleteConfirmText = '', ?string $removeBtnText = '', ?string $cancelBtnText = ''): void
     {
         $this->stops = collect($initialStops)
             ->map(function ($stop) {
@@ -73,6 +76,8 @@ class StopsRepeater extends Component
         $this->addStopBtnLabel = $addStopBtnLabel;
         $this->stopAlongTheWayLabel = $stopAlongTheWayLabel;
         $this->stopsDeleteConfirmText = $stopsDeleteConfirmText;
+        $this->removeBtnText = $removeBtnText;
+        $this->cancelBtnText = $cancelBtnText;
     }
 
     public function addStop(): void

@@ -181,6 +181,22 @@ return [
         'city_not_in_record' => [
             'message' => 'हमारे रिकॉर्ड में इस शहर का नाम नहीं मिला, कृपया वर्तनी की दोबारा जाँच करें।',
         ],
+        'origin.label' => [
+            'required' => 'प्रस्थान स्थान आवश्यक है।',
+        ],
+        'destination.label' => [
+            'required' => 'गंतव्य स्थान आवश्यक है।',
+        ],
+        'date' => [
+            'required' => 'तारीख आवश्यक है।',
+        ],
+        'price_minor' => [
+            'required' => 'मूल्य आवश्यक है।',
+            'gt' => 'मूल्य 0 से अधिक होना चाहिए।',
+        ],
+        'stops.*.label' => ['required_with' => 'प्रत्येक स्टॉप के लिए स्टॉप स्थान आवश्यक है।'],
+        'stops.*.departure_at' => ['required_with' => 'प्रत्येक स्टॉप के लिए प्रस्थान समय आवश्यक है।'],
+        'stops.*.pickup_dropoff_location.required_with' => 'पिकअप/ड्रॉपऑफ स्थान आवश्यक है।',
         'from' => [
             'required' => 'प्रस्थान स्थान आवश्यक है।',
         ],
