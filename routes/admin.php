@@ -184,6 +184,7 @@ Route::group(['prefix' => 'admin'], function () {
     Route::post('/update-features-setting', [FeaturesSettingController::class, 'update']);
     Route::get('/get-features-setting', [FeaturesSettingController::class, 'show']);
     Route::post('/features-setting-details/{id}', [FeaturesSettingController::class, 'updateDetail']);
+    Route::post('/features-setting-details-bulk', [FeaturesSettingController::class, 'bulkUpdateDetails']);
     Route::post('/upload-features-setting-excel', [FeaturesSettingController::class, 'uploadExcel']);
     Route::get('/download-features-setting-template', [FeaturesSettingController::class, 'downloadTemplate']);
     Route::get('/download-all-features-setting-template', [FeaturesSettingController::class, 'downloadAllTemplate']);
