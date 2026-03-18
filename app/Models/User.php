@@ -619,6 +619,30 @@ class User extends Authenticatable
         return \Carbon\Carbon::parse($this->dob)->diffInYears(now());
     }
 
+    /**
+     * Get the user's age in years.
+     *
+     * @return int The age in years, or 0 if date of birth is not set
+     */
+    public function getAge(): int
+    {
+        return $this->age();
+    }
+
+    /**
+     * Get the number of passengers whose bookings are completed on rides created by this user (as a driver).
+     *
+     * @return int The count of completed passenger bookings
+     */
+    public function getCompletedPassengerBookingsCount(): int
+    {
+        return Booking::whereHas('ride', function ($query) {
+                $query->where('added_by', $this->id);
+            })
+            ->where('status', Booking::STATUS_COMPLETED)
+            ->count();
+    }
+
     protected function displayDriverOverallRating(): float
     {
         $overallRating = $this->driverOverallRating();

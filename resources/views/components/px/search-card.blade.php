@@ -110,8 +110,6 @@
     $waitingBookingRequestsCount = $ride->relationLoaded('bookings')
         ? (int) $ride->bookings->where('status', 'waiting')->count()
         : (int) $ride->bookings()->where('status', 'waiting')->count();
-
-
 @endphp
 
 @php
@@ -145,32 +143,18 @@
             is_array($detailQuery) ? $detailQuery : [],
         );
     @endphp
-    <a href="{{ route($detailRoute, $detailParams) }}" class="block">
+    
         <div class="rounded-lg shadow-3xl border-[3px] border-solid border-gray-100"
             @if ($cardId) id="{{ $cardId }}" @endif>
-            {{-- @if ($showStatus)
-                @if ($ride->status === 'draft')
-                    <span class="bg-yellow-100 text-yellow-800 text-sm font-medium ml-3 px-2.5 py-0.5 rounded">Draft</span>
-                @elseif ($ride->status === 'published')
-                    <span class="bg-green-100 text-green-800 text-sm font-medium ml-3 px-2.5 py-0.5 rounded">Published</span>
-                @endif
-            @endif --}}
 
-            <div class="flex items-center justify-between pb-0 p-4">
-                <p class="flex items-center space-x-2 font-semibold">
-                    {{ $departureDate }}
-                    at
-                    {{ $departureTime ?? 'N/A' }}
-                </p>
-                <div>
-                    <p class="font-semibold">
-                        Total {{ $ride->seats_total }} seats
+            <div class="grid grid-cols-4 gap-4 p-4">
+                
+                <div class="col-span-3">
+                    <p class="flex items-center space-x-2 font-semibold">
+                        {{ $departureDate }}
+                        at
+                        {{ $departureTime ?? 'N/A' }}
                     </p>
-                </div>
-            </div>
-
-            <div class="flex flex-col md:flex-row justify-between px-4">
-                <div class="w-full md:w-2/3 order-2 md:order-1">
                     @if ($showParentRouteHint)
                         <p class="text-sm mt-2 text-gray-600">
                             Parent route: {{ $parentOrigin }} -> {{ $parentDestination }}
@@ -218,7 +202,8 @@
                                                             </path>
                                                         </g>
                                                     </svg>
-                                                </span>{{ $stop->label }}</li>
+                                                </span>{{ $stop->label }}
+                                            </li>
                                         @endforeach
                                     </ul>
                                 </div>
@@ -247,82 +232,125 @@
                                 </div>
                             </div>
                         </div>
-
-
                     </div>
                 </div>
-
-                <div class="mt-4 justify-items-end order-1 md:order-2">
-                    <p class="text-xl text-right font-semibold text-primary">
-                        {{ $resolvedCurrency }}{{ number_format($normalizedPrice, 2) }}
-                        <small>per seat</small>
-                    </p>
-                    @if (!empty($resolvedRightInfo))
-                        <p class="text-sm text-right text-gray-600 mt-1">
-                            {{ $resolvedRightInfo }}
+                <div class="grid justify-items-end">
+                    <div class="pr-2">
+                        <p class="font-medium text-2xl text-right">
+                            {{ str_replace(':count', $ride->seats, $findRidePage->total_seats_label ?? 'Total :count seats') }}
                         </p>
-                    @endif
-                    @if ($showBookingInfo && $waitingBookingRequestsCount > 0)
-                        <div class="mt-2 rounded-lg border-2 border-red-400 bg-red-50 px-3 py-2.5 shadow-md animate__animated animate__fadeInDown booking-request-alert">
-                            <div class="flex items-center gap-2">
-                                <svg class="h-5 w-5 flex-shrink-0 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75v-.7V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5" />
+                        <div class="flex items-center gap-2 text-primary justify-end">
+                            @php
+                                $seat_price = $ride->detail->price / 100;
+                            @endphp
+                            @if (isset($firm_cancellation_discount) &&
+                                    $firm_cancellation_discount != '' &&
+                                    $ride->booking_type == $postRidePage->cancellation_policy_label2?->features_setting_id)
+                                <span class="line-through">
+                                    ${{ number_format(floatval($seat_price), 2) }}
+                                </span>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="h-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
                                 </svg>
-                                <p class="font-semibold text-red-700">
-                                    You have {{ $waitingBookingRequestsCount }} booking request(s).
+    
+                                <span>
+    
+                                    ${{ $seat_price - ($seat_price * $firm_cancellation_discount) / 100 }}
+                                </span>
+                            @else
+                                ${{ number_format(floatval($seat_price), 2) }}
+                            @endif
+    
+                            <small>
+                                @isset($findRidePage->card_section_per_seat)
+                                    {{ $findRidePage->card_section_per_seat }}
+                                @endisset
+                            </small>
+                            @if (isset($firm_cancellation_discount) &&
+                                    $firm_cancellation_discount != '' &&
+                                    $ride->booking_type == $postRidePage->cancellation_policy_label2?->features_setting_id)
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                    class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16"
+                                    data-tippy-content="{!! nl2br($findRidePage->firm_cancellation_tooltip) ??
+                                        'This ride has the Firm cancellation policy, so its booking price is reduced by 10%' !!}">
+                                    <path
+                                        d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                </svg>
+                            @endif
+    
+                        </div>
+                        <p class="text-primary text-right">
+                            {{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
+                            {{ $findRidePage->card_section_seats_left ?? 'seats available' }}
+                        </p>
+                    </div>
+
+                    <div class="my-4">
+                        @if ($ride->bookingMethod() == 'instant' )
+                            <a href="{{ route('ride_detail', ['lang' => app()->getLocale(), 'id' => $ride->id]) }}"
+                                class="button-exp-green-fill flex justify-center w-full" data-tippy-content="{{ $postRidePage->booking_option1_tooltip }}">
+                                <img class="w-8 h-8" src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}" />
+                                {{ $siteText['instant_booking_btn_text'] ?? 'Instant booking' }}
+                            </a>
+                        @else
+                            <a href="{{ route('ride_detail', ['lang' => app()->getLocale(), 'id' => $ride->id]) }}"
+                                class="button-exp-sky-fill flex justify-center w-full" data-tippy-content="{{ $postRidePage->booking_option2_tooltip }}">
+                                <img class="w-8 h-8" src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}" />
+                                {{ $siteText['request_to_book_btn_text'] ?? 'Request to book' }}
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+
+            @if ($showDriverInfo)
+
+                <div
+                    class="border-t border-gray-300">
+                    <div class="flex items-center justify-between p-4 w-full">
+                        <div class="flex items-center space-x-2">
+                            <div>
+                                <p class="font-semibold">
+                                    {{ $ride->driver?->first_name }}
+                                </p>
+                                <p class="text-sm">
+                                    {{ $findRidePage->card_section_age }} {{ $ride->driver?->getAge() }}
+                                </p>
+                                <p class="text-sm">
+                                    {{ $ride->driver?->getCompletedPassengerBookingsCount() }} {{ $findRidePage->card_section_driven }}
                                 </p>
                             </div>
                         </div>
-                    @endif
-                </div>
-            </div>
-            
-            @if ($showBookingInfo)
-                @php
-                    $bookedSeats = max(0, (int) (($ride->seats_total ?? 0) - ($ride->seats_available ?? 0)));
-                    $bookingPriceMinorTotal = $ride->relationLoaded('bookings')
-                        ? (int) $ride->bookings->where('status', '!=', 'cancelled')->sum('segment_price_minor')
-                        : (int) $ride->bookings()->where('status', '!=', 'cancelled')->sum('segment_price_minor');
-                    $bookingPriceTotal = (float) ($bookingPriceMinorTotal / 100);
-                    $bookingFeeTotal = (float) ($ride->booking_fee ?? 0);
-                    $totalAmount = (float) ($ride->total_amount ?? ($bookingPriceTotal + $bookingFeeTotal));
-                @endphp
-                <div
-                    class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
-                    <div class="flex items-center justify-between p-4">
-                        <p class="font-semibold">
-                            Booked:
-                        </p>
-                        <p class="">
-                            {{ $bookedSeats }} {{ $bookedSeats === 1 ? 'seat' : 'seats' }}
-                        </p>
-                    </div>
-                    <div class="p-4">
-                        <div class="flex items-center justify-between">
-                            <p class="font-semibold">Booking Price (total):</p>
-                            <p class="">
-                                {{ $resolvedCurrency }}{{ number_format($bookingPriceTotal, 2) }}
-                            </p>
-                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="flex items-center justify-end">
+                                <span class="font-semibold text-gray-800">
+                                    @if ($ride->getDriverHasRatings())
+                                        {{ number_format($ride->getDriverAverageRating(), 1) }}
+                                    @else
+                                        {{ $rideDetailPage->no_reviews_label ?? 'No Reviews' }}
+                                    @endif
+                                </span>
 
-                        <div class="flex items-center justify-between">
-                            <p class="font-semibold">Booking Fee (total):</p>
-                            <p class="">
-                                {{ $resolvedCurrency }}{{ number_format($bookingFeeTotal, 2) }}
-                            </p>
-                        </div>
+                                @if ($ride->getDriverHasRatings())
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="currentColor"
+                                        class="w-6 h-6 text-yellow-500 stroke-gray-600">
+                                        <path fill-rule="evenodd"
+                                            d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                            clip-rule="evenodd"></path>
+                                    </svg>
+                                @endif
+                            </div>
 
-                        <div class="flex items-center justify-between">
-                            <p class="font-semibold">Total Amount:</p>
-                            <p class="">
-                                {{ $resolvedCurrency }}{{ number_format($totalAmount, 2) }}
-                            </p>
                         </div>
                     </div>
                 </div>
             @endif
 
-                        
+
             @if ($showOptions && $ride->features)
                 <div class="border-t border-gray-300 p-3">
                     <div class="flex flex-wrap items-center gap-2">
@@ -339,6 +367,6 @@
                 </div>
             @endif
         </div>
-    </a>
+
 </div>
 {!! $wrapperEnd !!}

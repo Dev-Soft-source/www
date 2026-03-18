@@ -23,6 +23,9 @@ class Ride extends Model
     public const STATUS_ACTIVE = 1;
     public const STATUS_CANCELLED = 2;
 
+    public const INSTANT_BOOKING = 31;
+    public const REQUEST_BOOKING = 32;
+
     protected $fillable = ['random_id','departure','departure_lat','departure_lng','departure_place','departure_route','departure_zipcode','departure_city','departure_state','departure_state_short','departure_country',
         'destination','destination_lat','destination_lng','destination_place','destination_route','destination_zipcode','destination_city','destination_state','destination_state_short','destination_country',
         'total_distance','total_time','date','time','completed_date','completed_time','recurring','recurring_type','recurring_trips','recurring_id','details','seats','vehicle_mode','skip_vehicle','add_vehicle','added_vehicle','vehicle_id','make','model','vehicle_type','year','color','license_no','car_type','car_image','car_image_original','smoke','animal_friendly','features',
@@ -286,6 +289,10 @@ class Ride extends Model
             ->first();
 
         return $detail?->name;
+    }
+
+    public function bookingMethod(): string{
+        return self::INSTANT_BOOKING == $this->booking_method ? 'instant' : 'request';
     }
 
     public function isPinkRide(): bool

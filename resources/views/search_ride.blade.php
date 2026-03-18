@@ -1161,7 +1161,7 @@
                                                     <p class="text-sm md:text-base whitespace-nowrap font-medium">
                                                         {{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
                                                         @isset($findRidePage->card_section_seats_left)
-                                                            {{ $findRidePage->card_section_seats_left }}
+                                                            {{ $findRidePage->card_section_seats_left ?? 'seats available' }}
                                                         @endisset
                                                     </p>
                                                     <div class="my-4">
