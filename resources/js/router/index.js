@@ -79,6 +79,7 @@ import CreateTripsPageSetting from '../admin/Pages/CreateTripsPageSetting.vue'
 import CreateThankyouPageSetting from '../admin/Pages/CreateThankyouPageSetting.vue'
 import CreateNotificationsPageSetting from '../admin/Pages/CreateNotificationsPageSetting.vue'
 import CreateFeaturesSetting from '../admin/Pages/CreateFeaturesSetting.vue'
+import ManageFeaturesSettings from '../admin/Pages/ManageFeaturesSettings.vue'
 import CreatePreferencesSetting from '../admin/Pages/CreatePreferencesSetting.vue'
 import CreatePaymentMethodsSetting from '../admin/Pages/CreatePaymentMethodsSetting.vue'
 import CreateLuggageOptionsSetting from '../admin/Pages/CreateLuggageOptionsSetting.vue'
@@ -537,7 +538,7 @@ const routes = [
         name: 'admin.site-text-setting.index',
         component: SiteTextSetting,
         meta: {
-            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Setting site text', 'routeName': 'admin.site-text-setting.index', 'isCurrentRoute': 1}],
+            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Common site text', 'routeName': 'admin.site-text-setting.index', 'isCurrentRoute': 1}],
         },
     },
     {
@@ -970,6 +971,14 @@ const routes = [
         component: CreateFeaturesSetting,
         meta: {
             breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Features settings', 'routeName': 'admin.features-setting.index', 'isCurrentRoute': 1}],
+        },
+    },
+    {
+        path: '/admin/pages/manage-features',
+        name: 'admin.features-setting.manage',
+        component: ManageFeaturesSettings,
+        meta: {
+            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Manage features', 'routeName': 'admin.features-setting.manage', 'isCurrentRoute': 1}],
         },
     },
     {

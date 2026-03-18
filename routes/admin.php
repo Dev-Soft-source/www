@@ -183,8 +183,11 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('/download-post-ride-page-setting-template', [PostRidePageSettingController::class, 'downloadTemplate']);
     Route::post('/update-features-setting', [FeaturesSettingController::class, 'update']);
     Route::get('/get-features-setting', [FeaturesSettingController::class, 'show']);
+    Route::post('/features-setting-details/{id}', [FeaturesSettingController::class, 'updateDetail']);
     Route::post('/upload-features-setting-excel', [FeaturesSettingController::class, 'uploadExcel']);
     Route::get('/download-features-setting-template', [FeaturesSettingController::class, 'downloadTemplate']);
+    Route::get('/download-all-features-setting-template', [FeaturesSettingController::class, 'downloadAllTemplate']);
+    Route::post('/upload-all-features-setting-excel', [FeaturesSettingController::class, 'uploadAllExcel']);
     Route::post('/update-preferences-setting', [PreferencesSettingController::class, 'update']);
     Route::post('/update-payment-methods-setting', [PaymentMethodsSettingController::class, 'update']);
     Route::post('/upload-payment-methods-setting-excel', [PaymentMethodsSettingController::class, 'uploadExcel']);

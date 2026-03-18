@@ -13,6 +13,8 @@ use App\Traits\StatusResponser;
 use Illuminate\Http\Request;
 use App\Imports\FeaturesSettingImport;
 use App\Exports\FeaturesSettingTemplateExport;
+use App\Imports\AllFeaturesSettingImport;
+use App\Exports\AllFeaturesSettingTemplateExport;
 use App\Models\Language;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
@@ -635,7 +637,28 @@ class FeaturesSettingController extends Controller
     public function show()
     {
         $features = FeaturesSetting::with(['featuresSettingDetail', 'featuresSettingDetail.language:id,name'])->get();
+
         return $this->successResponse($features, 'Data Get Successfully!');
+    }
+
+    public function updateDetail(Request $request, $id)
+    {
+        $detail = FeaturesSettingDetail::findOrFail($id);
+
+        $data = $this->validate(
+            $request,
+            [
+                'name' => ['required', 'string'],
+                'tooltip' => ['nullable', 'string'],
+            ]
+        );
+
+        $detail->update($data);
+
+        return $this->successResponse(
+            $detail->fresh(['language:id,name', 'featuresSetting:id,slug']),
+            'Feature detail updated successfully.'
+        );
     }
 
     /**
@@ -697,6 +720,56 @@ class FeaturesSettingController extends Controller
         } catch (\Exception $e) {
             Log::error('Features Setting Excel upload error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Failed to upload Excel file'], 500);
+        }
+    }
+
+    /**
+     * Download a flat Excel listing of all features (all slugs, all languages).
+     */
+    public function downloadAllTemplate()
+    {
+        $fileName = 'all_features_settings_' . date('Y-m-d') . '.xlsx';
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new AllFeaturesSettingTemplateExport(),
+            $fileName
+        );
+    }
+
+    /**
+     * Upload a flat Excel file for all features (all slugs, all languages).
+     */
+    public function uploadAllExcel(Request $request)
+    {
+        $request->validate([
+            'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:5120',
+        ], [
+            'excel_file.required' => 'Please upload an Excel file',
+            'excel_file.file' => 'The uploaded file is not valid',
+            'excel_file.mimes' => 'The file must be an Excel file (xlsx, xls, or csv)',
+            'excel_file.max' => 'The file size must not exceed 5MB',
+        ]);
+
+        try {
+            \Maatwebsite\Excel\Facades\Excel::import(
+                new AllFeaturesSettingImport(),
+                $request->file('excel_file')
+            );
+
+            return $this->successResponse(
+                [],
+                'All feature names and tooltips uploaded successfully from Excel.'
+            );
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation errors in Excel file',
+                'errors' => array_map(fn($f) => [
+                    'row' => $f->row(),
+                    'attribute' => $f->attribute(),
+                    'errors' => $f->errors(),
+                ], $e->failures()),
+            ], 422);
         }
     }
 
