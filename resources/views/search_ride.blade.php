@@ -1,6 +1,7 @@
 @extends('px.search_template')
 
 @section('style')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
         /* Shared style for all checkbox & radio inputs */
         .form-check-input {

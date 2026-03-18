@@ -2,10 +2,7 @@
 
 @section('style')
     <style>
-         /* Match ride_detail: body text in Roboto, sizes from Tailwind (text-xl, text-sm) */
-        .ride-detail-page p {
-            font-family: 'Roboto', sans-serif;
-        }
+
     </style>
 
     <!-- Scripts -->
@@ -398,14 +395,441 @@
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-y-4 lg:gap-4">
                 <div class="col-span-2">
-                    <x-px.ride-detail-info
-                        :ride="$ride"
-                        :findRidePage="$findRidePage"
-                        :postRidePage="$postRidePage"
-                        :rideDetailPage="$rideDetailPage"
-                        :selectedLanguage="$selectedLanguage ?? null"
-                        :searchOptionGroups="$searchOptionGroups"
-                    />
+                    <div class="bg-white rounded-lg shadow-3xl">
+                        <div class="flex flex-col px-4 pb-4 md:pb-0">
+                            @php
+                                // Always show the driver's full route: origin (e.g. A) and destination (e.g. E), regardless of passenger search (e.g. B to D)
+                                $displayFrom = $origin ?? null;
+                                $displayTo = $destination ?? null;
+                            @endphp
+                            <div class="w-full flex items-center justify-between mt-4 ml-4 mr-4">
+                                <div class="text-gray-700 text-lg">
+                                    @if ($displayFrom && $displayTo)
+                                        <span>
+                                            Origin:
+                                        </span>
+                                        <span class="text-primary">
+                                            {{ $displayFrom }}
+                                        </span>
+                                        <span class="font-semibold">
+                                            &rarr;
+                                        </span>
+                                        <span>
+                                            Destination:
+                                        </span>
+                                        <span class="text-primary">
+                                            {{ $displayTo }}
+                                        </span>
+                                    @endif
+                                </div>
+                                @php
+                                    $departureDateTime = formatDepartureDateTime(
+                                        $displayDepartureDateTime ?? ($ride->date . ' ' . ($ride->time ?? '00:00')),
+                                        $selectedLanguage ?? null,
+                                        $rideDetailPage ?? null,
+                                    );
+                                    $departureDateLabel = $departureDateTime['dateLabel'];
+                                    $departureTimeLabel = $departureDateTime['timeLabel'];
+                                @endphp
+                                <p class="whitespace-nowrap font-semibold mr-4">
+                                    {{ $departureDateLabel }}
+                                    {{ $rideDetailPage->at_label }}
+                                    {{ $departureTimeLabel ?? 'N/A' }}
+                                </p>
+                            </div>
+                            <div class="w-full md:w-2/3 order-2 md:order-1">
+                                @php
+                                    // Full route labels: always driver's origin and destination (A and E), not search segment (B to D)
+                                @endphp
+                                @if ($fromLabel || $toLabel)
+                                    <div class="relative mt-5 text-left rounded-lg bg-white p-4">
+                                        <div class="space-y-0">
+                                            @if ($fromLabel)
+                                                <div class="flex items-center relative">
+                                                    <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
+                                                        <span class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
+                                                            <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-from.png') }}" alt="">
+                                                        </span>
+                                                    </div>
+                                                    <div class="ml-12 md:ml-20">
+                                                        <p class="font-bold text-xl text-black">
+                                                            @isset($rideDetailPage->from_label)
+                                                                {{ $rideDetailPage->from_label }}:
+                                                            @else
+                                                                From:
+                                                            @endisset
+                                                        </p>
+                                                        <div class="flex flex-col md:flex-row md:items-baseline md:space-x-2">
+                                                            <h4 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl">
+                                                                {{ $fromLabel }}.
+                                                            </h4>
+                                                            @if (!empty($segmentPickup))
+                                                                <p class="text-sm mt-1 md:mt-0">
+                                                                    {{ $rideDetailPage->pickup_at_label ?? 'Pick-up at' }}:
+                                                                    {{ $segmentPickup }}
+                                                                </p>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                            @if ($stops->isNotEmpty())
+                                                <div class="flex items-center relative">
+                                                    <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10"></div>
+                                                    <div class="ml-12 md:ml-20 py-2">
+                                                        <p class="font-bold text-xl text-black mb-2">
+                                                            @isset($rideDetailPage->stops_label)
+                                                                {{ $rideDetailPage->stops_label }}
+                                                            @else
+                                                                Stops:
+                                                            @endisset
+                                                        </p>
+                                                        <ul class="list-disc list-inside space-y-3 ml-6 text-gray-900 text-base md:text-lg">
+                                                            @foreach ($stops as $stop)
+                                                                <li class="flex flex-row items-center items-baseline flex-wrap gap-x-2">
+                                                                    <div class="text-primary font-FuturaMdCnBT text-xl md:text-2xl">
+                                                                        {{ $stop['name'] }}.
+                                                                    </div>
+                                                                    @if (!empty($stop['date']) || !empty($stop['time']))
+                                                                        <p class="text-sm mt-1 md:mt-0">
+                                                                            @if (!empty($stop['date']))
+                                                                                {{ $rideDetailPage->stop_date_label ?? 'Date' }}: {{ \Carbon\Carbon::parse($stop['date'])->format('F d, Y') }}
+                                                                            @endif
+                                                                            @if (!empty($stop['time']))
+                                                                                {{ $rideDetailPage->at_label ?? 'At' }} {{ \Carbon\Carbon::parse($stop['time'])->format('g:i A') }}
+                                                                            @endif
+                                                                        </p>
+                                                                    @endif
+                                                                    @if (!empty($stop['pickup']))
+                                                                        <p class="text-sm mt-1 md:mt-0 ml-2">
+                                                                            {{ $rideDetailPage->pickup_at_label ?? 'Pick-up at' }}:
+                                                                            {{ $stop['pickup'] }}
+                                                                        </p>
+                                                                    @endif
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                            @if ($toLabel)
+                                                <div class="flex items-center relative">
+                                                    <div class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
+                                                        <span class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
+                                                            <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
+                                                        </span>
+                                                    </div>
+                                                    <div class="ml-12 md:ml-20">
+                                                        <p class="font-bold text-xl text-black">
+                                                            @isset($rideDetailPage->to_label)
+                                                                {{ $rideDetailPage->to_label }}:
+                                                            @else
+                                                                To:
+                                                            @endisset
+                                                        </p>
+                                                        <div class="flex flex-col md:flex-row md:items-baseline md:space-x-2">
+                                                            <h4 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl">
+                                                                {{ $toLabel }}.
+                                                            </h4>
+                                                            @if (!empty($segmentDropoff))
+                                                                <p class="text-sm mt-1 md:mt-0">
+                                                                    {{ $rideDetailPage->dropoff_at_label ?? 'Drop-off at' }}:
+                                                                    {{ $segmentDropoff }}
+                                                                </p>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="border-t border-gray-300 grid grid-cols-2 divide-x divide-gray-300">
+                            <div class="p-4">
+                                <p class="text-left font-semibold">
+                                    @if (auth()->user() &&
+                                            $ride->bookings &&
+                                            $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->isNotEmpty())
+                                        @if ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->first()->status !== '3')
+                                            @if (strtotime($ride->date) > strtotime('today') ||
+                                                    (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
+                                                <div class="flex items-baseline">
+                                                    <a class="text-black text-xl xl:text-2xl items"
+                                                        href="{{ route('booking.edit', ['lang' => $selectedLanguage->abbreviation,'id' => $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->first()->id]) }}">
+                                                        @isset($rideDetailPage->seats_left_label)
+                                                            {{ $rideDetailPage->seats_left_label }}:
+                                                        @endisset
+                                                    </a>
+                                                    <p class="text-xl text-primary font-normal ml-2"
+                                                        style="font-family: 'Roboto', sans-serif;">
+                                                        {{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
+                                                    </p>
+                                                </div>
+                                            @endif
+                                        @endif
+                                    @elseif (
+                                        $ride->seats -
+                                            $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {
+                                                    $query->whereNull('deleted_at');
+                                                })->sum('seats') !=
+                                            0)
+                                        @if ($ride->status !== '2')
+                                            <div class="flex items-baseline">
+                                                @if ($needsPhoneOnFileForRegularRide)
+                                                    <button type="button" onclick="showPhoneOnFileRequiredModal()"
+                                                        class="text-black text-xl xl:text-2xl bg-transparent border-0 p-0 cursor-pointer ">
+                                                        @isset($rideDetailPage->seats_left_label)
+                                                            {{ $rideDetailPage->seats_left_label }}:
+                                                        @endisset
+                                                    </button>
+                                                @elseif ($needsVerifiedPhoneForPinkExtra)
+                                                    <button type="button" onclick="showVerifiedPhoneForPinkExtraModal()"
+                                                        class="text-black text-xl xl:text-2xl bg-transparent border-0 p-0 cursor-pointer ">
+                                                        @isset($rideDetailPage->seats_left_label)
+                                                            {{ $rideDetailPage->seats_left_label }}:
+                                                        @endisset
+                                                    </button>
+                                                @elseif ($needsPhoneVerification)
+                                                    <button type="button" onclick="showPhoneVerificationModal()"
+                                                        class="text-black text-xl xl:text-2xl bg-transparent border-0 p-0 cursor-pointer ">
+                                                        @isset($rideDetailPage->seats_left_label)
+                                                            {{ $rideDetailPage->seats_left_label }}:
+                                                        @endisset
+                                                    </button>
+                                                @elseif ($showPhotoIdRequiredForBooking)
+                                                    <button type="button" onclick="showPhotoIdRequiredModal()"
+                                                        class="text-black text-xl xl:text-2xl bg-transparent border-0 p-0 cursor-pointer ">
+                                                        @isset($rideDetailPage->seats_left_label)
+                                                            {{ $rideDetailPage->seats_left_label }}:
+                                                        @endisset
+                                                    </button>
+                                                @else
+                                                    <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->rideDetail[0]->id]) }}"
+                                                        class="text-black text-xl xl:text-2xl">
+                                                        @isset($rideDetailPage->seats_left_label)
+                                                            {{ $rideDetailPage->seats_left_label }}:
+                                                        @endisset
+                                                    </a>
+                                                @endif
+                                                <p class="text-xl text-primary font-normal ml-2"
+                                                    style="font-family: 'Roboto', sans-serif;">
+                                                    {{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
+                                                </p>
+                                            </div>
+                                        @endif
+                                    @endif
+
+
+                                </p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-3 p-4 items-baseline">
+                                <h4 class="text-black text-xl xl:text-2xl">
+                                    {{ $rideDetailPage->booking_price_label ?? 'Booking Price' }}:
+                                </h4>
+                                <p class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">
+                                    ${{ number_format(floatval($ride->rideDetail->first()?->price/100), 2) }}
+                                    @isset($rideDetailPage->per_seat_label)
+                                        {{ $rideDetailPage->per_seat_label }}
+                                    @endisset
+                                </p>
+                            </div>
+                        </div>
+                        <div
+                            class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
+                            <div class="p-4">
+                                <h4
+                                    class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT items-baseline">
+                                    {{ $rideDetailPage->payment_method_label ?? 'Payment method' }}:
+                                    <span class="text-lg text-primary font-normal inline-block cursor-help"
+                                        style="font-family: 'Roboto', sans-serif;"
+                                        @if (optional($ride->payment_method)->features_setting_id ===
+                                                (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option1_tooltip ?? '' }}"
+                                    @elseif (optional($ride->payment_method)->features_setting_id ===
+                                            (optional($postRidePage->payment_methods_option2)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option2_tooltip ?? '' }}"
+                                    @elseif (optional($ride->payment_method)->features_setting_id ===
+                                            (optional($postRidePage->payment_methods_option3)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option3_tooltip ?? '' }}"
+                                    @elseif (optional($ride->payment_method)->features_setting_id ===
+                                            (optional($postRidePage->payment_methods_option4)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option4_tooltip ?? '' }}" @endif>{{ $ride->payment_method->name ?? '' }}</span>
+                                </h4>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT items-baseline">
+
+                                        {{ $rideDetailPage->booking_method_label ?? 'Booking method' }}:
+                                    </h4>
+                                    @isset($ride->booking_method->features_setting_id)
+                                        <div class="text-lg text-primary font-normal inline-block cursor-pointer"
+                                            style="font-family: 'Roboto', sans-serif;"
+                                            @if (
+                                                $ride->booking_method->features_setting_id ==
+                                                    (optional($postRidePage->booking_option1)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->booking_option1_tooltip ?? '' }}"
+                                        @elseif (
+                                            $ride->booking_method->features_setting_id ==
+                                                (optional($postRidePage->booking_option2)->features_setting_id ?? null))
+                                            data-tippy-content="{{ optional($postRidePage)->booking_option2_tooltip ?? '' }}" @endif>
+                                            {{ $ride->booking_method->name }}
+                                        </div>
+                                    @endisset
+                                </div>
+                            </div>
+                        </div>
+                        @php
+                            $rideDetail = $ride->rideDetail->first();
+                        @endphp
+
+                        <a
+                            @if (auth()->user() &&
+                                    $ride->bookings
+                                        ?->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->id())->isNotEmpty() &&
+                                    $rideDetail) href="{{ route('my_co_passengers', ['lang' => $selectedLanguage->abbreviation, 'departure' => $rideDetail->departure, 'destination' => $rideDetail->destination, 'id' => $ride->id]) }}"
+                        @else
+                            href="javascript:void(0);" @endif>
+
+                            <div
+                                class="border-t border-gray-300 flex flex-col md:flex-row md:items-center justify-start md:space-x-2 p-4">
+                                <div>
+                                    <h4
+                                        class="font-medium text-xl xl:text-2xl md:text-center text-black mr-4 font-FuturaMdCnBT">
+                                        @isset($rideDetailPage->co_passenger_label)
+                                            {{ $rideDetailPage->co_passenger_label }}
+                                        @endisset :
+                                    </h4>
+                                </div>
+                                <div class="flex items-center space-x-2 no-scrollbar overflow-x-auto mt-2 md:mt-0">
+                                    @foreach ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4) as $booking)
+                                        @for ($i = 0; $i < $booking->seats; $i++)
+                                            @if ($booking->passenger)
+                                                @if ($booking->passenger->profile_image)
+                                                    <img class="w-10 h-10 rounded-full"
+                                                        src="{{ $booking->passenger->profile_image }}" alt="">
+                                                @else
+                                                    <img class="w-10 h-10 rounded-full"
+                                                        src="{{ asset('images/59-booked-seat.png') }}" alt="">
+                                                @endif
+                                            @endif
+                                        @endfor
+                                    @endforeach
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="bg-white rounded-lg overflow-hidden shadow-3xl mt-4">
+                        <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl">
+                            @isset($rideDetailPage->ride_features_label)
+                                {{ $rideDetailPage->ride_features_label }}
+                            @endisset
+                        </h3>
+                        <div class="bg-white p-4 space-y-3">
+                            <div class="flex items-center gap-2">
+                                @if ($ride->smoke == (optional($postRidePage->smoking_option1)->features_setting_id ?? null))
+                                    @isset(optional($postRidePage->smoking_option1)->icon)
+                                        <img class="w-7 h-7"
+                                            src="{{ asset('home_page_icons/' . optional($postRidePage->smoking_option1)->icon) }}"
+                                            alt="">
+                                    @endisset
+                                    <div class="flex items-center gap-1">
+                                        <p class="font-semibold">{{ $rideDetailPage->smoking_label ?? '' }}
+                                            {{ optional($postRidePage->smoking_option1)->name }}</p>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            fill="currentColor"
+                                            class="bi bi-exclamation-circle-fill text-black cursor-help inline-block"
+                                            data-tippy-content="{{ optional($postRidePage)->smoking_option1_tooltip ?? '' }}"
+                                            viewBox="0 0 16 16">
+                                            <path
+                                                d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
+                                        </svg>
+                                    </div>
+                                @elseif ($ride->smoke == (optional($postRidePage->smoking_option2)->features_setting_id ?? null))
+                                    @isset(optional($postRidePage->smoking_option2)->icon)
+                                        <img class="w-7 h-7"
+                                            src="{{ asset('home_page_icons/' . optional($postRidePage->smoking_option2)->icon) }}"
+                                            alt="">
+                                    @endisset
+                                    <div class="flex items-center gap-1">
+                                        <p class="font-semibold">{{ $rideDetailPage->smoking_label ?? '' }}
+                                            {{ optional($postRidePage->smoking_option2)->name }}</p>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            fill="currentColor"
+                                            class="bi bi-exclamation-circle-fill text-black cursor-help inline-block"
+                                            data-tippy-content="{{ optional($postRidePage)->smoking_option2_tooltip ?? '' }}"
+                                            viewBox="0 0 16 16">
+                                            <path
+                                                d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
+                                        </svg>
+                                    </div>
+                                @endif
+                            </div>
+                            @isset($ride->animal_friendly->features_setting_id)
+                                <div class="flex items-center gap-2">
+                                    <img class="w-7 h-7"
+                                        @if (
+                                            $ride->animal_friendly->features_setting_id ===
+                                                (optional($postRidePage->animals_option1)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->animals_option1)->icon) }}"
+                                    @elseif (
+                                        $ride->animal_friendly->features_setting_id ===
+                                            (optional($postRidePage->animals_option2)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->animals_option2)->icon) }}"
+                                    @elseif (
+                                        $ride->animal_friendly->features_setting_id ===
+                                            (optional($postRidePage->animals_option3)->features_setting_id ?? null)) src="{{ asset('home_page_icons/' . optional($postRidePage->animals_option3)->icon) }}" @endif
+                                        alt="">
+                                    <div class="flex items-center gap-1">
+                                        <p class="font-semibold">{{ $rideDetailPage->pets_label ?? '' }}
+                                            {{ $ride->animal_friendly->name }}</p>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            fill="currentColor"
+                                            class="bi bi-exclamation-circle-fill text-black cursor-help inline-block"
+                                            @if (
+                                                $ride->animal_friendly->features_setting_id ===
+                                                    (optional($postRidePage->animals_option1)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->animals_option1_tooltip ?? '' }}"
+                                        @elseif (
+                                            $ride->animal_friendly->features_setting_id ===
+                                                (optional($postRidePage->animals_option2)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->animals_option2_tooltip ?? '' }}"
+                                        @elseif (
+                                            $ride->animal_friendly->features_setting_id ===
+                                                (optional($postRidePage->animals_option3)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->animals_option3_tooltip ?? '' }}" @endif
+                                            viewBox="0 0 16 16">
+                                            <path
+                                                d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            @endisset
+                            @isset($ride->luggage->features_setting_id)
+                                <div class="flex items-center gap-2">
+                                    <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $ride->luggage->icon) }}"
+                                        alt="">
+                                    <div class="flex items-center gap-1">
+                                        <p class="font-semibold">{{ $rideDetailPage->luggage_label ?? '' }}
+                                            {{ $ride->luggage->name }}</p>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            fill="currentColor"
+                                            class="bi bi-exclamation-circle-fill text-black cursor-help inline-block"
+                                            @if ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option1)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->luggage_option1_tooltip ?? '' }}"
+                                        @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option2)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->luggage_option2_tooltip ?? '' }}"
+                                        @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option3)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->luggage_option3_tooltip ?? '' }}"
+                                        @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option4)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->luggage_option4_tooltip ?? '' }}"
+                                        @elseif ($ride->luggage->features_setting_id === (optional($postRidePage->luggage_option5)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->luggage_option5_tooltip ?? '' }}" @endif
+                                            viewBox="0 0 16 16">
+                                            <path
+                                                d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            @endisset
+                            
+                            @php
+                                $features = !empty($ride->features) ? explode('=', $ride->features) : [];
+                            @endphp
+                            @include('partials.ride_feature_items', [
+                                'features' => $features,
+                            ])
+                        </div>
+                    </div>
                 </div>
                 <div class="col-span-1">
                     <div class="space-y-4">
@@ -958,15 +1382,16 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                                                     class="font-medium text-xl">{{ $rideDetailPage->book_seats_btn_label ?? 'Book Your Seats' }}</span>
                                             </button>
                                         @else
-                                            <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'from_stop_id' => $from_stop_id, 'to_stop_id' => $to_stop_id]) }}"
+                                            <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->rideDetail[0]->id]) }}"
                                                 class="">
                                                 <label for="instant-booking"
                                                     class="inline-flex items-center justify-center space-x-3 w-fit pr-8 button-exp-fill rounded cursor-pointer peer-checked:border-blue-500 peer-checked:border-2 peer-checked:text-blue-500 hover:border-2 hover:border-blue-500">
-                                                        @if ($ride->isInstantBooking())
+                                                    @isset($ride->booking_method->features_setting_id)
+                                                        @if ($ride->booking_method->features_setting_id === $postRidePage->booking_option1->features_setting_id)
                                                             <img class="w-10 h-10 rounded-full"
                                                                 src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
                                                                 alt="">
-                                                        @elseif ($ride->isRequestBooking())
+                                                        @elseif ($ride->booking_method->features_setting_id === $postRidePage->booking_option2->features_setting_id)
                                                             <img class="w-10 h-10 rounded-full"
                                                                 src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
                                                                 alt="">
@@ -974,6 +1399,7 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                                                         <span class="font-medium text-xl">
                                                             {{ $rideDetailPage->book_seats_btn_label ?? 'Book Your Seats' }}
                                                         </span>
+                                                    @endisset
                                                 </label>
                                             </a>
                                         @endif

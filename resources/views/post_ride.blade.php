@@ -114,6 +114,7 @@
                 $oldDestinationPriceDeltaMinor = $destinationStop ? $destinationStop->price_delta_minor ?? 0 : 0;
             }
 
+
             // Populate other fields
             $oldSeatsTotal = old('seats_total', $prefillRide->seats);
             $oldPriceMinor = old('price_minor', $rideDetail->price);

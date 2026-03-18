@@ -113,7 +113,7 @@ class Controller extends BaseController
                         return redirect()->route('step5to5', ['lang' => $lang]);
                     }
                 }
-                
+
                 // Only require vehicle/license/phone completion when posting a ride, not when viewing My Rides
                 if ($routeName === 'post_ride') {
                     if ($user->step3 !== 1) {
@@ -232,7 +232,7 @@ class Controller extends BaseController
                 'slug' => $vehicleType['slug'],
                 'label' => $detail?->name ?? $fallback?->name,
             ];
-        })->filter(fn ($type) => !empty($type['id']) && !empty($type['label']))->values();
+        })->filter(fn($type) => !empty($type['id']) && !empty($type['label']))->values();
     }
 
     protected function getFeaturesForLanguage(?int $languageId = null, ?int $fallbackLanguageId = null)
@@ -265,7 +265,7 @@ class Controller extends BaseController
                 'icon' => $detail?->icon ?? $fallback?->icon,
                 'tooltip' => $detail?->display_tooltip ?? $fallback?->display_tooltip,
             ];
-        })->filter(fn ($feature) => !empty($feature['id']) && !empty($feature['label']))->values();
+        })->filter(fn($feature) => !empty($feature['id']) && !empty($feature['label']))->values();
     }
 
     protected function getVehicleTypeFeatureMap(): array
@@ -411,5 +411,53 @@ class Controller extends BaseController
             ])
             ->values()
             ->toArray();
+    }
+
+    protected function makeDetailOfRide(Ride $ride, $from_stop_id = null, $to_stop_id = null): Ride
+    {
+
+        if (!$from_stop_id || !$to_stop_id) {
+            // main ride
+            $from_stop_id = $ride->rideStops->first()?->id;
+            $to_stop_id   = $ride->rideStops->last()?->id;
+        
+            $ride->matched_segment_price_minor = $ride->detail->price;
+        } else {
+        
+            $stopSegment = $ride->rideStopSegments()
+                ->where([
+                    'from_stop_id' => $from_stop_id,
+                    'to_stop_id' => $to_stop_id,
+                ])
+                ->first();
+        
+            $stopOfFrom = $ride->rideStops->firstWhere('id', $from_stop_id);
+            $stopOfTo   = $ride->rideStops->firstWhere('id', $to_stop_id);
+        
+            $ride->matched_segment_price_minor = $stopSegment?->price_minor;
+        
+            $ride->matched_from_stop_index = $stopOfFrom
+                ? ((int) $stopOfFrom->stop_order - 1)
+                : 0;
+        
+            $ride->matched_to_stop_index = $stopOfTo
+                ? ((int) $stopOfTo->stop_order - 1)
+                : 1;
+        }
+        
+        $ride->matched_from_stop_id = $from_stop_id;
+        $ride->matched_to_stop_id   = $to_stop_id;
+        
+        $ride->applyDisplaySummaryAttributes();
+        
+        $ride->matched_seats_available =
+            ($ride->matched_from_stop_id && $ride->matched_to_stop_id && method_exists($ride, 'resolveSegmentAvailableSeats'))
+                ? $ride->resolveSegmentAvailableSeats(
+                    (int) $ride->matched_from_stop_id,
+                    (int) $ride->matched_to_stop_id
+                )
+                : (int) ($ride->seats_available ?? $ride->seats ?? 0);
+                
+        return $ride;
     }
 }

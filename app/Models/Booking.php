@@ -15,6 +15,19 @@ class Booking extends Model
     public const STATUS_DECLINED = 3;
     public const STATUS_CANCELLED = 4;
 
+    public static function rejectedStatuses(): array
+    {
+        return [
+            self::STATUS_DECLINED,
+            self::STATUS_CANCELLED,
+        ];
+    }
+
+    public function isRejected(): bool
+    {
+        return in_array((int) $this->status, self::rejectedStatuses(), true);
+    }
+
     public $timestamps  = false;
     protected $fillable = ['user_id', 'ride_id', 'seats', 'type', 'booked_on', 'status', 'booking_credit', 'fare', 'secured_cash', 'secured_cash_code', 'expires_at', 'removed_permanently', 'uuid', 'block_days', 'block_date_time', 'tax_amount', 'ride_detail_id', 'departure', 'destination', 'price', 'conversation_sid', 'participant_sid', 'phone_number'];
 
@@ -103,6 +116,16 @@ class Booking extends Model
             self::STATUS_BOOKED,
             self::STATUS_COMPLETED,
         ]);
+    }
+
+    public function scopeNotRejected($query)
+    {
+        return $query->whereNotIn('status', self::rejectedStatuses());
+    }
+    
+    public function scopeRequested($query)
+    {
+        return $query->where('status', self::STATUS_REQUESTED);
     }
 
     public function scopeWithActivePassenger($query)

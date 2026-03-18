@@ -22,9 +22,99 @@ class Ride extends Model
     public const EXTRA_CARE_RIDE_FEATURE_ID = '2';
     public const STATUS_ACTIVE = 1;
     public const STATUS_CANCELLED = 2;
+    public const STATUS_COMPLETED = 3;
 
     public const INSTANT_BOOKING = 31;
     public const REQUEST_BOOKING = 32;
+
+    public const PAYMENT_METHOD_CASH = 33;
+    public const PAYMENT_METHOD_ONLINE = 34;
+    public const PAYMENT_METHOD_SECURE_CASH = 35;
+
+    public const BOOKING_TYPE_STANDARD_CANCELLATION = 36;
+    public const BOOKING_TYPE_FIRM_CANCELLATION = 37;
+
+    protected function featuresSettingIdFor(string $attribute): ?int
+    {
+        $value = $this->{$attribute} ?? null;
+
+        // When option groups are mapped, these are typically FeaturesSettingDetail models
+        // which contain features_setting_id.
+        if (is_object($value) && isset($value->features_setting_id)) {
+            return (int) $value->features_setting_id;
+        }
+
+        if (is_numeric($value)) {
+            return (int) $value;
+        }
+
+        return null;
+    }
+
+    public function bookingMethodId(): ?int
+    {
+        return $this->featuresSettingIdFor('booking_method');
+    }
+
+    public function paymentMethodId(): ?int
+    {
+        return $this->featuresSettingIdFor('payment_method');
+    }
+
+    public function bookingTypeId(): ?int
+    {
+        return $this->featuresSettingIdFor('booking_type');
+    }
+
+    public function isInstantBooking(): bool
+    {
+        return $this->bookingMethodId() === self::INSTANT_BOOKING;
+    }
+
+    public function isRequestBooking(): bool
+    {
+        return $this->bookingMethodId() === self::REQUEST_BOOKING;
+    }
+
+    public function isCashPayment(): bool
+    {
+        return $this->paymentMethodId() === self::PAYMENT_METHOD_CASH;
+    }
+
+    public function isOnlinePayment(): bool
+    {
+        return $this->paymentMethodId() === self::PAYMENT_METHOD_ONLINE;
+    }
+
+    public function isSecureCashPayment(): bool
+    {
+        return $this->paymentMethodId() === self::PAYMENT_METHOD_SECURE_CASH;
+    }
+
+    public function isStandardCancellation(): bool
+    {
+        return $this->bookingTypeId() === self::BOOKING_TYPE_STANDARD_CANCELLATION;
+    }
+
+    public function isFirmCancellation(): bool
+    {
+        return $this->bookingTypeId() === self::BOOKING_TYPE_FIRM_CANCELLATION;
+    }
+
+    public function isActive(): bool
+    {
+        return (int) ($this->status ?? 0) === self::STATUS_ACTIVE;
+    }
+
+    public function isCancelled(): bool
+    {
+        return (int) ($this->status ?? 0) === self::STATUS_CANCELLED;
+    }
+    
+    public function isCompleted(): bool
+    {
+        return (int) ($this->status ?? 0) === self::STATUS_COMPLETED;
+    }
 
     protected $fillable = ['random_id','departure','departure_lat','departure_lng','departure_place','departure_route','departure_zipcode','departure_city','departure_state','departure_state_short','departure_country',
         'destination','destination_lat','destination_lng','destination_place','destination_route','destination_zipcode','destination_city','destination_state','destination_state_short','destination_country',
@@ -47,6 +137,91 @@ class Ride extends Model
 
     function bookings(){
         return $this->hasMany(Booking::class, 'ride_id');
+    }
+
+    public function hasNonRejectedBookingForUser(?User $user): bool
+    {
+        if (!$user) {
+            return false;
+        }
+
+        return $this->bookings()
+            ->notRejected()
+            ->where('user_id', $user->id)
+            ->exists();
+    }
+
+    /**
+     * Get the number of remaining seats available for booking.
+     * 
+     * This calculates: total seats - booked seats (from non-rejected bookings with active passengers)
+     * 
+     * @return int The number of remaining seats (never negative, minimum 0)
+     */
+    public function getRemainingSeats(): int
+    {
+        $totalSeats = (int) ($this->seats ?? 0);
+        
+        $bookedSeats = (int) $this->bookings()
+            ->notRejected()
+            ->whereHas('passenger', function ($query) {
+                $query->whereNull('deleted_at');
+            })
+            ->sum('seats');
+        
+        return max(0, $totalSeats - $bookedSeats);
+    }
+    
+    public function getBookedSeats(): int
+    {
+        $bookedSeats = (int) $this->bookings()
+            ->notRejected()
+            ->whereHas('passenger', function ($query) {
+                $query->whereNull('deleted_at');
+            })
+            ->sum('seats');
+        
+        return max(0, $bookedSeats);
+    }
+
+    /**
+     * Fare amount used in the mobile ride details section:
+     *   sum(booked seats) * ride_detail.price
+     * where booked seats are from non-declined/non-cancelled bookings
+     * with a non-deleted passenger.
+     */
+    public function getMobileSeatFareTotal(): float
+    {
+        $seatPrice = (float) ($this->rideDetail()->first()?->price ?? 0);
+
+        $bookedSeats = (int) $this->bookings()
+            ->notRejected()
+            ->whereHas('passenger', function ($query) {
+                $query->whereNull('deleted_at');
+            })
+            ->sum('seats');
+
+        return (float) $bookedSeats * $seatPrice;
+    }
+
+    /**
+     * Booking fee amount used in the mobile ride details section:
+     *   sum(booking_credit) for non-declined/non-cancelled bookings.
+     */
+    public function getMobileSeatBookingFeeTotal(): float
+    {
+        return (float) $this->bookings()
+            ->notRejected()
+            ->sum('booking_credit');
+    }
+
+    /**
+     * Total amount used in the mobile ride details section:
+     *   fare + booking fee.
+     */
+    public function getMobileSeatTotalAmount(): float
+    {
+        return $this->getMobileSeatFareTotal() + $this->getMobileSeatBookingFeeTotal();
     }
     
     function detail(){
@@ -322,6 +497,54 @@ class Ride extends Model
         return $pricePerSeat > 0 && $pricePerSeat <= 15;
     }
 
+    /**
+     * Apply computed relations/attributes used for ride cards/search UI.
+     *
+     * This is mainly used by {@see searchRides()} but can be reused elsewhere
+     * anywhere we need a consistent "display-ready" ride summary.
+     */
+    public function applyDisplaySummaryAttributes(): self
+    {
+        $orderedStops = $this->rideStops->sortBy('stop_order')->values();
+        $firstStop = $orderedStops->first();
+        $lastStop = $orderedStops->last();
+
+        $departureAt = $firstStop?->departure_at
+            ?: trim(($this->date ?? '') . ' ' . ($this->time ?? ''));
+
+        $priceMinor = (int) round((float) ($this->pricePerSeat()));
+
+        // Keep the "stops" relation consistent for Blade/UI consumers.
+        $this->setRelation('stops', $orderedStops);
+
+        $this->setRelation('route', (object) [
+            'origin_label' => $firstStop?->label ?: $this->departure,
+            'destination_label' => $lastStop?->label ?: $this->destination,
+        ]);
+
+        $this->setRelation('options', collect());
+
+        $this->meta = [
+            'pickup_location' => $this->pickup,
+            'dropoff_location' => $this->dropoff,
+        ];
+
+        $this->departure_at = $departureAt ?: null;
+        $this->price_minor = $priceMinor;
+        $this->price_per_seat_minor = $priceMinor;
+
+        $this->seats_total = (int) ($this->seats ?? 0);
+        $this->seats_available = $this->pendingSeatDetail->count() ?: max(0, (int) ($this->seats ?? 0));
+
+        $this->detail_route = 'ride_detail';
+        $this->detail_query = [
+            'departure' => $firstStop?->label ?: $this->departure,
+            'destination' => $lastStop?->label ?: $this->destination,
+        ];
+
+        return $this;
+    }
+
     public static function searchRides(array $filters, ?User $user = null): LengthAwarePaginator
     {
         $query = static::query()
@@ -386,34 +609,7 @@ class Ride extends Model
         $rides = $query->paginate($perPage);
 
         $rides->getCollection()->transform(function (self $ride) {
-            $orderedStops = $ride->rideStops->sortBy('stop_order')->values();
-            $firstStop = $orderedStops->first();
-            $lastStop = $orderedStops->last();
-            $departureAt = $firstStop?->departure_at ?: trim(($ride->date ?? '') . ' ' . ($ride->time ?? ''));
-            $priceMinor = (int) round((float) ($ride->pricePerSeat()));
-
-            $ride->setRelation('stops', $orderedStops);
-            $ride->setRelation('route', (object) [
-                'origin_label' => $firstStop?->label ?: $ride->departure,
-                'destination_label' => $lastStop?->label ?: $ride->destination,
-            ]);
-            $ride->setRelation('options', collect());
-
-            $ride->meta = [
-                'pickup_location' => $ride->pickup,
-                'dropoff_location' => $ride->dropoff,
-            ];
-            $ride->departure_at = $departureAt ?: null;
-            $ride->price_minor = $priceMinor;
-            $ride->price_per_seat_minor = $priceMinor;
-            // $ride->currency = 'USD';
-            $ride->seats_total = (int) ($ride->seats ?? 0);
-            $ride->seats_available = $ride->pendingSeatDetail->count() ?: max(0, (int) ($ride->seats ?? 0));
-            $ride->detail_route = 'ride_detail';
-            $ride->detail_query = [
-                'departure' => $firstStop?->label ?: $ride->departure,
-                'destination' => $lastStop?->label ?: $ride->destination,
-            ];
+            $ride->applyDisplaySummaryAttributes();
 
             return $ride;
         });
