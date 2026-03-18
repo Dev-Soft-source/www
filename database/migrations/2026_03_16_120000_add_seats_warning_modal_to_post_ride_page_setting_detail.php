@@ -13,6 +13,8 @@ return new class extends Migration
             $table->text('seats_warning_modal_paragraph')->nullable()->after('seats_warning_modal_heading');
             $table->string('seats_warning_modal_got_it_btn')->nullable()->after('seats_warning_modal_paragraph');
             $table->string('seats_warning_modal_learn_more_btn')->nullable()->after('seats_warning_modal_got_it_btn');
+            $table->string('pink_ride_disclaimer_text')->nullable()->after('seats_warning_modal_learn_more_btn');
+            $table->string('extra_care_ride_disclaimer_text')->nullable()->after('pink_ride_disclaimer_text');
         });
     }
 
@@ -24,6 +26,8 @@ return new class extends Migration
                 'seats_warning_modal_paragraph',
                 'seats_warning_modal_got_it_btn',
                 'seats_warning_modal_learn_more_btn',
+                'pink_ride_disclaimer_text',
+                'extra_care_ride_disclaimer_text',
             ]);
         });
     }
