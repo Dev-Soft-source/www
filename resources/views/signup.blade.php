@@ -480,7 +480,7 @@
                                     <p class="text-sm text-red-600 text-center mb-2" id="email-error-message"></p>
                                     <button type="button" id="resend-email-btn"
                                         class="inline-flex w-auto justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-primary/80 mx-auto">
-                                        Request a new verification email
+                                        {{ $signupPage->request_new_verification_email_btn_label ?? 'Request a new verification email' }}
                                     </button>
                                 </div>
                             </div>

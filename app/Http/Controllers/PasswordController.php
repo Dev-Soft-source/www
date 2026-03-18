@@ -95,6 +95,6 @@ class PasswordController extends Controller
             }
         }
 
-        return redirect()->route('password', ['lang' => $selectedLanguage->abbreviation])->with('success', $messages->password_update_message);
+        return redirect()->route('password', ['lang' => $this->selectedLanguage->abbreviation])->with('success', $messages->password_update_message);
     }
 }

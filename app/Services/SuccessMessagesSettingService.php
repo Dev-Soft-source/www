@@ -170,6 +170,8 @@ class SuccessMessagesSettingService
                 $errorMessages = array_merge($errorMessages, ['reset_password_message.reset_password_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['email_update_message.email_update_message_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['email_update_message.email_update_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['email_update_verify_message.email_update_verify_message_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['email_update_verify_message.email_update_verify_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
     
                 $validationRule = array_merge($validationRule, ['general_error_message.general_error_message_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['general_error_message.general_error_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
@@ -399,6 +401,7 @@ class SuccessMessagesSettingService
             'email_not_verify_message' => $this->data($request, $language, 'email_not_verify_message'),
             'reset_password_message' => $this->data($request, $language, 'reset_password_message'),
             'email_update_message' => $this->data($request, $language, 'email_update_message'),
+            'email_update_verify_message' => $this->data($request, $language, 'email_update_verify_message'),
             'general_error_message' => $this->data($request, $language, 'general_error_message'),
             'current_email_not_match' => $this->data($request, $language, 'current_email_not_match'),
             'email_not_found_message' => $this->data($request, $language, 'email_not_found_message'),

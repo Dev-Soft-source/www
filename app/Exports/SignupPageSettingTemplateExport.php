@@ -55,6 +55,7 @@ class SignupPageSettingTemplateExport implements FromCollection, WithHeadings, S
             'agree_terms_label' => 'I agree to the terms',
             'button_label' => 'Sign up',
             'after_button_label' => 'After sign up',
+            'request_new_verification_email_btn_label' => 'Request a new verification email',
             'signin_label' => 'Sign in',
             'app_main_heading' => 'Create account',
             'app_agree_terms_part1_label' => 'I agree to the',

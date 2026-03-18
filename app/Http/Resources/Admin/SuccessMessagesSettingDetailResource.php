@@ -95,6 +95,7 @@ class SuccessMessagesSettingDetailResource extends JsonResource
             'email_not_verify_message' => $this->email_not_verify_message,
             'reset_password_message' => $this->reset_password_message,
             'email_update_message' => $this->email_update_message,
+            'email_update_verify_message' => $this->email_update_verify_message,
             'general_error_message' => $this->general_error_message,
             'current_email_not_match' => $this->current_email_not_match,
             'email_not_found_message' => $this->email_not_found_message,

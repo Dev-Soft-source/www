@@ -10,6 +10,7 @@ use App\Models\MyReviewSettingDetail;
 use App\Models\ProfilePageSettingDetail;
 use App\Models\ProfileSettingDetail;
 use App\Models\User;
+use App\Models\SuccessMessagesSettingDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -145,7 +146,23 @@ class EmailController extends Controller
         Mail::to($user->email)->queue(new EmailAddressUpdatedEmail($verificationData));
         // Mail::to($user->email)->queue(new UserEmailVerification($verificationData));
 
+        $successMessages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)
+            ->select('email_update_verify_message', 'email_update_message')
+            ->first();
+
+        if (!$successMessages) {
+            $defaultLang = Language::where('is_default', 1)->first();
+            $successMessages = $defaultLang
+                ? SuccessMessagesSettingDetail::where('language_id', $defaultLang->id)
+                    ->select('email_update_verify_message', 'email_update_message')
+                    ->first()
+                : null;
+        }
+
+        $successMessage = ($successMessages?->email_update_verify_message ?? $successMessages?->email_update_message)
+            ?? 'Email updated successfully. Please verify your new email address.';
+
         return redirect()->route('email', ['lang' => $selectedLanguage->abbreviation])
-            ->with('success', 'Email updated successfully. Please verify your new email address.');
+            ->with('success', $successMessage);
     }
 }

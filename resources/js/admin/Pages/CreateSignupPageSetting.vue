@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <AppLayout>
                 <div class="relative shadow-md sm:rounded-lg bg-white py-4">
                     <header class="pt-4">
@@ -1462,6 +1462,50 @@
                                                     class="flex justify-between"
                                                 >
                                                     <label
+                                                        :for="`request_new_verification_email_btn_label_${activeLanguageId}`"
+                                                        >Request new verification email button label</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`request_new_verification_email_btn_label_${activeLanguageId}`"
+                                                    :id="`request_new_verification_email_btn_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'request_new_verification_email_btn_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'request_new_verification_email_btn_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `request_new_verification_email_btn_label.request_new_verification_email_btn_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `request_new_verification_email_btn_label.request_new_verification_email_btn_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group col-span-2">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
                                                         :for="`signin_label_${activeLanguageId}`"
                                                         >Signin label (Web)</label
                                                     >
@@ -1796,6 +1840,7 @@ export default {
                             this.handleInput("", language, "app_agree_terms_part3_label");
                             this.handleInput("", language, "button_label");
                             this.handleInput("", language, "after_button_label");
+                            this.handleInput("", language, "request_new_verification_email_btn_label");
                             this.handleInput("", language, "signin_label");
                             this.handleInput("", language, "no_account_label");
                             this.handleInput("", language, "signin_link_label");
@@ -1988,6 +2033,11 @@ export default {
                                 setting?.after_button_label,
                                 setting?.language,
                                 "after_button_label"
+                            );
+                            this.handleInput(
+                                setting?.request_new_verification_email_btn_label,
+                                setting?.language,
+                                "request_new_verification_email_btn_label"
                             );
                             this.handleInput(
                                 setting?.signin_label,

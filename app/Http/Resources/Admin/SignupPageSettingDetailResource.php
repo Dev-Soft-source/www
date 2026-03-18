@@ -46,6 +46,7 @@ class SignupPageSettingDetailResource extends JsonResource
             'agree_terms_label' => $this->agree_terms_label,
             'button_label' => $this->button_label,
             'after_button_label' => $this->after_button_label,
+            'request_new_verification_email_btn_label' => $this->request_new_verification_email_btn_label,
             'signin_label' => $this->signin_label,
             'app_main_heading' => $this->app_main_heading,
             'app_agree_terms_part1_label' => $this->app_agree_terms_part1_label,

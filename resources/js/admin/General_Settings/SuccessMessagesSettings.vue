@@ -2995,6 +2995,44 @@
                                         <div>
                                             <div class="flex justify-between">
                                                 <label
+                                                    :for="`email_update_verify_message_${activeLanguageId}`"
+                                                    >67.1. Email update success (please verify)</label
+                                                >
+                                            </div>
+                                            <input
+                                                type="text"
+                                                :name="`email_update_verify_message_${activeLanguageId}`"
+                                                :id="`email_update_verify_message_${activeLanguageId}`"
+                                                class="can-exp-input w-full block border border-gray-300 rounded"
+                                                placeholder=" "
+                                                :value="getCurrentValue('email_update_verify_message')"
+                                                @input="
+                                                    handleInput(
+                                                        $event.target.value,
+                                                        language,
+                                                        'email_update_verify_message'
+                                                    )
+                                                "
+                                            />
+                                        </div>
+                                        <p
+                                            class="mt-2 text-sm text-red-400"
+                                            v-if="
+                                                validationErros.has(
+                                                    `email_update_verify_message.email_update_verify_message_${activeLanguageId}`
+                                                )
+                                            "
+                                            v-text="
+                                                validationErros.get(
+                                                    `email_update_verify_message.email_update_verify_message_${activeLanguageId}`
+                                                )
+                                            "
+                                        ></p>
+                                    </div>
+                                    <div class="relative z-0 w-full group">
+                                        <div>
+                                            <div class="flex justify-between">
+                                                <label
                                                     :for="`general_error_message${activeLanguageId}`"
                                                     >68. Not found (General error message)</label
                                                 >
@@ -5406,6 +5444,7 @@ export default {
                             this.handleInput("", language, "email_not_verify_message");
                             this.handleInput("", language, "reset_password_message");
                             this.handleInput("", language, "email_update_message");
+                            this.handleInput("", language, "email_update_verify_message");
                             this.handleInput("", language, "need_to_select_card_message");
                             this.handleInput("", language, "phone_number_not_allowed_message");
                             this.handleInput("", language, "email_not_allowed_message");
@@ -5940,6 +5979,11 @@ export default {
                                 "email_update_message"
                             );
                             this.handleInput(
+                                setting?.email_update_verify_message,
+                                setting?.language,
+                                "email_update_verify_message"
+                            );
+                            this.handleInput(
                                 setting?.need_to_select_card_message,
                                 setting?.language,
                                 "need_to_select_card_message"
@@ -6281,6 +6325,7 @@ export default {
                 validationErros.has(`email_not_verify_message.email_not_verify_message_${language.id}`) ||
                 validationErros.has(`reset_password_message.reset_password_message_${language.id}`) ||
                 validationErros.has(`email_update_message.email_update_message_${language.id}`) ||
+                validationErros.has(`email_update_verify_message.email_update_verify_message_${language.id}`) ||
                 validationErros.has(`need_to_select_card_message.need_to_select_card_message_${language.id}`) ||
                 validationErros.has(`phone_number_not_allowed_message.phone_number_not_allowed_message_${language.id}`) ||
                 validationErros.has(`email_not_allowed_message.email_not_allowed_message_${language.id}`) ||
