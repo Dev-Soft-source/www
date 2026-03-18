@@ -64,6 +64,8 @@ class SuccessMessagesSettingDetailResource extends JsonResource
             'star4_passenger_message' => $this->star4_passenger_message,
             'star3_passenger_message' => $this->star3_passenger_message,
             'passenger_with_review_message' => $this->passenger_with_review_message,
+            'complete_address_passenger_message' => $this->complete_address_passenger_message,
+            'star5_passenger_with_complete_address_message' => $this->star5_passenger_with_complete_address_message,
             'past_time_message' => $this->past_time_message,
             'past_date_message' => $this->past_date_message,
             'enter_code_message' => $this->enter_code_message,

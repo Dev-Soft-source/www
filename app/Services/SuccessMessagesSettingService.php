@@ -102,6 +102,10 @@ class SuccessMessagesSettingService
                 $errorMessages = array_merge($errorMessages, ['ride_schedule_message.ride_schedule_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['female_user_message.female_user_message_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['female_user_message.female_user_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['complete_address_passenger_message.complete_address_passenger_message_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['complete_address_passenger_message.complete_address_passenger_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['star5_passenger_with_complete_address_message.star5_passenger_with_complete_address_message_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['star5_passenger_with_complete_address_message.star5_passenger_with_complete_address_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['star5_passenger_message.star5_passenger_message_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['star5_passenger_message.star5_passenger_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['star4_passenger_message.star4_passenger_message_' . $language->id => ['required', 'string']]);
@@ -366,6 +370,8 @@ class SuccessMessagesSettingService
             'already_added_card_message' => $this->data($request, $language, 'already_added_card_message'),
             'ride_schedule_message' => $this->data($request, $language, 'ride_schedule_message'),
             'female_user_message' => $this->data($request, $language, 'female_user_message'),
+            'complete_address_passenger_message' => $this->data($request, $language, 'complete_address_passenger_message'),
+            'star5_passenger_with_complete_address_message' => $this->data($request, $language, 'star5_passenger_with_complete_address_message'),
             'star5_passenger_message' => $this->data($request, $language, 'star5_passenger_message'),
             'star4_passenger_message' => $this->data($request, $language, 'star4_passenger_message'),
             'star3_passenger_message' => $this->data($request, $language, 'star3_passenger_message'),
