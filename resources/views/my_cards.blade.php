@@ -372,6 +372,7 @@
 <script src="https://pay.google.com/gp/p/js/pay.js"></script>
 
 <script>
+    var processingText = {!! json_encode(getTranslatedText('processing_text', isset($selectedLanguage) ? $selectedLanguage : getDefaultLanguage(true), [], 'Processing...')) !!};
     const stripe = Stripe('{{ env('STRIPE_KEY') }}');
     let elements;
     let paymentElement;
@@ -861,7 +862,7 @@
             event.preventDefault();
             const submitButton = document.getElementById('submit-card-button');
             submitButton.disabled = true;
-            submitButton.textContent = 'Processing...';
+            submitButton.textContent = processingText;
             
             try {
                 // First, submit the elements to validate the form

@@ -119,6 +119,7 @@ class SignupPageSettingService
             'agree_terms_label' => $this->data($request, $language, 'agree_terms_label'),
             'button_label' => $this->data($request, $language, 'button_label'),
             'after_button_label' => $this->data($request, $language, 'after_button_label'),
+            'request_new_verification_email_btn_label' => $this->data($request, $language, 'request_new_verification_email_btn_label'),
             'signin_label' => $this->data($request, $language, 'signin_label'),
             'app_main_heading' => $this->data($request, $language, 'app_main_heading'),
             'app_agree_terms_part1_label' => $this->data($request, $language, 'app_agree_terms_part1_label'),

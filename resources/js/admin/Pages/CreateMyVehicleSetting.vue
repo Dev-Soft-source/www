@@ -2101,6 +2101,44 @@
                                           <div>
                                               <div class="flex justify-between">
                                                   <label
+                                                      :for="`cannot_delete_vehicle_upcoming_ride_message_${activeLanguageId}`"
+                                                      >Cannot delete vehicle (used in upcoming ride) message</label
+                                                  >
+                                              </div>
+                                              <input
+                                                  type="text"
+                                                  :name="`cannot_delete_vehicle_upcoming_ride_message_${activeLanguageId}`"
+                                                  :id="`cannot_delete_vehicle_upcoming_ride_message_${activeLanguageId}`"
+                                                  class="can-exp-input w-full block border border-gray-300 rounded"
+                                                  placeholder=" "
+                                                  :value="getCurrentValue('cannot_delete_vehicle_upcoming_ride_message')"
+                                                  @input="
+                                                      handleInput(
+                                                          $event.target.value,
+                                                          language,
+                                                          'cannot_delete_vehicle_upcoming_ride_message'
+                                                      )
+                                                  "
+                                              />
+                                          </div>
+                                          <p
+                                              class="mt-2 text-sm text-red-400"
+                                              v-if="
+                                                  validationErros.has(
+                                                      `cannot_delete_vehicle_upcoming_ride_message.cannot_delete_vehicle_upcoming_ride_message_${activeLanguageId}`
+                                                  )
+                                              "
+                                              v-text="
+                                                  validationErros.get(
+                                                      `cannot_delete_vehicle_upcoming_ride_message.cannot_delete_vehicle_upcoming_ride_message_${activeLanguageId}`
+                                                  )
+                                              "
+                                          ></p>
+                                      </div>
+                                      <div class="relative z-0 w-full group">
+                                          <div>
+                                              <div class="flex justify-between">
+                                                  <label
                                                       :for="`edit_photo_label_${activeLanguageId}`"
                                                         >Edit photo message</label
                                                     >
@@ -2273,6 +2311,7 @@ export default {
                             this.handleInput("", language, "remove_car_photo_label");
                             this.handleInput("", language, "delete_photo_message");
                             this.handleInput("", language, "delete_vehicle_message");
+                            this.handleInput("", language, "cannot_delete_vehicle_upcoming_ride_message");
                             this.handleInput("", language, "edit_photo_label");
                         });
                         this.fetchMyVehicleSetting();
@@ -2521,6 +2560,11 @@ export default {
                                 "delete_vehicle_message"
                             );
                             this.handleInput(
+                                setting?.cannot_delete_vehicle_upcoming_ride_message,
+                                setting?.language,
+                                "cannot_delete_vehicle_upcoming_ride_message"
+                            );
+                            this.handleInput(
                                 setting?.edit_photo_label,
                                 setting?.language,
                                 "edit_photo_label"
@@ -2584,6 +2628,7 @@ export default {
                 validationErros.has(`edit_photo_label.edit_photo_label_${language.id}`) ||
                 validationErros.has(`delete_photo_message.delete_photo_message_${language.id}`) ||
                 validationErros.has(`delete_vehicle_message.delete_vehicle_message_${language.id}`) ||
+                validationErros.has(`cannot_delete_vehicle_upcoming_ride_message.cannot_delete_vehicle_upcoming_ride_message_${language.id}`) ||
                 validationErros.has(
                     `make_error.make_error_${language.id}`
                 ) ||

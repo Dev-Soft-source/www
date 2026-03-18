@@ -143,10 +143,16 @@ class FindRidePageSettingService
                 $errorMessages = array_merge($errorMessages, ['luggage_label.luggage_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['luggage_placeholder.luggage_placeholder_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['luggage_placeholder.luggage_placeholder_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['luggage_any_label.luggage_any_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['luggage_any_label.luggage_any_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['smoking_label.smoking_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['smoking_label.smoking_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['smoking_any_label.smoking_any_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['smoking_any_label.smoking_any_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['pets_allowed_label.pets_allowed_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['pets_allowed_label.pets_allowed_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['pets_any_label.pets_any_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['pets_any_label.pets_any_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['card_section_from_label.card_section_from_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['card_section_from_label.card_section_from_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['card_section_to_label.card_section_to_label_' . $language->id => ['required', 'string']]);
@@ -269,8 +275,11 @@ class FindRidePageSettingService
             'ride_features_option17' => $this->data($request, $language, 'ride_features_option17'),
             'luggage_label' => $this->data($request, $language, 'luggage_label'),
             'luggage_placeholder' => $this->data($request, $language, 'luggage_placeholder'),
+            'luggage_any_label' => $this->data($request, $language, 'luggage_any_label'),
             'smoking_label' => $this->data($request, $language, 'smoking_label'),
+            'smoking_any_label' => $this->data($request, $language, 'smoking_any_label'),
             'pets_allowed_label' => $this->data($request, $language, 'pets_allowed_label'),
+            'pets_any_label' => $this->data($request, $language, 'pets_any_label'),
             'card_section_cancelled' => $this->data($request, $language, 'card_section_cancelled'),
             'search_filter_all_label' => $this->data($request, $language, 'search_filter_all_label'),
             'search_filter_select_vehicle_label' => $this->data($request, $language, 'search_filter_select_vehicle_label'),

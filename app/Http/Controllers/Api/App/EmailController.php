@@ -120,16 +120,17 @@ class EmailController extends Controller
                 // Find the language by abbreviation
                 $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
                 if ($selectedLanguage) {
-                    $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('email_update_message')->first();
+                    $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('email_update_verify_message', 'email_update_message')->first();
                 }
             } else {
                 $selectedLanguage = Language::where('is_default', 1)->first();
                 if ($selectedLanguage) {
-                    $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('email_update_message')->first();
+                    $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('email_update_verify_message', 'email_update_message')->first();
                 }
             }
 
-            return $this->successResponse('', strip_tags($message->email_update_message ?? null));
+            $successMsg = $message?->email_update_verify_message ?? $message?->email_update_message ?? null;
+            return $this->successResponse('', strip_tags($successMsg));
         } catch (\Illuminate\Validation\ValidationException $e) {
             $errors = $e->errors();
 

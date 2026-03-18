@@ -852,45 +852,45 @@
                                         @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)) &&
                                             auth()->user()->gender != 'female' && auth()->user()->address != '')
-                                            href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Only females can select this ride')"
+                                            href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.female_user_message)"
                                         @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
                                             @if ($filteredRatings->count() === 0 && auth()->user()->address == '')
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Only passengers with complete address can select this ride')"
+                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.complete_address_passenger_message)"
                                             @elseif ($filteredRatings->count() === 0 && auth()->user()->address !== '')
                                                 href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
                                             @elseif ($totalAverage < 4.5 && auth()->user()->address !== '')
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Only 5 star passengers can select this ride')"
+                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.star5_passenger_only)"
                                             @elseif ($totalAverage < 4.5 && auth()->user()->address == '')
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Only 5 star passengers with complete address can select this ride')"
+                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.star5_passenger_with_complete_address_message)"
                                             @else
                                                 href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @elseif (auth()->user() &&
                                             in_array('I only want passengers with reviews', explode('=', $ride->features)))
                                             @if ($filteredRatings->count() === 0)
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Driver only want passengers with reviews')"
+                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.passenger_with_review_message)"
                                             @else
                                                 href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option15->features_setting_id ?? null, explode('=', $ride->features)))
                                             @if ($totalAverage < 3)
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Driver want only passengers with-3 star reviews above')"
+                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.star3_passenger_message)"
                                             @else
                                                 href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option14->features_setting_id ?? null, explode('=', $ride->features)))
                                             @if ($totalAverage < 4)
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Driver want only passengers with-4 star reviews above')"
+                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.star4_passenger_message)"
                                             @else
                                                 href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option13->features_setting_id ?? null, explode('=', $ride->features)))
                                             @if ($totalAverage < 4.5)
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Driver want only passengers with-5 star reviews above')"
+                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.star5_passenger_driver)"
                                             @else
                                                 href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
                                             @endif
@@ -1279,45 +1279,45 @@
                                         @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)) &&
                                             auth()->user()->gender != 'female' && auth()->user()->address != '')
-                                            href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Only females can select this ride')"
+                                            href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.female_user_message)"
                                         @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
                                             @if ($filteredRatings->count() === 0 && auth()->user()->address == '')
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Only passengers with complete address can select this ride')"
+                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.complete_address_passenger_message)"
                                             @elseif ($filteredRatings->count() === 0 && auth()->user()->address !== '')
                                                 href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
                                             @elseif ($totalAverage < 4.5 && auth()->user()->address !== '')
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Only 5 star passengers can select this ride')"
+                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.star5_passenger_only)"
                                             @elseif ($totalAverage < 4.5 && auth()->user()->address == '')
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Only 5 star passengers with complete address can select this ride')"
+                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.star5_passenger_with_complete_address_message)"
                                             @else
                                                 href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @elseif (auth()->user() &&
                                             in_array('I only want passengers with reviews', explode('=', $ride->features)))
                                             @if ($filteredRatings->count() === 0)
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Driver only want passengers with reviews')"
+                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.passenger_with_review_message)"
                                             @else
                                                 href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option15->features_setting_id ?? null, explode('=', $ride->features)))
                                             @if ($totalAverage < 3)
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Driver want only passengers with-3 star reviews above')"
+                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.star3_passenger_message)"
                                             @else
                                                 href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option14->features_setting_id ?? null, explode('=', $ride->features)))
                                             @if ($totalAverage < 4)
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Driver want only passengers with-4 star reviews above')"
+                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.star4_passenger_message)"
                                             @else
                                                 href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option13->features_setting_id ?? null, explode('=', $ride->features)))
                                             @if ($totalAverage < 4.5)
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', 'Driver want only passengers with-5 star reviews above')"
+                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.star5_passenger_driver)"
                                             @else
                                                 href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
                                             @endif
@@ -1966,6 +1966,18 @@
                 }, { once: true });
             }
         }
+
+        // Localized messages for ride restriction modal (used by toggleModal1()).
+        var proximalLocalModalMessages = {!! json_encode([
+            'female_user_message' => $successMessage->female_user_message ?? 'Only females can select this ride',
+            'complete_address_passenger_message' => $successMessage->complete_address_passenger_message ?? 'Only passengers with complete address can select this ride',
+            'star5_passenger_only' => $successMessage->star5_passenger_message ?? 'Only 5 star passengers can select this ride',
+            'star5_passenger_with_complete_address_message' => $successMessage->star5_passenger_with_complete_address_message ?? 'Only 5 star passengers with complete address can select this ride',
+            'passenger_with_review_message' => $successMessage->passenger_with_review_message ?? 'Driver only want passengers with reviews',
+            'star3_passenger_message' => $successMessage->star3_passenger_message ?? 'Driver want only passengers with-3 star reviews above',
+            'star4_passenger_message' => $successMessage->star4_passenger_message ?? 'Driver want only passengers with-4 star reviews above',
+            'star5_passenger_driver' => $successMessage->star5_passenger_message ?? 'Driver want only passengers with-5 star reviews above',
+        ]) !!};
 
         function toggleModal1(modalID, message, title = '') {
             var modalElement = document.getElementById(modalID);

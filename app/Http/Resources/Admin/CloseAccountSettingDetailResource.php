@@ -24,6 +24,7 @@ class CloseAccountSettingDetailResource extends JsonResource
             'main_heading' => $this->main_heading,
             'apply_reason_label' => $this->apply_reason_label,
             'reason_label' => $this->reason_label,
+            'reasons_required_error' => $this->reasons_required_error,
             'not_say_checkbox_label' => $this->not_say_checkbox_label,
             'check_box_validation_message' => $this->check_box_validation_message,
             'customer_service_checkbox_label' => $this->customer_service_checkbox_label,

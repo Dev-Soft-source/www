@@ -63,6 +63,7 @@ import CreateStep3PageSetting from '../admin/Pages/CreateStep3PageSetting.vue'
 import CreateStep4PageSetting from '../admin/Pages/CreateStep4PageSetting.vue'
 import CreateStep5PageSetting from '../admin/Pages/CreateStep5PageSetting.vue'
 import CreateContactUsPageSetting from '../admin/Pages/CreateContactUsPageSetting.vue'
+import CreateMediaSetting from '../admin/Pages/CreateMediaSetting.vue'
 import CreateTermsAndConditionPageSetting from '../admin/Pages/CreateTermsAndConditionPageSetting.vue'
 import CreatePrivacyPolicyPageSetting from '../admin/Pages/CreatePrivacyPolicyPageSetting.vue'
 import CreateCostSharingPageSetting from '../admin/Pages/CreateCostSharingPageSetting.vue'
@@ -860,6 +861,14 @@ const routes = [
         component: CreateContactUsPageSetting,
         meta: {
             breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Contact us page settings', 'routeName': 'admin.contact-us-page-setting.index', 'isCurrentRoute': 1}],
+        },
+    },
+    {
+        path: '/admin/pages/media-page-settings',
+        name: 'admin.media-page-setting.index',
+        component: CreateMediaSetting,
+        meta: {
+            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Media page settings', 'routeName': 'admin.media-page-setting.index', 'isCurrentRoute': 1}],
         },
     },
     {

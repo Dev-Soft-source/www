@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <AppLayout>
                 <div class="relative shadow-md sm:rounded-lg bg-white py-4">
                     <header class="pt-4">
@@ -1583,6 +1583,36 @@
                                             <div>
                                                 <div class="flex justify-between">
                                                     <label
+                                                        :for="`cancel_ride_confirm_decision_title_${activeLanguageId}`">Cancel
+                                                        ride confirm dialog title</label>
+                                                </div>
+                                                <input type="text"
+                                                    :name="`cancel_ride_confirm_decision_title_${activeLanguageId}`"
+                                                    :id="`cancel_ride_confirm_decision_title_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue('cancel_ride_confirm_decision_title')"
+                                                    @input="handleInput($event.target.value, language, 'cancel_ride_confirm_decision_title')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label
+                                                        :for="`cancel_ride_confirm_ok_btn_text_${activeLanguageId}`">Cancel
+                                                        ride confirm OK button text</label>
+                                                </div>
+                                                <input type="text"
+                                                    :name="`cancel_ride_confirm_ok_btn_text_${activeLanguageId}`"
+                                                    :id="`cancel_ride_confirm_ok_btn_text_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue('cancel_ride_confirm_ok_btn_text')"
+                                                    @input="handleInput($event.target.value, language, 'cancel_ride_confirm_ok_btn_text')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label
                                                         :for="`cancel_booking_confirm_48_hour_message_${activeLanguageId}`">Cancel
                                                         booking confirm 48 hour message</label>
                                                 </div>
@@ -1820,6 +1850,8 @@ export default {
                             this.handleInput("", language, "booking_cancel_btn_yes_label");
                             this.handleInput("", language, "booking_cancel_btn_no_label");
                             this.handleInput("", language, "cancel_booking_confirm_firm_message");
+                            this.handleInput("", language, "cancel_ride_confirm_decision_title");
+                            this.handleInput("", language, "cancel_ride_confirm_ok_btn_text");
                             this.handleInput("", language, "cancel_booking_confirm_48_hour_message");
                             this.handleInput("", language, "cancel_booking_confirm_12_to_48_hour_message");
                             this.handleInput("", language, "cancel_booking_confirm_less_12_hour_message");
@@ -1965,6 +1997,8 @@ export default {
                             this.handleInput(setting?.booking_cancel_btn_yes_label, setting?.language, "booking_cancel_btn_yes_label");
                             this.handleInput(setting?.booking_cancel_btn_no_label, setting?.language, "booking_cancel_btn_no_label");
                             this.handleInput(setting?.cancel_booking_confirm_firm_message, setting?.language, "cancel_booking_confirm_firm_message");
+                            this.handleInput(setting?.cancel_ride_confirm_decision_title, setting?.language, "cancel_ride_confirm_decision_title");
+                            this.handleInput(setting?.cancel_ride_confirm_ok_btn_text, setting?.language, "cancel_ride_confirm_ok_btn_text");
                             this.handleInput(setting?.cancel_booking_confirm_48_hour_message, setting?.language, "cancel_booking_confirm_48_hour_message");
                             this.handleInput(setting?.cancel_booking_confirm_12_to_48_hour_message, setting?.language, "cancel_booking_confirm_12_to_48_hour_message");
                             this.handleInput(setting?.cancel_booking_confirm_less_12_hour_message, setting?.language, "cancel_booking_confirm_less_12_hour_message");

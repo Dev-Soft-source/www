@@ -311,7 +311,7 @@
                                                     }
                                                     return '<a ' . $attrs . '>';
                                                 },
-                                                $signupPage->agree_terms_label,
+                                                $signupPage->agree_terms_label
                                             ) !!}
                                         @endisset
                                     </div>
@@ -480,7 +480,7 @@
                                     <p class="text-sm text-red-600 text-center mb-2" id="email-error-message"></p>
                                     <button type="button" id="resend-email-btn"
                                         class="inline-flex w-auto justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-primary/80 mx-auto">
-                                        Request a new verification email
+                                        {{ $signupPage->request_new_verification_email_btn_label ?? 'Request a new verification email' }}
                                     </button>
                                 </div>
                             </div>
@@ -502,6 +502,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
+        var processingText = {!! json_encode(getTranslatedText('processing_text', isset($selectedLanguage) ? $selectedLanguage : getDefaultLanguage(true), [], 'Processing...')) !!};
         function closeModal() {
             var modal = document.getElementById('my-modal');
             if (modal) {
@@ -770,7 +771,7 @@
                 // Disable button and show loading state
                 if (signupButton) {
                     signupButton.setAttribute('disabled', 'true');
-                    signupButton.innerHTML = '<span>Processing...</span>';
+                    signupButton.innerHTML = '<span>' + processingText + '</span>';
                 }
 
                 // Get CSRF token

@@ -306,19 +306,31 @@ class SignupController extends Controller
             }
         }
 
+        $selectedLanguageId = $this->selectedLanguage?->id;
+        $defaultLanguageId = $this->defaultLang?->id;
+        $languageId = $selectedLanguageId ?? $defaultLanguageId;
+
+        $messages = $languageId
+            ? SuccessMessagesSettingDetail::where('language_id', $languageId)
+                ->select('email_sent_message')
+                ->first()
+            : null;
+
+        $emailSentMessage = $messages->email_sent_message ?? 'We\'ve sent you a verification email. Please check your inbox.';
+        if (!$emailSent) {
+            // Keep the fallback note in English (admin can include their own wording inside `email_sent_message`).
+            $emailSentMessage .= ' <strong>Note: There was an issue sending the email. Please use the "Request a new verification email" option if you don\'t receive it.</strong>';
+        }
+
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => $emailSent,
-                'message' => $emailSent
-                    ? 'Verification email has been sent! Please check your inbox.'
-                    : 'There was an issue sending the email. Please try again later.'
+                'message' => $emailSentMessage,
             ]);
         }
 
         return redirect()->back()->with([
-            'success' => $emailSent
-                ? 'We\'ve sent you a verification email. Check your inbox'
-                : 'There was an issue sending the email. Please try again later.'
+            'success' => $emailSentMessage,
         ]);
     }
 

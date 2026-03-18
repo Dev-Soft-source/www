@@ -311,7 +311,7 @@
                     <div class="px-4 pb-6 pt-4 flex items-center justify-center space-x-2 sm:space-x-4 sm:px-6">
                          <button type="button" onclick="closeCloseAccountConfirmationModal()"
                             class="button-exp-fill">
-                            {{ $siteText['take_me_back_button_label'] ?? 'No, take me back!' }}
+                            {{ $closeAccountPage->take_me_back_button_label ?? 'No, take me back!' }}
                         </button>
                         <button type="button" onclick="submitCloseAccountForm()"
                             class="button-exp-red-fill">

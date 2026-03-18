@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <AppLayout>
                 <div class="relative shadow-md sm:rounded-lg bg-white py-4">
                     <header class="pt-4">
@@ -324,6 +324,51 @@
                                                 v-text="
                                                     validationErros.get(
                                                         `reason_label.reason_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`reasons_required_error_${activeLanguageId}`"
+                                                        >Reasons required error</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`reasons_required_error_${activeLanguageId}`"
+                                                    :id="`reasons_required_error_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'reasons_required_error'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'reasons_required_error'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `reasons_required_error.reasons_required_error_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `reasons_required_error.reasons_required_error_${activeLanguageId}`
                                                     )
                                                 "
                                             ></p>
@@ -1662,6 +1707,7 @@ export default {
                             this.handleInput("", language, "main_heading");
                             this.handleInput("", language, "apply_reason_label");
                             this.handleInput("", language, "reason_label");
+                            this.handleInput("", language, "reasons_required_error");
                             this.handleInput("", language, "not_say_checkbox_label");
                             this.handleInput("", language, "check_box_validation_message");
                             
@@ -1733,6 +1779,11 @@ export default {
                                 setting?.reason_label,
                                 setting?.language,
                                 "reason_label"
+                            );
+                            this.handleInput(
+                                setting?.reasons_required_error,
+                                setting?.language,
+                                "reasons_required_error"
                             );
                              this.handleInput(
                                 setting?.not_say_checkbox_label,
@@ -1929,6 +1980,9 @@ export default {
                 ) ||
                 validationErros.has(
                     `reason_label.reason_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `reasons_required_error.reasons_required_error_${language.id}`
                 ) ||
                 validationErros.has(
                     `not_say_checkbox_label.not_say_checkbox_label_${language.id}`

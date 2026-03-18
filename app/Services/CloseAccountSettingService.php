@@ -23,6 +23,8 @@ class CloseAccountSettingService
                 $errorMessages = array_merge($errorMessages, ['apply_reason_label.apply_reason_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['reason_label.reason_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['reason_label.reason_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['reasons_required_error.reasons_required_error_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['reasons_required_error.reasons_required_error_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['customer_service_checkbox_label.customer_service_checkbox_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['customer_service_checkbox_label.customer_service_checkbox_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['dont_use_checkbox_label.dont_use_checkbox_label_' . $language->id => ['required', 'string']]);
@@ -88,6 +90,7 @@ class CloseAccountSettingService
             'closing_account_label' => $this->data($request, $language, 'closing_account_label'),
             'apply_reason_label' => $this->data($request, $language, 'apply_reason_label'),
             'reason_label' => $this->data($request, $language, 'reason_label'),
+            'reasons_required_error' => $this->data($request, $language, 'reasons_required_error'),
             'not_say_checkbox_label' => $this->data($request, $language, 'not_say_checkbox_label'),
             'check_box_validation_message' => $this->data($request, $language, 'check_box_validation_message'),
             'customer_service_checkbox_label' => $this->data($request, $language, 'customer_service_checkbox_label'),

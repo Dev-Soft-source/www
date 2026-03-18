@@ -1663,6 +1663,82 @@
                                         <div>
                                             <div class="flex justify-between">
                                                 <label
+                                                    :for="`complete_address_passenger_message_${activeLanguageId}`"
+                                                    >34. Only passengers with complete address can select this ride</label
+                                                >
+                                            </div>
+                                            <input
+                                                type="text"
+                                                :name="`complete_address_passenger_message_${activeLanguageId}`"
+                                                :id="`complete_address_passenger_message_${activeLanguageId}`"
+                                                class="can-exp-input w-full block border border-gray-300 rounded"
+                                                placeholder=" "
+                                                :value="getCurrentValue('complete_address_passenger_message')"
+                                                @input="
+                                                    handleInput(
+                                                        $event.target.value,
+                                                        language,
+                                                        'complete_address_passenger_message'
+                                                    )
+                                                "
+                                            />
+                                        </div>
+                                        <p
+                                            class="mt-2 text-sm text-red-400"
+                                            v-if="
+                                                validationErros.has(
+                                                    `complete_address_passenger_message.complete_address_passenger_message_${activeLanguageId}`
+                                                )
+                                            "
+                                            v-text="
+                                                validationErros.get(
+                                                    `complete_address_passenger_message.complete_address_passenger_message_${activeLanguageId}`
+                                                )
+                                            "
+                                        ></p>
+                                    </div>
+                                    <div class="relative z-0 w-full group">
+                                        <div>
+                                            <div class="flex justify-between">
+                                                <label
+                                                    :for="`star5_passenger_with_complete_address_message_${activeLanguageId}`"
+                                                    >35. Only 5 star passengers with complete address can select this ride</label
+                                                >
+                                            </div>
+                                            <input
+                                                type="text"
+                                                :name="`star5_passenger_with_complete_address_message_${activeLanguageId}`"
+                                                :id="`star5_passenger_with_complete_address_message_${activeLanguageId}`"
+                                                class="can-exp-input w-full block border border-gray-300 rounded"
+                                                placeholder=" "
+                                                :value="getCurrentValue('star5_passenger_with_complete_address_message')"
+                                                @input="
+                                                    handleInput(
+                                                        $event.target.value,
+                                                        language,
+                                                        'star5_passenger_with_complete_address_message'
+                                                    )
+                                                "
+                                            />
+                                        </div>
+                                        <p
+                                            class="mt-2 text-sm text-red-400"
+                                            v-if="
+                                                validationErros.has(
+                                                    `star5_passenger_with_complete_address_message.star5_passenger_with_complete_address_message_${activeLanguageId}`
+                                                )
+                                            "
+                                            v-text="
+                                                validationErros.get(
+                                                    `star5_passenger_with_complete_address_message.star5_passenger_with_complete_address_message_${activeLanguageId}`
+                                                )
+                                            "
+                                        ></p>
+                                    </div>
+                                    <div class="relative z-0 w-full group">
+                                        <div>
+                                            <div class="flex justify-between">
+                                                <label
                                                     :for="`star5_passenger_message_${activeLanguageId}`"
                                                     >34. Driver only wants passengers with reviews of 5 star </label
                                                 >
@@ -2987,6 +3063,44 @@
                                             v-text="
                                                 validationErros.get(
                                                     `email_update_message.email_update_message_${activeLanguageId}`
+                                                )
+                                            "
+                                        ></p>
+                                    </div>
+                                    <div class="relative z-0 w-full group">
+                                        <div>
+                                            <div class="flex justify-between">
+                                                <label
+                                                    :for="`email_update_verify_message_${activeLanguageId}`"
+                                                    >67.1. Email update success (please verify)</label
+                                                >
+                                            </div>
+                                            <input
+                                                type="text"
+                                                :name="`email_update_verify_message_${activeLanguageId}`"
+                                                :id="`email_update_verify_message_${activeLanguageId}`"
+                                                class="can-exp-input w-full block border border-gray-300 rounded"
+                                                placeholder=" "
+                                                :value="getCurrentValue('email_update_verify_message')"
+                                                @input="
+                                                    handleInput(
+                                                        $event.target.value,
+                                                        language,
+                                                        'email_update_verify_message'
+                                                    )
+                                                "
+                                            />
+                                        </div>
+                                        <p
+                                            class="mt-2 text-sm text-red-400"
+                                            v-if="
+                                                validationErros.has(
+                                                    `email_update_verify_message.email_update_verify_message_${activeLanguageId}`
+                                                )
+                                            "
+                                            v-text="
+                                                validationErros.get(
+                                                    `email_update_verify_message.email_update_verify_message_${activeLanguageId}`
                                                 )
                                             "
                                         ></p>
@@ -5364,6 +5478,8 @@ export default {
                             this.handleInput("", language, "already_added_card_message");
                             this.handleInput("", language, "ride_schedule_message");
                             this.handleInput("", language, "female_user_message");
+                            this.handleInput("", language, "complete_address_passenger_message");
+                            this.handleInput("", language, "star5_passenger_with_complete_address_message");
                             this.handleInput("", language, "star5_passenger_message");
                             this.handleInput("", language, "star4_passenger_message");
                             this.handleInput("", language, "star3_passenger_message");
@@ -5406,6 +5522,7 @@ export default {
                             this.handleInput("", language, "email_not_verify_message");
                             this.handleInput("", language, "reset_password_message");
                             this.handleInput("", language, "email_update_message");
+                            this.handleInput("", language, "email_update_verify_message");
                             this.handleInput("", language, "need_to_select_card_message");
                             this.handleInput("", language, "phone_number_not_allowed_message");
                             this.handleInput("", language, "email_not_allowed_message");
@@ -5726,6 +5843,16 @@ export default {
                                 "female_user_message"
                             );
                             this.handleInput(
+                                setting?.complete_address_passenger_message,
+                                setting?.language,
+                                "complete_address_passenger_message"
+                            );
+                            this.handleInput(
+                                setting?.star5_passenger_with_complete_address_message,
+                                setting?.language,
+                                "star5_passenger_with_complete_address_message"
+                            );
+                            this.handleInput(
                                 setting?.star5_passenger_message,
                                 setting?.language,
                                 "star5_passenger_message"
@@ -5938,6 +6065,11 @@ export default {
                                 setting?.email_update_message,
                                 setting?.language,
                                 "email_update_message"
+                            );
+                            this.handleInput(
+                                setting?.email_update_verify_message,
+                                setting?.language,
+                                "email_update_verify_message"
                             );
                             this.handleInput(
                                 setting?.need_to_select_card_message,
@@ -6239,6 +6371,8 @@ export default {
                 validationErros.has(`already_added_card_message.already_added_card_message_${language.id}`) ||
                 validationErros.has(`ride_schedule_message.ride_schedule_message_${language.id}`) ||
                 validationErros.has(`female_user_message.female_user_message_${language.id}`) ||
+                validationErros.has(`complete_address_passenger_message.complete_address_passenger_message_${language.id}`) ||
+                validationErros.has(`star5_passenger_with_complete_address_message.star5_passenger_with_complete_address_message_${language.id}`) ||
                 validationErros.has(`star5_passenger_message.star5_passenger_message_${language.id}`) ||
                 validationErros.has(`star4_passenger_message.star4_passenger_message_${language.id}`) ||
                 validationErros.has(`star3_passenger_message.star3_passenger_message_${language.id}`) ||
@@ -6281,6 +6415,7 @@ export default {
                 validationErros.has(`email_not_verify_message.email_not_verify_message_${language.id}`) ||
                 validationErros.has(`reset_password_message.reset_password_message_${language.id}`) ||
                 validationErros.has(`email_update_message.email_update_message_${language.id}`) ||
+                validationErros.has(`email_update_verify_message.email_update_verify_message_${language.id}`) ||
                 validationErros.has(`need_to_select_card_message.need_to_select_card_message_${language.id}`) ||
                 validationErros.has(`phone_number_not_allowed_message.phone_number_not_allowed_message_${language.id}`) ||
                 validationErros.has(`email_not_allowed_message.email_not_allowed_message_${language.id}`) ||

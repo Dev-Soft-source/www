@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\MediaSettingDetail;
 use App\Models\ChatsPageSettingDetail;
 use App\Models\Language;
 use App\Models\Notification;
@@ -20,8 +21,15 @@ class NewsController extends Controller
             });
         }
 
+        $mediaSetting = MediaSettingDetail::getByLanguageWithFallback(
+            $this->selectedLanguage->id,
+            $this->defaultLang->id
+        );
+
         return view('news',[
             'articles' => $articles,
+            'mediaSetting' => $mediaSetting,
+            'selectedLanguage' => $this->selectedLanguage,
             ]);
     }
 

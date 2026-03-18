@@ -385,7 +385,10 @@ class ProfileVehicleController extends Controller
             ->exists();
 
         if ($hasUpcomingRide) {
-            return redirect()->route('profile.vehicle', ['lang' => $selectedLanguage->abbreviation])->with('message', "You can't delete this vehicle because this vehicle is used in an upcoming ride");
+            $defaultLang = Language::where('is_default', 1)->first();
+            $myVehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($selectedLanguage->id, $defaultLang?->id ?? $selectedLanguage->id);
+            $cannotDeleteMessage = $myVehiclePage->cannot_delete_vehicle_upcoming_ride_message ?? "You can't delete this vehicle because this vehicle is used in an upcoming ride";
+            return redirect()->route('profile.vehicle', ['lang' => $selectedLanguage->abbreviation])->with('message', $cannotDeleteMessage);
         }
 
         // Check if we're deleting the primary vehicle

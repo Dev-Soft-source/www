@@ -122,7 +122,9 @@
                                 @endif
 
                                 <label class="flex items-center justify-between p-3">
-                                    <span class="text-base md:text-lg text-gray-900">{{ $findRidePage->hide_full_ride_text ?? 'Hide Full Rides' }}</span>
+                                    <span class="text-base md:text-lg text-gray-900">
+                                        {{ getTranslatedText('hide_full_ride_text', $selectedLanguage ?? getDefaultLanguage(true), [], 'Hide Full Rides') }}
+                                    </span>
                                     <input type="checkbox" name="hide_full_rides" value="1" class="w-4 h-4 form-check-input"
                                         @checked(!empty($searchFilters['hide_full_rides']))>
                                 </label>
@@ -242,7 +244,7 @@
                             @if ($preferenceGroup && $preferenceGroup->options->isNotEmpty())
                                 <div class="space-y-3">
                                     <h3 class="text-primary text-2xl xl:text-3xl">
-                                        {{ $findRidePage->preference_label ?? 'Preference' }}</h3>
+                                        {{ $findRidePage->ride_preferences_label ?? 'Preference' }}</h3>
                                     <div class="border rounded-md overflow-hidden divide-y">
                                         @foreach ($preferenceGroup->options as $option)
                                             @continue(in_array($option->code, $coPassengerOptionCodes, true))
@@ -279,7 +281,7 @@
                                             <label class="flex items-center gap-2 text-base md:text-lg">
                                                 <input type="radio" name="luggage_size" value="" class="w-4 h-4 form-check-input"
                                                     @checked(empty($searchFilters['luggage_size']))>
-                                                <span>Any</span>
+                                                <span>{{ $findRidePage->luggage_any_label ?? 'Any' }}</span>
                                             </label>
                                         </div>
                                     </div>
@@ -305,7 +307,7 @@
                                             <label class="flex items-center gap-2 text-base md:text-lg">
                                                 <input type="radio" name="smoking_allowed" value=""
                                                     class="w-4 h-4 form-check-input" @checked(empty($searchFilters['smoking_allowed']))>
-                                                <span>Any</span>
+                                                <span>{{ $findRidePage->smoking_any_label ?? 'Any' }}</span>
                                             </label>
                                         </div>
                                     </div>
@@ -331,7 +333,7 @@
                                             <label class="flex items-center gap-2 text-base md:text-lg">
                                                 <input type="radio" name="pets_allowed" value="" class="w-4 h-4 form-check-input"
                                                     @checked(empty($searchFilters['pets_allowed']))>
-                                                <span>Any</span>
+                                                <span>{{ $findRidePage->pets_any_label ?? 'Any' }}</span>
                                             </label>
                                         </div>
                                     </div>
@@ -368,7 +370,7 @@
                                             </g>
                                         </svg>
                                     </span>
-                                    <span class="text-xl">Clear</span>
+                                    <span class="text-xl"> {{ $findRidePage->clear_button_label ?? 'Clear' }}</span>
                                 </a>
                             </div>
                         </div>
@@ -456,7 +458,7 @@
                             <div class="w-full md:w-[20%]">
                                 <button type="submit" name="search" value="1"
                                     class="px-search-submit w-full h-full flex items-center justify-center text-base font-semibold text-white transition-colors">
-                                    Search
+                                    {{ $findRidePage->search_section_button_label ?? 'Search' }}
                                 </button>
                             </div>
                         </div>

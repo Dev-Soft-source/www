@@ -176,8 +176,8 @@
 
             if (!checkbox.checked) {
                 Swal.fire({
-                    title: 'Please confirm your decision',
-                    confirmButtonText: 'OK'
+                    title: "{{ $tripsPage->cancel_ride_confirm_decision_title ?? 'Please confirm your decision' }}",
+                    confirmButtonText: "{{ $tripsPage->cancel_ride_confirm_ok_btn_text ?? 'OK' }}"
                 });
                 return;
             }

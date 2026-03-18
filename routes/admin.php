@@ -92,7 +92,8 @@ use App\Http\Controllers\Api\Admin\{
     NoShowController,
     PackageController,
     PinkRideFaqController,
-    SelectLocationPageSettingController
+    SelectLocationPageSettingController,
+    MediaSettingController
 };
 use App\Http\Resources\Admin\AdminResource;
 use Illuminate\Http\Request;
@@ -454,4 +455,6 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('/get-billing-address-setting', [BillingAdressSettingController::class, 'show']);
     Route::post('/upload-billing-address-setting-excel', [BillingAdressSettingController::class, 'uploadExcel']);
     Route::get('/download-billing-address-setting-template', [BillingAdressSettingController::class, 'downloadTemplate']);
+    Route::post('/update-media-setting', [MediaSettingController::class, 'update']);
+    Route::get('/get-media-setting', [MediaSettingController::class, 'show']);
 });
