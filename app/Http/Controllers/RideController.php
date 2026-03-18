@@ -914,19 +914,7 @@ class RideController extends Controller
 
             $this->syncRideSeatDetails($ride, (int) $request->seats);
 
-            RideDetail::where('ride_id', $ride->id)
-                ->where('default_ride', 0)
-                ->delete();
-
-            $rideDetail = $request->filled('default_ride_detail_id')
-                ? RideDetail::where('id', $request->input('default_ride_detail_id'))->first()
-                : null;
-
-            if (!$rideDetail) {
-                $rideDetail = RideDetail::where('ride_id', $ride->id)
-                    ->where('default_ride', 1)
-                    ->first();
-            }
+            $rideDetail = RideDetail::where('ride_id', $ride->id) ->first();
 
             if (!$rideDetail) {
                 $rideDetail = new RideDetail();
