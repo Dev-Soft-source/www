@@ -637,6 +637,66 @@ class User extends Authenticatable
             ->avg('average_rating');
     }
 
+    public const STUDENT_STATUS_NONE = 0;
+    public const STUDENT_STATUS_VERIFIED = 1;
+    public const STUDENT_STATUS_PENDING = 2;
+
+    public const CHARGE_BOOKING_CHARGED = 1;
+    public const CHARGE_BOOKING_WAIVED = 2;
+
+    public function isStudent(): bool
+    {
+        return (int) ($this->student ?? 0) !== self::STUDENT_STATUS_NONE;
+    }
+
+    public function isVerifiedStudent(): bool
+    {
+        return (int) ($this->student ?? 0) === self::STUDENT_STATUS_VERIFIED;
+    }
+
+    public function isPendingStudent(): bool
+    {
+        return (int) ($this->student ?? 0) === self::STUDENT_STATUS_PENDING;
+    }
+
+    public function studentStatus(): int
+    {
+        return (int) ($this->student ?? 0);
+    }
+
+    public function hasBookingFeeWaiverFlag(): bool
+    {
+        return (int) ($this->charge_booking ?? 0) === self::CHARGE_BOOKING_WAIVED;
+    }
+    
+    public function hasBookingChargeFlag(): bool
+    {
+        return (int) ($this->charge_booking ?? 0) === self::CHARGE_BOOKING_CHARGED;
+    }
+
+    public function isBookingFeeCurrentlyWaived(): bool
+    {
+        // Mirror BookingController::validateStudentBookingFee logic in a reusable way.
+        if (!$this->hasBookingFeeWaiverFlag()) {
+            return false;
+        }
+
+        // If verified student with an expiration date, only waive if card is not expired.
+        if ($this->isVerifiedStudent() && !empty($this->student_card_exp_date)) {
+            try {
+                $expirationDate = \Carbon\Carbon::parse($this->student_card_exp_date);
+
+                if ($expirationDate->isPast()) {
+                    return false;
+                }
+            } catch (\Exception $e) {
+                // On parse error, fall back to the raw flag.
+            }
+        }
+
+        return true;
+    }
+
     protected function completedRideCount(): int
     {
         return Ride::where('added_by', $this->id)

@@ -210,188 +210,33 @@ class MyRideController extends Controller
             session(['selectedLanguage' => $lang]);
         }
 
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-        }
+        $postRidePage = $this->getPostRidePageWithSettingDetail();
+        
+        $searchOptionGroups = $this->getSearchOptionGroups(
+            $this->selectedLanguage->id,
+            $this->defaultLang->id
+        );
 
-        if ($selectedLanguage) {
-            $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-            $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button','delete_button', 'too_many_secured_cash_attempt_message')->first();
-            $postRidePage = $this->getPostRidePageWithSettingDetail();
-            $searchOptionGroups = $this->getSearchOptionGroups($selectedLanguage->id, $this->defaultLang->id);
+        $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);  
+        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback(
+            $this->selectedLanguage->id,
+            $this->defaultLang->id
+        );
+        $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback(
+            $this->selectedLanguage->id,
+            $this->defaultLang->id
+        );
+        $messages = $this->successMessage;
 
-            $ride->luggage = FeaturesSettingDetail::whereFeaturesSettingId($ride->luggage)
-                ->whereLanguageId($selectedLanguage->id)
-                ->first();
+        $ride->mapMultipleOptionColumnsToDetails(
+            ['luggage', 'payment_method', 'booking_type', 'animal_friendly', 'booking_method'],
+            $this->selectedLanguage->id,
+            $this->defaultLang->id,
+            false
+        );
 
-            $ride->payment_method = FeaturesSettingDetail::whereFeaturesSettingId($ride->payment_method)
-                ->whereLanguageId($selectedLanguage->id)
-                ->value('name');
+        $ride = $this->makeDetailOfRide($ride);
 
-            $ride->booking_method = FeaturesSettingDetail::whereFeaturesSettingId($ride->booking_method)
-                ->whereLanguageId($selectedLanguage->id)
-                ->value('name');
-
-            $ride->booking_type = FeaturesSettingDetail::whereFeaturesSettingId($ride->booking_type)
-                ->whereLanguageId($selectedLanguage->id)
-                ->value('name');
-
-            $ride->animal_friendly = FeaturesSettingDetail::whereFeaturesSettingId($ride->animal_friendly)
-                ->whereLanguageId($selectedLanguage->id)
-                ->first();
-
-            $vehicleTypeName = $ride->vehicle_type ? FeaturesSettingDetail::whereFeaturesSettingId($ride->vehicle_type)
-                ->whereLanguageId($selectedLanguage->id)
-                ->value('name') : null;
-            $ride->vehicle_type = $vehicleTypeName ?? $ride->vehicle_type;
-
-            $featureIds = explode('=', (string) $ride->features);
-            $featureNames = collect($featureIds)->map(function ($id) use ($selectedLanguage) {
-                return FeaturesSettingDetail::whereFeaturesSettingId($id)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->value('name');
-            })->filter()->implode('=');
-            $ride->features = $featureNames;
-        } else {
-            $notificationPage = null;
-            $successMessage = null;
-            $postRidePage = $this->getPostRidePageWithSettingDetail();
-            $searchOptionGroups = collect();
-        }
-
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0');
-            $notifications = $notifications->where(function ($query) use ($user_id) {
-                $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
-                    $query->where('added_by', $user_id);
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                        $query->where('user_id', $user_id);
-                    });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                        $query->where('id', $user_id);
-                    });
-                });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
-        }
-
-        $rideDetailPage = null;
-        $tripsPage = null;
-        $messages = null;
-        if ($selectedLanguage) {
-            $rideDetailPage = RideDetailPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $tripsPage = TripsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('popup_close_btn_text', 'popup_submit_btn_text')->first();
-        }
-
-        $allDetails = $ride->rideDetail->sortBy('id')->values();
-        $orderedStops = $ride->rideStops->sortBy('stop_order')->values();
-
-        if ($orderedStops->count() >= 2) {
-            $originStop = $orderedStops->first();
-            $destinationStop = $orderedStops->last();
-            $origin = $originStop->label ?: ($ride->departure ?? '');
-            $destination = $destinationStop->label ?: ($ride->destination ?? '');
-
-            [$fromIndex, $toIndex] = $this->resolveMyRideStopIndices($orderedStops, $from, $to);
-            $segmentFromIndex = $fromIndex ?? 0;
-            $segmentToIndex = $toIndex ?? ($orderedStops->count() - 1);
-
-            if ($segmentFromIndex >= $segmentToIndex) {
-                $segmentFromIndex = 0;
-                $segmentToIndex = $orderedStops->count() - 1;
-            }
-
-            $segmentFromStop = $orderedStops->get($segmentFromIndex);
-            $segmentToStop = $orderedStops->get($segmentToIndex);
-
-            $segmentPickup = $segmentFromStop->pickup_dropoff_location ?: ($ride->pickup ?? null);
-            $segmentDropoff = $segmentToStop->pickup_dropoff_location ?: ($ride->dropoff ?? null);
-
-            $stops = $orderedStops
-                ->slice($segmentFromIndex + 1, max(0, $segmentToIndex - $segmentFromIndex - 1))
-                ->values()
-                ->map(function ($stop) {
-                    $dateTime = $stop->departure_at ?: $stop->eta_at;
-
-                    return [
-                        'name' => $stop->label,
-                        'pickup' => $stop->is_pickup ? $stop->pickup_dropoff_location : null,
-                        'dropoff' => $stop->is_dropoff ? $stop->pickup_dropoff_location : null,
-                        'date' => $dateTime ? Carbon::parse($dateTime)->format('Y-m-d') : null,
-                        'time' => $dateTime ? Carbon::parse($dateTime)->format('H:i:s') : null,
-                    ];
-                });
-
-            $displayDepartureDateTime = $segmentFromStop && $segmentFromStop->departure_at
-                ? Carbon::parse($segmentFromStop->departure_at)->format('Y-m-d H:i:s')
-                : (($ride->date ?? '') . ' ' . ($ride->time ?? '00:00:00'));
-
-            $selectedRideDetail = $this->resolveMyRideDetailForStops(
-                $ride,
-                $segmentFromStop?->label,
-                $segmentToStop?->label
-            );
-
-            if ($selectedRideDetail) {
-                $matchingSegment = $ride->rideStopSegments->first(function ($segment) use ($segmentFromStop, $segmentToStop) {
-                    return (int) $segment->from_stop_id === (int) ($segmentFromStop->id ?? 0)
-                        && (int) $segment->to_stop_id === (int) ($segmentToStop->id ?? 0);
-                });
-
-                if ($matchingSegment && (int) $matchingSegment->price_minor > 0) {
-                    $selectedRideDetail->price = round(((int) $matchingSegment->price_minor) / 100, 2);
-                }
-
-                $selectedRideDetail->departure = $segmentFromStop->label ?? ($selectedRideDetail->departure ?? null);
-                $selectedRideDetail->destination = $segmentToStop->label ?? ($selectedRideDetail->destination ?? null);
-                $selectedRideDetail->pickup = $segmentPickup ?: ($selectedRideDetail->pickup ?? null);
-                $selectedRideDetail->dropoff = $segmentDropoff ?: ($selectedRideDetail->dropoff ?? null);
-
-                $ride->setRelation('rideDetail', collect([$selectedRideDetail]));
-            }
-        } else {
-            $defaultDetail = $allDetails->where('default_ride', 1)->first();
-            $moreDetails = $allDetails->where('default_ride', 0)->sortBy('id');
-
-            $origin = $defaultDetail && $defaultDetail->departure
-                ? $defaultDetail->departure
-                : ($allDetails->first() ? $allDetails->first()->departure : ($ride->departure ?? ''));
-            $destination = $defaultDetail && $defaultDetail->destination
-                ? $defaultDetail->destination
-                : ($allDetails->last() ? $allDetails->last()->destination : ($ride->destination ?? ''));
-
-            $orderedPoints = collect([$origin]);
-            $current = $origin;
-            $remaining = $moreDetails->values();
-            while ($current !== $destination && $remaining->isNotEmpty()) {
-                $nextSegment = $remaining->first(fn($d) => (string) $d->departure === (string) $current);
-                if (!$nextSegment) {
-                    break;
-                }
-                $orderedPoints->push($nextSegment->destination);
-                $current = $nextSegment->destination;
-                $remaining = $remaining->filter(fn($d) => $d->id != $nextSegment->id);
-            }
-
-            $segmentPickup = $ride->pickup ?? null;
-            $segmentDropoff = $ride->dropoff ?? null;
-            $stops = $orderedPoints->count() > 2
-                ? $orderedPoints->slice(1, $orderedPoints->count() - 2)->values()->map(fn($stop) => ['name' => $stop, 'pickup' => null, 'dropoff' => null, 'date' => null, 'time' => null])
-                : collect();
-
-            $displayDepartureDateTime = ($ride->date ?? '') . ' ' . ($ride->time ?? '00:00');
-        }
 
         $ratings = Rating::all();
         $ride_cancelled = false;
@@ -401,25 +246,18 @@ class MyRideController extends Controller
         }
 
         return view('my_ride_detail', [
+            'ride' => $ride,
             'siteSetting' => $siteSetting,
             'ride_cancelled' => $ride_cancelled,
-            'ride' => $ride,
             'setting' => $setting,
             'ratings' => $ratings,
             'postRidePage' => $postRidePage,
+            'findRidePage' => $findRidePage,
             'cancelSetting' => $cancelSetting,
             'rideDetailPage' => $rideDetailPage,
             'tripsPage' => $tripsPage,
             'messages' => $messages,
-            'notifications' => $notifications,
-            'selectedLanguage' => $selectedLanguage,
             'searchOptionGroups' => $searchOptionGroups,
-            'origin' => $origin,
-            'destination' => $destination,
-            'stops' => $stops,
-            'segmentPickup' => $segmentPickup,
-            'segmentDropoff' => $segmentDropoff,
-            'displayDepartureDateTime' => $displayDepartureDateTime,
         ]);
     }
 

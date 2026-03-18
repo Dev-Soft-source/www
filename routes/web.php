@@ -295,8 +295,8 @@ Route::get('{lang?}/students', [StudentController::class, 'index'])->name('stude
 Route::get('{lang?}/drivers', [DriverController::class, 'index'])->name('drivers');
 Route::get('{lang?}/passenger', [PassengerController::class, 'index'])->name('passengers');
 
-Route::get('{lang?}/ride/{id}', [RideController::class, 'RideDetail'])->name('ride_detail');
-Route::get('{lang?}/my-co-passengers/{departure}/to/{destination}/{id}', [RideController::class, 'MyCoPassengers'])->name('my_co_passengers');
+Route::get('{lang?}/ride/{id}/{from_stop_id?}/{to_stop_id?}', [RideController::class, 'RideDetail'])->name('ride_detail');
+Route::get('{lang?}/my-co-passengers/{id}', [RideController::class, 'MyCoPassengers'])->name('my_co_passengers');
 
 Route::get('{lang?}/my-rides', [MyRideController::class, 'CurrentRides'])->name('my_rides')->middleware('auth');
 Route::get('{lang?}/past-rides', [MyRideController::class, 'PastRides'])->name('past_rides')->middleware('auth');
@@ -318,7 +318,7 @@ Route::get('{lang?}/review-left/passenger/{id}', [ReviewController::class, 'pass
 Route::get('{lang?}/review-passenger/{id}', [ReviewController::class, 'ReviewPassenger'])->name('review_passenger');
 Route::get('{lang?}/review-driver/{id}', [ReviewController::class, 'ReviewDriver'])->name('review_driver');
 Route::get('{lang?}/review-reply/{id}', [ReviewController::class, 'ReviewReply'])->name('review_reply');
-Route::get('{lang?}/booking/{id}/{rideDetailId}', [BookingController::class, 'create'])->name('booking')->middleware('nocache');
+Route::get('{lang?}/booking/{id}/{from_stop_id?}/{to_stop_id?}', [BookingController::class, 'create'])->name('booking');//->middleware('nocache');
 Route::get('{lang?}/edit-booking/{id}', [BookingController::class, 'edit'])->name('booking.edit');
 Route::get('{lang?}/cancel-booking/{id}', [BookingController::class, 'cancel'])->middleware('auth')->name('booking.cancel');
 Route::get('{lang?}/accept-booking-request/{id}/{email}', [BookingController::class, 'AcceptBookingRequest'])->name('accept_booking_request');

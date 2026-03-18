@@ -15,7 +15,7 @@
     @endphp
     <div class="flex items-center gap-2">
         @if (!empty($featureOption['icon']))
-            <img class="{{ $iconClass ?? 'w-7 h-7' }}"
+            <img class="{{ $iconClass ?? 'w-8 h-8' }}"
                 src="{{ asset('home_page_icons/' . $featureOption['icon']) }}"
                 alt="">
         @else

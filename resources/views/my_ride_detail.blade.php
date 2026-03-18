@@ -54,13 +54,7 @@
                         </button>
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
-                                <!-- <div
-                                    class="mx-auto h-16 w-16">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                    </svg>
-                                </div> -->
+
                             </div>
                             <div class="w-full mt-4">
                                 <p class="can-exp-p text-center">{!! session('success') !!}</p>
@@ -81,7 +75,7 @@
             <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                 <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                     <div
-                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
+                        class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border1">
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
 
@@ -103,46 +97,37 @@
         </div>
     @endif
     <div class="container mx-auto my-10 xl:my-14 px-4 xl:px-0">
-        @if (
-            $ride->seats -
-                $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {
-                        $query->whereNull('deleted_at');
-                    })->sum('seats') ==
-                0)
-            <div class="mt-4 rounded-lg px-6 py-3 bg-blue-100 text-gray-600" role="alert">
-                {{ $rideDetailPage->all_seats_booked_label ?? 'All seats are booked' }}
-            </div>
-        @endif
-        @if ($ride->status == '2')
-            <div class="mt-4 rounded-lg px-6 py-3 bg-red-100 text-gray-600" role="alert">
-                {{ $rideDetailPage->ride_canceller_by_driver ?? 'This ride was cancelled by the driver' }}
-            </div>
-        @endif
+        @php
+            $note = null;
+            if ($ride->isCancelled()) {
+                $note = ['bg' => 'red', 'text' => $rideDetailPage->ride_canceller_by_driver ?? 'This ride was cancelled by the driver'];
+            } elseif ($ride->isCompleted()) {
+                $note = ['bg' => 'blue', 'text' => $rideDetailPage->ride_completed_text ?? 'This ride was completed'];
+            } elseif ($ride->getRemainingSeats() == 0) {
+                $note = ['bg' => 'blue', 'text' => $rideDetailPage->all_seats_booked_label ?? 'All seats are booked'];
+            }
+        @endphp
 
-        @if ($ride->status == '3')
-            <div class="mt-4 rounded-lg px-6 py-3 bg-blue-100 text-gray-600" role="alert">
-                {{ $rideDetailPage->ride_completed_text ?? 'This ride was completed' }}
+        @if ($note)
+            <div class="mt-4 rounded-lg px-6 py-3 bg-{{ $note['bg'] }}-100 text-gray-600" role="alert">
+                {{ $note['text'] }}
             </div>
         @endif
-        <h1>{{ $rideDetailPage->main_heading ?? 'My ride detail' }}</h1>
+        <h1>{{ $rideDetailPage->main_heading ?? 'Ride Details Page' }}</h1>
         <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-y-4 md:gap-4">
             <div class="col-span-2">
-                @if (strtotime($ride->date) > strtotime('today') ||
-                        (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
-                    @if (count($ride->bookings->where('status', 0)) > 0)
-                        <div
-                            class="bg-white rounded-xl overflow-hidden shadow-2xl mb-6 border-2 border-amber-400 booking-request-frame ring-2 ring-amber-300 ring-offset-2">
+                @if (strtotime($ride->date) > strtotime('today') || (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
+                    @if ($ride->bookings()->requested()->count() > 0)
+                        <div class="bg-white rounded-xl overflow-hidden shadow-2xl mb-6 border-2 border-amber-400 booking-request-frame ring-2 ring-amber-300 ring-offset-2">
                             <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl ">
                                 {{ $rideDetailPage->booking_request_main_heading ?? 'You have the following booking requests' }}
                             </h3>
                             <div class="bg-amber-50/30 p-2 py-4 md:p-4 space-y-3">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    @foreach ($ride->bookings->where('status', 0) as $booking)
+                                    @foreach ($ride->bookings()->requested()->get() as $booking)
                                         @if ($booking->passenger)
-                                            <div
-                                                class="border-2 border-amber-200 rounded-xl shadow-lg bg-white booking-request-card animate__animated animate__fadeInUp overflow-hidden">
-                                                <div
-                                                    class="border-b border-slate-300 px-4 py-2 font-FuturaMdCnBT text-2xl">
+                                            <div class="border-2 border-amber-200 rounded-xl shadow-lg bg-white booking-request-card animate__animated animate__fadeInUp overflow-hidden">
+                                                <div class="border-b border-slate-300 px-4 py-2 font-FuturaMdCnBT text-2xl">
                                                     {{ $rideDetailPage->booking_request_heading ?? 'Booking request' }}
                                                 </div>
                                                 <div class="p-4">
@@ -195,9 +180,8 @@
                         </div>
                     @endif
                 @endif
-
-                @if (strtotime($ride->date) > strtotime('today') ||
-                        (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
+{{-- TODO : check more --}}
+                @if (strtotime($ride->date) > strtotime('today') || (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
                     @if (count($ride->bookings->where('status', 1)->where('secured_cash', 1)) > 0)
                         <div class="bg-white rounded-lg overflow-hidden shadow-3xl mb-6">
                             <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl">
@@ -293,122 +277,14 @@
                     @endif
                 @endif
                 <div class="bg-white rounded-lg shadow-3xl">
-                    <div class="flex flex-col md:flex-row justify-between px-4">
-                        @php
-                            $defaultDetail = $ride->rideDetail->where('default_ride', 1)->first();
-                            $moreDetails = $ride->rideDetail->where('default_ride', 0)->sortBy('id');
-                            $origin = $defaultDetail && $defaultDetail->departure ? $defaultDetail->departure : ($ride->rideDetail->first() ? $ride->rideDetail->first()->departure : '');
-                            $destination = $defaultDetail && $defaultDetail->destination ? $defaultDetail->destination : ($ride->rideDetail->last() ? $ride->rideDetail->last()->destination : '');
-                            // Build ordered route points (origin → stops → destination) from segment chain to avoid duplicates and exclude destination from stops list
-                            $orderedPoints = collect([$origin]);
-                            $current = $origin;
-                            $remaining = $moreDetails->values();
-                            while ($current !== $destination && $remaining->isNotEmpty()) {
-                                $nextSegment = $remaining->first(fn($d) => (string) $d->departure === (string) $current);
-                                if (!$nextSegment) {
-                                    break;
-                                }
-                                $orderedPoints->push($nextSegment->destination);
-                                $current = $nextSegment->destination;
-                                $remaining = $remaining->filter(fn($d) => $d->id != $nextSegment->id);
-                            }
-
-                            
-                        @endphp
-                        <div class="w-full md:w-2/3 order-2 md:order-1">
-                            @if ($origin || $destination)
-                                <div class="relative mt-5 text-left rounded-lg bg-white p-4">
-                                    <div class="space-y-0">
-                                        @if ($origin)
-                                            <div class="flex items-center relative">
-                                                <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
-                                                    <span class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
-                                                        <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-from.png') }}" alt="">
-                                                    </span>
-                                                </div>
-                                                <div class="flex items-center ml-12 md:ml-20">
-                                                    <p class="font-bold text-xl text-black">
-                                                        @isset($rideDetailPage->from_label)
-                                                            {{ $rideDetailPage->from_label }}:
-                                                        @else
-                                                            From:
-                                                        @endisset
-                                                    </p>
-                                                    <h4 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl ml-2">
-                                                        {{ $origin }}
-                                                    </h4>
-                                                </div>
-                                            </div>
-                                        @endif
-                                        @if ($stops->isNotEmpty())
-                                            <div class="flex items-center relative">
-                                                <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10"></div>
-                                                <div class="ml-12 md:ml-20 py-2">
-                                                    <p class="font-bold text-xl text-black mb-2">
-                                                        @isset($rideDetailPage->stops_label)
-                                                            {{ $rideDetailPage->stops_label }}
-                                                        @else
-                                                            Stops:
-                                                        @endisset
-                                                    </p>
-                                                    <ul class="list-disc list-inside space-y-1 ml-6 text-gray-900 text-base md:text-lg">
-                                                    @foreach ($ride->rideStops as $stop)
-                                                    @continue($loop->first || $loop->last)
-                                                            <li class="text-primary font-FuturaMdCnBT text-xl md:text-2xl">
-                                                                {{ $stop->label ?? '' }}
-                                                            </li>
-                                                        @endforeach
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        @endif
-                                        @if ($destination)
-                                            <div class="flex items-center relative">
-                                                <div class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
-                                                    <span class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
-                                                        <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
-                                                    </span>
-                                                </div>
-                                                <div class="flex items-center ml-12 md:ml-20">
-                                                    <p class="font-bold text-xl text-black">
-                                                        @isset($rideDetailPage->to_label)
-                                                            {{ $rideDetailPage->to_label }}:
-                                                        @else
-                                                            To:
-                                                        @endisset
-                                                    </p>
-                                                    <h4 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl ml-2">
-                                                        {{ $destination }}
-                                                    </h4>
-                                                </div>
-                                            </div>
-                                        @endif  
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
-                        <div class="mt-4 order-1 md:order-2">
-                            @php
-                                $displayDt = $ride->date . ' ' . ($ride->time ?? '00:00');
-                                $reqFrom = request('departure');
-                                if ($reqFrom !== null && $reqFrom !== '' && (string) $reqFrom !== (string) $origin) {
-                                    $segmentFrom = $ride->rideDetail->first(function ($d) use ($reqFrom) {
-                                        return (string) $d->departure === (string) $reqFrom;
-                                    });
-                                    if ($segmentFrom) {
-                                        $displayDt = ($segmentFrom->date ?? $ride->date) . ' ' . ($segmentFrom->time ?? $ride->time ?? '00:00');
-                                    }
-                                }
-                                $departureDateTime = formatDepartureDateTime($displayDt, $selectedLanguage ?? null, $rideDetailPage ?? null);
-                                $departureDateLabel = $departureDateTime['dateLabel'];
-                                $departureTimeLabel = $departureDateTime['timeLabel'];
-                            @endphp
-                            <p class="whitespace-nowrap font-semibold">
-                                {{ $departureDateLabel }}
-                                {{ $rideDetailPage->at_label }}
-                                {{ $departureTimeLabel ?? 'N/A' }}
-                            </p>
-                        </div>
+                    <div class="flex flex-col p-4 pb-4 md:pb-0">
+                        <x-px.route-info
+                            :ride="$ride"
+                            :findRidePage="$findRidePage"
+                            :postRidePage="$postRidePage"
+                            :rideDetailPage="$rideDetailPage ?? null"
+                            :selectedLanguage="$selectedLanguage ?? null"
+                        />
                     </div>
                     <div class="border-t border-gray-300 grid grid-cols-2 divide-x divide-gray-300">
                         <div class="flex items-baseline p-4">
@@ -430,72 +306,66 @@
                             </p>
                         </div>
                     </div>
-                    <div
-                        class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
+                    <div class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
                         <div class="p-4 items-baseline">
-                            <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
-                                {{ $rideDetailPage->payment_method_label ?? 'Payment method' }}:
-                                <span class="text-primary font-normal text-lg" style="font-family: 'Roboto', sans-serif;">{{ is_object($ride->payment_method) ? $ride->payment_method->name : $ride->payment_method }}</span>
-                            </h4>
-                        </div>
-                        <div class="p-4 items-baseline">
-                            <div class="flex flex-wrap items-center gap-3">
-                                <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
-                                     {{ $rideDetailPage->booking_method_label ?? 'Booking method' }}:
+                            <div class="flex flex-wrap items-end gap-3">
+                                <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
+                                    {{ $rideDetailPage->payment_method_label ?? 'Payment Method' }}:
                                 </h4>
-                                @isset($ride->booking_method->features_setting_id)
-                                    <div class="text-primary font-normal text-lg" style="font-family: 'Roboto', sans-serif;">
-                                        {{ $ride->booking_method->name }}
-                                    </div>
-                                @else
-                                    <div class="text-primary font-normal text-lg" style="font-family: 'Roboto', sans-serif;">
-                                        {{ is_object($ride->booking_method) ? $ride->booking_method->name : $ride->booking_method }}
-                                    </div>
-                                @endisset
+                                <p class="text-lg text-primary font-normal inline-block cursor-pointer"
+                                    data-tippy-content="{{ optional($ride->payment_method)->tooltip }}">
+                                    {{ optional($ride->payment_method)->name }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="p-4 items-baseline">
+                            <div class="flex flex-wrap items-end gap-3">
+                                <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
+                                    {{ $rideDetailPage->booking_method_label ?? 'Booking Method' }}:
+                                </h4>
+                                <p class="text-lg text-primary font-normal inline-block cursor-pointer"
+                                    data-tippy-content="{{ optional($ride->booking_method)->tooltip }}">
+                                    {{ optional($ride->booking_method)->name }}
+                                </p>
                             </div>
                         </div>
                     </div>
-                    <div
-                        class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
+                    <div class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
                         <div class="p-4 flex items-baseline">
                             <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
                                 @php
-                                    $bookedSeatsCount = $ride
-                                        ->bookings()
-                                        ->where('status', '<>', 3)
-                                        ->where('status', '<>', 4)
-                                        ->whereHas('passenger', function ($query) {
-                                            $query->whereNull('deleted_at');
-                                        })
-                                        ->sum('seats');
+                                    $bookedSeatsCount = $ride->getBookedSeats();
                                 @endphp
                                 {{ $rideDetailPage->booked_on_column_label ?? 'Booked' }}: 
                             </h4>
-                            <h4 class="text-primary font-normal text-lg ml-2" style="font-family: 'Roboto', sans-serif;">{{ $bookedSeatsCount }}
-                                {{ $bookedSeatsCount == 1 ? ($rideDetailPage->seat_on_column_label ?? 'seat') : ($rideDetailPage->ride_seat_label ?? 'seats') }}
-                            </h4>
-                            
+                            <p class="text-primary font-normal text-lg ml-2" style="font-family: 'Roboto', sans-serif;">
+                                {{ $bookedSeatsCount }}
+                                {{ $bookedSeatsCount == 1
+                                    ? ($rideDetailPage->seat_on_column_label ?? 'seat')
+                                    : ($rideDetailPage->ride_seat_label ?? 'seats') }}
+                            </p>
                         </div>
                         <div class="p-4">
                             <div class="flex items-center justify-between">
                                 <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
                                     {{ $rideDetailPage->mobile_seat_fare_label ?? 'Fare' }}: </h4>
-                                <p class="">
-                                    ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') * floatval($ride->rideDetail[0]->price)),2) }}
+                                <p class="text-primary ">
+                                    ${{ number_format($ride->getMobileSeatFareTotal(), 2) }}
                                 </p>
                             </div>
                             <div class="flex items-center justify-between">
                                 <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
                                     {{ $rideDetailPage->mobile_seat_booking_fee_label ?? 'Booking fee' }}: </h4>
-                                <p class="">
-                                    ${{ number_format(floatval($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')), 2) }}
+                                <p class="text-primary ">
+                                    ${{ number_format($ride->getMobileSeatBookingFeeTotal(), 2) }}
                                 </p>
                             </div>
                             <div class="flex items-center justify-between">
                                 <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
                                     {{ $rideDetailPage->mobile_seat_total_amount_label ?? 'Total amount' }}: </h4>
-                                <p class="">
-                                    ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') *floatval($ride->rideDetail[0]->price) +$ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')),2) }}
+                                <p class="text-primary ">
+                                    ${{ number_format($ride->getMobileSeatTotalAmount(), 2) }}
                                 </p>
                             </div>
                         </div>
@@ -505,41 +375,11 @@
                     <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl">
                         {{ $rideDetailPage->ride_features_label ?? 'Ride features' }}</h3>
                     <div class="bg-white p-4 space-y-3">
-                        <div class="flex items-center space-x-2">
-                            @if ($ride->smoke == $postRidePage->smoking_option1->features_setting_id)
-                                @isset($postRidePage->smoking_option1->icon)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->smoking_option1->icon) }}"
-                                        alt="">
-                                @endisset
-                                <p>{{ $rideDetailPage->smoking_label }} {{ $postRidePage->smoking_option1->name }}</p>
-                            @elseif ($ride->smoke == $postRidePage->smoking_option2->features_setting_id)
-                                @isset($postRidePage->smoking_option2->icon)
-                                    <img class="w-7 h-7"
-                                        src="{{ asset('home_page_icons/' . $postRidePage->smoking_option2->icon) }}"
-                                        alt="">
-                                @endisset
-                                <p>{{ $rideDetailPage->smoking_label }} {{ $postRidePage->smoking_option2->name }}</p>
-                            @endif
-                        </div>
-                        @isset($ride->animal_friendly->features_setting_id)
-                            <div class="flex items-center space-x-2">
-                                <img class="w-7 h-7"
-                                    @if ($ride->animal_friendly->features_setting_id === $postRidePage->animals_option1->features_setting_id) src="{{ asset('home_page_icons/' . $postRidePage->animals_option1->icon) }}"
-                                @elseif ($ride->animal_friendly->features_setting_id === $postRidePage->animals_option2->features_setting_id) src="{{ asset('home_page_icons/' . $postRidePage->animals_option2->icon) }}"
-                                @elseif ($ride->animal_friendly->features_setting_id === $postRidePage->animals_option3->features_setting_id)
-                                    src="{{ asset('home_page_icons/' . $postRidePage->animals_option3->icon) }}" @endif
-                                    alt="">
-                                <p>{{ $rideDetailPage->pets_label }} {{ $ride->animal_friendly->name }}</p>
-                            </div>
-                        @endisset
-                        @isset($ride->luggage->features_setting_id)
-                            <div class="flex items-center space-x-2">
-                                <img class="w-7 h-7" src="{{ asset('home_page_icons/' . $ride->luggage->icon) }}"
-                                    alt="">
-                                <p>{{ $rideDetailPage->luggage_label }} {{ $ride->luggage->name }}</p>
-                            </div>
-                        @endisset
+                        @include('partials.ride_preference_items', [
+                            'ride' => $ride,
+                            'rideDetailPage' => $rideDetailPage,
+                            'searchOptionGroups' => $searchOptionGroups,
+                        ])
                         @php
                             $features = !empty($ride->features) ? explode('=', $ride->features) : [];
                         @endphp
@@ -548,23 +388,21 @@
                         ])
                     </div>
                 </div>
-                {{-- <div class="mt-4 mb-4 rounded-lg px-6 py-3 bg-blue-100 text-gray-600" role="alert">
-                <p class="text-gray-800">Important note from the driver: <span class="text-gray-500">{{ $ride->notes }}</span></p>
-            </div> --}}
+
+                
             </div>
             <div class="col-span-1">
                 <div class="space-y-4">
                     @if (count($ride->bookings->where('status', 1)) > 0)
                         <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                             <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl">
-                                @if ($ride_cancelled)
+                                @if ($ride->isCancelled())
                                     {{ $rideDetailPage->review_passanger_label ?? 'Review my passengers' }}
                                 @else
                                     {{ $rideDetailPage->ride_co_passenger_heading ?? 'My passengers' }}
                                 @endif
                             </h3>
-                            <a
-                                href="{{ route('my_passengers', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}">
+                            <a href="{{ route('my_passengers', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}">
                                 <div class="space-y-4 p-4">
                                     @foreach ($ride->bookings->where('status', 1) as $booking)
                                         @if ($booking->passenger)
@@ -572,10 +410,7 @@
                                                 <div class="w-12 h-12 rounded-full flex-shrink-0">
                                                     <img class="w-full h-full rounded-full object-cover"
                                                         src="{{ $booking->passenger->profile_image }}" alt=""> 
-                                                        
-                                                    {{-- @if (count($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)) > 0)
-                                                        <a href="{{ route('my_passengers', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}">Review passenger</a>
-                                                    @endif --}}
+
                                                     @if (auth()->user())
                                                         @php
                                                             $uuid = $booking
@@ -662,26 +497,25 @@
                             {{ $rideDetailPage->vehicle_info_label ?? 'Vehicle info' }}</h3>
                         <div class="flex items-start space-x-2 p-4 w-full">
                             <div class="w-20 h-20 rounded-full overflow-hidden">
-                                <img class="w-full h-full object-cover rounded-full" src="{{ $ride->car_image }}"
-                                    alt="">
+                                <img class="w-full h-full object-cover rounded-full" src="{{ $ride->car_image }}" alt="">
                             </div>
                             <div class="text-center">
+                                @php
+                                    $vehicleParts = array_filter([
+                                        $ride->year,
+                                        $ride->make,
+                                        $ride->model,
+                                        $ride->color,
+                                    ]);
+                                @endphp
                                 <div class="flex items-center flex-wrap gap-x-2 text-sm text-black">
-                                    @if ($ride->year)
-                                        <p class="text-md">{{ $ride->year }}</p>
-                                    @endif
-                                    <span>|</span>
-                                    <p class="text-md">{{ $ride->make }}</p>
-                                    <span>|</span>
-                                    <p class="text-md">{{ $ride->model }}</p>
-                                    <span>|</span>
-                                    @if ($ride->color)
-                                        <p class="text-md">{{ $ride->color }}</p>
-                                    @endif
+                                    <p class="text-md">{{ implode(' | ', $vehicleParts) }}</p>
                                 </div>
-                                <p class="font-semibold text-lg text-black text-start">{{ $ride->license_no }}</p>
+                                <p class="font-semibold text-lg text-black text-start">
+                                    {{ $ride->license_no }}
+                                </p>
                                 @if ($ride->vehicle_type_label)
-                                    <p class="text-md">{{ $ride->vehicle_type_label }} </p>
+                                    <p class="text-md">{{ $ride->vehicle_type_label }}</p>
                                 @endif
                             </div>
                         </div>
@@ -692,17 +526,15 @@
                             {{ $rideDetailPage->cancellation_policy_label ?? 'Cancellation policy' }}</h3>
                         <div class="flex items-center space-x-2 p-4 w-full">
                             <div class="flex items-center justify-between w-full">
-                                <label for="booking-method" class="font-normal text-gray-900 flex space-x-1">
-                                    <span class="text-lg">
-                                        {{ $ride->booking_type }}
-                                    </span>
-                                </label>
+                                <p class="font-normal text-gray-900 flex space-x-1">
+                                    {{ $ride->booking_type->name }}
+                                </p>
                             </div>
                         </div>
                     </div>
                     @if (strtotime($ride->date) > strtotime('today') ||
                             (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
-                        @if ($ride->status !== '2')
+                        @if (!$ride->isCancelled())
                             <div class="flex justify-center gap-4">
                                 <a href="{{ route('edit_ride', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id]) }}"
                                     class="button-exp-fill w-36">
@@ -712,23 +544,6 @@
                                     class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 w-36">
                                     {{ $rideDetailPage->cancel_ride_btn_label ?? 'Cancel ride' }}
                                 </a>
-
-                                {{-- <a href="{{ route('ride.cancel', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id]) }}" class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 w-36">
-                                {{ $rideDetailPage->cancel_ride_btn_label ?? "Cancel ride"}}
-                            </a> --}}
-                                {{-- @php
-                                if ($cancelSetting) {
-                                    // Calculate the cancellation deadline
-                                    $cancellationDeadline = strtotime('+' . $cancelSetting->driver_cancel_hours . ' hours', strtotime($ride->added_on));
-                                }
-                            @endphp
-                            @if (isset($cancelSetting) && $cancelSetting && isset($cancellationDeadline))
-                                @if (strtotime('now') < $cancellationDeadline)
-                                    <a href="{{ route('ride.cancel', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id]) }}" class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 w-36">
-                                        {{ $rideDetailPage->cancel_ride_btn_label ?? "Cancel ride"}}
-                                    </a>
-                                @endif
-                            @endif --}}
                             </div>
                         @endif
                     @endif

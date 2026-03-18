@@ -131,9 +131,110 @@ class BookingController extends Controller
     }
 
     /**
+     * Make a Booking of a Ride
+     * @id: Ride's id
+     * @routeId: Ride's route id, it is only available on rides with multi stops
+     * 
+     */
+    public function create($lang = null, $id, $from_stop_id = null, $to_stop_id = null)
+    {
+        $user_id = auth()->user()->id;
+        $user = User::whereId($user_id)->first();
+
+        // Check if user has suspanded
+        if ($user->isSuspended()) {
+            return back()->with('message', $this->successMessage['admin_block_account_message'] ?? 'Your account has been suspended by the admin');
+        }
+
+        $ride = Ride::where('id', $id)->first();
+
+
+        // $ride_detail = 
+        // dd('ss');
+
+        if (!isset($ride) && empty($ride)) {
+            $lang = $lang ?? "en";
+            return redirect(route('home', ['lang' => $lang]));
+
+            }
+
+
+        $bookingPage = BookingPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $paymentSettingDetail = BillingAddressSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        
+        $cards = Card::where('user_id', $user_id)->orderBy('id', 'desc')->get();
+        $topBalance = TopUpBalance::where('user_id', $user->id)
+            ->selectRaw('SUM(dr_amount) - SUM(cr_amount) as balance')
+            ->value('balance');
+        $coffeeBalance = CoffeeWallet::selectRaw('SUM(dr_amount) - SUM(cr_amount) as balance')
+            ->value('balance');
+            
+        $ride->mapMultipleOptionColumnsToDetails(
+                ['luggage', 'payment_method', 'booking_type', 'animal_friendly', 'booking_method'],
+                $this->selectedLanguage->id,
+                $this->defaultLang->id,
+                false
+            );
+
+            
+        $ride = $this->makeDetailOfRide($ride, $from_stop_id, $to_stop_id);
+
+        $searchOptionGroups = $this->getSearchOptionGroups(
+            $this->selectedLanguage->id,
+            $this->defaultLang->id
+        );
+
+        $setting = SiteSetting::first();
+        $settingTaxPercentage = 0;
+        if (isset($setting->deduct_tax) && $setting->deduct_tax == "deduct_from_passenger") {
+            if($setting->tax_type == "state_wise_tax"){
+                $getFromState = City::with('state:id,tax')->where('status', '1')->where('id',  $cityIdOfRide)->first();
+                if (isset($getFromState) && !empty($getFromState)) {
+                    $settingTaxPercentage = $getFromState->state->tax;
+                }
+            } else {
+                $settingTaxPercentage = $setting->tax;
+            }
+        }
+
+        return view('booking', 
+            [
+                'user' => $user,
+                'bookingPage' => $bookingPage, 
+                'rideDetailPage' => $rideDetailPage,
+                'ride' => $ride, 
+                'searchOptionGroups' => $searchOptionGroups,
+                'cards' => $cards, 
+                'paymentSettingDetail' => $paymentSettingDetail,
+                'balance' => $topBalance,
+                'setting' => $setting, 
+                'settingTaxPercentage' => $settingTaxPercentage, 
+                'coffeeBalance' => $coffeeBalance, 
+                'postRidePage' => $postRidePage, 
+                'findRidePage' => $findRidePage, 
+
+            // 'isPinkRide' => $isPinkRide ?? false, 
+            // 'isExtraCareRide' => $isExtraCareRide ?? false, 
+            // 'isShortDistanceRide' => $isShortDistanceRide ?? false,
+            // 'selectedLanguage' => $selectedLanguage,
+            // 'origin' => $origin, 
+            // 'destination' => $destination,
+            //  'stops' => $stops, 
+            //  'segmentPickup' => $segmentPickup, 
+            //  'segmentDropoff' => $segmentDropoff, 
+            //  'displayDepartureDateTime' => $displayDepartureDateTime, 
+            //  'fromLabel' => $fromLabel, 'toLabel' => $toLabel,
+            // 'remainingForSegment' => $remainingForSegment, 'availableSeatIdsForSegment' => $availableSeatIdsForSegment
+            ]);
+    }
+
+    /**
      * Booking page
      */
-    public function create($lang = null, $id, $rideDetailId)
+    public function create1($lang = null, $id, $rideDetailId)
     {
 
         $successMessage = $this->successMessage;
@@ -167,11 +268,15 @@ class BookingController extends Controller
             $setting = SiteSetting::first();
 
             $stateTax = 0;
-            if (isset($setting->deduct_tax) && $setting->deduct_tax == "deduct_from_passenger" && $setting->tax_type == "state_wise_tax") {
-                $locationBeforeComma = explode(',', $ride->rideDetail[0]->departure);
-                $getFromState = City::with('state:id,tax')->where('status', '1')->whereRaw('LOWER(`name`) LIKE ? ', ['%' . $locationBeforeComma[0] . '%'])->first();
-                if (isset($getFromState) && !empty($getFromState)) {
-                    $stateTax = $getFromState->state->tax;
+            if (isset($setting->deduct_tax) && $setting->deduct_tax == "deduct_from_passenger") {
+                if($setting->tax_type == "state_wise_tax"){
+                    $locationBeforeComma = explode(',', $ride->rideDetail[0]->departure);
+                    $getFromState = City::with('state:id,tax')->where('status', '1')->whereRaw('LOWER(`name`) LIKE ? ', ['%' . $locationBeforeComma[0] . '%'])->first();
+                    if (isset($getFromState) && !empty($getFromState)) {
+                        $stateTax = $getFromState->state->tax;
+                    }
+                } else {
+                    $stateTax = $setting->tax;
                 }
             }
 
@@ -187,21 +292,8 @@ class BookingController extends Controller
 
                 $bookingPage = BookingPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
 
-                $ride->luggage = FeaturesSettingDetail::whereFeaturesSettingId($ride->luggage)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->first();
 
-                $ride->payment_method = FeaturesSettingDetail::whereFeaturesSettingId($ride->payment_method)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->first();
-
-                $ride->animal_friendly = FeaturesSettingDetail::whereFeaturesSettingId($ride->animal_friendly)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->first();
-
-                $ride->booking_method = FeaturesSettingDetail::whereFeaturesSettingId($ride->booking_method)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->first();
+                
 
                 // Compute Pink Ride and Extra Care flags BEFORE replacing features with names
                 $featureIds = array_filter(explode('=', $ride->features ?? ''));
@@ -386,9 +478,28 @@ class BookingController extends Controller
                 }
             }
 
+
+
+            $ride->mapMultipleOptionColumnsToDetails(
+                ['luggage', 'payment_method', 'booking_type', 'animal_friendly', 'booking_method'],
+                $this->selectedLanguage->id,
+                $this->defaultLang->id,
+                false
+            );
+
+            $searchOptionGroups = $this->getSearchOptionGroups(
+                $this->selectedLanguage->id,
+                $this->defaultLang->id
+            );
+
+            
             return view('booking', 
-            ['bookingPage' => $bookingPage, 'rideDetailPage' => $rideDetailPage,
-            'ride' => $ride, 'cards' => $cards, 'balance' => ($getDrBalance - $getCrBalance),
+            [
+                'bookingPage' => $bookingPage, 
+                'rideDetailPage' => $rideDetailPage,
+            'ride' => $ride, 
+            'searchOptionGroups' => $searchOptionGroups,
+            'cards' => $cards, 'balance' => ($getDrBalance - $getCrBalance),
             'paymentSettingDetail' => $paymentSettingDetail,
             'postRidePage' => $postRidePage, 'setting' => $setting, 'coffeeBalance' => ($getCoffeeDrBalance - $getCoffeeCrBalance), 'stateTax' => $stateTax, 'isPinkRide' => $isPinkRide ?? false, 'isExtraCareRide' => $isExtraCareRide ?? false, 'isShortDistanceRide' => $isShortDistanceRide ?? false,
             'selectedLanguage' => $selectedLanguage,
