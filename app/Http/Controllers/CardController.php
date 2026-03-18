@@ -321,7 +321,7 @@ class CardController extends Controller
             'exp_year' => '0',
         ]);
 
-        $successMessage = 'You have successfully added the card to your profile.';
+        $successMessage = $message->card_add_message ?? 'You have successfully added the card to your profile.';
 
         $redirectUrl = $request->input('redirectUrl');
         
@@ -399,7 +399,7 @@ class CardController extends Controller
             'primary_card' => $primary_card,
         ]);
 
-        $successMessage = 'You have successfully added the card to your profile.';
+        $successMessage = $message->card_add_message ?? 'You have successfully added the card to your profile.';
 
         $redirectUrl = $request->input('redirectUrl');
         
@@ -491,11 +491,13 @@ class CardController extends Controller
             'primary_card' => $primary_card,
         ]);
 
+        $successMessage = $message->card_add_message ?? 'You have successfully added the card to your profile.';
+
         if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => 'You have successfully added the card to your profile.']);
+            return response()->json(['success' => true, 'message' => $successMessage]);
         }
 
-        return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', 'You have successfully added the card to your profile.');
+        return redirect()->route('my_cards', ['lang' => $selectedLanguage])->with('message', $successMessage);
     }
 
     public function primary($id)
