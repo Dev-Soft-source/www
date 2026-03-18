@@ -37,7 +37,7 @@
                         <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                             <a href='' id="close-modal"
                                 class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 w-auto">
-                                Close
+                                {{ $siteText['close_btn_text'] ?? 'Close' }}
                             </a>
                             {{-- <a href=""
                         class="inline-flex w-full justinline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24">{{ $siteText['close_btn_text'] }}</a> --}}
@@ -66,10 +66,12 @@
                         <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                             <div class="">
                                 <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4"
-                                    id="cancel-confirm-title">Are you sure?</h3>
+                                    id="cancel-confirm-title">{{ $tripsPage->cancel_ride_confirm_modal_title ?? 'Are you sure?' }}</h3>
                             </div>
                             <div class="mt-2 w-full">
-                                <p class="can-exp-p text-center">Canceling a ride may inconvenience your passengers.</p>
+                                <p class="can-exp-p text-center">
+                                    {{ $tripsPage->cancel_ride_confirm_modal_message ?? 'Canceling a ride may inconvenience your passengers.' }}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -77,12 +79,12 @@
                         <button type="button" onclick="closeCancelConfirmModal()"
                             class="inline-flex justify-center rounded px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:shadow-lg shadow-sm sm:w-auto"
                             style="background-color: #3085d6;">
-                            No, take me back
+                            {{ $tripsPage->cancel_ride_confirm_modal_no_btn_text ?? 'No, take me back' }}
                         </button>
                         <button type="button" onclick="confirmCancelRide()"
                             class="inline-flex justify-center rounded px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:shadow-lg shadow-sm sm:w-auto"
                             style="background-color: #d33;">
-                            Yes, cancel it
+                            {{ $tripsPage->cancel_ride_confirm_modal_yes_btn_text ?? 'Yes, cancel it' }}
                         </button>
                     </div>
                 </div>
