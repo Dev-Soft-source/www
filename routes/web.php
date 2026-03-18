@@ -294,10 +294,6 @@ Route::post('{lang?}/step5-5-send-verification-whatsapp', [Step5to5Controller::c
 Route::get('{lang?}/students', [StudentController::class, 'index'])->name('students');
 Route::get('{lang?}/drivers', [DriverController::class, 'index'])->name('drivers');
 Route::get('{lang?}/passenger', [PassengerController::class, 'index'])->name('passengers');
-// Route::get('{lang?}/search-rides', [RideController::class, 'SearchRide'])->name('search_ride');
-// Route::get('{lang?}/pink-rides', [PinkRideController::class, 'SearchRide'])->name('pink_ride');
-// Route::get('{lang?}/extra-plus-rides', [FolkRideController::class, 'SearchRide'])->name('folk_ride');
-// Route::get('{lang?}/proximalocal-rides', [ProximaLocalRideController::class, 'SearchRide'])->name('proximalocal_ride');
 
 Route::get('{lang?}/ride/{id}', [RideController::class, 'RideDetail'])->name('ride_detail');
 Route::get('{lang?}/my-co-passengers/{departure}/to/{destination}/{id}', [RideController::class, 'MyCoPassengers'])->name('my_co_passengers');
