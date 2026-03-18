@@ -6,6 +6,7 @@
 
 @section('content')
     @php
+    
         $searchRoute = route($action_route, ['lang' => optional($selectedLanguage)->abbreviation]);
         $bookingMethodGroup = $searchOptionGroups->get('booking_method');
         $luggageGroup = $searchOptionGroups->get('luggage_size');
@@ -496,8 +497,15 @@
 
                             <div class="space-y-4">
                                 @foreach ($rides as $ride)
-                                    <x-px.ride-card :ride="$ride" :lang="optional($selectedLanguage)->abbreviation" :detail-route="$ride->detail_route ?? 'px.ride_detail'" :detail-query="$ride->detail_query ?? []"
-                                        :show-status="false" :show-booking-info="false" :show-options="true" :price-minor="$ride->matched_segment_price_minor ?? $ride->price_minor" />
+                                    <x-px.search-card 
+                                    :ride="$ride" 
+                                    :lang="optional($selectedLanguage)->abbreviation" 
+                                    :detail-route="$ride->detail_route ?? 'px.ride_detail'" 
+                                    :detail-query="$ride->detail_query ?? []"
+                                    :show-status="true" 
+                                    :show-driver-info="true" 
+                                    :show-options="true" 
+                                    :price-minor="$ride->matched_segment_price_minor ?? $ride->price_minor" />
                                 @endforeach
                             </div>
                             <div class="mt-6">

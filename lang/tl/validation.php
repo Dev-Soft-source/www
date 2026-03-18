@@ -181,6 +181,22 @@ return [
         'city_not_in_record' => [
             'message' => 'Hindi namin makita ang pangalan ng lungsod na ito sa aming talaan, pakisuri muli ang baybay.',
         ],
+        'origin.label' => [
+            'required' => 'Kinakailangan ang pinanggalingan.',
+        ],
+        'destination.label' => [
+            'required' => 'Kinakailangan ang patutunguhan.',
+        ],
+        'date' => [
+            'required' => 'Kinakailangan ang petsa.',
+        ],
+        'price_minor' => [
+            'required' => 'Kinakailangan ang presyo.',
+            'gt' => 'Ang presyo ay dapat na mas malaki sa 0.',
+        ],
+        'stops.*.label' => ['required_with' => 'Kinakailangan ang lokasyon ng hintuan para sa bawat hintuan.'],
+        'stops.*.departure_at' => ['required_with' => 'Kinakailangan ang oras ng pag-alis para sa bawat hintuan.'],
+        'stops.*.pickup_dropoff_location.required_with' => 'Kinakailangan ang lokasyon ng pagsakay/pagbaba.',
         'from' => [
             'required' => 'Kinakailangan ang pinanggalingan.',
         ],

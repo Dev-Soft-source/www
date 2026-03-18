@@ -42,12 +42,14 @@ use App\Mail\RidePostedMail;
 use App\Mail\PinkRideMail;
 use App\Mail\ExtraCareRideMail;
 use App\Mail\PinkExtraCareRideMail;
+use App\Models\FindRidePageSettingDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\View;
 
 class RideSearchController extends Controller
 {
@@ -92,10 +94,10 @@ class RideSearchController extends Controller
         $defaultLangId = optional($this->defaultLang)->id;
         $user = auth()->user();
         $isGuest = !$user;
-        $per_page = 20;
+        $per_page = 2;
         $excludedDriverIds = $user ? $this->getTemporarilyBlockedDriverIds($user->id) : [];
 
-        $findRidePage = $this->getFindRidePageWithSettingDetail();
+        // $findRidePage = $this->getFindRidePageWithSettingDetail();
 
         $searchOptionGroups = $this->getSearchOptionGroups($selectedLangId, $defaultLangId);
         $searchFilters = $this->getPxSearchFilters($request);
@@ -343,9 +345,17 @@ class RideSearchController extends Controller
                 ->values();
         }
 
+        $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $postRidePage = $this->getPostRidePageWithSettingDetail();
+
+        View::share([
+            'findRidePage' => $findRidePage,
+            'postRidePage' => $postRidePage,
+        ]);
+
         return view($view, [
             'action_route' => $action_route,
-            'findRidePage' => $findRidePage,
+            
             'searchOptionGroups' => $searchOptionGroups,
             'rides' => $rides,
             'recentSearches' => $recentSearches,

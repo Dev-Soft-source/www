@@ -68,21 +68,21 @@
 
     @if (!is_null($pendingRemoveIndex))
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-            <div class="w-full max-w-md rounded-xl bg-white p-5 shadow-xl">
+            <div class="w-full max-w-md rounded-xl bg-white p-5 shadow-xl text-center modal-border1">
                 <div class="flex items-start justify-between gap-3">
-                    <h3 class="text-2xl text-gray-900">Remove a stop</h3>
+                    <h3 class="text-2xl text-gray-900"></h3>
                     <button type="button" wire:click="cancelRemove"
                         class="text-gray-500 hover:text-gray-700">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg></button>
                 </div>
-                <p class="mt-3 text-xl text-gray-600">{{ $stopsDeleteConfirmText }}</p>
+                <p class="mt-3 text-xl text-center text-gray-600">{{ $stopsDeleteConfirmText }}</p>
                 <div class="mt-5 flex items-center justify-end gap-2">
                     <button type="button" wire:click="cancelRemove"
-                        class="button-exp-no-fill !px-3 !py-2">{{ $siteText['cancel_btn_text'] }}</button>
+                        class="button-exp-no-fill !px-3 !py-2">{{ $cancelBtnText }}</button>
                     <button type="button" wire:click="confirmRemove"
-                        class="button-exp-fill !px-3 !py-2">{{ $siteText['remove_btn_text'] }}</button>
+                        class="button-exp-red-fill !px-3 !py-2">{{ $removeBtnText }}</button>
                 </div>
             </div>
         </div>

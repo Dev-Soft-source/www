@@ -205,6 +205,22 @@ return [
         'city_not_in_record' => [
             'message' => 'No hemos encontrado este nombre de ciudad en nuestros registros, por favor verifica la ortografía.',
         ],
+        'origin.label' => [
+            'required' => 'El origen es obligatorio.',
+        ],
+        'destination.label' => [
+            'required' => 'El destino es obligatorio.',
+        ],
+        'date' => [
+            'required' => 'La fecha es obligatoria.',
+        ],
+        'price_minor' => [
+            'required' => 'El precio es obligatorio.',
+            'gt' => 'El precio debe ser mayor que 0.',
+        ],
+        'stops.*.label' => ['required_with' => 'La ubicación de la parada es obligatoria para cada parada.'],
+        'stops.*.departure_at' => ['required_with' => 'La hora de salida es obligatoria para cada parada.'],
+        'stops.*.pickup_dropoff_location.required_with' => 'La ubicación de recogida/entrega es obligatoria.',
         'from' => [
             'required' => 'El origen es obligatorio.',
         ],
