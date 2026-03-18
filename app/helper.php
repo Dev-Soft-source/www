@@ -42,6 +42,18 @@ if (!function_exists("updateLangByAbber")) {
     }
 }
 
+if (!function_exists('trans_choice_string')) {
+    // Use trans_choice_string helper
+    function trans_choice_string($string, $count, $replace = [])
+    {
+        $replace = array_merge(['count' => $count], $replace);
+        
+        // Laravel has internal function to parse plural forms
+        $translator = app('translator');
+        return $translator->choice($string, $count, $replace);
+    }
+}
+
 if (!function_exists('getTranslatedText')) {
     /**
      * Get a translated sentence/text by slug for the given language.

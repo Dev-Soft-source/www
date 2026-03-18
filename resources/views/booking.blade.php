@@ -738,13 +738,12 @@
                                                     (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null))
                                             <div class="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                                                 <p class="text-yellow-800 text-sm">
-                                                    <strong>Note for Students:</strong> You are limited to booking a maximum
-                                                    of 2 seats per ride for Cash payment rides.
+                                                    <strong>Note for Students:</strong> You are limited to booking a maximum of 2 seats per ride for Cash payment rides.
                                                 </p>
                                             </div>
                                         @endif
                                         @if (isset($remainingForSegment))
-                                            <p class="text-gray-700 text-sm mt-1 mb-2">{{ $remainingForSegment }} {{ $remainingForSegment === 1 ? 'seat' : 'seats' }} available for this segment.</p>
+                                            <p class="text-gray-700 text-sm mt-1 mb-2">{{ trans_choice_string($bookingPage->seats_available, $remainingForSegment) }}</p>
                                         @endif
                                         <div class="flex items-center flex-wrap gap-2 mt-2" id="seat-selection-container">
                                             @foreach ($ride->seatDetail as $detail)
