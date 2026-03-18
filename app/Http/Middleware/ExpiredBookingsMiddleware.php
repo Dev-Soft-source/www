@@ -31,6 +31,7 @@ class ExpiredBookingsMiddleware
         // Booking::where('expires_at', '<', now())->delete();
         $bookings = Booking::where('expires_at', '<', now())->get();
         foreach ($bookings as $booking) {
+            $user = User::whereId($booking->user_id)->first();
             $notification = Notification::create([
                 'type' => 2,
                 'ride_id' => $booking->ride_id,
@@ -49,7 +50,7 @@ class ExpiredBookingsMiddleware
                 'destination' => $booking->destination
             ]);
     
-            $user = User::whereId($booking->user_id)->first();
+            
             // Assuming $user and $fcmToken are defined
             $fcmToken = $user->mobile_fcm_token;
             $body = $notification->message;

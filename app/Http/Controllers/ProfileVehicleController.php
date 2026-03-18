@@ -188,7 +188,7 @@ class ProfileVehicleController extends Controller
             }
         }
 
-        return redirect()->route('profile.vehicle', ['lang' => $selectedLanguage->abbreviation])->with('message', $message->vehicle_add_message);
+        return redirect()->route('profile.vehicle', ['lang' => $this->selectedLanguage->abbreviation])->with('message', $message->vehicle_add_message);
     }
 
     public function edit(Request $request, $lang = null, $id)

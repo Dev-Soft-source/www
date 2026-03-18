@@ -135,6 +135,8 @@
                                                     $power_type = $myVehiclePage->hybrid_checkbox_label;
                                                 } elseif ($vehicle->power_type == 'Electric') {
                                                     $power_type = $myVehiclePage->electric_checkbox_label;
+                                                } else {
+                                                    $power_type = 'None';
                                                 }
                                             @endphp
                                             <p>{{ $power_type }}</p>

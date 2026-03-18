@@ -217,41 +217,18 @@ class User extends Authenticatable
 
     public function canUsePinkRide(?PinkRideSetting $pinkRideSetting = null): bool
     {
+        // Explicitly disabled by admin flag.
         if ((string) $this->pink_ride === '0') {
             return false;
         }
 
+        // Explicitly enabled by admin flag.
         if ((string) $this->pink_ride === '1') {
             return true;
         }
 
-        $pinkRideSetting = $pinkRideSetting ?: PinkRideSetting::first();
-
-        if (!$pinkRideSetting) {
-            return true;
-        }
-
-        if (strtolower((string) $this->gender) !== 'female') {
-            return false;
-        }
-
-        if (empty($this->government_issued_id) || empty($this->address)) {
-            return false;
-        }
-
-        if ($pinkRideSetting->requiresVerifiedPhone() && !$this->hasPinkRideVerifiedPhone()) {
-            return false;
-        }
-
-        if ($pinkRideSetting->requiresVerifiedEmail() && (string) $this->email_verified !== '1') {
-            return false;
-        }
-
-        if ($pinkRideSetting->requiresDriverLicense() && (string) $this->driver !== '1') {
-            return false;
-        }
-
-        return true;
+        // Fallback to the same business rules used to build the tooltip/error message.
+        return $this->pinkRideEligibilityError($pinkRideSetting) === null;
     }
 
     public function canUseExtraRide(

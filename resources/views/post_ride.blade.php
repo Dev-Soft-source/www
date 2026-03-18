@@ -1492,6 +1492,7 @@
 
                                         if ($featureOption['slug'] === 'pink_rides') {
                                             $disabled = !$user->canUsePinkRide();
+
                                             $tooltipText = $user->pinkRideTooltip($postRidePage);
                                             $data_ride_option_code = 'pink_rides';
                                             $pinkRideChecked = in_array($featureOption['id'], $oldSelectedFeatures);

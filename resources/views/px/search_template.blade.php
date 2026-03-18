@@ -2,6 +2,7 @@
 
 @section('style')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    
 @endsection
 
 @section('content')
@@ -101,7 +102,7 @@
 
                                 <label class="flex items-center justify-between p-3">
                                     <span class="text-pink-500 text-base md:text-lg">{{ $pinkRideLabel }}</span>
-                                    <input type="checkbox" name="women_only" value="1" class="w-4 h-4"
+                                    <input type="checkbox" name="women_only" value="1" class="w-4 h-4 form-check-input"
                                         @checked(!empty($searchFilters['women_only'])) {{ $pinkRideDisabled }}>
                                 </label>
 
@@ -115,14 +116,14 @@
                                 @else
                                     <label class="flex items-center justify-between p-3">
                                         <span class="text-green-600 text-base md:text-lg">{{ $extraRideLabel }}</span>
-                                        <input type="checkbox" name="extra_care" value="1" class="w-4 h-4"
+                                        <input type="checkbox" name="extra_care" value="1" class="w-4 h-4 form-check-input"
                                             @checked(!empty($searchFilters['extra_care'])) {{ $extraRideDisabled }}>
                                     </label>
                                 @endif
 
                                 <label class="flex items-center justify-between p-3">
-                                    <span class="text-base md:text-lg text-gray-900">Hide Full Rides</span>
-                                    <input type="checkbox" name="hide_full_rides" value="1" class="w-4 h-4"
+                                    <span class="text-base md:text-lg text-gray-900">{{ $findRidePage->hide_full_ride_text ?? 'Hide Full Rides' }}</span>
+                                    <input type="checkbox" name="hide_full_rides" value="1" class="w-4 h-4 form-check-input"
                                         @checked(!empty($searchFilters['hide_full_rides']))>
                                 </label>
                             </div>
@@ -158,7 +159,7 @@
                                 </div>
                                 <label class="flex items-center space-x-2">
                                     <input id="driverPhone" type="checkbox" name="driver_phone" value="1"
-                                        class="w-4 h-4" @checked(!empty($searchFilters['driver_phone']))>
+                                        class="w-4 h-4 form-check-input" @checked(!empty($searchFilters['driver_phone']))>
                                     <span>{{ $findRidePage->driver_phone_access_label ?? "Access to Driver's Phone Number" }}</span>
                                 </label>
                                 <div>
@@ -246,11 +247,11 @@
                                         @foreach ($preferenceGroup->options as $option)
                                             @continue(in_array($option->code, $coPassengerOptionCodes, true))
                                             @continue(in_array($option->code, $extraOptionCodes, true))
-                                            <div class="flex items-start justify-between p-3">
+                                            <div class="flex items-start gap-2 p-3">
                                                 <label class="flex gap-2 text-base md:text-lg">
-                                                    <input type="checkbox" name="ride_option_ids[]"
-                                                        value="{{ $option->id }}" class="w-4 h-4 mt-1"
-                                                        @checked(in_array($option->id, (array) ($searchFilters['ride_option_ids'] ?? [])))>
+                                                <input type="checkbox" name="ride_option_ids[]"
+                                                    value="{{ $option->id }}" class="form-check-input"
+                                                    @checked(in_array($option->id, (array) ($searchFilters['ride_option_ids'] ?? [])))>
                                                     <span>{{ $option->display_label }}</span>
                                                 </label>
                                             </div>
@@ -265,18 +266,18 @@
                                         {{ $findRidePage->luggage_label ?? 'Luggage' }}</h3>
                                     <div class="border rounded-md overflow-hidden divide-y">
                                         @foreach ($luggageGroup->options as $option)
-                                            <div class="flex items-start justify-between p-3">
+                                            <div class="flex items-center justify-between p-3">
                                                 <label class="flex items-center gap-2 text-base md:text-lg">
                                                     <input type="radio" name="luggage_size"
-                                                        value="{{ $option->id }}" class="w-4 h-4"
+                                                        value="{{ $option->id }}" class="w-4 h-4 form-check-input"
                                                         @checked((string) ($searchFilters['luggage_size'] ?? '') === (string) $option->id)>
                                                     <span>{{ $option->display_label }}</span>
                                                 </label>
                                             </div>
                                         @endforeach
-                                        <div class="flex items-start justify-between p-3">
+                                        <div class="flex items-center justify-between p-3">
                                             <label class="flex items-center gap-2 text-base md:text-lg">
-                                                <input type="radio" name="luggage_size" value="" class="w-4 h-4"
+                                                <input type="radio" name="luggage_size" value="" class="w-4 h-4 form-check-input"
                                                     @checked(empty($searchFilters['luggage_size']))>
                                                 <span>Any</span>
                                             </label>
@@ -291,19 +292,19 @@
                                         {{ $findRidePage->smoking_label ?? 'Smoking' }}</h3>
                                     <div class="border rounded-md overflow-hidden divide-y">
                                         @foreach ($smokingGroup->options as $option)
-                                            <div class="flex items-start justify-between p-3">
+                                            <div class="flex items-center justify-between p-3">
                                                 <label class="flex items-center gap-2 text-base md:text-lg">
                                                     <input type="radio" name="smoking_allowed"
-                                                        value="{{ $option->id }}" class="w-4 h-4"
+                                                        value="{{ $option->id }}" class="w-4 h-4 form-check-input"
                                                         @checked((string) ($searchFilters['smoking_allowed'] ?? '') === (string) $option->id)>
                                                     <span>{{ $option->display_label }}</span>
                                                 </label>
                                             </div>
                                         @endforeach
-                                        <div class="flex items-start justify-between p-3">
+                                        <div class="flex items-center justify-between p-3">
                                             <label class="flex items-center gap-2 text-base md:text-lg">
                                                 <input type="radio" name="smoking_allowed" value=""
-                                                    class="w-4 h-4" @checked(empty($searchFilters['smoking_allowed']))>
+                                                    class="w-4 h-4 form-check-input" @checked(empty($searchFilters['smoking_allowed']))>
                                                 <span>Any</span>
                                             </label>
                                         </div>
@@ -317,18 +318,18 @@
                                         {{ $findRidePage->pets_allowed_label ?? 'Pets' }}</h3>
                                     <div class="border rounded-md overflow-hidden divide-y">
                                         @foreach ($petsGroup->options as $option)
-                                            <div class="flex items-start justify-between p-3">
+                                            <div class="flex items-center justify-between p-3">
                                                 <label class="flex items-center gap-2 text-base md:text-lg">
                                                     <input type="radio" name="pets_allowed"
-                                                        value="{{ $option->id }}" class="w-4 h-4"
+                                                        value="{{ $option->id }}" class="w-4 h-4 form-check-input"
                                                         @checked((string) ($searchFilters['pets_allowed'] ?? '') === (string) $option->id)>
                                                     <span>{{ $option->display_label }}</span>
                                                 </label>
                                             </div>
                                         @endforeach
-                                        <div class="flex items-start justify-between p-3">
+                                        <div class="flex items-center justify-between p-3">
                                             <label class="flex items-center gap-2 text-base md:text-lg">
-                                                <input type="radio" name="pets_allowed" value="" class="w-4 h-4"
+                                                <input type="radio" name="pets_allowed" value="" class="w-4 h-4 form-check-input"
                                                     @checked(empty($searchFilters['pets_allowed']))>
                                                 <span>Any</span>
                                             </label>

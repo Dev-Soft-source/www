@@ -69,7 +69,7 @@ class RideSearchController extends Controller
         $extraCareFaqs = ExtraCareFaqDetail::where('language_id', $this->selectedLanguage->id)->get();
         view()->share('extraCareFaqs', $extraCareFaqs);
 
-        return $this->search($request, $lang, 'px.search_folk_ride');
+        return $this->search($request, $lang, 'search_folk_ride');
     }
 
     public function pink_ride_search(Request $request, $lang = null)
@@ -77,7 +77,7 @@ class RideSearchController extends Controller
         $pinkRideFaqs = PinkRideFaqDetail::where('language_id', $this->selectedLanguage->id)->get();
         view()->share('pinkRideFaqs', $pinkRideFaqs);
 
-        return $this->search($request, $lang, 'px.search_pink_ride');
+        return $this->search($request, $lang, 'search_pink_ride');
     }
 
     public function proximalocal_ride_search(Request $request, $lang = null)
@@ -85,16 +85,16 @@ class RideSearchController extends Controller
         $proximaLocalRideFaqs = [];
         view()->share('proximaLocalRideFaqs', $proximaLocalRideFaqs);
 
-        return $this->search($request, $lang, 'px.search_proximalocal_ride');
+        return $this->search($request, $lang, 'search_proximalocal_ride');
     }
 
-    public function search(Request $request, $lang = null, $view = 'px.search_ride')
+    public function search(Request $request, $lang = null, $view = 'search_ride')
     {
         $selectedLangId = optional($this->selectedLanguage)->id;
         $defaultLangId = optional($this->defaultLang)->id;
         $user = auth()->user();
         $isGuest = !$user;
-        $per_page = 2;
+        $per_page = 6;
         $excludedDriverIds = $user ? $this->getTemporarilyBlockedDriverIds($user->id) : [];
 
         // $findRidePage = $this->getFindRidePageWithSettingDetail();
@@ -106,15 +106,15 @@ class RideSearchController extends Controller
         $searchFilters['proximalocal'] = 0;
         $page_type = 'px_ride';
         $action_route = 'search_ride';
-        if ($view === 'px.search_folk_ride') {
+        if ($view === 'search_folk_ride') {
             $searchFilters['extra_care'] = 1;
             $page_type = 'px_folk_ride';
             $action_route = 'folk_ride';
-        } elseif ($view === 'px.search_pink_ride') {
+        } elseif ($view === 'search_pink_ride') {
             $searchFilters['women_only'] = 1;
             $page_type = 'px_pink_ride';
             $action_route = 'pink_ride';
-        } elseif ($view === 'px.search_proximalocal_ride') {
+        } elseif ($view === 'search_proximalocal_ride') {
             $searchFilters['proximalocal'] = 1;
             $page_type = 'px_proximalocal_ride';
             $action_route = 'proximalocal_ride';
@@ -346,11 +346,13 @@ class RideSearchController extends Controller
         }
 
         $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $postRidePage = $this->getPostRidePageWithSettingDetail();
 
         View::share([
             'findRidePage' => $findRidePage,
             'postRidePage' => $postRidePage,
+            'rideDetailPage' => $rideDetailPage,
         ]);
 
         return view($view, [
