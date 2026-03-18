@@ -1035,8 +1035,6 @@
                                 <label
                                     class="block text-sm mb-4 required">{{ $vehiclePage->vehicle_type_label ?? 'Select vehicle' }}</label>
                                 <select name="vehicle_id" class="w-full rounded border-gray-300">
-                                    <option value="">{{ $vehiclePage->vehicle_type_placeholder ?? 'Select' }}
-                                    </option>
                                     @foreach ($vehicles as $vehicle)
                                         <option value="{{ $vehicle->id }}" @selected((string) old('vehicle_id', $oldVehicleId) === (string) $vehicle->id)>
                                             {{ $vehicle->make }} / {{ $vehicle->model }} / {{ $vehicle->year }}
