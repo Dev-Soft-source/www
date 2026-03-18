@@ -411,6 +411,243 @@
                                                     class="flex justify-between"
                                                 >
                                                     <label
+                                                        :for="`fee_student_pending_text_${activeLanguageId}`"
+                                                        >Fee student pending text</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`fee_student_pending_text_${activeLanguageId}`"
+                                                    :id="`fee_student_pending_text_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'fee_student_pending_text'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'fee_student_pending_text'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`fee_charge_waived_${activeLanguageId}`"
+                                                        >Fee charge waived</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`fee_charge_waived_${activeLanguageId}`"
+                                                    :id="`fee_charge_waived_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'fee_charge_waived'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'fee_charge_waived'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`coffee_wall_cash_text_${activeLanguageId}`"
+                                                        >Coffee wall cash text</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`coffee_wall_cash_text_${activeLanguageId}`"
+                                                    :id="`coffee_wall_cash_text_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'coffee_wall_cash_text'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'coffee_wall_cash_text'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`coffee_wall_online_payment_text_${activeLanguageId}`"
+                                                        >Coffee wall online payment text</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`coffee_wall_online_payment_text_${activeLanguageId}`"
+                                                    :id="`coffee_wall_online_payment_text_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'coffee_wall_online_payment_text'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'coffee_wall_online_payment_text'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`coffee_wall_secure_cash_text_${activeLanguageId}`"
+                                                        >Coffee wall secure cash text</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`coffee_wall_secure_cash_text_${activeLanguageId}`"
+                                                    :id="`coffee_wall_secure_cash_text_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'coffee_wall_secure_cash_text'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'coffee_wall_secure_cash_text'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`note_for_students_text_${activeLanguageId}`"
+                                                        >Note for students text</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`note_for_students_text_${activeLanguageId}`"
+                                                    :id="`note_for_students_text_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'note_for_students_text'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'note_for_students_text'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <!-- <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`seats_available_${activeLanguageId}`"
+                                                        >Seats available (template)</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`seats_available_${activeLanguageId}`"
+                                                    :id="`seats_available_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'seats_available'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'seats_available'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `seats_available.seats_available_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `seats_available.seats_available_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div> -->
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
                                                         :for="`seats_available_tooltip_${activeLanguageId}`"
                                                         >Seats available tooltip</label
                                                     >
@@ -2451,6 +2688,13 @@ export default {
                             this.handleInput("", language, "booking_disclaimer_extra_care_ride");
                             this.handleInput("", language, "booking_disclaimer_firm");
                             this.handleInput("", language, "booking_disclaimer_firm_tooltip");
+                            this.handleInput("", language, "fee_student_pending_text");
+                            this.handleInput("", language, "fee_charge_waived");
+                            this.handleInput("", language, "coffee_wall_cash_text");
+                            this.handleInput("", language, "coffee_wall_online_payment_text");
+                            this.handleInput("", language, "coffee_wall_secure_cash_text");
+                            this.handleInput("", language, "note_for_students_text");
+                            this.handleInput("", language, "seats_available");
                             this.handleInput("", language, "booking_term_agree_text");
                             this.handleInput("", language, "booking_pink_ride_term_agree_text");
                             this.handleInput("", language, "booking_extra_care_ride_term_agree_text");
@@ -2699,6 +2943,41 @@ export default {
                                 setting?.booking_disclaimer_firm_tooltip,
                                 setting?.language,
                                 "booking_disclaimer_firm_tooltip"
+                            );
+                            this.handleInput(
+                                setting?.fee_student_pending_text,
+                                setting?.language,
+                                "fee_student_pending_text"
+                            );
+                            this.handleInput(
+                                setting?.fee_charge_waived,
+                                setting?.language,
+                                "fee_charge_waived"
+                            );
+                            this.handleInput(
+                                setting?.coffee_wall_cash_text,
+                                setting?.language,
+                                "coffee_wall_cash_text"
+                            );
+                            this.handleInput(
+                                setting?.coffee_wall_online_payment_text,
+                                setting?.language,
+                                "coffee_wall_online_payment_text"
+                            );
+                            this.handleInput(
+                                setting?.coffee_wall_secure_cash_text,
+                                setting?.language,
+                                "coffee_wall_secure_cash_text"
+                            );
+                            this.handleInput(
+                                setting?.note_for_students_text,
+                                setting?.language,
+                                "note_for_students_text"
+                            );
+                            this.handleInput(
+                                setting?.seats_available,
+                                setting?.language,
+                                "seats_available"
                             );
 
                             this.handleInput(
