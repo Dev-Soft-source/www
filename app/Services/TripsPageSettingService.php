@@ -139,6 +139,8 @@ class TripsPageSettingService
             'booking_cancel_btn_yes_label' => $this->data($request, $language, 'booking_cancel_btn_yes_label'),
             'booking_cancel_btn_no_label' => $this->data($request, $language, 'booking_cancel_btn_no_label'),
             'cancel_booking_confirm_firm_message' => $this->data($request, $language, 'cancel_booking_confirm_firm_message'),
+            'cancel_ride_confirm_decision_title' => $this->data($request, $language, 'cancel_ride_confirm_decision_title'),
+            'cancel_ride_confirm_ok_btn_text' => $this->data($request, $language, 'cancel_ride_confirm_ok_btn_text'),
             'cancel_booking_confirm_48_hour_message' => $this->data($request, $language, 'cancel_booking_confirm_48_hour_message'),
             'cancel_booking_confirm_12_to_48_hour_message' => $this->data($request, $language, 'cancel_booking_confirm_12_to_48_hour_message'),
             'cancel_booking_confirm_less_12_hour_message' => $this->data($request, $language, 'cancel_booking_confirm_less_12_hour_message'),
