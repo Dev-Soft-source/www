@@ -517,6 +517,7 @@
     </script>
 
     <script>
+        const processingText = @json(getTranslatedText('processing_text', $selectedLanguage ?? getDefaultLanguage(true), [], 'Processing...'));
         // Modal functions
         function closeModal() {
             document.getElementById('myModal').style.display = 'none';
@@ -1046,7 +1047,7 @@
                     e.preventDefault();
                     const submitButton = document.getElementById("submit-payment");
                     submitButton.disabled = true;
-                    submitButton.textContent = "Processing...";
+                    submitButton.textContent = processingText;
 
                     const {
                         setupIntent,

@@ -502,6 +502,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
+        var processingText = @json(getTranslatedText('processing_text', $selectedLanguage ?? getDefaultLanguage(true), [], 'Processing...'));
         function closeModal() {
             var modal = document.getElementById('my-modal');
             if (modal) {
@@ -770,7 +771,7 @@
                 // Disable button and show loading state
                 if (signupButton) {
                     signupButton.setAttribute('disabled', 'true');
-                    signupButton.innerHTML = '<span>Processing...</span>';
+                    signupButton.innerHTML = '<span>' + processingText + '</span>';
                 }
 
                 // Get CSRF token
