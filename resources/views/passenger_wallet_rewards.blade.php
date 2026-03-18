@@ -55,8 +55,8 @@
                                     <div class="relative">
                                         <div class="bg-white rounded-lg shadow-3xl border-[3px] border-solid  border-gray-100 " id="ride-29">
                                             <div class="border-gray-300 flex items-center justify-between space-x-2 p-4">
-                                                <p class="text-blue-600 font-FuturaMdCnBT text-2xl">{{ $walletSettingPage->passenger_reward_points_table_label ?? "Points" }}</p>                                                
-                                                <p class="text-blue-600 font-FuturaMdCnBT text-2xl">{{ $walletSettingPage->passenger_reward_reward_table_label ?? "Reward" }}</p>
+                                                <p class="text-blue-600 font-FuturaMdCnBT text-2xl">{{ $walletSettingPage->passenger_my_reward_points_table_label ?? "Points" }}</p>                                                
+                                                <p class="text-blue-600 font-FuturaMdCnBT text-2xl">{{ $walletSettingPage->passenger_my_reward_reward_table_label ?? "Reward" }}</p>
                                             </div>
                                             @if (!empty($rewardPointSettings) && count($rewardPointSettings) > 0)
                                                 @foreach ($rewardPointSettings as $rewardPointSetting)

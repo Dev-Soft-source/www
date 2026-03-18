@@ -3622,9 +3622,7 @@
                 para1.textContent = priceWarningParagraph1;
             }
             if (para2) {
-                para2.textContent = softWarningPrice ?
-                    'We suggest keeping this segment at or below $' + softWarningPrice + ' per seat.' :
-                    priceWarningParagraph2;
+                para2.textContent = priceWarningParagraph2;
             }
 
             modal.classList.remove('hidden');
