@@ -1397,7 +1397,27 @@
                                     clip-rule="evenodd" />
                             </svg>
                         </div>
-                        <span class="links_name pointer-events-auto opacity-0 text-white ">Ride features</span>
+                        <span class="links_name pointer-events-auto opacity-0 text-white ">Ride features (page layout)</span>
+                    </router-link>
+                </li>
+                <li>
+                    <router-link :to="{ name: 'admin.features-setting.manage' }"
+                        class="py-2 flex items-center h-full w-full hover:bg-gradient-to-r from-secondarywhite to-transparent bg-opacity-50 group"
+                        :class="$route.name == 'admin.features-setting.manage' ?
+                            'border-l-4 border-white bg-gradient-to-r from-secondarywhite to-transparent bg-opacity-50 group' :
+                            ''">
+                        <div class="sidebar-links-icon flex justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                class="w-6 h-6 text-white">
+                                <path fill-rule="evenodd"
+                                    d="M4.5 6.75A2.25 2.25 0 016.75 4.5h3.5a.75.75 0 010 1.5h-3.5a.75.75 0 00-.75.75v10.5c0 .414.336.75.75.75h10.5a.75.75 0 00.75-.75v-3.5a.75.75 0 011.5 0v3.5A2.25 2.25 0 0117.25 20.25H6.75A2.25 2.25 0 014.5 18V6.75z"
+                                    clip-rule="evenodd" />
+                                <path fill-rule="evenodd"
+                                    d="M9 12a.75.75 0 01.75-.75h3.69l-1.72-1.72a.75.75 0 111.06-1.06l3.25 3.25a.75.75 0 010 1.06l-3.25 3.25a.75.75 0 11-1.06-1.06l1.72-1.72H9.75A.75.75 0 019 12z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <span class="links_name pointer-events-auto opacity-0 text-white ">Manage features of ride</span>
                     </router-link>
                 </li>
                 <li>
