@@ -33,8 +33,7 @@ class FindRidePageSettingController extends Controller
     {
         $validationRule = [];
         $errorMessages = [];
-        $languages = getAllLanguages();
-
+        $languages = getAllLanguages();        
         $pageSettingService = new FindRidePageSettingService();
         $response = $pageSettingService->validation($languages, $validationRule, $errorMessages);
         $validationRule = $response['validation_rules'];
