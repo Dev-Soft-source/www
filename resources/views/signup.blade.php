@@ -311,7 +311,7 @@
                                                     }
                                                     return '<a ' . $attrs . '>';
                                                 },
-                                                $signupPage->agree_terms_label,
+                                                $signupPage->agree_terms_label
                                             ) !!}
                                         @endisset
                                     </div>
@@ -502,7 +502,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
-        var processingText = @json(getTranslatedText('processing_text', $selectedLanguage ?? getDefaultLanguage(true), [], 'Processing...'));
+        var processingText = {!! json_encode(getTranslatedText('processing_text', isset($selectedLanguage) ? $selectedLanguage : getDefaultLanguage(true), [], 'Processing...')) !!};
         function closeModal() {
             var modal = document.getElementById('my-modal');
             if (modal) {

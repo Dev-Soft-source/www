@@ -164,11 +164,14 @@
                                                 @if ($isApp)
                                                     <button
                                                         onclick="closeModal('my-modal'); setTimeout(function(){ window.location.href='proximaride://login'; }, 100);"
-                                                        class="button-exp-fill px-8">Back to log in</button>
+                                                        class="button-exp-fill px-8">
+                                                        {{ getTranslatedText('back_to_log_in_text', $selectedLanguage ?? getDefaultLanguage(true), [], 'Back to log in') }}
+                                                    </button>
                                                 @else
                                                     <a href="{{ route('login', ['lang' => $selectedLanguage->abbreviation ?? 'en']) }}"
-                                                        class="button-exp-fill px-8 inline-block text-center">Back to log
-                                                        in</a>
+                                                        class="button-exp-fill px-8 inline-block text-center">
+                                                        {{ getTranslatedText('back_to_log_in_text', $selectedLanguage ?? getDefaultLanguage(true), [], 'Back to log in') }}
+                                                    </a>
                                                 @endif
                                             </div>
                                         </div>

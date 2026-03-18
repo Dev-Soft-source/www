@@ -517,7 +517,8 @@
     </script>
 
     <script>
-        const processingText = @json(getTranslatedText('processing_text', $selectedLanguage ?? getDefaultLanguage(true), [], 'Processing...'));
+         var processingText = {!! json_encode(getTranslatedText('processing_text', isset($selectedLanguage) ? $selectedLanguage : getDefaultLanguage(true), [], 'Processing...')) !!};
+
         // Modal functions
         function closeModal() {
             document.getElementById('myModal').style.display = 'none';

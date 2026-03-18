@@ -372,7 +372,7 @@
 <script src="https://pay.google.com/gp/p/js/pay.js"></script>
 
 <script>
-    const processingText = @json(getTranslatedText('processing_text', $selectedLanguage ?? getDefaultLanguage(true), [], 'Processing...'));
+    var processingText = {!! json_encode(getTranslatedText('processing_text', isset($selectedLanguage) ? $selectedLanguage : getDefaultLanguage(true), [], 'Processing...')) !!};
     const stripe = Stripe('{{ env('STRIPE_KEY') }}');
     let elements;
     let paymentElement;
