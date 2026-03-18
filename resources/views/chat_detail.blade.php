@@ -46,8 +46,8 @@
         window.ride = @json($ride->id ?? null); // Pass $ride to JavaScript
         window.passenger = @json($passenger->id ?? null); // Pass $ride to JavaScript
         window.rideDetails = {!! json_encode([
-            'departure' => ($ride && $ride->rideDetail && isset($ride->rideDetail[0])) ? $ride->rideDetail[0]->departure : '',
-            'destination' => ($ride && $ride->rideDetail && isset($ride->rideDetail[0])) ? $ride->rideDetail[0]->destination : '',
+            'departure' => ($ride && $ride->rideDetail && isset($ride->detail)) ? $ride->detail->departure : '',
+            'destination' => ($ride && $ride->rideDetail && isset($ride->detail)) ? $ride->detail->destination : '',
             'date' => $ride->date ?? '',
             'time' => $ride->time ?? ''
         ]) !!};

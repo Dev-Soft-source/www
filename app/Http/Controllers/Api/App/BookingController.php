@@ -440,7 +440,7 @@ class BookingController extends Controller
         $setting = SiteSetting::first();
         $stateTax = 0;
         if(isset($setting->deduct_tax) && $setting->deduct_tax == "deduct_from_passenger" && $setting->tax_type == "state_wise_tax"){
-            $locationBeforeComma = explode(',', $ride->rideDetail[0]->departure);
+            $locationBeforeComma = explode(',', $ride->detail->departure);
             $getFromState = City::with('state:id,tax')->where('status', '1')->whereRaw('LOWER(`name`) LIKE ? ',['%'.$locationBeforeComma[0].'%'])->first();
             if(isset($getFromState) && !empty($getFromState)){
                 $stateTax = $getFromState->state->tax;
@@ -550,9 +550,9 @@ class BookingController extends Controller
             $type = FeaturesSetting::whereId($request->type)->first();
             if (isset($type) && $type->slug === 'firm') {
                 $setting = SiteSetting::first();
-                $seat_price = $ride->rideDetail[0]->price - ($ride->rideDetail[0]->price * $setting->frim_discount / 100);
+                $seat_price = $ride->detail->price - ($ride->detail->price * $setting->frim_discount / 100);
             } else {
-                $seat_price = $ride->rideDetail[0]->price;
+                $seat_price = $ride->detail->price;
             }
             $booking_credit = $request->booking_credit;
 
@@ -589,7 +589,7 @@ class BookingController extends Controller
             
                             $depatureDate = date('d F, Y H:i:s', strtotime('' . $ride->date . ' ' . $ride->time . ''));
             
-                            $message = "" . $title . "\nYour secured cash code is: $secured_cash_code\nTrip detail\nOrigin: " . $ride->rideDetail[0]->departure . "\nDestination: " . $ride->rideDetail[0]->destination . "\nDeparture date: " . $depatureDate . "\Driver name: " . $ride->driver->first_name . "\nDriver phone number: " . $ride->driver->phone . "\nVehicle info: " . $ride->make ?? '' . "," . $ride->year ?? '' . "," . $ride->modal ?? '' . "\nVehicle type: " . $ride->car_type . "";
+                            $message = "" . $title . "\nYour secured cash code is: $secured_cash_code\nTrip detail\nOrigin: " . $ride->detail->departure . "\nDestination: " . $ride->detail->destination . "\nDeparture date: " . $depatureDate . "\Driver name: " . $ride->driver->first_name . "\nDriver phone number: " . $ride->driver->phone . "\nVehicle info: " . $ride->make ?? '' . "," . $ride->year ?? '' . "," . $ride->modal ?? '' . "\nVehicle type: " . $ride->car_type . "";
             
                             try {
                                 $res = $twilio->messages->create(
@@ -617,12 +617,12 @@ class BookingController extends Controller
                                 'driver_last_name' => $ride->driver->last_name,
                                 'driver_phone' => $driverPhoneToUse,
                                 'driver_email' => $ride->driver->email,
-                                'departure' => $ride->rideDetail[0]->departure,
-                                'destination' => $ride->rideDetail[0]->destination,
+                                'departure' => $ride->detail->departure,
+                                'destination' => $ride->detail->destination,
                                 'date' => Carbon::parse($ride->date)->format('F d, Y'),
                                 'time' => $ride->time,
                                 'seats' => $request->seats,
-                                'booking_price' => $ride->rideDetail[0]->price * $request->seats
+                                'booking_price' => $ride->detail->price * $request->seats
                             ];
                     
                             Mail::to($user->email)->queue(new SecuredCashPaymentCodeMail($emailData));
@@ -644,10 +644,10 @@ class BookingController extends Controller
                         'tax_amount' => $taxAmt,
                         'secured_cash' => $secured_cash,
                         'secured_cash_code' => $secured_cash_code,
-                        'departure' => $ride->rideDetail[0]->departure,
-                        'destination' => $ride->rideDetail[0]->destination,
-                        'price' => $ride->rideDetail[0]->price,
-                        'ride_detail_id' => $ride->rideDetail[0]->id
+                        'departure' => $ride->detail->departure,
+                        'destination' => $ride->detail->destination,
+                        'price' => $ride->detail->price,
+                        'ride_detail_id' => $ride->detail->id
                     ]);
 
                     
@@ -719,9 +719,9 @@ class BookingController extends Controller
                         ),
                         'status' => 'completed',
                         'notification_type' => 'upcoming',
-                        'ride_detail_id' => $ride->rideDetail[0]->id,
-                        'departure' => $ride->rideDetail[0]->departure,
-                        'destination' => $ride->rideDetail[0]->destination
+                        'ride_detail_id' => $ride->detail->id,
+                        'departure' => $ride->detail->departure,
+                        'destination' => $ride->detail->destination
                     ]);
     
                     // Assuming $user and $fcmToken are defined
@@ -747,9 +747,9 @@ class BookingController extends Controller
                         ),
                         'status' => 'completed',
                         'notification_type' => 'upcoming',
-                        'ride_detail_id' => $ride->rideDetail[0]->id,
-                        'departure' => $ride->rideDetail[0]->departure,
-                        'destination' => $ride->rideDetail[0]->destination
+                        'ride_detail_id' => $ride->detail->id,
+                        'departure' => $ride->detail->departure,
+                        'destination' => $ride->detail->destination
                     ]);
     
                     // Assuming $user and $fcmToken are defined
@@ -961,7 +961,7 @@ class BookingController extends Controller
                                 $phoneNumber = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->first();
                             }
                             if (!$phoneNumber) {
-                                return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
+                                return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation, 'from' => $ride->detail->departure, 'to' => $ride->detail->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
                             }
                 
                             $secured_cash = '1';
@@ -986,7 +986,7 @@ class BookingController extends Controller
                 
                                 $depatureDate = date('d F, Y H:i:s', strtotime('' . $ride->date . ' ' . $ride->time . ''));
                 
-                                $message = "" . $title . "\nYour secured cash code is: $secured_cash_code\nTrip detail\nOrigin: " . $ride->rideDetail[0]->departure . "\nDestination: " . $ride->rideDetail[0]->destination . "\nDeparture date: " . $depatureDate . "\Driver name: " . $ride->driver->first_name . "\nDriver phone number: " . $ride->driver->phone . "\nVehicle info: " . $ride->make ?? '' . "," . $ride->year ?? '' . "," . $ride->modal ?? '' . "\nVehicle type: " . $ride->car_type . "";
+                                $message = "" . $title . "\nYour secured cash code is: $secured_cash_code\nTrip detail\nOrigin: " . $ride->detail->departure . "\nDestination: " . $ride->detail->destination . "\nDeparture date: " . $depatureDate . "\Driver name: " . $ride->driver->first_name . "\nDriver phone number: " . $ride->driver->phone . "\nVehicle info: " . $ride->make ?? '' . "," . $ride->year ?? '' . "," . $ride->modal ?? '' . "\nVehicle type: " . $ride->car_type . "";
                 
                                 try {
                                     $res = $twilio->messages->create(
@@ -1014,12 +1014,12 @@ class BookingController extends Controller
                                     'driver_last_name' => $ride->driver->last_name,
                                     'driver_phone' => $driverPhoneToUse,
                                     'driver_email' => $ride->driver->email,
-                                    'departure' => $ride->rideDetail[0]->departure,
-                                    'destination' => $ride->rideDetail[0]->destination,
+                                    'departure' => $ride->detail->departure,
+                                    'destination' => $ride->detail->destination,
                                     'date' => Carbon::parse($ride->date)->format('F d, Y'),
                                     'time' => $ride->time,
                                     'seats' => $request->seats,
-                                    'booking_price' => $ride->rideDetail[0]->price * $request->seats
+                                    'booking_price' => $ride->detail->price * $request->seats
                                 ];
                     
                                 Mail::to($user->email)->queue(new SecuredCashPaymentCodeMail($emailData));
@@ -1042,10 +1042,10 @@ class BookingController extends Controller
                             'tax_amount' => $taxAmt,
                             'secured_cash' => $secured_cash,
                             'secured_cash_code' => $secured_cash_code,    
-                            'departure' => $ride->rideDetail[0]->departure,
-                            'destination' => $ride->rideDetail[0]->destination,
-                            'price' => $ride->rideDetail[0]->price,
-                            'ride_detail_id' => $ride->rideDetail[0]->id
+                            'departure' => $ride->detail->departure,
+                            'destination' => $ride->detail->destination,
+                            'price' => $ride->detail->price,
+                            'ride_detail_id' => $ride->detail->id
                         ]);
 
                         $getBookingFeeSum = Transaction::where('booking_id', $booking->id)->sum('booking_fee');
@@ -1126,9 +1126,9 @@ class BookingController extends Controller
                             ),
                             'status' => 'completed',
                             'notification_type' => 'upcoming',
-                            'ride_detail_id' => $ride->rideDetail[0]->id,
-                            'departure' => $ride->rideDetail[0]->departure,
-                            'destination' => $ride->rideDetail[0]->destination
+                            'ride_detail_id' => $ride->detail->id,
+                            'departure' => $ride->detail->departure,
+                            'destination' => $ride->detail->destination
                         ]);
     
                         // Assuming $user and $fcmToken are defined
@@ -1154,9 +1154,9 @@ class BookingController extends Controller
                             ),
                             'status' => 'completed',
                             'notification_type' => 'upcoming',
-                            'ride_detail_id' => $ride->rideDetail[0]->id,
-                            'departure' => $ride->rideDetail[0]->departure,
-                            'destination' => $ride->rideDetail[0]->destination
+                            'ride_detail_id' => $ride->detail->id,
+                            'departure' => $ride->detail->departure,
+                            'destination' => $ride->detail->destination
                         ]);
     
                         // Assuming $user and $fcmToken are defined
@@ -1351,7 +1351,7 @@ class BookingController extends Controller
                         $phoneNumber = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->first();
                     }
                     if (!$phoneNumber) {
-                        return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
+                        return redirect()->route('search_ride', ['lang' => $selectedLanguage->abbreviation, 'from' => $ride->detail->departure, 'to' => $ride->detail->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
                     }
         
                     $secured_cash = '1';
@@ -1376,7 +1376,7 @@ class BookingController extends Controller
         
                         $depatureDate = date('d F, Y H:i:s', strtotime('' . $ride->date . ' ' . $ride->time . ''));
         
-                        $message = "" . $title . "\nYour secured cash code is: $secured_cash_code\nTrip detail\nOrigin: " . $ride->rideDetail[0]->departure . "\nDestination: " . $ride->rideDetail[0]->destination . "\nDeparture date: " . $depatureDate . "\Driver name: " . $ride->driver->first_name . "\nDriver phone number: " . $ride->driver->phone . "\nVehicle info: " . $ride->make ?? '' . "," . $ride->year ?? '' . "," . $ride->modal ?? '' . "\nVehicle type: " . $ride->car_type . "";
+                        $message = "" . $title . "\nYour secured cash code is: $secured_cash_code\nTrip detail\nOrigin: " . $ride->detail->departure . "\nDestination: " . $ride->detail->destination . "\nDeparture date: " . $depatureDate . "\Driver name: " . $ride->driver->first_name . "\nDriver phone number: " . $ride->driver->phone . "\nVehicle info: " . $ride->make ?? '' . "," . $ride->year ?? '' . "," . $ride->modal ?? '' . "\nVehicle type: " . $ride->car_type . "";
         
                         try {
                             $res = $twilio->messages->create(
@@ -1404,12 +1404,12 @@ class BookingController extends Controller
                             'driver_last_name' => $ride->driver->last_name,
                             'driver_phone' => $driverPhoneToUse,
                             'driver_email' => $ride->driver->email,
-                            'departure' => $ride->rideDetail[0]->departure,
-                            'destination' => $ride->rideDetail[0]->destination,
+                            'departure' => $ride->detail->departure,
+                            'destination' => $ride->detail->destination,
                             'date' => Carbon::parse($ride->date)->format('F d, Y'),
                             'time' => $ride->time,
                             'seats' => $request->seats,
-                            'booking_price' => $ride->rideDetail[0]->price * $request->seats
+                            'booking_price' => $ride->detail->price * $request->seats
                         ];
                     
                         Mail::to($user->email)->queue(new SecuredCashPaymentCodeMail($emailData));
@@ -1432,10 +1432,10 @@ class BookingController extends Controller
                     'tax_amount' => $taxAmt,
                     'secured_cash' => $secured_cash,
                     'secured_cash_code' => $secured_cash_code,
-                    'departure' => $ride->rideDetail[0]->departure,
-                    'destination' => $ride->rideDetail[0]->destination,
-                    'price' => $ride->rideDetail[0]->price,
-                    'ride_detail_id' => $ride->rideDetail[0]->id
+                    'departure' => $ride->detail->departure,
+                    'destination' => $ride->detail->destination,
+                    'price' => $ride->detail->price,
+                    'ride_detail_id' => $ride->detail->id
                 ]);
 
                 
@@ -1478,9 +1478,9 @@ class BookingController extends Controller
                     ),
                     'status' => 'completed',
                     'notification_type' => 'upcoming',
-                    'ride_detail_id' => $ride->rideDetail[0]->id,
-                    'departure' => $ride->rideDetail[0]->departure,
-                    'destination' => $ride->rideDetail[0]->destination
+                    'ride_detail_id' => $ride->detail->id,
+                    'departure' => $ride->detail->departure,
+                    'destination' => $ride->detail->destination
                 ]);
 
                 // Assuming $user and $fcmToken are defined
@@ -1506,9 +1506,9 @@ class BookingController extends Controller
                     ),
                     'status' => 'completed',
                     'notification_type' => 'upcoming',
-                    'ride_detail_id' => $ride->rideDetail[0]->id,
-                    'departure' => $ride->rideDetail[0]->departure,
-                    'destination' => $ride->rideDetail[0]->destination
+                    'ride_detail_id' => $ride->detail->id,
+                    'departure' => $ride->detail->departure,
+                    'destination' => $ride->detail->destination
                 ]);
 
                 // Assuming $user and $fcmToken are defined
@@ -2293,9 +2293,9 @@ class BookingController extends Controller
         $type = FeaturesSetting::whereId($request->type)->first();
         if (isset($type) && $type->slug === 'firm') {
             $setting = SiteSetting::first();
-            $seat_price = $ride->rideDetail[0]->price - ($ride->rideDetail[0]->price * $setting->frim_discount / 100);
+            $seat_price = $ride->detail->price - ($ride->detail->price * $setting->frim_discount / 100);
         } else {
-            $seat_price = $ride->rideDetail[0]->price;
+            $seat_price = $ride->detail->price;
         }
 
         
@@ -2320,10 +2320,10 @@ class BookingController extends Controller
                     'tax_amount' => $taxAmt,
                     'secured_cash_code' => $secured_cash_code,
                     'expires_at' => $expiryTime,
-                    'departure' => $ride->rideDetail[0]->departure,
-                    'destination' => $ride->rideDetail[0]->destination,
-                    'price' => $ride->rideDetail[0]->price,
-                    'ride_detail_id' => $ride->rideDetail[0]->id
+                    'departure' => $ride->detail->departure,
+                    'destination' => $ride->detail->destination,
+                    'price' => $ride->detail->price,
+                    'ride_detail_id' => $ride->detail->id
                 ]);
 
             
@@ -2543,10 +2543,10 @@ class BookingController extends Controller
                         'tax_amount' => $taxAmt,
                         'secured_cash_code' => $secured_cash_code,
                         'expires_at' => $expiryTime,
-                        'departure' => $ride->rideDetail[0]->departure,
-                        'destination' => $ride->rideDetail[0]->destination,
-                        'price' => $ride->rideDetail[0]->price,
-                        'ride_detail_id' => $ride->rideDetail[0]->id
+                        'departure' => $ride->detail->departure,
+                        'destination' => $ride->detail->destination,
+                        'price' => $ride->detail->price,
+                        'ride_detail_id' => $ride->detail->id
                     ]);
 
                     
@@ -2756,10 +2756,10 @@ class BookingController extends Controller
                 'tax_amount' => $taxAmt,
                 'secured_cash_code' => $secured_cash_code,
                 'expires_at' => $expiryTime,
-                'departure' => $ride->rideDetail[0]->departure,
-                'destination' => $ride->rideDetail[0]->destination,
-                'price' => $ride->rideDetail[0]->price,
-                'ride_detail_id' => $ride->rideDetail[0]->id
+                'departure' => $ride->detail->departure,
+                'destination' => $ride->detail->destination,
+                'price' => $ride->detail->price,
+                'ride_detail_id' => $ride->detail->id
             ]);
 
             

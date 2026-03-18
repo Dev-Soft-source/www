@@ -122,7 +122,7 @@
         <div class="proximalocal-ride-fag">
             <div class="flex flex-col items-center justify-center proximalocal-ride-fag__header">
                 <h3 class="text-primary text-xl xl:text-2xl font-FuturaMdCnBT text-center mb-0 font-medium">
-                    {{ $findRidePage->proximalocal_ride_faqs_heading ?? 'FAQs on the ProximaLocal Rides' }}
+                    {!! $findRidePage->proximalocal_ride_faqs_heading ?? 'FAQs on the ProximaLocal Rides' !!}
                 </h3>
             </div>
             <div class="proximalocal-ride-fag__body">

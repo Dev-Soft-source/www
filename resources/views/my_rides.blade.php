@@ -337,7 +337,7 @@
                                                                     </div>
                                                                     <div class="mt-4 order-1 md:order-2">
                                                                         <p class="text-xl font-semibold text-primary">
-                                                                            ${{ number_format(floatval($ride->rideDetail[0]->price/100), 2) }}
+                                                                            ${{ number_format(floatval($ride->detail->price/100), 2) }}
                                                                             <small>
                                                                                 @isset($rideDetailPage->card_section_per_seat)
                                                                                     {{ $rideDetailPage->card_section_per_seat }}
@@ -399,7 +399,7 @@
                                                                                 : </p>
                                                                             <p class="">
 
-                                                                                ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') * floatval($ride->rideDetail[0]->price)),2) }}
+                                                                                ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') * floatval($ride->detail->price)),2) }}
                                                                             </p>
                                                                         </div>
 
@@ -421,7 +421,7 @@
                                                                                 @endisset
                                                                                 : </p>
                                                                             <p class="">
-                                                                                ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') *floatval($ride->rideDetail[0]->price) +$ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')),2) }}
+                                                                                ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') *floatval($ride->detail->price) +$ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')),2) }}
                                                                             </p>
                                                                         </div>
                                                                     </div>

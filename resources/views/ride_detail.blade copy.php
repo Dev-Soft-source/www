@@ -608,7 +608,7 @@
                                                         @endisset
                                                     </button>
                                                 @else
-                                                    <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->rideDetail[0]->id]) }}"
+                                                    <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->detail->id]) }}"
                                                         class="text-black text-xl xl:text-2xl">
                                                         @isset($rideDetailPage->seats_left_label)
                                                             {{ $rideDetailPage->seats_left_label }}:
@@ -1162,7 +1162,7 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                                     <div class="flex justify-center mt-4">
                                         @if (Auth::check())
                                             @if ($ride->driver?->id)
-                                                <a href="{{ route('chat', ['lang' => app()->getLocale(), 'departure' => $ride->rideDetail[0]->departure ?? 'unknown', 'destination' => $ride->rideDetail[0]->destination ?? 'unknown', 'id' => $ride->id, 'passenger' => $ride->driver->id]) }}"
+                                                <a href="{{ route('chat', ['lang' => app()->getLocale(), 'departure' => $ride->detail->departure ?? 'unknown', 'destination' => $ride->detail->destination ?? 'unknown', 'id' => $ride->id, 'passenger' => $ride->driver->id]) }}"
                                                     class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS w-36">
                                                     @isset($rideDetailPage->driver_chat_button_label)
                                                         {{ $rideDetailPage->driver_chat_button_label }}
@@ -1382,7 +1382,7 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                                                     class="font-medium text-xl">{{ $rideDetailPage->book_seats_btn_label ?? 'Book Your Seats' }}</span>
                                             </button>
                                         @else
-                                            <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->rideDetail[0]->id]) }}"
+                                            <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'rideDetailId' => $ride->detail->id]) }}"
                                                 class="">
                                                 <label for="instant-booking"
                                                     class="inline-flex items-center justify-center space-x-3 w-fit pr-8 button-exp-fill rounded cursor-pointer peer-checked:border-blue-500 peer-checked:border-2 peer-checked:text-blue-500 hover:border-2 hover:border-blue-500">

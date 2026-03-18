@@ -821,8 +821,8 @@
                             </div>
                             @foreach ($paginatedRides->filter(fn($ride) => $ride->type === 'ride') as $ride)
                                 @php
-                                    $from = $ride->rideDetail[0]->departure;
-                                    $to = $ride->rideDetail[0]->destination;
+                                    $from = $ride->detail->departure;
+                                    $to = $ride->detail->destination;
                                 @endphp
                                 <div class="relative even:bg-white odd:bg-gray-200 space-y-4 rounded-lg">
                                     <div class="absolute right-4 top-8">
@@ -858,44 +858,44 @@
                                             @if ($filteredRatings->count() === 0 && auth()->user()->address == '')
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.complete_address_passenger_message)"
                                             @elseif ($filteredRatings->count() === 0 && auth()->user()->address !== '')
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
                                             @elseif ($totalAverage < 4.5 && auth()->user()->address !== '')
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.star5_passenger_only)"
                                             @elseif ($totalAverage < 4.5 && auth()->user()->address == '')
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.star5_passenger_with_complete_address_message)"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @elseif (auth()->user() &&
                                             in_array('I only want passengers with reviews', explode('=', $ride->features)))
                                             @if ($filteredRatings->count() === 0)
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.passenger_with_review_message)"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option15->features_setting_id ?? null, explode('=', $ride->features)))
                                             @if ($totalAverage < 3)
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.star3_passenger_message)"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option14->features_setting_id ?? null, explode('=', $ride->features)))
                                             @if ($totalAverage < 4)
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.star4_passenger_message)"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option13->features_setting_id ?? null, explode('=', $ride->features)))
                                             @if ($totalAverage < 4.5)
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.star5_passenger_driver)"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @else
-                                            href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}" @endif>
+                                            href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}" @endif>
                                         <div class="rounded-lg shadow-3xl border-[3px] border-solid @if ($ride->status === '2') border-red-500 @elseif(isset($findRidePage->ride_features_option1->features_setting_id) &&
                                                    in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features))) border-green-500 @else border-gray-100 @endif"
                                             id="ride-{{ $ride->id }}">
@@ -955,7 +955,7 @@
                                                                     <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                                                                         {{ $from }}.
                                                                     </h3>
-                                                                    @php $segmentPickup = $ride->rideDetail[0]?->pickup ?? $ride->pickup; @endphp
+                                                                    @php $segmentPickup = $ride->detail?->pickup ?? $ride->pickup; @endphp
                                                                     @if(!empty($segmentPickup))
                                                                         <p class="text-sm mt-2">
                                                                             {{ $findRidePage->pickup_at_label ?? 'Pick-up at' }}: {{ $segmentPickup }}
@@ -984,7 +984,7 @@
                                                                     <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                                                                         {{ $to }}.
                                                                     </h3>
-                                                                    @php $segmentDropoff = $ride->rideDetail[0]?->dropoff ?? $ride->dropoff; @endphp
+                                                                    @php $segmentDropoff = $ride->detail?->dropoff ?? $ride->dropoff; @endphp
                                                                     @if(!empty($segmentDropoff))
                                                                         <p class="text-sm mt-2">
                                                                             {{ $findRidePage->dropoff_at_label ?? 'Drop-off at' }}: {{ $segmentDropoff }}
@@ -1000,7 +1000,7 @@
                                                         <div class="flex items-center gap-2">
                                                             @if (isset($firm_cancellation_discount) && $firm_cancellation_discount!='' && $ride->booking_type == ($postRidePage->cancellation_policy_label2?->features_setting_id))
                                                                 <span class="line-through">
-                                                                    ${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
+                                                                    ${{ number_format(floatval($ride->detail->price), 2) }}
                                                                     </span>
                                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6">
                                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
@@ -1008,11 +1008,11 @@
 
                                                                     <span>
 
-                                                                        ${{ $ride->rideDetail[0]->price - ($ride->rideDetail[0]->price * $firm_cancellation_discount) / 100 }}
+                                                                        ${{ $ride->detail->price - ($ride->detail->price * $firm_cancellation_discount) / 100 }}
                                                                     </span>
 
                                                                 @else
-                                                                    ${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
+                                                                    ${{ number_format(floatval($ride->detail->price), 2) }}
                                                                 @endif
 
                                                                 <small>
@@ -1030,7 +1030,7 @@
                                                                 @endif
                                                         </div>
                                                     </p>
-                                                    {{-- <p class="text-xl font-semibold text-primary">${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
+                                                    {{-- <p class="text-xl font-semibold text-primary">${{ number_format(floatval($ride->detail->price), 2) }}
                                                         <small>
                                                             @isset($findRidePage->card_section_per_seat)
                                                                 {{ $findRidePage->card_section_per_seat }}
@@ -1212,7 +1212,7 @@
                                                         </p>
                                                         <p class="">
                                                             @if (auth()->user())
-                                                                ${{ number_format(floatval(($ride->bookings()->where('user_id', auth()->user()->id)->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function($query) { $query->whereNull('deleted_at'); })->sum('seats') * floatval($ride->rideDetail[0]->price))), 2) }}
+                                                                ${{ number_format(floatval(($ride->bookings()->where('user_id', auth()->user()->id)->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function($query) { $query->whereNull('deleted_at'); })->sum('seats') * floatval($ride->detail->price))), 2) }}
                                                             @else
                                                                 $0.00
                                                             @endif
@@ -1226,7 +1226,7 @@
                                                         </p>
                                                         <p class="">
                                                             @if (auth()->user())
-                                                                ${{ number_format(floatval(($ride->bookings()->where('user_id', auth()->user()->id)->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function($query) { $query->whereNull('deleted_at'); })->sum('seats') * floatval($ride->rideDetail[0]->price)) + $ride->bookings->where('user_id', auth()->user()->id)->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')), 2) }}
+                                                                ${{ number_format(floatval(($ride->bookings()->where('user_id', auth()->user()->id)->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function($query) { $query->whereNull('deleted_at'); })->sum('seats') * floatval($ride->detail->price)) + $ride->bookings->where('user_id', auth()->user()->id)->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')), 2) }}
                                                             @else
                                                                 $0.00
                                                             @endif
@@ -1248,8 +1248,8 @@
                             </div>                       
                             @foreach ($paginatedRides->filter(fn($ride) => $ride->type === 'otherRide') as $ride)
                                 @php
-                                    $from = $ride->rideDetail[0]->departure;
-                                    $to = $ride->rideDetail[0]->destination;
+                                    $from = $ride->detail->departure;
+                                    $to = $ride->detail->destination;
                                 @endphp
                                 <div class="relative even:bg-white odd:bg-gray-200 space-y-4 rounded-lg">
                                     <div class="absolute right-4 top-8">
@@ -1285,44 +1285,44 @@
                                             @if ($filteredRatings->count() === 0 && auth()->user()->address == '')
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.complete_address_passenger_message)"
                                             @elseif ($filteredRatings->count() === 0 && auth()->user()->address !== '')
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
                                             @elseif ($totalAverage < 4.5 && auth()->user()->address !== '')
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.star5_passenger_only)"
                                             @elseif ($totalAverage < 4.5 && auth()->user()->address == '')
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.star5_passenger_with_complete_address_message)"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @elseif (auth()->user() &&
                                             in_array('I only want passengers with reviews', explode('=', $ride->features)))
                                             @if ($filteredRatings->count() === 0)
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.passenger_with_review_message)"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option15->features_setting_id ?? null, explode('=', $ride->features)))
                                             @if ($totalAverage < 3)
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.star3_passenger_message)"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option14->features_setting_id ?? null, explode('=', $ride->features)))
                                             @if ($totalAverage < 4)
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.star4_passenger_message)"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option13->features_setting_id ?? null, explode('=', $ride->features)))
                                             @if ($totalAverage < 4.5)
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', proximalLocalModalMessages.star5_passenger_driver)"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}"
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
                                             @endif
                                         @else
-                                            href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}" @endif>
+                                            href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}" @endif>
                                         <div class="rounded-lg shadow-3xl border-[3px] border-solid @if ($ride->status === '2') border-red-500 @elseif(isset($findRidePage->ride_features_option1->features_setting_id) &&
                                                 in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features))) border-pink-500 @elseif(isset($findRidePage->ride_features_option2->features_setting_id) &&
                                                 in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features))) border-green-500 @else border-gray-100 @endif"
@@ -1422,7 +1422,7 @@
                                                         <div class="flex items-center gap-2">
                                                             @if (isset($firm_cancellation_discount) && $firm_cancellation_discount!='' && $ride->booking_type == ($postRidePage->cancellation_policy_label2?->features_setting_id))
                                                                 <span class="line-through">
-                                                                    ${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
+                                                                    ${{ number_format(floatval($ride->detail->price), 2) }}
                                                                     </span>
                                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6">
                                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
@@ -1430,11 +1430,11 @@
 
                                                                     <span>
 
-                                                                        ${{ $ride->rideDetail[0]->price - ($ride->rideDetail[0]->price * $firm_cancellation_discount) / 100 }}
+                                                                        ${{ $ride->detail->price - ($ride->detail->price * $firm_cancellation_discount) / 100 }}
                                                                     </span>
 
                                                                 @else
-                                                                    ${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
+                                                                    ${{ number_format(floatval($ride->detail->price), 2) }}
                                                                 @endif
 
                                                                 <small>
@@ -1457,7 +1457,7 @@
                                                                 </div> -->
                                                         </div>
                                                     </p>
-                                                    {{-- <p class="text-xl font-semibold text-primary">${{ number_format(floatval($ride->rideDetail[0]->price), 2) }}
+                                                    {{-- <p class="text-xl font-semibold text-primary">${{ number_format(floatval($ride->detail->price), 2) }}
                                                         <small>
                                                             @isset($findRidePage->card_section_per_seat)
                                                                 {{ $findRidePage->card_section_per_seat }}
@@ -1690,7 +1690,7 @@
                                                         </p>
                                                         <p class="">
                                                             @if (auth()->user())
-                                                                ${{ number_format(floatval(($ride->bookings()->where('user_id', auth()->user()->id)->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function($query) { $query->whereNull('deleted_at'); })->sum('seats') * floatval($ride->rideDetail[0]->price))), 2) }}
+                                                                ${{ number_format(floatval(($ride->bookings()->where('user_id', auth()->user()->id)->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function($query) { $query->whereNull('deleted_at'); })->sum('seats') * floatval($ride->detail->price))), 2) }}
                                                             @else
                                                                 $0.00
                                                             @endif
@@ -1704,7 +1704,7 @@
                                                         </p>
                                                         <p class="">
                                                             @if (auth()->user())
-                                                                ${{ number_format(floatval(($ride->bookings()->where('user_id', auth()->user()->id)->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function($query) { $query->whereNull('deleted_at'); })->sum('seats') * floatval($ride->rideDetail[0]->price)) + $ride->bookings->where('user_id', auth()->user()->id)->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')), 2) }}
+                                                                ${{ number_format(floatval(($ride->bookings()->where('user_id', auth()->user()->id)->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function($query) { $query->whereNull('deleted_at'); })->sum('seats') * floatval($ride->detail->price)) + $ride->bookings->where('user_id', auth()->user()->id)->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')), 2) }}
                                                             @else
                                                                 $0.00
                                                             @endif

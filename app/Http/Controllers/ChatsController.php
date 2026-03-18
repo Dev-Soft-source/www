@@ -30,7 +30,9 @@ class ChatsController extends Controller
 
         $ride = Ride::whereId($id)->first();
         $passenger = User::whereId($passenger)->first();
-        $closeUrl = $request->query('return_to');
+
+        // If a redirectUrl query/body param is present, prefer redirecting there
+        $closeUrl = $request->query('redirectUrl');
 
         if (!is_string($closeUrl) || !str_starts_with($closeUrl, url('/'))) {
             $closeUrl = route('notifications', ['lang' => app()->getLocale()]);
@@ -41,7 +43,7 @@ class ChatsController extends Controller
             return redirect()->route('my_chats', ['lang' => $selectedLanguage->abbreviation ?? app()->getLocale()])
                 ->with('error', 'Ride or passenger not found.');
         }
-// dd($chatsPage);
+
         return view('chat', [
             'ride' => $ride, 'passenger' => $passenger, 'chatsPage' => $chatsPage, 'closeUrl' => $closeUrl]);
     }
@@ -176,8 +178,8 @@ class ChatsController extends Controller
             }])->first();
 
             $rideDetailId = "";
-            if (isset($ride->rideDetail[0]) && !empty($ride->rideDetail[0])) {
-                $rideDetailId = $ride->rideDetail[0]->id;
+            if (isset($ride->detail) && !empty($ride->detail)) {
+                $rideDetailId = $ride->detail->id;
             }
 
             // Check the last message between the sender and receiver
@@ -240,10 +242,10 @@ class ChatsController extends Controller
                                 'senderLastName' => $user->last_name,
                                 // 'seats' => $booking->seats,
                                 // 'price' => $booking->fare,
-                                'from' => $ride->rideDetail[0]->departure,
-                                'to' => $ride->rideDetail[0]->destination,
-                                'date' => $ride->rideDetail[0]->date,
-                                'time' => $ride->rideDetail[0]->time
+                                'from' => $ride->detail->departure,
+                                'to' => $ride->detail->destination,
+                                'date' => $ride->detail->date,
+                                'time' => $ride->detail->time
                             ];
                             Mail::to($receiver->email)->queue(new ReceiveChatMessageMail($data));
                         }

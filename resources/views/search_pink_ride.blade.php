@@ -131,7 +131,7 @@
         <div class="pink-ride-faq">
             <div class="pink-ride-faq__header">
                 <h3 class="text-primary text-xl xl:text-2xl font-FuturaMdCnBT text-center mb-0 font-medium">
-                    {{ $findRidePage->pink_ride_page_faq_heading ?? 'FAQs on Pink Rides' }}
+                    {!! $findRidePage->pink_ride_page_faq_heading ?? 'FAQs on Pink Rides' !!}
                 </h3>
             </div>
             <div class="pink-ride-faq__body">

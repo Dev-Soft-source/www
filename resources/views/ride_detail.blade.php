@@ -652,8 +652,8 @@
                                             $ride->bookings->where('user_id', auth()->user()->id)->where('status', 1)->isNotEmpty())
                                         @php
                                             // Calculate the difference in days between today and the ride's date
-$rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
-// Add the leave review days to the ride's DateTime
+                                            $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
+                                            // Add the leave review days to the ride's DateTime
                                             $reviewDateTime = clone $rideDateTime;
                                             $reviewDateTime->add(
                                                 new DateInterval('P' . $setting->leave_review_days . 'D'),
@@ -738,7 +738,7 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                                     <div class="flex justify-center mt-4">
                                         @if (Auth::check())
                                             @if ($ride->driver?->id)
-                                                <a href="{{ route('chat', ['lang' => app()->getLocale(), 'departure' => $ride->rideDetail[0]->departure ?? 'unknown', 'destination' => $ride->rideDetail[0]->destination ?? 'unknown', 'id' => $ride->id, 'passenger' => $ride->driver->id]) }}"
+                                                <a href="{{ route('chat', ['lang' => app()->getLocale(), 'departure' => $ride->detail->departure ?? 'unknown', 'destination' => $ride->detail->destination ?? 'unknown', 'id' => $ride->id, 'passenger' => $ride->driver->id,'redirectUrl' => url()->full()]) }}"
                                                     class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS w-36">
                                                     @isset($rideDetailPage->driver_chat_button_label)
                                                         {{ $rideDetailPage->driver_chat_button_label }}
@@ -845,7 +845,7 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                                                     })->sum('seats') !=
                                                 0)
                                             <div class="flex items-center justify-end">
-                                                <a href="{{ route('booking.edit', ['lang' => $selectedLanguage->abbreviation, 'id' => $userBookingForEdit->id]) }}"
+                                                <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'from_stop_id'=>$from_stop_id, 'to_stop_id'=>$to_stop_id]) }}"
                                                     class="button-exp-fill whitespace-nowrap me-1 text-xl">
                                                     @isset($rideDetailPage->edit_button_actions_label)
                                                         {{ $rideDetailPage->edit_button_actions_label }}
@@ -889,94 +889,51 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                                     0)
                                 @if ($ride->status !== '2')
                                     <div class="flex justify-end">
-                                        @if ($needsPhoneOnFileForRegularRide)
-                                            <button type="button" onclick="showPhoneOnFileRequiredModal()"
-                                                class="inline-flex items-center justify-center space-x-3 w-fit pr-8 button-exp-fill rounded cursor-pointer">
-                                                @isset($ride->booking_method->features_setting_id)
-                                                    @if ($ride->booking_method->features_setting_id === $postRidePage->booking_option1->features_setting_id)
-                                                        <img class="w-10 h-10 rounded-full"
-                                                            src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
-                                                            alt="">
-                                                    @elseif ($ride->booking_method->features_setting_id === $postRidePage->booking_option2->features_setting_id)
-                                                        <img class="w-10 h-10 rounded-full"
-                                                            src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
-                                                            alt="">
-                                                    @endif
-                                                @endisset
-                                                <span
-                                                    class="font-medium text-xl">{{ $rideDetailPage->book_seats_btn_label ?? 'Book Your Seats' }}</span>
-                                            </button>
-                                        @elseif ($needsVerifiedPhoneForPinkExtra)
-                                            <button type="button" onclick="showVerifiedPhoneForPinkExtraModal()"
-                                                class="inline-flex items-center justify-center space-x-3 w-fit pr-8 button-exp-fill rounded cursor-pointer">
-                                                @isset($ride->booking_method->features_setting_id)
-                                                    @if ($ride->booking_method->features_setting_id === $postRidePage->booking_option1->features_setting_id)
-                                                        <img class="w-10 h-10 rounded-full"
-                                                            src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
-                                                            alt="">
-                                                    @elseif ($ride->booking_method->features_setting_id === $postRidePage->booking_option2->features_setting_id)
-                                                        <img class="w-10 h-10 rounded-full"
-                                                            src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
-                                                            alt="">
-                                                    @endif
-                                                @endisset
-                                                <span
-                                                    class="font-medium text-xl">{{ $rideDetailPage->book_seats_btn_label ?? 'Book Your Seats' }}</span>
-                                            </button>
-                                        @elseif ($needsPhoneVerification)
-                                            <button type="button" onclick="showPhoneVerificationModal()"
-                                                class="inline-flex items-center justify-center space-x-3 w-fit pr-8 button-exp-fill rounded cursor-pointer">
-                                                @isset($ride->booking_method->features_setting_id)
-                                                    @if ($ride->booking_method->features_setting_id === $postRidePage->booking_option1->features_setting_id)
-                                                        <img class="w-10 h-10 rounded-full"
-                                                            src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
-                                                            alt="">
-                                                    @elseif ($ride->booking_method->features_setting_id === $postRidePage->booking_option2->features_setting_id)
-                                                        <img class="w-10 h-10 rounded-full"
-                                                            src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
-                                                            alt="">
-                                                    @endif
-                                                @endisset
-                                                <span
-                                                    class="font-medium text-xl">{{ $rideDetailPage->book_seats_btn_label ?? 'Book Your Seats' }}</span>
-                                            </button>
-                                        @elseif ($showPhotoIdRequiredForBooking)
-                                            <button type="button" onclick="showPhotoIdRequiredModal()"
-                                                class="inline-flex items-center justify-center space-x-3 w-fit pr-8 button-exp-fill rounded cursor-pointer">
-                                                @isset($ride->booking_method->features_setting_id)
-                                                    @if ($ride->booking_method->features_setting_id === $postRidePage->booking_option1->features_setting_id)
-                                                        <img class="w-10 h-10 rounded-full"
-                                                            src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
-                                                            alt="">
-                                                    @elseif ($ride->booking_method->features_setting_id === $postRidePage->booking_option2->features_setting_id)
-                                                        <img class="w-10 h-10 rounded-full"
-                                                            src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
-                                                            alt="">
-                                                    @endif
-                                                @endisset
-                                                <span
-                                                    class="font-medium text-xl">{{ $rideDetailPage->book_seats_btn_label ?? 'Book Your Seats' }}</span>
+                                        @php
+                                            $isInstant = $ride->isInstantBooking();
+
+                                            $icon = $isInstant
+                                                ? asset('home_page_icons/' . $postRidePage->booking_option1->icon)
+                                                : asset('home_page_icons/' . $postRidePage->booking_option2->icon);
+
+                                            $label = $isInstant
+                                                ? ($rideDetailPage->instant_booking_btn_label ?? 'Instant Book')
+                                                : ($rideDetailPage->request_booing_btn_label ?? 'Request to Book');
+
+                                            $action = null;
+
+                                            if ($needsPhoneOnFileForRegularRide) {
+                                                $action = "showPhoneOnFileRequiredModal()";
+                                            } elseif ($needsVerifiedPhoneForPinkExtra) {
+                                                $action = "showVerifiedPhoneForPinkExtraModal()";
+                                            } elseif ($needsPhoneVerification) {
+                                                $action = "showPhoneVerificationModal()";
+                                            } elseif ($showPhotoIdRequiredForBooking) {
+                                                $action = "showPhotoIdRequiredModal()";
+                                            }
+                                        @endphp
+
+                                        @if ($action)
+                                            <button type="button"
+                                                    onclick="{{ $action }}"
+                                                    class="inline-flex items-center justify-center space-x-3 w-fit pr-8 button-exp-fill rounded cursor-pointer">
+                                                <img class="w-10 h-10 rounded-full" src="{{ $icon }}" alt="">
+                                                <span class="font-medium text-xl">{{ $label }}</span>
                                             </button>
                                         @else
-                                            <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'from_stop_id' => $from_stop_id, 'to_stop_id' => $to_stop_id]) }}"
-                                                class="">
-                                                <label for="instant-booking"
-                                                    class="inline-flex items-center justify-center space-x-3 w-fit pr-8 button-exp-fill rounded cursor-pointer peer-checked:border-blue-500 peer-checked:border-2 peer-checked:text-blue-500 hover:border-2 hover:border-blue-500">
-                                                        @if ($ride->isInstantBooking())
-                                                            <img class="w-10 h-10 rounded-full"
-                                                                src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
-                                                                alt="">
-                                                        @elseif ($ride->isRequestBooking())
-                                                            <img class="w-10 h-10 rounded-full"
-                                                                src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
-                                                                alt="">
-                                                        @endif
-                                                        <span class="font-medium text-xl">
-                                                            {{ $rideDetailPage->book_seats_btn_label ?? 'Book Your Seats' }}
-                                                        </span>
+                                            <a href="{{ route('booking', [
+                                                    'lang' => $selectedLanguage->abbreviation,
+                                                    'id' => $ride->id,
+                                                    'from_stop_id' => $from_stop_id,
+                                                    'to_stop_id' => $to_stop_id
+                                                ]) }}">
+                                                <label class="inline-flex items-center justify-center space-x-3 w-fit pr-8 button-exp-fill rounded cursor-pointer hover:border-2 hover:border-blue-500">
+                                                    <img class="w-10 h-10 rounded-full" src="{{ $icon }}" alt="">
+                                                    <span class="font-medium text-xl">{{ $label }}</span>
                                                 </label>
                                             </a>
                                         @endif
+
                                     </div>
                                 @endif
                             @endif
@@ -1093,7 +1050,7 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
             </div>
             <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                 <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
-                    <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border"
+                    <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border1"
                         onclick="event.stopPropagation()">
                         <button type="button" onclick="closePhotoIdRequiredModal()"
                             class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">

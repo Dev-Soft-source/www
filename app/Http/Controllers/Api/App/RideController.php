@@ -2583,9 +2583,9 @@ class RideController extends Controller
                 'message' =>  $pinkExtraCareLiveMessage,
                 'status' => 'upcoming',
                 'notification_type' => 'upcoming',
-                'ride_detail_id' => $initialRide->rideDetail[0]->id,
-                'departure' => $initialRide->rideDetail[0]->departure,
-                'destination' => $initialRide->rideDetail[0]->destination
+                'ride_detail_id' => $initialRide->detail->id,
+                'departure' => $initialRide->detail->departure,
+                'destination' => $initialRide->detail->destination
             ]);
 
             $fcmToken = $user->mobile_fcm_token;
@@ -2604,9 +2604,9 @@ class RideController extends Controller
                 'message' =>  $pinkLiveMessage,
                 'status' => 'upcoming',
                 'notification_type' => 'upcoming',
-                'ride_detail_id' => $initialRide->rideDetail[0]->id,
-                'departure' => $initialRide->rideDetail[0]->departure,
-                'destination' => $initialRide->rideDetail[0]->destination
+                'ride_detail_id' => $initialRide->detail->id,
+                'departure' => $initialRide->detail->departure,
+                'destination' => $initialRide->detail->destination
             ]);
 
             $fcmToken = $user->mobile_fcm_token;
@@ -2625,9 +2625,9 @@ class RideController extends Controller
                 'message' =>  $extraCareLiveMessage,
                 'status' => 'upcoming',
                 'notification_type' => 'upcoming',
-                'ride_detail_id' => $initialRide->rideDetail[0]->id,
-                'departure' => $initialRide->rideDetail[0]->departure,
-                'destination' => $initialRide->rideDetail[0]->destination
+                'ride_detail_id' => $initialRide->detail->id,
+                'departure' => $initialRide->detail->departure,
+                'destination' => $initialRide->detail->destination
             ]);
 
             $fcmToken = $user->mobile_fcm_token;
@@ -2646,9 +2646,9 @@ class RideController extends Controller
                 'message' =>  $liveMessage,
                 'status' => 'upcoming',
                 'notification_type' => 'upcoming',
-                'ride_detail_id' => $initialRide->rideDetail[0]->id,
-                'departure' => $initialRide->rideDetail[0]->departure,
-                'destination' => $initialRide->rideDetail[0]->destination
+                'ride_detail_id' => $initialRide->detail->id,
+                'departure' => $initialRide->detail->departure,
+                'destination' => $initialRide->detail->destination
             ]);
 
             $fcmToken = $user->mobile_fcm_token;

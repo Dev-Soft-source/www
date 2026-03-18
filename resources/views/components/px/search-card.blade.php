@@ -174,7 +174,7 @@
                             @endphp
                             @if (isset($firm_cancellation_discount) &&
                                     $firm_cancellation_discount != '' &&
-                                    $ride->booking_type == $postRidePage->cancellation_policy_label2?->features_setting_id)
+                                    $ride->isFirmCancellation())
                                 <span class="line-through">
                                     ${{ number_format(floatval($seat_price), 2) }}
                                 </span>
@@ -197,9 +197,7 @@
                                     {{ $findRidePage->card_section_per_seat }}
                                 @endisset
                             </small>
-                            @if (isset($firm_cancellation_discount) &&
-                                    $firm_cancellation_discount != '' &&
-                                    $ride->booking_type == $postRidePage->cancellation_policy_label2?->features_setting_id)
+                            @if (isset($firm_cancellation_discount) && $firm_cancellation_discount != '' && $ride->isFirmCancellation())
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                     class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16"
                                     data-tippy-content="{!! nl2br($findRidePage->firm_cancellation_tooltip) ??

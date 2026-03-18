@@ -299,7 +299,7 @@
                             <h4 class="text-black text-xl xl:text-2xl">
                                 {{ $rideDetailPage->booking_price_label ?? 'Booking Price' }}:
                             </h4>
-                            <p class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">${{ number_format(floatval($ride->rideDetail[0]->price/100), 2) }}
+                            <p class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">${{ number_format(floatval($ride->detail->price/100), 2) }}
                                 @isset($rideDetailPage->per_seat_label)
                                     {{ $rideDetailPage->per_seat_label }}
                                 @endisset
@@ -402,7 +402,7 @@
                                     {{ $rideDetailPage->ride_co_passenger_heading ?? 'My passengers' }}
                                 @endif
                             </h3>
-                            <a href="{{ route('my_passengers', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id]) }}">
+                            <a href="{{ route('my_passengers', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}">
                                 <div class="space-y-4 p-4">
                                     @foreach ($ride->bookings->where('status', 1) as $booking)
                                         @if ($booking->passenger)

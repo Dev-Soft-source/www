@@ -225,8 +225,8 @@ class MyChatsController extends Controller
                 $q->where('default_ride','1');
             }])->first();
 
-            if(isset($ride->rideDetail[0]) && !empty($ride->rideDetail[0])){
-                $rideDetailId = $ride->rideDetail[0]->id;
+            if(isset($ride->detail) && !empty($ride->detail)){
+                $rideDetailId = $ride->detail->id;
             }
         }
 

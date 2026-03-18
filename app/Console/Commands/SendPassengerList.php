@@ -145,7 +145,7 @@ class SendPassengerList extends Command
                             }
 
                             $message = $title . "\n" . "From ProximaRide: Here is your passenger list for your ride from " . 
-                            $ride->rideDetail[0]->departure . " to " . $ride->rideDetail[0]->destination . 
+                            $ride->detail->departure . " to " . $ride->detail->destination . 
                             " on " . $departureDate . " at " . $departureTime . "\n" . 
                             $passengerList . "Drive safe!";
 

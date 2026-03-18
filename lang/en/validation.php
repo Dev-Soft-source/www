@@ -192,7 +192,7 @@ return
 			'city_not_in_record' => [
 				'message' => 'We could not find this city name in our records, please double-check the spelling.',
 			],
-///////////// todo
+
 			'origin.label' => [
 				'required' => 'The origin is required.',
 			],
@@ -209,7 +209,7 @@ return
 			'stops.*.label' => ['required_with' => 'Stop location is required for each stop.'],
 			'stops.*.departure_at' => ['required_with' => 'Departure time is required for each stop.'],
     		'stops.*.pickup_dropoff_location.required_with' => 'Pickup/Dropoff location is required.',
-///
+
 			'pickup' => [
 				'required' => 'The pickup is required.',
 			],

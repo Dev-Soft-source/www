@@ -1818,7 +1818,7 @@ class RideController extends Controller
         $message = getNotificationMessageText($key, $user, [], $fallback);
 
         // Ride detail
-        $rideDetail = $initialRide->rideDetail[0];
+        $rideDetail = $initialRide->detail;
 
         // Create notification
         $notification = Notification::create([

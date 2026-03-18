@@ -1,6 +1,7 @@
 @extends('px.search_template')
 
 @section('style')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         /* Shared style for all checkbox & radio inputs */
         .form-check-input {
@@ -123,7 +124,7 @@
         <div class="folk-ride-faq">
             <div class="flex flex-col items-center justify-center folk-ride-faq__header">
                 <h3 class="text-primary text-xl xl:text-2xl font-FuturaMdCnBT text-center mb-0 font-medium">
-                    {{ $findRidePage->extra_care_ride_faqs_heading ?? 'FAQs on the Extra+ Rides' }}
+                    {!! $findRidePage->extra_care_ride_faqs_heading ?? 'FAQs on the Extra+ Rides' !!}
                 </h3>
             </div>
             <div class="folk-ride-faq__body">

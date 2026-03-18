@@ -149,16 +149,6 @@ class BookingController extends Controller
         $ride = Ride::where('id', $id)->first();
 
 
-        // $ride_detail = 
-        // dd('ss');
-
-        if (!isset($ride) && empty($ride)) {
-            $lang = $lang ?? "en";
-            return redirect(route('home', ['lang' => $lang]));
-
-            }
-
-
         $bookingPage = BookingPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
@@ -178,7 +168,6 @@ class BookingController extends Controller
                 $this->defaultLang->id,
                 false
             );
-
             
         $ride = $this->makeDetailOfRide($ride, $from_stop_id, $to_stop_id);
 
@@ -209,306 +198,23 @@ class BookingController extends Controller
                 'searchOptionGroups' => $searchOptionGroups,
                 'cards' => $cards, 
                 'paymentSettingDetail' => $paymentSettingDetail,
-                'balance' => $topBalance,
+                'topUpBalance' => $topBalance,
                 'setting' => $setting, 
                 'settingTaxPercentage' => $settingTaxPercentage, 
                 'coffeeBalance' => $coffeeBalance, 
                 'postRidePage' => $postRidePage, 
                 'findRidePage' => $findRidePage, 
-
-            // 'isPinkRide' => $isPinkRide ?? false, 
-            // 'isExtraCareRide' => $isExtraCareRide ?? false, 
-            // 'isShortDistanceRide' => $isShortDistanceRide ?? false,
-            // 'selectedLanguage' => $selectedLanguage,
-            // 'origin' => $origin, 
-            // 'destination' => $destination,
-            //  'stops' => $stops, 
-            //  'segmentPickup' => $segmentPickup, 
-            //  'segmentDropoff' => $segmentDropoff, 
-            //  'displayDepartureDateTime' => $displayDepartureDateTime, 
-            //  'fromLabel' => $fromLabel, 'toLabel' => $toLabel,
-            // 'remainingForSegment' => $remainingForSegment, 'availableSeatIdsForSegment' => $availableSeatIdsForSegment
             ]);
     }
 
     /**
-     * Booking page
+     * it is not needed
      */
-    public function create1($lang = null, $id, $rideDetailId)
+    public function edit($lang = null, $id)
     {
-
-        $successMessage = $this->successMessage;
-
-        if (auth()->user()) {
-            
-            $user_id = auth()->user()->id;
-            $user = User::whereId($user_id)->first();
-
-            // Check if user has suspanded
-            if ($user->isSuspended()) {
-                return back()->with('message', $this->successMessage['admin_block_account_message'] ?? 'Your account has been suspended by the admin');
-            }
-
-            $ride = Ride::where('id', $id)->with('seatDetail');
-            if ($rideDetailId != 0) {
-                $ride = $ride->with(['rideDetail' => function ($q) use ($rideDetailId) {
-                    $q->where('id', $rideDetailId);
-                }]);
-            } else {
-                $ride = $ride->with(['rideDetail' => function ($q) {
-                    $q->where('default_ride', '1');
-                }]);
-            }
-            $ride = $ride->first();
-
-            if (!isset($ride) && empty($ride)) {
-                $lang = $lang ?? "en";
-                return redirect(route('home', ['lang' => $lang]));
-            }
-            $setting = SiteSetting::first();
-
-            $stateTax = 0;
-            if (isset($setting->deduct_tax) && $setting->deduct_tax == "deduct_from_passenger") {
-                if($setting->tax_type == "state_wise_tax"){
-                    $locationBeforeComma = explode(',', $ride->rideDetail[0]->departure);
-                    $getFromState = City::with('state:id,tax')->where('status', '1')->whereRaw('LOWER(`name`) LIKE ? ', ['%' . $locationBeforeComma[0] . '%'])->first();
-                    if (isset($getFromState) && !empty($getFromState)) {
-                        $stateTax = $getFromState->state->tax;
-                    }
-                } else {
-                    $stateTax = $setting->tax;
-                }
-            }
-
-            $bookingPage = null;
-            $selectedLanguage = $this->selectedLanguage;
-            if ($selectedLanguage) {
-                // Retrieve the HomePageSettingDetail associated with the selected language
-                $rideDetailPage = RideDetailPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-
-                $postRidePage = $this->getPostRidePageWithSettingDetail();
-
-
-                $bookingPage = BookingPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-
-
-                
-
-                // Compute Pink Ride and Extra Care flags BEFORE replacing features with names
-                $featureIds = array_filter(explode('=', $ride->features ?? ''));
-
-                $isPinkRide = $ride->isPinkRide();
-                $isExtraCareRide = $ride->isExtraCareRide();
-                // Short-Distance Ride: price per seat from RideDetail <= $15, no booking fee (same logic as ride_detail)
-                $pricePerSeat = (float) ($ride->rideDetail->first()?->price ?? 0);
-                $isShortDistanceRide = $pricePerSeat > 0 && $pricePerSeat <= 15;
-                // Fetch data for each feature ID and concatenate with '='
-                $featureNames = collect($featureIds)->map(function ($id) use ($selectedLanguage) {
-                    return FeaturesSettingDetail::whereFeaturesSettingId($id)
-                        ->whereLanguageId($selectedLanguage->id)
-                        ->value('name');
-                })->filter()->implode('='); // Filter out nulls and concatenate with '='
-                $ride->features = $featureNames;
-            }
-
-            $bookings = Booking::where('ride_id', $id)->where('status', '!=', '3')->where('status', '!=', '4')->get();
-
-
-            // Segment-based seat availability will be computed after we have $orderedPoints and $from/$to (below).
-            // We keep a simple guard here; the real check is done after building the route.
-            $seatsBooked = $bookings->sum('seats');
-            if ($seatsBooked >= $ride->seats) {
-                return redirect()->route('search_ride', ['notificationPage' => $notificationPage, 'successMessage' => $successMessage, 'lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $successMessage->seat_unavailable_message]);
-            }
-
-            $cards = Card::where('user_id', $user_id)->orderBy('id', 'desc')->get();
-
-            // If ride requires online payment, user has cards, but no primary card set - redirect to my_cards to select one
-            $isOnlinePaymentRide = (optional($ride->payment_method)->features_setting_id ?? null) !== (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null);
-            $hasPrimaryCard = $cards->contains(fn($c) => $c->primary_card == 1 || $c->primary_card === '1');
-            if ($isOnlinePaymentRide && $cards->isNotEmpty() && !$hasPrimaryCard) {
-                return redirect()->route('my_cards', ['lang' => $this->selectedLanguage->abbreviation])
-                    ->with('message', 'Please set a primary card to continue with your booking.');
-            }
-
-            Stripe::setApiKey(env('STRIPE_SECRET'));
-            // Fetch card details from Stripe
-            foreach ($cards as $card) {
-                if ($card->stripe_payment_method_id) {
-                    $card->paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
-                }
-            }
-
-            $getCoffeeCrBalance = CoffeeWallet::sum('cr_amount');
-            $getCoffeeDrBalance = CoffeeWallet::sum('dr_amount');
-
-            $getCrBalance = TopUpBalance::where('user_id', $user->id)->sum('cr_amount');
-            $getDrBalance = TopUpBalance::where('user_id', $user->id)->sum('dr_amount');
-
-            $paymentSettingDetail = BillingAddressSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-
-            // Build full route (origin, stops, destination) and segment time for booking display (same logic as ride_detail)
-            $bookedSegment = $ride->rideDetail->first();
-            $from = $bookedSegment ? $bookedSegment->departure : null;
-            $to = $bookedSegment ? $bookedSegment->destination : null;
-            $allDetails = RideDetail::where('ride_id', $ride->id)->orderBy('id')->get();
-            $defaultDetail = $allDetails->where('default_ride', 1)->first();
-            $moreDetails = $allDetails->where('default_ride', 0)->sortBy('id');
-            $origin = $defaultDetail && $defaultDetail->departure
-                ? $defaultDetail->departure
-                : ($allDetails->first() ? $allDetails->first()->departure : '');
-            $destination = $defaultDetail && $defaultDetail->destination
-                ? $defaultDetail->destination
-                : ($allDetails->last() ? $allDetails->last()->destination : '');
-            $segmentPickup = $bookedSegment && !empty($bookedSegment->pickup) ? $bookedSegment->pickup : ($ride->pickup ?? '');
-            $segmentDropoff = $bookedSegment && !empty($bookedSegment->dropoff) ? $bookedSegment->dropoff : ($ride->dropoff ?? '');
-            $orderedPoints = collect([$origin]);
-            $current = $origin;
-            $remaining = $moreDetails->values();
-            while ($current !== $destination && $remaining->isNotEmpty()) {
-                $nextSegment = $remaining->first(function ($d) use ($current) {
-                    return (string) $d->departure === (string) $current;
-                });
-                if (!$nextSegment) {
-                    break;
-                }
-                $orderedPoints->push($nextSegment->destination);
-                $current = $nextSegment->destination;
-                $remaining = $remaining->filter(function ($d) use ($nextSegment) {
-                    return $d->id != $nextSegment->id;
-                });
-            }
-            if ($orderedPoints->isNotEmpty()) {
-                $origin = $orderedPoints->first();
-                $destination = $orderedPoints->last();
-            }
-            $fromIndex = $orderedPoints->search(function ($p) use ($from) {
-                return (string) $p === (string) $from;
-            });
-            $toIndex = $orderedPoints->search(function ($p) use ($to) {
-                return (string) $p === (string) $to;
-            });
-            $stopNames = collect();
-            if ($from !== null && $from !== '' && $to !== null && $to !== ''
-                && $fromIndex !== false && $toIndex !== false && $fromIndex < $toIndex && ($toIndex - $fromIndex) >= 2) {
-                $stopNames = $orderedPoints->slice($fromIndex + 1, $toIndex - $fromIndex - 1)->values();
-            } else {
-                $stopNames = $orderedPoints->count() > 2
-                    ? $orderedPoints->slice(1, $orderedPoints->count() - 2)->values()
-                    : collect();
-            }
-            $stops = $stopNames->map(function ($name) use ($allDetails) {
-                $pickupSegment = $allDetails->first(function ($d) use ($name) {
-                    return (string) $d->departure === (string) $name && !empty($d->pickup);
-                });
-                $dropoffSegment = $allDetails->first(function ($d) use ($name) {
-                    return (string) $d->destination === (string) $name && !empty($d->dropoff);
-                });
-                return [
-                    'name'    => $name,
-                    'pickup'  => $pickupSegment ? $pickupSegment->pickup : null,
-                    'dropoff' => $dropoffSegment ? $dropoffSegment->dropoff : null,
-                ];
-            });
-            $displayDepartureDate = $bookedSegment && $bookedSegment->date ? $bookedSegment->date : $ride->date;
-            $displayDepartureTime = $bookedSegment && $bookedSegment->time ? $bookedSegment->time : ($ride->time ?? '00:00');
-            $displayDepartureDateTime = ($displayDepartureDate ?? '') . ' ' . ($displayDepartureTime ?? '00:00');
-            $fromLabel = $from;
-            $toLabel = $to;
-
-            // Segment-based seat availability: remaining seats and which physical seats are available for this segment (from -> to)
-            $remainingForSegment = (int) $ride->seats;
-            $availableSeatIdsForSegment = $ride->seatDetail->pluck('id')->all();
-            $bookingsById = $bookings->keyBy('id');
-            $authId = auth()->id();
-
-            if ($from !== null && $from !== '' && $to !== null && $to !== ''
-                && $fromIndex !== false && $toIndex !== false && $fromIndex <= $toIndex) {
-                // Helper: does a booking's journey overlap the segment [fromIndex, toIndex]?
-                $bookingOverlapsSegment = function ($booking) use ($orderedPoints, $fromIndex, $toIndex) {
-                    $bDep = $booking->departure;
-                    $bDest = $booking->destination;
-                    $bDepIndex = ($bDep !== null && $bDep !== '') ? $orderedPoints->search(function ($p) use ($bDep) {
-                        return (string) $p === (string) $bDep;
-                    }) : 0;
-                    $bDestIndex = ($bDest !== null && $bDest !== '') ? $orderedPoints->search(function ($p) use ($bDest) {
-                        return (string) $p === (string) $bDest;
-                    }) : ($orderedPoints->count() - 1);
-                    if ($bDepIndex === false) {
-                        $bDepIndex = 0;
-                    }
-                    if ($bDestIndex === false) {
-                        $bDestIndex = $orderedPoints->count() - 1;
-                    }
-                    return $bDepIndex <= $toIndex && $bDestIndex >= $fromIndex;
-                };
-
-                $seatsUsedOnSegment = $bookings->filter($bookingOverlapsSegment)->sum('seats');
-                $remainingForSegment = (int) $ride->seats - (int) $seatsUsedOnSegment;
-                if ($remainingForSegment <= 0) {
-                    return redirect()->route('search_ride', [
-                        'notificationPage' => $notificationPage,
-                        'successMessage' => $successMessage,
-                        'lang' => $this->selectedLanguage->abbreviation,
-                        'from' => $ride->rideDetail[0]->departure,
-                        'to' => $ride->rideDetail[0]->destination,
-                        'date' => Carbon::parse($ride->date)->format('F d, Y'),
-                    ])->with(['failure' => $successMessage->seat_unavailable_message]);
-                }
-
-                $availableSeatIdsForSegment = [];
-                foreach ($ride->seatDetail as $seat) {
-                    if ($seat->status === 'pending') {
-                        $availableSeatIdsForSegment[] = $seat->id;
-                        continue;
-                    }
-                    if ($seat->status === 'hold') {
-                        if ($seat->user_id == $authId) {
-                            $availableSeatIdsForSegment[] = $seat->id;
-                        }
-                        continue;
-                    }
-                    if ($seat->status === 'booked' && $seat->booking_id) {
-                        $booking = $bookingsById->get($seat->booking_id);
-                        if (!$booking || !$bookingOverlapsSegment($booking)) {
-                            $availableSeatIdsForSegment[] = $seat->id;
-                        }
-                    }
-                }
-            }
-
-
-
-            $ride->mapMultipleOptionColumnsToDetails(
-                ['luggage', 'payment_method', 'booking_type', 'animal_friendly', 'booking_method'],
-                $this->selectedLanguage->id,
-                $this->defaultLang->id,
-                false
-            );
-
-            $searchOptionGroups = $this->getSearchOptionGroups(
-                $this->selectedLanguage->id,
-                $this->defaultLang->id
-            );
-
-            
-            return view('booking', 
-            [
-                'bookingPage' => $bookingPage, 
-                'rideDetailPage' => $rideDetailPage,
-            'ride' => $ride, 
-            'searchOptionGroups' => $searchOptionGroups,
-            'cards' => $cards, 'balance' => ($getDrBalance - $getCrBalance),
-            'paymentSettingDetail' => $paymentSettingDetail,
-            'postRidePage' => $postRidePage, 'setting' => $setting, 'coffeeBalance' => ($getCoffeeDrBalance - $getCoffeeCrBalance), 'stateTax' => $stateTax, 'isPinkRide' => $isPinkRide ?? false, 'isExtraCareRide' => $isExtraCareRide ?? false, 'isShortDistanceRide' => $isShortDistanceRide ?? false,
-            'selectedLanguage' => $selectedLanguage,
-            'origin' => $origin, 'destination' => $destination, 'stops' => $stops, 'segmentPickup' => $segmentPickup, 'segmentDropoff' => $segmentDropoff, 'displayDepartureDateTime' => $displayDepartureDateTime, 'fromLabel' => $fromLabel, 'toLabel' => $toLabel,
-            'remainingForSegment' => $remainingForSegment, 'availableSeatIdsForSegment' => $availableSeatIdsForSegment]);
-        } else {
-            return back()->with(['message' => $successMessage->login_before_booking_message ?? 'You must have to log in to your account before booking']);
-        }
+        
     }
+
 
     public function seatOnHold(Request $request)
     {
@@ -686,159 +392,7 @@ class BookingController extends Controller
         return response()->json($data);
     }
 
-    public function edit($lang = null, $id)
-    {
-        $booking = Booking::with(['transaction:id,booking_id,tax_amount,tax_percentage,tax_type,deduct_type'])->where('id', $id)->first();
 
-        if (!isset($booking) && empty($booking)) {
-            $lang = $lang ?? "en";
-            return redirect(route('home', ['lang' => $lang]));
-        }
-
-        $ride = Ride::where('id', $booking->ride_id)->first();
-        $setting = SiteSetting::first();
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-
-        $bookingPage = null;
-
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $rideDetailPage = RideDetailPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button', 'login_before_booking_message')->first();
-                // Retrieve the HomePageSettingDetail associated with the selected language
-                $postRidePage = $this->getPostRidePageWithSettingDetail();
-
-                $bookingPage = BookingPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-
-                $ride->luggage = FeaturesSettingDetail::whereFeaturesSettingId($ride->luggage)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->value('name');
-
-                $ride->payment_method = FeaturesSettingDetail::whereFeaturesSettingId($ride->payment_method)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->first();
-
-                $ride->animal_friendly = FeaturesSettingDetail::whereFeaturesSettingId($ride->animal_friendly)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->first();
-
-                $ride->booking_method = FeaturesSettingDetail::whereFeaturesSettingId($ride->booking_method)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->first();
-
-                $featureIds = explode('=', $ride->features);
-                // Fetch data for each feature ID and concatenate with '='
-                $featureNames = collect($featureIds)->map(function ($id) use ($selectedLanguage) {
-                    return FeaturesSettingDetail::whereFeaturesSettingId($id)
-                        ->whereLanguageId($selectedLanguage->id)
-                        ->value('name');
-                })->filter()->implode('='); // Filter out nulls and concatenate with '='
-                $ride->features = $featureNames;
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $rideDetailPage = RideDetailPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button', 'login_before_booking_message')->first();
-                // Retrieve the HomePageSettingDetail associated with the selected language
-                $postRidePage = $this->getPostRidePageWithSettingDetail();
-
-                $bookingPage = BookingPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-
-
-                $ride->luggage = FeaturesSettingDetail::whereFeaturesSettingId($ride->luggage)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->value('name');
-
-                $ride->payment_method = FeaturesSettingDetail::whereFeaturesSettingId($ride->payment_method)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->first();
-
-                $ride->animal_friendly = FeaturesSettingDetail::whereFeaturesSettingId($ride->animal_friendly)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->first();
-
-                $ride->booking_method = FeaturesSettingDetail::whereFeaturesSettingId($ride->booking_method)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->first();
-
-                $featureIds = explode('=', $ride->features);
-                // Fetch data for each feature ID and concatenate with '='
-                $featureNames = collect($featureIds)->map(function ($id) use ($selectedLanguage) {
-                    return FeaturesSettingDetail::whereFeaturesSettingId($id)
-                        ->whereLanguageId($selectedLanguage->id)
-                        ->value('name');
-                })->filter()->implode('='); // Filter out nulls and concatenate with '='
-                $ride->features = $featureNames;
-            }
-        }
-
-        if (auth()->user()) {
-        } else {
-            return back()->with(['message' => $successMessage->login_before_booking_message ?? 'You must have to log in to your account before booking']);
-        }
-
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0');
-            $notifications = $notifications->where(function ($query) use ($user_id) {
-                $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
-                    $query->where('added_by', $user_id);
-                })
-                    ->orWhere(function ($query) use ($user_id) {
-                        $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-                    })
-                    ->orWhere(function ($query) use ($user_id) {
-                        $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                            $query->where('id', $user_id);
-                        });
-                    });
-            })
-                ->orderBy('id', 'desc')
-                ->get();
-        }
-
-        $cards = Card::where('user_id', $user_id)->orderBy('id', 'desc')->get();
-
-        Stripe::setApiKey(env('STRIPE_SECRET'));
-        // Fetch card details from Stripe
-        foreach ($cards as $card) {
-            if ($card->stripe_payment_method_id) {
-                $card->paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
-            }
-        }
-
-        $getCoffeeCrBalance = CoffeeWallet::sum('cr_amount');
-        $getCoffeeDrBalance = CoffeeWallet::sum('dr_amount');
-
-        $getCrBalance = TopUpBalance::where('user_id', $user_id)->sum('cr_amount');
-        $getDrBalance = TopUpBalance::where('user_id', $user_id)->sum('dr_amount');
-
-        // Merge seat details from all user's bookings on this ride (for display - show all booked seats)
-        $userAllBookedSeats = collect();
-        $userBookingsOnRide = Booking::where('ride_id', $ride->id)
-            ->where('user_id', $user_id)
-            ->whereNotIn('status', [3, 4])
-            ->with('seatDetail')
-            ->get();
-        foreach ($userBookingsOnRide as $ub) {
-            $userAllBookedSeats = $userAllBookedSeats->merge($ub->seatDetail);
-        }
-
-        return view('edit_booking', ['notificationPage' => $notificationPage, 'rideDetailPage' => $rideDetailPage, 'successMessage' => $successMessage, 'booking' => $booking, 'ride' => $ride, 'cards' => $cards, 'balance' => ($getDrBalance - $getCrBalance), 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'postRidePage' => $postRidePage, 'setting' => $setting, 'coffeeBalance' => ($getCoffeeDrBalance - $getCoffeeCrBalance), 'bookingPage' => $bookingPage, 'userAllBookedSeats' => $userAllBookedSeats]);
-    }
 
     public function cancel($lang = null, $id)
     {
@@ -907,7 +461,7 @@ class BookingController extends Controller
         $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $messages = $this->successMessage;
         
-        $ride = Ride::where('id', $request->id)->first();
+        $ride = Ride::where('id', $id)->first();
         $type = FeaturesSetting::whereId($ride->payment_method)->first();
         $user = User::where('id', auth()->user()->id)->first();
         
@@ -927,12 +481,9 @@ class BookingController extends Controller
             return redirect()->route('step5to5', ['lang' => $this->selectedLanguage->abbreviation])->with(['error' => $messages->verified_number_message ?? "secured cash message", 'phone' => $phoneNumber]);
         }
 
-
-
-
         $rideDetailId = isset($request->ride_detail_id) ? $request->ride_detail_id : 0;
 
-        $ride = Ride::where('id', $request->id);
+        $ride = Ride::where('id', $id);
         if ($rideDetailId != 0) {
             $ride = $ride->with(['rideDetail' => function ($q) use ($rideDetailId) {
                 $q->where('id', $rideDetailId);
@@ -964,10 +515,8 @@ class BookingController extends Controller
 
         $taxAmt = isset($request->tax_amount) ? $request->tax_amount : 0;
 
-
-
         if ($user->block_booking == '1') {
-            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $message->block_booking_message ?? null]);
+            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->detail->departure, 'to' => $ride->detail->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $message->block_booking_message ?? null]);
         }
 
         // Passenger gatekeeping logic for Pink Ride and Extra Care Ride
@@ -976,7 +525,7 @@ class BookingController extends Controller
         $folkRideSetting = FolkRideSetting::first();
 
         // Check if ride has Pink Ride feature (feature ID 1)
-        if (in_array('1', $featuresArray)) {
+        if ($ride->isPinkRide()) {
             // GENDER VALIDATION: Only female passengers can book Pink Rides
             if ($pinkRideSetting && $pinkRideSetting->female === '1') {
                 // Check if user has admin override (pink_ride = '1')
@@ -1002,7 +551,7 @@ class BookingController extends Controller
         }
 
         // Check if ride has Extra Care feature (feature ID 2)
-        if (in_array('2', $featuresArray)) {
+        if ($ride->isExtraCareRide()) {
             // For passengers booking Extra Care Rides, require government ID (check all possible ID fields)
             if ($folkRideSetting && $folkRideSetting->requiresDriverLicense()) {
                 $hasGovernmentId = !empty($user->government_id) || !empty($user->government_issued_id) || !empty($user->driver_license_upload);
@@ -1016,14 +565,8 @@ class BookingController extends Controller
         // This limit does NOT apply to "Online" or "Secured-Cash" payment methods
         $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         if ($postRidePage) {
-            // Check if user is a student (student == 1 for verified, student == 2 for pending)
-            $isStudent = ($user->student == '1' || $user->student == '2');
-
-            // Check if payment method is Cash (payment_methods_option1 is Cash)
-            $isCashPayment = ($ride->payment_method == $postRidePage->payment_methods_option1);
-
             // Apply limit only for students on Cash rides
-            if ($isStudent && $isCashPayment) {
+            if ($user->isStudent() && $ride->isCashPayment()) {
                 if ($request->seats > 2) {
                     return redirect()->back()->with(['failure' => 'Students are limited to booking a maximum of 2 seats per ride for Cash payment rides.'])->withInput();
                 }
@@ -1036,22 +579,22 @@ class BookingController extends Controller
             'driver_message' => 'required'
         ];
 
-        if ($ride->booking_type == "37") {
+        if ($ride->isFirmCancellation()) {
             $rules['firm_agree_terms'] = 'accepted|required';
             $rules['firm_cancellation_understand'] = 'accepted|required';
         }
 
-        if (in_array('1', $featuresArray)) {
+        if ($ride->isPinkRide()) {
             $rules['pink_ride_agree_terms'] = 'accepted|required';
         }
-        if (in_array('2', $featuresArray)) {
+        if ($ride->isExtraCareRide()) {
             $rules['extra_care_ride_agree_terms'] = 'accepted|required';
         }
 
         $request->validate($rules);
 
         // ProximaLocal: no booking fee on rides under $15 per seat
-        $pricePerSeat = (float) ($ride->rideDetail[0]->price ?? 0);
+        $pricePerSeat = (float) ($ride->detail?->price ?? 0) / 100;
         if ($pricePerSeat < 15) {
             $request->merge(['booking_credit' => '0']);
         }
@@ -1065,9 +608,7 @@ class BookingController extends Controller
 
         $seatsBooked = $bookings->sum('seats') + $request->seats;
         if ($seatsBooked > $ride->seats) {
-            // return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation,'from' => $ride->rideDetail[0]->departure,'to' => $ride->rideDetail[0]->destination,'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => 'Oops, this seat is no longer available. Looks like another passenger has just booked it. We apologize for the inconvenience. Here are more rides for your route']);
-
-            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $errorMsg->seat_unavailable_message]);
+            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->detail->departure, 'to' => $ride->detail->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $errorMsg->seat_unavailable_message]);
         }
 
         $price = $request->seats_amount / $request->seats;
@@ -1132,7 +673,7 @@ class BookingController extends Controller
                         }
 
                         if (!$phoneNumber) {
-                            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
+                            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->detail->departure, 'to' => $ride->detail->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
                         }
                     }
 
@@ -1192,46 +733,187 @@ class BookingController extends Controller
                 $secured_cash = null;
                 $secured_cash_code = null;
 
+                // Helper to redirect back with a generic error
+                $genericErrorResponse = function () use ($messages) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->with(['failure' => $messages->general_error_message ?? 'Payment could not be completed. Please try again.']);
+                };
+
+                // Helper: charge via Stripe PaymentIntent using a Stripe payment method id (card / Google Pay / Apple Pay)
+                $chargeWithStripePaymentMethod = function (string $stripePaymentMethodId, float $amount) use ($user, $taxAmt, $request, $genericErrorResponse) {
+                    if (!$user->stripe_customer_id) {
+                        return $genericErrorResponse();
+                    }
+
+                    Stripe::setApiKey(env('STRIPE_SECRET'));
+
+                    $stripePay = 0;
+                    if ($request->cash_payment > 0) {
+                        $stripePay = $amount + $taxAmt;
+                    } else {
+                        $stripePay = $amount;
+                    }
+
+                    try {
+                        $paymentIntent = PaymentIntent::create([
+                            'amount'        => round(($stripePay * 100), 0),
+                            'currency'      => 'CAD',
+                            'customer'      => $user->stripe_customer_id,
+                            'payment_method'=> $stripePaymentMethodId,
+                            'off_session'   => true,
+                            'confirm'       => true,
+                        ]);
+
+                        return $paymentIntent;
+                    } catch (\Stripe\Exception\CardException $e) {
+                        // Card declined or similar error
+                        return redirect()->back()
+                            ->withInput()
+                            ->with(['failure' => $e->getMessage()]);
+                    } catch (\Stripe\Exception\ApiErrorException $e) {
+                        // General Stripe API error
+                        return redirect()->back()
+                            ->withInput()
+                            ->with(['failure' => $e->getMessage()]);
+                    } catch (\Throwable $e) {
+                        return $genericErrorResponse();
+                    }
+                };
 
                 $stripId = null;
                 try {
-
-
                     if (isset($request->gPayApplePayId) && $request->gPayApplePayId != '') {
+                        // gPayApplePayId is already a PaymentIntent ID from the frontend (for Google Pay / Apple Pay)
                         $stripId = $request->gPayApplePayId;
+                    } elseif ($request->card_id === 'credit_card') {
+                        // New credit card entered by user
+                        if (!$user->stripe_customer_id) {
+                            Stripe::setApiKey(env('STRIPE_SECRET'));
+                            $customer = Customer::create([
+                                'email' => $user->email,
+                                'name' => $user->first_name,
+                            ]);
+                            User::whereId($user->id)->update(['stripe_customer_id' => $customer->id]);
+                            $user = User::whereId($user->id)->first();
+                        }
+
+                        Stripe::setApiKey(env('STRIPE_SECRET'));
+                        $stripeToken = $request->stripeToken;
+
+                        if (!$stripeToken) {
+                            return redirect()->back()
+                                ->withInput()
+                                ->withErrors(['card_element' => 'Card details are required.']);
+                        }
+
+                        if (str_starts_with($stripeToken, 'tok_')) {
+                            $paymentMethod = PaymentMethod::create([
+                                'type' => 'card',
+                                'card' => [
+                                    'token' => $stripeToken,
+                                ],
+                            ]);
+                        } elseif (str_starts_with($stripeToken, 'pm_')) {
+                            $paymentMethod = PaymentMethod::retrieve($stripeToken);
+                        } else {
+                            return redirect()->back()
+                                ->withInput()
+                                ->with(['failure' => $messages->general_error_message ?? 'Payment method not found. Please try again.']);
+                        }
+
+                        $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
+
+                        if ($request->online_payment > '0') {
+                            $paymentIntentOrResponse = $chargeWithStripePaymentMethod($paymentMethod->id, (float) $request->online_payment);
+                            if ($paymentIntentOrResponse instanceof \Illuminate\Http\RedirectResponse) {
+                                return $paymentIntentOrResponse;
+                            }
+
+                            /** @var \Stripe\PaymentIntent $paymentIntentOrResponse */
+                            if ($paymentIntentOrResponse->status !== 'succeeded') {
+                                return $genericErrorResponse();
+                            }
+
+                            $stripId = $paymentIntentOrResponse->id;
+                        }
+                    } elseif ($request->card_id === 'google_pay' || $request->card_id === 'apple_pay') {
+                        // Use the user's primary saved Google Pay / Apple Pay card
+                        $typeMap = [
+                            'google_pay'  => 'google_pay',
+                            'apple_pay'   => 'apple_pay',
+                        ];
+
+                        $mappedType = $typeMap[$request->card_id] ?? null;
+                        if (!$mappedType) {
+                            return $genericErrorResponse();
+                        }
+
+                        $card = Card::where('user_id', $user->id)
+                            ->where('payment_method_type', $mappedType)
+                            ->where('primary_card', 1)
+                            ->first();
+
+                        if (!$card || !$card->stripe_payment_method_id) {
+                            return redirect()->back()
+                                ->withInput()
+                                ->with(['failure' => $messages->general_error_message ?? 'Payment method not found. Please add a card first.']);
+                        }
+
+                        if ($request->online_payment > '0') {
+                            $paymentIntentOrResponse = $chargeWithStripePaymentMethod($card->stripe_payment_method_id, (float) $request->online_payment);
+                            if ($paymentIntentOrResponse instanceof \Illuminate\Http\RedirectResponse) {
+                                return $paymentIntentOrResponse;
+                            }
+
+                            /** @var \Stripe\PaymentIntent $paymentIntentOrResponse */
+                            if ($paymentIntentOrResponse->status !== 'succeeded') {
+                                return $genericErrorResponse();
+                            }
+
+                            $stripId = $paymentIntentOrResponse->id;
+                        }
                     } else {
-                        // Retrieve the selected card from the database
+                        // card_id is expected to be an ID of a saved card in the cards table
+                        if (!is_numeric($request->card_id)) {
+                            return redirect()->back()
+                                ->withInput()
+                                ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
+                        }
+
                         $card = Card::where('id', $request->card_id)
                             ->where('user_id', $user->id)
-                            ->firstOrFail();
+                            ->first();
 
-                        // Set your Stripe API key.
-                        Stripe::setApiKey(env('STRIPE_SECRET'));
+                        if (!$card) {
+                            return redirect()->back()
+                                ->withInput()
+                                ->with(['failure' => $messages->general_error_message ?? 'Selected payment option is not available. Please choose another one.']);
+                        }
+
+                        if (!$card->stripe_payment_method_id) {
+                            return redirect()->back()
+                                ->withInput()
+                                ->with(['failure' => $messages->general_error_message ?? 'Saved payment method is not properly configured.']);
+                        }
 
                         // Attach the payment method to the customer
+                        Stripe::setApiKey(env('STRIPE_SECRET'));
                         $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
                         $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
 
                         if ($request->online_payment > '0') {
-
-                            $stripePay = 0;
-                            if ($request->cash_payment > 0) {
-                                $stripePay = $request->input('online_payment') + $taxAmt;
-                            } else {
-                                $stripePay = $request->input('online_payment');
+                            $paymentIntentOrResponse = $chargeWithStripePaymentMethod($card->stripe_payment_method_id, (float) $request->online_payment);
+                            if ($paymentIntentOrResponse instanceof \Illuminate\Http\RedirectResponse) {
+                                return $paymentIntentOrResponse;
                             }
 
-                            // Create a payment intent
-                            $paymentIntent = PaymentIntent::create([
-                                'amount' => round(($stripePay * 100), 0),
-                                'currency' => 'cad',
-                                'customer' => $user->stripe_customer_id,
-                                'payment_method' => $paymentMethod->id,
-                                'off_session' => true,
-                                'confirm' => true,
-                            ]);
+                            /** @var \Stripe\PaymentIntent $paymentIntentOrResponse */
+                            if ($paymentIntentOrResponse->status !== 'succeeded') {
+                                return $genericErrorResponse();
+                            }
 
-                            $stripId = $paymentIntent->id;
+                            $stripId = $paymentIntentOrResponse->id;
                         }
                     }
 
@@ -1240,11 +922,15 @@ class BookingController extends Controller
 
 
                     // Payment successful, handle booking logic here
+                    // Ensure type is a valid string (use ride->booking_type as fallback, limit length to prevent truncation errors)
+                    $bookingType = (string) ($request->type ?? $ride->booking_type ?? 'standard');
+                    $bookingType = substr($bookingType, 0, 50); // Limit to 50 characters to prevent truncation errors
+                    
                     $booking = Booking::create([
                         'user_id' => $user->id,
                         'ride_id' => $id,
                         'seats' => $request->seats,
-                        'type' => $request->type,
+                        'type' => $bookingType,
                         'booked_on' => $currentTime,
                         'booking_credit' => $request->booking_credit,
                         'fare' => $request->seats_amount,
@@ -1252,10 +938,10 @@ class BookingController extends Controller
                         'secured_cash' => $secured_cash,
                         'secured_cash_code' => $secured_cash_code,
                         'expires_at' => $expiryTime,
-                        'departure' => (string)$ride->rideDetail[0]->departure,
-                        'destination' => (string)$ride->rideDetail[0]->destination,
-                        'price' => $ride->rideDetail[0]->price,
-                        'ride_detail_id' => $ride->rideDetail[0]->id
+                        'departure' => (string)$ride->detail->departure,
+                        'destination' => (string)$ride->detail->destination,
+                        'price' => $ride->detail->price,
+                        'ride_detail_id' => $ride->detail->id
                     ]);
 
                     $ids = $request->seats_id;
@@ -1480,12 +1166,16 @@ class BookingController extends Controller
         $secured_cash = null;
         $secured_cash_code = null;
 
+        // Ensure type is a valid string (use ride->booking_type as fallback, limit length to prevent truncation errors)
+        $bookingType = (string) ($request->type ?? $ride->booking_type ?? 'standard');
+        $bookingType = substr($bookingType, 0, 50); // Limit to 50 characters to prevent truncation errors
+
         // Payment successful, handle booking logic here
         $booking = Booking::create([
             'user_id' => $user->id,
             'ride_id' => $ride->id,
             'seats' => $request->seats,
-            'type' => $request->type,
+            'type' => $bookingType,
             'booked_on' => $currentTime,
             'booking_credit' => $request->booking_credit,
             'fare' => $request->seats_amount,
@@ -1493,10 +1183,10 @@ class BookingController extends Controller
             'tax_amount' => $taxAmt,
             'secured_cash_code' => $secured_cash_code,
             'expires_at' => $expiryTime,
-            'departure' => $ride->rideDetail[0]->departure,
-            'destination' => $ride->rideDetail[0]->destination,
-            'price' => $ride->rideDetail[0]->price,
-            'ride_detail_id' => $ride->rideDetail[0]->id
+            'departure' => $ride->detail->departure,
+            'destination' => $ride->detail->destination,
+            'price' => $ride->detail->price,
+            'ride_detail_id' => $ride->detail->id
 
         ]);
 
@@ -1774,7 +1464,7 @@ class BookingController extends Controller
         }
 
         if ($user->isBlockedBooking()) {
-            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $message->block_booking_message ?? null]);
+            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->detail->departure, 'to' => $ride->detail->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $message->block_booking_message ?? null]);
         }
 
         // Passenger gatekeeping logic for Pink Ride and Extra Care Ride (instant booking)
@@ -1845,7 +1535,7 @@ class BookingController extends Controller
 
         $seatsBooked = $bookings->sum('seats') + $request->seats;
         if ($seatsBooked > $ride->seats) {
-            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])
+            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->detail->departure, 'to' => $ride->detail->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])
             ->with(['failure' => $errorMsg->seat_unavailable_message]);
         }
 
@@ -1869,7 +1559,7 @@ class BookingController extends Controller
         }
 
         // ProximaLocal: no booking fee on rides under $15 per seat
-        $pricePerSeat = (float) ($ride->rideDetail[0]->price ?? 0);
+        $pricePerSeat = (float) ($ride->detail->price ?? 0);
         if ($pricePerSeat < 15) {
             $request->merge(['booking_credit' => '0']);
         }
@@ -1952,7 +1642,7 @@ class BookingController extends Controller
                     }
 
                     if (!$phoneNumber) {
-                        return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
+                        return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->detail->departure, 'to' => $ride->detail->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
                     }
                 }
 
@@ -2025,7 +1715,7 @@ class BookingController extends Controller
                             $phoneNumber = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->first();
                         }
                         if (!$phoneNumber) {
-                            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
+                            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->detail->departure, 'to' => $ride->detail->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
                         }
 
                         $secured_cash = '1';
@@ -2056,11 +1746,11 @@ class BookingController extends Controller
 
                             $seatWords = numberToWords($request->seats);
 
-                            // $message = "" . $title . "\nYour secured cash code is: $secured_cash_code\nTrip detail\nOrigin: " . $ride->rideDetail[0]->departure . "\nDestination: " . $ride->rideDetail[0]->destination . "\nDeparture date: " . $depatureDate . "\Driver name: " . $ride->driver->first_name . "\nDriver phone number: " . $ride->driver->phone . "\nVehicle info: " . $ride->make ?? '' . "," . $ride->year ?? '' . "," . $ride->modal ?? '' . "\nVehicle type: " . $ride->car_type . "";
+                            // $message = "" . $title . "\nYour secured cash code is: $secured_cash_code\nTrip detail\nOrigin: " . $ride->detail->departure . "\nDestination: " . $ride->detail->destination . "\nDeparture date: " . $depatureDate . "\Driver name: " . $ride->driver->first_name . "\nDriver phone number: " . $ride->driver->phone . "\nVehicle info: " . $ride->make ?? '' . "," . $ride->year ?? '' . "," . $ride->modal ?? '' . "\nVehicle type: " . $ride->car_type . "";
                             $message = $title . "\n" . "From ProximaRide: Your secured-cash payment code is: " . $secured_cash_code . "\n" .
                                 "Give this code to your driver ONLY at the time of the ride when you meet with them.\n" .
                                 "Driver name is " . $ride->driver->first_name . ", phone " . $driverPhone . "\n" .
-                                "Ride from " . $ride->rideDetail[0]->departure . " to " . $ride->rideDetail[0]->destination .
+                                "Ride from " . $ride->detail->departure . " to " . $ride->detail->destination .
                                 " on " . $departureDate . " at " . $departureTime . "\n" .
                                 "Number of seats: " . ucfirst($seatWords);
 
@@ -2157,11 +1847,15 @@ class BookingController extends Controller
                     }
 
                     // Payment successful, handle booking logic here
+                    // Ensure type is a valid string (use ride->booking_type as fallback, limit length to prevent truncation errors)
+                    $bookingType = (string) ($request->type ?? $ride->booking_type ?? 'standard');
+                    $bookingType = substr($bookingType, 0, 50); // Limit to 50 characters to prevent truncation errors
+                    
                     $booking = Booking::create([
                         'user_id' => $user->id,
                         'ride_id' => $id,
                         'seats' => $request->seats,
-                        'type' => $request->type,
+                        'type' => $bookingType,
                         'booked_on' => Carbon::now(),
                         'status' => '1',
                         'booking_credit' => $request->booking_credit,
@@ -2169,10 +1863,10 @@ class BookingController extends Controller
                         'tax_amount' => $taxAmt,
                         'secured_cash' => $secured_cash,
                         'secured_cash_code' => $secured_cash_code,
-                        'departure' => $ride->rideDetail[0]->departure,
-                        'destination' => $ride->rideDetail[0]->destination,
-                        'price' => $ride->rideDetail[0]->price,
-                        'ride_detail_id' => $ride->rideDetail[0]->id
+                        'departure' => $ride->detail->departure,
+                        'destination' => $ride->detail->destination,
+                        'price' => $ride->detail->price,
+                        'ride_detail_id' => $ride->detail->id
                     ]);
 
 
@@ -2405,12 +2099,12 @@ class BookingController extends Controller
                             'driver_last_name' => $driver->last_name,
                             'driver_phone' => $driverPhoneToUse,
                             'driver_email' => $driver->email,
-                            'departure' => $ride->rideDetail[0]->departure,
-                            'destination' => $ride->rideDetail[0]->destination,
+                            'departure' => $ride->detail->departure,
+                            'destination' => $ride->detail->destination,
                             'date' => Carbon::parse($ride->date)->format('F d, Y'),
                             'time' => $ride->time,
                             'seats' => $request->seats,
-                            'booking_price' => $ride->rideDetail[0]->price * $request->seats
+                            'booking_price' => $ride->detail->price * $request->seats
                         ];
 
                         Mail::to($user->email)->queue(new SecuredCashPaymentCodeMail($emailData));
@@ -2429,9 +2123,9 @@ class BookingController extends Controller
                             ),
                             'status' => 'completed',
                             'notification_type' => 'secured_cash',
-                            'ride_detail_id' => $ride->rideDetail[0]->id,
-                            'departure' => $ride->rideDetail[0]->departure,
-                            'destination' => $ride->rideDetail[0]->destination
+                            'ride_detail_id' => $ride->detail->id,
+                            'departure' => $ride->detail->departure,
+                            'destination' => $ride->detail->destination
                         ]);
 
                         // Send push notification
@@ -2650,7 +2344,7 @@ class BookingController extends Controller
 
                                 // $message = "" . $title . "\nTrip detail\nOrigin: " . $booking->departure . "\nDestination: " . $booking->destination . "\nDeparture date: " . $depatureDate . "\nHere is your passengers’ list\n" . $messageContent . "";
                                 $message = $title . "\n" . "From ProximaRide: Here is your passenger list for your ride from " .
-                                    $ride->rideDetail[0]->departure . " to " . $ride->rideDetail[0]->destination .
+                                    $ride->detail->departure . " to " . $ride->detail->destination .
                                     " on " . $departureDate . " at " . $departureTime . "\n" .
                                     $passengerList . "Drive safe!";
 
@@ -2684,7 +2378,7 @@ class BookingController extends Controller
                     $phoneNumber = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->first();
                 }
                 if (!$phoneNumber) {
-                    return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
+                    return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->detail->departure, 'to' => $ride->detail->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
                 }
 
                 $secured_cash = '1';
@@ -2715,11 +2409,11 @@ class BookingController extends Controller
 
                     $seatWords = numberToWords($request->seats);
 
-                    // $message = "" . $title . "\nYour secured cash code is: $secured_cash_code\nTrip detail\nOrigin: " . $ride->rideDetail[0]->departure . "\nDestination: " . $ride->rideDetail[0]->destination . "\nDeparture date: " . $depatureDate . "\Driver name: " . $ride->driver->first_name . "\nDriver phone number: " . $ride->driver->phone . "\nVehicle info: " . $ride->make ?? '' . "," . $ride->year ?? '' . "," . $ride->modal ?? '' . "\nVehicle type: " . $ride->car_type . "";
+                    // $message = "" . $title . "\nYour secured cash code is: $secured_cash_code\nTrip detail\nOrigin: " . $ride->detail->departure . "\nDestination: " . $ride->detail->destination . "\nDeparture date: " . $depatureDate . "\Driver name: " . $ride->driver->first_name . "\nDriver phone number: " . $ride->driver->phone . "\nVehicle info: " . $ride->make ?? '' . "," . $ride->year ?? '' . "," . $ride->modal ?? '' . "\nVehicle type: " . $ride->car_type . "";
                     $message = $title . "\n" . "From ProximaRide: Your secured-cash payment code is: " . $secured_cash_code . "\n" .
                         "Give this code to your driver ONLY at the time of the ride when you meet with them.\n" .
                         "Driver name is " . $ride->driver->first_name . ", phone " . $driverPhone . "\n" .
-                        "Ride from " . $ride->rideDetail[0]->departure . " to " . $ride->rideDetail[0]->destination .
+                        "Ride from " . $ride->detail->departure . " to " . $ride->detail->destination .
                         " on " . $departureDate . " at " . $departureTime . "\n" .
                         "Number of seats: " . ucfirst($seatWords);
 
@@ -2740,11 +2434,15 @@ class BookingController extends Controller
                 $secured_cash_code = null;
             }
 
+            // Ensure type is a valid string (use ride->booking_type as fallback, limit length to prevent truncation errors)
+            $bookingType = (string) ($request->type ?? $ride->booking_type ?? 'standard');
+            $bookingType = substr($bookingType, 0, 50); // Limit to 50 characters to prevent truncation errors
+
             $booking = Booking::create([
                 'user_id' => $user->id,
                 'ride_id' => $id,
                 'seats' => $request->seats,
-                'type' => $request->type,
+                'type' => $bookingType,
                 'booked_on' => Carbon::now(),
                 'status' => '1',
                 'booking_credit' => $request->booking_credit,
@@ -2752,10 +2450,10 @@ class BookingController extends Controller
                 'tax_amount' => $taxAmt,
                 'secured_cash' => $secured_cash,
                 'secured_cash_code' => $secured_cash_code,
-                'departure' => $ride->rideDetail[0]->departure,
-                'destination' => $ride->rideDetail[0]->destination,
-                'price' => $ride->rideDetail[0]->price,
-                'ride_detail_id' => $ride->rideDetail[0]->id
+                'departure' => $ride->detail->departure,
+                'destination' => $ride->detail->destination,
+                'price' => $ride->detail->price,
+                'ride_detail_id' => $ride->detail->id
             ]);
 
             if ($secured_cash_code && isset($user->email_notification) && $user->email_notification == 1) {
@@ -2771,12 +2469,12 @@ class BookingController extends Controller
                     'driver_last_name' => $ride->driver->last_name,
                     'driver_phone' => $driverPhoneToUse,
                     'driver_email' => $ride->driver->email,
-                    'departure' => $ride->rideDetail[0]->departure,
-                    'destination' => $ride->rideDetail[0]->destination,
+                    'departure' => $ride->detail->departure,
+                    'destination' => $ride->detail->destination,
                     'date' => Carbon::parse($ride->date)->format('F d, Y'),
                     'time' => $ride->time,
                     'seats' => $request->seats,
-                    'booking_price' => $ride->rideDetail[0]->price * $request->seats
+                    'booking_price' => $ride->detail->price * $request->seats
                 ];
 
                 Mail::to($user->email)->queue(new SecuredCashPaymentCodeMail($emailData));
@@ -2790,9 +2488,9 @@ class BookingController extends Controller
                     'message' => $notificationMessage,
                     'status' => 'completed',
                     'notification_type' => 'secured_cash',
-                    'ride_detail_id' => $ride->rideDetail[0]->id,
-                    'departure' => $ride->rideDetail[0]->departure,
-                    'destination' => $ride->rideDetail[0]->destination
+                    'ride_detail_id' => $ride->detail->id,
+                    'departure' => $ride->detail->departure,
+                    'destination' => $ride->detail->destination
                 ]);
 
                 // Send push notification
@@ -3184,7 +2882,7 @@ class BookingController extends Controller
 
                         // $message = "" . $title . "\nTrip detail\nOrigin: " . $booking->ride->departure . "\nDestination: " . $booking->ride->destination . "\nDeparture date: " . $depatureDate . "\nHere is your passengers’ list\n" . $messageContent . "";
                         $message = $title . "\n" . "From ProximaRide: Here is your passenger list for your ride from " .
-                            $ride->rideDetail[0]->departure . " to " . $ride->rideDetail[0]->destination .
+                            $ride->detail->departure . " to " . $ride->detail->destination .
                             " on " . $departureDate . " at " . $departureTime . "\n" .
                             $passengerList . "Drive safe!";
 
@@ -3271,7 +2969,7 @@ class BookingController extends Controller
         }
 
         // ProximaLocal: no booking fee on rides under $15 per seat
-        $pricePerSeat = (float) ($ride->rideDetail[0]->price ?? 0);
+        $pricePerSeat = (float) ($ride->detail->price ?? 0);
         if ($pricePerSeat < 15) {
             $request->merge(['booking_credit' => '0']);
         }
@@ -3496,10 +3194,10 @@ class BookingController extends Controller
                                 'tax_amount' => $taxAmt,
                                 'secured_cash_code' => $secured_cash_code,
                                 'expires_at' => $expiryTime,
-                                'departure' => $ride->rideDetail[0]->departure,
-                                'destination' => $ride->rideDetail[0]->destination,
-                                'price' => $ride->rideDetail[0]->price,
-                                'ride_detail_id' => $ride->rideDetail[0]->id
+                                'departure' => $ride->detail->departure,
+                                'destination' => $ride->detail->destination,
+                                'price' => $ride->detail->price,
+                                'ride_detail_id' => $ride->detail->id
                             ]);
 
                             $ids = $request->seats_id;
@@ -3846,10 +3544,10 @@ class BookingController extends Controller
                                 'tax_amount' => $taxAmt,
                                 'secured_cash_code' => $secured_cash_code,
                                 'expires_at' => $expiryTime,
-                                'departure' => $ride->rideDetail[0]->departure,
-                                'destination' => $ride->rideDetail[0]->destination,
-                                'price' => $ride->rideDetail[0]->price,
-                                'ride_detail_id' => $ride->rideDetail[0]->id
+                                'departure' => $ride->detail->departure,
+                                'destination' => $ride->detail->destination,
+                                'price' => $ride->detail->price,
+                                'ride_detail_id' => $ride->detail->id
                             ]);
 
                             $ids = $request->seats_id;
@@ -3937,10 +3635,10 @@ class BookingController extends Controller
                         'tax_amount' => $taxAmt,
                         'secured_cash_code' => $secured_cash_code,
                         'expires_at' => $expiryTime,
-                        'departure' => $ride->rideDetail[0]->departure,
-                        'destination' => $ride->rideDetail[0]->destination,
-                        'price' => $ride->rideDetail[0]->price,
-                        'ride_detail_id' => $ride->rideDetail[0]->id
+                        'departure' => $ride->detail->departure,
+                        'destination' => $ride->detail->destination,
+                        'price' => $ride->detail->price,
+                        'ride_detail_id' => $ride->detail->id
                     ]);
 
                     $transactionTaxAmt = $taxAmt - $transactionTaxSum;
@@ -4149,10 +3847,10 @@ class BookingController extends Controller
                 'tax_amount' => $taxAmt,
                 'secured_cash_code' => $secured_cash_code,
                 'expires_at' => $expiryTime,
-                'departure' => $ride->rideDetail[0]->departure,
-                'destination' => $ride->rideDetail[0]->destination,
-                'price' => $ride->rideDetail[0]->price,
-                'ride_detail_id' => $ride->rideDetail[0]->id
+                'departure' => $ride->detail->departure,
+                'destination' => $ride->detail->destination,
+                'price' => $ride->detail->price,
+                'ride_detail_id' => $ride->detail->id
             ]);
 
 
@@ -4374,10 +4072,10 @@ class BookingController extends Controller
                     'tax_amount' => $taxAmt,
                     'secured_cash_code' => $secured_cash_code,
                     'expires_at' => $expiryTime,
-                    'departure' => $ride->rideDetail[0]->departure,
-                    'destination' => $ride->rideDetail[0]->destination,
-                    'price' => $ride->rideDetail[0]->price,
-                    'ride_detail_id' => $ride->rideDetail[0]->id
+                    'departure' => $ride->detail->departure,
+                    'destination' => $ride->detail->destination,
+                    'price' => $ride->detail->price,
+                    'ride_detail_id' => $ride->detail->id
                 ]);
 
                 $seats_id_array = explode(',', $seats_id);
@@ -4504,10 +4202,10 @@ class BookingController extends Controller
                     'secured_cash' => $secured_cash,
                     'secured_cash_code' => $secured_cash_code,
                     'expires_at' => $expiryTime,
-                    'departure' => $ride->rideDetail[0]->departure,
-                    'destination' => $ride->rideDetail[0]->destination,
-                    'price' => $ride->rideDetail[0]->price,
-                    'ride_detail_id' => $ride->rideDetail[0]->id
+                    'departure' => $ride->detail->departure,
+                    'destination' => $ride->detail->destination,
+                    'price' => $ride->detail->price,
+                    'ride_detail_id' => $ride->detail->id
                 ]);
 
                 $transactionTotalPrice = Transaction::where('booking_id', $booking->id)->where('parent_id', '0')->sum('price');
@@ -5006,11 +4704,11 @@ class BookingController extends Controller
 
                         $seatWords = numberToWords($booking->seats);
 
-                        // $message = "" . $title . "\nYour secured cash code is: $secured_cash_code\nTrip detail\nOrigin: " . $booking->ride->rideDetail[0]->departure . "\nDestination: " . $booking->ride->rideDetail[0]->destination . "\nDeparture date: " . $departureDate . "\Driver name: " . $booking->ride->driver->first_name . "\nDriver phone number: " . $booking->ride->driver->phone . "\nVehicle info: " . $booking->ride->make ?? '' . "," . $booking->ride->year ?? '' . "," . $booking->ride->modal ?? '' . "\nVehicle type: " . $booking->ride->car_type . "";
+                        // $message = "" . $title . "\nYour secured cash code is: $secured_cash_code\nTrip detail\nOrigin: " . $booking->ride->detail->departure . "\nDestination: " . $booking->ride->detail->destination . "\nDeparture date: " . $departureDate . "\Driver name: " . $booking->ride->driver->first_name . "\nDriver phone number: " . $booking->ride->driver->phone . "\nVehicle info: " . $booking->ride->make ?? '' . "," . $booking->ride->year ?? '' . "," . $booking->ride->modal ?? '' . "\nVehicle type: " . $booking->ride->car_type . "";
                         $message = $title . "\n" . "From ProximaRide: Your secured-cash payment code is: " . $secured_cash_code . "\n" .
                             "Give this code to your driver ONLY at the time of the ride when you meet with them.\n" .
                             "Driver name is " . $booking->ride->driver->first_name . ", phone " . $driverPhone . "\n" .
-                            "Ride from " . $booking->ride->rideDetail[0]->departure . " to " . $booking->ride->rideDetail[0]->destination .
+                            "Ride from " . $booking->ride->detail->departure . " to " . $booking->ride->detail->destination .
                             " on " . $departureDate . " at " . $departureTime . "\n" .
                             "Number of seats: " . ucfirst($seatWords);
 
@@ -5519,7 +5217,7 @@ class BookingController extends Controller
                     $phoneNumber = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->first();
                 }
                 if (!$phoneNumber) {
-                    return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->rideDetail[0]->departure, 'to' => $ride->rideDetail[0]->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
+                    return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->detail->departure, 'to' => $ride->detail->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $messages->verified_number_message ?? null]);
                 }
 
                 $secured_cash = '1';
@@ -5544,7 +5242,7 @@ class BookingController extends Controller
 
                     $depatureDate = date('d F, Y H:i:s', strtotime('' . $ride->date . ' ' . $ride->time . ''));
 
-                    $message = "" . $title . "\nYour secured cash code is: $secured_cash_code\nTrip detail\nOrigin: " . $ride->rideDetail[0]->departure . "\nDestination: " . $ride->rideDetail[0]->destination . "\nDeparture date: " . $depatureDate . "\Driver name: " . $ride->driver->first_name . "\nDriver phone number: " . $ride->driver->phone . "\nVehicle info: " . $ride->make ?? '' . "," . $ride->year ?? '' . "," . $ride->modal ?? '' . "\nVehicle type: " . $ride->car_type . "";
+                    $message = "" . $title . "\nYour secured cash code is: $secured_cash_code\nTrip detail\nOrigin: " . $ride->detail->departure . "\nDestination: " . $ride->detail->destination . "\nDeparture date: " . $depatureDate . "\Driver name: " . $ride->driver->first_name . "\nDriver phone number: " . $ride->driver->phone . "\nVehicle info: " . $ride->make ?? '' . "," . $ride->year ?? '' . "," . $ride->modal ?? '' . "\nVehicle type: " . $ride->car_type . "";
 
                     try {
                         $res = $twilio->messages->create(
@@ -5577,10 +5275,10 @@ class BookingController extends Controller
                 'tax_amount' => $taxAmt,
                 'secured_cash' => $secured_cash,
                 'secured_cash_code' => $secured_cash_code,
-                'departure' => $ride->rideDetail[0]->departure,
-                'destination' => $ride->rideDetail[0]->destination,
-                'price' => $ride->rideDetail[0]->price,
-                'ride_detail_id' => $ride->rideDetail[0]->id
+                'departure' => $ride->detail->departure,
+                'destination' => $ride->detail->destination,
+                'price' => $ride->detail->price,
+                'ride_detail_id' => $ride->detail->id
             ]);
 
             if ($secured_cash_code && isset($user->email_notification) && $user->email_notification == 1) {
@@ -5596,12 +5294,12 @@ class BookingController extends Controller
                     'driver_last_name' => $ride->driver->last_name,
                     'driver_phone' => $driverPhoneToUse,
                     'driver_email' => $ride->driver->email,
-                    'departure' => $ride->rideDetail[0]->departure,
-                    'destination' => $ride->rideDetail[0]->destination,
+                    'departure' => $ride->detail->departure,
+                    'destination' => $ride->detail->destination,
                     'date' => Carbon::parse($ride->date)->format('F d, Y'),
                     'time' => $ride->time,
                     'seats' => $request->seats,
-                    'booking_price' => $ride->rideDetail[0]->price * $request->seats
+                    'booking_price' => $ride->detail->price * $request->seats
                 ];
 
                 Mail::to($user->email)->queue(new SecuredCashPaymentCodeMail($emailData));
@@ -5620,9 +5318,9 @@ class BookingController extends Controller
                     ),
                     'status' => 'completed',
                     'notification_type' => 'secured_cash',
-                    'ride_detail_id' => $ride->rideDetail[0]->id,
-                    'departure' => $ride->rideDetail[0]->departure,
-                    'destination' => $ride->rideDetail[0]->destination
+                    'ride_detail_id' => $ride->detail->id,
+                    'departure' => $ride->detail->departure,
+                    'destination' => $ride->detail->destination
                 ]);
 
                 // Send push notification
@@ -5963,7 +5661,7 @@ class BookingController extends Controller
             }
 
             // ProximaLocal: no booking fee on rides under $15 per seat
-            $pricePerSeat = (float) ($ride->rideDetail[0]->price ?? 0);
+            $pricePerSeat = (float) ($ride->detail->price ?? 0);
             if ($pricePerSeat < 15) {
                 $request->merge(['booking_credit' => '0']);
             }

@@ -58,7 +58,7 @@
                                 @if (strtotime($ride->date) > strtotime('today') ||
                                         (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
                                     <div>
-                                        <a href="{{ route('chat', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->rideDetail[0]->departure, 'destination' => $ride->rideDetail[0]->destination, 'id' => $ride->id, 'passenger' => $booking->user_id]) }}"
+                                        <a href="{{ route('chat', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id, 'passenger' => $booking->user_id]) }}"
                                             class="button-exp-fill me-1">
                                             {{ $myPassengerPage->chat_passenger_btn_label ?? 'Chat with passenger' }}
                                         </a>

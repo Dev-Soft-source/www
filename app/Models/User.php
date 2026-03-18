@@ -369,6 +369,10 @@ class User extends Authenticatable
             return 'Extra Care Rides require at least ' . $rideLimit . ' completed rides.';
         }
 
+        if ($this->home_address == ''){
+            return 'You have to address.';
+        }
+
         return null;
     }
 
@@ -395,6 +399,12 @@ class User extends Authenticatable
         if ($pinkRideSetting->requiresDriverLicense() && !$this->hasDriverLicenseUpload()) {
             return 'A government-issued photo ID (driver\'s license) is required to post Pink Rides. Please upload your driver\'s license in your profile.';
         }
+
+        if ($this->home_address == ''){
+            return 'You have to address.';
+        }
+
+        
 
         return null;
     }

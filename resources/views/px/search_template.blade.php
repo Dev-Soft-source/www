@@ -7,7 +7,7 @@
 
 @section('content')
     @php
-    
+
         $searchRoute = route($action_route, ['lang' => optional($selectedLanguage)->abbreviation]);
         $bookingMethodGroup = $searchOptionGroups->get('booking_method');
         $luggageGroup = $searchOptionGroups->get('luggage_size');
@@ -456,7 +456,7 @@
                             </div>
 
                             <div class="w-full md:w-[20%]">
-                                <button type="submit" name="search" value="1"
+                                <button type="submit" name="search" value="1" id="search-button" 
                                     class="px-search-submit w-full h-full flex items-center justify-center text-base font-semibold text-white transition-colors">
                                     {{ $findRidePage->search_section_button_label ?? 'Search' }}
                                 </button>

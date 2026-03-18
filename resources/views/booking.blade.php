@@ -12,29 +12,7 @@
 
 @section('content')
     <div class="font-FuturaMdCnBT booking-page">
-        @php
 
-            $settingTaxPercentage = 0;
-        @endphp
-
-
-        @php
-            $hidePaymentSection = false;
-            $firm = false;
-            $topUpBalance = $balance;
-        @endphp
-        @if (
-            (optional($ride->payment_method)->features_setting_id ?? null) ===
-                (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null))
-            @php
-                $hidePaymentSection = true;
-            @endphp
-        @endif
-        @isset($postRidePage->cancellation_policy_label2->features_setting_id)
-            @php
-                $firm = $postRidePage->cancellation_policy_label2->features_setting_id;
-            @endphp
-        @endisset
         @if ($setting)
             @php
                 $settingBookingPrice = $setting->booking_price;
@@ -270,9 +248,7 @@
                                                 </p>
                                             </div>
                                         @endif
-                                        {{-- @if (isset($remainingForSegment))
-                                            <p class="text-gray-700 text-sm mt-1 mb-2">{{ $remainingForSegment }} {{ $remainingForSegment === 1 ? 'seat' : 'seats' }} available for this segment.</p>
-                                        @endif --}}
+
                                         <div class="flex items-center flex-wrap gap-2 mt-2" id="seat-selection-container">
                                             {{-- TODO : to check more --}}
                                             @foreach ($ride->seatDetail as $detail)
@@ -575,7 +551,7 @@
                                             @endphp
                                             <div class="flex items-start my-4">
                                                 <label class="flex items-start cursor-pointer font-normal text-gray-900">
-                                                    <input id="" type="checkbox" name="firm_agree_terms"
+                                                    <input id="firm_agree_terms" type="checkbox" name="firm_agree_terms"
                                                         value="1" @checked(old('firm_agree_terms'))
                                                         class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
                                                     <span class="ml-2">
@@ -677,9 +653,6 @@
 
 
 
-
-
-
         <div id="bookingModal" class="hidden fixed z-50 inset-0 overflow-y-auto">
             <div class="relative z-50">
                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
@@ -696,17 +669,10 @@
                             </button>
                             <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                 <div class="sm:flex sm:items-start justify-center">
-                                    <!-- <div
-                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-blue-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                    </svg>
-                                </div> -->
+
                                 </div>
                                 <div class="text-center  sm:ml-4 sm:mt-0 sm:text-left">
-                                    <!-- <div class="">
-                                    <h3 class="text-3xl text-center font-FuturaMdCnBT font-medium text-gray-900 mb-4" id="modal-title">{!! session('heading') !!}</h3>
-                                </div> -->
+
                                     <div class="w-full">
                                         <p class="text-md text-center mt-10 text-gray-500"></p>
                                     </div>
@@ -757,8 +723,7 @@
                                         id="student-seat-limit-modal-title">Seat Limit Reached</h3>
                                 </div>
                                 <div class="mt-2 w-full">
-                                    <p class="can-exp-p text-center">Students are limited to booking a maximum of 2 seats
-                                        per ride for Cash payment rides.</p>
+                                    <p class="can-exp-p text-center">Students are limited to booking a maximum of 2 seats per ride for Cash payment rides.</p>
                                 </div>
                             </div>
                         </div>
@@ -779,644 +744,466 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get all code inputs
-            const inputs = document.querySelectorAll('input[name="code[]"]');
+        (function() {
+            'use strict';
 
-            // Focus first input on page load
-            if (inputs.length > 0) {
-                inputs[0].focus();
-            }
+            // ============================================
+            // Configuration & Constants
+            // ============================================
+            const BOOKING_SEATS_STORAGE_KEY = 'booking_seats_{{ $ride->id }}_{{ $ride->detail->id }}';
+            const SEAT_IMAGES = {
+                selected: '{{ asset('assets/seat-hover-1.png') }}',
+                unselected: '{{ asset('assets/seat.png') }}'
+            };
+            const SEAT_HOLD_ROUTE = '{{ route('seat_on_hold') }}';
+            const CSRF_TOKEN = '{{ csrf_token() }}';
+            const MAX_STUDENT_SEATS = 2;
+            const BOOKING_FEE_PERCENTAGE = 0.10; // 10%
+            const MIN_PRICE_FOR_BOOKING_FEE = 15;
 
-            // Add event listeners to all inputs
-            inputs.forEach((input, index) => {
-                // Handle input event (when user types/pastes)
-                input.addEventListener('input', function(e) {
-                    if (this.value.length === 1) {
-                        // Move to next input if available
-                        if (index < inputs.length - 1) {
-                            inputs[index + 1].focus();
-                        }
-                    }
-                });
+            // Calculate booking price based on user status and ride price
+            const chargeBooking = {{ auth()->user() && auth()->user()->charge_booking ? auth()->user()->charge_booking : '1' }};
+            const isStudentFeeWaived = (chargeBooking == '2');
+            const pricePerSeat = parseFloat(@json($ride->price_minor ?? 0));
+            const bookingPrice = (isStudentFeeWaived || pricePerSeat < MIN_PRICE_FOR_BOOKING_FEE) 
+                ? 0.0 
+                : parseFloat(pricePerSeat * BOOKING_FEE_PERCENTAGE);
 
-                // Handle keydown for backspace and arrow keys
-                input.addEventListener('keydown', function(e) {
-                    // On backspace with empty input, move to previous
-                    if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
-                        inputs[index - 1].focus();
-                    }
-                    // Allow left arrow to move to previous input
-                    else if (e.key === 'ArrowLeft' && index > 0) {
-                        inputs[index - 1].focus();
-                        e.preventDefault(); // Prevent cursor movement within current input
-                    }
-                    // Allow right arrow to move to next input
-                    else if (e.key === 'ArrowRight' && index < inputs.length - 1) {
-                        inputs[index + 1].focus();
-                        e.preventDefault(); // Prevent cursor movement within current input
-                    }
-                });
+            // Ride configuration
+            const rideConfig = {
+                isFirmRide: {{ $ride->isFirmCancellation() ? 'true' : 'false' }},
+                firmDiscount: parseFloat("{{ $settingFirmDiscount ?? 0 }}"),
+                taxPercentage: parseFloat("{{ $settingTaxPercentage ?? 0 }}"),
+                seatPrice: parseFloat({{ $ride->price_minor ?? 0 }}),
+                paymentMethod: '{{ $ride->isCashPayment() ? 'cash' : 'online' }}'
+            };
 
-                // Handle paste event (to handle multi-digit paste)
-                input.addEventListener('paste', function(e) {
-                    e.preventDefault();
-                    const pasteData = e.clipboardData.getData('text').trim();
+            // ============================================
+            // Verification Code Input Handler
+            // ============================================
+            document.addEventListener('DOMContentLoaded', function() {
+                const codeInputs = document.querySelectorAll('input[name="code[]"]');
+                if (codeInputs.length === 0) return;
 
-                    // Fill current and subsequent inputs with paste data
-                    for (let i = 0; i < pasteData.length && (index + i) < inputs.length; i++) {
-                        inputs[index + i].value = pasteData[i];
-                    }
+                codeInputs[0].focus();
 
-                    // Focus the last filled input
-                    const lastFilledIndex = Math.min(index + pasteData.length - 1, inputs.length -
-                        1);
-                    inputs[lastFilledIndex].focus();
-                });
-            });
-        });
-    </script>
-
-
-
-    <script>
-        // Key used to persist selected seats across reloads for this ride
-        var bookingSeatsStorageKey = 'booking_seats_{{ $ride->id }}_{{ $ride->rideDetail[0]->id }}';
-
-        $(document).ready(function() {
-            // Restore seat selection after refresh
-            try {
-                var saved = sessionStorage.getItem(bookingSeatsStorageKey);
-                if (saved) {
-                    var ids = JSON.parse(saved);
-                    var selectedImg = '{{ asset('assets/seat-hover-1.png') }}';
-                    var unselectedImg = '{{ asset('assets/seat.png') }}';
-                    $("input[name='seats_id[]']").each(function() {
-                        var id = $(this).val();
-                        var shouldCheck = ids.indexOf(id) !== -1;
-                        $(this).prop('checked', shouldCheck);
-                        $(".seat-image.seat-unselect-" + id).attr('src', shouldCheck ? selectedImg :
-                            unselectedImg);
-                        if (shouldCheck) {
-                            $(".seat-number.seat-number-" + id).addClass('text-green-300');
-                        } else {
-                            $(".seat-number.seat-number-" + id).removeClass('text-green-300');
+                codeInputs.forEach((input, index) => {
+                    input.addEventListener('input', function() {
+                        if (this.value.length === 1 && index < codeInputs.length - 1) {
+                            codeInputs[index + 1].focus();
                         }
                     });
+
+                    input.addEventListener('keydown', function(e) {
+                        if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
+                            codeInputs[index - 1].focus();
+                        } else if (e.key === 'ArrowLeft' && index > 0) {
+                            codeInputs[index - 1].focus();
+                            e.preventDefault();
+                        } else if (e.key === 'ArrowRight' && index < codeInputs.length - 1) {
+                            codeInputs[index + 1].focus();
+                            e.preventDefault();
+                        }
+                    });
+
+                    input.addEventListener('paste', function(e) {
+                        e.preventDefault();
+                        const pasteData = e.clipboardData.getData('text').trim();
+                        const maxIndex = Math.min(index + pasteData.length, codeInputs.length);
+                        
+                        for (let i = 0; i < pasteData.length && (index + i) < codeInputs.length; i++) {
+                            codeInputs[index + i].value = pasteData[i];
+                        }
+                        
+                        if (maxIndex > 0) {
+                            codeInputs[Math.min(maxIndex - 1, codeInputs.length - 1)].focus();
+                        }
+                    });
+                });
+            });
+
+            // ============================================
+            // Seat Selection Management
+            // ============================================
+            function restoreSeatSelection() {
+                try {
+                    const saved = sessionStorage.getItem(BOOKING_SEATS_STORAGE_KEY);
+                    if (!saved) return;
+
+                    const savedIds = JSON.parse(saved);
+                    $("input[name='seats_id[]']").each(function() {
+                        const id = $(this).val();
+                        const shouldCheck = savedIds.indexOf(id) !== -1;
+                        $(this).prop('checked', shouldCheck);
+                        
+                        const $seatImage = $(".seat-image.seat-unselect-" + id);
+                        const $seatNumber = $(".seat-number.seat-number-" + id);
+                        
+                        $seatImage.attr('src', shouldCheck ? SEAT_IMAGES.selected : SEAT_IMAGES.unselected);
+                        $seatNumber.toggleClass('text-green-300', shouldCheck);
+                    });
+                } catch (e) {
+                    console.warn('Failed to restore seat selection:', e);
                 }
-            } catch (e) {
-                /* ignore */ }
-            updateTotalAmount();
+            }
 
-            $('input[name="type"]').change(function() {
-                updateTotalAmount();
-            });
-
-            $('input[name="coffee_wall"]').change(function() {
-                updateTotalAmount();
-            });
-
-            // Trigger the change event on page load
-            $('#type').trigger('change');
-
-            $('input[type=radio][name=payment_method]').change(function() {
-                if (this.value === 'credit_card') {
-                    $('.cards').removeClass('hidden');
-                    // $('.other_number').addClass('hidden');
-                } else if (this.value === 'paypal') {
-                    $('.cards').addClass('hidden');
-                    // $('.other_number').removeClass('hidden');
+            function persistSeatSelection() {
+                try {
+                    const ids = [];
+                    $("input[name='seats_id[]']:checked").each(function() {
+                        ids.push($(this).val());
+                    });
+                    sessionStorage.setItem(BOOKING_SEATS_STORAGE_KEY, JSON.stringify(ids));
+                } catch (e) {
+                    console.warn('Failed to persist seat selection:', e);
                 }
-            });
+            }
 
-            // Seat selection logic
-            var lastSelectedIndex = -1; // To track the last selected index
-        });
+            function updateSeatUI(seatIds) {
+                $(".seat-image").attr('src', SEAT_IMAGES.unselected);
+                $(".seat-number").removeClass('text-green-300');
+                
+                seatIds.forEach(function(id) {
+                    $(".seat-image.seat-unselect-" + id).attr('src', SEAT_IMAGES.selected);
+                    $(".seat-number.seat-number-" + id).addClass('text-green-300');
+                });
+            }
 
-        // Get the current date
-        var currentDate = new Date();
+            // ============================================
+            // Modal Management
+            // ============================================
+            function showStudentSeatLimitModal() {
+                const modal = document.getElementById('studentSeatLimitModal');
+                if (!modal) {
+                    alert('Students are limited to booking a maximum of 2 seats per ride for Cash payment rides.');
+                    return;
+                }
+                modal.classList.remove('hidden');
+                modal.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; z-index: 50 !important;';
+                
+                const backdrop = modal.querySelector('.fixed.inset-0.bg-gray-500');
+                if (backdrop) {
+                    backdrop.style.display = 'block';
+                }
+            }
 
-        var settingBookingPrice = "{{ $settingBookingPrice }}";
+            function closeStudentSeatLimitModal() {
+                const modal = document.getElementById('studentSeatLimitModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    ['display', 'visibility', 'opacity', 'z-index'].forEach(prop => {
+                        modal.style.removeProperty(prop);
+                    });
+                }
+            }
 
-        // Check if $setting is defined and not null
-        var bookingPrice;
+            function closeModal() {
+                const modal = document.getElementById('myModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                }
+            }
 
-        // Check if user is a student who should NOT be charged booking fee
-        // charge_booking = '2' means booking fee is waived (student with valid card)
-        // charge_booking = '1' means booking fee is charged (regular user or student with expired card)
-        var chargeBooking = {{ auth()->user() && auth()->user()->charge_booking ? auth()->user()->charge_booking : '1' }};
-        var isStudentFeeWaived = (chargeBooking == '2');
+            // Make modal functions globally available
+            window.showStudentSeatLimitModal = showStudentSeatLimitModal;
+            window.closeStudentSeatLimitModal = closeStudentSeatLimitModal;
+            window.closeModal = closeModal;
 
-        var pricePerSeat = parseFloat(@json($ride->price_minor));
-        if (isStudentFeeWaived) {
-            // Student with valid card - booking fee is waived
-            bookingPrice = 0.0;
-        } else if (pricePerSeat < 15) {
-            // ProximaLocal: no booking fee on rides under $15 per seat
-            bookingPrice = 0.0;
-        } else {
-            bookingPrice = parseFloat((10 / 100) * pricePerSeat);
-        }
+            // ============================================
+            // Price Calculation
+            // ============================================
+            function getCheckedTerms() {
+                const getCheckboxValue = (name) => {
+                    const field = document.querySelector(`[name="${name}"]`);
+                    return field ? field.checked : true;
+                };
 
-        // Function to update the total amount
-        function updateTotalAmount() {
+                return {
+                    agreeTerms: getCheckboxValue('agree_terms'),
+                    firmTerms: getCheckboxValue('firm_agree_terms'),
+                    pinkRideTerms: getCheckboxValue('pink_ride_agree_terms'),
+                    extraCareTerms: getCheckboxValue('extra_care_ride_agree_terms')
+                };
+            }
 
-            var seatPrice = parseFloat({{ $ride->price_minor }});
-            var selectedSeats = $("input[name='seats_id[]']:checked").length;
-            var totalAmount = bookingPrice * selectedSeats;
-            var totalSeatsAmount = seatPrice * selectedSeats;
+            function updateTotalAmount() {
+                const selectedSeats = $("input[name='seats_id[]']:checked").length;
+                const seatCountInput = document.getElementById('seat-count');
+                if (seatCountInput) {
+                    seatCountInput.value = selectedSeats;
+                }
 
-            const seatCountInput = document.getElementById('seat-count');
-            // Update the hidden field's value
-            seatCountInput.value = selectedSeats;
+                let totalAmount = bookingPrice * selectedSeats;
+                let totalSeatsAmount = rideConfig.seatPrice * selectedSeats;
+                const totalRideSeatAmount = totalSeatsAmount;
 
-            $('#discount').text('');
-
-            var firm = "{{ $firm }}";
-            var isFirmRide =
-                {{ $ride->isFirmCancellation() ?? false ? 'true' : 'false' }};
-            var totalRideSeatAmout = totalSeatsAmount;
-            var firmSelected = isFirmRide || ($('input[name="type"]:checked').length && $('input[name="type"]:checked')
-            .val() === firm);
-            if (firmSelected) {
-                var settingFirmDiscount = "{{ $settingFirmDiscount }}";
-                if (settingFirmDiscount && settingFirmDiscount !== '') {
-                    var firmAmt = (totalSeatsAmount * settingFirmDiscount / 100);
-                    totalSeatsAmount = totalSeatsAmount - firmAmt;
-                    $(".firmDiscountAmt").text('$' + firmAmt.toFixed(2));
+                // Apply firm ride discount
+                if (rideConfig.isFirmRide && rideConfig.firmDiscount > 0) {
+                    const firmDiscountAmount = (totalSeatsAmount * rideConfig.firmDiscount) / 100;
+                    totalSeatsAmount -= firmDiscountAmount;
+                    $(".firmDiscountAmt").text('$' + firmDiscountAmount.toFixed(2));
                     $(".yourPriceAmt").text('$' + totalSeatsAmount.toFixed(2));
-                    // totalAmount = totalAmount - (totalAmount * settingFirmDiscount / 100);
-                    //$('#discount').text('(' + settingFirmDiscount + '% discount)');
-
                 }
-            }
 
-            var settingTaxPercentage = "{{ $settingTaxPercentage }}";
-            var taxAmount = (totalAmount * settingTaxPercentage) / 100;
+                // Calculate tax
+                const taxAmount = (totalAmount * rideConfig.taxPercentage) / 100;
+                let totalSum = totalAmount + totalSeatsAmount + taxAmount;
+                let totalAmountIn = totalAmount;
+                let totalSumIn = totalSum;
 
-            // Calculate the sum of totalAmount and totalSeatsAmount
-            var totalSum = totalAmount + totalSeatsAmount + taxAmount;
-            var actualTotalSum = totalAmount + totalSeatsAmount + taxAmount;
-
-            var totalAmountIn = totalAmount;
-            var totalSumIn = totalSum;
-
-            const isTermChecked = document.querySelector('[name="agree_terms"]').checked;
-            let isFirmChecked = false;
-            const firmFields = document.getElementsByName('firm_agree_terms');
-            if (firmFields.length > 0) {
-                isFirmChecked = document.querySelector('[name="firm_agree_terms"]').checked;
-            } else {
-                isFirmChecked = true;
-            }
-
-            let pinkRideAgreeTerms = true;
-            const pinkFields = document.getElementsByName('pink_ride_agree_terms');
-            if (pinkFields.length > 0) {
-                pinkRideAgreeTerms = document.querySelector('[name="pink_ride_agree_terms"]').checked;
-            } else {
-                pinkRideAgreeTerms = true;
-            }
-
-            let extraCareRideAgreeTerms = true;
-            const extraFields = document.getElementsByName('extra_care_ride_agree_terms');
-            if (extraFields.length > 0) {
-                extraCareRideAgreeTerms = document.querySelector('[name="extra_care_ride_agree_terms"]').checked;
-            } else {
-                extraCareRideAgreeTerms = true;
-            }
-
-            var errorElementDiv = document.getElementById('paymentSection');
-            if (errorElementDiv && isTermChecked && isFirmChecked && pinkRideAgreeTerms && extraCareRideAgreeTerms) {
-                if (errorElementDiv.classList.contains('hidden')) {
-                    errorElementDiv.classList.remove('hidden');
-                }
-            }
-
-            var errorElementDivGPay = document.getElementById('paymentSectionGPay');
-            if (errorElementDivGPay && isTermChecked && isFirmChecked && pinkRideAgreeTerms && extraCareRideAgreeTerms) {
-                if (errorElementDivGPay.classList.contains('hidden')) {
-                    errorElementDivGPay.classList.remove('hidden');
-                }
-            }
-
-            var hidePaymentSection = "{{ $hidePaymentSection }}";
-
-            var topUpBalance = "{{ $topUpBalance }}";
-            if (hidePaymentSection) {
-                if (totalAmountIn <= topUpBalance) {
+                // Handle coffee wall option
+                const isCoffeeWallChecked = $('input[name="coffee_wall"]:checked').val() === '1';
+                const hideBookingFeeDiv = document.getElementById('hideBookingFee');
+                
+                if (isCoffeeWallChecked) {
+                    totalSumIn = totalSum - totalAmount;
+                    totalSum = totalSum - totalAmount;
                     totalAmountIn = 0;
-                    $('.bookedByWallet').val(1);
-                    if (errorElementDiv) {
-                        if (!errorElementDiv.classList.contains('hidden')) {
-                            errorElementDiv.classList.add('hidden');
-                        }
-                    }
-
-                    if (errorElementDivGPay) {
-                        if (!errorElementDivGPay.classList.contains('hidden')) {
-                            errorElementDivGPay.classList.add('hidden');
-                        }
-                    }
-                }
-            } else {
-                if (totalSum <= topUpBalance) {
-                    totalSumIn = 0;
-                    $('.bookedByWallet').val(1);
-                    if (!errorElementDiv.classList.contains('hidden')) {
-                        errorElementDiv.classList.add('hidden');
-                    }
-
-                    if (!errorElementDivGPay.classList.contains('hidden')) {
-                        errorElementDivGPay.classList.add('hidden');
-                    }
-                } else {
-                    $('.bookedByWallet').val(null);
-                }
-            }
-
-            var hideBookingFeeDiv = document.getElementById('hideBookingFee');
-
-            if ($('input[name="coffee_wall"]:checked').val()) {
-                totalSumIn = totalSum - totalAmount
-                totalSum = totalSum - totalAmount
-                totalAmountIn = 0;
-
-                if (hideBookingFeeDiv) {
-                    if (hideBookingFeeDiv.classList.contains('hidden')) {
+                    if (hideBookingFeeDiv) {
                         hideBookingFeeDiv.classList.remove('hidden');
                         hideBookingFeeDiv.classList.add('flex');
                     }
-                }
-
-                if (hidePaymentSection) {
-                    $('.bookedByWallet').val(null);
-                    if (errorElementDiv) {
-                        if (!errorElementDiv.classList.contains('hidden')) {
-                            errorElementDiv.classList.add('hidden');
-                        }
-                    }
-
-                    if (errorElementDivGPay) {
-                        if (!errorElementDivGPay.classList.contains('hidden')) {
-                            errorElementDivGPay.classList.add('hidden');
-                        }
-                    }
                 } else {
-                    if (totalSum <= topUpBalance) {
-                        totalSumIn = 0;
-                        $('.bookedByWallet').val(1);
-                        if (!errorElementDiv.classList.contains('hidden')) {
-                            errorElementDiv.classList.add('hidden');
-                        }
-                        if (!errorElementDivGPay.classList.contains('hidden')) {
-                            errorElementDivGPay.classList.add('hidden');
-                        }
-                    } else {
-                        $('.bookedByWallet').val(null);
-                    }
-                }
-            } else {
-                if (hideBookingFeeDiv) {
-                    if (!hideBookingFeeDiv.classList.contains('hidden')) {
+                    if (hideBookingFeeDiv) {
                         hideBookingFeeDiv.classList.add('hidden');
                         hideBookingFeeDiv.classList.remove('flex');
                     }
                 }
-            }
 
-            // Format the sums to two decimal places
-            var formattedTotalAmount = totalAmount.toFixed(2);
-            var formattedTaxAmount = taxAmount.toFixed(2);
-            var formattedTotalSeatsAmount = totalSeatsAmount.toFixed(2);
-            var formattedTotalRideSeatAmout = totalRideSeatAmout.toFixed(2);
-            var formattedTotalSum = totalSum.toFixed(2);
+                // Show/hide payment section based on terms
+                const terms = getCheckedTerms();
+                const allTermsChecked = terms.agreeTerms && terms.firmTerms && 
+                                       terms.pinkRideTerms && terms.extraCareTerms;
+                
+                ['paymentSection', 'paymentSectionGPay'].forEach(sectionId => {
+                    const section = document.getElementById(sectionId);
+                    if (section && allTermsChecked) {
+                        section.classList.remove('hidden');
+                    }
+                });
 
-            // Update the content of the <p> tags
-            $('#selectedSeats').text(selectedSeats);
-            $('.totalAmount').text('$' + formattedTotalAmount);
-            $('.taxAmount').text('$' + formattedTaxAmount);
-            $(".totalTaxAmountInput").val(taxAmount);
-            $('.totalAmountInput').val(totalAmount);
-            $('.totalAmountIn').val(totalAmountIn);
-            $('.totalSeatsAmount').text('$' + formattedTotalRideSeatAmout);
-            $('.totalSeatsAmountInput').val(totalSeatsAmount);
-            $('.totalSum').text('$' + formattedTotalSum);
-            $('.totalSumIn').val(totalSumIn);
-            $('.totalSumInput').val(actualTotalSum);
+                // Update UI
+                $('#selectedSeats').text(selectedSeats);
+                $('.totalAmount').text('$' + totalAmount.toFixed(2));
+                $('.taxAmount').text('$' + taxAmount.toFixed(2));
+                $('.totalSeatsAmount').text('$' + totalRideSeatAmount.toFixed(2));
+                $('.totalSum').text('$' + totalSum.toFixed(2));
+                
+                // Update hidden inputs
+                $('.totalTaxAmountInput').val(taxAmount);
+                $('.totalAmountInput').val(totalAmount);
+                $('.totalAmountIn').val(totalAmountIn);
+                $('.totalSeatsAmountInput').val(totalSeatsAmount);
+                $('.totalSumIn').val(totalSumIn);
+                $('.totalSumInput').val(totalSum);
 
-            if (typeof paymentRequest !== 'undefined' && paymentRequest && typeof paymentRequest.update === 'function') {
-                if ($("#check_payment_method").val() == "cash") {
-                    var chargeAmount = totalAmountIn + taxAmount;
+                // Update payment request if available
+                if (typeof paymentRequest !== 'undefined' && paymentRequest && typeof paymentRequest.update === 'function') {
+                    const chargeAmount = rideConfig.paymentMethod === 'cash' 
+                        ? totalAmountIn + taxAmount 
+                        : totalSumIn;
                     paymentRequest.update({
                         total: {
                             label: 'Total',
                             amount: Math.round(chargeAmount * 100)
-                        },
-                    });
-                } else {
-                    paymentRequest.update({
-                        total: {
-                            label: 'Total',
-                            amount: Math.round(totalSumIn * 100)
-                        },
+                        }
                     });
                 }
             }
 
+            // ============================================
+            // Seat Selection Handler
+            // ============================================
+            function seat_selected(event, clickedSeatId, clickedSeatNumber) {
+                event.preventDefault();
+                event.stopPropagation();
 
-        }
+                const isStudent = {{ auth()->user() && (auth()->user()->student == '1' || auth()->user()->student == '2') ? 'true' : 'false' }};
+                const paymentMethod = $('#check_payment_method').val();
+                const isCashPayment = (paymentMethod === 'cash');
 
-        // Define modal functions early to ensure they're available
-        function showStudentSeatLimitModal() {
-            const modal = document.getElementById('studentSeatLimitModal');
-            if (!modal) {
-                console.error('Student seat limit modal not found');
-                // Fallback to alert if modal not found
-                alert('Students are limited to booking a maximum of 2 seats per ride for Cash payment rides.');
-                return;
-            }
-            // Remove hidden class and ensure visibility
-            modal.classList.remove('hidden');
-            modal.style.setProperty('display', 'block', 'important');
-            modal.style.setProperty('visibility', 'visible', 'important');
-            modal.style.setProperty('opacity', '1', 'important');
-            modal.style.setProperty('z-index', '50', 'important');
-
-            // Also ensure the backdrop is visible
-            const backdrop = modal.querySelector('.fixed.inset-0.bg-gray-500');
-            if (backdrop) {
-                backdrop.style.setProperty('display', 'block', 'important');
-            }
-        }
-
-        function closeStudentSeatLimitModal() {
-            const modal = document.getElementById('studentSeatLimitModal');
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.style.removeProperty('display');
-                modal.style.removeProperty('visibility');
-                modal.style.removeProperty('opacity');
-                modal.style.removeProperty('z-index');
-            }
-        }
-
-        // Make functions globally available immediately
-        window.showStudentSeatLimitModal = showStudentSeatLimitModal;
-        window.closeStudentSeatLimitModal = closeStudentSeatLimitModal;
-
-        function seat_selected(event, clickedSeatId, clickedSeatNumber) {
-            event.preventDefault();
-            event.stopPropagation();
-
-            var isStudent =
-                {{ auth()->user() && (auth()->user()->student == '1' || auth()->user()->student == '2') ? 'true' : 'false' }};
-            var paymentMethod = $('#check_payment_method').val();
-            var isCashPayment = (paymentMethod === 'cash');
-            var maxSeatsForStudent = 2;
-
-            // Build list of available seats (not booked) in order
-            var availableSeats = [];
-            $('#seat-selection-container .seat-item[data-is-booked="0"]').each(function() {
-                var seatId = $(this).data('seat-id');
-                var seatNum = parseInt($(this).data('seat-number'), 10);
-                availableSeats.push({
-                    id: seatId,
-                    seatNumber: seatNum
-                });
-            });
-            availableSeats.sort(function(a, b) {
-                return a.seatNumber - b.seatNumber;
-            });
-
-            // Get seats to select: all available seats with seat_number <= clicked seat_number
-            var seatsToSelect = availableSeats.filter(function(s) {
-                return s.seatNumber <= clickedSeatNumber;
-            });
-
-            // Student limit: cap at 2 seats for Cash payment
-            if (isStudent && isCashPayment && seatsToSelect.length > maxSeatsForStudent) {
-                seatsToSelect = seatsToSelect.slice(0, maxSeatsForStudent);
-                showStudentSeatLimitModal();
-            }
-
-            // Check if this is a toggle-off: clicked seat was the rightmost selected
-            var currentlyChecked = [];
-            $("input.seat-checkbox:checked").each(function() {
-                currentlyChecked.push(parseInt($(this).val(), 10));
-            });
-            var currentlySelectedIds = currentlyChecked;
-            var rightmostSelected = currentlySelectedIds.length > 0 ? Math.max.apply(null, currentlySelectedIds.map(
-                function(id) {
-                    var s = availableSeats.find(function(s) {
-                        return s.id == id;
+                // Build sorted list of available seats
+                const availableSeats = [];
+                $('#seat-selection-container .seat-item[data-is-booked="0"]').each(function() {
+                    availableSeats.push({
+                        id: $(this).data('seat-id'),
+                        seatNumber: parseInt($(this).data('seat-number'), 10)
                     });
-                    return s ? s.seatNumber : 0;
-                })) : 0;
-
-            var newSelectionIds = [];
-            if (rightmostSelected === clickedSeatNumber && currentlySelectedIds.length > 0) {
-                // Toggle off: deselect all
-                newSelectionIds = [];
-            } else {
-                newSelectionIds = seatsToSelect.map(function(s) {
-                    return s.id;
                 });
-            }
+                availableSeats.sort((a, b) => a.seatNumber - b.seatNumber);
 
-            // Update UI immediately
-            $("input.seat-checkbox").prop('checked', false);
-            newSelectionIds.forEach(function(id) {
-                $("#number-of-seat-" + id).prop('checked', true);
-            });
+                // Get seats to select (all seats <= clicked seat)
+                let seatsToSelect = availableSeats.filter(s => s.seatNumber <= clickedSeatNumber);
 
-            // Hide seats validation error when at least one seat is selected; show when none
-            // Use next-sibling selector so we find the Laravel error div even if id is missing
-            var seatsErrorEl = document.getElementById('seats-laravel-error') ||
-                document.querySelector('#seat-selection-container + .tooltip-error');
-            var seatsErrorContainer = document.getElementById('seats-error');
-            if (newSelectionIds.length > 0) {
-                if (seatsErrorEl) {
-                    seatsErrorEl.classList.add('hidden');
-                    seatsErrorEl.style.display = 'none';
+                // Apply student limit for cash payments
+                if (isStudent && isCashPayment && seatsToSelect.length > MAX_STUDENT_SEATS) {
+                    seatsToSelect = seatsToSelect.slice(0, MAX_STUDENT_SEATS);
+                    showStudentSeatLimitModal();
                 }
-                if (seatsErrorContainer) {
-                    seatsErrorContainer.classList.add('hidden');
-                    seatsErrorContainer.style.display = 'none';
-                }
-            } else {
-                if (seatsErrorEl) {
-                    seatsErrorEl.classList.remove('hidden');
-                    seatsErrorEl.style.display = '';
-                }
-                if (seatsErrorContainer) seatsErrorContainer.classList.add('hidden');
-            }
 
-            $(".seat-image").attr('src', '{{ asset('assets/seat.png') }}');
-            $(".seat-number").removeClass('text-green-300');
-            newSelectionIds.forEach(function(id) {
-                $(".seat-image.seat-unselect-" + id).attr('src', '{{ asset('assets/seat-hover-1.png') }}');
-                $(".seat-number.seat-number-" + id).addClass('text-green-300');
-            });
-
-            // Determine which seats to hold vs release
-            var toHold = newSelectionIds.filter(function(id) {
-                return currentlySelectedIds.indexOf(id) < 0;
-            });
-            var toRelease = currentlySelectedIds.filter(function(id) {
-                return newSelectionIds.indexOf(id) < 0;
-            });
-
-            // Process seats: release first, then hold
-            var apiCalls = [];
-            toRelease.forEach(function(seatId) {
-                apiCalls.push($.ajax({
-                    url: '{{ route('seat_on_hold') }}',
-                    type: 'POST',
-                    data: {
-                        seat_id: seatId,
-                        _token: '{{ csrf_token() }}'
-                    }
-                }));
-            });
-            toHold.forEach(function(seatId) {
-                apiCalls.push($.ajax({
-                    url: '{{ route('seat_on_hold') }}',
-                    type: 'POST',
-                    data: {
-                        seat_id: seatId,
-                        _token: '{{ csrf_token() }}'
-                    }
-                }));
-            });
-
-            if (apiCalls.length === 0) {
-                updateTotalAmount();
-                persistSeatSelection();
-                return;
-            }
-
-            var seatHoldInfoMessage = {!! json_encode(
-                $bookingPage->seats_available_info_text_ ??
-                    "Your selected seat(s) will be held for 10 minutes. If the booking isn't completed within that time, the seat(s) will be released and made available to others.",
-            ) !!};
-            var isSuccessMessage = function(msg) {
-                if (!msg) return false;
-                return msg === 'Seat on hold successfully' || (msg.indexOf('will be held for 10 minutes') !== -1);
-            };
-
-            $.when.apply($, apiCalls).done(function() {
-                var responses = arguments.length === 1 ? [arguments[0]] : Array.prototype.slice.call(arguments);
-                var hasError = responses.some(function(r) {
-                    return r[0] && r[0].message && !isSuccessMessage(r[0].message);
+                // Get currently selected seats
+                const currentlySelectedIds = [];
+                $("input.seat-checkbox:checked").each(function() {
+                    currentlySelectedIds.push(parseInt($(this).val(), 10));
                 });
-                if (hasError) {
-                    var errMsg = (responses.find(function(r) {
-                        return r[0] && r[0].message && !isSuccessMessage(r[0].message);
-                    }) || [{}])[0].message;
-                    var modalMessageElement = document.querySelector('#bookingModal .text-md.text-gray-500');
-                    if (modalMessageElement) modalMessageElement.textContent = errMsg || 'Seat could not be held.';
-                    document.getElementById('bookingModal').classList.remove('hidden');
-                } else if (toHold.length > 0) {
-                    var modalMessageElement = document.querySelector('#bookingModal .text-md.text-gray-500');
-                    if (modalMessageElement) modalMessageElement.textContent = seatHoldInfoMessage;
-                    document.getElementById('bookingModal').classList.remove('hidden');
-                }
-                updateTotalAmount();
-                persistSeatSelection();
-            }).fail(function() {
-                // Revert on error
+
+                // Find rightmost selected seat number
+                const rightmostSelected = currentlySelectedIds.length > 0
+                    ? Math.max(...currentlySelectedIds.map(id => {
+                        const seat = availableSeats.find(s => s.id === id);
+                        return seat ? seat.seatNumber : 0;
+                    }))
+                    : 0;
+
+                // Determine new selection (toggle off if clicking rightmost)
+                const newSelectionIds = (rightmostSelected === clickedSeatNumber && currentlySelectedIds.length > 0)
+                    ? []
+                    : seatsToSelect.map(s => s.id);
+
+                // Update checkboxes
                 $("input.seat-checkbox").prop('checked', false);
-                currentlySelectedIds.forEach(function(id) {
+                newSelectionIds.forEach(id => {
                     $("#number-of-seat-" + id).prop('checked', true);
                 });
-                $(".seat-image").attr('src', '{{ asset('assets/seat.png') }}');
-                $(".seat-number").removeClass('text-green-300');
-                currentlySelectedIds.forEach(function(id) {
-                    $(".seat-image.seat-unselect-" + id).attr('src',
-                        '{{ asset('assets/seat-hover-1.png') }}');
-                    $(".seat-number.seat-number-" + id).addClass('text-green-300');
+
+                // Update error visibility
+                const seatsErrorEl = document.getElementById('seats-laravel-error') ||
+                    document.querySelector('#seat-selection-container + .tooltip-error');
+                const seatsErrorContainer = document.getElementById('seats-error');
+                
+                if (newSelectionIds.length > 0) {
+                    if (seatsErrorEl) {
+                        seatsErrorEl.classList.add('hidden');
+                        seatsErrorEl.style.display = 'none';
+                    }
+                    if (seatsErrorContainer) {
+                        seatsErrorContainer.classList.add('hidden');
+                        seatsErrorContainer.style.display = 'none';
+                    }
+                } else {
+                    if (seatsErrorEl) {
+                        seatsErrorEl.classList.remove('hidden');
+                        seatsErrorEl.style.display = '';
+                    }
+                    if (seatsErrorContainer) {
+                        seatsErrorContainer.classList.add('hidden');
+                    }
+                }
+
+                // Update seat UI
+                updateSeatUI(newSelectionIds);
+
+                // Determine seats to hold/release
+                const toHold = newSelectionIds.filter(id => currentlySelectedIds.indexOf(id) < 0);
+                const toRelease = currentlySelectedIds.filter(id => newSelectionIds.indexOf(id) < 0);
+
+                // If no changes, just update totals
+                if (toHold.length === 0 && toRelease.length === 0) {
+                    updateTotalAmount();
+                    persistSeatSelection();
+                    return;
+                }
+
+                // Make API calls to hold/release seats
+                const apiCalls = [];
+                [...toRelease, ...toHold].forEach(seatId => {
+                    apiCalls.push($.ajax({
+                        url: SEAT_HOLD_ROUTE,
+                        type: 'POST',
+                        data: { seat_id: seatId, _token: CSRF_TOKEN }
+                    }));
                 });
+
+                const seatHoldInfoMessage = {!! json_encode(
+                    $bookingPage->seats_available_info_text_ ??
+                        "Your selected seat(s) will be held for 10 minutes. If the booking isn't completed within that time, the seat(s) will be released and made available to others.",
+                ) !!};
+                
+                const isSuccessMessage = (msg) => {
+                    if (!msg) return false;
+                    return msg === 'Seat on hold successfully' || msg.indexOf('will be held for 10 minutes') !== -1;
+                };
+
+                $.when(...apiCalls).done(function() {
+                    const responses = arguments.length === 1 ? [arguments[0]] : Array.from(arguments);
+                    const hasError = responses.some(r => r[0] && r[0].message && !isSuccessMessage(r[0].message));
+                    
+                    const modalMessageEl = document.querySelector('#bookingModal .text-md.text-gray-500');
+                    const bookingModal = document.getElementById('bookingModal');
+                    
+                    if (hasError) {
+                        const errMsg = (responses.find(r => r[0] && r[0].message && !isSuccessMessage(r[0].message)) || [{}])[0].message;
+                        if (modalMessageEl) modalMessageEl.textContent = errMsg || 'Seat could not be held.';
+                        if (bookingModal) bookingModal.classList.remove('hidden');
+                    } else if (toHold.length > 0) {
+                        if (modalMessageEl) modalMessageEl.textContent = seatHoldInfoMessage;
+                        if (bookingModal) bookingModal.classList.remove('hidden');
+                    }
+                    
+                    updateTotalAmount();
+                    persistSeatSelection();
+                }).fail(function() {
+                    // Revert on error
+                    $("input.seat-checkbox").prop('checked', false);
+                    currentlySelectedIds.forEach(id => {
+                        $("#number-of-seat-" + id).prop('checked', true);
+                    });
+                    updateSeatUI(currentlySelectedIds);
+                    updateTotalAmount();
+                });
+            }
+
+            // Make seat_selected globally available
+            window.seat_selected = seat_selected;
+
+            // ============================================
+            // Event Handlers
+            // ============================================
+            $(document).ready(function() {
+                restoreSeatSelection();
                 updateTotalAmount();
-            });
-        }
 
-        function persistSeatSelection() {
-            try {
-                var ids = [];
-                $("input[name='seats_id[]']:checked").each(function() {
-                    ids.push($(this).val());
+                // Update totals when type or coffee_wall changes
+                $('input[name="type"], input[name="coffee_wall"]').on('change', updateTotalAmount);
+
+                // Handle payment method changes
+                $('input[type=radio][name=payment_method]').on('change', function() {
+                    if (this.value === 'credit_card') {
+                        $('.cards').removeClass('hidden');
+                    } else if (this.value === 'paypal') {
+                        $('.cards').addClass('hidden');
+                    }
                 });
-                sessionStorage.setItem(bookingSeatsStorageKey, JSON.stringify(ids));
-            } catch (e) {
-                /* ignore */ }
-        }
 
-        document.getElementById('close-modal').addEventListener('click', function() {
-            const modal = document.getElementById('bookingModal');
-            modal.classList.add('hidden');
-        });
+                // Modal close handlers
+                const bookingModal = document.getElementById('bookingModal');
+                if (bookingModal) {
+                    const closeHandlers = ['close-modal', 'close-popup'];
+                    closeHandlers.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            el.addEventListener('click', () => {
+                                bookingModal.classList.add('hidden');
+                            });
+                        }
+                    });
+                }
+            });
 
-        document.getElementById('close-popup').addEventListener('click', function() {
-            const modal = document.getElementById('bookingModal');
-            modal.classList.add('hidden');
-        });
+            // Close modal on Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeStudentSeatLimitModal();
+                }
+            });
 
-        document.getElementById('submitForm').addEventListener('submit', function() {
-            document.getElementById('submitButton').setAttribute('disabled', 'true');
-            try {
-                sessionStorage.removeItem(bookingSeatsStorageKey);
-            } catch (e) {
-                /* ignore */ }
-        });
-
-
-        function getFirmAgreeTerms() {
-            updateTotalAmount();
-            // Hide only the error for the checkbox that is checked (so only that one disappears, not all)
-            function hideErrorIfChecked(checkboxName, errorContainerId, laravelErrorId) {
-                var cb = document.querySelector('[name="' + checkboxName + '"]');
-                if (!cb || !cb.checked) return;
-                var el = document.getElementById(errorContainerId);
-                if (el) { el.classList.add('hidden'); el.style.display = 'none'; }
-                el = document.getElementById(laravelErrorId);
-                if (el) { el.classList.add('hidden'); el.style.display = 'none'; }
-            }
-            hideErrorIfChecked('agree_terms', 'agree_terms-error', 'agree_terms-laravel-error');
-            hideErrorIfChecked('firm_agree_terms', 'firm_agree_terms-error', 'firm_agree_terms-laravel-error');
-            hideErrorIfChecked('firm_cancellation_understand', 'firm_cancellation_understand-error', 'firm_cancellation_understand-laravel-error');
-            hideErrorIfChecked('pink_ride_agree_terms', 'pink_ride_agree_terms-error', 'pink_ride_agree_terms-laravel-error');
-            hideErrorIfChecked('extra_care_ride_agree_terms', 'extra_care_ride_agree_terms-error', 'extra_care_ride_agree_terms-laravel-error');
-        }
-
-        
-
-        function closeModal() {
-            const modal = document.getElementById('myModal');
-            if (modal) {
-                modal.classList.add('hidden');
-            }
-        }
-
-        // Close modal on Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeStudentSeatLimitModal();
-            }
-        });
-    </script>
-    <script>
-        window.addEventListener("pageshow", function() {
-
-            const navEntries = performance.getEntriesByType("navigation");
-
-            if (navEntries.length > 0 && navEntries[0].type === "back_forward") {
-                // User came using browser back button - redirect to my_trips to avoid showing stale booking form
-                // (seats may have been booked; showing form again could allow double-booking)
-                window.location.replace(
-                    '{{ route('my_trips', ['lang' => $selectedLanguage->abbreviation ?? 'en']) }}');
-            }
-
-        });
+            // Handle browser back button
+            window.addEventListener("pageshow", function() {
+                const navEntries = performance.getEntriesByType("navigation");
+                if (navEntries.length > 0 && navEntries[0].type === "back_forward") {
+                    window.location.replace('{{ route('my_trips', ['lang' => $selectedLanguage->abbreviation ?? 'en']) }}');
+                }
+            });
+        })();
     </script>
 @endsection
