@@ -1613,6 +1613,68 @@
                                             <div>
                                                 <div class="flex justify-between">
                                                     <label
+                                                        :for="`cancel_ride_confirm_modal_title_${activeLanguageId}`">Cancel
+                                                        ride confirm modal title</label>
+                                                </div>
+                                                <input type="text"
+                                                    :name="`cancel_ride_confirm_modal_title_${activeLanguageId}`"
+                                                    :id="`cancel_ride_confirm_modal_title_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue('cancel_ride_confirm_modal_title')"
+                                                    @input="handleInput($event.target.value, language, 'cancel_ride_confirm_modal_title')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label
+                                                        :for="`cancel_ride_confirm_modal_message_${activeLanguageId}`">Cancel
+                                                        ride confirm modal message</label>
+                                                </div>
+                                                <input type="text"
+                                                    :name="`cancel_ride_confirm_modal_message_${activeLanguageId}`"
+                                                    :id="`cancel_ride_confirm_modal_message_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue('cancel_ride_confirm_modal_message')"
+                                                    @input="handleInput($event.target.value, language, 'cancel_ride_confirm_modal_message')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label
+                                                        :for="`cancel_ride_confirm_modal_no_btn_text_${activeLanguageId}`">Cancel
+                                                        ride confirm modal NO button text</label>
+                                                </div>
+                                                <input type="text"
+                                                    :name="`cancel_ride_confirm_modal_no_btn_text_${activeLanguageId}`"
+                                                    :id="`cancel_ride_confirm_modal_no_btn_text_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="getCurrentValue('cancel_ride_confirm_modal_no_btn_text')"
+                                                    @input="handleInput($event.target.value, language, 'cancel_ride_confirm_modal_no_btn_text')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label
+                                                        :for="`cancel_ride_confirm_modal_yes_btn_text_${activeLanguageId}`">Cancel
+                                                        ride confirm modal YES button text</label>
+                                                </div>
+                                                <input type="text"
+                                                    :name="`cancel_ride_confirm_modal_yes_btn_text_${activeLanguageId}`"
+                                                    :id="`cancel_ride_confirm_modal_yes_btn_text_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="getCurrentValue('cancel_ride_confirm_modal_yes_btn_text')"
+                                                    @input="handleInput($event.target.value, language, 'cancel_ride_confirm_modal_yes_btn_text')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label
                                                         :for="`cancel_booking_confirm_48_hour_message_${activeLanguageId}`">Cancel
                                                         booking confirm 48 hour message</label>
                                                 </div>
@@ -1852,6 +1914,10 @@ export default {
                             this.handleInput("", language, "cancel_booking_confirm_firm_message");
                             this.handleInput("", language, "cancel_ride_confirm_decision_title");
                             this.handleInput("", language, "cancel_ride_confirm_ok_btn_text");
+                            this.handleInput("", language, "cancel_ride_confirm_modal_title");
+                            this.handleInput("", language, "cancel_ride_confirm_modal_message");
+                            this.handleInput("", language, "cancel_ride_confirm_modal_no_btn_text");
+                            this.handleInput("", language, "cancel_ride_confirm_modal_yes_btn_text");
                             this.handleInput("", language, "cancel_booking_confirm_48_hour_message");
                             this.handleInput("", language, "cancel_booking_confirm_12_to_48_hour_message");
                             this.handleInput("", language, "cancel_booking_confirm_less_12_hour_message");
@@ -1999,6 +2065,10 @@ export default {
                             this.handleInput(setting?.cancel_booking_confirm_firm_message, setting?.language, "cancel_booking_confirm_firm_message");
                             this.handleInput(setting?.cancel_ride_confirm_decision_title, setting?.language, "cancel_ride_confirm_decision_title");
                             this.handleInput(setting?.cancel_ride_confirm_ok_btn_text, setting?.language, "cancel_ride_confirm_ok_btn_text");
+                            this.handleInput(setting?.cancel_ride_confirm_modal_title, setting?.language, "cancel_ride_confirm_modal_title");
+                            this.handleInput(setting?.cancel_ride_confirm_modal_message, setting?.language, "cancel_ride_confirm_modal_message");
+                            this.handleInput(setting?.cancel_ride_confirm_modal_no_btn_text, setting?.language, "cancel_ride_confirm_modal_no_btn_text");
+                            this.handleInput(setting?.cancel_ride_confirm_modal_yes_btn_text, setting?.language, "cancel_ride_confirm_modal_yes_btn_text");
                             this.handleInput(setting?.cancel_booking_confirm_48_hour_message, setting?.language, "cancel_booking_confirm_48_hour_message");
                             this.handleInput(setting?.cancel_booking_confirm_12_to_48_hour_message, setting?.language, "cancel_booking_confirm_12_to_48_hour_message");
                             this.handleInput(setting?.cancel_booking_confirm_less_12_hour_message, setting?.language, "cancel_booking_confirm_less_12_hour_message");
