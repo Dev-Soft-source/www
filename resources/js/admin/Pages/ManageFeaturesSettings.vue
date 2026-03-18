@@ -28,21 +28,27 @@
                 </div>
 
                 <div v-else>
-                    <div class="mb-4 flex flex-wrap gap-2">
-                        <button
-                            v-for="language in languages"
-                            :key="language.id"
-                            type="button"
-                            @click="activeLanguageId = language.id"
-                            :class="[
-                                'px-3 py-1 text-sm rounded border',
-                                activeLanguageId === language.id
-                                    ? 'bg-primary text-white border-primary'
-                                    : 'bg-white text-gray-700 border-gray-300',
-                            ]"
-                        >
-                            {{ language.name }}
-                        </button>
+                    <div class="text-sm font-medium text-center text-gray-500 border-b border-gray-200 mb-4">
+                        <ul class="flex flex-wrap mb-2 overflow-x-auto gap-1">
+                            <li
+                                class="mr-2"
+                                v-for="language in languages"
+                                :key="language.id"
+                            >
+                                <a
+                                    href="#"
+                                    @click.prevent="activeLanguageId = language.id"
+                                    :class="[
+                                        'inline-block rounded font-FuturaMdCnBT px-5 py-2 lg:text-lg md:text-base sm:text-base text-base hover:bg-blue-100 border border-primary text-center hover:border-blue-500 hover:text-blue-600',
+                                        activeLanguageId === language.id
+                                            ? 'bg-primary text-white'
+                                            : '',
+                                    ]"
+                                >
+                                    {{ language.name }}
+                                </a>
+                            </li>
+                        </ul>
                     </div>
 
                     <div v-if="activeLanguageId" class="space-y-8">
@@ -51,16 +57,31 @@
                             :key="section.key"
                             class="border rounded-md"
                         >
-                            <div class="flex items-center justify-between bg-primary px-4 py-2 text-white">
+                            <div
+                                class="flex items-center justify-between bg-primary px-4 py-2 text-white cursor-pointer"
+                                @click="toggleSection(section.key)"
+                            >
                                 <h4 class="font-semibold">
                                     {{ section.title }}
                                 </h4>
-                                <span class="text-xs opacity-80">
-                                    {{ section.features.length }} items
+                                <span class="flex items-center text-xs opacity-80 gap-2">
+                                    <span>{{ section.features.length }} items</span>
+                                    <svg
+                                        class="w-4 h-4 transform transition-transform duration-150"
+                                        :class="isSectionOpen(section.key) ? 'rotate-180' : ''"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
                                 </span>
                             </div>
 
-                            <div class="divide-y">
+                            <div
+                                v-if="isSectionOpen(section.key)"
+                                class="divide-y"
+                            >
                                 <div
                                     v-for="feature in section.features"
                                     :key="feature.id"
@@ -71,23 +92,11 @@
                                             <p class="font-semibold text-gray-800">
                                                 {{ feature.slug }}
                                             </p>
-                                            <p class="text-xs text-gray-500">
-                                                ID: {{ feature.id }}
-                                            </p>
+                                            
                                         </div>
-                                        <button
-                                            type="button"
-                                            class="text-xs text-primary hover:underline"
-                                            @click="toggleFeature(feature.id)"
-                                        >
-                                            {{ isOpen(feature.id) ? 'Hide' : 'Show' }} details
-                                        </button>
                                     </div>
 
-                                    <div
-                                        v-if="isOpen(feature.id)"
-                                        class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4"
-                                    >
+                                    <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">
                                                 Name
@@ -109,27 +118,20 @@
                                                 v-model="feature._editing.tooltip"
                                             />
                                         </div>
-
-                                        <div class="md:col-span-2 flex justify-end gap-2">
-                                            <button
-                                                type="button"
-                                                class="px-3 py-1 text-sm border border-gray-300 rounded text-gray-700 hover:bg-gray-100"
-                                                @click="resetFeature(feature.id)"
-                                            >
-                                                Reset
-                                            </button>
-                                            <button
-                                                type="button"
-                                                class="px-4 py-1.5 text-sm rounded bg-primary text-white hover:bg-blue-700 disabled:opacity-50"
-                                                :disabled="feature._saving"
-                                                @click="saveFeature(feature)"
-                                            >
-                                                {{ feature._saving ? 'Saving...' : 'Save' }}
-                                            </button>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <button
+                                type="button"
+                                class="px-6 py-2 text-sm rounded bg-primary text-white hover:bg-blue-700 disabled:opacity-50"
+                                :disabled="savingAll"
+                                @click="saveAll"
+                            >
+                                {{ savingAll ? 'Saving...' : 'Save' }}
+                            </button>
                         </div>
                     </div>
 
@@ -155,8 +157,9 @@ export default {
             languages: [],
             activeLanguageId: null,
             featuresByLanguage: {},
-            openFeatureIds: [],
             loading: false,
+            savingAll: false,
+            openSectionKeys: [],
         };
     },
     computed: {
@@ -301,53 +304,64 @@ export default {
 
             this.featuresByLanguage = byLang;
         },
-        isOpen(id) {
-            return this.openFeatureIds.includes(id);
+        isSectionOpen(key) {
+            return this.openSectionKeys.includes(key);
         },
-        toggleFeature(id) {
-            if (this.isOpen(id)) {
-                this.openFeatureIds = this.openFeatureIds.filter(
-                    (x) => x !== id
+        toggleSection(key) {
+            if (this.isSectionOpen(key)) {
+                this.openSectionKeys = this.openSectionKeys.filter(
+                    (k) => k !== key
                 );
             } else {
-                this.openFeatureIds.push(id);
+                this.openSectionKeys.push(key);
             }
         },
-        resetFeature(id) {
-            const list = this.filteredFeatures;
-            const feature = list.find((f) => f.id === id);
-            if (!feature) return;
-            feature._editing.name = feature.name;
-            feature._editing.tooltip = feature.tooltip ?? "";
-        },
-        async saveFeature(feature) {
-            feature._saving = true;
+        async saveAll() {
+            const items = [];
+
+            Object.values(this.featuresByLanguage).forEach((list) => {
+                list.forEach((feature) => {
+                    items.push({
+                        id: feature.id,
+                        name: feature._editing.name,
+                        tooltip: feature._editing.tooltip,
+                    });
+                });
+            });
+
+            if (!items.length) {
+                return;
+            }
+
+            this.savingAll = true;
             try {
-                const payload = {
-                    name: feature._editing.name,
-                    tooltip: feature._editing.tooltip,
-                };
                 const res = await axios.post(
-                    `${process.env.MIX_ADMIN_API_URL}features-setting-details/${feature.id}`,
-                    payload
+                    `${process.env.MIX_ADMIN_API_URL}features-setting-details-bulk`,
+                    { items }
                 );
                 if (res?.data?.status === "Success") {
-                    feature.name = feature._editing.name;
-                    feature.tooltip = feature._editing.tooltip;
+                    Object.values(this.featuresByLanguage).forEach((list) => {
+                        list.forEach((feature) => {
+                            feature.name = feature._editing.name;
+                            feature.tooltip = feature._editing.tooltip;
+                        });
+                    });
                     if (window?.helper?.swalSuccessMessage) {
-                        helper.swalSuccessMessage("Feature updated successfully.");
+                        helper.swalSuccessMessage(
+                            "All feature changes saved successfully."
+                        );
                     }
                 } else if (window?.helper?.swalErrorMessage) {
                     helper.swalErrorMessage(
-                        res?.data?.message || "Unable to update feature."
+                        res?.data?.message || "Unable to save changes."
                     );
                 }
             } catch (e) {
                 if (window?.helper?.swalErrorMessage) {
-                    helper.swalErrorMessage("Unable to update feature.");
+                    helper.swalErrorMessage("Unable to save changes.");
                 }
             } finally {
-                feature._saving = false;
+                this.savingAll = false;
             }
         },
     },

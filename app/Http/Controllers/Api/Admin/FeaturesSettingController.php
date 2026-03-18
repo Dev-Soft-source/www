@@ -661,6 +661,28 @@ class FeaturesSettingController extends Controller
         );
     }
 
+    public function bulkUpdateDetails(Request $request)
+    {
+        $payload = $this->validate(
+            $request,
+            [
+                'items' => ['required', 'array'],
+                'items.*.id' => ['required', 'integer', 'exists:features_setting_detail,id'],
+                'items.*.name' => ['required', 'string'],
+                'items.*.tooltip' => ['nullable', 'string'],
+            ]
+        );
+
+        foreach ($payload['items'] as $item) {
+            FeaturesSettingDetail::whereKey($item['id'])->update([
+                'name' => $item['name'],
+                'tooltip' => $item['tooltip'] ?? null,
+            ]);
+        }
+
+        return $this->successResponse([], 'Feature details updated successfully.');
+    }
+
     /**
      * Upload features settings via Excel file.
      * All-languages mode: no language_id, Excel has Field Name + one column per language.
