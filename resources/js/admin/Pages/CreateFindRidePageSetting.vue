@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <AppLayout>
                 <div class="relative shadow-md sm:rounded-lg bg-white py-4">
                     <header class="pt-4">
@@ -2793,6 +2793,35 @@
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
+                                                    <label :for="`luggage_any_label_${activeLanguageId}`">Luggage
+                                                        "Any" label</label>
+                                                </div>
+                                                <input type="text" :name="`luggage_any_label_${activeLanguageId}`"
+                                                    :id="`luggage_any_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'luggage_any_label'
+                                                    )
+                                                        " @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'luggage_any_label'
+                                                        )
+                                                        " />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `luggage_any_label.luggage_any_label_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                    `luggage_any_label.luggage_any_label_${activeLanguageId}`
+                                                )
+                                                    "></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
                                                     <label :for="`smoking_label_${activeLanguageId}`">Smoking
                                                         label</label>
                                                 </div>
@@ -2822,6 +2851,35 @@
                                         <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
+                                                    <label :for="`smoking_any_label_${activeLanguageId}`">Smoking
+                                                        "Any" label</label>
+                                                </div>
+                                                <input type="text" :name="`smoking_any_label_${activeLanguageId}`"
+                                                    :id="`smoking_any_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'smoking_any_label'
+                                                    )
+                                                        " @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'smoking_any_label'
+                                                        )
+                                                        " />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `smoking_any_label.smoking_any_label_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                    `smoking_any_label.smoking_any_label_${activeLanguageId}`
+                                                )
+                                                    "></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
                                                     <label :for="`pets_allowed_label_${activeLanguageId}`">Pets
                                                         label</label>
                                                 </div>
@@ -2845,6 +2903,35 @@
                                                 )
                                             " v-text="validationErros.get(
                                                     `pets_allowed_label.pets_allowed_label_${activeLanguageId}`
+                                                )
+                                                    "></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`pets_any_label_${activeLanguageId}`">Pets
+                                                        "Any" label</label>
+                                                </div>
+                                                <input type="text" :name="`pets_any_label_${activeLanguageId}`"
+                                                    :id="`pets_any_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" " :value="getCurrentValue(
+                                                        'pets_any_label'
+                                                    )
+                                                        " @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'pets_any_label'
+                                                        )
+                                                        " />
+                                            </div>
+                                            <p class="mt-2 text-sm text-red-400" v-if="
+                                                validationErros.has(
+                                                    `pets_any_label.pets_any_label_${activeLanguageId}`
+                                                )
+                                            " v-text="validationErros.get(
+                                                    `pets_any_label.pets_any_label_${activeLanguageId}`
                                                 )
                                                     "></p>
                                         </div>
@@ -3464,10 +3551,13 @@ export default {
                             this.handleInput("", language, "ride_features_option17");
                             this.handleInput("", language, "luggage_label");
                             this.handleInput("", language, "luggage_placeholder");
+                            this.handleInput("", language, "luggage_any_label");
                             this.handleInput("", language, "smoking_label");
+                            this.handleInput("", language, "smoking_any_label");
                             this.handleInput("", language, "smoking_option1");
                             this.handleInput("", language, "smoking_option2");
                             this.handleInput("", language, "pets_allowed_label");
+                            this.handleInput("", language, "pets_any_label");
                             this.handleInput("", language, "pets_allowed_option1");
                             this.handleInput("", language, "pets_allowed_option2");
                             this.handleInput("", language, "pets_allowed_option3");
@@ -4013,9 +4103,19 @@ export default {
                                 "luggage_placeholder"
                             );
                             this.handleInput(
+                                setting?.luggage_any_label,
+                                setting?.language,
+                                "luggage_any_label"
+                            );
+                            this.handleInput(
                                 setting?.smoking_label,
                                 setting?.language,
                                 "smoking_label"
+                            );
+                            this.handleInput(
+                                setting?.smoking_any_label,
+                                setting?.language,
+                                "smoking_any_label"
                             );
                             this.handleInput(
                                 setting?.smoking_option1,
@@ -4031,6 +4131,11 @@ export default {
                                 setting?.pets_allowed_label,
                                 setting?.language,
                                 "pets_allowed_label"
+                            );
+                            this.handleInput(
+                                setting?.pets_any_label,
+                                setting?.language,
+                                "pets_any_label"
                             );
                             this.handleInput(
                                 setting?.pets_allowed_option1,
