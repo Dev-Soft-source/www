@@ -99,7 +99,7 @@ class StudentPageSettingTemplateExport implements FromCollection, WithHeadings, 
 
     protected function getFields(): array
     {
-        return ['name','meta_keywords','meta_description','main_heading','sub_heading','page_description'];
+        return ['name','meta_keywords','meta_description','main_heading','sub_heading','page_description','success_upload_card_label','success_upload_card_title','different_copy_label','expire_student_card_label'];
     }
 }
 

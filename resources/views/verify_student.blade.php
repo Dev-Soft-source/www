@@ -219,16 +219,14 @@
                             </svg>
                         </div>
                         <div class="text-center sm:text-left">
-                            <h3 class="text-xl font-bold text-emerald-800 animate__animated animate__fadeIn">Student Card
-                                Approved!</h3>
-                            <p class="text-emerald-700 mt-1">Thank you for uploading your student card. You're all set to
-                                enjoy student benefits.</p>
+                            <h3 class="text-xl font-bold text-emerald-800 animate__animated animate__fadeIn">{{ $studentCardPage->success_upload_card_title ?? 'Student Card Approved!' }}</h3>
+                            <p class="text-emerald-700 mt-1">{{ $studentCardPage->success_upload_card_label ?? 'Thank you for uploading your student card. You\'re all set to enjoy student benefits.' }} </p>
                         </div>
                     </div>
                 </div>
             @elseif ($user->student == 1 && \Carbon\Carbon::parse($user->student_card_exp_date) <= now())
                 <div class="mt-4 rounded-lg px-6 py-3 bg-red-100 text-gray-600" role="alert">
-                    Your student card has been expired.
+                    {{ $studentCardPage->expire_student_card_label ?? 'Your student card has been expired.' }}
                 </div>
             @else
                 <p class="text-gray-900 mt-3">
@@ -263,7 +261,7 @@
                                                 @endisset
                                             </label>
                                         @else
-                                            <label for="">Use a different copy</label>
+                                            <label for="">{{ $studentCardPage->different_copy_label ?? 'Use a different copy' }}</label>
                                         @endif
                                     </p>
                                     <p class="text-sm lg:text-base text-gray-900 font-normal">

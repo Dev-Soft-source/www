@@ -415,6 +415,182 @@
                                                 "
                                             ></p>
                                         </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`success_upload_card_title_${activeLanguageId}`"
+                                                        >Success upload card title</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`success_upload_card_title_${activeLanguageId}`"
+                                                    :id="`success_upload_card_title_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'success_upload_card_title'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'success_upload_card_title'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `success_upload_card_title.success_upload_card_title_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `success_upload_card_title.success_upload_card_title_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`success_upload_card_label_${activeLanguageId}`"
+                                                        >Success upload card label</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`success_upload_card_label_${activeLanguageId}`"
+                                                    :id="`success_upload_card_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'success_upload_card_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'success_upload_card_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `success_upload_card_label.success_upload_card_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `success_upload_card_label.success_upload_card_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`different_copy_label_${activeLanguageId}`"
+                                                        >Different copy label</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`different_copy_label_${activeLanguageId}`"
+                                                    :id="`different_copy_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'different_copy_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'different_copy_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `different_copy_label.different_copy_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `different_copy_label.different_copy_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`expire_student_card_label_${activeLanguageId}`"
+                                                        >Expire student card label</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`expire_student_card_label_${activeLanguageId}`"
+                                                    :id="`expire_student_card_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'expire_student_card_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'expire_student_card_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `expire_student_card_label.expire_student_card_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `expire_student_card_label.expire_student_card_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
                                     </div>
                                 </div>
                                 <!-- about section end -->
@@ -532,6 +708,26 @@ export default {
                                 language,
                                 "page_description"
                             );
+                            this.handleInput(
+                                "",
+                                language,
+                                "success_upload_card_label"
+                            );
+                            this.handleInput(
+                                "",
+                                language,
+                                "success_upload_card_title"
+                            );
+                            this.handleInput(
+                                "",
+                                language,
+                                "different_copy_label"
+                            );
+                            this.handleInput(
+                                "",
+                                language,
+                                "expire_student_card_label"
+                            );
                         });
                         this.fetchStudentPageSetting();
                     }
@@ -579,6 +775,26 @@ export default {
                                 setting?.page_description,
                                 setting?.language,
                                 "page_description",
+                            );
+                            this.handleInput(
+                                setting?.success_upload_card_label,
+                                setting?.language,
+                                "success_upload_card_label"
+                            );
+                            this.handleInput(
+                                setting?.success_upload_card_title,
+                                setting?.language,
+                                "success_upload_card_title"
+                            );
+                            this.handleInput(
+                                setting?.different_copy_label,
+                                setting?.language,
+                                "different_copy_label"
+                            );
+                            this.handleInput(
+                                setting?.expire_student_card_label,
+                                setting?.language,
+                                "expire_student_card_label"
                             );
                         });
                     }
@@ -635,6 +851,18 @@ export default {
                 ) ||
                 validationErros.has(
                     `page_description.page_description_${language.id}`
+                ) ||
+                validationErros.has(
+                    `success_upload_card_label.success_upload_card_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `success_upload_card_title.success_upload_card_title_${language.id}`
+                ) ||
+                validationErros.has(
+                    `different_copy_label.different_copy_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `expire_student_card_label.expire_student_card_label_${language.id}`
                 )
             );
         },
