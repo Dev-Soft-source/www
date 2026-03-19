@@ -56,7 +56,7 @@
             <div class="flex justify-between">
                 <div class="pt-4">
                     <p class="text-gray-900">
-                        {{ $editProfilePage->edit_profile_text ?? 'Manage your profile details below. A government-issued photo ID is required to <strong>book or post</strong> Pink Rides or Extra+ Rides; <strong>additionally</strong>, drivers posting these rides must provide their residential address.' }}
+                        {!! $editProfilePage->edit_profile_text ?? 'Manage your profile details below. A government-issued photo ID is required to <strong>book or post</strong> Pink Rides or Extra+ Rides; <strong>additionally</strong>, drivers posting these rides must provide their residential address.' !!}
                     </p>
                     <p class="text-base md:text-lg font-medium text-red-500">{{ $siteText['required_fields_label'] ?? '* Indicates required fields' }}</p>
                 </div>

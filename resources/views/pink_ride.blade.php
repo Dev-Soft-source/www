@@ -10,23 +10,30 @@
             overflow: hidden;
             box-shadow: 0 4px 14px rgba(3, 105, 161, 0.08);
         }
+
         .pink-ride-faq__header {
-            background: linear-gradient(135deg,rgb(255, 255, 255) 0%,rgb(172, 186, 194) 100%);
+            background: linear-gradient(135deg, rgb(255, 255, 255) 0%, rgb(172, 186, 194) 100%);
             color: #fff;
             padding: 1rem 1.25rem;
-            border-bottom: 1px solid rgba(255,255,255,0.15);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
         }
+
         .pink-ride-faq__body {
             background: #f0f9ff;
             padding: 0.75rem;
         }
+
         .pink-ride-faq__item {
             margin-bottom: 0.5rem;
             border-radius: 0.5rem;
             overflow: hidden;
             border: 1px solid rgba(3, 105, 161, 0.2);
         }
-        .pink-ride-faq__item:last-child { margin-bottom: 0; }
+
+        .pink-ride-faq__item:last-child {
+            margin-bottom: 0;
+        }
+
         .pink-ride-faq__question {
             width: 100%;
             text-align: left;
@@ -41,24 +48,29 @@
             font-family: inherit;
             border-radius: 0.5rem;
         }
+
         .pink-ride-faq__question:hover {
             background: #eff6ff;
             color: #0369a1;
         }
+
         .pink-ride-faq__question[aria-expanded="true"] {
             background: #0369a1;
             color: #fff;
             border-radius: 0.5rem 0.5rem 0 0;
         }
+
         .pink-ride-faq__question[aria-expanded="true"]:hover {
             background: #0284c7;
             color: #fff;
         }
+
         .pink-ride-faq__answer {
             overflow: hidden;
             height: 0;
             transition: height 0.35s ease-out;
         }
+
         .pink-ride-faq__answer-inner {
             padding: 1rem 1.25rem;
             background: #fff;
@@ -73,35 +85,38 @@
 @endsection
 
 @section('content')
-
     @if (session('success'))
         <div id="my-modal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                    <div class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal()"></div>
-                          <div class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                            <button onclick="closeModal()" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                              </button>
-                            <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                        <div class="sm:flex sm:items-start justify-center">
-                            <!-- <div
-                                class="mx-auto h-16 w-16">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                </svg>
-                            </div> -->
+            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                <div
+                    class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal()"></div>
+                    <div
+                        class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                        <button onclick="closeModal()"
+                            class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                            <div class="sm:flex sm:items-start justify-center">
+                                <!-- <div
+                                    class="mx-auto h-16 w-16">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                </div> -->
+                            </div>
+                            <div class="">
+                                <p class="can-exp-p text-center">{!! session('success') !!}</p>
+                            </div>
                         </div>
-                        <div class="">
-                          <p class="can-exp-p text-center">{!! session('success') !!}</p>
-                        </div>
-                    </div>
                         <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                            <a href=""
-                                class="button-exp-fill">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
+                            <a href="" class="button-exp-fill">{{ $siteText['close_btn_text'] ?? 'Close' }}</a>
                         </div>
                     </div>
                 </div>
@@ -119,11 +134,11 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div
-                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                    </svg>
-                                </div> -->
+                                        class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                            <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                        </svg>
+                                    </div> -->
                             </div>
                             <div class="text-center">
                                 <div class="w-full">
@@ -145,7 +160,7 @@
         <div class="border-b border-gray-400">
             <div class="flex gap-2">
                 <div class="bg-white rounded-md p-1 h-16 w-16 flex justify-center items-center">
-                    <img class="" src="{{asset('/images/pinkrider.png')}}" alt="">
+                    <img class="" src="{{ asset('/images/pinkrider.png') }}" alt="">
                 </div>
                 <h1 class="text-pink-600">
                     Pink Rides
@@ -166,21 +181,24 @@
                     {!! $findRidePage->pink_ride_description !!}
                 @endisset
             </p>
-        </div> 
+        </div>
         <div class="mt-6 grid grid-cols-1 lg:grid-cols-4 gap-x-0 lg:gap-x-4 gap-4">
             <div>
-            <div class="search-filter-container flex flex-col relative">
-                <button id="search-filter-toggle"
-                    class="search-filter-toggle button-exp-fill flex items-center justify-center ml-auto gap-1 w-40 shadow lg:hidden">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
-                    </svg>
-                    <span class="text-xl">
-                    {{ $siteText['search_filters_btn_text'] ?? 'Search filters' }}
-                    </span>
-                </button>
+                <div class="search-filter-container flex flex-col relative">
+                    <button id="search-filter-toggle"
+                        class="search-filter-toggle button-exp-fill flex items-center justify-center ml-auto gap-1 w-40 shadow lg:hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+                        </svg>
+                        <span class="text-xl">
+                            {{ $siteText['search_filters_btn_text'] ?? 'Search filters' }}
+                        </span>
+                    </button>
 
-                <div id="search-filter-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40 lg:hidden"></div>
+                    <div id="search-filter-overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40 lg:hidden">
+                    </div>
                     <div id="search-filter"
                         class="search-filter fixed top-0 right-0 h-full overflow-y-auto bg-white w-11/12 sm:w-96 lg:w-full transform translate-x-full lg:translate-x-0 lg:static lg:shadow-3xl lg:h-auto transition-transform duration-300 z-40">
                         <button id="search-filter-close"
@@ -190,71 +208,76 @@
                         <div
                             class="search-filter-menu bg-white border lg:border-none rounded pt-12 p-4 lg:p-0 border-gray-200 w-full shadow">
 
-                        <div class="">
-                            <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
-                                    <div class="bg-primary text-white font-medium text-xl flex items-center justify-center gap-2 p-4">
+                            <div class="">
+                                <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
+                                    <div
+                                        class="bg-primary text-white font-medium text-xl flex items-center justify-center gap-2 p-4">
                                         <div class="flex items-center justify-center h-8 w-8 rounded-full bg-white">
-                                            <img class="w-6 h-6 rounded-full" src="{{ asset('assets/filter.png') }}" alt="">
+                                            <img class="w-6 h-6 rounded-full" src="{{ asset('assets/filter.png') }}"
+                                                alt="">
                                         </div>
                                         @isset($findRidePage->filter_section_heading)
-                                        {{ $findRidePage->filter_section_heading }}
+                                            {{ $findRidePage->filter_section_heading }}
                                         @endisset
                                     </div>
                                     <div class="bg-white p-4">
                                         <div class="divide-y mb-2">
-                                                @php
-                                                    $features_check = isset($_GET['features']) ? explode(';', $_GET['features']) : [];
-                                                @endphp
-                                                @isset($findRidePage->ride_features_option1->features_setting_id)
+                                            @php
+                                                $features_check = isset($_GET['features'])
+                                                    ? explode(';', $_GET['features'])
+                                                    : [];
+                                            @endphp
+                                            @isset($findRidePage->ride_features_option1->features_setting_id)
                                                 <div class="flex items-start justify-between p-3">
                                                     <label for="pink-ride" class="text-gray-900 flex space-x-1">
                                                         <span class="text-pink-600 text-lg">
                                                             {{ $findRidePage->ride_features_option1->name }}
                                                         </span>
                                                         <!-- <div class="sups relative">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                                fill="currentColor" class="bi bi-info-circle-fill text-gray-900 peer"
-                                                                viewBox="0 0 16 16">
-                                                                <path
-                                                                    d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                                                            </svg>
-                                                            <div
-                                                                class="absolute right-32 tooltip -top-12 group-hover:flex hidden peer-hover:flex">
-                                                                <div role="tooltip"
-                                                                    class="absolute tooltiptext_icon after:right-1/2 -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded w-64 px-4">
-                                                                    <p class="text-white font-semibold leading-none text-sm lg:text-base">
-                                                                        tooltip text
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </div> -->
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                                        fill="currentColor" class="bi bi-info-circle-fill text-gray-900 peer"
+                                                                        viewBox="0 0 16 16">
+                                                                        <path
+                                                                            d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                                    </svg>
+                                                                    <div
+                                                                        class="absolute right-32 tooltip -top-12 group-hover:flex hidden peer-hover:flex">
+                                                                        <div role="tooltip"
+                                                                            class="absolute tooltiptext_icon after:right-1/2 -left-1/2 -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-blue-500  border border-blue-500 text-gray-600 rounded w-64 px-4">
+                                                                            <p class="text-white font-semibold leading-none text-sm lg:text-base">
+                                                                                tooltip text
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div> -->
                                                     </label>
-                                                    <input id="pink-ride" type="checkbox" value="{{ $findRidePage->ride_features_option1->features_setting_id }}"
+                                                    <input id="pink-ride" type="checkbox"
+                                                        value="{{ $findRidePage->ride_features_option1->features_setting_id }}"
                                                         checked disabled
                                                         class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
                                                 </div>
-                                                @endisset
-                                                @isset($findRidePage->ride_features_option2->features_setting_id)
+                                            @endisset
+                                            @isset($findRidePage->ride_features_option2->features_setting_id)
                                                 <div class="flex items-start justify-between p-3">
                                                     <label for="Extra+" class="text-gray-900 flex space-x-1">
                                                         <span class="text-indigo-600 text-lg">
                                                             {{ $findRidePage->ride_features_option2->name }}
                                                         </span>
                                                         <!-- <div class="sups">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                                fill="currentColor" class="bi bi-info-circle-fill text-gray-900"
-                                                                viewBox="0 0 16 16">
-                                                                <path
-                                                                    d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                                                            </svg>
-                                                        </div> -->
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                                        fill="currentColor" class="bi bi-info-circle-fill text-gray-900"
+                                                                        viewBox="0 0 16 16">
+                                                                        <path
+                                                                            d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                                    </svg>
+                                                                </div> -->
                                                     </label>
                                                     <input id="Extra+" type="checkbox"
                                                         value="{{ $findRidePage->ride_features_option2->features_setting_id }}"
                                                         {{ in_array($findRidePage->ride_features_option2->features_setting_id, $features_check) ? 'checked' : '' }}
                                                         class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
                                                 </div>
-                                                @endisset
+                                            @endisset
                                         </div>
                                         <div class="space-y-4 mb-4">
                                             <h3 for="keyword" class="text-primary text-2xl xl:text-3xl">
@@ -264,7 +287,7 @@
                                             </h3>
 
                                             <textarea id="keyword"
-                                            class="bg-gray-100 border-0 text-black text-base md:text-lg rounded italic focus:outline-none focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none overflow-hidden"
+                                                class="bg-gray-100 border-0 text-black text-base md:text-lg rounded italic focus:outline-none focus:ring-1 focus:ring-sky-500 block w-full p-2.5 resize-none overflow-hidden"
                                                 @isset($findRidePage->search_section_keyword_placeholder)
                                                     placeholder="{{ $findRidePage->search_section_keyword_placeholder }}"
                                                 @endisset></textarea>
@@ -275,89 +298,100 @@
                                                     {{ $findRidePage->filter1_driver_heading }}
                                                 @endisset
                                             </h3>
-                                        <div>
-                                            <label for="type" class="block mb-2 font-medium text-gray-900">
-                                                @isset($findRidePage->driver_age_label)
-                                                    {{ $findRidePage->driver_age_label }}
-                                                @endisset
-                                            </label>
-                                            <div class="mt-2">
-                                                <select id="driverAge" name=""
-                                                    class="bg-gray-100 border-0 text-gray-500 rounded text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
-                                                    {{-- onchange="navigateToSearchRoute()" --}}
-                                                    >
-                                                    <option value="0" {{ $request->driver_age == 0 ? 'selected' : '' }}>
-                                                        @isset($findRidePage->driver_age_placeholder)
-                                                            {{ $findRidePage->driver_age_placeholder }}
-                                                        @endisset
-                                                    </option>
-                                                    <option {{ $request->driver_age == 20 ? 'selected' : '' }}>20</option>
-                                                    <option {{ $request->driver_age == 30 ? 'selected' : '' }}>30</option>
-                                                    <option {{ $request->driver_age == 40 ? 'selected' : '' }}>40</option>
-                                                    <option {{ $request->driver_age == 50 ? 'selected' : '' }}>50</option>
-                                                    <option {{ $request->driver_age == 60 ? 'selected' : '' }}>60</option>
-                                                </select>
+                                            <div>
+                                                <label for="type" class="block mb-2 font-medium text-gray-900">
+                                                    @isset($findRidePage->driver_age_label)
+                                                        {{ $findRidePage->driver_age_label }}
+                                                    @endisset
+                                                </label>
+                                                <div class="mt-2">
+                                                    <select id="driverAge" name=""
+                                                        class="bg-gray-100 border-0 text-gray-500 rounded text-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                                        {{-- onchange="navigateToSearchRoute()" --}}>
+                                                        <option value="0"
+                                                            {{ $request->driver_age == 0 ? 'selected' : '' }}>
+                                                            @isset($findRidePage->driver_age_placeholder)
+                                                                {{ $findRidePage->driver_age_placeholder }}
+                                                            @endisset
+                                                        </option>
+                                                        <option {{ $request->driver_age == 20 ? 'selected' : '' }}>20
+                                                        </option>
+                                                        <option {{ $request->driver_age == 30 ? 'selected' : '' }}>30
+                                                        </option>
+                                                        <option {{ $request->driver_age == 40 ? 'selected' : '' }}>40
+                                                        </option>
+                                                        <option {{ $request->driver_age == 50 ? 'selected' : '' }}>50
+                                                        </option>
+                                                        <option {{ $request->driver_age == 60 ? 'selected' : '' }}>60
+                                                        </option>
+                                                    </select>
+                                                </div>
                                             </div>
-                                        </div>
-                                        
-                                        <div>
-                                            <label for="type" class="block mb-2 font-medium text-gray-900">
-                                                @isset($findRidePage->driver_rating_label)
-                                                    {{ $findRidePage->driver_rating_label }}
-                                                @endisset
-                                            </label>
-                                            <div class="mt-2">
-                                                <select id="driverRating" name=""
-                                                    class="bg-gray-100 border-0 text-gray-500 text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
-                                                    {{-- onchange="navigateToSearchRoute()" --}}
-                                                    >
-                                                    <option value="0" {{ $request->driver_rating == 0 ? 'selected' : '' }}>
-                                                        @isset($findRidePage->driver_rating_placeholder)
-                                                            {{ $findRidePage->driver_rating_placeholder }}
-                                                        @endisset
-                                                    </option>
-                                                    <option value="4.5" {{ $request->driver_rating == 4.5 ? 'selected' : '' }}>5</option>
-                                                    <option value="4" {{ $request->driver_rating == 4 ? 'selected' : '' }}>4</option>
-                                                    <option value="3" {{ $request->driver_rating == 3 ? 'selected' : '' }}>3</option>
-                                                    <option value="2" {{ $request->driver_rating == 2 ? 'selected' : '' }}>2</option>
-                                                    <option value="1" {{ $request->driver_rating == 1 ? 'selected' : '' }}>1</option>
-                                                </select>
+
+                                            <div>
+                                                <label for="type" class="block mb-2 font-medium text-gray-900">
+                                                    @isset($findRidePage->driver_rating_label)
+                                                        {{ $findRidePage->driver_rating_label }}
+                                                    @endisset
+                                                </label>
+                                                <div class="mt-2">
+                                                    <select id="driverRating" name=""
+                                                        class="bg-gray-100 border-0 text-gray-500 text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                                        {{-- onchange="navigateToSearchRoute()" --}}>
+                                                        <option value="0"
+                                                            {{ $request->driver_rating == 0 ? 'selected' : '' }}>
+                                                            @isset($findRidePage->driver_rating_placeholder)
+                                                                {{ $findRidePage->driver_rating_placeholder }}
+                                                            @endisset
+                                                        </option>
+                                                        <option value="4.5"
+                                                            {{ $request->driver_rating == 4.5 ? 'selected' : '' }}>5
+                                                        </option>
+                                                        <option value="4"
+                                                            {{ $request->driver_rating == 4 ? 'selected' : '' }}>4</option>
+                                                        <option value="3"
+                                                            {{ $request->driver_rating == 3 ? 'selected' : '' }}>3</option>
+                                                        <option value="2"
+                                                            {{ $request->driver_rating == 2 ? 'selected' : '' }}>2</option>
+                                                        <option value="1"
+                                                            {{ $request->driver_rating == 1 ? 'selected' : '' }}>1</option>
+                                                    </select>
+                                                </div>
                                             </div>
-                                        </div>
-                                        
-                                        <div class="flex items-center space-x-2 mb-2 mr-2 lg:mr-2">
-                                            <input id="driverPhone" name="" type="checkbox"
-                                                {{ $request->driver_phone == 1 ? 'checked' : '' }}
-                                                class="h-4 w-4 border-gray-300 bg-white cursor-pointer text-indigo-600 focus:ring-indigo-600"
-                                                {{-- onchange="navigateToSearchRoute()" --}}
-                                                >
-                                            <label for="" class="block font-normal text-sm text-gray-900">
-                                                @isset($findRidePage->driver_phone_access_label)
-                                                    {{ $findRidePage->driver_phone_access_label }}
-                                                @endisset
-                                            </label>
-                                        </div>
-                                        
-                                        <div>
-                                            <label for="driverName" class="block mb-2 font-medium text-gray-900">
-                                                @isset($findRidePage->driver_know_label)
-                                                    {{ $findRidePage->driver_know_label }}
-                                                @endisset
-                                            </label>
-                                            <input type="text" id="driverName" value="{{ $request->driver_name }}"
-                                                class="bg-gray-100 border-0 text-gray-500 text-lg italic rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
-                                                @isset($findRidePage->driver_know_placeholder)
+
+                                            <div class="flex items-center space-x-2 mb-2 mr-2 lg:mr-2">
+                                                <input id="driverPhone" name="" type="checkbox"
+                                                    {{ $request->driver_phone == 1 ? 'checked' : '' }}
+                                                    class="h-4 w-4 border-gray-300 bg-white cursor-pointer text-indigo-600 focus:ring-indigo-600"
+                                                    {{-- onchange="navigateToSearchRoute()" --}}>
+                                                <label for="" class="block font-normal text-sm text-gray-900">
+                                                    @isset($findRidePage->driver_phone_access_label)
+                                                        {{ $findRidePage->driver_phone_access_label }}
+                                                    @endisset
+                                                </label>
+                                            </div>
+
+                                            <div>
+                                                <label for="driverName" class="block mb-2 font-medium text-gray-900">
+                                                    @isset($findRidePage->driver_know_label)
+                                                        {{ $findRidePage->driver_know_label }}
+                                                    @endisset
+                                                </label>
+                                                <input type="text" id="driverName"
+                                                    value="{{ $request->driver_name }}"
+                                                    class="bg-gray-100 border-0 text-gray-500 text-lg italic rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                                    @isset($findRidePage->driver_know_placeholder)
                                                 placeholder={{ $findRidePage->driver_know_placeholder }}
                                             @endisset>
-                                        </div>
+                                            </div>
                                         </div>
 
                                         <div class="space-y-4 mb-4">
-                                                <h3 class="text-primary">
-                                                    @isset($findRidePage->filter2_passengers_heading)
-                                                        {{ $findRidePage->filter2_passengers_heading }}
-                                                    @endisset
-                                                </h3>
+                                            <h3 class="text-primary">
+                                                @isset($findRidePage->filter2_passengers_heading)
+                                                    {{ $findRidePage->filter2_passengers_heading }}
+                                                @endisset
+                                            </h3>
                                             <div>
                                                 <label for="type" class="block mb-2 font-medium text-gray-900">
                                                     @isset($findRidePage->passengers_rating_label)
@@ -367,9 +401,9 @@
                                                 <div class="mt-2">
                                                     <select id="passengerRating" name=""
                                                         class="bg-gray-100 border-0 text-gray-500 text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
-                                                        {{-- onchange="navigateToSearchRoute()" --}}
-                                                        >
-                                                        <option value="" {{ $request->passenger_rating == '' ? 'selected' : '' }}>
+                                                        {{-- onchange="navigateToSearchRoute()" --}}>
+                                                        <option value=""
+                                                            {{ $request->passenger_rating == '' ? 'selected' : '' }}>
                                                             @isset($findRidePage->passengers_rating_placeholder)
                                                                 {{ $findRidePage->passengers_rating_placeholder }}
                                                             @endisset
@@ -378,7 +412,8 @@
                                                             <?php
                                                             $dynamicText = str_replace('passengers', 'co-passengers', $findRidePage->ride_features_option13->name);
                                                             ?>
-                                                            <option value="{{ $findRidePage->ride_features_option13->features_setting_id }}"
+                                                            <option
+                                                                value="{{ $findRidePage->ride_features_option13->features_setting_id }}"
                                                                 {{ $request->passenger_rating == $findRidePage->ride_features_option13->features_setting_id ? 'selected' : '' }}>
                                                                 {{ $dynamicText }}
                                                             </option>
@@ -387,7 +422,8 @@
                                                             <?php
                                                             $dynamicText = str_replace('passengers', 'co-passengers', $findRidePage->ride_features_option14->name);
                                                             ?>
-                                                            <option value="{{ $findRidePage->ride_features_option14->features_setting_id }}"
+                                                            <option
+                                                                value="{{ $findRidePage->ride_features_option14->features_setting_id }}"
                                                                 {{ $request->passenger_rating == $findRidePage->ride_features_option14->features_setting_id ? 'selected' : '' }}>
                                                                 {{ $dynamicText }}
                                                             </option>
@@ -396,7 +432,8 @@
                                                             <?php
                                                             $dynamicText = str_replace('passengers', 'co-passengers', $findRidePage->ride_features_option15->name);
                                                             ?>
-                                                            <option value="{{ $findRidePage->ride_features_option15->features_setting_id }}"
+                                                            <option
+                                                                value="{{ $findRidePage->ride_features_option15->features_setting_id }}"
                                                                 {{ $request->passenger_rating == $findRidePage->ride_features_option15->features_setting_id ? 'selected' : '' }}>
                                                                 {{ $dynamicText }}
                                                             </option>
@@ -405,7 +442,8 @@
                                                             <?php
                                                             $dynamicText = str_replace('passengers', 'co-passengers', $findRidePage->ride_features_option16->name);
                                                             ?>
-                                                            <option value="{{ $findRidePage->ride_features_option16->features_setting_id }}"
+                                                            <option
+                                                                value="{{ $findRidePage->ride_features_option16->features_setting_id }}"
                                                                 {{ $request->passenger_rating == $findRidePage->ride_features_option16->features_setting_id ? 'selected' : '' }}>
                                                                 {{ $dynamicText }}
                                                             </option>
@@ -430,8 +468,7 @@
                                                 <div class="mt-2">
                                                     <select id="payment-method" name=""
                                                         class="bg-gray-100 border-0 text-gray-500 text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
-                                                        {{-- onchange="navigateToSearchRoute()" --}}
-                                                        >
+                                                        {{-- onchange="navigateToSearchRoute()" --}}>
                                                         @isset($findRidePage->payment_methods_option1)
                                                             <option value=""
                                                                 {{ $request->payment_method == '' ? 'selected' : '' }}>
@@ -467,39 +504,40 @@
                                                 @endisset
                                             </h3>
                                             <div>
-                                            <label for="type" class="block mb-2 font-medium text-gray-900">
+                                                <label for="type" class="block mb-2 font-medium text-gray-900">
                                                     @isset($findRidePage->vehicle_type_label)
                                                         {{ $findRidePage->vehicle_type_label }}
                                                     @endisset
                                                 </label>
                                                 <div class="mt-2">
                                                     <select id="VehicleType" name=""
-                                                    class="bg-gray-100 border-0 text-gray-500 text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
-                                                    {{-- onchange="navigateToSearchRoute()" --}}
-                                                    >
-                                                        <option {{ $request->vehicle_type == '' ? 'selected' : '' }} value="">
+                                                        class="bg-gray-100 border-0 text-gray-500 text-lg rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5"
+                                                        {{-- onchange="navigateToSearchRoute()" --}}>
+                                                        <option {{ $request->vehicle_type == '' ? 'selected' : '' }}
+                                                            value="">
                                                             @isset($findRidePage->vehicle_type_placeholder)
                                                                 {{ $findRidePage->vehicle_type_placeholder }}
                                                             @endisset
                                                         </option>
                                                         @foreach ([
-                                                            'convertible' => 'Convertable',
-                                                            'hatchback' => 'Hatchback',
-                                                            'coupe' => 'Coupe',
-                                                            'minivan' => 'Minivan',
-                                                            'sedan' => 'Sedan',
-                                                            'station_wagon' => 'Station wagon',
-                                                            'suv' => 'SUV',
-                                                            'truck' => 'Truck',
-                                                            'van' => 'Van',
-                                                        ] as $key => $default)
+            'convertible' => 'Convertable',
+            'hatchback' => 'Hatchback',
+            'coupe' => 'Coupe',
+            'minivan' => 'Minivan',
+            'sedan' => 'Sedan',
+            'station_wagon' => 'Station wagon',
+            'suv' => 'SUV',
+            'truck' => 'Truck',
+            'van' => 'Van',
+        ] as $key => $default)
                                                             @php
                                                                 $valueProperty = 'vehicle_type_' . $key . '_value';
                                                                 $textProperty = 'vehicle_type_' . $key . '_text';
                                                                 $value = $findRidePage->$valueProperty ?? $default;
                                                                 $text = $findRidePage->$textProperty ?? $default;
                                                             @endphp
-                                                            <option value="{{ $value }}" {{ (string) $request->vehicle_type === (string) $value ? 'selected' : '' }}>
+                                                            <option value="{{ $value }}"
+                                                                {{ (string) $request->vehicle_type === (string) $value ? 'selected' : '' }}>
                                                                 {{ $text }}
                                                             </option>
                                                         @endforeach
@@ -515,20 +553,24 @@
                                             </h3>
                                             <div class="border rounded-md overflow-hidden divide-y">
                                                 @php
-                                                    $features_check = isset($_GET['features']) ? explode(';', $_GET['features']) : [];
+                                                    $features_check = isset($_GET['features'])
+                                                        ? explode(';', $_GET['features'])
+                                                        : [];
                                                 @endphp
 
                                                 @foreach ($featureOptions as $featureOption)
-                                                <div class="flex items-start justify-between p-3">
-                                                    <label for="{{ $featureOption['slug'] }}" class="font-normal text-gray-900 flex space-x-1">
-                                                        <span class="text-lg">
-                                                            {{ $featureOption['label'] }}
-                                                        </span>
-                                                    </label>
-                                                    <input id="{{ $featureOption['slug'] }}" type="checkbox" value="{{ $featureOption['id'] }}"
-                                                        {{ in_array($featureOption['id'], $features_check) ? 'checked' : '' }}
-                                                        class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
-                                                </div>
+                                                    <div class="flex items-start justify-between p-3">
+                                                        <label for="{{ $featureOption['slug'] }}"
+                                                            class="font-normal text-gray-900 flex space-x-1">
+                                                            <span class="text-lg">
+                                                                {{ $featureOption['label'] }}
+                                                            </span>
+                                                        </label>
+                                                        <input id="{{ $featureOption['slug'] }}" type="checkbox"
+                                                            value="{{ $featureOption['id'] }}"
+                                                            {{ in_array($featureOption['id'], $features_check) ? 'checked' : '' }}
+                                                            class="ride-preferences w-4 h-4 ml-4 mt-1 text-blue-600 cursor-pointer bg-white border-gray-300 rounded focus:ring-blue-500  focus:ring-2">
+                                                    </div>
                                                 @endforeach
                                             </div>
                                         </div>
@@ -540,11 +582,14 @@
                                             </h3>
                                             <div class="border rounded-md overflow-hidden divide-y">
                                                 @php
-                                                    $luggages_check = isset($_GET['luggage']) ? explode(';', $_GET['luggage']) : [];
+                                                    $luggages_check = isset($_GET['luggage'])
+                                                        ? explode(';', $_GET['luggage'])
+                                                        : [];
                                                 @endphp
                                                 @isset($findRidePage->luggage_option1->features_setting_id)
                                                     <div class="flex items-center justify-between p-3">
-                                                        <label for="small-luggage" class="font-normal text-gray-900 flex space-x-1">
+                                                        <label for="small-luggage"
+                                                            class="font-normal text-gray-900 flex space-x-1">
                                                             <span class="text-lg">
                                                                 {{ $findRidePage->luggage_option1->name }}
                                                             </span>
@@ -557,7 +602,8 @@
                                                 @endisset
                                                 @isset($findRidePage->luggage_option2->features_setting_id)
                                                     <div class="flex items-center justify-between p-3">
-                                                        <label for="Medium-luggage" class="font-normal text-gray-900 flex space-x-1">
+                                                        <label for="Medium-luggage"
+                                                            class="font-normal text-gray-900 flex space-x-1">
                                                             <span class="text-lg">
                                                                 {{ $findRidePage->luggage_option2->name }}
                                                             </span>
@@ -570,7 +616,8 @@
                                                 @endisset
                                                 @isset($findRidePage->luggage_option3->features_setting_id)
                                                     <div class="flex items-center justify-between p-3">
-                                                        <label for="Large-luggage" class="font-normal text-gray-900 flex space-x-1">
+                                                        <label for="Large-luggage"
+                                                            class="font-normal text-gray-900 flex space-x-1">
                                                             <span class="text-lg">
                                                                 {{ $findRidePage->luggage_option3->name }}
                                                             </span>
@@ -583,7 +630,8 @@
                                                 @endisset
                                                 @isset($findRidePage->luggage_option4->features_setting_id)
                                                     <div class="flex items-center justify-between p-3">
-                                                        <label for="multiple-luggage" class="font-normal text-gray-900 flex space-x-1">
+                                                        <label for="multiple-luggage"
+                                                            class="font-normal text-gray-900 flex space-x-1">
                                                             <span class="text-lg">
                                                                 {{ $findRidePage->luggage_option4->name }}
                                                             </span>
@@ -596,7 +644,8 @@
                                                 @endisset
                                                 @isset($findRidePage->luggage_option5->features_setting_id)
                                                     <div class="flex items-center justify-between p-3">
-                                                        <label for="no-luggage" class="font-normal text-gray-900 flex space-x-1">
+                                                        <label for="no-luggage"
+                                                            class="font-normal text-gray-900 flex space-x-1">
                                                             <span class="text-lg">
                                                                 {{ $findRidePage->luggage_option5->name }}
                                                             </span>
@@ -617,11 +666,14 @@
                                             </h3>
                                             <div class="border rounded-md overflow-hidden divide-y">
                                                 @php
-                                                    $smoking_check = isset($_GET['smoking']) ? explode(';', $_GET['smoking']) : [];
+                                                    $smoking_check = isset($_GET['smoking'])
+                                                        ? explode(';', $_GET['smoking'])
+                                                        : [];
                                                 @endphp
                                                 @isset($findRidePage->smoking_option1->features_setting_id)
                                                     <div class="flex items-center justify-between p-3">
-                                                        <label for="indifferent" class="font-normal text-gray-900 flex space-x-1">
+                                                        <label for="indifferent"
+                                                            class="font-normal text-gray-900 flex space-x-1">
                                                             <span class="text-lg">
                                                                 {{ $findRidePage->smoking_option1->name }}
                                                             </span>
@@ -634,7 +686,8 @@
                                                 @endisset
                                                 @isset($findRidePage->smoking_option2->features_setting_id)
                                                     <div class="flex items-center justify-between p-3">
-                                                        <label for="no-smoking" class="font-normal text-gray-900 flex space-x-1">
+                                                        <label for="no-smoking"
+                                                            class="font-normal text-gray-900 flex space-x-1">
                                                             <span class="text-lg">
                                                                 {{ $findRidePage->smoking_option2->name }}
                                                             </span>
@@ -655,11 +708,14 @@
                                             </h3>
                                             <div class="border rounded-md overflow-hidden divide-y">
                                                 @php
-                                                    $pets_check = isset($_GET['pets']) ? explode(';', $_GET['pets']) : [];
+                                                    $pets_check = isset($_GET['pets'])
+                                                        ? explode(';', $_GET['pets'])
+                                                        : [];
                                                 @endphp
                                                 @isset($findRidePage->pets_allowed_option1->features_setting_id)
                                                     <div class="flex items-center justify-between p-3">
-                                                        <label for="indifferent-pet" class="font-normal text-gray-900 flex space-x-1">
+                                                        <label for="indifferent-pet"
+                                                            class="font-normal text-gray-900 flex space-x-1">
                                                             <span class="text-lg">
                                                                 {{ $findRidePage->pets_allowed_option1->name }}
                                                             </span>
@@ -672,7 +728,8 @@
                                                 @endisset
                                                 @isset($findRidePage->pets_allowed_option2->features_setting_id)
                                                     <div class="flex items-center justify-between p-3">
-                                                        <label for="no-pet" class="font-normal text-gray-900 flex space-x-1">
+                                                        <label for="no-pet"
+                                                            class="font-normal text-gray-900 flex space-x-1">
                                                             <span class="text-lg">
                                                                 {{ $findRidePage->pets_allowed_option2->name }}
                                                             </span>
@@ -685,7 +742,8 @@
                                                 @endisset
                                                 @isset($findRidePage->pets_allowed_option3->features_setting_id)
                                                     <div class="flex items-center justify-between p-3">
-                                                        <label for="caged" class="font-normal text-gray-900 flex space-x-1">
+                                                        <label for="caged"
+                                                            class="font-normal text-gray-900 flex space-x-1">
                                                             <span class="text-lg">
                                                                 {{ $findRidePage->pets_allowed_option3->name }}
                                                             </span>
@@ -704,11 +762,16 @@
                                                 <input type="checkbox" id="hide-full-rides"
                                                     class="hide-full-rides w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 focus:ring-2 cursor-pointer"
                                                     {{ request('hide_full_rides') ? 'checked' : '' }}>
-                                                <span class="text-base font-medium">{{ $siteText['hide_full_ride_text'] ?? 'Hide Full Rides' }}</span>
+                                                <span
+                                                    class="text-base font-medium">{{ $findRidePage->hide_full_ride_text ?? 'Hide Full Rides' }}</span>
                                             </label>
                                         </div>
-                                        <button class="w-auto text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded" onclick="navigateToSearchRoute()">{{ $findRidePage->filter_search_btn_label }}</button>
-                                        <button class="w-auto text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded" onclick="resetFilters()">{{ $findRidePage->filter_close_btn_label }}</button>
+                                        <button
+                                            class="w-auto text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded"
+                                            onclick="navigateToSearchRoute()">{{ $findRidePage->filter_search_btn_label }}</button>
+                                        <button
+                                            class="w-auto text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded"
+                                            onclick="resetFilters()">{{ $findRidePage->filter_close_btn_label }}</button>
                                     </div>
                                 </div>
                             </div>
@@ -733,7 +796,9 @@
                                     @endisset>
                             </div>
                             <div class="absolute hidden mt-1 z-10" id="fromInputError">
-                                <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>
+                                <div
+                                    class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
+                                </div>
                             </div>
                         </div>
                         <div class="w-full md:w-[5%] md:bg-gray-200 md:h-12 flex items-center justify-center">
@@ -744,7 +809,8 @@
                         <div class="w-full md:w-[30%] relative">
                             <div class="relative">
                                 <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
-                                    <img src="{{ asset('images/new-21-search-bar-to.png') }}" class="w-4 h-6" alt="">
+                                    <img src="{{ asset('images/new-21-search-bar-to.png') }}" class="w-4 h-6"
+                                        alt="">
                                 </div>
                                 <input type="text" id="to_spot_0" value="{{ $request->to }}" autocomplete="off"
                                     class="bg-white pl-7 rounded-md md:rounded-none md:border-0 italic text-gray-900 focus:outline-none text-lg focus:border-sky-500 focus:ring-1 focus:ring-sky-500 block w-full p-2.5 border-x-0 border-t-0 border-gray-300"
@@ -753,7 +819,9 @@
                                     @endisset>
                             </div>
                             <div class="absolute hidden mt-1 z-10" id="toInputError">
-                                <div class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base"></div>
+                                <div
+                                    class="tooltip-error shadow-lg rounded p-2 bg-red-500 text-white text-sm lg:text-base">
+                                </div>
                             </div>
                         </div>
                         <div class="w-48 mx-auto md:mx-0 md:w-[30%]">
@@ -793,14 +861,19 @@
                             @endisset
                         </div>
                         @foreach ($recentSearches as $recentSearch)
-                            <div class="bg-white rounded-lg shadow-3xl border border-solid border-gray-100 cursor-pointer" onclick="SearchRoute('{{ $recentSearch->from }}', '{{ $recentSearch->to }}')">
+                            <div class="bg-white rounded-lg shadow-3xl border border-solid border-gray-100 cursor-pointer"
+                                onclick="SearchRoute('{{ $recentSearch->from }}', '{{ $recentSearch->to }}')">
                                 <div class="flex justify-between px-4">
                                     <div class="w-full">
                                         <div class="relative mt-5 text-left">
                                             <div class="flex items-center relative">
-                                                <div class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
-                                                    <span class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
-                                                        <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-from.png')}}" alt="">
+                                                <div
+                                                    class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
+                                                    <span
+                                                        class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
+                                                        <img class="w-5 h-5 object-contain"
+                                                            src="{{ asset('./images/new-21-search-bar-from.png') }}"
+                                                            alt="">
                                                     </span>
                                                 </div>
                                                 <div class="ml-20">
@@ -814,9 +887,13 @@
                                             </div>
 
                                             <div class="flex items-center relative">
-                                                <div class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
-                                                    <span class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[9px] absolute flex justify-center items-center">
-                                                        <img class="w-5 h-5 object-contain" src="{{ asset('./images/new-21-search-bar-to.png')}}" alt="">
+                                                <div
+                                                    class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
+                                                    <span
+                                                        class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[9px] absolute flex justify-center items-center">
+                                                        <img class="w-5 h-5 object-contain"
+                                                            src="{{ asset('./images/new-21-search-bar-to.png') }}"
+                                                            alt="">
                                                     </span>
                                                 </div>
                                                 <div class="ml-20">
@@ -836,13 +913,15 @@
                     @elseif ($paginatedRides && $paginatedRides->count() > 0)
                         @if ($paginatedRides->filter(fn($ride) => $ride->type === 'ride')->count() > 0)
                             <div class="flex flex-col items-center justify-center border-b border-gray-400">
-                                <h3 class="text-primary">{{ $findRidePage->search_results_pink_ride_label ?? 'Search results for ProximaRide' }}</h3>
+                                <h3 class="text-primary">
+                                    {{ $findRidePage->search_results_pink_ride_label ?? 'Search results for ProximaRide' }}
+                                </h3>
                             </div>
                             @foreach ($paginatedRides->filter(fn($ride) => $ride->type === 'ride') as $ride)
                                 <div class="relative even:bg-white odd:bg-gray-200 space-y-4 rounded-lg">
                                     <div class="absolute right-4 top-8">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                            viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor"
                                             class="w-6 h-6 -mt-4 cursor-pointer ride-remove-btn"
                                             data-ride-id="{{ $ride->id }}">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -854,22 +933,29 @@
                                             $user_id = auth()->user()->id;
 
                                             // Assuming $ratings is a collection
-                                            $filteredRatings = $ratings->where('status', 1)->where('type', '2')->filter(function ($rating) use ($user_id) {
-                                                // Check if booking exists and is not null before accessing user_id
-                                                return $rating->booking && $rating->booking->user_id === $user_id;
-                                            });
+                                            $filteredRatings = $ratings
+                                                ->where('status', 1)
+                                                ->where('type', '2')
+                                                ->filter(function ($rating) use ($user_id) {
+                                                    // Check if booking exists and is not null before accessing user_id
+                                                    return $rating->booking && $rating->booking->user_id === $user_id;
+                                                });
 
                                             $totalAverage = $filteredRatings->avg('average_rating') ?? 0;
                                         @endphp
                                     @endif
-                                    <a
-                                        @if ($ride->status === '2') href=""
-                                        @elseif (!auth()->user() || (auth()->user() &&
-                                            in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)) &&
-                                            auth()->user()->gender != 'female' && auth()->user()->address != ''))
+                                    <a @if ($ride->status === '2') href=""
+                                        @elseif (
+                                            !auth()->user() ||
+                                                (auth()->user() &&
+                                                    in_array(
+                                                        $findRidePage->ride_features_option1->features_setting_id ?? null,
+                                                        explode('=', $ride->features)) &&
+                                                    auth()->user()->gender != 'female' &&
+                                                    auth()->user()->address != ''))
                                             href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.female_user_message_long)"
                                         @elseif (auth()->user() &&
-                                            in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
+                                                in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
                                             @if ($filteredRatings->count() === 0 && auth()->user()->address == '')
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.complete_address_passenger_message)"
                                             @elseif ($filteredRatings->count() === 0 && auth()->user()->address !== '')
@@ -879,46 +965,37 @@
                                             @elseif ($totalAverage < 4.5 && auth()->user()->address == '')
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.star5_passenger_with_complete_address_message)"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
-                                            @endif
-                                        @elseif (auth()->user() &&
-                                            in_array('I only want passengers with reviews', explode('=', $ride->features)))
-                                            @if ($filteredRatings->count() === 0)
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.passenger_with_review_message)"
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}" @endif
+                                    @elseif (auth()->user() && in_array('I only want passengers with reviews', explode('=', $ride->features)))
+                                        @if ($filteredRatings->count() === 0) href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.passenger_with_review_message)"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
-                                            @endif
-                                        @elseif (auth()->user() &&
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}" @endif
+                                    @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option15->features_setting_id ?? null, explode('=', $ride->features)))
-                                            @if ($totalAverage < 3)
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.star3_passenger_message)"
+                                        @if ($totalAverage < 3) href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.star3_passenger_message)"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
-                                            @endif
-                                        @elseif (auth()->user() &&
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}" @endif
+                                    @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option14->features_setting_id ?? null, explode('=', $ride->features)))
-                                            @if ($totalAverage < 4)
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.star4_passenger_message)"
+                                        @if ($totalAverage < 4) href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.star4_passenger_message)"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
-                                            @endif
-                                        @elseif (auth()->user() &&
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}" @endif
+                                    @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option13->features_setting_id ?? null, explode('=', $ride->features)))
-                                            @if ($totalAverage < 4.5)
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.star5_passenger_driver)"
+                                        @if ($totalAverage < 4.5) href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.star5_passenger_driver)"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
-                                            @endif
-                                        @else
-                                            href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}" @endif>
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}" @endif
+                                    @else
+                                        href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
+                                        @endif>
                                         <div class="rounded-lg shadow-3xl border-[3px] border-solid @if ($ride->status === '2') border-red-500 @elseif(isset($findRidePage->ride_features_option1->features_setting_id) &&
-                                            in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features))) border-pink-500 @elseif(isset($findRidePage->ride_features_option2->features_setting_id) &&
-                                            in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features))) border-green-500 @else border-gray-100 @endif"
+                                                in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features))) border-pink-500 @elseif(isset($findRidePage->ride_features_option2->features_setting_id) &&
+                                                in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features))) border-green-500 @else border-gray-100 @endif"
                                             id="ride-{{ $ride->id }}">
                                             @php
                                                 $segmentForCard = $ride->rideDetail->first();
                                                 $displayDate = $segmentForCard?->date ?? $ride->date;
-                                                $displayTime = $segmentForCard?->time ?? $ride->time ?? '00:00';
+                                                $displayTime = $segmentForCard?->time ?? ($ride->time ?? '00:00');
                                             @endphp
                                             <div class="flex items-center justify-between pb-0 p-4">
                                                 <div class="flex items-center gap-2">
@@ -930,19 +1007,25 @@
                                                         {{ \Carbon\Carbon::parse($displayTime)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($displayTime)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($displayTime)->format('h:i A')) }}
                                                     </p>
                                                     @if (in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <span class="ml-2 inline-block cursor-help" data-tippy-content="{{ $postRidePage->features_option1_tooltip ?? '' }}">
-                                                            <img class="w-10 h-10" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option1->icon)}}" alt="">
+                                                        <span class="ml-2 inline-block cursor-help"
+                                                            data-tippy-content="{{ $postRidePage->features_option1_tooltip ?? '' }}">
+                                                            <img class="w-10 h-10"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->ride_features_option1->icon) }}"
+                                                                alt="">
                                                         </span>
                                                     @endif
                                                     @if (in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <span class="ml-2 inline-block cursor-help" data-tippy-content="{{ $postRidePage->features_option2_tooltip ?? '' }}">
-                                                            <img class="w-10 h-10" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt="">
+                                                        <span class="ml-2 inline-block cursor-help"
+                                                            data-tippy-content="{{ $postRidePage->features_option2_tooltip ?? '' }}">
+                                                            <img class="w-10 h-10"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->ride_features_option2->icon) }}"
+                                                                alt="">
                                                         </span>
                                                     @endif
                                                 </div>
                                                 <div class="pr-8">
                                                     <p class="font-medium">
-                                                        {{ intval($ride->seats) - intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function($query) { $query->whereNull('deleted_at'); })->sum('seats')) }}
+                                                        {{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
                                                         @isset($findRidePage->card_section_seats_left)
                                                             {{ $findRidePage->card_section_seats_left }}
                                                         @endisset
@@ -958,7 +1041,8 @@
                                                                 <span
                                                                     class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
                                                                     <img class="w-5 h-5 object-contain"
-                                                                        src="{{ asset('./images/new-21-search-bar-from.png') }}" alt="">
+                                                                        src="{{ asset('./images/new-21-search-bar-from.png') }}"
+                                                                        alt="">
                                                                 </span>
                                                             </div>
                                                             <div class="ml-12 md:ml-20">
@@ -968,13 +1052,15 @@
                                                                     @endisset
                                                                 </p>
                                                                 <div class="flex gap-2">
-                                                                    <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                                    <h3
+                                                                        class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                                                                         {{ $ride->detail->departure }}.
                                                                     </h3>
                                                                     @php $segmentPickup = $ride->detail?->pickup ?? $ride->pickup; @endphp
-                                                                    @if(!empty($segmentPickup))
+                                                                    @if (!empty($segmentPickup))
                                                                         <p class="text-sm mt-2">
-                                                                            {{ $findRidePage->pickup_at_label ?? 'Pick-up at' }}: {{ $segmentPickup }}
+                                                                            {{ $findRidePage->pickup_at_label ?? 'Pick-up at' }}:
+                                                                            {{ $segmentPickup }}
                                                                         </p>
                                                                     @endif
                                                                 </div>
@@ -987,7 +1073,8 @@
                                                                 <span
                                                                     class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
                                                                     <img class="w-5 h-5 object-contain"
-                                                                        src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
+                                                                        src="{{ asset('./images/new-21-search-bar-to.png') }}"
+                                                                        alt="">
                                                                 </span>
                                                             </div>
                                                             <div class="ml-12 md:ml-20">
@@ -997,13 +1084,15 @@
                                                                     @endisset
                                                                 </p>
                                                                 <div class="flex gap-2">
-                                                                    <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                                    <h3
+                                                                        class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                                                                         {{ $ride->detail->destination }}.
                                                                     </h3>
                                                                     @php $segmentDropoff = $ride->detail?->dropoff ?? $ride->dropoff; @endphp
-                                                                    @if(!empty($segmentDropoff))
+                                                                    @if (!empty($segmentDropoff))
                                                                         <p class="text-sm mt-2">
-                                                                            {{ $findRidePage->dropoff_at_label ?? 'Drop-off at' }}: {{ $segmentDropoff }}
+                                                                            {{ $findRidePage->dropoff_at_label ?? 'Drop-off at' }}:
+                                                                            {{ $segmentDropoff }}
                                                                         </p>
                                                                     @endif
                                                                 </div>
@@ -1013,37 +1102,49 @@
                                                 </div>
                                                 <div class="mt-4 flex-shrink-0 min-w-[11rem]">
                                                     <p class="text-xl font-semibold text-primary">
-                                                        <div class="flex flex-wrap items-center justify-end gap-2">
-                                                            @if (isset($firm_cancellation_discount) && $firm_cancellation_discount!='' && $ride->booking_type == ($postRidePage->cancellation_policy_label2?->features_setting_id))
-                                                                <span class="line-through whitespace-nowrap">
-                                                                    ${{ number_format(floatval($ride->detail->price), 2) }}
-                                                                    </span>
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 flex-shrink-0">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
-                                                                    </svg>
+                                                    <div class="flex flex-wrap items-center justify-end gap-2">
+                                                        @if (isset($firm_cancellation_discount) &&
+                                                                $firm_cancellation_discount != '' &&
+                                                                $ride->booking_type == $postRidePage->cancellation_policy_label2?->features_setting_id)
+                                                            <span class="line-through whitespace-nowrap">
+                                                                ${{ number_format(floatval($ride->detail->price), 2) }}
+                                                            </span>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                viewBox="0 0 24 24" stroke-width="1.5"
+                                                                stroke="currentColor" class="h-6 flex-shrink-0">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                                                            </svg>
 
-                                                                    <span class="whitespace-nowrap">
+                                                            <span class="whitespace-nowrap">
 
-                                                                        ${{ $ride->detail->price - ($ride->detail->price * $firm_cancellation_discount) / 100 }}
-                                                                    </span>
+                                                                ${{ $ride->detail->price - ($ride->detail->price * $firm_cancellation_discount) / 100 }}
+                                                            </span>
+                                                        @else
+                                                            <span
+                                                                class="whitespace-nowrap">${{ number_format(floatval($ride->detail->price), 2) }}</span>
+                                                        @endif
 
-                                                                @else
-                                                                    <span class="whitespace-nowrap">${{ number_format(floatval($ride->detail->price), 2) }}</span>
-                                                                @endif
+                                                        <small class="whitespace-nowrap">
+                                                            @isset($findRidePage->card_section_per_seat)
+                                                                {{ $findRidePage->card_section_per_seat }}
+                                                            @endisset
+                                                        </small>
 
-                                                                <small class="whitespace-nowrap">
-                                                                    @isset($findRidePage->card_section_per_seat)
-                                                                        {{ $findRidePage->card_section_per_seat }}
-                                                                    @endisset
-                                                                </small>
-
-                                                            @if (isset($firm_cancellation_discount) && $firm_cancellation_discount != '' && $ride->booking_type == $postRidePage->cancellation_policy_label2?->features_setting_id)
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill text-black cursor-help inline-block" viewBox="0 0 16 16"
-                                                                    data-tippy-content="{!! nl2br($findRidePage->firm_cancellation_tooltip) ?? 'This ride has the Firm cancellation policy, so its booking price is reduced by 10%' !!}">
-                                                                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                                                                </svg>
-                                                            @endif
-                                                        </div>
+                                                        @if (isset($firm_cancellation_discount) &&
+                                                                $firm_cancellation_discount != '' &&
+                                                                $ride->booking_type == $postRidePage->cancellation_policy_label2?->features_setting_id)
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16"
+                                                                height="16" fill="currentColor"
+                                                                class="bi bi-info-circle-fill text-black cursor-help inline-block"
+                                                                viewBox="0 0 16 16"
+                                                                data-tippy-content="{!! nl2br($findRidePage->firm_cancellation_tooltip) ??
+                                                                    'This ride has the Firm cancellation policy, so its booking price is reduced by 10%' !!}">
+                                                                <path
+                                                                    d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                            </svg>
+                                                        @endif
+                                                    </div>
                                                     </p>
                                                     {{-- <p class="text-xl font-semibold text-primary">${{ number_format(floatval($ride->detail->price), 2) }}
                                                         <small>
@@ -1054,7 +1155,8 @@
                                                     </p> --}}
                                                 </div>
                                             </div>
-                                            <div class="border-t border-gray-300 grid grid-cols-4 divide-x divide-gray-300">
+                                            <div
+                                                class="border-t border-gray-300 grid grid-cols-4 divide-x divide-gray-300">
                                                 {{-- <div class="flex items-center justify-between p-4">
                                                     <p class="font-semibold">
                                                         @isset($findRidePage->card_section_booked)
@@ -1072,53 +1174,75 @@
                                                         @endisset
                                                     </p>
                                                 </div> --}}
-                                                <div class="col-span-4 p-4 flex justify-start items-center no-scrollbar overflow-x-auto overflow-y-hidden space-x-2 md:space-x-4">
-                                                    @unless(old('skip_vehicle', $ride->skip_vehicle) == '0')
+                                                <div
+                                                    class="col-span-4 p-4 flex justify-start items-center no-scrollbar overflow-x-auto overflow-y-hidden space-x-2 md:space-x-4">
+                                                    @unless (old('skip_vehicle', $ride->skip_vehicle) == '0')
                                                         @if ($ride->remove_car_image == 0)
                                                             <div class="flex-none w-12 h-12 bg-gray-100 border rounded-full">
                                                                 <img class="w-full h-full object-cover rounded-full"
-                                                                    src="{{ $ride->car_image }}"
-                                                                    alt="">
+                                                                    src="{{ $ride->car_image }}" alt="">
                                                             </div>
                                                         @endif
                                                     @endunless
 
                                                     <div class="flex flex-nowrap items-center gap-1 md:gap-2">
                                                         @if ($ride->payment_method == ($findRidePage->payment_methods_option2->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option2->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->payment_methods_option2->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->payment_methods_option1_tooltip }}">
                                                         @elseif ($ride->payment_method == ($findRidePage->payment_methods_option3->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option3->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->payment_methods_option3->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->payment_methods_option2_tooltip }}">
                                                         @elseif ($ride->payment_method == ($findRidePage->payment_methods_option4->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option4->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->payment_methods_option4->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->payment_methods_option3_tooltip }}">
                                                         @endif
                                                         @if ($ride->smoke == ($findRidePage->smoking_option2->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->smoking_option2->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->smoking_option2->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->smoking_option2_tooltip }}">
                                                         @endif
                                                         @if ($ride->animal_friendly == ($findRidePage->pets_allowed_option2->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option2->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->pets_allowed_option2->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->animals_option2_tooltip }}">
                                                         @elseif ($ride->animal_friendly == ($findRidePage->pets_allowed_option3->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option3->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->pets_allowed_option3->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->animals_option3_tooltip }}">
                                                         @endif
                                                         @if ($ride->luggage == ($findRidePage->luggage_option1->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option1->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->luggage_option1->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->luggage_option1_tooltip }}">
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option2->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option2->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->luggage_option2->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->luggage_option2_tooltip }}">
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option3->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option3->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->luggage_option3->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->luggage_option3_tooltip }}">
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option4->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option4->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->luggage_option4->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->luggage_option4_tooltip }}">
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option5->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option5->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->luggage_option5->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->luggage_option5_tooltip }}">
                                                         @endif
                                                         @include('partials.ride_feature_icons', [
@@ -1129,7 +1253,8 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="border-t border-gray-300 grid grid-cols-1 divide-x divide-gray-300">
+                                            <div
+                                                class="border-t border-gray-300 grid grid-cols-1 divide-x divide-gray-300">
                                                 <div class="flex items-center justify-between p-4 w-full">
                                                     <div class="flex items-center space-x-2">
                                                         {{-- <div class="w-12 h-12 rounded-full overflow-hidden">
@@ -1145,11 +1270,13 @@
                                                                     @if ($ride->driver?->type === '2')
                                                                         {{ $ride->driver?->last_name }}
                                                                     @elseif ($ride->driver?->type === '3')
-                                                                        {{ $ride->driver?->first_name }} {{ $ride->driver?->last_name }}
+                                                                        {{ $ride->driver?->first_name }}
+                                                                        {{ $ride->driver?->last_name }}
                                                                     @else
                                                                         {{ $ride->driver?->first_name }}
                                                                     @endif
-                                                                </span></p>
+                                                                </span>
+                                                            </p>
                                                             @php
                                                                 // Calculate the age based on the driver's date of birth
                                                                 $dob = \Carbon\Carbon::parse($ride->driver?->dob);
@@ -1161,31 +1288,29 @@
                                                                 @endisset
                                                                 {{ $age }}</p>
                                                             <p class="mb-0 text-sm">
-                                                                {{  $ride->driver?->rides()
-                                                                        ->where('status', '!=', 2)
-                                                                        ->where(function ($query) {
-                                                                            $query->whereDate('rides.date', '<', now()->toDateString())
-                                                                                ->orWhere(function ($query) {
-                                                                                    $query->whereDate('rides.date', '=', now()->toDateString())
-                                                                                        ->whereTime('rides.time', '<=', now()->toTimeString());
-                                                                                });
-                                                                        })
-                                                                        ->get()
-                                                                        ->flatMap(function ($ride) {
-                                                                            return $ride->bookings()->pluck('seats');
-                                                                        })
-                                                                        ->sum()
-                                                                }}
+                                                                {{ $ride->driver
+                                                                    ?->rides()->where('status', '!=', 2)->where(function ($query) {
+                                                                        $query->whereDate('rides.date', '<', now()->toDateString())->orWhere(function ($query) {
+                                                                            $query->whereDate('rides.date', '=', now()->toDateString())->whereTime('rides.time', '<=', now()->toTimeString());
+                                                                        });
+                                                                    })->get()->flatMap(function ($ride) {
+                                                                        return $ride->bookings()->pluck('seats');
+                                                                    })->sum() }}
                                                                 @isset($findRidePage->card_section_driven)
                                                                     {{ $findRidePage->card_section_driven }}
                                                                 @endisset
                                                             </p>
                                                             @php
-                                                                $filteredRatings = $ratings->where('status', 1)->where('type', '1')->filter(function ($rating) use ($ride) {
-                                                                    return $rating->ride && $rating->ride->added_by === $ride->added_by;
-                                                                });
+                                                                $filteredRatings = $ratings
+                                                                    ->where('status', 1)
+                                                                    ->where('type', '1')
+                                                                    ->filter(function ($rating) use ($ride) {
+                                                                        return $rating->ride &&
+                                                                            $rating->ride->added_by === $ride->added_by;
+                                                                    });
 
-                                                                $totalAverage = $filteredRatings->avg('average_rating') ?? 0;
+                                                                $totalAverage =
+                                                                    $filteredRatings->avg('average_rating') ?? 0;
                                                             @endphp
                                                         </div>
                                                     </div>
@@ -1251,19 +1376,25 @@
                                 </div>
                             @endforeach
                         @endif
-                        @if($paginatedRides->filter(fn($ride) => $ride->type === 'otherRide')->count() > 0)
+                        @if ($paginatedRides->filter(fn($ride) => $ride->type === 'otherRide')->count() > 0)
                             <div class="border-b border-gray-400 flex flex-col items-center justify-center pt-6">
                                 @if ($paginatedRides->filter(fn($ride) => $ride->type === 'ride')->count() <= 0)
-                                    <h3 class="text-primary">{{ $findRidePage->no_rides_found_pink_ride_label ?? 'Sorry, we couldn\'t find any Pink Rides matching your search.' }}</h3>
+                                    <h3 class="text-primary">
+                                        {{ $findRidePage->no_rides_found_pink_ride_label ?? 'Sorry, we couldn\'t find any Pink Rides matching your search.' }}
+                                    </h3>
                                 @endif
-                                    <h3 class="text-primary">{{ $findRidePage->more_rides_pink_ride_label ?? 'More rides from' }} {{ $request->from }} {{ $findRidePage->to_pink_ride_label ?? 'to' }} {{ $request->to }}. {{ $findRidePage->imp_pink_ride_label ?? 'Important: these are NOT ProximaRide' }}</h3>
+                                <h3 class="text-primary">
+                                    {{ $findRidePage->more_rides_pink_ride_label ?? 'More rides from' }}
+                                    {{ $request->from }} {{ $findRidePage->to_pink_ride_label ?? 'to' }}
+                                    {{ $request->to }}.
+                                    {{ $findRidePage->imp_pink_ride_label ?? 'Important: these are NOT ProximaRide' }}
+                                </h3>
                             </div>
-                            @foreach($paginatedRides->filter(fn($ride) => $ride->type === 'otherRide') as $ride)
-
+                            @foreach ($paginatedRides->filter(fn($ride) => $ride->type === 'otherRide') as $ride)
                                 <div class="relative even:bg-white odd:bg-gray-200 space-y-4 rounded-lg">
                                     <div class="absolute right-4 top-8">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                            viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor"
                                             class="w-6 h-6 -mt-4 cursor-pointer ride-remove-btn"
                                             data-ride-id="{{ $ride->id }}">
                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -1275,22 +1406,25 @@
                                             $user_id = auth()->user()->id;
 
                                             // Assuming $ratings is a collection
-                                            $filteredRatings = $ratings->where('status', 1)->where('type', '2')->filter(function ($rating) use ($user_id) {
-                                                // Check if booking exists and is not null before accessing user_id
-                                                return $rating->booking && $rating->booking->user_id === $user_id;
-                                            });
+                                            $filteredRatings = $ratings
+                                                ->where('status', 1)
+                                                ->where('type', '2')
+                                                ->filter(function ($rating) use ($user_id) {
+                                                    // Check if booking exists and is not null before accessing user_id
+                                                    return $rating->booking && $rating->booking->user_id === $user_id;
+                                                });
 
                                             $totalAverage = $filteredRatings->avg('average_rating') ?? 0;
                                         @endphp
                                     @endif
-                                    <a
-                                        @if ($ride->status === '2') href=""
+                                    <a @if ($ride->status === '2') href=""
                                         @elseif (auth()->user() &&
-                                            in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)) &&
-                                            auth()->user()->gender != 'female' && auth()->user()->address != '')
+                                                in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)) &&
+                                                auth()->user()->gender != 'female' &&
+                                                auth()->user()->address != '')
                                             href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.female_user_message_short)"
                                         @elseif (auth()->user() &&
-                                            in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
+                                                in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
                                             @if ($filteredRatings->count() === 0 && auth()->user()->address == '')
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.complete_address_passenger_message)"
                                             @elseif ($filteredRatings->count() === 0 && auth()->user()->address !== '')
@@ -1300,46 +1434,37 @@
                                             @elseif ($totalAverage < 4.5 && auth()->user()->address == '')
                                                 href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.star5_passenger_with_complete_address_message)"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
-                                            @endif
-                                        @elseif (auth()->user() &&
-                                            in_array('I only want passengers with reviews', explode('=', $ride->features)))
-                                            @if ($filteredRatings->count() === 0)
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.passenger_with_review_message)"
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}" @endif
+                                    @elseif (auth()->user() && in_array('I only want passengers with reviews', explode('=', $ride->features)))
+                                        @if ($filteredRatings->count() === 0) href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.passenger_with_review_message)"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
-                                            @endif
-                                        @elseif (auth()->user() &&
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}" @endif
+                                    @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option15->features_setting_id ?? null, explode('=', $ride->features)))
-                                            @if ($totalAverage < 3)
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.star3_passenger_message)"
+                                        @if ($totalAverage < 3) href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.star3_passenger_message)"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
-                                            @endif
-                                        @elseif (auth()->user() &&
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}" @endif
+                                    @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option14->features_setting_id ?? null, explode('=', $ride->features)))
-                                            @if ($totalAverage < 4)
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.star4_passenger_message)"
+                                        @if ($totalAverage < 4) href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.star4_passenger_message)"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
-                                            @endif
-                                        @elseif (auth()->user() &&
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}" @endif
+                                    @elseif (auth()->user() &&
                                             in_array($findRidePage->ride_features_option13->features_setting_id ?? null, explode('=', $ride->features)))
-                                            @if ($totalAverage < 4.5)
-                                                href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.star5_passenger_driver)"
+                                        @if ($totalAverage < 4.5) href="javascript:void(0);" onclick="toggleModal1('modal-id1', pinkRideModalMessages.star5_passenger_driver)"
                                             @else
-                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
-                                            @endif
-                                        @else
-                                            href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}" @endif>
+                                                href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}" @endif
+                                    @else
+                                        href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}"
+                                        @endif>
                                         <div class="rounded-lg shadow-3xl border-[3px] border-solid @if ($ride->status === '2') border-red-500 @elseif(isset($findRidePage->ride_features_option1->features_setting_id) &&
-                                            in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features))) border-pink-500 @elseif(isset($findRidePage->ride_features_option2->features_setting_id) &&
-                                            in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features))) border-green-500 @else border-gray-100 @endif"
+                                                in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features))) border-pink-500 @elseif(isset($findRidePage->ride_features_option2->features_setting_id) &&
+                                                in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features))) border-green-500 @else border-gray-100 @endif"
                                             id="ride-{{ $ride->id }}">
                                             @php
                                                 $segmentForCard = $ride->rideDetail->first();
                                                 $displayDate = $segmentForCard?->date ?? $ride->date;
-                                                $displayTime = $segmentForCard?->time ?? $ride->time ?? '00:00';
+                                                $displayTime = $segmentForCard?->time ?? ($ride->time ?? '00:00');
                                             @endphp
                                             <div class="flex items-center justify-between pb-0 p-4">
                                                 <div class="flex items-center gap-2">
@@ -1351,19 +1476,25 @@
                                                         {{ \Carbon\Carbon::parse($displayTime)->format('h:i A') == '12:00 PM' ? '12 noon' : (\Carbon\Carbon::parse($displayTime)->format('h:i A') == '12:00 AM' ? '12 midnight' : \Carbon\Carbon::parse($displayTime)->format('h:i A')) }}
                                                     </p>
                                                     @if (in_array($findRidePage->ride_features_option1->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <span class="ml-2 inline-block cursor-help" data-tippy-content="{{ $postRidePage->features_option1_tooltip ?? '' }}">
-                                                            <img class="w-12 h-12" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option1->icon)}}" alt="">
+                                                        <span class="ml-2 inline-block cursor-help"
+                                                            data-tippy-content="{{ $postRidePage->features_option1_tooltip ?? '' }}">
+                                                            <img class="w-12 h-12"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->ride_features_option1->icon) }}"
+                                                                alt="">
                                                         </span>
                                                     @endif
                                                     @if (in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
-                                                        <span class="ml-2 inline-block cursor-help" data-tippy-content="{{ $postRidePage->features_option2_tooltip ?? '' }}">
-                                                            <img class="w-12 h-12" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt="">
+                                                        <span class="ml-2 inline-block cursor-help"
+                                                            data-tippy-content="{{ $postRidePage->features_option2_tooltip ?? '' }}">
+                                                            <img class="w-12 h-12"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->ride_features_option2->icon) }}"
+                                                                alt="">
                                                         </span>
                                                     @endif
                                                 </div>
                                                 <div class="pr-8">
                                                     <p class="font-medium">
-                                                        {{ intval($ride->seats) - intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function($query) { $query->whereNull('deleted_at'); })->sum('seats')) }}
+                                                        {{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
                                                         @isset($findRidePage->card_section_seats_left)
                                                             {{ $findRidePage->card_section_seats_left }}
                                                         @endisset
@@ -1379,7 +1510,8 @@
                                                                 <span
                                                                     class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
                                                                     <img class="w-5 h-5 object-contain"
-                                                                        src="{{ asset('./images/new-21-search-bar-from.png') }}" alt="">
+                                                                        src="{{ asset('./images/new-21-search-bar-from.png') }}"
+                                                                        alt="">
                                                                 </span>
                                                             </div>
                                                             <div class="ml-12 md:ml-20">
@@ -1389,11 +1521,13 @@
                                                                     @endisset
                                                                 </p>
                                                                 <div class="flex gap-2">
-                                                                    <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                                    <h3
+                                                                        class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                                                                         {{ $ride->detail->departure }}.
                                                                     </h3>
                                                                     <p class="text-sm mt-2">
-                                                                        {{ $findRidePage->pickup_at_label ?? 'Pick-up at' }}: {{ $ride->pickup }}
+                                                                        {{ $findRidePage->pickup_at_label ?? 'Pick-up at' }}:
+                                                                        {{ $ride->pickup }}
                                                                     </p>
                                                                 </div>
                                                             </div>
@@ -1405,7 +1539,8 @@
                                                                 <span
                                                                     class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
                                                                     <img class="w-5 h-5 object-contain"
-                                                                        src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
+                                                                        src="{{ asset('./images/new-21-search-bar-to.png') }}"
+                                                                        alt="">
                                                                 </span>
                                                             </div>
                                                             <div class="ml-12 md:ml-20">
@@ -1415,11 +1550,13 @@
                                                                     @endisset
                                                                 </p>
                                                                 <div class="flex gap-2">
-                                                                    <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                                    <h3
+                                                                        class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                                                                         {{ $ride->detail->destination }}.
                                                                     </h3>
                                                                     <p class="text-sm mt-2">
-                                                                        {{ $findRidePage->dropoff_at_label ?? 'Drop-off at' }}: {{ $ride->dropoff }}
+                                                                        {{ $findRidePage->dropoff_at_label ?? 'Drop-off at' }}:
+                                                                        {{ $ride->dropoff }}
                                                                     </p>
                                                                 </div>
                                                             </div>
@@ -1427,7 +1564,8 @@
                                                     </div>
                                                 </div>
                                                 <div class="mt-4">
-                                                    <p class="text-xl font-semibold text-primary">${{ number_format(floatval($ride->detail->price), 2) }}
+                                                    <p class="text-xl font-semibold text-primary">
+                                                        ${{ number_format(floatval($ride->detail->price), 2) }}
                                                         <small>
                                                             @isset($findRidePage->card_section_per_seat)
                                                                 {{ $findRidePage->card_section_per_seat }}
@@ -1436,7 +1574,8 @@
                                                     </p>
                                                 </div>
                                             </div>
-                                            <div class="border-t border-gray-300 grid grid-cols-4 divide-x divide-gray-300">
+                                            <div
+                                                class="border-t border-gray-300 grid grid-cols-4 divide-x divide-gray-300">
                                                 {{-- <div class="flex items-center justify-between p-4">
                                                     <p class="font-semibold">
                                                         @isset($findRidePage->card_section_booked)
@@ -1454,118 +1593,171 @@
                                                         @endisset
                                                     </p>
                                                 </div> --}}
-                                                <div class="col-span-4 p-4 flex justify-start items-center no-scrollbar overflow-x-auto overflow-y-hidden space-x-2 md:space-x-4">
-                                                    @unless(old('skip_vehicle', $ride->skip_vehicle) == '0')
+                                                <div
+                                                    class="col-span-4 p-4 flex justify-start items-center no-scrollbar overflow-x-auto overflow-y-hidden space-x-2 md:space-x-4">
+                                                    @unless (old('skip_vehicle', $ride->skip_vehicle) == '0')
                                                         @if ($ride->remove_car_image == 0)
                                                             <div class="flex-none w-12 h-12 bg-gray-100 border rounded-full">
                                                                 <img class="w-full h-full object-cover rounded-full"
-                                                                    src="{{ $ride->car_image }}"
-                                                                    alt="">
+                                                                    src="{{ $ride->car_image }}" alt="">
                                                             </div>
                                                         @endif
                                                     @endunless
-                                                    <div class="flex flex-nowrap items-center gap-1 md:gap-2">                                                        
+                                                    <div class="flex flex-nowrap items-center gap-1 md:gap-2">
                                                         @if ($ride->payment_method == ($findRidePage->payment_methods_option2->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option2->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->payment_methods_option2->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->payment_methods_option1_tooltip }}">
                                                         @elseif ($ride->payment_method == ($findRidePage->payment_methods_option3->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option3->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->payment_methods_option3->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->payment_methods_option2_tooltip }}">
                                                         @elseif ($ride->payment_method == ($findRidePage->payment_methods_option4->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->payment_methods_option4->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->payment_methods_option4->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->payment_methods_option3_tooltip }}">
                                                         @endif
                                                         @if ($ride->smoke == ($findRidePage->smoking_option2->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->smoking_option2->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->smoking_option2->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->smoking_option2_tooltip }}">
                                                         @endif
                                                         @if ($ride->animal_friendly == ($findRidePage->pets_allowed_option2->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option2->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->pets_allowed_option2->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->animals_option2_tooltip }}">
                                                         @elseif ($ride->animal_friendly == ($findRidePage->pets_allowed_option3->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->pets_allowed_option3->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->pets_allowed_option3->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->animals_option3_tooltip }}">
                                                         @endif
                                                         @if ($ride->luggage == ($findRidePage->luggage_option1->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option1->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->luggage_option1->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->luggage_option1_tooltip }}">
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option2->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option2->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->luggage_option2->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->luggage_option2_tooltip }}">
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option3->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option3->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->luggage_option3->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->luggage_option3_tooltip }}">
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option4->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option4->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->luggage_option4->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->luggage_option4_tooltip }}">
                                                         @elseif ($ride->luggage == ($findRidePage->luggage_option5->features_setting_id ?? null))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->luggage_option5->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->luggage_option5->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->luggage_option5_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option2->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option2->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->ride_features_option2->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->features_option2_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option3->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option3->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->ride_features_option3->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->features_option3_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option8->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option8->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->ride_features_option8->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->features_option8_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option9->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option9->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->ride_features_option9->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->features_option9_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option10->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option10->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->ride_features_option10->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->features_option10_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option11->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option11->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->ride_features_option11->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->features_option11_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option12->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option12->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->ride_features_option12->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->features_option12_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option13->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option13->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->ride_features_option13->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->features_option13_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option14->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option14->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->ride_features_option14->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->features_option14_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option15->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option15->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->ride_features_option15->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->features_option15_tooltip }}">
                                                         @endif
                                                         @if (in_array($findRidePage->ride_features_option16->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $findRidePage->ride_features_option16->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $findRidePage->ride_features_option16->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->features_option16_tooltip }}">
                                                         @endif
                                                         @if (in_array($postRidePage->features_option4->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option4->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $postRidePage->features_option4->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->features_option4_tooltip }}">
                                                         @endif
                                                         @if (in_array($postRidePage->features_option5->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option5->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $postRidePage->features_option5->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->features_option5_tooltip }}">
                                                         @endif
                                                         @if (in_array($postRidePage->features_option6->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option6->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $postRidePage->features_option6->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->features_option6_tooltip }}">
                                                         @endif
                                                         @if (in_array($postRidePage->features_option7->features_setting_id ?? null, explode('=', $ride->features)))
-                                                            <img class="w-8 h-8" src="{{asset('home_page_icons/' . $postRidePage->features_option7->icon)}}" alt=""
+                                                            <img class="w-8 h-8"
+                                                                src="{{ asset('home_page_icons/' . $postRidePage->features_option7->icon) }}"
+                                                                alt=""
                                                                 data-tippy-content="{{ $postRidePage->features_option7_tooltip }}">
                                                         @endif
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="border-t border-gray-300 grid grid-cols-1 divide-x divide-gray-300">
+                                            <div
+                                                class="border-t border-gray-300 grid grid-cols-1 divide-x divide-gray-300">
                                                 <div class="flex items-center justify-between p-4 w-full">
                                                     <div class="flex items-center space-x-2">
                                                         {{-- <div class="w-12 h-12 rounded-full overflow-hidden">
@@ -1581,14 +1773,16 @@
                                                                     @if ($ride->driver?->type === '2')
                                                                         {{ $ride->driver?->last_name }}
                                                                     @elseif ($ride->driver?->type === '3')
-                                                                        {{ $ride->driver?->first_name }} {{ $ride->driver?->last_name }}
+                                                                        {{ $ride->driver?->first_name }}
+                                                                        {{ $ride->driver?->last_name }}
                                                                     @else
                                                                         {{ $ride->driver?->first_name }}
                                                                     @endif
-                                                                    {{-- @if($ride->driver?->gender && $ride->driver?->gender !== 'Prefer not to say')
+                                                                    {{-- @if ($ride->driver?->gender && $ride->driver?->gender !== 'Prefer not to say')
                                                                     ({{ strtoupper(substr($ride->driver?->gender, 0, 1)) }})
                                                                 @endif --}}
-                                                                </span></p>
+                                                                </span>
+                                                            </p>
                                                             @php
                                                                 // Calculate the age based on the driver's date of birth
                                                                 $dob = \Carbon\Carbon::parse($ride->driver?->dob);
@@ -1600,31 +1794,29 @@
                                                                 @endisset
                                                                 {{ $age }}</p>
                                                             <p class="mb-0 text-sm">
-                                                                {{  $ride->driver?->rides()
-                                                                        ->where('status', '!=', 2)
-                                                                        ->where(function ($query) {
-                                                                            $query->whereDate('rides.date', '<', now()->toDateString())
-                                                                                ->orWhere(function ($query) {
-                                                                                    $query->whereDate('rides.date', '=', now()->toDateString())
-                                                                                        ->whereTime('rides.time', '<=', now()->toTimeString());
-                                                                                });
-                                                                        })
-                                                                        ->get()
-                                                                        ->flatMap(function ($ride) {
-                                                                            return $ride->bookings()->pluck('seats');
-                                                                        })
-                                                                        ->sum()
-                                                                }}
+                                                                {{ $ride->driver
+                                                                    ?->rides()->where('status', '!=', 2)->where(function ($query) {
+                                                                        $query->whereDate('rides.date', '<', now()->toDateString())->orWhere(function ($query) {
+                                                                            $query->whereDate('rides.date', '=', now()->toDateString())->whereTime('rides.time', '<=', now()->toTimeString());
+                                                                        });
+                                                                    })->get()->flatMap(function ($ride) {
+                                                                        return $ride->bookings()->pluck('seats');
+                                                                    })->sum() }}
                                                                 @isset($findRidePage->card_section_driven)
                                                                     {{ $findRidePage->card_section_driven }}
                                                                 @endisset
                                                             </p>
                                                             @php
-                                                                $filteredRatings = $ratings->where('status', 1)->where('type', '1')->filter(function ($rating) use ($ride) {
-                                                                    return $rating->ride && $rating->ride->added_by === $ride->added_by;
-                                                                });
+                                                                $filteredRatings = $ratings
+                                                                    ->where('status', 1)
+                                                                    ->where('type', '1')
+                                                                    ->filter(function ($rating) use ($ride) {
+                                                                        return $rating->ride &&
+                                                                            $rating->ride->added_by === $ride->added_by;
+                                                                    });
 
-                                                                $totalAverage = $filteredRatings->avg('average_rating') ?? 0;
+                                                                $totalAverage =
+                                                                    $filteredRatings->avg('average_rating') ?? 0;
                                                             @endphp
                                                         </div>
                                                     </div>
@@ -1693,45 +1885,59 @@
                         {{ $paginatedRides->appends(request()->except('page'))->links() }}
                     @elseif ($paginatedRides && $paginatedRides->count() == 0)
                         <div class="flex flex-col items-center justify-center">
-                            <h3 class="text-primary">{{ $findRidePage->no_rides_found_pink_ride_label ?? 'Sorry, we couldn\'t find any Pink Rides matching your search.' }}</h3>
+                            <h3 class="text-primary">
+                                {{ $findRidePage->no_rides_found_pink_ride_label ?? 'Sorry, we couldn\'t find any Pink Rides matching your search.' }}
+                            </h3>
 
                             <!-- <img class="w-8 h-8" src="{{ asset('assets/exclamation-mark.png') }}">
-                            <p>Sorry, no rides found for your search.</p> -->
+                                <p>Sorry, no rides found for your search.</p> -->
                         </div>
                     @endif
                 </div>
                 <!-- Confirmation Modal for Hiding Rides (styled like login.blade.php modals) -->
-                <div class="hidden relative z-50" id="hide-ride-confirm-modal" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                <div class="hidden relative z-50" id="hide-ride-confirm-modal" aria-labelledby="modal-title"
+                    role="dialog" aria-modal="true">
                     <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity modal-backdrop"></div>
                     <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                         <div class="flex min-h-full justify-center p-4 text-center items-center sm:p-0">
-                            <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border1">
+                            <div
+                                class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border1">
                                 <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                     <div class="flex justify-end">
-                                        <button type="button" onclick="closeHideRideModal()" class="p-1 rounded-full hover:bg-gray-100">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        <button type="button" onclick="closeHideRideModal()"
+                                            class="p-1 rounded-full hover:bg-gray-100">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M6 18L18 6M6 6l12 12" />
                                             </svg>
                                         </button>
                                     </div>
                                     <!-- <div class="sm:flex sm:items-start justify-center">
-                                        <div class="mx-auto h-16 w-16 flex-shrink-0">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-gray-400">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            </svg>
-                                        </div>
-                                    </div> -->
+                                            <div class="mx-auto h-16 w-16 flex-shrink-0">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-gray-400">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                            </div>
+                                        </div> -->
                                     <div class="text-center mt-2">
-                                        <h3 class="text-2xl font-FuturaMdCnBT leading-6 text-gray-900" id="modal-title">Confirm Hide Ride</h3>
+                                        <h3 class="text-2xl font-FuturaMdCnBT leading-6 text-gray-900" id="modal-title">
+                                            Confirm Hide Ride</h3>
                                         <div class="w-full mt-4">
-                                            <p class="can-exp-p text-center text-black">Do you want this ride to be hidden from your search results? You will not be able to see it anymore.</p>
+                                            <p class="can-exp-p text-center text-black">Do you want this ride to be hidden
+                                                from your search results? You will not be able to see it anymore.</p>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
-                                    <button type="button" onclick="closeHideRideModal()" class="inline-flex justify-center w-36 rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">No, take me back</button>
-                                    <button type="button" id="confirm-hide-ride" class="inline-flex justify-center w-auto rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-primary/80 sm:ml-3">Yes, hide it</button>
+                                <div
+                                    class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
+                                    <button type="button" onclick="closeHideRideModal()"
+                                        class="inline-flex justify-center w-36 rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">No,
+                                        take me back</button>
+                                    <button type="button" id="confirm-hide-ride"
+                                        class="inline-flex justify-center w-auto rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-primary/80 sm:ml-3">Yes,
+                                        hide it</button>
                                 </div>
                             </div>
                         </div>
@@ -1739,26 +1945,30 @@
                 </div>
                 <div class="hidden overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none justify-center items-center"
                     id="modal-id1">
-                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="toggleModal1('modal-id1')"></div>
+                    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                        onclick="toggleModal1('modal-id1')"></div>
                     <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                        <div
+                            class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                             <!--content-->
                             <div
                                 class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
                                 <!--body-->
-                                <button type="button" onclick="toggleModal1('modal-id1')" class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                                <button type="button" onclick="toggleModal1('modal-id1')"
+                                    class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
                                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12" />
                                     </svg>
                                 </button>
                                 <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 sm:pt-16">
                                     <div class="sm:flex sm:items-start justify-center">
                                         <!-- <div
-                                            class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                            </svg>
-                                        </div> -->
+                                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                                </svg>
+                                            </div> -->
                                     </div>
                                     <div class="text-center w-full">
                                         <div class=" w-full">
@@ -1767,8 +1977,7 @@
                                     </div>
                                 </div>
                                 <!--footer-->
-                                <div
-                                    class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
+                                <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                                     <button
                                         class="inline-flex w-full justinline-flex justify-center rounded bg-red-600 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3 sm:w-24"
                                         type="button" onclick="toggleModal1('modal-id1')">
@@ -1780,33 +1989,36 @@
                     </div>
                 </div>
 
-        @if (empty($request->from) && empty($request->to) && empty($request->date))
-            <div class="mt-6 grid grid-cols-1 lg:grid-cols-1 gap-x-0 lg:gap-x-4 gap-4">
-                <div class="pink-ride-faq">
-                    <div class="pink-ride-faq__header">
-                        <h3 class="text-primary text-xl xl:text-2xl font-FuturaMdCnBT text-center mb-0 font-medium">
-                            @isset($findRidePage->pink_ride_page_faq_heading)
-                                {{ $findRidePage->pink_ride_page_faq_heading }}
-                            @endisset
-                        </h3>
-                    </div>
-                    <div class="pink-ride-faq__body">
-                        @foreach ($pinkRideFaqs as $pinkRideFaq)
-                            <div class="pink-ride-faq__item">
-                                <button type="button" class="pink-ride-faq__question font-FuturaMdCnBT focus:outline-none focus:ring-2 focus:ring-[#0369a1] focus:ring-offset-1" aria-expanded="false" onclick="togglePinkRideFaq(this)">
-                                    {{ $pinkRideFaq->question }}
-                                </button>
-                                <div class="pink-ride-faq__answer" role="region" aria-hidden="true">
-                                    <div class="pink-ride-faq__answer-inner">
-                                        {!! $pinkRideFaq->answer !!}
-                                    </div>
-                                </div>
+                @if (empty($request->from) && empty($request->to) && empty($request->date))
+                    <div class="mt-6 grid grid-cols-1 lg:grid-cols-1 gap-x-0 lg:gap-x-4 gap-4">
+                        <div class="pink-ride-faq">
+                            <div class="pink-ride-faq__header">
+                                <h3
+                                    class="text-primary text-xl xl:text-2xl font-FuturaMdCnBT text-center mb-0 font-medium">
+                                    @isset($findRidePage->pink_ride_page_faq_heading)
+                                        {{ $findRidePage->pink_ride_page_faq_heading }}
+                                    @endisset
+                                </h3>
                             </div>
-                        @endforeach
+                            <div class="pink-ride-faq__body">
+                                @foreach ($pinkRideFaqs as $pinkRideFaq)
+                                    <div class="pink-ride-faq__item">
+                                        <button type="button"
+                                            class="pink-ride-faq__question font-FuturaMdCnBT focus:outline-none focus:ring-2 focus:ring-[#0369a1] focus:ring-offset-1"
+                                            aria-expanded="false" onclick="togglePinkRideFaq(this)">
+                                            {{ $pinkRideFaq->question }}
+                                        </button>
+                                        <div class="pink-ride-faq__answer" role="region" aria-hidden="true">
+                                            <div class="pink-ride-faq__answer-inner">
+                                                {!! $pinkRideFaq->answer !!}
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        @endif
+                @endif
             </div>
         </div>
 
@@ -1931,21 +2143,33 @@
                     if (button.getAttribute('aria-expanded') === 'true') {
                         answer.style.height = 'auto';
                     }
-                }, { once: true });
+                }, {
+                    once: true
+                });
             }
         }
 
         // Localized messages for ride restriction modal (used by toggleModal1()).
         var pinkRideModalMessages = {!! json_encode([
             'female_user_message_short' => $successMessage->female_user_message ?? 'Only females can select this ride',
-            'female_user_message_long' => $successMessage->female_user_message ?? 'ProximaRide are exclusive to our female passengers and drivers; you are not allowed to use them',
-            'complete_address_passenger_message' => $successMessage->complete_address_passenger_message ?? 'Only passengers with complete address can select this ride',
+            'female_user_message_long' =>
+                $successMessage->female_user_message ??
+                'ProximaRide are exclusive to our female passengers and drivers; you are not allowed to use them',
+            'complete_address_passenger_message' =>
+                $successMessage->complete_address_passenger_message ??
+                'Only passengers with complete address can select this ride',
             'star5_passenger_only' => $successMessage->star5_passenger_message ?? 'Only 5 star passengers can select this ride',
-            'star5_passenger_with_complete_address_message' => $successMessage->star5_passenger_with_complete_address_message ?? 'Only 5 star passengers with complete address can select this ride',
-            'passenger_with_review_message' => $successMessage->passenger_with_review_message ?? 'Driver only want passengers with reviews',
-            'star3_passenger_message' => $successMessage->star3_passenger_message ?? 'Driver want only passengers with-3 star reviews above',
-            'star4_passenger_message' => $successMessage->star4_passenger_message ?? 'Driver want only passengers with-4 star reviews above',
-            'star5_passenger_driver' => $successMessage->star5_passenger_message ?? 'Driver want only passengers with-5 star reviews above',
+            'star5_passenger_with_complete_address_message' =>
+                $successMessage->star5_passenger_with_complete_address_message ??
+                'Only 5 star passengers with complete address can select this ride',
+            'passenger_with_review_message' =>
+                $successMessage->passenger_with_review_message ?? 'Driver only want passengers with reviews',
+            'star3_passenger_message' =>
+                $successMessage->star3_passenger_message ?? 'Driver want only passengers with-3 star reviews above',
+            'star4_passenger_message' =>
+                $successMessage->star4_passenger_message ?? 'Driver want only passengers with-4 star reviews above',
+            'star5_passenger_driver' =>
+                $successMessage->star5_passenger_message ?? 'Driver want only passengers with-5 star reviews above',
         ]) !!};
 
         function toggleModal1(modalID, message) {
@@ -1980,33 +2204,64 @@
             var fromInput = document.getElementById('from_spot_0');
             var toInput = document.getElementById('to_spot_0');
             if (!fromInput || !toInput) return;
-            fromAutocompletePinkRide = new google.maps.places.Autocomplete(fromInput, { componentRestrictions: { country: 'ca' }, types: ['(cities)'], fields: ['address_components', 'formatted_address', 'name', 'place_id'] });
-            toAutocompletePinkRide = new google.maps.places.Autocomplete(toInput, { componentRestrictions: { country: 'ca' }, types: ['(cities)'], fields: ['address_components', 'formatted_address', 'name', 'place_id'] });
+            fromAutocompletePinkRide = new google.maps.places.Autocomplete(fromInput, {
+                componentRestrictions: {
+                    country: 'ca'
+                },
+                types: ['(cities)'],
+                fields: ['address_components', 'formatted_address', 'name', 'place_id']
+            });
+            toAutocompletePinkRide = new google.maps.places.Autocomplete(toInput, {
+                componentRestrictions: {
+                    country: 'ca'
+                },
+                types: ['(cities)'],
+                fields: ['address_components', 'formatted_address', 'name', 'place_id']
+            });
             fromAutocompletePinkRide.addListener('place_changed', function() {
                 var place = fromAutocompletePinkRide.getPlace();
                 if (place.address_components && place.place_id) {
-                    isSettingPlaceValuePinkRide = true; isSelectingFromDropdownPinkRide = true;
+                    isSettingPlaceValuePinkRide = true;
+                    isSelectingFromDropdownPinkRide = true;
                     var formatted = formatPlaceAddressPinkRide(place);
-                    selectedFromPlace = { place_id: place.place_id, formatted_address: formatted, value: formatted };
+                    selectedFromPlace = {
+                        place_id: place.place_id,
+                        formatted_address: formatted,
+                        value: formatted
+                    };
                     fromInput.value = formatted;
-                    var err = document.getElementById('fromInputError'); if (err) err.classList.add('hidden');
-                    setTimeout(function() { isSettingPlaceValuePinkRide = false; isSelectingFromDropdownPinkRide = false; }, 100);
+                    var err = document.getElementById('fromInputError');
+                    if (err) err.classList.add('hidden');
+                    setTimeout(function() {
+                        isSettingPlaceValuePinkRide = false;
+                        isSelectingFromDropdownPinkRide = false;
+                    }, 100);
                 }
             });
             toAutocompletePinkRide.addListener('place_changed', function() {
                 var place = toAutocompletePinkRide.getPlace();
                 if (place.address_components && place.place_id) {
-                    isSettingPlaceValuePinkRide = true; isSelectingFromDropdownPinkRide = true;
+                    isSettingPlaceValuePinkRide = true;
+                    isSelectingFromDropdownPinkRide = true;
                     var formatted = formatPlaceAddressPinkRide(place);
-                    selectedToPlace = { place_id: place.place_id, formatted_address: formatted, value: formatted };
+                    selectedToPlace = {
+                        place_id: place.place_id,
+                        formatted_address: formatted,
+                        value: formatted
+                    };
                     toInput.value = formatted;
-                    var err = document.getElementById('toInputError'); if (err) err.classList.add('hidden');
-                    setTimeout(function() { isSettingPlaceValuePinkRide = false; isSelectingFromDropdownPinkRide = false; }, 100);
+                    var err = document.getElementById('toInputError');
+                    if (err) err.classList.add('hidden');
+                    setTimeout(function() {
+                        isSettingPlaceValuePinkRide = false;
+                        isSelectingFromDropdownPinkRide = false;
+                    }, 100);
                 }
             });
             fromInput.addEventListener('input', function() {
                 if (isSettingPlaceValuePinkRide) return;
-                if (selectedFromPlace && this.value.trim() !== selectedFromPlace.value) selectedFromPlace = null;
+                if (selectedFromPlace && this.value.trim() !== selectedFromPlace.value) selectedFromPlace =
+                null;
             });
             toInput.addEventListener('input', function() {
                 if (isSettingPlaceValuePinkRide) return;
@@ -2016,19 +2271,25 @@
             fromInput.addEventListener('keydown', function(event) {
                 if (event.key === 'Enter') {
                     event.preventDefault();
-                    resolveTypedCityValuePinkRide(this.value, 'from').then(function() { navigateToSearchRoute1(); });
+                    resolveTypedCityValuePinkRide(this.value, 'from').then(function() {
+                        navigateToSearchRoute1();
+                    });
                 }
             });
             toInput.addEventListener('keydown', function(event) {
                 if (event.key === 'Enter') {
                     event.preventDefault();
-                    resolveTypedCityValuePinkRide(this.value, 'to').then(function() { navigateToSearchRoute1(); });
+                    resolveTypedCityValuePinkRide(this.value, 'to').then(function() {
+                        navigateToSearchRoute1();
+                    });
                 }
             });
 
             document.addEventListener('mousedown', function(e) {
                 if (e.target.closest('.pac-container')) isSelectingFromDropdownPinkRide = true;
-                else setTimeout(function() { isSelectingFromDropdownPinkRide = false; }, 50);
+                else setTimeout(function() {
+                    isSelectingFromDropdownPinkRide = false;
+                }, 50);
             });
 
             fromInput.addEventListener('blur', function() {
@@ -2039,20 +2300,23 @@
                     var currentValue = self.value.trim();
                     var fromInputError = document.getElementById('fromInputError');
 
-                    if (currentValue !== '' && (!selectedFromPlace || currentValue !== selectedFromPlace.value)) {
+                    if (currentValue !== '' && (!selectedFromPlace || currentValue !==
+                            selectedFromPlace.value)) {
                         await resolveTypedCityValuePinkRide(currentValue, 'from');
                         currentValue = self.value.trim();
                     }
 
                     // Validate: check if input has value but no valid place is selected
-                    if (currentValue === '' || !selectedFromPlace || currentValue !== selectedFromPlace.value) {
+                    if (currentValue === '' || !selectedFromPlace || currentValue !==
+                        selectedFromPlace.value) {
                         selectedFromPlace = null;
 
                         // Show error tooltip: required when empty, city not found when invalid text
                         if (currentValue !== '' && fromInputError) {
                             var tooltipError = fromInputError.querySelector('.tooltip-error');
                             if (tooltipError) {
-                                tooltipError.textContent = currentValue === '' ? errorFromRequiredPinkRide : errorCityMissingPinkRide;
+                                tooltipError.textContent = currentValue === '' ?
+                                    errorFromRequiredPinkRide : errorCityMissingPinkRide;
                             }
                             fromInputError.classList.remove('hidden');
                         }
@@ -2073,20 +2337,23 @@
                     var currentValue = self.value.trim();
                     var toInputError = document.getElementById('toInputError');
 
-                    if (currentValue !== '' && (!selectedToPlace || currentValue !== selectedToPlace.value)) {
+                    if (currentValue !== '' && (!selectedToPlace || currentValue !== selectedToPlace
+                            .value)) {
                         await resolveTypedCityValuePinkRide(currentValue, 'to');
                         currentValue = self.value.trim();
                     }
 
                     // Validate: check if input has value but no valid place is selected
-                    if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace.value) {
+                    if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace
+                        .value) {
                         selectedToPlace = null;
 
                         // Show error tooltip: required when empty, city not found when invalid text
                         if (currentValue !== '' && toInputError) {
                             var tooltipError = toInputError.querySelector('.tooltip-error');
                             if (tooltipError) {
-                                tooltipError.textContent = currentValue === '' ? errorToRequiredPinkRide : errorCityMissingPinkRide;
+                                tooltipError.textContent = currentValue === '' ?
+                                    errorToRequiredPinkRide : errorCityMissingPinkRide;
                             }
                             toInputError.classList.remove('hidden');
                         }
@@ -2116,42 +2383,90 @@
                 if (toVal) resolveTypedCityValuePinkRide(toVal, 'to');
             })();
         };
+
         function formatPlaceAddressPinkRide(place) {
-            var city = '', province = '', country = 'Canada';
+            var city = '',
+                province = '',
+                country = 'Canada';
             if (!place.address_components) return place.name || place.formatted_address || '';
             for (var i = 0; i < place.address_components.length; i++) {
-                var c = place.address_components[i], t = c.types;
-                if (!city && (t.indexOf('locality') !== -1 || t.indexOf('administrative_area_level_2') !== -1)) city = c.long_name;
+                var c = place.address_components[i],
+                    t = c.types;
+                if (!city && (t.indexOf('locality') !== -1 || t.indexOf('administrative_area_level_2') !== -1)) city = c
+                    .long_name;
                 if (!province && t.indexOf('administrative_area_level_1') !== -1) province = c.short_name;
                 if (t.indexOf('country') !== -1) country = c.long_name;
             }
-            if (!city && place.name) { var p = place.name.split(',').map(function(s) { return s.trim(); }); if (p[0]) city = p[0]; if (p[1] && p[1].length <= 3 && !province) province = p[1].toUpperCase(); }
-            if (!city && place.formatted_address) { var a = place.formatted_address.split(',').map(function(s) { return s.trim(); }); if (a[0]) city = a[0]; }
-            var out = city || ''; if (province) out += (out ? ', ' : '') + province; if (country && out) out += ', ' + country;
+            if (!city && place.name) {
+                var p = place.name.split(',').map(function(s) {
+                    return s.trim();
+                });
+                if (p[0]) city = p[0];
+                if (p[1] && p[1].length <= 3 && !province) province = p[1].toUpperCase();
+            }
+            if (!city && place.formatted_address) {
+                var a = place.formatted_address.split(',').map(function(s) {
+                    return s.trim();
+                });
+                if (a[0]) city = a[0];
+            }
+            var out = city || '';
+            if (province) out += (out ? ', ' : '') + province;
+            if (country && out) out += ', ' + country;
             return out || place.name || place.formatted_address || '';
         }
+
         function resolveTypedCityValuePinkRide(rawValue, target) {
             var value = (rawValue || '').trim();
             if (!value || !geocoderPinkRide) return Promise.resolve(false);
             var inputId = target === 'from' ? 'from_spot_0' : 'to_spot_0';
             var input = document.getElementById(inputId);
             return new Promise(function(resolve) {
-                geocoderPinkRide.geocode({ address: value, componentRestrictions: { country: 'CA' } }, function(response, status) {
-                    if (status !== 'OK' || !response || !response.length) { resolve(false); return; }
+                geocoderPinkRide.geocode({
+                    address: value,
+                    componentRestrictions: {
+                        country: 'CA'
+                    }
+                }, function(response, status) {
+                    if (status !== 'OK' || !response || !response.length) {
+                        resolve(false);
+                        return;
+                    }
                     var result = null;
                     for (var i = 0; i < response.length; i++) {
                         var item = response[i];
-                        if (item.address_components && item.address_components.some(function(comp) { return comp.types.indexOf('locality') !== -1 || comp.types.indexOf('administrative_area_level_2') !== -1; })) { result = item; break; }
+                        if (item.address_components && item.address_components.some(function(comp) {
+                                return comp.types.indexOf('locality') !== -1 || comp.types.indexOf(
+                                    'administrative_area_level_2') !== -1;
+                            })) {
+                            result = item;
+                            break;
+                        }
                     }
-                    if (!result) { resolve(false); return; }
+                    if (!result) {
+                        resolve(false);
+                        return;
+                    }
                     var formatted = formatPlaceAddressPinkRide(result);
-                    if (!formatted) { resolve(false); return; }
+                    if (!formatted) {
+                        resolve(false);
+                        return;
+                    }
                     isSettingPlaceValuePinkRide = true;
-                    var sel = { place_id: result.place_id, formatted_address: formatted, value: formatted };
-                    if (target === 'from') selectedFromPlace = sel; else selectedToPlace = sel;
+                    var sel = {
+                        place_id: result.place_id,
+                        formatted_address: formatted,
+                        value: formatted
+                    };
+                    if (target === 'from') selectedFromPlace = sel;
+                    else selectedToPlace = sel;
                     if (input) input.value = formatted;
-                    var err = document.getElementById(target === 'from' ? 'fromInputError' : 'toInputError'); if (err) err.classList.add('hidden');
-                    setTimeout(function() { isSettingPlaceValuePinkRide = false; }, 100);
+                    var err = document.getElementById(target === 'from' ? 'fromInputError' :
+                    'toInputError');
+                    if (err) err.classList.add('hidden');
+                    setTimeout(function() {
+                        isSettingPlaceValuePinkRide = false;
+                    }, 100);
                     resolve(true);
                 });
             });
@@ -2162,7 +2477,9 @@
             return function() {
                 const args = arguments;
                 clearTimeout(timer);
-                timer = setTimeout(() => { func.apply(this, args); }, delay);
+                timer = setTimeout(() => {
+                    func.apply(this, args);
+                }, delay);
             };
         }
 
@@ -2178,37 +2495,39 @@
                 _token: '{{ csrf_token() }}'
             });
             fetch('{{ url('get-cities-by-state') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: body.toString()
-            })
-            .then(r => {
-                if (!r.ok) throw new Error('Request failed: ' + r.status);
-                return r.json();
-            })
-            .then(result => {
-                container.innerHTML = '';
-                const cities = result.cities != null ? (Array.isArray(result.cities) ? result.cities : Object.values(result.cities)) : [];
-                cities.forEach(value => {
-                    const stateAbrv = value.state && value.state.abrv ? value.state.abrv : '';
-                    const countryName = value.state && value.state.country && value.state.country.name ? value.state.country.name : '';
-                    const displayText = [value.name, stateAbrv, countryName].filter(Boolean).join(', ');
-                    const div = document.createElement('div');
-                    div.className = 'suggestion-item p-2 hover:bg-gray-200 cursor-pointer';
-                    div.textContent = displayText;
-                    div.addEventListener('click', function() {
-                        const input = document.getElementById(fieldId + '_' + fieldIndex);
-                        if (input) input.value = displayText;
-                        container.innerHTML = '';
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: body.toString()
+                })
+                .then(r => {
+                    if (!r.ok) throw new Error('Request failed: ' + r.status);
+                    return r.json();
+                })
+                .then(result => {
+                    container.innerHTML = '';
+                    const cities = result.cities != null ? (Array.isArray(result.cities) ? result.cities : Object
+                        .values(result.cities)) : [];
+                    cities.forEach(value => {
+                        const stateAbrv = value.state && value.state.abrv ? value.state.abrv : '';
+                        const countryName = value.state && value.state.country && value.state.country.name ?
+                            value.state.country.name : '';
+                        const displayText = [value.name, stateAbrv, countryName].filter(Boolean).join(', ');
+                        const div = document.createElement('div');
+                        div.className = 'suggestion-item p-2 hover:bg-gray-200 cursor-pointer';
+                        div.textContent = displayText;
+                        div.addEventListener('click', function() {
+                            const input = document.getElementById(fieldId + '_' + fieldIndex);
+                            if (input) input.value = displayText;
+                            container.innerHTML = '';
+                        });
+                        container.appendChild(div);
                     });
-                    container.appendChild(div);
-                });
-            })
-            .catch(err => console.error('fetchCities error', err));
+                })
+                .catch(err => console.error('fetchCities error', err));
         }
 
         const debouncedFromFetch = debounce(function() {
@@ -2241,7 +2560,8 @@
         document.addEventListener('click', function(e) {
             const fromSuggest = document.getElementById('from_spot_suggestions0');
             const toSuggest = document.getElementById('to_spot_suggestions0');
-            if (fromSuggest && !fromSuggest.contains(e.target) && e.target.id !== 'from_spot_0') fromSuggest.innerHTML = '';
+            if (fromSuggest && !fromSuggest.contains(e.target) && e.target.id !== 'from_spot_0') fromSuggest
+                .innerHTML = '';
             if (toSuggest && !toSuggest.contains(e.target) && e.target.id !== 'to_spot_0') toSuggest.innerHTML = '';
         });
 
@@ -2258,13 +2578,22 @@
 
         // Enter key: submit search
         document.getElementById('from_spot_0').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') { event.preventDefault(); navigateToSearchRoute(); }
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                navigateToSearchRoute();
+            }
         });
         document.getElementById('to_spot_0').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') { event.preventDefault(); navigateToSearchRoute(); }
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                navigateToSearchRoute();
+            }
         });
         document.getElementById('dateInput').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') { event.preventDefault(); navigateToSearchRoute(); }
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                navigateToSearchRoute();
+            }
         });
 
         document.getElementById('driverName').addEventListener('keypress', function(event) {
@@ -2278,7 +2607,7 @@
         let getFeatures = '{{ isset($_GET['features']) ? $_GET['features'] : '' }}';
         getFeatures = getFeatures ? getFeatures.split(";").filter(f => f.trim() !== "") : [];
         let selectedFeatures = getFeatures;
-        selectedFeatures.push('{{ $findRidePage->ride_features_option1->features_setting_id ?? "" }}');
+        selectedFeatures.push('{{ $findRidePage->ride_features_option1->features_setting_id ?? '' }}');
         console.log(selectedFeatures);
 
         // Initialize an array to store selected luggages
@@ -2399,7 +2728,8 @@
             const fromInputError = document.getElementById('fromInputError');
             const toInputError = document.getElementById('toInputError');
 
-            var fromInvalid = !fromValue.trim() || !selectedFromPlace || fromValue.trim() !== (selectedFromPlace.value || '').trim();
+            var fromInvalid = !fromValue.trim() || !selectedFromPlace || fromValue.trim() !== (selectedFromPlace.value ||
+                '').trim();
             var toInvalid = !toValue.trim() || !selectedToPlace || toValue.trim() !== (selectedToPlace.value || '').trim();
             if (fromInvalid || toInvalid) {
                 if (fromInvalid && fromInputError) {
@@ -2413,7 +2743,10 @@
                     toInputError.classList.remove('hidden');
                 }
                 var firstField = document.getElementById('from_spot_0');
-                if (fromInvalid && firstField) firstField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (fromInvalid && firstField) firstField.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
                 return;
             }
             if (fromInputError) fromInputError.classList.add('hidden');
@@ -2447,13 +2780,20 @@
             const fromInputError = document.getElementById('fromInputError');
             const toInputError = document.getElementById('toInputError');
 
-            var fromInvalid = !fromValue.trim() || !selectedFromPlace || fromValue.trim() !== (selectedFromPlace.value || '').trim();
+            var fromInvalid = !fromValue.trim() || !selectedFromPlace || fromValue.trim() !== (selectedFromPlace.value ||
+                '').trim();
             var toInvalid = !toValue.trim() || !selectedToPlace || toValue.trim() !== (selectedToPlace.value || '').trim();
             if (fromInvalid || toInvalid) {
                 var firstField = document.getElementById('from_spot_0');
-                if (fromInvalid && firstField) firstField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (fromInvalid && firstField) firstField.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
                 var secondField = document.getElementById('to_spot_0');
-                if (toInvalid && secondField) secondField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (toInvalid && secondField) secondField.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
                 return;
             }
             if (fromInputError) fromInputError.classList.add('hidden');
@@ -2477,39 +2817,39 @@
 
             window.location.href = searchUrl;
         }
+
         function resetFilters() {
-    // Reset checkboxes
-    document.querySelectorAll('.ride-preferences, .luggage, .smoking, .pet').forEach(checkbox => {
-        checkbox.checked = false;
-    });
+            // Reset checkboxes
+            document.querySelectorAll('.ride-preferences, .luggage, .smoking, .pet').forEach(checkbox => {
+                checkbox.checked = false;
+            });
 
-    // Reset selects
-    document.getElementById('driverAge').value = '0';
-    document.getElementById('passengerRating').value = '';
-    document.getElementById('payment-method').value = '';
-    document.getElementById('driverRating').value = '0';
-    document.getElementById('VehicleType').value = '';
+            // Reset selects
+            document.getElementById('driverAge').value = '0';
+            document.getElementById('passengerRating').value = '';
+            document.getElementById('payment-method').value = '';
+            document.getElementById('driverRating').value = '0';
+            document.getElementById('VehicleType').value = '';
 
-    // Reset other inputs
-    document.getElementById('driverPhone').checked = false;
-    document.getElementById('driverName').value = '';
-    document.getElementById('keyword').value = '';
+            // Reset other inputs
+            document.getElementById('driverPhone').checked = false;
+            document.getElementById('driverName').value = '';
+            document.getElementById('keyword').value = '';
 
-    const hideFullRidesCheckbox = document.getElementById('hide-full-rides');
-    if (hideFullRidesCheckbox) hideFullRidesCheckbox.checked = false;
+            const hideFullRidesCheckbox = document.getElementById('hide-full-rides');
+            if (hideFullRidesCheckbox) hideFullRidesCheckbox.checked = false;
 
-    // Clear any stored selections
-    selectedFeatures = [];
-    selectedLuggages = [];
-    selectedSmoking = [];
-    selectedPets = [];
+            // Clear any stored selections
+            selectedFeatures = [];
+            selectedLuggages = [];
+            selectedSmoking = [];
+            selectedPets = [];
 
-    // Optionally refresh the page or navigate back
-    window.location.href = "{{ route('search_ride', ['lang' => $selectedLanguage->abbreviation]) }}";
-}
+            // Optionally refresh the page or navigate back
+            window.location.href = "{{ route('search_ride', ['lang' => $selectedLanguage->abbreviation]) }}";
+        }
     </script>
     <script>
-
         document.addEventListener('DOMContentLoaded', () => {
 
             const autoGrow = (textarea) => {
@@ -2553,7 +2893,8 @@
             close.addEventListener('click', () => toggleSearchFilters(false));
             overlay.addEventListener('click', () => toggleSearchFilters(false));
         });
-
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_API_KEY') }}&libraries=places&callback=initPinkRidePlaces" async defer></script>
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_API_KEY') }}&libraries=places&callback=initPinkRidePlaces"
+        async defer></script>
 @endsection

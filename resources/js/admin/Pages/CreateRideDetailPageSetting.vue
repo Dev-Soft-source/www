@@ -108,9 +108,40 @@
                                                 )
                                             "
                                         ></p>
-                                    </div>
-                                    <div class="relative z-0 w-full group">
-                                        <div>
+          </div>
+          <div class="relative z-0 w-full group">
+              <div>
+                  <div
+                      class="flex justify-between"
+                  >
+                      <label
+                          :for="`request_booking_label_${activeLanguageId}`"
+                          >Request booking label</label
+                      >
+                  </div>
+                  <input
+                      type="text"
+                      :name="`request_booking_label_${activeLanguageId}`"
+                      :id="`request_booking_label_${activeLanguageId}`"
+                      class="can-exp-input w-full block border border-gray-300 rounded"
+                      placeholder=" "
+                      :value="
+                          getCurrentValue(
+                              'request_booking_label'
+                          )
+                      "
+                      @input="
+                          handleInput(
+                              $event.target.value,
+                              language,
+                              'request_booking_label'
+                          )
+                      "
+                  />
+              </div>
+          </div>
+          <div class="relative z-0 w-full group">
+              <div>
                                             <div class="flex justify-between">
                                                 <label
                                                     :for="`meta_description_${activeLanguageId}`"
@@ -1103,10 +1134,41 @@
                                                     )
                                                 "
                                             ></p>
-                                        </div>
-                                        
-                                        
-                                        <div class="relative z-0 w-full group">
+          </div>
+          <div class="relative z-0 w-full group">
+              <div>
+                  <div
+                      class="flex justify-between"
+                  >
+                      <label
+                          :for="`view_cancellation_tooltip_${activeLanguageId}`"
+                          >View cancellation tooltip</label
+                      >
+                  </div>
+                  <input
+                      type="text"
+                      :name="`view_cancellation_tooltip_${activeLanguageId}`"
+                      :id="`view_cancellation_tooltip_${activeLanguageId}`"
+                      class="can-exp-input w-full block border border-gray-300 rounded"
+                      placeholder=" "
+                      :value="
+                          getCurrentValue(
+                              'view_cancellation_tooltip'
+                          )
+                      "
+                      @input="
+                          handleInput(
+                              $event.target.value,
+                              language,
+                              'view_cancellation_tooltip'
+                          )
+                      "
+                  />
+              </div>
+          </div>
+          
+          
+          <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
                                                     class="flex justify-between"
@@ -2871,13 +2933,57 @@
                                                         `enter_code_label.enter_code_label_${activeLanguageId}`
                                                     )
                                                 "
-                                            ></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div
-                                                    class="flex justify-between"
-                                                >
+                                                ></p>
+                                            </div>
+                                            <div class="relative z-0 w-full group">
+                                                <div>
+                                                    <div
+                                                        class="flex justify-between"
+                                                    >
+                                                        <label
+                                                            :for="`enter_secured_placeholder_${activeLanguageId}`"
+                                                            >Enter secured placeholder</label
+                                                        >
+                                                    </div>
+                                                    <input
+                                                        type="text"
+                                                        :name="`enter_secured_placeholder_${activeLanguageId}`"
+                                                        :id="`enter_secured_placeholder_${activeLanguageId}`"
+                                                        class="can-exp-input w-full block border border-gray-300 rounded"
+                                                        placeholder=" "
+                                                        :value="
+                                                            getCurrentValue(
+                                                                'enter_secured_placeholder'
+                                                            )
+                                                        "
+                                                        @input="
+                                                            handleInput(
+                                                                $event.target.value,
+                                                                language,
+                                                                'enter_secured_placeholder'
+                                                            )
+                                                        "
+                                                    />
+                                                </div>
+                                                <p
+                                                    class="mt-2 text-sm text-red-400"
+                                                    v-if="
+                                                        validationErros.has(
+                                                            `enter_secured_placeholder.enter_secured_placeholder_${activeLanguageId}`
+                                                        )
+                                                    "
+                                                    v-text="
+                                                        validationErros.get(
+                                                            `enter_secured_placeholder.enter_secured_placeholder_${activeLanguageId}`
+                                                        )
+                                                    "
+                                                ></p>
+                                            </div>
+                                            <div class="relative z-0 w-full group">
+                                                <div>
+                                                    <div
+                                                        class="flex justify-between"
+                                                    >
                                                     <label
                                                         :for="`mobile_seat_booked_heading_${activeLanguageId}`"
                                                         >Seat booked heading (App)</label
@@ -4741,12 +4847,14 @@ export default {
                             this.handleInput("", language, "edit_ride_btn_label");
                             this.handleInput("", language, "review_label");
                             this.handleInput("", language, "no_reviews_label");
-                            this.handleInput("", language, "booking_request_heading");
+this.handleInput("", language, "booking_request_heading");
+this.handleInput("", language, "request_booking_label");
                             this.handleInput("", language, "seat_requested_label");
                             this.handleInput("", language, "request_accept_label");
                             this.handleInput("", language, "request_reject_label");
                             this.handleInput("", language, "secured_cash_heading");
                             this.handleInput("", language, "enter_code_label");
+                            this.handleInput("", language, "enter_secured_placeholder");
                             this.handleInput("", language, "mobile_seat_booked_heading");
                             this.handleInput("", language, "mobile_seat_booked_label");
                             this.handleInput("", language, "mobile_seat_fare_label");
@@ -4787,8 +4895,9 @@ export default {
                             this.handleInput("", language, "passenger_age_label");
                             this.handleInput("", language, "passenger_gender_label");
                             this.handleInput("", language, "seat_on_column_label");
-                            this.handleInput("", language, "cancellation_policy_tooltip");
-                            this.handleInput("", language, "cancellation_policy_tooltip_url");
+this.handleInput("", language, "cancellation_policy_tooltip");
+this.handleInput("", language, "view_cancellation_tooltip");
+this.handleInput("", language, "cancellation_policy_tooltip_url");
                             this.handleInput("", language, "firm_cancellation_confirm_poup_heading");
                             this.handleInput("", language, "firm_cancellation_confirm_poup_text");
                             this.handleInput("", language, "firm_cancellation_confirm_poup_sub_text");
@@ -5053,11 +5162,16 @@ export default {
                                 setting?.language,
                                 "no_reviews_label"
                             );
-                            this.handleInput(
-                                setting?.booking_request_heading,
-                                setting?.language,
-                                "booking_request_heading"
-                            );
+this.handleInput(
+  setting?.booking_request_heading,
+  setting?.language,
+  "booking_request_heading"
+);
+this.handleInput(
+  setting?.request_booking_label,
+  setting?.language,
+  "request_booking_label"
+);
                             this.handleInput(
                                 setting?.seat_requested_label,
                                 setting?.language,
@@ -5082,6 +5196,11 @@ export default {
                                 setting?.enter_code_label,
                                 setting?.language,
                                 "enter_code_label"
+                            );
+                            this.handleInput(
+                                setting?.enter_secured_placeholder,
+                                setting?.language,
+                                "enter_secured_placeholder"
                             );
                             this.handleInput(
                                 setting?.mobile_seat_booked_heading,
@@ -5277,13 +5396,18 @@ export default {
                                 setting?.language,
                                 "seat_on_column_label"
                             );
-                            this.handleInput(
-                                setting?.cancellation_policy_tooltip,
-                                setting?.language,
-                                "cancellation_policy_tooltip"
-                            );
-                            this.handleInput(
-                                setting?.cancellation_policy_tooltip_url,
+this.handleInput(
+  setting?.cancellation_policy_tooltip,
+  setting?.language,
+  "cancellation_policy_tooltip"
+);
+this.handleInput(
+  setting?.view_cancellation_tooltip,
+  setting?.language,
+  "view_cancellation_tooltip"
+);
+this.handleInput(
+  setting?.cancellation_policy_tooltip_url,
                                 setting?.language,
                                 "cancellation_policy_tooltip_url"
                             );
@@ -5519,6 +5643,9 @@ export default {
                 ) ||
                 validationErros.has(
                     `enter_code_label.enter_code_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `enter_secured_placeholder.enter_secured_placeholder_${language.id}`
                 ) ||
                 validationErros.has(
                     `mobile_seat_booked_heading.mobile_seat_booked_heading_${language.id}`

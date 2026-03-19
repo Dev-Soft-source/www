@@ -71,10 +71,10 @@
                                 <div
                                     class="grid my-5 grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6"
                                 >
-                                <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div
-                                                    class="flex justify-between"
+                                    <div class="relative z-0 w-full group">
+                                        <div>
+                                            <div
+                                                class="flex justify-between"
                                                 >
                                                     <label
                                                         :for="`main_heading_${activeLanguageId}`"
@@ -193,9 +193,40 @@
                                         ></p>
                                     </div>
                                     <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div
-                                                    class="flex justify-between"
+                                        <div>
+                                            <div
+                                                class="flex justify-between"
+                                            >
+                                                <label
+                                                    :for="`already_reveiwed_label_${activeLanguageId}`"
+                                                    >Already reviewed label</label
+                                                >
+                                            </div>
+                                            <input
+                                                type="text"
+                                                :name="`already_reveiwed_label_${activeLanguageId}`"
+                                                :id="`already_reveiwed_label_${activeLanguageId}`"
+                                                class="can-exp-input w-full block border border-gray-300 rounded"
+                                                placeholder=" "
+                                                :value="
+                                                    getCurrentValue(
+                                                        'already_reveiwed_label'
+                                                    )
+                                                "
+                                                @input="
+                                                    handleInput(
+                                                        $event.target.value,
+                                                        language,
+                                                        'already_reveiwed_label'
+                                                    )
+                                                "
+                                            />
+                                        </div>
+                                    </div>
+                                    <div class="relative z-0 w-full group">
+                                        <div>
+                                            <div
+                                                class="flex justify-between"
                                                 >
                                                     <label
                                                         :for="`no_received_message_${activeLanguageId}`">
@@ -876,6 +907,7 @@ export default {
                             this.handleInput("", language, "reply_placeholder");
                             this.handleInput("", language, "reply_heading_label");
                             this.handleInput("", language, "review_label");
+                            this.handleInput("", language, "already_reveiwed_label");
                             this.handleInput("", language, "see_all_review_label");
                             this.handleInput("", language, "passenger_review_heading");
                             this.handleInput("", language, "passenger_review_criteria_heading");
@@ -975,6 +1007,12 @@ export default {
                                 setting?.review_label,
                                 setting?.language,
                                 "review_label"
+                            );
+                            this.handleInput(
+                                setting?.already_reveiwed_label ??
+                                    setting?.already_reviewed_label,
+                                setting?.language,
+                                "already_reveiwed_label"
                             );
                             this.handleInput(setting?.passenger_review_heading, setting?.language, "passenger_review_heading");
                             this.handleInput(setting?.passenger_review_criteria_heading, setting?.language, "passenger_review_criteria_heading");

@@ -29,11 +29,11 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div class="mx-auto h-16 w-16 flex-shrink-0 flex items-center justify-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                            </svg>
-                                        </div> -->
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                </svg>
+                                            </div> -->
                             </div>
                             <div class="mt-4 w-full">
                                 <p class="can-exp-p text-center">{!! session('success') !!}</p>
@@ -100,11 +100,11 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div
-                                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                                </svg>
-                                            </div> -->
+                                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                                    </svg>
+                                                </div> -->
                             </div>
                             <div class="text-center">
 
@@ -133,11 +133,11 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div
-                                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                                    </svg>
-                                                </div> -->
+                                                        class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                                            <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                                        </svg>
+                                                    </div> -->
                             </div>
                             <div class="text-center">
                                 <div class="w-full">
@@ -223,7 +223,7 @@
                                                     <span class="text-indigo-600 text-base md:text-lg">
                                                         {{ $findRidePage->ride_features_option2->name }}
                                                     </span>
-                                                    
+
                                                 </label>
                                                 <input id="Extra+" type="checkbox"
                                                     value="{{ $findRidePage->ride_features_option2->features_setting_id }}"
@@ -488,7 +488,8 @@
                                                             $textProperty = 'vehicle_type_' . $key . '_text';
                                                             $value = $findRidePage->$valueProperty ?? $default;
                                                             $text = $findRidePage->$textProperty ?? $default;
-                                                            $isSelected = (string) $request->vehicle_type === (string) $value;
+                                                            $isSelected =
+                                                                (string) $request->vehicle_type === (string) $value;
                                                         @endphp
                                                         <option value="{{ $value }}"
                                                             {{ $isSelected ? 'selected' : '' }}>
@@ -512,7 +513,6 @@
                                                     ? explode(';', $_GET['features'])
                                                     : [];
 
-                                                
                                             @endphp
                                             @foreach ($featureOptions as $featureOption)
                                                 @php
@@ -521,7 +521,8 @@
                                                 <div class="flex items-start justify-between p-3">
                                                     <label for="{{ $featureOption['slug'] }}"
                                                         class="font-normal text-gray-900 flex space-x-1">
-                                                        <span class="text-base md:text-lg">{{ $featureOption['label'] }}</span>
+                                                        <span
+                                                            class="text-base md:text-lg">{{ $featureOption['label'] }}</span>
                                                     </label>
                                                     <input id="{{ $featureOption['slug'] }}" type="checkbox"
                                                         value="{{ $featureOption['id'] }}"
@@ -759,13 +760,15 @@
                                                 class="hide-full-rides w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 focus:ring-2 cursor-pointer"
                                                 {{ request('hide_full_rides') ? 'checked' : '' }}>
                                             <span
-                                                class="text-base font-medium">{{ $siteText['hide_full_ride_text'] ?? 'Hide Full Rides' }}</span>
+                                                class="text-base font-medium">{{ $findRidePage->hide_full_ride_text ?? 'Hide Full Rides' }}</span>
                                         </label>
                                     </div>
 
-                                    <button class="w-auto text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded"
+                                    <button
+                                        class="w-auto text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded"
                                         onclick="navigateToSearchRoute()">{{ $findRidePage->filter_search_btn_label }}</button>
-                                    <button class="w-auto text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded"
+                                    <button
+                                        class="w-auto text-white text-lg font-FuturaMdCnBT px-4 py-2 bg-blue-600 rounded"
                                         onclick="resetFilters()">{{ $findRidePage->filter_close_btn_label }}</button>
                                 </div>
                             </div>
@@ -989,7 +992,10 @@
                                                 class="flex flex-col md:flex-row items-start md:items-center justify-between pb-0 p-4">
                                                 <div class="flex items-center gap-2">
                                                     @php
-                                                        $displayDt = ($rideDetail->date ?? $ride->date) . ' ' . ($rideDetail->time ?? $ride->time ?? '00:00');
+                                                        $displayDt =
+                                                            ($rideDetail->date ?? $ride->date) .
+                                                            ' ' .
+                                                            ($rideDetail->time ?? ($ride->time ?? '00:00'));
                                                         $departureDateTime = formatDepartureDateTime(
                                                             $displayDt,
                                                             $selectedLanguage ?? null,
@@ -1515,11 +1521,11 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div
-                                                            class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                                <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                                            </svg>
-                                                        </div> -->
+                                                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-[#c75b5b]">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                                                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                                                </svg>
+                                                            </div> -->
                             </div>
                             <div class="text-center w-full">
                                 <h3 class="card-heading"></h3>
@@ -1785,7 +1791,8 @@
         document.addEventListener('click', function(e) {
             const fromSuggest = document.getElementById('from_spot_suggestions0');
             const toSuggest = document.getElementById('to_spot_suggestions0');
-            if (fromSuggest && !fromSuggest.contains(e.target) && e.target.id !== 'from_spot_0') fromSuggest.innerHTML = '';
+            if (fromSuggest && !fromSuggest.contains(e.target) && e.target.id !== 'from_spot_0') fromSuggest
+                .innerHTML = '';
             if (toSuggest && !toSuggest.contains(e.target) && e.target.id !== 'to_spot_0') toSuggest.innerHTML = '';
         });
 

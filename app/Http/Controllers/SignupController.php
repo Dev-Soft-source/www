@@ -8,6 +8,7 @@ use App\Models\Language;
 use App\Models\Notification;
 use App\Models\SignupPageSettingDetail;
 use App\Models\User;
+use App\Models\Admin;
 use App\Models\ReferralDetail;
 use App\Models\SuccessMessagesSettingDetail;
 use App\Models\Country;
@@ -207,11 +208,12 @@ class SignupController extends Controller
             'registration_date' => Carbon::now()->format('M d, Y H:i:s'),
             'platform' => 'Website'
         ];
+        $admin = Admin::first();
         try {
-            Mail::to('ccaned@gmail.com')->queue(new AdminNewUserSignupMail($adminData));
+            Mail::to($admin->admin_email)->queue(new AdminNewUserSignupMail($adminData));
         } catch (\Throwable $e) {
             try {
-                Mail::mailer('log')->to('ccaned@gmail.com')->send(new AdminNewUserSignupMail($adminData));
+                Mail::mailer('log')->to($admin->admin_email)->send(new AdminNewUserSignupMail($adminData));
             } catch (\Throwable $e2) {
             }
         }
@@ -479,9 +481,11 @@ class SignupController extends Controller
                 'platform' => 'Web - ' . ucfirst($provider) . ' Login'
             ];
 
+            $admin = Admin::first();
+
             // Send email with error handling similar to regular signup
             try {
-                Mail::to('ccaned@gmail.com')->send(new AdminNewUserSignupMail($adminData));
+                Mail::to($admin->admin_email)->send(new AdminNewUserSignupMail($adminData));
                 Log::info('Admin notification sent successfully for social signup', [
                     'email' => $providerUser->email,
                     'provider' => $provider
@@ -495,7 +499,7 @@ class SignupController extends Controller
                 ]);
                 // Try fallback to log mailer
                 try {
-                    Mail::mailer('log')->to('ccaned@gmail.com')->send(new AdminNewUserSignupMail($adminData));
+                    Mail::mailer('log')->to($admin->admin_email)->send(new AdminNewUserSignupMail($adminData));
                     Log::info('Admin notification sent via log mailer (fallback) for social signup', [
                         'email' => $providerUser->email,
                         'provider' => $provider

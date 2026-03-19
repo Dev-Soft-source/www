@@ -39,6 +39,7 @@ class Step1PageSettingTemplateExport implements FromCollection, WithHeadings, Sh
             'female_option_label' => 'Female',
             'prefer_option_label' => 'Prefer not to say',
             'dob_label' => 'Date of birth',
+            'alert_age_limit_text' => 'You must be at least 18 years old to join ProximaRide. Please check your date of birth or refer to our Terms of Service.',
             'country_label' => 'Country',
             'state_label' => 'State',
             'city_label' => 'City',

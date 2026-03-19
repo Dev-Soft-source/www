@@ -108,8 +108,39 @@
                                                 )
                                             "
                                         ></p>
-                                    </div>
-                                    <div class="relative z-0 w-full group">
+    </div>
+    <div class="relative z-0 w-full group">
+        <div>
+            <div
+                class="flex justify-between"
+            >
+                <label
+                    :for="`alert_age_limit_text_${activeLanguageId}`"
+                    >Alert age limit text</label
+                >
+            </div>
+            <input
+                type="text"
+                :name="`alert_age_limit_text_${activeLanguageId}`"
+                :id="`alert_age_limit_text_${activeLanguageId}`"
+                class="can-exp-input w-full block border border-gray-300 rounded"
+                placeholder=" "
+                :value="
+                    getCurrentValue(
+                        'alert_age_limit_text'
+                    )
+                "
+                @input="
+                    handleInput(
+                        $event.target.value,
+                        language,
+                        'alert_age_limit_text'
+                    )
+                "
+            />
+        </div>
+    </div>
+    <div class="relative z-0 w-full group">
                                         <div>
                                             <div class="flex justify-between">
                                                 <label
@@ -1472,9 +1503,10 @@ export default {
                             this.handleInput("", language, "male_option_label");
                             this.handleInput("", language, "female_option_label");
                             this.handleInput("", language, "prefer_option_label");
-                            this.handleInput("", language, "dob_label");
-                            this.handleInput("", language, "dob_error");
-                            this.handleInput("", language, "country_label");
+this.handleInput("", language, "dob_label");
+this.handleInput("", language, "dob_error");
+this.handleInput("", language, "alert_age_limit_text");
+this.handleInput("", language, "country_label");
                             this.handleInput("", language, "country_error");
                             this.handleInput("", language, "state_label");
                             this.handleInput("", language, "state_error");
@@ -1575,13 +1607,18 @@ export default {
                                 setting?.language,
                                 "dob_label"
                             );
-                            this.handleInput(
-                                setting?.dob_error,
-                                setting?.language,
-                                "dob_error"
-                            );
-                            this.handleInput(
-                                setting?.country_label,
+this.handleInput(
+setting?.dob_error,
+setting?.language,
+"dob_error"
+);
+this.handleInput(
+setting?.alert_age_limit_text,
+setting?.language,
+"alert_age_limit_text"
+);
+this.handleInput(
+setting?.country_label,
                                 setting?.language,
                                 "country_label"
                             );

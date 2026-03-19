@@ -224,6 +224,7 @@ class FindRidePageSettingService
             'search_section_keyword_label' => $this->data($request, $language, 'search_section_keyword_label'),
             'search_section_keyword_placeholder' => $this->data($request, $language, 'search_section_keyword_placeholder'),
             'search_section_button_label' => $this->data($request, $language, 'search_section_button_label'),
+            'hide_full_ride_text' => $this->data($request, $language, 'hide_full_ride_text'),
             'search_section_recent_searches' => $this->data($request, $language, 'search_section_recent_searches'),
             'card_section_from_label' => $this->data($request, $language, 'card_section_from_label'),
             'card_section_to_label' => $this->data($request, $language, 'card_section_to_label'),

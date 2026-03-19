@@ -96,6 +96,7 @@ class Step1PageSettingService
             'prefer_option_label' => $this->data($request, $language, 'prefer_option_label'),
             'dob_label' => $this->data($request, $language, 'dob_label'),
             'dob_error' => $this->data($request, $language, 'dob_error'),
+            'alert_age_limit_text' => $this->data($request, $language, 'alert_age_limit_text'),
             'country_label' => $this->data($request, $language, 'country_label'),
             'country_error' => $this->data($request, $language, 'country_error'),
             'state_label' => $this->data($request, $language, 'state_label'),

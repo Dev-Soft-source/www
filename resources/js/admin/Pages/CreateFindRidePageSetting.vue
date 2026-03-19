@@ -74,9 +74,31 @@
                                                 `name.name_${activeLanguageId}`
                                             )
                                                 "></p>
-                                    </div>
-                                    <div class="relative z-0 w-full group">
-                                        <div>
+        </div>
+        <div class="relative z-0 w-full group">
+            <div>
+                <div class="flex justify-between">
+                    <label
+                        :for="`hide_full_ride_text_${activeLanguageId}`">Hide full ride text</label>
+                </div>
+                <input type="text"
+                    :name="`hide_full_ride_text_${activeLanguageId}`"
+                    :id="`hide_full_ride_text_${activeLanguageId}`"
+                    class="can-exp-input w-full block border border-gray-300 rounded"
+                    placeholder=" " :value="getCurrentValue(
+                        'hide_full_ride_text'
+                    )
+                        " @input="
+                        handleInput(
+                            $event.target.value,
+                            language,
+                            'hide_full_ride_text'
+                        )
+                        " />
+            </div>
+        </div>
+        <div class="relative z-0 w-full group">
+            <div>
                                             <div class="flex justify-between">
                                                 <label :for="`meta_description_${activeLanguageId}`">Meta
                                                     description</label>
@@ -3484,8 +3506,9 @@ export default {
                             this.handleInput("", language, "search_section_required_error");
                             this.handleInput("", language, "search_section_keyword_label");
                             this.handleInput("", language, "search_section_keyword_placeholder");
-                            this.handleInput("", language, "search_section_button_label");
-                            this.handleInput("", language, "search_section_recent_searches");
+this.handleInput("", language, "search_section_button_label");
+this.handleInput("", language, "hide_full_ride_text");
+this.handleInput("", language, "search_section_recent_searches");
                             this.handleInput("", language, "card_section_from_label");
                             this.handleInput("", language, "card_section_to_label");
                             this.handleInput("", language, "card_section_at_label");
@@ -3771,12 +3794,17 @@ export default {
                                 setting?.language,
                                 "search_section_keyword_placeholder"
                             );
-                            this.handleInput(
-                                setting?.search_section_button_label,
-                                setting?.language,
-                                "search_section_button_label"
-                            );
-                            this.handleInput(
+this.handleInput(
+setting?.search_section_button_label,
+setting?.language,
+"search_section_button_label"
+);
+this.handleInput(
+setting?.hide_full_ride_text,
+setting?.language,
+"hide_full_ride_text"
+);
+this.handleInput(
                                 setting?.search_section_recent_searches,
                                 setting?.language,
                                 "search_section_recent_searches"

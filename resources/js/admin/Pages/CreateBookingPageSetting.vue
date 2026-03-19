@@ -313,9 +313,40 @@
                                                     )
                                                 "
                                             ></p>
-                                        </div>
- 
-                                        <div class="relative z-0 w-full group">
+       </div>
+       <div class="relative z-0 w-full group">
+           <div>
+               <div
+                   class="flex justify-between"
+               >
+                   <label
+                       :for="`pay_and_request_to_book_btn_text_${activeLanguageId}`"
+                       >Pay and request to book button</label
+                   >
+               </div>
+               <input
+                   type="text"
+                   :name="`pay_and_request_to_book_btn_text_${activeLanguageId}`"
+                   :id="`pay_and_request_to_book_btn_text_${activeLanguageId}`"
+                   class="can-exp-input w-full block border border-gray-300 rounded"
+                   placeholder=" "
+                   :value="
+                       getCurrentValue(
+                           'pay_and_request_to_book_btn_text'
+                       )
+                   "
+                   @input="
+                       handleInput(
+                           $event.target.value,
+                           language,
+                           'pay_and_request_to_book_btn_text'
+                       )
+                   "
+               />
+           </div>
+       </div>
+
+       <div class="relative z-0 w-full group">
                                             <div>
                                                 <div
                                                     class="flex justify-between"
@@ -2672,8 +2703,9 @@ export default {
                             this.handleInput("", language, "total_label");
                             this.handleInput("", language, "message_to_driver_label");
                             this.handleInput("", language, "message_driver_placeholder");
-                            this.handleInput("", language, "book_seat_button_label");
-                            this.handleInput("", language, "like_to_pay_label");
+this.handleInput("", language, "book_seat_button_label");
+this.handleInput("", language, "pay_and_request_to_book_btn_text");
+this.handleInput("", language, "like_to_pay_label");
                             this.handleInput("", language, "credit_card_label");
                             this.handleInput("", language, "select_card_label");
                             this.handleInput("", language, "add_card_label");
@@ -2846,12 +2878,17 @@ export default {
                                 setting?.language,
                                 "message_driver_placeholder"
                             );
-                            this.handleInput(
-                                setting?.book_seat_button_label,
-                                setting?.language,
-                                "book_seat_button_label"
-                            );
-                            this.handleInput(
+this.handleInput(
+setting?.book_seat_button_label,
+setting?.language,
+"book_seat_button_label"
+);
+this.handleInput(
+setting?.pay_and_request_to_book_btn_text,
+setting?.language,
+"pay_and_request_to_book_btn_text"
+);
+this.handleInput(
                                 setting?.like_to_pay_label,
                                 setting?.language,
                                 "like_to_pay_label"

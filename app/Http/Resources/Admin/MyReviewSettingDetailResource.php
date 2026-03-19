@@ -32,6 +32,8 @@ class MyReviewSettingDetailResource extends JsonResource
             'reply_heading_label' => $this->reply_heading_label,
             'see_all_review_label' => $this->see_all_review_label,
             'review_label' => $this->review_label,
+            'already_reveiwed_label' => $this->already_reveiwed_label,
+            'already_reviewed_label' => $this->already_reviewed_label,
             'passenger_review_heading' => $this->passenger_review_heading,
             'passenger_review_criteria_heading' => $this->passenger_review_criteria_heading,
             'passenger_review_condition_label' => $this->passenger_review_condition_label,
