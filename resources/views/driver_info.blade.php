@@ -28,8 +28,27 @@
             <p>{{ $ride->driver?->about }}</p>
         </div>
         </div>
-        <div class="bg-blue-50 p-4 flex justify-center my-4">
+        <div class="bg-blue-50 p-4 flex justify-center mb-4 mt-12">
           <div class="w-full md:w-3/4 flex justify-center items-center">
+            
+            <div class="flex flex-col justify-center items-center w-48 my-4">
+                <img class="w-12 h-12 object-contain" src="{{ asset('assets/ridestaken.png') }}" alt="">
+                <p class="text-xl font-semibold">
+                    {{  $ride->driver?->rides()
+                            ->where('status', '!=', 2)
+                            ->where(function ($query) {
+                                $query->whereDate('rides.date', '<', now()->toDateString())
+                                    ->orWhere(function ($query) {
+                                        $query->whereDate('rides.date', '=', now()->toDateString())
+                                            ->whereTime('rides.time', '<=', now()->toTimeString());
+                                    });
+                            })
+                            ->count()
+                    }}
+                </p>
+                <h4 class="text-black">{{ optional($driverPage)->rides_taken_label ?? 'Rides taken' }}</h4>
+            </div>
+            <div class="bg-gray-500 w-0.5 h-20"></div>
             <div class="flex flex-col justify-center items-center w-48 my-4">
                 <img class="w-12 h-12 object-contain" src="{{ asset('assets/passengerdriven.png') }}" alt="">
                 <p class="text-xl font-semibold">
@@ -50,24 +69,6 @@
                     }}
                 </p>
                 <h4 class="text-black">{{ optional($driverPage)->passengers_driven_label ?? 'Passengers driven' }}</h4>
-            </div>
-            <div class="bg-gray-500 w-0.5 h-20"></div>
-            <div class="flex flex-col justify-center items-center w-48 my-4">
-                <img class="w-12 h-12 object-contain" src="{{ asset('assets/ridestaken.png') }}" alt="">
-                <p class="text-xl font-semibold">
-                    {{  $ride->driver?->rides()
-                            ->where('status', '!=', 2)
-                            ->where(function ($query) {
-                                $query->whereDate('rides.date', '<', now()->toDateString())
-                                    ->orWhere(function ($query) {
-                                        $query->whereDate('rides.date', '=', now()->toDateString())
-                                            ->whereTime('rides.time', '<=', now()->toTimeString());
-                                    });
-                            })
-                            ->count()
-                    }}
-                </p>
-                <h4 class="text-black">{{ optional($driverPage)->rides_taken_label ?? 'Rides taken' }}</h4>
             </div>
             <div class="bg-gray-500 w-0.5 h-20"></div>
             <div class="flex flex-col justify-center items-center w-48 my-4">
@@ -110,9 +111,16 @@
             </div>
         </div>
         <div class="pb-2 px-4">
-            <h3 class="mb-0 text-2xl xl:text-3xl">{{ $ratings->count() }} {{ optional($driverPage)->reviews_heading ?? 'Reviews' }}</h3>
+            @php
+                $heading = $ratings->count() > 0
+                    ? optional($driverPage)->reviews_heading ?? 'Reviews'
+                    : optional($driverPage)->no_reviews_label ?? 'No Reviews Yet';
+            @endphp
+
+            <h3 class="mb-0 text-2xl xl:text-3xl mt-8">{{ $heading }}</h3>            
             <div class="space-y-4 mt-4">
                 @php $displayLimit = 2; @endphp
+                
                 @foreach ($ratings as $index => $rating)
                     @if ($rating->from)
                     <div class="even:bg-gray-100 odd:bg-white rounded border border-gray-100 shadow p-4 md:p-6 {{ $index >= $displayLimit ? 'hidden-rating hidden' : '' }}">

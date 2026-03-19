@@ -53,6 +53,7 @@ class DriverPageSettingTemplateExport implements FromCollection, WithHeadings, W
             'km_shared_label' => 'KM shared',
             'vehicle_info_heading' => 'Vehicle info',
             'reviews_heading' => 'Reviews',
+            'no_reviews_label' => 'No Reviews Yet',
             'see_all_reviews_btn' => 'See all reviews',
         ];
     }

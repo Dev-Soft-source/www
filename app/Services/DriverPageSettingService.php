@@ -48,6 +48,7 @@ class DriverPageSettingService
             'km_shared_label' => $this->data($request, $language, 'km_shared_label'),
             'vehicle_info_heading' => $this->data($request, $language, 'vehicle_info_heading'),
             'reviews_heading' => $this->data($request, $language, 'reviews_heading'),
+            'no_reviews_label' => $this->data($request, $language, 'no_reviews_label'),
             'see_all_reviews_btn' => $this->data($request, $language, 'see_all_reviews_btn'),
         ];
     }
