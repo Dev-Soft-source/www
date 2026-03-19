@@ -14,6 +14,7 @@ use App\Models\ProfileSettingDetail;
 use App\Models\User;
 use App\Models\WithdrawalRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class PayoutController extends Controller
 {
@@ -40,119 +41,123 @@ class PayoutController extends Controller
 
     public function store(Request $request)
     {
-        
-        
         $user = auth()->user();
         $user_id = $user->id;
-        
-        $message = "";
+
+        $message = '';
         $messages = null;
+        $niceNames = [];
+
+        $selectedLanguageAbbr = null;
         $selectedLanguage = session('selectedLanguage');
         if ($selectedLanguage) {
-            // Find the language by abbreviation
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('bank_save_message', 'paypal_update_message', 'paypal_saved_message', 'bank_detail_update_message')->first();
-                $payOut = PayoutOptionSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $niceNames = [
-                    'bank_name' => isset($payOut->bank_error) ? $payOut->bank_error : '',
-                    'institution_number' => isset($payOut->bank_error) ? $payOut->institute_no_error : '',
-                    'branch' => isset($payOut->bank_error) ? $payOut->branch_error : '',
-                    'branch_address' => isset($payOut->bank_error) ? $payOut->branch_address_error : '',
-                    'branch_number' => isset($payOut->bank_error) ? $payOut->branch_no_error : '',
-                    'account_holder_number' => isset($payOut->bank_error) ? $payOut->acc_no_error : '',
-                    'account_holder_address' => isset($payOut->bank_error) ? $payOut->address_error : '',
-                    'account_holder_name' => isset($payOut->bank_error) ? $payOut->bank_title_error : '',
-              
-                ];
-            }
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('bank_save_message', 'paypal_update_message', 'paypal_saved_message', 'bank_detail_update_message')->first();
-                $payOut = PayoutOptionSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $niceNames = [
-                    'bank_name' => isset($payOut->bank_error) ? $payOut->bank_error : '',
-                    'institution_number' => isset($payOut->bank_error) ? $payOut->institute_no_error : '',
-                    'branch' => isset($payOut->bank_error) ? $payOut->branch_error : '',
-                    'branch_address' => isset($payOut->bank_error) ? $payOut->branch_address_error : '',
-                    'branch_number' => isset($payOut->bank_error) ? $payOut->branch_no_error : '',
-                    'account_holder_number' => isset($payOut->bank_error) ? $payOut->acc_no_error : '',
-                    'account_holder_address' => isset($payOut->bank_error) ? $payOut->address_error : '',
-                    'account_holder_name' => isset($payOut->bank_error) ? $payOut->bank_title_error : '',
-                    
-                ];
-            }
         }
+
+        if ($selectedLanguage) {
+            $selectedLanguageAbbr = $selectedLanguage->abbreviation;
+            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)
+                ->select('bank_save_message', 'paypal_update_message', 'paypal_saved_message', 'bank_detail_update_message')
+                ->first();
+
+            $payOut = PayoutOptionSettingDetail::where('language_id', $selectedLanguage->id)->first();
+            $niceNames = [
+                'bank_name' => isset($payOut->bank_error) ? $payOut->bank_error : '',
+                'institution_number' => isset($payOut->bank_error) ? $payOut->institute_no_error : '',
+                'branch' => isset($payOut->bank_error) ? $payOut->branch_error : '',
+                'branch_address' => isset($payOut->bank_error) ? $payOut->branch_address_error : '',
+                'branch_number' => isset($payOut->bank_error) ? $payOut->branch_no_error : '',
+                'account_holder_number' => isset($payOut->bank_error) ? $payOut->acc_no_error : '',
+                'account_holder_address' => isset($payOut->bank_error) ? $payOut->address_error : '',
+                'account_holder_name' => isset($payOut->bank_error) ? $payOut->bank_title_error : '',
+            ];
+        } else {
+            $selectedLanguageAbbr = app()->getLocale() ?? 'en';
+        }
+
+        $payoutMethod = (string) $request->input('payout_method');
+        $isPaypal = $payoutMethod === 'paypal';
+        $isBank = $payoutMethod === 'bank';
+        $isInterac = $payoutMethod === 'interac';
+
         $validated = $request->validate([
-            'payout_method' => 'required',
-            'bank_name' => $request->payout_method == 'bank' ? 'required' : 'nullable',
-            'account_holder_name' => $request->payout_method == 'bank' ? 'required' : 'nullable',
-            'account_holder_number' => $request->payout_method == 'bank' ? 'required|digits_between:7,12' : 'nullable',
-            'branch' => $request->payout_method == 'bank' ? 'required' : 'nullable',
-            'branch_number' => $request->payout_method == 'bank' ? 'required|digits:5' : 'nullable',
-            'branch_address' => $request->payout_method == 'bank' ? 'required' : 'nullable',
-            'institution_number' => $request->payout_method == 'bank' ? 'required|digits:3' : 'nullable',
-            'account_holder_address' => $request->payout_method == 'bank' ? 'required' : 'nullable',
-            'paypal_email' => $request->payout_method == 'paypal' ? 'required|email' : 'nullable',
+            'payout_method' => 'required|in:interac,bank,paypal',
+
+            // Interac fields (persist only if your DB schema supports it)
+            'interac_email' => $isInterac ? 'required|email' : 'nullable',
+            'interac_email_confirm' => $isInterac ? 'required|same:interac_email' : 'nullable',
+            'interac_autodeposit' => $isInterac ? 'accepted' : 'nullable',
+
+            // Bank fields
+            'account_holder_name' => $isBank ? 'required' : 'nullable',
+            'account_holder_number' => $isBank ? 'required|digits_between:7,12' : 'nullable',
+            'branch_number' => $isBank ? 'required|digits:5' : 'nullable',
+            'institution_number' => $isBank ? 'required|digits:3' : 'nullable',
+
+            // Paypal fields
+            'paypal_email' => $isPaypal ? 'required|email' : 'nullable',
+            'paypal_email_confirm' => $isPaypal ? 'required|same:paypal_email' : 'nullable',
         ], [
-            'payout_method.required' => 'The payout method is required',
-            'bank_name.required' => 'The bank name is required',
-            'account_holder_name.required' => 'The account holder name is required',
-            'account_holder_number.required' => 'The account holder number is required',
-            'account_holder_number.digits_between' => 'The account holder number must be between 7 and 12 digits',
-            'branch.required' => 'The branch is required',
-            'branch_number.required' => 'The branch number is required',
-            'branch_number.digits' => 'The branch number must be exactly 5 digits',
-            'branch_address.required' => 'The branch address is required',
-            'institution_number.required' => 'The institution number is required',
-            'institution_number.digits' => 'The institution number must be exactly 3 digits',
-            'account_holder_address.required' => 'The account holder address is required',
-            'paypal_email.required' => 'The paypal email is required',
-            'paypal_email.email' => 'The paypal email must be a valid email address',
+            'interac_autodeposit.accepted' => 'Please enable Autodeposit for Interac withdrawals.',
+            'paypal_email_confirm.required' => 'Please confirm your PayPal email.',
+            'paypal_email_confirm.same' => 'PayPal emails must match.',
+            'interac_email_confirm.required' => 'Please confirm your Interac email.',
+            'interac_email_confirm.same' => 'Interac emails must match.',
         ], $niceNames);
 
         $getBankDetail = BankDetail::where('user_id', $user_id)->first();
-        if(isset($getBankDetail) && !is_null($getBankDetail)){
-            if($request->payout_method == "paypal"){
-                $message = $messages->paypal_update_message;
-            }else{
-                $message = $messages->bank_detail_update_message ?? 'Bank detail successfully updated';
-            }
-        }else{
-            $getBankDetail = new  BankDetail();
-            if($request->payout_method == "paypal"){
-                $message = $messages->paypal_saved_message ?? 'Your PayPal account is now set up for payouts';
-            }else{
-                $message = $messages->bank_save_message;
-            }
+        $existing = (bool) $getBankDetail;
+        if (!$existing) {
+            $getBankDetail = new BankDetail();
         }
 
-        if($request->payout_method == "paypal"){
-            $getBankDetail->paypal_email = $request->paypal_email;
-        }else{
-            $getBankDetail->bank_id = $request->bank_name;
-            $getBankDetail->bank_title = $request->account_holder_name;
-            $getBankDetail->acc_no = $request->account_holder_number;
-            $getBankDetail->branch = $request->branch;
-            $getBankDetail->address = $request->account_holder_address;
-            $getBankDetail->institution_number = $request->institution_number;
-            $getBankDetail->branch_address = $request->account_holder_branch_address;
-            $getBankDetail->branch_number = $request->account_holder_branch_number;
+        // Choose success message (null-safe)
+        if ($existing) {
+            $message = $isPaypal
+                ? (optional($messages)->paypal_update_message ?? 'PayPal account successfully updated')
+                : (optional($messages)->bank_detail_update_message ?? 'Bank detail successfully updated');
+        } else {
+            $message = $isPaypal
+                ? (optional($messages)->paypal_saved_message ?? 'Your PayPal account is now set up for payouts')
+                : (optional($messages)->bank_save_message ?? 'Your bank details are now set up for payouts');
+        }
+
+        if ($isPaypal) {
+            $getBankDetail->paypal_email = $request->input('paypal_email');
+        } elseif ($isBank) {
+            $getBankDetail->bank_title = $request->input('account_holder_name');
+            $getBankDetail->acc_no = $request->input('account_holder_number');
+            $getBankDetail->institution_number = $request->input('institution_number');
+
+            // Your Blade sends `branch_address` and also may send the legacy keys below.
+            $getBankDetail->branch_number = $request->input('branch_number')?? $request->input('account_holder_branch_number');
+        } elseif ($isInterac) {
+            $getBankDetail->interac_email = $request->input('interac_email');
+            if (!$existing) {
+                // On first-time interac selection, ensure set_default is valid for downstream.
+                $getBankDetail->set_default = 'interac';
+            }
         }
 
         $getBankDetail->user_id = $user_id;
-        if(isset($getBankDetail->status) && $getBankDetail->status != "pending"){
 
-        }else{
-            $getBankDetail->status =  "pending";
+        if (empty($getBankDetail->status) || $getBankDetail->status === 'pending') {
+            $getBankDetail->status = 'pending';
         }
-        
-        $getBankDetail->set_default = isset($request->set_default) ? $request->set_default : "bank";
+
+        if ($isBank) {
+            $getBankDetail->set_default = $request->input('set_default', 'bank');
+        } elseif ($isPaypal) {
+            $getBankDetail->set_default = $request->input('set_default', 'paypal');
+        } elseif ($isInterac) {
+            $getBankDetail->set_default = 'interac';
+        }
+
         $getBankDetail->save();
-        
-        // Redirect
-        return redirect()->route('payout', ['lang' => $selectedLanguage->abbreviation])->with('message', $message);
+
+        return redirect()->route('payout', ['lang' => $selectedLanguageAbbr])->with('message', $message);
     }
 
     public function verifyBank(Request $request){
@@ -160,7 +165,6 @@ class PayoutController extends Controller
 
         $selectedLanguage = app()->getLocale() ?? 'en';
 
-        
         $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
 
         $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('admin_sent_verify_amount_message', 'bank_already_verified_message','bank_verified_message','verify_amount_not_match_message','general_error_message')->first();
@@ -186,9 +190,9 @@ class PayoutController extends Controller
 
         if(isset($getBankDetail) && !is_null($getBankDetail)){
             if($getBankDetail->status == "sent_amount"){
-                return redirect()->route('payout', ['lang' => $selectedLanguage->abbreviation])->with('message', $message->admin_sent_verify_amount_message ?? 'ProximaRide can not send any amount in your account please wait');
+                return redirect()->route('payout', ['lang' => $selectedLanguage->abbreviation])->with('message', optional($message)->admin_sent_verify_amount_message ?? 'ProximaRide can not send any amount in your account please wait');
             }elseif($getBankDetail->status == "verify"){
-                return redirect()->route('payout', ['lang' => $selectedLanguage->abbreviation])->with('message', $message->bank_already_verified_message ?? 'Your bank account already verified');
+                return redirect()->route('payout', ['lang' => $selectedLanguage->abbreviation])->with('message', optional($message)->bank_already_verified_message ?? 'Your bank account already verified');
             }
 
             if($getBankDetail->admin_verify_amount == $request->user_verify_amount){
@@ -196,9 +200,9 @@ class PayoutController extends Controller
                 $getBankDetail->status = "verified";
                 $getBankDetail->save();
 
-                return redirect()->route('payout', ['lang' => $selectedLanguage->abbreviation])->with('message', $message->bank_verified_message ?? 'Bank detail verified successfully');
+                return redirect()->route('payout', ['lang' => $selectedLanguage->abbreviation])->with('message', optional($message)->bank_verified_message ?? 'Bank detail verified successfully');
             }else{
-                return redirect()->route('payout', ['lang' => $selectedLanguage->abbreviation])->with('message', $message->verify_amount_not_match_message ?? 'Your enter amount not match with ProximaRide send amount please check your amount');
+                return redirect()->route('payout', ['lang' => $selectedLanguage->abbreviation])->with('message', optional($message)->verify_amount_not_match_message ?? 'Your enter amount not match with ProximaRide send amount please check your amount');
             }
         }else{
             return $this->apiErrorResponse($message->general_error_message ?? 'No Bank detail find', 200);
