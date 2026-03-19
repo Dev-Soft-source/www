@@ -72,9 +72,29 @@
                                             `name.name_${activeLanguageId}`
                                         )
                                             "></p>
-                                    </div>
-                                    <div class="relative z-0 w-full group">
-                                        <div>
+       </div>
+       <div class="relative z-0 w-full group">
+           <div>
+               <div class="flex justify-between">
+                   <label :for="`stops_along_the_way_label_${activeLanguageId}`">Stops along the way label</label>
+               </div>
+               <input type="text" :name="`stops_along_the_way_label_${activeLanguageId}`"
+                   :id="`stops_along_the_way_label_${activeLanguageId}`"
+                   class="can-exp-input w-full block border border-gray-300 rounded"
+                   placeholder=" " :value="getCurrentValue(
+                       'stops_along_the_way_label'
+                   )
+                       " @input="
+                           handleInput(
+                               $event.target.value,
+                               language,
+                               'stops_along_the_way_label'
+                           )
+                           " />
+           </div>
+       </div>
+       <div class="relative z-0 w-full group">
+           <div>
                                             <div class="flex justify-between">
                                                 <label :for="`meta_description_${activeLanguageId}`">Meta
                                                     description</label>
@@ -101,9 +121,29 @@
                                             `meta_description.meta_description_${activeLanguageId}`
                                         )
                                             "></p>
-                                    </div>
-                                    <div class="relative z-0 w-full group">
-                                        <div>
+       </div>
+       <div class="relative z-0 w-full group">
+           <div>
+               <div class="flex justify-between">
+                   <label :for="`stop_suggest_label_${activeLanguageId}`">Stop suggest label</label>
+               </div>
+               <input type="text" :name="`stop_suggest_label_${activeLanguageId}`"
+                   :id="`stop_suggest_label_${activeLanguageId}`"
+                   class="can-exp-input w-full block border border-gray-300 rounded"
+                   placeholder=" " :value="getCurrentValue(
+                       'stop_suggest_label'
+                   )
+                       " @input="
+                           handleInput(
+                               $event.target.value,
+                               language,
+                               'stop_suggest_label'
+                           )
+                           " />
+           </div>
+       </div>
+       <div class="relative z-0 w-full group">
+           <div>
                                             <div class="flex justify-between">
                                                 <label :for="`meta_keywords_${activeLanguageId}`">Meta keywords</label>
                                             </div>
@@ -129,9 +169,49 @@
                                             `meta_keywords.meta_keywords_${activeLanguageId}`
                                         )
                                             "></p>
-                                    </div>
-                                    <div class="relative z-0 w-full group">
-                                            <div>
+       </div>
+       <div class="relative z-0 w-full group">
+           <div>
+               <div class="flex justify-between">
+                   <label :for="`stops_remove_confirm_text_${activeLanguageId}`">Stops remove confirm text</label>
+               </div>
+               <input type="text" :name="`stops_remove_confirm_text_${activeLanguageId}`"
+                   :id="`stops_remove_confirm_text_${activeLanguageId}`"
+                   class="can-exp-input w-full block border border-gray-300 rounded"
+                   placeholder=" " :value="getCurrentValue(
+                       'stops_remove_confirm_text'
+                   )
+                       " @input="
+                           handleInput(
+                               $event.target.value,
+                               language,
+                               'stops_remove_confirm_text'
+                           )
+                           " />
+           </div>
+       </div>
+       <div class="relative z-0 w-full group">
+           <div>
+               <div class="flex justify-between">
+                   <label :for="`distance_suffix_${activeLanguageId}`">Distance suffix</label>
+               </div>
+               <input type="text" :name="`distance_suffix_${activeLanguageId}`"
+                   :id="`distance_suffix_${activeLanguageId}`"
+                   class="can-exp-input w-full block border border-gray-300 rounded"
+                   placeholder=" " :value="getCurrentValue(
+                       'distance_suffix'
+                   )
+                       " @input="
+                           handleInput(
+                               $event.target.value,
+                               language,
+                               'distance_suffix'
+                           )
+                           " />
+           </div>
+       </div>
+       <div class="relative z-0 w-full group">
+           <div>
                                                 <div class="flex justify-between">
                                                     <label
                                                         :for="`feilds_required_text_${activeLanguageId}`">Indicate required feilds text</label>
@@ -3857,10 +3937,14 @@ export default {
                             this.handleInput("", language, "drop_off_label");
                             this.handleInput("", language, "drop_off_placeholder");
                             this.handleInput("", language, "stop_along_the_way_label");
+                            this.handleInput("", language, "stops_along_the_way_label");
                             this.handleInput("", language, "add_stop_btn_label");
+                            this.handleInput("", language, "stop_suggest_label");
                             this.handleInput("", language, "stop_placeholder");
                             this.handleInput("", language, "pickup_off_placeholder");
                             this.handleInput("", language, "delete_stop_text");
+                            this.handleInput("", language, "stops_remove_confirm_text");
+                            this.handleInput("", language, "distance_suffix");
                             this.handleInput("", language, "date_time_label");
                             this.handleInput("", language, "at_label");
                             this.handleInput("", language, "recurring_label");
@@ -4124,9 +4208,19 @@ export default {
                                 "stop_along_the_way_label"
                             );
                             this.handleInput(
+                                setting?.stops_along_the_way_label,
+                                setting?.language,
+                                "stops_along_the_way_label"
+                            );
+                            this.handleInput(
                                 setting?.add_stop_btn_label,
                                 setting?.language,
                                 "add_stop_btn_label"
+                            );
+                            this.handleInput(
+                                setting?.stop_suggest_label,
+                                setting?.language,
+                                "stop_suggest_label"
                             );
                             this.handleInput(
                                 setting?.stop_placeholder,
@@ -4142,6 +4236,16 @@ export default {
                                 setting?.delete_stop_text,
                                 setting?.language,
                                 "delete_stop_text"
+                            );
+                            this.handleInput(
+                                setting?.stops_remove_confirm_text,
+                                setting?.language,
+                                "stops_remove_confirm_text"
+                            );
+                            this.handleInput(
+                                setting?.distance_suffix,
+                                setting?.language,
+                                "distance_suffix"
                             );
                             this.handleInput(
                                 setting?.date_time_label,

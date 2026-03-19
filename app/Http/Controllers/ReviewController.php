@@ -163,12 +163,18 @@ class ReviewController extends Controller
                 ->get();
             }
 
+            $reviewPage = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+
             $existingRating = Rating::where('type', 2)->where('posted_to', $booking->id)->where('posted_by', $booking->ride->driver->id)->first();
             if ($existingRating) {
-                return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation])->with(['success' => 'Already reviewed']);
+                return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $reviewPage->already_reviewed_label ?? 'Already reviewed']);
             }
 
-            return view('review_passenger',['booking' => $booking, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
+
+            return view('review_passenger',['booking' => $booking, 
+            'reviewPage' => $reviewPage, 
+            'notifications' => $notifications, 
+            'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
         }
         $errorPage = \App\View\Composers\ErrorPageComposer::getErrorPage();
         return view('errors/404', ['errorPage' => $errorPage]);
@@ -433,12 +439,17 @@ class ReviewController extends Controller
                 ->get();
             }
 
+            $reviewPage = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+
             $existingRating = Rating::where('ride_id', $booking->ride_id)->where('type', 1)->where('posted_by', $booking->user_id)->first();
             if ($existingRating) {
-                return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation])->with(['success' => 'Already reviewed']);
+                return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $reviewPage->already_reviewed_label ?? 'Already reviewed']);
             }
 
-            return view('review_driver',['booking' => $booking, 'ride' => $ride, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
+            return view('review_driver',['booking' => $booking, 
+            'ride' => $ride, 
+            'reviewPage' => $reviewPage, 
+            'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
         }
         $errorPage = \App\View\Composers\ErrorPageComposer::getErrorPage();
         return view('errors/404', ['errorPage' => $errorPage]);

@@ -25,4 +25,11 @@ class MyReviewSettingDetail extends Model
         return $this->belongsTo(Language::class);
     }
 
+    public function getAlreadyReviewedLabelAttribute(): ?string
+    {
+        return $this->attributes['already_reviewed_label']
+            ?? $this->attributes['already_reveiwed_label']
+            ?? null;
+    }
+
 }

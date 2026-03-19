@@ -167,6 +167,7 @@ class BookingPageSettingImport implements ToCollection, WithHeadingRow, WithVali
             'message_to_driver_label' => $row['message_to_driver_label'] ?? null,
             'message_driver_placeholder' => $row['message_driver_placeholder'] ?? null,
             'book_seat_button_label' => $row['book_seat_button_label'] ?? null,
+            'pay_and_request_to_book_btn_text' => $row['pay_and_request_to_book_btn_text'] ?? null,
             'like_to_pay_label' => $row['like_to_pay_label'] ?? null,
             'credit_card_label' => $row['credit_card_label'] ?? null,
             'select_card_label' => $row['select_card_label'] ?? null,

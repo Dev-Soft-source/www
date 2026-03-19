@@ -39,6 +39,7 @@ class BookingPageSettingDetailResource extends JsonResource
             'message_to_driver_label' => $this->message_to_driver_label,
             'message_driver_placeholder' => $this->message_driver_placeholder,
             'book_seat_button_label' => $this->book_seat_button_label,
+            'pay_and_request_to_book_btn_text' => $this->pay_and_request_to_book_btn_text,
             'like_to_pay_label' => $this->like_to_pay_label,
             'credit_card_label' => $this->credit_card_label,
             'select_card_label' => $this->select_card_label,

@@ -34,6 +34,7 @@ class Step1PageSettingDetailResource extends JsonResource
             'prefer_option_label' => $this->prefer_option_label,
             'dob_label' => $this->dob_label,
             'dob_error' => $this->dob_error,
+            'alert_age_limit_text' => $this->alert_age_limit_text,
             'country_label' => $this->country_label,
             'country_error' => $this->country_error,
             'state_label' => $this->state_label,

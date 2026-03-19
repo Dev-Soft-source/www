@@ -50,6 +50,7 @@ class FindRidePageSettingDetailResource extends JsonResource
             'search_section_keyword_label' => $this->search_section_keyword_label,
             'search_section_keyword_placeholder' => $this->search_section_keyword_placeholder,
             'search_section_button_label' => $this->search_section_button_label,
+            'hide_full_ride_text' => $this->hide_full_ride_text,
             'search_section_recent_searches' => $this->search_section_recent_searches,
             'card_section_from_label' => $this->card_section_from_label,
             'card_section_to_label' => $this->card_section_to_label,

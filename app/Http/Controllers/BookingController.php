@@ -1960,8 +1960,7 @@ class BookingController extends Controller
                     // Ensure type is a valid string (use ride->booking_type as fallback, limit length to prevent truncation errors)
                     $bookingType = (string) ($request->type ?? $ride->booking_type ?? 'standard');
                     $bookingType = substr($bookingType, 0, 50); // Limit to 50 characters to prevent truncation errors
-                    Log::info('hasExistingBooking', [$hasExistingBooking]);
-                    Log::info('hasExistingBooking', [$request->seats,$booking->seats]);
+
                     if ($hasExistingBooking) {
                         // Update existing booking (no duplicate Booking::create()) by ADDING new values to old values.
                         $newSeats          = (int) ($booking->seats ?? 0) + (int) ($request->seats ?? 0);

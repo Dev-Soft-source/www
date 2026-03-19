@@ -9,6 +9,7 @@ use App\Models\Language;
 use App\Models\SignupPageSettingDetail;
 use App\Models\SuccessMessagesSettingDetail;
 use App\Models\User;
+use App\Models\Admin;
 use App\Traits\StatusResponser;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -129,7 +130,9 @@ class SignupController extends Controller
                 'platform' => 'Mobile App',
                 'ip_address' => $ipAddress
             ];
-            Mail::to('ccaned@gmail.com')->queue(new AdminNewUserSignupMail($adminData));
+
+            $admin = Admin::first();
+            Mail::to($admin->admin_email)->queue(new AdminNewUserSignupMail($adminData));
 
             $message = null;
             if ($request->lang_id && $request->lang_id != 0) {

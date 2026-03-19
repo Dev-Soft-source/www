@@ -98,6 +98,8 @@ class RideDetailPageSettingService
                 $errorMessages = array_merge($errorMessages, ['secured_cash_heading.secured_cash_heading_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['enter_code_label.enter_code_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['enter_code_label.enter_code_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['enter_secured_placeholder.enter_secured_placeholder_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['enter_secured_placeholder.enter_secured_placeholder_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['mobile_seat_booked_heading.mobile_seat_booked_heading_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['mobile_seat_booked_heading.mobile_seat_booked_heading_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['mobile_seat_booked_label.mobile_seat_booked_label_' . $language->id => ['required', 'string']]);
@@ -283,11 +285,13 @@ class RideDetailPageSettingService
             'review_label' => $this->data($request, $language, 'review_label'),
             'no_reviews_label' => $this->data($request, $language, 'no_reviews_label'),
             'booking_request_heading' => $this->data($request, $language, 'booking_request_heading'),
+            'request_booking_label' => $this->data($request, $language, 'request_booking_label'),
             'seat_requested_label' => $this->data($request, $language, 'seat_requested_label'),
             'request_accept_label' => $this->data($request, $language, 'request_accept_label'),
             'request_reject_label' => $this->data($request, $language, 'request_reject_label'),
             'secured_cash_heading' => $this->data($request, $language, 'secured_cash_heading'),
             'enter_code_label' => $this->data($request, $language, 'enter_code_label'),
+            'enter_secured_placeholder' => $this->data($request, $language, 'enter_secured_placeholder'),
             'mobile_seat_booked_heading' => $this->data($request, $language, 'mobile_seat_booked_heading'),
             'mobile_seat_booked_label' => $this->data($request, $language, 'mobile_seat_booked_label'),
             'mobile_seat_fare_label' => $this->data($request, $language, 'mobile_seat_fare_label'),
@@ -329,6 +333,7 @@ class RideDetailPageSettingService
             'passenger_gender_label' => $this->data($request, $language, 'passenger_gender_label'),
             'seat_on_column_label' => $this->data($request, $language, 'seat_on_column_label'),
             'cancellation_policy_tooltip' => $this->data($request, $language, 'cancellation_policy_tooltip'),
+            'view_cancellation_tooltip' => $this->data($request, $language, 'view_cancellation_tooltip'),
             'cancellation_policy_tooltip_url' => $this->data($request, $language, 'cancellation_policy_tooltip_url'),
 
             'firm_cancellation_confirm_poup_heading' => $this->data($request, $language, 'firm_cancellation_confirm_poup_heading'),

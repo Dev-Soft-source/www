@@ -360,9 +360,7 @@
                                                                                                 d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75v-.7V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5" />
                                                                                         </svg>
                                                                                         <p class="font-semibold text-red-700">
-                                                                                            You have
-                                                                                            {{ $pendingBookingRequests->count() }}
-                                                                                            booking request(s).
+                                                                                            {{ str_replace(':count', $pendingBookingRequests->count(), $rideDetailPage->request_booking_label ?? 'You have :count booking request(s).') }}
                                                                                         </p>
                                                                                     </div>
                                                                                 </div>
@@ -372,13 +370,13 @@
                                                                 </div>
                                                                 <div
                                                                     class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
-                                                                    <div class="flex items-center justify-between p-4">
+                                                                    <div class="flex items-center justify-start p-4">
                                                                         <p class="font-semibold">
                                                                             @isset($findrideDetailPage->card_section_booked)
-                                                                                {{ $findrideDetailPage->card_section_booked }}
+                                                                                {{ $findrideDetailPage->card_section_booked }}:
                                                                             @endisset
                                                                         </p>
-                                                                        <p class="font-semibold">
+                                                                        <p class="text-primary font-semibold ml-2">
                                                                             {{ $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {
                                                                                     $query->whereNull('deleted_at'); // Exclude soft deleted users
                                                                                 })->sum('seats') }}
@@ -394,9 +392,9 @@
                                                                                     {{ $findrideDetailPage->card_section_seats_fee }}
                                                                                 @endisset
                                                                                 : </p>
-                                                                            <p class="font-semibold">
+                                                                            <p class="text-primary font-semibold">
 
-                                                                                ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') * floatval($ride->detail->price)),2) }}
+                                                                                ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') * floatval($ride->detail->price) / 100),2) }}
                                                                             </p>
                                                                         </div>
 
@@ -406,7 +404,7 @@
                                                                                     {{ $findrideDetailPage->card_section_booking_fee }}
                                                                                 @endisset
                                                                                 : </p>
-                                                                            <p class="font-semibold">
+                                                                            <p class="text-primary font-semibold">
                                                                                 ${{ number_format(floatval($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')), 2) }}
                                                                             </p>
                                                                         </div>
@@ -417,8 +415,8 @@
                                                                                     {{ $findrideDetailPage->card_section_amount }}
                                                                                 @endisset
                                                                                 : </p>
-                                                                            <p class="font-semibold">
-                                                                                ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') *floatval($ride->detail->price) +$ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')),2) }}
+                                                                            <p class="text-primary font-semibold">
+                                                                                ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') *floatval($ride->detail->price / 100) + $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')),2) }}
                                                                             </p>
                                                                         </div>
                                                                     </div>
@@ -433,24 +431,26 @@
                                                                         'rideFeatures' => $ride->features,
                                                                     ])
                                                                 </div>
-                                                                <div
-                                                                    class="border-t border-gray-300 flex no-scrollbar overflow-x-auto items-center space-x-2 p-4">
-                                                                    @foreach ($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4) as $booking)
-                                                                        @for ($i = 0; $i < $booking->seats; $i++)
-                                                                            @if ($booking->passenger)
-                                                                                @if ($booking->passenger->profile_image)
-                                                                                    <img class="w-10 h-10 rounded-full"
-                                                                                        src="{{ $booking->passenger->profile_image }}"
-                                                                                        alt="">
-                                                                                @else
-                                                                                    <img class="w-10 h-10 rounded-full"
-                                                                                        src="{{ asset('images/59-booked-seat.png') }}"
-                                                                                        alt="">
-                                                                                @endif
-                                                                            @endif
-                                                                        @endfor
-                                                                    @endforeach
-                                                                </div>
+                                                                @php
+                                                                    $bookings = $ride->bookings->whereNotIn('status', [3, 4]);
+                                                                @endphp
+
+                                                                @if ($bookings->isNotEmpty())
+                                                                    <div class="border-t border-gray-300 flex no-scrollbar overflow-x-auto items-center space-x-2 p-4">
+                                                                        
+                                                                        @foreach ($bookings as $booking)
+                                                                            @php
+                                                                                $image = $booking->passenger?->profile_image
+                                                                                    ?? asset('images/59-booked-seat.png');
+                                                                            @endphp
+
+                                                                            @for ($i = 0; $i < $booking->seats; $i++)
+                                                                                <img class="w-10 h-10 rounded-full" src="{{ $image }}" alt="">
+                                                                            @endfor
+                                                                        @endforeach
+
+                                                                    </div>
+                                                                @endif
                                                             </div>
                                                         </a>
                                                     </div>

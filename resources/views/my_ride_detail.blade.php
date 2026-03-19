@@ -577,7 +577,7 @@
                                 <div class="mt-2">
                                     <input type="hidden" name="booking_id" id="booking-id"
                                         value="{{ old('booking_id') }}">
-                                    <input type="text" name="code" placeholder="Enter secured-cash payment code"
+                                    <input type="text" name="code" placeholder="{{ $rideDetailPage->enter_secured_placeholder ?? 'Enter secured-cash payment code' }}"
                                         class="mt-2 p-2 border border-gray-300 rounded w-full"
                                         value="{{ old('code') }}">
                                     @error('code')

@@ -149,6 +149,7 @@ class BookingPageSettingService
             'message_to_driver_label' => $this->data($request, $language, 'message_to_driver_label'),
             'message_driver_placeholder' => $this->data($request, $language, 'message_driver_placeholder'),
             'book_seat_button_label' => $this->data($request, $language, 'book_seat_button_label'),
+            'pay_and_request_to_book_btn_text' => $this->data($request, $language, 'pay_and_request_to_book_btn_text'),
             'like_to_pay_label' => $this->data($request, $language, 'like_to_pay_label'),
             'credit_card_label' => $this->data($request, $language, 'credit_card_label'),
             'select_card_label' => $this->data($request, $language, 'select_card_label'),
