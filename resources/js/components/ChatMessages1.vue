@@ -18,7 +18,7 @@
         </div>
         <!-- Chat messages grouped by day -->
         <div ref="messagesContainer" class="chat" v-if="messages.length > 0">
-            <div v-for="group in groupedMessages" :key="group.dateKey" class="mb-4 day-message-group">
+            <div v-for="group in groupedMessages" :key="group.dateKey" class="mb-4">
                 <!-- Day label -->
                 <div class="flex justify-center mb-2">
                     <span class="px-3 py-1 rounded-full bg-gray-200 text-gray-700 text-xs font-semibold">
@@ -79,6 +79,7 @@ export default {
     },
     mounted() {
         // If messages are already available, scroll immediately
+        console.log('ChatMessages component mounted', this.messages.length);
         if (this.messages.length > 0) {
             this.scrollToBottomDelayed();
             this.hasScrolledOnLoad = true;
@@ -276,20 +277,10 @@ export default {
                 this.$refs.messagesContainer.scrollTop = this.$refs.messagesContainer.scrollHeight;
             }
 
-            // Find the last message element in the last day group
-            // Structure: .day-message-group:last-child > ul > li:last-child
-            const lastDayGroup = this.$el?.querySelector('.day-message-group:last-child');
-            if (lastDayGroup) {
-                const lastMessage = lastDayGroup.querySelector('ul li:last-child');
-                if (lastMessage) {
-                    lastMessage.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                }
-            } else {
-                // Fallback: try to find any last li (for backward compatibility)
-                const lastMessage = this.$el?.querySelector('li:last-child');
-                if (lastMessage) {
-                    lastMessage.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                }
+            // Also scroll to the last message element (works with any scroll container)
+            const lastMessage = this.$el?.querySelector('li:last-child');
+            if (lastMessage) {
+                lastMessage.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }
         },
 

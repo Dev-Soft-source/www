@@ -79,13 +79,13 @@
             }
         @endphp
 
-        <a href="{{ $my_co_passengers_href }}">
-            <div class="border-t border-gray-300 flex flex-col md:flex-row md:items-center justify-start md:space-x-2 p-4">
-                <h4 class="font-medium text-xl xl:text-2xl md:text-center text-black mr-4 font-FuturaMdCnBT">
-                    {{ $rideDetailPage->co_passenger_label ?? 'My Co-Passengers' }}:
-                </h4>
-
-                <div class="flex items-center space-x-2 no-scrollbar overflow-x-auto mt-2 md:mt-0">
+        <div class="border-t border-gray-300 flex flex-col md:flex-row md:items-center justify-start md:space-x-2 p-4">
+            <h4 class="font-medium text-xl xl:text-2xl md:text-center text-black mr-4 font-FuturaMdCnBT">
+                {{ $rideDetailPage->co_passenger_label ?? 'My Co-Passengers' }}:
+            </h4>
+            
+            <div class="flex items-center space-x-2 no-scrollbar overflow-x-auto mt-2 md:mt-0">
+                <a href="{{ $my_co_passengers_href }}">
                     @foreach ($ride->bookings()->notRejected()->get() as $booking)
                         @php
                             $image = $booking->passenger?->profile_image ?? asset('images/59-booked-seat.png');
@@ -94,9 +94,9 @@
                             <img class="w-10 h-10 rounded-full" src="{{ $image }}" alt="">
                         @endfor
                     @endforeach
-                </div>
+                </a>
             </div>
-        </a>
+        </div>
     </div>
 
     <div class="bg-white rounded-lg overflow-hidden shadow-3xl mt-4">

@@ -6,7 +6,7 @@
         .booking-page p {
             font-family: 'Roboto', sans-serif;
         }
-        
+
     </style>
 @endsection
 
@@ -193,21 +193,21 @@
                     @endphp
 
                     @if ($bg && $text)
-                    <div class="col-span-3 w-full">
+                        <div class="col-span-3 w-full">
                         <div class="bg-{{ $bg }}-100 border-l-4 border-{{ $bg }}-500 text-{{ $bg }}-800 px-4 py-2 rounded flex items-center"
-                            role="alert">
+                                role="alert">
 
                             <svg class="w-6 h-6 mr-2 text-{{ $bg }}-500 flex-shrink-0" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
+                                    stroke="currentColor" viewBox="0 0 24 24">
                                 <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
-                                <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
+                                    <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
 
                             <span class="text-lg">{{ $text }}</span>
-                        </div>
-                    </div>
-                    @endif
+                                    </div>
+                                                    </div>
+                                                @endif
 
                     <x-px.ride-detail-info
                         :ride="$ride"
@@ -355,7 +355,7 @@
                                     <div class="flex items-center justify-between gap-2 mt-1">
                                         <div class="flex items-center gap-2">
                                             <p class="text-black">
-                                                {{ $bookingPage->booking_fee_label }}
+                                                    {{ $bookingPage->booking_fee_label }}
                                             </p>
                                             @if ($user->isPendingStudent())
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -468,7 +468,7 @@
                                     <input type="hidden" name="booked_by_wallet" class="bookedByWallet form-control" readonly>
                                     <div class="flex items-center justify-between gap-2 mt-1">
                                         <p>
-                                            {{ $bookingPage->total_label }}
+                                                {{ $bookingPage->total_label }}
                                         </p>
                                         <div>
                                             <p class="totalSum text-right"></p>
@@ -506,18 +506,18 @@
                                 </div>
                                 <div class="bg-white p-4">
                                     
-                                    <p class="text-left">● @isset($bookingPage->booking_disclaimer_on_time)
-                                            {!! $bookingPage->booking_disclaimer_on_time !!}
-                                        @endisset
-                                    </p>
+                                            <p class="text-left">● @isset($bookingPage->booking_disclaimer_on_time)
+                                                    {!! $bookingPage->booking_disclaimer_on_time !!}
+                                                @endisset
+                                            </p>
                                 
                                     <p class="text-left mt-4">●<strong> Pink Rides: </strong>
-                                        {{ $bookingPage->booking_disclaimer_pink_ride ?? 'I know that ProximaRide are exclusive to ProximaRide female members. If I am booking on a Pink Ride, I will not be accompanied by male members who are above 12 years of age, nor will I send a male member in my place. If I do, the driver will not take me or them, and I will not be refunded' }}
-                                    </p>
+                                                {{ $bookingPage->booking_disclaimer_pink_ride ?? 'I know that ProximaRide are exclusive to ProximaRide female members. If I am booking on a Pink Ride, I will not be accompanied by male members who are above 12 years of age, nor will I send a male member in my place. If I do, the driver will not take me or them, and I will not be refunded' }}
+                                            </p>
                                 
                                     <p class="text-left mt-4">●<strong> Extra+ Rides: </strong>
-                                        {{ $bookingPage->booking_disclaimer_extra_care_ride ?? 'I know that Extra+ Rides are exclusive to members with highest review score. If I am booking on an Extra+ Ride, I will adhere to its standards' }}
-                                    </p>
+                                                {{ $bookingPage->booking_disclaimer_extra_care_ride ?? 'I know that Extra+ Rides are exclusive to members with highest review score. If I am booking on an Extra+ Ride, I will adhere to its standards' }}
+                                            </p>
 
                                     <div class="relative">
                                         <div class="flex items-start my-4">
@@ -532,9 +532,9 @@
                                                 </span>
                                             </label>
                                         </div>
-                                        @error('agree_terms')
+                                    @error('agree_terms')
                                             <div class="tooltip-error shadow-lg mt-1">{{ $bookingPage->aggreement_tooltip ?? $message }}</div>
-                                        @enderror
+                                    @enderror
                                     </div>
 
                                     <div class="relative">
@@ -564,20 +564,20 @@
                                                 <div class="tooltip-error shadow-lg mt-1">{{ $bookingPage->booking_disclaimer_firm_tooltip ?? $message }}</div>
                                             @enderror
 
-                                            {{-- Second checkbox for Firm Cancellation Policy --}}
-                                            <div class="flex items-start my-4">
-                                                <label class="flex items-start cursor-pointer font-normal text-gray-900">
-                                                    <input id="firm_cancellation_understand" type="checkbox"
+                                                {{-- Second checkbox for Firm Cancellation Policy --}}
+                                                <div class="flex items-start my-4">
+                                                    <label class="flex items-start cursor-pointer font-normal text-gray-900">
+                                                        <input id="firm_cancellation_understand" type="checkbox"
                                                         name="firm_cancellation_understand" value="1" @checked(old('firm_cancellation_understand'))
-                                                        class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-500 focus:ring-2">
-                                                    <span class="ml-2">
-                                                        @isset($bookingPage->firm_cancellation_understand_text)
-                                                            {!! $bookingPage->firm_cancellation_understand_text !!}
-                                                        @endisset
-                                                        <span class="text-red-500">*</span>
-                                                    </span>
-                                                </label>
-                                            </div>
+                                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-500 focus:ring-2">
+                                                        <span class="ml-2">
+                                                            @isset($bookingPage->firm_cancellation_understand_text)
+                                                                {!! $bookingPage->firm_cancellation_understand_text !!}
+                                                            @endisset
+                                                            <span class="text-red-500">*</span>
+                                                        </span>
+                                                    </label>
+                                                </div>
                                             @error('firm_cancellation_understand')
                                                 <div class="tooltip-error shadow-lg mt-1">{{ $message }}</div>
                                             @enderror
@@ -621,7 +621,7 @@
                                         @error('extra_care_ride_agree_terms')
                                             <div class="tooltip-error shadow-lg">
                                                 {{ $bookingPage->extra_care_ride_tooltip ?? $message }}
-                                            </div>
+                                        </div>
                                         @enderror
                                     @endif
 
@@ -636,11 +636,11 @@
                                         </div>
                                     @endif
 
-                                    <div class="flex justify-center items-center mt-4">
-                                        <button id="submitButton" class="button-exp-fill" type="submit">
+                                        <div class="flex justify-center items-center mt-4">
+                                            <button id="submitButton" class="button-exp-fill" type="submit">
                                             {{ $bookingPage->pay_and_request_to_book_btn_text ?? 'Pay and Request to Book' }}
-                                        </button>
-                                    </div>
+                                            </button>
+                                        </div>
 
                                 </div>
                             </div>
@@ -781,7 +781,7 @@
             // ============================================
             // Verification Code Input Handler
             // ============================================
-            document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function() {
                 const codeInputs = document.querySelectorAll('input[name="code[]"]');
                 if (codeInputs.length === 0) return;
 
@@ -794,8 +794,8 @@
                         }
                     });
 
-                    input.addEventListener('keydown', function(e) {
-                        if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
                             codeInputs[index - 1].focus();
                         } else if (e.key === 'ArrowLeft' && index > 0) {
                             codeInputs[index - 1].focus();
@@ -806,9 +806,9 @@
                         }
                     });
 
-                    input.addEventListener('paste', function(e) {
-                        e.preventDefault();
-                        const pasteData = e.clipboardData.getData('text').trim();
+                input.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    const pasteData = e.clipboardData.getData('text').trim();
                         const maxIndex = Math.min(index + pasteData.length, codeInputs.length);
                         
                         for (let i = 0; i < pasteData.length && (index + i) < codeInputs.length; i++) {
@@ -818,9 +818,9 @@
                         if (maxIndex > 0) {
                             codeInputs[Math.min(maxIndex - 1, codeInputs.length - 1)].focus();
                         }
-                    });
                 });
             });
+        });
 
             // ============================================
             // Seat Selection Management
@@ -959,12 +959,12 @@
                     totalSumIn = totalSum - totalAmount;
                     totalSum = totalSum - totalAmount;
                     totalAmountIn = 0;
-                    if (hideBookingFeeDiv) {
+                if (hideBookingFeeDiv) {
                         hideBookingFeeDiv.classList.remove('hidden');
                         hideBookingFeeDiv.classList.add('flex');
-                    }
-                } else {
-                    if (hideBookingFeeDiv) {
+                }
+            } else {
+                if (hideBookingFeeDiv) {
                         hideBookingFeeDiv.classList.add('hidden');
                         hideBookingFeeDiv.classList.remove('flex');
                     }
@@ -983,7 +983,7 @@
                 });
 
                 // Update UI
-                $('#selectedSeats').text(selectedSeats);
+            $('#selectedSeats').text(selectedSeats);
                 $('.totalAmount').text('$' + totalAmount.toFixed(2));
                 $('.taxAmount').text('$' + taxAmount.toFixed(2));
                 $('.totalSeatsAmount').text('$' + totalRideSeatAmount.toFixed(2));
@@ -991,14 +991,14 @@
                 
                 // Update hidden inputs
                 $('.totalTaxAmountInput').val(taxAmount);
-                $('.totalAmountInput').val(totalAmount);
-                $('.totalAmountIn').val(totalAmountIn);
-                $('.totalSeatsAmountInput').val(totalSeatsAmount);
-                $('.totalSumIn').val(totalSumIn);
+            $('.totalAmountInput').val(totalAmount);
+            $('.totalAmountIn').val(totalAmountIn);
+            $('.totalSeatsAmountInput').val(totalSeatsAmount);
+            $('.totalSumIn').val(totalSumIn);
                 $('.totalSumInput').val(totalSum);
 
                 // Update payment request if available
-                if (typeof paymentRequest !== 'undefined' && paymentRequest && typeof paymentRequest.update === 'function') {
+            if (typeof paymentRequest !== 'undefined' && paymentRequest && typeof paymentRequest.update === 'function') {
                     const chargeAmount = rideConfig.paymentMethod === 'cash' 
                         ? totalAmountIn + taxAmount 
                         : totalSumIn;
@@ -1014,9 +1014,9 @@
             // ============================================
             // Seat Selection Handler
             // ============================================
-            function seat_selected(event, clickedSeatId, clickedSeatNumber) {
-                event.preventDefault();
-                event.stopPropagation();
+        function seat_selected(event, clickedSeatId, clickedSeatNumber) {
+            event.preventDefault();
+            event.stopPropagation();
 
                 const isStudent = {{ auth()->user() && (auth()->user()->student == '1' || auth()->user()->student == '2') ? 'true' : 'false' }};
                 const paymentMethod = $('#check_payment_method').val();
@@ -1024,12 +1024,12 @@
 
                 // Build sorted list of available seats
                 const availableSeats = [];
-                $('#seat-selection-container .seat-item[data-is-booked="0"]').each(function() {
-                    availableSeats.push({
+            $('#seat-selection-container .seat-item[data-is-booked="0"]').each(function() {
+                availableSeats.push({
                         id: $(this).data('seat-id'),
                         seatNumber: parseInt($(this).data('seat-number'), 10)
-                    });
                 });
+            });
                 availableSeats.sort((a, b) => a.seatNumber - b.seatNumber);
 
                 // Get seats to select (all seats <= clicked seat)
@@ -1038,12 +1038,12 @@
                 // Apply student limit for cash payments
                 if (isStudent && isCashPayment && seatsToSelect.length > MAX_STUDENT_SEATS) {
                     seatsToSelect = seatsToSelect.slice(0, MAX_STUDENT_SEATS);
-                    showStudentSeatLimitModal();
-                }
+                showStudentSeatLimitModal();
+            }
 
                 // Get currently selected seats
                 const currentlySelectedIds = [];
-                $("input.seat-checkbox:checked").each(function() {
+            $("input.seat-checkbox:checked").each(function() {
                     currentlySelectedIds.push(parseInt($(this).val(), 10));
                 });
 
@@ -1061,30 +1061,30 @@
                     : seatsToSelect.map(s => s.id);
 
                 // Update checkboxes
-                $("input.seat-checkbox").prop('checked', false);
+            $("input.seat-checkbox").prop('checked', false);
                 newSelectionIds.forEach(id => {
-                    $("#number-of-seat-" + id).prop('checked', true);
-                });
+                $("#number-of-seat-" + id).prop('checked', true);
+            });
 
                 // Update error visibility
                 const seatsErrorEl = document.getElementById('seats-laravel-error') ||
-                    document.querySelector('#seat-selection-container + .tooltip-error');
+                document.querySelector('#seat-selection-container + .tooltip-error');
                 const seatsErrorContainer = document.getElementById('seats-error');
                 
-                if (newSelectionIds.length > 0) {
-                    if (seatsErrorEl) {
-                        seatsErrorEl.classList.add('hidden');
-                        seatsErrorEl.style.display = 'none';
-                    }
-                    if (seatsErrorContainer) {
-                        seatsErrorContainer.classList.add('hidden');
-                        seatsErrorContainer.style.display = 'none';
-                    }
-                } else {
-                    if (seatsErrorEl) {
-                        seatsErrorEl.classList.remove('hidden');
-                        seatsErrorEl.style.display = '';
-                    }
+            if (newSelectionIds.length > 0) {
+                if (seatsErrorEl) {
+                    seatsErrorEl.classList.add('hidden');
+                    seatsErrorEl.style.display = 'none';
+                }
+                if (seatsErrorContainer) {
+                    seatsErrorContainer.classList.add('hidden');
+                    seatsErrorContainer.style.display = 'none';
+                }
+            } else {
+                if (seatsErrorEl) {
+                    seatsErrorEl.classList.remove('hidden');
+                    seatsErrorEl.style.display = '';
+                }
                     if (seatsErrorContainer) {
                         seatsErrorContainer.classList.add('hidden');
                     }
@@ -1107,20 +1107,20 @@
                 // Make API calls to hold/release seats
                 const apiCalls = [];
                 [...toRelease, ...toHold].forEach(seatId => {
-                    apiCalls.push($.ajax({
+                apiCalls.push($.ajax({
                         url: SEAT_HOLD_ROUTE,
-                        type: 'POST',
+                    type: 'POST',
                         data: { seat_id: seatId, _token: CSRF_TOKEN }
-                    }));
-                });
+                }));
+            });
 
                 const seatHoldInfoMessage = {!! json_encode(
-                    $bookingPage->seats_available_info_text_ ??
-                        "Your selected seat(s) will be held for 10 minutes. If the booking isn't completed within that time, the seat(s) will be released and made available to others.",
-                ) !!};
+                $bookingPage->seats_available_info_text_ ??
+                    "Your selected seat(s) will be held for 10 minutes. If the booking isn't completed within that time, the seat(s) will be released and made available to others.",
+            ) !!};
                 
                 const isSuccessMessage = (msg) => {
-                    if (!msg) return false;
+                if (!msg) return false;
                     return msg === 'Seat on hold successfully' || msg.indexOf('will be held for 10 minutes') !== -1;
                 };
 
@@ -1131,27 +1131,27 @@
                     const modalMessageEl = document.querySelector('#bookingModal .text-md.text-gray-500');
                     const bookingModal = document.getElementById('bookingModal');
                     
-                    if (hasError) {
+                if (hasError) {
                         const errMsg = (responses.find(r => r[0] && r[0].message && !isSuccessMessage(r[0].message)) || [{}])[0].message;
                         if (modalMessageEl) modalMessageEl.textContent = errMsg || 'Seat could not be held.';
                         if (bookingModal) bookingModal.classList.remove('hidden');
-                    } else if (toHold.length > 0) {
+                } else if (toHold.length > 0) {
                         if (modalMessageEl) modalMessageEl.textContent = seatHoldInfoMessage;
                         if (bookingModal) bookingModal.classList.remove('hidden');
-                    }
+                }
                     
-                    updateTotalAmount();
-                    persistSeatSelection();
-                }).fail(function() {
-                    // Revert on error
-                    $("input.seat-checkbox").prop('checked', false);
+                updateTotalAmount();
+                persistSeatSelection();
+            }).fail(function() {
+                // Revert on error
+                $("input.seat-checkbox").prop('checked', false);
                     currentlySelectedIds.forEach(id => {
-                        $("#number-of-seat-" + id).prop('checked', true);
-                    });
-                    updateSeatUI(currentlySelectedIds);
-                    updateTotalAmount();
+                    $("#number-of-seat-" + id).prop('checked', true);
                 });
-            }
+                    updateSeatUI(currentlySelectedIds);
+                updateTotalAmount();
+            });
+        }
 
             // Make seat_selected globally available
             window.seat_selected = seat_selected;
@@ -1190,20 +1190,20 @@
                 }
             });
 
-            // Close modal on Escape key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    closeStudentSeatLimitModal();
-                }
-            });
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeStudentSeatLimitModal();
+            }
+        });
 
             // Handle browser back button
             window.addEventListener("pageshow", function() {
-                const navEntries = performance.getEntriesByType("navigation");
-                if (navEntries.length > 0 && navEntries[0].type === "back_forward") {
+            const navEntries = performance.getEntriesByType("navigation");
+            if (navEntries.length > 0 && navEntries[0].type === "back_forward") {
                     window.location.replace('{{ route('my_trips', ['lang' => $selectedLanguage->abbreviation ?? 'en']) }}');
-                }
-            });
+            }
+        });
         })();
     </script>
 @endsection

@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
         Commands\RideCompleteCron::class,
         Commands\StudentCardExpiryCron::class,
         Commands\StudentAnnualRenewalCron::class,
+        Commands\ExpireBookingsCommand::class,
     ];
 
     /**
@@ -37,6 +38,14 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('ride-complete:cron')
         ->everyThirtyMinutes();
+
+        // Process expired bookings every minute
+        $schedule->command('bookings:expire')
+            ->everyMinute()
+            ->withoutOverlapping()
+            ->onFailure(function () {
+                Log::error('ExpireBookingsCommand failed');
+            });
 
         // $schedule->command('ride-complete:cron')
         // ->everySixHours();
