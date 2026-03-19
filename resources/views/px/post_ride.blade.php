@@ -2855,5 +2855,15 @@
         function closePxValidationErrorModal() {
             closeModalById('pxValidationErrorModal');
         }
+        document.addEventListener('keydown', function(event) {
+            if (event.key !== 'Enter') {
+                return;
+            }
+
+            const target = event.target;
+            if (target instanceof HTMLInputElement && target.classList.contains('px-segment-price-input')) {
+                event.preventDefault();
+            }
+        });
     </script>
 @endsection
