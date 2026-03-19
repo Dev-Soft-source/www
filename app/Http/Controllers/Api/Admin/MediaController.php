@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Traits\FileUploadTrait;
 use App\Traits\StatusResponser;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
+use Illuminate\Validation\ValidationException;
 
 class MediaController extends Controller
 {
@@ -38,12 +40,26 @@ class MediaController extends Controller
     public function uploadImage(Request $request)
     {
         $this->validate($request, [
-            'file' => 'required|image|mimes:jpg,png,jpeg,gif,svg',
+            'file' => 'required|file|max:10240',
         ]);
 
         $image = $request->file('file');
-        $name = time() . '-' . $image->getClientOriginalName();
+        $extension = strtolower($image->getClientOriginalExtension());
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'avif'];
+
+        if (!in_array($extension, $allowedExtensions, true)) {
+            throw ValidationException::withMessages([
+                'file' => ['The file must be an image of type: jpg, jpeg, png, gif, svg, webp, or avif.'],
+            ]);
+        }
+
+        $name = time() . '-' . preg_replace('/[^A-Za-z0-9._-]/', '-', $image->getClientOriginalName());
         $destinationPath = public_path('/home_page_icons');
+
+        if (!File::exists($destinationPath)) {
+            File::makeDirectory($destinationPath, 0755, true);
+        }
+
         $image->move($destinationPath, $name);
 
         return $name;
