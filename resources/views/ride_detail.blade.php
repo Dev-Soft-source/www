@@ -567,14 +567,17 @@
                                                 {{ $rideDetailPage->passengers_driven_label }}
                                             @endisset
                                             <span>
-                                                {{ $ride->driver
+                                                @php
+                                                    $drivenNum = $ride->driver
                                                     ?->rides()->where('status', '!=', 2)->where(function ($query) {
                                                         $query->whereDate('rides.date', '<', now()->toDateString())->orWhere(function ($query) {
                                                             $query->whereDate('rides.date', '=', now()->toDateString())->whereTime('rides.time', '<=', now()->toTimeString());
                                                         });
                                                     })->get()->flatMap(function ($ride) {
                                                         return $ride->bookings()->pluck('seats');
-                                                    })->sum() }}
+                                                    })->sum();
+                                                @endphp
+                                                {{ $drivenNum > 100 ? '99+' : $drivenNum }}
                                             </span>
                                         </p>
                                         <div class="flex items-center gap-4 w-full">
@@ -618,7 +621,7 @@
                                             <div class="flex items-center gap-2 w-auto">
                                                 @if ($ride->driver?->email_verified == '1')
                                                     <span>|</span>
-                                                    <span class="inline-block cursor-pointer"
+                                                    <span class="inline-block"
                                                         data-tippy-content="{{ $rideDetailPage->verified_email_tooltip ?? (optional($rideDetailPage)->verified_email_tooltip ?? '') }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                             viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
@@ -631,7 +634,7 @@
 
                                                 @if ($hasVerifiedPhone)
                                                     <span>|</span>
-                                                    <span class="inline-block cursor-pointer"
+                                                    <span class="inline-block"
                                                         data-tippy-content="{{ $rideDetailPage->verified_phone_tooltip ?? (optional($rideDetailPage)->verified_phone_tooltip ?? '') }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                             viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
@@ -766,7 +769,7 @@
                                 @isset($rideDetailPage->cancellation_policy)
                                     {{ $rideDetailPage->cancellation_policy }}
                                 @endisset
-                                @if (isset($ride->booking_type->name) && $ride->booking_type->name == 'Firm cancellation')
+                                @if ($ride->isFirmCancellation())
                                     <div class="relative inline-flex group">
                                         <!-- Info Icon -->
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -807,17 +810,38 @@
                                 @endif
                             </h3>
                             <div class=" p-4 w-full">
-                                <p class="text-left">
-                                    @if (isset($ride->booking_type->name) && $ride->booking_type->name == 'Standard cancellation')
-                                        <a href="{{ route('cancellation_policy', ['lang' => $selectedLanguage->abbreviation, 'type' => 'standard']) }}"
-                                            class="font-bold text-black no-underline hover:no-underline" target="_blank">
+                                <p class="text-left text-md font-semibold">
+                                    @php
+                                        $route = null;
+
+                                        if ($ride->isStandardCancellation()) {
+                                            $route = route('cancellation_policy', [
+                                                'lang' => $selectedLanguage->abbreviation,
+                                                'type' => 'standard'
+                                            ]);
+                                        } elseif ($ride->isFirmCancellation()) {
+                                            $route = route('firm_cancellation_policy', [
+                                                'lang' => $selectedLanguage->abbreviation,
+                                                'type' => 'firm'
+                                            ]);
+                                        }
+
+                                        $tooltip = $rideDetailPage->view_cancellation_tooltip  ?? 'View our full Cancellation Policy';
+                                    @endphp
+
+                                    @if ($route)
+                                        <a href="{{ $route }}" class="font-bold text-black no-underline hover:no-underline" target="_blank">
                                             {{ $ride->booking_type->name }}
                                         </a>
-                                    @elseif(isset($ride->booking_type->name) && $ride->booking_type->name == 'Firm cancellation')
-                                        <a href="{{ route('firm_cancellation_policy', ['lang' => $selectedLanguage->abbreviation, 'type' => 'firm']) }}"
-                                            class="font-bold text-black no-underline hover:no-underline" target="_blank">
-                                            {{ $ride->booking_type->name }}
-                                        </a>
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                            width="16"
+                                            height="16"
+                                            fill="currentColor"
+                                            class="bi bi-exclamation-circle-fill text-black cursor-help inline-block"
+                                            data-tippy-content="{{ $tooltip }}"
+                                            viewBox="0 0 16 16">
+                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+                                        </svg>
                                     @else
                                         {{ $ride->booking_type->name ?? '' }}
                                     @endif
