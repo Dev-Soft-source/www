@@ -480,7 +480,8 @@
                         </div>
                         <div class="bg-white rounded-lg shadow-3xl mt-6">
                             <button type="button" id="px-stops-toggle"
-                                class="bg-primary rounded-lg text-white w-full flex items-center justify-between text-left px-4 py-2"
+                                class="bg-primary rounded-lg text-white w-full flex items-center justify-between text-left px-4 py-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                                {{ empty($oldOriginCityId) || empty($oldDestinationCityId) ? 'disabled' : '' }}
                                 aria-expanded="{{ $stopsExpanded ? 'true' : 'false' }}" aria-controls="stops-content">
                                 <h3 class="text-2xl">
                                     {{ $postRidePage->stop_along_the_way_label ?? 'Stops Along the Way' }}
@@ -511,6 +512,8 @@
                                 )
                             </div>
                         </div>
+
+                        <div class="border my-4"></div>
 
                         <div class="flex items-center mb-4">
                             <input id="px-is-recurring" type="checkbox" name="recurring" value="1"
@@ -748,7 +751,7 @@
                         <div id="px-price-segments-wrap" class="{{ $showSegmentPriceMode ? '' : 'hidden' }} space-y-3">
                             <div id="px-price-segments-list" class="space-y-2"></div>
                             <div
-                                class="flex items-center justify-between rounded-md bg-gray-50 border border-gray-200 px-3 py-2 hidden">
+                                class="flex items-center justify-between rounded-md bg-gray-50 border border-gray-200 px-3 py-2">
                                 <span class="text-gray-700">Parent route price per seat</span>
                                 <span id="px-price-segments-total" class="text-gray-900">0.00</span>
                             </div>
@@ -1751,12 +1754,12 @@
     <!-- Modal for Price Error (Exceeds $0.72/km per seat) -->
     <div id="pxPriceErrorModal" class="hidden fixed inset-0 z-50" aria-labelledby="px-price-error-modal-title"
         role="dialog" aria-modal="true">
-        <div onclick="closePxPriceErrorModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div onclick="adjustPxPriceFromError()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
         <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
             <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                 <div
                     class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
-                    <button type="button" onclick="closePxPriceErrorModal()"
+                    <button type="button" onclick="adjustPxPriceFromError()"
                         class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 z-50">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -2001,14 +2004,36 @@
             const stopsContent = document.getElementById('px-stops-content');
             const stopsChevron = document.getElementById('px-stops-chevron');
 
+            function syncStopsToggleState() {
+                if (!stopsToggle || !stopsContent || !stopsChevron) {
+                    return;
+                }
+
+                const canOpenStops = hasValidCityId('origin[city_id]') && hasValidCityId('destination[city_id]');
+                stopsToggle.disabled = !canOpenStops;
+                stopsToggle.setAttribute('aria-disabled', canOpenStops ? 'false' : 'true');
+
+                if (!canOpenStops) {
+                    stopsToggle.setAttribute('aria-expanded', 'false');
+                    stopsContent.classList.add('hidden');
+                    stopsChevron.classList.remove('rotate-180');
+                }
+            }
+
             if (stopsToggle && stopsContent && stopsChevron) {
                 stopsToggle.addEventListener('click', function() {
+                    if (stopsToggle.disabled) {
+                        return;
+                    }
+
                     const expanded = stopsToggle.getAttribute('aria-expanded') === 'true';
                     const nextExpanded = !expanded;
                     stopsToggle.setAttribute('aria-expanded', nextExpanded ? 'true' : 'false');
                     stopsContent.classList.toggle('hidden', !nextExpanded);
                     stopsChevron.classList.toggle('rotate-180', nextExpanded);
                 });
+
+                syncStopsToggleState();
             }
 
             // Enable recurring inputs only when recurring trip is checked.
@@ -2118,13 +2143,23 @@
                 return '$';
             }
 
-            function setSegmentDistanceLoading(isLoading) {
-                if (!segmentDistanceLoader) {
+            function setSegmentPriceInputsDisabled(isDisabled) {
+                if (!priceSegmentsList) {
                     return;
                 }
 
-                segmentDistanceLoader.classList.toggle('is-active', isLoading);
-                segmentDistanceLoader.setAttribute('aria-hidden', isLoading ? 'false' : 'true');
+                priceSegmentsList.querySelectorAll('.px-segment-price-input').forEach((input) => {
+                    input.disabled = isDisabled;
+                });
+            }
+
+            function setSegmentDistanceLoading(isLoading) {
+                setSegmentPriceInputsDisabled(isLoading);
+
+                if (segmentDistanceLoader) {
+                    segmentDistanceLoader.classList.toggle('is-active', isLoading);
+                    segmentDistanceLoader.setAttribute('aria-hidden', isLoading ? 'false' : 'true');
+                }
             }
 
             function toMinorInt(value) {
@@ -2599,6 +2634,7 @@
                 }
                 refreshExpectedSegmentPriceHints();
                 refreshSingleRouteExpectedPriceHint();
+                console.log('maybeShowPxLivePriceAlert3');
                 maybeShowPxLivePriceAlert();
             }
 
@@ -2768,6 +2804,7 @@
                         priceInput.value = toMajorFromMinor(initialMinor);
                         priceInput.className = 'px-segment-price-input w-full rounded border-gray-300';
                         priceInput.placeholder = `e.g. ${getSelectedCurrencySymbol()}12.00`;
+                        priceInput.disabled = !!segmentDistanceState.pendingKey;
                         priceInput.setAttribute('data-from-index', String(fromIndex));
                         priceInput.setAttribute('data-to-index', String(toIndex));
                         priceInput.setAttribute('data-distance-meters', '0');
@@ -2800,10 +2837,12 @@
                             stopPriceInput.value = String(toMinorFromMajor(priceInput.value));
                             syncStopPriceDeltaInputsFromSegmentRows();
                             syncSegmentPriceTotal();
+                            console.log('maybeShowPxLivePriceAlert4');
                             maybeShowPxLivePriceAlert(false, priceInput);
                         });
 
                         priceInput.addEventListener('blur', function() {
+                            console.log('maybeShowPxLivePriceAlert5', priceInput);
                             maybeShowPxLivePriceAlert(true, priceInput);
                         });
 
@@ -2821,6 +2860,7 @@
                 syncStopPriceDeltaInputsFromSegmentRows();
                 syncSegmentPriceTotal();
                 refreshExpectedSegmentPriceHints();
+                setSegmentPriceInputsDisabled(!!segmentDistanceState.pendingKey);
             }
 
             if (priceMinorInput) {
@@ -2828,9 +2868,12 @@
                     if (priceMinorHiddenInput) {
                         priceMinorHiddenInput.value = String(toMinorFromMajor(priceMinorInput.value));
                     }
+                    console.log('maybeShowPxLivePriceAlert1');
+                    
                     maybeShowPxLivePriceAlert();
                 });
                 priceMinorInput.addEventListener('blur', function() {
+                    console.log('maybeShowPxLivePriceAlert2');
                     maybeShowPxLivePriceAlert(true);
                 });
             }
@@ -2842,9 +2885,12 @@
                 }
                 if (target.name && (
                         target.name.includes('origin[label]') ||
+                        target.name.includes('origin[city_id]') ||
                         target.name.includes('destination[label]') ||
+                        target.name.includes('destination[city_id]') ||
                         target.name.match(/^stops\[\d+\]\[(label|city_id|price_delta_minor)\]$/)
                     )) {
+                    syncStopsToggleState();
                     syncPriceInputMode();
                 }
             });
@@ -2864,10 +2910,12 @@
 
             if (window.Livewire && typeof window.Livewire.hook === 'function') {
                 window.Livewire.hook('message.processed', function() {
+                    setTimeout(syncStopsToggleState, 60);
                     setTimeout(syncPriceInputMode, 60);
                 });
             }
 
+            syncStopsToggleState();
             syncPriceInputMode();
             setTimeout(syncPriceInputMode, 150);
             setTimeout(syncPriceInputMode, 400);
@@ -3490,7 +3538,7 @@
         }
 
         function maybeShowPxLivePriceAlert(force = false, sourceInput = null) {
-            lastPxPriceValidationInput = sourceInput instanceof HTMLElement ? sourceInput : document.getElementById(
+            const validationInput = sourceInput instanceof HTMLElement ? sourceInput : document.getElementById(
                 'px-price-minor-input');
             const {
                 priceMinor,
@@ -3537,11 +3585,13 @@
             }
 
             if (validation.type === 'error') {
+                lastPxPriceValidationInput = validationInput;
                 showPxPriceErrorModal(validation.maxPricePerSeat, routeLabel);
                 return;
             }
 
             if (validation.type === 'warning') {
+                lastPxPriceValidationInput = validationInput;
                 showPxPriceWarningModal(function() {
                     closeModalById('pxPriceWarningModal');
                 }, routeLabel, validation.softWarningPrice);

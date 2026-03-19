@@ -1,6 +1,6 @@
 <div class="space-y-2">
     <label id="px-stops-origin-city" class="block mb-2 origin_city">{{ $originLabel }}</label>
-    <label class="block mb-4">{{ $stopAlongTheWayLabel }}</label>
+    <label class="block mb-4 hidden">{{ $stopAlongTheWayLabel }}</label>
     @foreach ($stops as $index => $stop)
         <div wire:key="stop-row-{{ $stop['_key'] ?? $index }}" class="flex flex-col md:flex-row md:items-center gap-3 stop-row ml-8">
             <div class="flex flex-col md:flex-row gap-2 items-stretch  min-w-0 w-full">
@@ -49,7 +49,7 @@
                 </div>
                 <div class="flex-1 min-w-0 w-full md:w-auto flex flex-col">
                     <textarea name="stops[{{ $index }}][pickup_dropoff_location]" rows="1"
-                        class="w-full rounded border-gray-300 md:h-full md:flex-1 resize-none" placeholder="Pick up/drop off location details" autocomplete="off">{{ $stop['pickup_dropoff_location'] ?? old("stops.$index.pickup_dropoff_location") }}</textarea>
+                        class="w-full rounded border-gray-300 md:h-full md:flex-1 resize-none" placeholder="e.g. Tim Hortons parking lot, near the entrance" autocomplete="off">{{ $stop['pickup_dropoff_location'] ?? old("stops.$index.pickup_dropoff_location") }}</textarea>
                     @error("stops.$index.pickup_dropoff_location")
                         <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
@@ -69,7 +69,8 @@
 
         </div>
     @endforeach
-    <button type="button" wire:click="addStop" class="button-exp-fill flex-shrink-0 whitespace-nowrap mb-4">+ {{ $addStopBtnLabel }}</button>
+    <button type="button" wire:click="addStop" data-add-stop-button
+        class="button-exp-fill flex-shrink-0 whitespace-nowrap mb-4 disabled:opacity-60 disabled:cursor-not-allowed">+ {{ $addStopBtnLabel }}</button>
     <label id="px-stops-destination-city"
         class="block mb-4 destination_city">{{ $destinationLabel }}</label>
 
@@ -162,16 +163,55 @@
                     }
                 }
 
+                function syncAddStopButtonState() {
+                    const addStopButton = document.querySelector('[data-add-stop-button]');
+                    if (!addStopButton) {
+                        return;
+                    }
+
+                    const stopRows = document.querySelectorAll('.stop-row');
+                    if (stopRows.length === 0) {
+                        addStopButton.disabled = false;
+                        return;
+                    }
+
+                    const hasIncompleteRow = Array.from(stopRows).some(function(row, index) {
+                        const cityIdInput = row.querySelector('input[name="stops[' + index + '][city_id]"]');
+                        const departureInput = row.querySelector('[data-stop-departure-value="' + index + '"]');
+                        const pickupDropoffInput = row.querySelector(
+                            'textarea[name="stops[' + index + '][pickup_dropoff_location]"]'
+                        );
+
+                        const hasCity = !!(cityIdInput && cityIdInput.value && cityIdInput.value.trim() !== '');
+                        const hasDeparture = !!(departureInput && departureInput.value && departureInput.value.trim() !== '');
+                        const hasPickupInfo = !!(pickupDropoffInput && pickupDropoffInput.value && pickupDropoffInput.value.trim() !== '');
+
+                        return !(hasCity && hasDeparture && hasPickupInfo);
+                    });
+
+                    addStopButton.disabled = hasIncompleteRow;
+                }
+
                 // Listen for input changes
                 document.addEventListener('input', function(event) {
                     const target = event.target;
-                    if (!(target instanceof HTMLInputElement)) {
+                    if (!(target instanceof HTMLInputElement) && !(target instanceof HTMLTextAreaElement)) {
                         return;
                     }
                     if (target.name && (target.name.includes('origin[label]') || target.name.includes(
                             'destination[label]'))) {
                         syncStopsEdgeCitiesEnhanced();
                     }
+                    syncAddStopButtonState();
+                });
+
+                document.addEventListener('change', function(event) {
+                    const target = event.target;
+                    if (!(target instanceof HTMLInputElement) && !(target instanceof HTMLTextAreaElement)) {
+                        return;
+                    }
+
+                    syncAddStopButtonState();
                 });
 
                 // Use Livewire hooks if available
@@ -191,11 +231,15 @@
 
                 // Initial sync with multiple attempts to catch Livewire initialization
                 syncStopsEdgeCitiesEnhanced();
+                syncAddStopButtonState();
 
                 // Retry after a short delay to catch Livewire components that load later
                 setTimeout(syncStopsEdgeCitiesEnhanced, 300);
                 setTimeout(syncStopsEdgeCitiesEnhanced, 600);
                 setTimeout(syncStopsEdgeCitiesEnhanced, 1000);
+                setTimeout(syncAddStopButtonState, 300);
+                setTimeout(syncAddStopButtonState, 600);
+                setTimeout(syncAddStopButtonState, 1000);
 
                 // Initialize flatpickr for stop departure date/time fields
                 function initializeStopDatePickers() {
@@ -258,12 +302,16 @@
 
                 // Initialize on load
                 initializeStopDatePickers();
+                syncAddStopButtonState();
 
                 // Re-initialize after Livewire updates
                 if (window.Livewire) {
                     if (typeof window.Livewire.hook === 'function') {
                         window.Livewire.hook('message.processed', function() {
-                            setTimeout(initializeStopDatePickers, 100);
+                            setTimeout(function() {
+                                initializeStopDatePickers();
+                                syncAddStopButtonState();
+                            }, 100);
                         });
                     }
                 }
