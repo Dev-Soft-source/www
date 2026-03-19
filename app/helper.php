@@ -111,7 +111,7 @@ if (!function_exists('getFooterSetting')) {
                 $footerSetting->menu3,
                 $footerSetting->menu4,
             ])
-            : [2, 3, 4, 5];
+            : [2, 3, 5];
 
         if (empty($menuIds)) {
             return (object) ['footerSettingDetail' => []];
