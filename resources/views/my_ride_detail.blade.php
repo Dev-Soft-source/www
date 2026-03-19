@@ -509,13 +509,13 @@
                                     ]);
                                 @endphp
                                 <div class="flex items-center flex-wrap gap-x-2 text-sm text-black">
-                                    <p class="text-md">{{ implode(' | ', $vehicleParts) }}</p>
+                                    <p class="text-md font-semibold">{{ implode(' | ', $vehicleParts) }}</p>
                                 </div>
-                                <p class="font-semibold text-lg text-black text-start">
+                                <p class="text-md font-semibold text-black text-start">
                                     {{ $ride->license_no }}
                                 </p>
                                 @if ($ride->vehicle_type_label)
-                                    <p class="text-md">{{ $ride->vehicle_type_label }}</p>
+                                    <p class="text-md font-semibold">{{ $ride->vehicle_type_label }}</p>
                                 @endif
                             </div>
                         </div>

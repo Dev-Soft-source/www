@@ -124,6 +124,7 @@
                     if ($card->payment_method_type == 'apple_pay') {
                         $social_pay_option = 'apple-pay-option';
                     }
+
                 @endphp
                 <label for="card_id_{{ $card->id }}"
                     class="border rounded m-3 p-3 flex items-center justify-between cursor-pointer {{ $social_pay_option }}">
@@ -131,6 +132,7 @@
                         @if ($card->payment_method_type == 'card' && $card->paymentMethod && $card->paymentMethod->card)
                             @php
                                 $brand = strtolower($card->paymentMethod->card->brand ?? '');
+                                
                             @endphp
                             @if ($brand === 'visa')
                                 <div class="w-14 h-9 flex items-center justify-center">

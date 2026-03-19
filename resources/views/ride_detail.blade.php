@@ -415,7 +415,7 @@
                                     {{ $rideDetailPage->vehicle_info_label }}
                                 @endisset
                             </h3>
-                            <div class="flex items-start space-x-2 p-4 w-full">
+                            <div class="flex items-start space-x-4 p-4 w-full">
                                 @if (auth()->user() &&
                                         $ride->bookings &&
                                         $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->isNotEmpty())
@@ -518,8 +518,8 @@
                                     @endif
                                 @endif
                             </h3>
-                            <div class="flex items-center justify-between p-4  pt-1 w-full">
-                                <div class="flex items-center space-x-2">
+                            <div class="flex items-center justify-between p-4 w-full">
+                                <div class="flex items-center space-x-4">
                                     @if (auth()->user() &&
                                             $ride->bookings &&
                                             $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->isNotEmpty())

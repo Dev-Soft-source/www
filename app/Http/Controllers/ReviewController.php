@@ -113,6 +113,7 @@ class ReviewController extends Controller
     }
 
     public function passengerLeftReviewIndex($lang, $id){
+        
         $rating = Rating::whereId($id)->first();
 
         return view('passenger_review_left',['rating' => $rating]);

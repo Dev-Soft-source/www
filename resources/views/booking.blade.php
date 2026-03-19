@@ -253,6 +253,7 @@
                                             {{-- TODO : to check more --}}
                                             @foreach ($ride->seatDetail as $detail)
                                                 @php
+                                               
                                                     $availableForSegment = $availableSeatIdsForSegment ?? $ride->seatDetail->pluck('id')->all();
                                                     $isBooked = $detail->status === 'booked';
                                                     $isHeldByOthers =
