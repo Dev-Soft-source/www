@@ -22,6 +22,9 @@ class BookingPageSettingService
                 $validationRule = array_merge($validationRule, ['seats_available_label.seats_available_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['seats_available_label.seats_available_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
 
+                $validationRule = array_merge($validationRule, ['seats_available.seats_available_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['seats_available.seats_available_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+
 
                 $validationRule = array_merge($validationRule, ['seats_available_info_text.seats_available_info_text_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['seats_available_info_text.seats_available_info_text_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
@@ -125,8 +128,11 @@ class BookingPageSettingService
             'meta_description' => $this->data($request, $language, 'meta_description'),
             'main_heading' => $this->data($request, $language, 'main_heading'),
             'seats_available_label' => $this->data($request, $language, 'seats_available_label'),
+            // Plural/range template used by booking seat-availability label.
+            'seats_available' => $this->data($request, $language, 'seats_available'),
             'seats_available_info_text' => $this->data($request, $language, 'seats_available_info_text'),
             'seats_available_tooltip' => $this->data($request, $language, 'seats_available_tooltip'),
+
             'chat_with_driver_tooltip' => $this->data($request, $language, 'chat_with_driver_tooltip'),
             'aggreement_tooltip' => $this->data($request, $language, 'aggreement_tooltip'),
             'pink_ride_tooltip' => $this->data($request, $language, 'pink_ride_tooltip'),
@@ -161,6 +167,15 @@ class BookingPageSettingService
             'booking_disclaimer_extra_care_ride' => $this->data($request, $language, 'booking_disclaimer_extra_care_ride'),
             'booking_disclaimer_firm' => $this->data($request, $language, 'booking_disclaimer_firm'),
             'booking_disclaimer_firm_tooltip' => $this->data($request, $language, 'booking_disclaimer_firm_tooltip'),
+
+            // Student payment / coffee-wall tooltips
+            'fee_student_pending_text' => $this->data($request, $language, 'fee_student_pending_text'),
+            'fee_charge_waived' => $this->data($request, $language, 'fee_charge_waived'),
+            'coffee_wall_cash_text' => $this->data($request, $language, 'coffee_wall_cash_text'),
+            'coffee_wall_online_payment_text' => $this->data($request, $language, 'coffee_wall_online_payment_text'),
+            'coffee_wall_secure_cash_text' => $this->data($request, $language, 'coffee_wall_secure_cash_text'),
+            'note_for_students_text' => $this->data($request, $language, 'note_for_students_text'),
+
             'booking_term_agree_text' => $this->data($request, $language, 'booking_term_agree_text'),
             'booking_pink_ride_term_agree_text' => $this->data($request, $language, 'booking_pink_ride_term_agree_text'),
             'booking_extra_care_ride_term_agree_text' => $this->data($request, $language, 'booking_extra_care_ride_term_agree_text'),

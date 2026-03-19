@@ -48,7 +48,9 @@
                         </li>
                     </ul>
                     <div class="flex items-center justify-between">
-                        <p class="text-primary font-semibold">Total Balance: ${{ $balance }} CAD</p>
+                        <p class="text-primary font-semibold">
+                            {{ $walletSettingPage->total_label ?? 'Total Balance:' }} ${{ $balance }} CAD
+                        </p>
                         <a href="{{ route('create_top_up_balance', ['lang' => $selectedLanguage->abbreviation]) }}"
                             class="button-exp-fill">
                             {{ $walletSettingPage->balance_buy_more_button_text ?? 'Buy more top up balance' }}
