@@ -218,9 +218,14 @@
 
                 </div>
 
-                <div class= "mt-12">
-                    <label for="">{{ $editProfilePage->govt_id_label ?? 'Government-issued photo ID' }}</label>
-                    <div class="mt-2"><p>{{ $editProfilePage->govt_id_text ?? 'Upload a valid government-issued photo ID' }}</p></div>
+                <div class= "mt-12 text-center md:text-left md:col-span-2">                  
+                    
+                    <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
+                        <h3 class="text-2xl bg-primary text-white py-2 px-4">
+                            {{ $editProfilePage->govt_id_label ?? 'Government-issued photo ID' }}
+                        </h3>
+                        <div class="bg-white p-4 space-y-3">
+                              <div class="mt-2"><p>{{ $editProfilePage->govt_id_text ?? 'Upload a valid government-issued photo ID' }}</p></div>
                     <label for="dropzone-file"
                         class="flex flex-col items-center justify-center w-full h-72 border-2 border-gray-300 border-dashed rounded cursor-pointer bg-white hover:bg-gray-100">
                         <div class="flex flex-col items-center justify-center pt-5 pb-6 p-4">
@@ -258,7 +263,10 @@
                             </div>
                         @endif
                     @enderror
-                </div>
+                    </div>
+                    </div>
+                  
+               
 
                 <div class="md:col-span-2">
                     <label for="">{{ $editProfilePage->mini_bio_label ?? 'Mini bio' }} <span class="text-red-500">*</span></label>
