@@ -54,7 +54,13 @@ class MyRideController extends Controller
 {
     public function CurrentRides($lang = null)
     {
-        $user_id = auth()->user()->id;
+        $user = auth()->user();
+        $user_id = $user->id;
+
+        if ($user->step1 != 1) {
+            // personal information
+            return redirect()->route('step1to5', ['lang' => $lang]);
+        }
         
         // Check if user has posted any rides (as a driver)
         $hasPostedRides = Ride::where('added_by', $user_id)->exists();

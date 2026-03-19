@@ -2,6 +2,38 @@
 
 @section('style')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        /* error tooltip css */
+.tooltip-dob-error {
+    position: relative;
+    margin-top: 6px;
+    padding: 8px 12px;
+    background: #c75b5b;
+    color: #fff;
+    border-radius: 8px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.4;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    /* display: inline-block; */
+    transform-origin: top center;
+    animation: tooltipErrorIn 0.28s ease-out forwards;
+    /* min-width: max-content; */
+    z-index: 9999;
+}
+
+.tooltip-dob-error::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    /* At the top of the tooltip */
+    left: 50%;
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent transparent #c75b5b transparent;
+}
+    </style>
 @endsection
 
 @section('content')
@@ -92,6 +124,9 @@
                     @error('dob')
                       <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
+                    <div id="dob-under-18-error" class="hidden tooltip-dob-error shadow-lg">
+                        {{ $step1Page->alert_age_limit_text ?? 'You must be at least 18 years old to join ProximaRide. Please check your date of birth or refer to our Terms of Service.' }}
+                    </div>
                 </div>
 
                 <div class="md:col-span-2">
@@ -291,6 +326,42 @@
     }
 
     const dateInput = document.getElementById('dateInput');
+    let dobPickerUserOpened = false;
+
+    // Check if DOB indicates user is at least 18.
+    // Flatpickr altInput can produce strings like "February 01, 2026", so we parse those reliably.
+    function isAtLeast18(dob) {
+        if (dob == null || dob === '') return true;
+                var birth = dob instanceof Date ? dob : new Date(String(dob).trim());
+                if (isNaN(birth.getTime())) return true;
+
+                var today = new Date();
+                var age = today.getFullYear() - birth.getFullYear();
+                var m = today.getMonth() - birth.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+
+
+                return age >= 18;
+    }
+
+    // Only show the tooltip after the user has focused/opened the picker.
+    function setDobTooltipFromSelection(selectedDate) {
+        
+        
+        var $dobError = $('#dob-under-18-error');
+        if (selectedDate == null) {
+            $dobError.addClass('hidden');
+            return;
+        }
+
+
+        if (isAtLeast18(selectedDate)) {
+            $dobError.addClass('hidden');
+        } else {
+            $dobError.removeClass('hidden');
+        } 
+    }
+
     const profileLocale = @json(app()->getLocale());
     const flatpickrLocaleKey = @json($flatpickrLocale);
     const flatpickrOptions = {
@@ -300,7 +371,11 @@
         disableMobile: true,
         allowInput: true,
         clickOpens: true,
-        theme: 'default'
+        theme: 'default',
+        onChange: function(selectedDates) {
+            // Flatpickr provides a Date array
+            setDobTooltipFromSelection(selectedDates && selectedDates.length ? selectedDates[0] : null);
+        }
     };
 
     if (
@@ -315,6 +390,11 @@
     flatpickr(dateInput, flatpickrOptions);
 
     $(document).ready(function() {
+        // Allow tooltip to show only after user has focused DOB (not on refresh)
+        $('#dateInput').one('focus', function() { dobPickerUserOpened = true; });
+        // Force-hide tooltip on load
+        setTimeout(function() { $('#dob-under-18-error').addClass('hidden'); }, 0);
+
         function loadStatesByCountry(countryId, selectedState) {
             $.ajax({
                 url: "{{ url('get-states-by-country') }}",

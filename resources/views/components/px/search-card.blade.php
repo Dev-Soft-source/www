@@ -218,13 +218,13 @@
                         @if ($ride->isInstantBooking() )
                             <a href="{{ route('ride_detail', ['lang' => app()->getLocale(), 'id' => $ride->id]) }}"
                                 class="button-exp-green-fill flex justify-center w-full" data-tippy-content="{{ $postRidePage->booking_option1_tooltip }}">
-                                <img class="w-8 h-8" src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}" />
+                                <img class="w-8 h-8 mr-2" src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}" />
                                 {{ $siteText['instant_booking_btn_text'] ?? 'Instant booking' }}
                             </a>
                         @else
                             <a href="{{ route('ride_detail', ['lang' => app()->getLocale(), 'id' => $ride->id]) }}"
                                 class="button-exp-sky-fill flex justify-center w-full" data-tippy-content="{{ $postRidePage->booking_option2_tooltip }}">
-                                <img class="w-8 h-8" src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}" />
+                                <img class="w-8 h-8 mr-2" src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}" />
                                 {{ $siteText['request_to_book_btn_text'] ?? 'Request to book' }}
                             </a>
                         @endif

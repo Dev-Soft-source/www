@@ -4,7 +4,36 @@
     {{-- <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/ui-lightness/jquery-ui.css"> --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
-        
+        /* error tooltip css */
+.tooltip-dob-error {
+    position: relative;
+    margin-top: 6px;
+    padding: 8px 12px;
+    background: #c75b5b;
+    color: #fff;
+    border-radius: 8px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.4;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    /* display: inline-block; */
+    transform-origin: top center;
+    animation: tooltipErrorIn 0.28s ease-out forwards;
+    /* min-width: max-content; */
+    z-index: 9999;
+}
+
+.tooltip-dob-error::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    /* At the top of the tooltip */
+    left: 50%;
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent transparent #c75b5b transparent;
+}
     </style>
 @endsection
 
@@ -110,9 +139,9 @@
                                 type="text" 
                                 class=""
                             />
-                            <!-- <div id="dob-under-18-error" class="hidden tooltip-error shadow-lg">
-                                You must be at least 18 years old to join ProximaRide. Please check your date of birth or refer to our Terms of Service.
-                            </div> -->
+                            <div id="dob-under-18-error" class="hidden tooltip-dob-error shadow-lg">
+                                {{ $step1Page->alert_age_limit_text ?? 'You must be at least 18 years old to join ProximaRide. Please check your date of birth or refer to our Terms of Service.' }}
+                            </div>
                         </div>
 
                         <div class="">
@@ -535,15 +564,19 @@
                 if (dob == null || dob === '') return true;
                 var birth = dob instanceof Date ? dob : new Date(String(dob).trim());
                 if (isNaN(birth.getTime())) return true;
+
                 var today = new Date();
                 var age = today.getFullYear() - birth.getFullYear();
                 var m = today.getMonth() - birth.getMonth();
                 if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+
                 return age >= 18;
             }
 
             // Only place that shows the under-18 tooltip. Show only after user opened the picker (never on refresh).
             function setDobTooltipFromSelection(selectedDate) {
+                
+                
                 var $dobError = $('#dob-under-18-error');
                 if (selectedDate == null) {
                     $dobError.addClass('hidden');
