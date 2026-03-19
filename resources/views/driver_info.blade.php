@@ -152,7 +152,7 @@
                     </div>
                 </div>
             @else
-                <h3 class="mb-0 text-2xl xl:text-3xl mt-8">{{ optional($driverPage)->no_reviews_label ?? 'No Reviews Yet' }}</h3>
+                <h3 class="mb-0 text-1xl xl:text-2xl mt-8">{{ optional($driverPage)->no_reviews_label ?? 'No Reviews Yet' }}</h3>
             @endif
 
             <div class="space-y-4 mt-4">
