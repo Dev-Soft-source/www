@@ -517,8 +517,8 @@
                                     @endif
                                 @endif
                             </h3>
-
-                            <div class="flex items-center justify-between p-4 w-full">
+                            <div class="flex items-center justify-between px-4 pt-2 w-full">{{ $rideDetailPage->driver_info_show_label ?? 'Driver details are shared after booking confirmation.' }}</div>
+                            <div class="flex items-center justify-between p-4  pt-1 w-full">
                                 <div class="flex items-center space-x-2">
                                     @if (auth()->user() &&
                                             $ride->bookings &&
