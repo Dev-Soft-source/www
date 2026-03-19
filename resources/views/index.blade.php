@@ -566,19 +566,22 @@
                 @endisset
             </h1>
             <div class="grid sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 mt-4 md:mt-10 gap-6 items-center">
-                <div class="space-y-4">
+                <div class="flex flex-col space-y-4">
                     @if (!empty($rides))
                         @foreach ($rides as $ride)
+                        <a href="{{ route('ride_detail', ['lang'=>app()->getLocale(), 'id'=>$ride->id]) }}" >
                             <x-px.search-card 
-                                    :ride="$ride" 
-                                    :lang="optional($selectedLanguage)->abbreviation" 
-                                    :detail-route="$ride->detail_route ?? 'px.ride_detail'" 
-                                    :detail-query="$ride->detail_query ?? []"
-                                    :show-status="true" 
-                                    :show-driver-info="true" 
-                                    :show-options="true" 
-                                    :show-booking-button="false" 
-                                    :price-minor="$ride->matched_segment_price_minor ?? $ride->price_minor" />
+                                :ride="$ride" 
+                                :lang="optional($selectedLanguage)->abbreviation" 
+                                :detail-route="$ride->detail_route ?? 'px.ride_detail'" 
+                                :detail-query="$ride->detail_query ?? []"
+                                :show-status="true" 
+                                :show-driver-info="true" 
+                                :show-options="true" 
+                                :show-booking-button="false" 
+                                :show-kind-border="false" 
+                                :price-minor="$ride->matched_segment_price_minor ?? $ride->price_minor" />
+                        </a>
                         @endforeach
                     @endif
                 </div>

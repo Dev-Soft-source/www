@@ -308,7 +308,7 @@ class RideController extends Controller
             $lastStopEtaAt = $ride->rideStops->last()?->eta_at;
             $ride->detail->date = $lastStopEtaAt ? Carbon::parse($lastStopEtaAt)->format('F j, Y') : null;
             $ride->detail->time = $lastStopEtaAt ? Carbon::parse($lastStopEtaAt)->format('H:i') : null;
-            View::share('projectToday', "$ride->detail->date");
+            View::share('projectToday', $ride->detail->date);
 
             $ride->intermediate_stops = $ride->rideStops
                 ->filter(function ($stop) use ($originLabel, $destinationLabel) {
