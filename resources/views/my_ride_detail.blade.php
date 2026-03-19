@@ -594,10 +594,10 @@
                         </div>
                         <div class="px-4 mt-4 sm:px-6 flex items-center justify-center gap-2">
                             <button type="button" class="button-exp-fill w-auto" id="closeModal">
-                                {{ $message->popup_close_btn_text ?? 'Close' }}
+                                {{ $siteText['close_btn_text'] ?? 'Close' }}
                             </button>
                             <button type="submit" class="button-exp-fill w-auto">
-                                {{ $message->popup_submit_btn_text ?? 'Submit' }}
+                                {{ $siteText['submit_btn_text'] ?? 'Submit' }}
                             </button>
                         </div>
                     </div>

@@ -640,7 +640,7 @@ class MyRideController extends Controller
                     }
                 }
                 
-                return redirect()->route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id])->with(['success' => $message->secured_cash_success_message ?? "Code submitted and the booking price has been released back to the passenger. Now, get your payment in cash from them"]);
+                return redirect()->route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id])->with(['success' => $this->successMessage->secured_cash_success_message ?? "Code submitted and the booking price has been released back to the passenger. Now, get your payment in cash from them"]);
             } else {
 
                 if($booking->secured_cash_attempt_count < $siteSetting->secured_cash_attempt){
@@ -648,14 +648,14 @@ class MyRideController extends Controller
                     $count = $count + 1;
                     $booking->secured_cash_attempt_count = $count;
                     $booking->save();
-                    $messageData = $message->incorrect_code_message;
+                    $messageData = $this->successMessage->incorrect_code_message;
                 }else{
-                   $messageData = $message->too_many_secured_cash_attempt_message;
+                   $messageData = $this->successMessage->too_many_secured_cash_attempt_message;
                 }
             }
             return redirect()->route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id])->with(['message' => $messageData, 'secured_cash_attempt_count' => $booking->secured_cash_attempt_count]);
         }
-        return $message->general_error_message ?? 'Booking not found';
+        return $this->successMessage->general_error_message ?? 'Booking not found';
     }
 
     public function MyPassengers(Request $request, $lang = null)

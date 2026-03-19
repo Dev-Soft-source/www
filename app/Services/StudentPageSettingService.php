@@ -25,6 +25,14 @@ class StudentPageSettingService
                 $errorMessages = array_merge($errorMessages, ['page_image.page_image_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['page_description.page_description_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['page_description.page_description_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['success_upload_card_label.success_upload_card_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['success_upload_card_label.success_upload_card_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['success_upload_card_title.success_upload_card_title_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['success_upload_card_title.success_upload_card_title_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['different_copy_label.different_copy_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['different_copy_label.different_copy_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['expire_student_card_label.expire_student_card_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['expire_student_card_label.expire_student_card_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
             }
         }
         return ['validation_rules' => $validationRule, 'error_messages' => $errorMessages, 'nice_names' => $niceNames];
@@ -42,6 +50,10 @@ class StudentPageSettingService
             'sub_heading' => $this->data($request, $language, 'sub_heading'),
             'page_image' => $this->data($request, $language, 'page_image'),
             'page_description' => $this->data($request, $language, 'page_description'),
+            'success_upload_card_label' => $this->data($request, $language, 'success_upload_card_label'),
+            'success_upload_card_title' => $this->data($request, $language, 'success_upload_card_title'),
+            'different_copy_label' => $this->data($request, $language, 'different_copy_label'),
+            'expire_student_card_label' => $this->data($request, $language, 'expire_student_card_label'),
         ];
     }
 

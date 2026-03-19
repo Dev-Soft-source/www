@@ -25,6 +25,10 @@ class StudentPageSettingDetailResource extends JsonResource
             'sub_heading' => $this->sub_heading,
             'page_image' => $this->page_image,
             'page_description' => $this->page_description,
+            'success_upload_card_label' => $this->success_upload_card_label,
+            'success_upload_card_title' => $this->success_upload_card_title,
+            'different_copy_label' => $this->different_copy_label,
+            'expire_student_card_label' => $this->expire_student_card_label,
             'student_page_setting' => new StudentPageSettingResource($this->whenLoaded('studentPageSetting')),
             'language' => new LanguageResource($this->whenLoaded('language')),
         ];

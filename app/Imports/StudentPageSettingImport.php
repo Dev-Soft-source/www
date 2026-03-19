@@ -24,7 +24,7 @@ class StudentPageSettingImport implements ToCollection, WithHeadingRow, WithVali
     protected function fields(): array
     {
         return [
-            'name','meta_keywords','meta_description','main_heading','sub_heading','page_description'
+            'name','meta_keywords','meta_description','main_heading','sub_heading','page_description','success_upload_card_label','success_upload_card_title','different_copy_label','expire_student_card_label'
         ];
     }
 
