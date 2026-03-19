@@ -197,10 +197,7 @@
                     @endisset
                 </h1>
             </div>
-            {{-- @if ($user->student == 2)
-        <div class="mt-4 rounded-lg px-6 py-3 bg-red-100 text-gray-600" role="alert">
-                Your student card is under review. You can update it anytime if needed.
-            </div> --}}
+
             @if ($user->student == 1 && \Carbon\Carbon::parse($user->student_card_exp_date) > now())
                 <div id="student-approved-celebration"
                     class="mt-4 relative overflow-hidden rounded-xl px-6 py-6 student-approved-card bg-gradient-to-r from-emerald-50 via-green-50 to-teal-50 border-2 border-emerald-200"
@@ -312,21 +309,21 @@
                             @endisset
                         </label>
                         <div class="flex gap-4 items-center mt-2 justify-center">
+                            <div class="relative w-24">
+                                <input type="text" id="yearInput" name="year" placeholder="Year" readonly
+                                onchange="changefield();"
+                                class="border p-2 w-full bg-gray-50 rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 cursor-pointer">
+                                <div id="yearDropdown"
+                                class="absolute z-10 w-full py-2 px-4 hidden bg-white rounded-md shadow-lg cursor-pointer">
+                                <!-- Dropdown content will be dynamically generated here -->
+                                </div>
+                            </div>
                             <div class="relative w-40">
                                 <input type="text" id="monthInput" name="month" placeholder="Month" readonly
                                     onchange="changefield();"
                                     class="border p-2 w-full bg-gray-50 rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 cursor-pointer">
                                 <div id="monthDropdown"
                                     class="absolute z-10 hidden bg-white rounded-md py-2 px-4 w-full shadow-lg cursor-pointer">
-                                    <!-- Dropdown content will be dynamically generated here -->
-                                </div>
-                            </div>
-                            <div class="relative w-24">
-                                <input type="text" id="yearInput" name="year" placeholder="Year" readonly
-                                    onchange="changefield();"
-                                    class="border p-2 w-full bg-gray-50 rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 cursor-pointer">
-                                <div id="yearDropdown"
-                                    class="absolute z-10 w-full py-2 px-4 hidden bg-white rounded-md shadow-lg cursor-pointer">
                                     <!-- Dropdown content will be dynamically generated here -->
                                 </div>
                             </div>
@@ -535,7 +532,7 @@
 
         const years = Array.from({
             length: 5
-        }, (_, i) => currentYear + i + 1); // Start from next year, add 5 years (currentYear+1 to currentYear+5)
+        }, (_, i) => currentYear + i); // Start from next year, add 5 years (currentYear+1 to currentYear+5)
 
         // Update the month dropdown dynamically
         function updateMonthsDropdown() {
