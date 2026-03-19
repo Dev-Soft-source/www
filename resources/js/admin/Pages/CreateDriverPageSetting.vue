@@ -446,6 +446,12 @@
                                         </div>
                                         <div class="relative z-0 w-full group">
                                             <div class="flex justify-between">
+                                                <label :for="`no_reviews_label_${activeLanguageId}`">No reviews label</label>
+                                            </div>
+                                            <input type="text" :name="`no_reviews_label_${activeLanguageId}`" :id="`no_reviews_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. No Reviews Yet" :value="getCurrentValue('no_reviews_label')" @input="handleInput($event.target.value, language, 'no_reviews_label')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div class="flex justify-between">
                                                 <label :for="`see_all_reviews_btn_${activeLanguageId}`">See all reviews button</label>
                                             </div>
                                             <input type="text" :name="`see_all_reviews_btn_${activeLanguageId}`" :id="`see_all_reviews_btn_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. See all reviews" :value="getCurrentValue('see_all_reviews_btn')" @input="handleInput($event.target.value, language, 'see_all_reviews_btn')" />
@@ -558,6 +564,7 @@ export default {
                             this.handleInput("", language, "km_shared_label");
                             this.handleInput("", language, "vehicle_info_heading");
                             this.handleInput("", language, "reviews_heading");
+                            this.handleInput("", language, "no_reviews_label");
                             this.handleInput("", language, "see_all_reviews_btn");
                         });
                         this.fetchDriverPageSetting();
@@ -611,6 +618,7 @@ export default {
                             this.handleInput(setting?.km_shared_label, setting?.language, "km_shared_label");
                             this.handleInput(setting?.vehicle_info_heading, setting?.language, "vehicle_info_heading");
                             this.handleInput(setting?.reviews_heading, setting?.language, "reviews_heading");
+                            this.handleInput(setting?.no_reviews_label, setting?.language, "no_reviews_label");
                             this.handleInput(setting?.see_all_reviews_btn, setting?.language, "see_all_reviews_btn");
                         });
                     }

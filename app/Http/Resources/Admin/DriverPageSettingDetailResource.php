@@ -33,6 +33,7 @@ class DriverPageSettingDetailResource extends JsonResource
             'km_shared_label' => $this->km_shared_label,
             'vehicle_info_heading' => $this->vehicle_info_heading,
             'reviews_heading' => $this->reviews_heading,
+            'no_reviews_label' => $this->no_reviews_label,
             'see_all_reviews_btn' => $this->see_all_reviews_btn,
             'language' => $this->when($this->relationLoaded('language'), function() {
                 return [
