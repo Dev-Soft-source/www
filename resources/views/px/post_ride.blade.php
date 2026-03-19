@@ -968,21 +968,24 @@
                         <div id="pink-ride-disclaimer"
                             class="bg-white border-t border-gray-200 {{ $pinkRideChecked ? '' : 'hidden' }}">
                             <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
-                                5. I understand that this is a Pink Ride, exclusive to female members. I will not send a
-                                male driver in my place and will not accept any male passengers over 12 years old, even if
-                                the booking is made by a female.
-                            </p>
+                                    {{ $postRidePage->pink_ride_disclaimer_text ?? 'I understand that this is a Pink Ride, exclusive to female members. I will not send a male driver in my place and will not accept any male passengers over 12 years old, even if the booking is made by a female.' }}
+                                    <!-- 5. I understand that this is a Pink Ride, exclusive to female members. I will not send a
+                                    male driver in my place and will not accept any male passengers over 12 years old, even if
+                                    the booking is made by a female. -->
+                                </p>
                         </div>
                         {{-- if extra_care_rides checked --}}
                         <div id="extra-care-ride-disclaimer"
                             class="bg-white border-t border-gray-200 {{ $extraCareRideChecked ? '' : 'hidden' }}">
                             <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
-                                <span id="extra-care-disclaimer-number">{{ $pinkRideChecked ? '6.' : '5.' }}</span>
-                                I understand that this is an Extra+ Ride, exclusively for members with top-tier review
-                                ratings. I commit to upholding the exceptional professionalism and courtesy that earned me
-                                this rating, keeping my vehicle immaculate, driving safely and smoothly as always, and
-                                ensuring a calm, respectful environment by preventing any passenger disputes.
-                            </p>
+                                    
+                                    <span id="extra-care-disclaimer-number">{{ $pinkRideChecked ? '6.' : '5.' }}</span>
+                                    {{ $postRidePage->extra_care_ride_disclaimer_text ?? 'I understand that this is an Extra+ Ride, exclusive to members with highest review score. I will adhere to its standards' }}
+                                    <!-- I understand that this is an Extra+ Ride, exclusively for members with top-tier review
+                                    ratings. I commit to upholding the exceptional professionalism and courtesy that earned me
+                                    this rating, keeping my vehicle immaculate, driving safely and smoothly as always, and
+                                    ensuring a calm, respectful environment by preventing any passenger disputes. -->
+                                </p>
                         </div>
                     </div>
                 </section>
