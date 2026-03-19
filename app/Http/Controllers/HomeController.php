@@ -344,11 +344,12 @@ class HomeController extends Controller
     public function coffeeOnWallStore(Request $request)
     {
         // Validate the form data
+        $displayName = $request->anonymous ? true : false; // Checkbox meaning: "display my name"
         $validatedData = $request->validate([
             'package' => $request->custom_amount ? 'nullable' : 'required',
             'custom_amount' => $request->package == 'custom' ? 'required' : 'nullable',
-            'name' => $request->anonymous ? 'nullable' : 'required',
-            'email' => $request->anonymous ? 'nullable|email' : 'required|email',
+            'name' => $displayName ? 'required' : 'nullable',
+            'email' => $request->notify_coffee_used ? 'required|email' : 'nullable|email',
             'payment_method' => 'required|in:stripe,paypal',
             'donation_acknowledgment' => 'required',
             'terms_privacy' => 'required',
@@ -533,8 +534,8 @@ class HomeController extends Controller
                 ]);
 
                 $stripeCustomer = Customer::create([
-                    'name' => $request->name,
-                    'email' => $request->email,
+                    'name' => $displayName ? ($request->name ?? 'Anonymous Donor') : 'Anonymous Donor',
+                    'email' => $request->email ?? (auth()->user()?->email ?? null),
                 ]);
 
                 $stripe_customer_id = $stripeCustomer->id;
@@ -614,13 +615,25 @@ class HomeController extends Controller
                     'plan_id' => $planId, // Replace with your actual plan ID
                     'subscriber' => [
                         'name' => [
-                            'given_name' => $request->name,
+                            'given_name' => $displayName ? ($request->name ?? '') : 'Anonymous Donor',
                             'surname' => '',
                         ],
-                        'email_address' => $request->email,
+                        'email_address' => $request->email ?? (auth()->user()?->email ?? ''),
                     ],
                     'application_context' => [
-                        'return_url' => route('paypal.subscription.success', ['name' => $request->name, 'email' => $request->email, 'package_id' => $package->id, 'phone' => $request->phone ?? null, 'anonymous' => $request->anonymous ?? null, 'designation' => is_array($request->designation) ? implode(', ', $request->designation) : ($request->designation ?? null), 'frequency' => $request->frequency ?? null]),
+                        'return_url' => route('paypal.subscription.success', [
+                            'name' => $request->name,
+                            'email' => $request->email,
+                            'package_id' => $package->id,
+                            'phone' => $request->phone ?? null,
+                            // This query param means: "display name checkbox state"
+                            'anonymous' => $request->anonymous ?? null,
+                            'notify_coffee_used' => $request->notify_coffee_used ? 1 : 0,
+                            'donation_acknowledgment' => $request->donation_acknowledgment ? 1 : 0,
+                            'terms_privacy' => $request->terms_privacy ? 1 : 0,
+                            'designation' => is_array($request->designation) ? implode(', ', $request->designation) : ($request->designation ?? null),
+                            'frequency' => $request->frequency ?? null,
+                        ]),
                         'cancel_url' => route('paypal.cancel')
                     ],
                 ];
@@ -684,10 +697,11 @@ class HomeController extends Controller
 
             $coffeeWallet =  CoffeeWallet::create([
                 'user_id' => auth()->id(),
-                'name' => $request->name,
+                'name' => $displayName ? $request->name : null,
                 'email' => $request->email,
                 'phone' => $request->phone,
-                'anonymous' => $request->anonymous ? $request->anonymous : 0,
+                // DB column means: anonymous donor
+                'anonymous' => $displayName ? 0 : 1,
                 'designation' => $designation,
                 'notify_coffee_used' => $request->notify_coffee_used ? true : false,
                 'donation_acknowledgment' => $request->donation_acknowledgment ? true : false,
@@ -701,8 +715,9 @@ class HomeController extends Controller
                 'payment_method' => $package_price > 0 ? $request->payment_method : null,
                 'status' => 'completed',
             ]);
-            $user = auth()->user() ?? User::where('email', $request->email)->first();
-            $fullName = $user ? $user->first_name . ' ' . $user->last_name : ($request->name ?? 'Anonymous Donor');
+            $user = auth()->user() ?? ($request->email ? User::where('email', $request->email)->first() : null);
+            $fullNameFromUser = $user ? $user->first_name . ' ' . $user->last_name : ($request->name ?? 'Anonymous Donor');
+            $fullName = $displayName ? $fullNameFromUser : 'Anonymous Donor';
             $data = [
                 // 'full_name' => $request->name ?? 'Anonymous Donor',
                 'full_name' => $fullName,
@@ -730,8 +745,8 @@ class HomeController extends Controller
             $admin = Admin::first();
             if ($admin && $admin->admin_email) {
                 $adminData = [
-                    'donor_name' => $request->anonymous ? 'Anonymous Donor' : $fullName,
-                    'donor_email' => $request->anonymous ? null : $request->email,
+                    'donor_name' => $fullName,
+                    'donor_email' => $request->notify_coffee_used ? $request->email : null,
                     'amount' => $package_price,
                     'transaction_id' => $coffeeWallet->random_id,
                     'transaction_date' => Carbon::now()->format('F j, Y \a\t H:i \E\S\T'),
@@ -772,15 +787,17 @@ class HomeController extends Controller
         $name = isset($_GET['name']) ? $_GET['name'] : null;
         $email = isset($_GET['email']) ? $_GET['email'] : null;
         $phone = isset($_GET['phone']) ? $_GET['phone'] : null;
-        $anonymous = isset($_GET['anonymous']) ? $_GET['anonymous'] : 0;
+        // Here `anonymous` query param means: "display name checkbox state"
+        $displayName = isset($_GET['anonymous']) ? ($_GET['anonymous'] ? true : false) : false;
         $designation = isset($_GET['designation']) ? $_GET['designation'] : null;
         $frequency = isset($_GET['frequency']) ? $_GET['frequency'] : null;
 
         $coffeeWallet = CoffeeWallet::create([
-            'name' => $name,
+            'name' => $displayName ? $name : null,
             'email' => $email,
             'phone' => $phone,
-            'anonymous' => $anonymous,
+            // DB column means: anonymous donor?
+            'anonymous' => $displayName ? 0 : 1,
             'designation' => $designation,
             'notify_coffee_used' => isset($_GET['notify_coffee_used']) ? ($_GET['notify_coffee_used'] ? true : false) : false,
             'donation_acknowledgment' => isset($_GET['donation_acknowledgment']) ? ($_GET['donation_acknowledgment'] ? true : false) : false,
@@ -794,10 +811,11 @@ class HomeController extends Controller
             'payment_method' => 'paypal',
             'status' => 'completed',
         ]);
-        $user = User::where('email', $email)->first();
-        $fullName = $user
+        $user = $email ? User::where('email', $email)->first() : null;
+        $fullNameFromUser = $user
             ? $user->first_name . ' ' . $user->last_name
             : ($name ?? 'Anonymous Donor');
+        $fullName = $displayName ? $fullNameFromUser : 'Anonymous Donor';
 
         $data = [
             'full_name' => $fullName,

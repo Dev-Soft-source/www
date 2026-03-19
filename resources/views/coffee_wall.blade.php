@@ -196,7 +196,6 @@
                                     <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
                                         <div class="mb-1 mt-9 bg-primary text-white py-2 px-4 rounded col-span-2">
                                             <h3 class=" text-2xl">{{ $coffeeWallPage->contact_infomation_label }}
-                                                <span class="text-white">*</span>
                                             </h3>
                                         </div>
                                         <div class="w-full mt-4">
@@ -206,13 +205,13 @@
                                                         id="anonymous" {{ old('anonymous') == '1' ? 'checked' : '' }}
                                                         class="h-5 w-5">
                                                     <span
-                                                        class="text-base md:text-lg">{{ $coffeeWallPage->annually_label ?? 'Make donation anonymous' }}</span>
+                                                        class="text-base md:text-lg">{{ $coffeeWallPage->annually_label ?? 'Display my name with this donation' }}</span>
                                                 </div>
                                             </label>
                                         </div>
                                     </div>
                                     <div id="name_field"
-                                        class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
+                                        class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 {{ old('anonymous') == '1' ? '' : 'hidden' }}">
                                         <div class="w-full mt-1">
                                             <label for="name" class="flex items-center justify-between w-full mb-1">
                                                 <div class="flex items-center gap-1 w-full">
@@ -224,43 +223,16 @@
                                             </label>
                                             <input type="text" id="name" name="name"
                                                 value="{{ old('name') }}"
+                                                {{ old('anonymous') == '1' ? 'required' : '' }}
+                                                {{ old('anonymous') == '1' ? '' : 'disabled' }}
                                                 class=" block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('name') ? 'border-red-500' : '' }}">
                                             @error('name')
                                                 <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
-                                    <div id="email_field"
-                                        class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
-                                        <div class="mt-1">
-                                            <label for="email">
-                                                @isset($coffeeWallPage->email_label)
-                                                    {!! $coffeeWallPage->email_label !!}
-                                                @endisset
-                                                <span class="text-red-500">*</span>
-                                            </label>
-                                            <input type="text" name="email" value="{{ old('email') }}"
-                                                class=" block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('email') ? 'border-red-500' : '' }}">
-                                            @error('email')
-                                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                    <div id="phone_field"
-                                        class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
-                                        <div class="mt-1">
-                                            <label for="phone">
-                                                @isset($coffeeWallPage->phone_label)
-                                                    {!! $coffeeWallPage->phone_label !!}
-                                                @endisset
-                                            </label>
-                                            <input type="text" name="phone" value="{{ old('phone') }}"
-                                                class=" block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('phone') ? 'border-red-500' : '' }}">
-                                            @error('phone')
-                                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
+                                    {{-- Phone field hidden as requested --}}
+                                    <div id="phone_field" class="hidden"></div>
                                     <div id="notify_field"
                                         class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
                                         <div class="mt-4">
@@ -283,6 +255,24 @@
                                                         d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
                                                 </svg>
                                             </label>
+                                        </div>
+                                    </div>
+                                    <div id="email_field"
+                                        class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 {{ old('notify_coffee_used') == '1' ? '' : 'hidden' }}">
+                                        <div class="mt-1">
+                                            <label for="email">
+                                                @isset($coffeeWallPage->email_label)
+                                                    {!! $coffeeWallPage->email_label !!}
+                                                @endisset
+                                                <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="text" id="email" name="email" value="{{ old('email') }}"
+                                                {{ old('notify_coffee_used') == '1' ? 'required' : '' }}
+                                                {{ old('notify_coffee_used') == '1' ? '' : 'disabled' }}
+                                                class=" block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('email') ? 'border-red-500' : '' }}">
+                                            @error('email')
+                                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                            @enderror
                                         </div>
                                     </div>
                                     <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
@@ -571,6 +561,9 @@
             const emailField = document.getElementById('email_field');
             const phoneField = document.getElementById('phone_field');
             const notifyField = document.getElementById('notify_field');
+            const notifyCheckbox = document.getElementById('notify_coffee_used');
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
             let stripe = null;
             let cardElement = null;
 
@@ -627,13 +620,98 @@
                 customAmountField.classList.toggle('border-blue-500', customAmountField.value.trim() === '');
             }
 
-            function syncAnonymousFields() {
-                const hidden = !!anonymousCheckbox?.checked;
-                [nameField, emailField, phoneField, notifyField].forEach((field) => {
-                    if (field) {
-                        field.classList.toggle('hidden', hidden);
-                    }
+            function slideUp(el, duration = 250) {
+                if (!el || window.getComputedStyle(el).display === 'none') return;
+                el.style.transitionProperty = 'height, opacity';
+                el.style.transitionDuration = `${duration}ms`;
+                el.style.height = `${el.offsetHeight}px`;
+                el.style.overflow = 'hidden';
+                el.style.opacity = '1';
+                // Ensure next frame for transition
+                requestAnimationFrame(() => {
+                    el.style.height = '0px';
+                    el.style.opacity = '0';
                 });
+                window.setTimeout(() => {
+                    el.style.display = 'none';
+                    el.classList.add('hidden');
+                    el.style.removeProperty('height');
+                    el.style.removeProperty('overflow');
+                    el.style.removeProperty('opacity');
+                    el.style.removeProperty('transition-duration');
+                    el.style.removeProperty('transition-property');
+                }, duration);
+            }
+
+            function slideDown(el, duration = 250, display = 'grid') {
+                if (!el || window.getComputedStyle(el).display !== 'none') return;
+                el.style.transitionProperty = 'height, opacity';
+                el.style.transitionDuration = `${duration}ms`;
+                el.classList.remove('hidden');
+                el.style.display = display;
+                el.style.height = '0px';
+                el.style.overflow = 'hidden';
+                el.style.opacity = '0';
+                requestAnimationFrame(() => {
+                    el.style.height = `${el.scrollHeight}px`;
+                    el.style.opacity = '1';
+                });
+                window.setTimeout(() => {
+                    el.style.removeProperty('height');
+                    el.style.removeProperty('overflow');
+                    el.style.removeProperty('opacity');
+                    el.style.removeProperty('transition-duration');
+                    el.style.removeProperty('transition-property');
+                }, duration);
+            }
+
+            function syncDisplayNameFields() {
+                const showNameAndPhone = !!anonymousCheckbox?.checked;
+                if (nameField) {
+                    if (showNameAndPhone) {
+                        nameField.classList.remove('hidden');
+                        slideDown(nameField, 250, 'grid');
+                        if (nameInput) {
+                            nameInput.disabled = false;
+                            nameInput.required = true;
+                        }
+                    } else {
+                        slideUp(nameField, 200);
+                        if (nameInput) {
+                            nameInput.disabled = true;
+                            nameInput.required = false;
+                        }
+                    }
+                }
+
+                if (phoneField) {
+                    if (showNameAndPhone) {
+                        phoneField.classList.remove('hidden');
+                        slideDown(phoneField, 250, 'grid');
+                    } else {
+                        slideUp(phoneField, 200);
+                    }
+                }
+            }
+
+            function syncNotifyEmailField() {
+                const showEmail = !!notifyCheckbox?.checked;
+                if (emailField) {
+                    if (showEmail) {
+                        emailField.classList.remove('hidden');
+                        slideDown(emailField, 250, 'grid');
+                        if (emailInput) {
+                            emailInput.disabled = false;
+                            emailInput.required = true;
+                        }
+                    } else {
+                        slideUp(emailField, 200);
+                        if (emailInput) {
+                            emailInput.disabled = true;
+                            emailInput.required = false;
+                        }
+                    }
+                }
             }
 
             function ensureStripe() {
@@ -737,7 +815,8 @@
                 radio?.addEventListener('change', togglePaymentSection);
             });
 
-            anonymousCheckbox?.addEventListener('change', syncAnonymousFields);
+            anonymousCheckbox?.addEventListener('change', syncDisplayNameFields);
+            notifyCheckbox?.addEventListener('change', syncNotifyEmailField);
 
 
 
@@ -829,7 +908,8 @@
             updateFrequencyStyles();
             updateDesignationStyles();
             updateCustomAmountStyle();
-            syncAnonymousFields();
+            syncDisplayNameFields();
+            syncNotifyEmailField();
             togglePaymentSection();
         });
     </script>
