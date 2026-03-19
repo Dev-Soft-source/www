@@ -116,7 +116,24 @@ class ReviewController extends Controller
         
         $rating = Rating::whereId($id)->first();
 
-        return view('passenger_review_left',['rating' => $rating]);
+        $languages = Language::all();
+        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
+            session(['selectedLanguage' => $lang]);
+        }
+        $selectedLanguage = session('selectedLanguage');
+        $selectedLanguage = $selectedLanguage
+            ? Language::where('abbreviation', $selectedLanguage)->first()
+            : Language::where('is_default', 1)->first();
+
+        $defaultLang = Language::where('is_default', 1)->first();
+        $myReviewPage = ($selectedLanguage && $defaultLang)
+            ? MyReviewSettingDetail::getByLanguageWithFallback($selectedLanguage->id, $defaultLang->id)
+            : null;
+
+        return view('passenger_review_left', [
+            'rating' => $rating,
+            'myReviewPage' => $myReviewPage,
+        ]);
     }
 
     public function ReviewPassenger($lang, $id){
@@ -673,6 +690,9 @@ class ReviewController extends Controller
         }
 
         $rating = Rating::whereId($id)->first();
+
+        // Validation custom messages (avoid undefined variable usage).
+        $customMessages = [];
         
         $request->validate([
             'reply' => 'required',
