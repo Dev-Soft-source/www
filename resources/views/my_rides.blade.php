@@ -219,7 +219,8 @@
                                                                         class="bg-red-100 text-red-800 text-sm font-medium ml-3 px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">Not
                                                                         live</span>
                                                                 @endif
-                                                                <div class="flex items-center justify-between pb-0 p-4">
+                                                                <div class="grid grid-cols-5 gap-4 p-4 items-start">
+                
                                                                     @php
                                                                         $displayDt = ($defaultDetail->date ?? $ride->date) . ' ' . ($defaultDetail->time ?? $ride->time ?? '00:00');
                                                                         $departureDateTime = formatDepartureDateTime(
@@ -232,21 +233,12 @@
                                                                         $departureTimeLabel =
                                                                             $departureDateTime['timeLabel'];
                                                                     @endphp
-                                                                    <p class="flex items-center space-x-2 font-semibold">
-                                                                        {{ $departureDateLabel }}
-                                                                        {{ $rideDetailPage->at_label }}
-                                                                        {{ $departureTimeLabel ?? 'N/A' }}
-                                                                    </p>
-
-                                                                    <div class="pr-8">
-                                                                        <p class="font-medium">
-                                                                            {{ str_replace(':count', $ride->seats, $rideDetailPage->total_seats_label ?? 'Total :count seats') }}
+                                                                    <div class="col-span-3">
+                                                                        <p class="flex items-center space-x-2 font-semibold">
+                                                                            {{ $departureDateLabel }}
+                                                                            {{ $rideDetailPage->at_label }}
+                                                                            {{ $departureTimeLabel ?? 'N/A' }}
                                                                         </p>
-                                                                    </div>
-                                                                </div>
-                                                                <div
-                                                                    class="flex flex-col md:flex-row justify-between px-4">
-                                                                    <div class="w-full md:w-2/3 order-2 md:order-1">
                                                                         <div class="relative mt-5 text-left">
                                                                             <div class="items-center relative">
                                                                                 <div
@@ -315,15 +307,13 @@
                                                                                     </span>
                                                                                 </div>
                                                                                 <div class="ml-12 md:ml-20 items-baseline">
-                                                                                    <p
-                                                                                        class="font-bold text-xl text-black">
+                                                                                    <p class="font-bold text-xl text-black">
                                                                                         @isset($rideDetailPage->card_section_to_label)
                                                                                             {{ $rideDetailPage->card_section_to_label }}
                                                                                         @endisset
                                                                                     </p>
                                                                                     <div class="flex gap-2">
-                                                                                        <h3
-                                                                                            class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                                                        <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                                                                                             {{ $to }}.
                                                                                         </h3>
                                                                                         <p class="text-sm mt-2">
@@ -335,69 +325,76 @@
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                    <div class="mt-4 order-1 md:order-2">
-                                                                        <p class="text-xl font-semibold text-primary">
-                                                                            ${{ number_format(floatval($ride->detail->price/100), 2) }}
-                                                                            <small>
-                                                                                @isset($rideDetailPage->card_section_per_seat)
-                                                                                    {{ $rideDetailPage->card_section_per_seat }}
-                                                                                @endisset
-                                                                            </small>
-                                                                        </p>
-                                                                        @php
-                                                                            $pendingBookingRequests = $ride->bookings->where(
-                                                                                'status',
-                                                                                0,
-                                                                            );
-                                                                        @endphp
-                                                                        @if ($pendingBookingRequests->isNotEmpty())
-                                                                            <div
-                                                                                class="mt-2 rounded-lg border-2 border-red-400 bg-red-50 px-3 py-2.5 shadow-md animate__animated animate__fadeInDown booking-request-alert">
-                                                                                <div class="flex items-center gap-2">
-                                                                                    <svg class="h-5 w-5 flex-shrink-0 text-red-600"
-                                                                                        xmlns="http://www.w3.org/2000/svg"
-                                                                                        fill="none" viewBox="0 0 24 24"
-                                                                                        stroke-width="2"
-                                                                                        stroke="currentColor">
-                                                                                        <path stroke-linecap="round"
-                                                                                            stroke-linejoin="round"
-                                                                                            d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75v-.7V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5" />
-                                                                                    </svg>
-                                                                                    <p class="font-semibold text-red-700">
-                                                                                        You have
-                                                                                        {{ $pendingBookingRequests->count() }}
-                                                                                        booking request(s).
-                                                                                    </p>
-                                                                                </div>
+                                                                    
+                                                                    <div class="col-span-2 px-4">
+                                                                        <div class="grid justify-end mt-4">
+                                                                            <div class="pr-8">
+                                                                                <p class="font-medium">
+                                                                                    {{ str_replace(':count', $ride->seats, $rideDetailPage->total_seats_label ?? 'Total :count seats') }}
+                                                                                </p>
                                                                             </div>
-                                                                        @endif
+                                                                            <p class="text-xl font-semibold text-primary">
+                                                                                ${{ number_format(floatval($ride->detail->price/100), 2) }}
+                                                                                <small>
+                                                                                    @isset($rideDetailPage->card_section_per_seat)
+                                                                                        {{ $rideDetailPage->card_section_per_seat }}
+                                                                                    @endisset
+                                                                                </small>
+                                                                            </p>
+                                                                            @php
+                                                                                $pendingBookingRequests = $ride->bookings->where(
+                                                                                    'status',
+                                                                                    0,
+                                                                                );
+                                                                            @endphp
+                                                                            @if ($pendingBookingRequests->isNotEmpty())
+                                                                                <div class="mt-2 rounded-lg border-2 border-red-400 bg-red-50 px-3 py-2.5 shadow-md animate__animated animate__fadeInDown booking-request-alert">
+                                                                                    <div class="flex items-center gap-2">
+                                                                                        <svg class="h-5 w-5 flex-shrink-0 text-red-600"
+                                                                                            xmlns="http://www.w3.org/2000/svg"
+                                                                                            fill="none" viewBox="0 0 24 24"
+                                                                                            stroke-width="2"
+                                                                                            stroke="currentColor">
+                                                                                            <path stroke-linecap="round"
+                                                                                                stroke-linejoin="round"
+                                                                                                d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75v-.7V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5" />
+                                                                                        </svg>
+                                                                                        <p class="font-semibold text-red-700">
+                                                                                            You have
+                                                                                            {{ $pendingBookingRequests->count() }}
+                                                                                            booking request(s).
+                                                                                        </p>
+                                                                                    </div>
+                                                                                </div>
+                                                                            @endif
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                                 <div
                                                                     class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
                                                                     <div class="flex items-center justify-between p-4">
                                                                         <p class="font-semibold">
-                                                                            @isset($rideDetailPage->card_section_booked)
-                                                                                {{ $rideDetailPage->card_section_booked }}
+                                                                            @isset($findrideDetailPage->card_section_booked)
+                                                                                {{ $findrideDetailPage->card_section_booked }}
                                                                             @endisset
                                                                         </p>
-                                                                        <p class="">
+                                                                        <p class="font-semibold">
                                                                             {{ $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {
                                                                                     $query->whereNull('deleted_at'); // Exclude soft deleted users
                                                                                 })->sum('seats') }}
-                                                                            @isset($rideDetailPage->card_section_seats)
-                                                                                {{ $rideDetailPage->card_section_seats }}
+                                                                            @isset($findrideDetailPage->card_section_seats)
+                                                                                {{ $findrideDetailPage->card_section_seats }}
                                                                             @endisset
                                                                         </p>
                                                                     </div>
                                                                     <div class="p-4">
                                                                         <div class="flex items-center justify-between">
                                                                             <p class="font-semibold">
-                                                                                @isset($rideDetailPage->card_section_seats_fee)
-                                                                                    {{ $rideDetailPage->card_section_seats_fee }}
+                                                                                @isset($findrideDetailPage->card_section_seats_fee)
+                                                                                    {{ $findrideDetailPage->card_section_seats_fee }}
                                                                                 @endisset
                                                                                 : </p>
-                                                                            <p class="">
+                                                                            <p class="font-semibold">
 
                                                                                 ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') * floatval($ride->detail->price)),2) }}
                                                                             </p>
@@ -405,22 +402,22 @@
 
                                                                         <div class="flex items-center justify-between">
                                                                             <p class="font-semibold">
-                                                                                @isset($rideDetailPage->card_section_booking_fee)
-                                                                                    {{ $rideDetailPage->card_section_booking_fee }}
+                                                                                @isset($findrideDetailPage->card_section_booking_fee)
+                                                                                    {{ $findrideDetailPage->card_section_booking_fee }}
                                                                                 @endisset
                                                                                 : </p>
-                                                                            <p class="">
+                                                                            <p class="font-semibold">
                                                                                 ${{ number_format(floatval($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')), 2) }}
                                                                             </p>
                                                                         </div>
 
                                                                         <div class="flex items-center justify-between">
                                                                             <p class="font-semibold">
-                                                                                @isset($rideDetailPage->card_section_amount)
-                                                                                    {{ $rideDetailPage->card_section_amount }}
+                                                                                @isset($findrideDetailPage->card_section_amount)
+                                                                                    {{ $findrideDetailPage->card_section_amount }}
                                                                                 @endisset
                                                                                 : </p>
-                                                                            <p class="">
+                                                                            <p class="font-semibold">
                                                                                 ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') *floatval($ride->detail->price) +$ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')),2) }}
                                                                             </p>
                                                                         </div>

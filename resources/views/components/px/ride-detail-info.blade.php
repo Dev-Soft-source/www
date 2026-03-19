@@ -114,7 +114,7 @@
     </div>
 
     <div class="bg-white rounded-lg overflow-hidden shadow-3xl mt-4">
-        <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl font-FuturaMdCnBT">
+        <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl">
             {{ $rideDetailPage->ride_features_label ?? 'Ride Preferences' }}
         </h3>
         <div class="bg-white p-4 space-y-3">

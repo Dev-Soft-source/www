@@ -593,6 +593,18 @@ class BookingController extends Controller
 
         $request->validate($rules);
 
+        // If this passenger already has an active booking for the same `ride_id`,
+        // update it (instead of creating a duplicate) using the existing update flow.
+        $existingBooking = Booking::where('ride_id', $id)
+            ->where('user_id', $user->id)
+            ->whereIn('status', [Booking::STATUS_REQUESTED, Booking::STATUS_BOOKED])
+            ->latest('id')
+            ->first();
+
+        $hasExistingBooking = (bool) $existingBooking;
+        // Reuse the existing booking instead of creating a new one.
+        $booking = $hasExistingBooking ? $existingBooking : null;
+
         // ProximaLocal: no booking fee on rides under $15 per seat
         $pricePerSeat = (float) ($ride->detail?->price ?? 0) / 100;
         if ($pricePerSeat < 15) {
@@ -607,6 +619,10 @@ class BookingController extends Controller
         $errorMsg = $this->successMessage;
 
         $seatsBooked = $bookings->sum('seats') + $request->seats;
+        // If we are reusing the existing booking, subtract its current seats to avoid double counting.
+        if ($hasExistingBooking) {
+            $seatsBooked -= (int) ($existingBooking->seats ?? 0);
+        }
         if ($seatsBooked > $ride->seats) {
             return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->detail->departure, 'to' => $ride->detail->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $errorMsg->seat_unavailable_message]);
         }
@@ -926,25 +942,60 @@ class BookingController extends Controller
                     $bookingType = (string) ($request->type ?? $ride->booking_type ?? 'standard');
                     $bookingType = substr($bookingType, 0, 50); // Limit to 50 characters to prevent truncation errors
                     
-                    $booking = Booking::create([
-                        'user_id' => $user->id,
-                        'ride_id' => $id,
-                        'seats' => $request->seats,
-                        'type' => $bookingType,
-                        'booked_on' => $currentTime,
-                        'booking_credit' => $request->booking_credit,
-                        'fare' => $request->seats_amount,
-                        'tax_amount' => $taxAmt,
-                        'secured_cash' => $secured_cash,
-                        'secured_cash_code' => $secured_cash_code,
-                        'expires_at' => $expiryTime,
-                        'departure' => (string)$ride->detail->departure,
-                        'destination' => (string)$ride->detail->destination,
-                        'price' => $ride->detail->price,
-                        'ride_detail_id' => $ride->detail->id
-                    ]);
+                    if ($hasExistingBooking) {
+                        // Update existing booking (instead of creating a duplicate).
+                        $booking->update([
+                            'seats' => $request->seats,
+                            'booking_credit' => $request->booking_credit,
+                            'fare' => $request->seats_amount,
+                            'tax_amount' => $taxAmt,
+                            // Keep the remaining fields in sync for downstream notifications and expiry.
+                            'type' => $bookingType,
+                            'booked_on' => $currentTime,
+                            'secured_cash' => $secured_cash,
+                            'secured_cash_code' => $secured_cash_code,
+                            'expires_at' => $expiryTime,
+                            'departure' => (string) $ride->detail->departure,
+                            'destination' => (string) $ride->detail->destination,
+                            'price' => $ride->detail->price,
+                            'ride_detail_id' => $ride->detail->id,
+                        ]);
+                    } else {
+                        $booking = Booking::create([
+                            'user_id' => $user->id,
+                            'ride_id' => $id,
+                            'seats' => $request->seats,
+                            'type' => $bookingType,
+                            'booked_on' => $currentTime,
+                            'booking_credit' => $request->booking_credit,
+                            'fare' => $request->seats_amount,
+                            'tax_amount' => $taxAmt,
+                            'secured_cash' => $secured_cash,
+                            'secured_cash_code' => $secured_cash_code,
+                            'expires_at' => $expiryTime,
+                            'departure' => (string) $ride->detail->departure,
+                            'destination' => (string) $ride->detail->destination,
+                            'price' => $ride->detail->price,
+                            'ride_detail_id' => $ride->detail->id,
+                        ]);
+                    }
 
                     $ids = $request->seats_id;
+                    // If we are reusing the booking and seats changed, release the old booked seats
+                    // that are not in the newly selected list.
+                    if ($hasExistingBooking) {
+                        $newSeatIds = is_array($ids) ? $ids : (array) $ids;
+                        if (!empty($newSeatIds)) {
+                            SeatDetail::where('booking_id', $booking->id)
+                                ->where('status', 'booked')
+                                ->whereNotIn('id', $newSeatIds)
+                                ->update([
+                                    'status' => 'pending',
+                                    'booking_id' => null,
+                                    'user_id' => null,
+                                ]);
+                        }
+                    }
                     $getSeatDetails = SeatDetail::whereIn('id', $ids)->get();
                     if (isset($getSeatDetails) && !empty($getSeatDetails)) {
                         foreach ($getSeatDetails as $key => $getSeatDetail) {
@@ -1171,28 +1222,59 @@ class BookingController extends Controller
         $bookingType = substr($bookingType, 0, 50); // Limit to 50 characters to prevent truncation errors
 
         // Payment successful, handle booking logic here
-        $booking = Booking::create([
-            'user_id' => $user->id,
-            'ride_id' => $ride->id,
-            'seats' => $request->seats,
-            'type' => $bookingType,
-            'booked_on' => $currentTime,
-            'booking_credit' => $request->booking_credit,
-            'fare' => $request->seats_amount,
-            'secured_cash' => $secured_cash,
-            'tax_amount' => $taxAmt,
-            'secured_cash_code' => $secured_cash_code,
-            'expires_at' => $expiryTime,
-            'departure' => $ride->detail->departure,
-            'destination' => $ride->detail->destination,
-            'price' => $ride->detail->price,
-            'ride_detail_id' => $ride->detail->id
-
-        ]);
+        if ($hasExistingBooking) {
+            // Update existing booking (no duplicate Booking::create()).
+            $booking->update([
+                'seats' => $request->seats,
+                'booking_credit' => $request->booking_credit,
+                'fare' => $request->seats_amount,
+                'tax_amount' => $taxAmt,
+                'type' => $bookingType,
+                'booked_on' => $currentTime,
+                'secured_cash' => $secured_cash,
+                'secured_cash_code' => $secured_cash_code,
+                'expires_at' => $expiryTime,
+                'departure' => $ride->detail->departure,
+                'destination' => $ride->detail->destination,
+                'price' => $ride->detail->price,
+                'ride_detail_id' => $ride->detail->id,
+            ]);
+        } else {
+            $booking = Booking::create([
+                'user_id' => $user->id,
+                'ride_id' => $ride->id,
+                'seats' => $request->seats,
+                'type' => $bookingType,
+                'booked_on' => $currentTime,
+                'booking_credit' => $request->booking_credit,
+                'fare' => $request->seats_amount,
+                'secured_cash' => $secured_cash,
+                'tax_amount' => $taxAmt,
+                'secured_cash_code' => $secured_cash_code,
+                'expires_at' => $expiryTime,
+                'departure' => $ride->detail->departure,
+                'destination' => $ride->detail->destination,
+                'price' => $ride->detail->price,
+                'ride_detail_id' => $ride->detail->id,
+            ]);
+        }
 
 
 
         $ids = $request->seats_id;
+        if ($hasExistingBooking) {
+            $newSeatIds = is_array($ids) ? $ids : (array) $ids;
+            if (!empty($newSeatIds)) {
+                SeatDetail::where('booking_id', $booking->id)
+                    ->where('status', 'booked')
+                    ->whereNotIn('id', $newSeatIds)
+                    ->update([
+                        'status' => 'pending',
+                        'booking_id' => null,
+                        'user_id' => null,
+                    ]);
+            }
+        }
         $getSeatDetails = SeatDetail::whereIn('id', $ids)->get();
         if (isset($getSeatDetails) && !empty($getSeatDetails)) {
             foreach ($getSeatDetails as $key => $getSeatDetail) {
@@ -1530,25 +1612,26 @@ class BookingController extends Controller
 
         $request->validate($rules);
 
-        // If this passenger already has an active booking for the same ride + selected ride detail,
-        // reuse the update flow instead of creating a duplicate booking.
-        $rideId = $ride->id ?? $id;
-        $requestedRideDetailId = $ride->detail?->id;
-        $existingBooking = Booking::where('ride_id', $rideId)
+        // If this passenger already has an active booking for the same `ride_id`,
+        // reuse it (instead of creating a duplicate) inside this method.
+        $existingBooking = Booking::where('ride_id', $id)
             ->where('user_id', $user->id)
-            ->when($requestedRideDetailId, fn ($q) => $q->where('ride_detail_id', $requestedRideDetailId))
-            ->whereNotIn('status', [Booking::STATUS_DECLINED, Booking::STATUS_CANCELLED])
+            ->whereIn('status', [Booking::STATUS_REQUESTED, Booking::STATUS_BOOKED])
             ->latest('id')
             ->first();
 
-        if ($existingBooking) {
-            return $this->updateInstantBooking($existingBooking->id, $request);
-        }
+        $hasExistingBooking = (bool) $existingBooking;
+        // Reuse existing booking and continue booking flow.
+        $booking = $hasExistingBooking ? $existingBooking : null;
 
         $bookings = Booking::where('ride_id', $id)->where('status', '!=', '3')->where('status', '!=', '4')->get();
         $errorMsg = $this->successMessage;
 
         $seatsBooked = $bookings->sum('seats') + $request->seats;
+        // If we are reusing the existing booking, subtract its current seats to avoid double counting.
+        if ($hasExistingBooking) {
+            $seatsBooked -= (int) ($existingBooking->seats ?? 0);
+        }
         if ($seatsBooked > $ride->seats) {
             return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->detail->departure, 'to' => $ride->detail->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])
             ->with(['failure' => $errorMsg->seat_unavailable_message]);
@@ -1866,26 +1949,59 @@ class BookingController extends Controller
                     $bookingType = (string) ($request->type ?? $ride->booking_type ?? 'standard');
                     $bookingType = substr($bookingType, 0, 50); // Limit to 50 characters to prevent truncation errors
                     
-                    $booking = Booking::create([
-                        'user_id' => $user->id,
-                        'ride_id' => $id,
-                        'seats' => $request->seats,
-                        'type' => $bookingType,
-                        'booked_on' => Carbon::now(),
-                        'status' => '1',
-                        'booking_credit' => $request->booking_credit,
-                        'fare' => $request->seats_amount,
-                        'tax_amount' => $taxAmt,
-                        'secured_cash' => $secured_cash,
-                        'secured_cash_code' => $secured_cash_code,
-                        'departure' => $ride->detail->departure,
-                        'destination' => $ride->detail->destination,
-                        'price' => $ride->detail->price,
-                        'ride_detail_id' => $ride->detail->id
-                    ]);
-
+                    if ($hasExistingBooking) {
+                        // Update existing booking (no duplicate Booking::create()).
+                        $booking->update([
+                            'seats' => $request->seats,
+                            'booking_credit' => $request->booking_credit,
+                            'fare' => $request->seats_amount,
+                            'tax_amount' => $taxAmt,
+                            'type' => $bookingType,
+                            'booked_on' => Carbon::now(),
+                            'status' => '1',
+                            'secured_cash' => $secured_cash,
+                            'secured_cash_code' => $secured_cash_code,
+                            'departure' => $ride->detail->departure,
+                            'destination' => $ride->detail->destination,
+                            'price' => $ride->detail->price,
+                            'ride_detail_id' => $ride->detail->id,
+                        ]);
+                    } else {
+                        $booking = Booking::create([
+                            'user_id' => $user->id,
+                            'ride_id' => $id,
+                            'seats' => $request->seats,
+                            'type' => $bookingType,
+                            'booked_on' => Carbon::now(),
+                            'status' => '1',
+                            'booking_credit' => $request->booking_credit,
+                            'fare' => $request->seats_amount,
+                            'tax_amount' => $taxAmt,
+                            'secured_cash' => $secured_cash,
+                            'secured_cash_code' => $secured_cash_code,
+                            'departure' => $ride->detail->departure,
+                            'destination' => $ride->detail->destination,
+                            'price' => $ride->detail->price,
+                            'ride_detail_id' => $ride->detail->id
+                        ]);
+                    }
 
                     $ids = $request->seats_id;
+                    // If seats are changed on an existing booking, release previously booked seats
+                    // that are not included in the new selection.
+                    if ($hasExistingBooking) {
+                        $newSeatIds = is_array($ids) ? $ids : (array) $ids;
+                        if (!empty($newSeatIds)) {
+                            SeatDetail::where('booking_id', $booking->id)
+                                ->where('status', 'booked')
+                                ->whereNotIn('id', $newSeatIds)
+                                ->update([
+                                    'status' => 'pending',
+                                    'booking_id' => null,
+                                    'user_id' => null,
+                                ]);
+                        }
+                    }
                     $getSeatDetails = SeatDetail::whereIn('id', $ids)->get();
                     if (isset($getSeatDetails) && !empty($getSeatDetails)) {
                         foreach ($getSeatDetails as $key => $getSeatDetail) {
@@ -2453,23 +2569,41 @@ class BookingController extends Controller
             $bookingType = (string) ($request->type ?? $ride->booking_type ?? 'standard');
             $bookingType = substr($bookingType, 0, 50); // Limit to 50 characters to prevent truncation errors
 
-            $booking = Booking::create([
-                'user_id' => $user->id,
-                'ride_id' => $id,
-                'seats' => $request->seats,
-                'type' => $bookingType,
-                'booked_on' => Carbon::now(),
-                'status' => '1',
-                'booking_credit' => $request->booking_credit,
-                'fare' => $request->seats_amount,
-                'tax_amount' => $taxAmt,
-                'secured_cash' => $secured_cash,
-                'secured_cash_code' => $secured_cash_code,
-                'departure' => $ride->detail->departure,
-                'destination' => $ride->detail->destination,
-                'price' => $ride->detail->price,
-                'ride_detail_id' => $ride->detail->id
-            ]);
+            if ($hasExistingBooking) {
+                $booking->update([
+                    'seats' => $request->seats,
+                    'booking_credit' => $request->booking_credit,
+                    'fare' => $request->seats_amount,
+                    'tax_amount' => $taxAmt,
+                    'type' => $bookingType,
+                    'booked_on' => Carbon::now(),
+                    'status' => '1',
+                    'secured_cash' => $secured_cash,
+                    'secured_cash_code' => $secured_cash_code,
+                    'departure' => $ride->detail->departure,
+                    'destination' => $ride->detail->destination,
+                    'price' => $ride->detail->price,
+                    'ride_detail_id' => $ride->detail->id,
+                ]);
+            } else {
+                $booking = Booking::create([
+                    'user_id' => $user->id,
+                    'ride_id' => $id,
+                    'seats' => $request->seats,
+                    'type' => $bookingType,
+                    'booked_on' => Carbon::now(),
+                    'status' => '1',
+                    'booking_credit' => $request->booking_credit,
+                    'fare' => $request->seats_amount,
+                    'tax_amount' => $taxAmt,
+                    'secured_cash' => $secured_cash,
+                    'secured_cash_code' => $secured_cash_code,
+                    'departure' => $ride->detail->departure,
+                    'destination' => $ride->detail->destination,
+                    'price' => $ride->detail->price,
+                    'ride_detail_id' => $ride->detail->id
+                ]);
+            }
 
             if ($secured_cash_code && isset($user->email_notification) && $user->email_notification == 1) {
                 $driverPhoneNumber = PhoneNumber::where('user_id', $ride->driver->id)
@@ -2528,6 +2662,19 @@ class BookingController extends Controller
             }
 
             $ids = $request->seats_id;
+            if ($hasExistingBooking) {
+                $newSeatIds = is_array($ids) ? $ids : (array) $ids;
+                if (!empty($newSeatIds)) {
+                    SeatDetail::where('booking_id', $booking->id)
+                        ->where('status', 'booked')
+                        ->whereNotIn('id', $newSeatIds)
+                        ->update([
+                            'status' => 'pending',
+                            'booking_id' => null,
+                            'user_id' => null,
+                        ]);
+                }
+            }
             $getSeatDetails = SeatDetail::whereIn('id', $ids)->get();
             if (isset($getSeatDetails) && !empty($getSeatDetails)) {
                 foreach ($getSeatDetails as $key => $getSeatDetail) {
@@ -5577,19 +5724,8 @@ class BookingController extends Controller
 
         $message = null;
         $taxAmt = isset($request->tax_amount) ? $request->tax_amount : 0;
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('book_seat_message', 'block_booking_message', 'add_your_phone', 'verified_number_message')->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('book_seat_message', 'block_booking_message', 'add_your_phone', 'verified_number_message')->first();
-            }
-        }
+        
+        $message = $this->successMessage;
         $type = FeaturesSetting::whereId($ride->payment_method)->first();
         $phoneNumber = PhoneNumber::where('user_id', $user->id)->first();
         if (is_null($phoneNumber) && $type->slug == 'secured') {

@@ -8,6 +8,7 @@
         'luggage' => 'luggage_size',
     ];
     $searchOptionGroups = $searchOptionGroups ?? collect();
+    
 @endphp
 @foreach ($optionGroups as $rideField => $groupKey)
     @foreach (data_get($searchOptionGroups->get($groupKey), 'options', []) as $option)
@@ -21,6 +22,7 @@
                 class="{{ $iconClass }}"
                 src="{{ asset('home_page_icons/' . data_get($option, 'icon')) }}"
                 alt=""
+                data-tippy-content="{{ data_get($option, 'display_description') }}"
             >
             @break
         @endif

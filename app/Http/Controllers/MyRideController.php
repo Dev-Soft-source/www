@@ -74,7 +74,8 @@ class MyRideController extends Controller
         $postRidePage = $this->getPostRidePageWithSettingDetail();
 
         $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
-        $rideDetailPage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
+        $findrideDetailPage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
+        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
         $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
         $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
         $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
@@ -105,6 +106,7 @@ class MyRideController extends Controller
             'ProfilePage' => $ProfilePage, 
             'ProfileSetting' => $ProfileSetting, 
             'rideDetailPage' => $rideDetailPage, 
+            'findrideDetailPage' => $findrideDetailPage, 
             'searchOptionGroups' => $searchOptionGroups, 
             'tripsPage' => $tripsPage
             ]);

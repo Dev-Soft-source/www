@@ -491,8 +491,7 @@
 
                                 $isAvailableShowInfo = (auth()->user() && $ride->hasNonRejectedBookingForUser(auth()->user()));
                             @endphp
-                            <h3
-                                class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl cursor-pointer">
+                            <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl">
                                 @if ($showReviewLink && $passengerBookingUuid && $isAvailableShowInfo)
                                     <a href="{{ route('review_driver', ['lang' => $selectedLanguage->abbreviation, 'id' => $passengerBookingUuid]) }}"
                                         class="w-full text-2xl xl:text-3xl text-white hover:text-red-400 no-underline cursor-pointer">
@@ -506,7 +505,7 @@
                                         @isset($rideDetailPage->driver_info_label)
                                             {{ $rideDetailPage->driver_info_label }}
                                         @endisset
-                                    </div>
+                                    </a>
                                 @else
                                     @if ($ride_cancelled)
                                         @isset($rideDetailPage->review_driver_info_label)
@@ -519,7 +518,6 @@
                                     @endif
                                 @endif
                             </h3>
-                            <div class="flex items-center justify-between px-4 pt-2 w-full">{{ $rideDetailPage->driver_info_show_label ?? 'Driver details are shared after booking confirmation.' }}</div>
                             <div class="flex items-center justify-between p-4  pt-1 w-full">
                                 <div class="flex items-center space-x-2">
                                     @if (auth()->user() &&
@@ -778,14 +776,7 @@
                                 @endisset
                                 @if ($ride->isFirmCancellation())
                                     <div class="relative inline-flex group">
-                                        <!-- Info Icon -->
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                            fill="currentColor"
-                                            class="bi bi-info-circle-fill text-gray-800 hover:text-gray-800 transition-colors cursor-pointer"
-                                            viewBox="0 0 16 16">
-                                            <path
-                                                d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                                        </svg>
+                                        
 
                                         <!-- Tooltip -->
                                         <div
