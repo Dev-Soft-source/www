@@ -1832,8 +1832,8 @@
         var toAutocompletePinkRide = null;
         var isSettingPlaceValuePinkRide = false;
         var isSelectingFromDropdownPinkRide = false;
-        var errorFromRequiredPinkRide = @json(__('validation.custom.from.required'));
-        var errorToRequiredPinkRide = @json(__('validation.custom.to.required'));
+        var errorFromRequiredPinkRide = @json(__('validation.custom.origin.label.required'));
+        var errorToRequiredPinkRide = @json(__('validation.custom.destination.label.required'));
         var errorCityMissingPinkRide = @json(__('validation.custom.city_not_in_record.message'));
 
         // Function to close the hide ride modal

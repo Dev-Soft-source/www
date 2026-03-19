@@ -1863,8 +1863,8 @@
         var toAutocompleteProximalocalRide = null;
         var isSettingPlaceValueProximalocalRide = false;
         var isSelectingFromDropdownProximalocalRide = false;
-        var errorFromRequiredProximalocalRide = @json(__('validation.custom.from.required'));
-        var errorToRequiredProximalocalRide = @json(__('validation.custom.to.required'));
+        var errorFromRequiredProximalocalRide = @json(__('validation.custom.origin.label.required'));
+        var errorToRequiredProximalocalRide = @json(__('validation.custom.destination.label.required'));
         var errorCityMissingProximalocalRide = @json(__('validation.custom.city_not_in_record.message'));
 
         // Function to close the hide ride modal

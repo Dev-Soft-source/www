@@ -8,7 +8,7 @@
 @section('content')
     @php
 
-        $searchRoute = route($action_route, ['lang' => optional($selectedLanguage)->abbreviation]);
+        $searchRoute = route($action_route . '.validate', ['lang' => optional($selectedLanguage)->abbreviation]);
         $bookingMethodGroup = $searchOptionGroups->get('booking_method');
         $luggageGroup = $searchOptionGroups->get('luggage_size');
         $preferenceGroup = $searchOptionGroups->get('preference');
@@ -35,7 +35,8 @@
 
         @yield('title-header')
 
-        <form method="GET" action="{{ $searchRoute }}" id="px-search-form">
+        <form method="POST" action="{{ $searchRoute }}" id="px-search-form">
+            @csrf
             <div class="mt-6 grid grid-cols-1 lg:grid-cols-4 gap-4">
                 <div class="search-filter-container flex flex-col relative">
                     <button id="search-filter-toggle"
@@ -56,15 +57,6 @@
                             class="search-filter-close border w-6 h-6 overflow-hidden flex items-center justify-center border-gray-500 rounded-full text-gray-500 text-3xl absolute top-3 right-4 hover:text-red-500 lg:hidden">
                             &times;
                         </button>
-
-                        <input type="hidden" name="origin[label]" value="{{ $oldOriginLabel ?? '' }}">
-                        <input type="hidden" name="origin[city_id]" value="{{ $oldOriginCityId ?? '' }}">
-                        <input type="hidden" name="destination[label]" value="{{ $oldDestinationLabel ?? '' }}">
-                        <input type="hidden" name="destination[city_id]" value="{{ $oldDestinationCityId ?? '' }}">
-                        <input type="hidden" name="departure_date" value="{{ $oldDepartureDate }}">
-                        <input type="hidden" name="keyword" value="{{ $oldKeyword ?? '' }}">
-                        <input type="hidden" name="search"
-                            value="{{ !empty($oldOriginLabel) || !empty($oldDestinationLabel) || !empty($oldKeyword) ? 1 : 0 }}">
 
                         <div
                             class="rounded-t-lg bg-primary text-white font-medium text-xl flex items-center justify-center space-x-2 p-4">
@@ -393,11 +385,12 @@
                                             'placeholder' => $findRidePage->search_section_from_placeholder ?? 'Origin',
                                             'initialLabel' => $oldOriginLabel,
                                             'initialCityId' => $oldOriginCityId,
-                                            'invalidErrorMessage' => $siteText['invalid_city_error_text'] ?? 'Please select a valid city from the dropdown',
+                                            'invalidErrorMessage' => __('validation.custom.city_not_in_record.message') ?? 'Please select a valid city from the dropdown',
                                             'class' => 'h-full w-full border-0 bg-transparent pl-10 pr-4 font-semibold text-slate-900 placeholder-slate-900 focus:ring-0',
                                         ],
                                         key('px-search-origin')
                                     )
+
                                 </div>
                             </div>
 
@@ -446,9 +439,19 @@
                                     </div>
                                     <input id="departure_date" name="departure_date" value="{{ $oldDepartureDate }}"
                                         type="text" readonly
-                                        class="h-full w-full border-0 bg-transparent pl-10 pr-4 font-semibold text-slate-900 placeholder-slate-900 focus:ring-0"
+                                        class="h-full w-full border-0 bg-transparent pl-10 pr-12 font-semibold text-slate-900 placeholder-slate-900 focus:ring-0"
                                         placeholder="{{ $findRidePage->search_section_date_placeholder ?? 'Select date' }}"
                                         autocomplete="off">
+                                    <button type="button" id="departure-date-clear-button"
+                                        class="absolute right-4 top-1/2 hidden -translate-y-1/2 text-gray-400 transition hover:text-gray-700"
+                                        aria-label="Clear date">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                            fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd"
+                                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
                                 </div>
                                 @error('departure_date')
                                     <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
@@ -483,6 +486,7 @@
                                             clip-rule="evenodd" />
                                     </svg>
                                 </button>
+
                             </div>
                         </div>
 
@@ -588,13 +592,18 @@
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        flatpickr("#departure_date", {
-            dateFormat: "Y-m-d",
-            minDate: "today",
-            enableTime: false,
-        });
-
+        let departureDatePicker = null;
+        
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize flatpickr
+            departureDatePicker = flatpickr("#departure_date", {
+                dateFormat: "Y-m-d",
+                minDate: "today",
+                enableTime: false,
+                onChange: function(selectedDates, dateStr, instance) {
+                    syncDepartureDateClearButton();
+                }
+            });
             const getLocationInput = (fieldName) => document.querySelector(
                 `input[name="${fieldName}"]:not([type="hidden"])`
             );
@@ -604,6 +613,7 @@
             const originCityIdInput = document.querySelector('input[name="origin[city_id]"]');
             const destinationCityIdInput = document.querySelector('input[name="destination[city_id]"]');
             const departureDateInput = document.querySelector('#departure_date');
+            const departureDateClearButton = document.getElementById('departure-date-clear-button');
             const keywordInputs = document.querySelectorAll('input[name="keyword"]');
             const keywordClearButton = document.getElementById('keyword-clear-button');
             const originComponent = originInput?.closest('[wire\\:id]');
@@ -689,6 +699,24 @@
                 keywordClearButton.classList.toggle('hidden', !hasKeywordValue);
             };
 
+            const syncDepartureDateClearButton = () => {
+                if (!departureDateClearButton || !departureDateInput) {
+                    return;
+                }
+
+                const hasDateValue = departureDateInput.value.trim() !== '';
+                departureDateClearButton.classList.toggle('hidden', !hasDateValue);
+            };
+
+            const clearDepartureDate = () => {
+                if (departureDatePicker) {
+                    departureDatePicker.clear();
+                } else if (departureDateInput) {
+                    departureDateInput.value = '';
+                }
+                syncDepartureDateClearButton();
+            };
+
             const clearLocationInputs = () => {
                 suppressKeywordClear = true;
                 resetAutocomplete(originInput, originCityIdInput, originComponent);
@@ -760,7 +788,7 @@
 
                     if (searchForm) {
                         if (typeof searchForm.requestSubmit === 'function') {
-                            searchForm.requestSubmit();
+                            // searchForm.requestSubmit();
                         } else {
                             searchForm.submit();
                         }
@@ -772,6 +800,16 @@
             }
 
             syncKeywordClearButton();
+            syncDepartureDateClearButton();
+
+            // Handle departure date clear button
+            if (departureDateClearButton) {
+                departureDateClearButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    clearDepartureDate();
+                });
+            }
         });
 
         function swapLocations() {

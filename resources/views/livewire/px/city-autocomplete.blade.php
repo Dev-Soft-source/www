@@ -15,7 +15,7 @@
         <input type="text" name="{{ $field }}[label]" wire:model.debounce.250ms="query" wire:focus="onFocus"
             wire:keydown.arrow-down.prevent="highlightNext" wire:keydown.arrow-up.prevent="highlightPrevious"
             wire:keydown.enter.prevent="selectHighlighted" wire:keydown.escape="closeSuggestions"
-            wire:blur="closeSuggestions" class=" {{ $class ? $class : 'w-full pl-8 rounded border-gray-300 placeholder-gray-400' }}"
+            wire:blur="closeSuggestions" class="city-autocomplete-input {{ $class ? $class : 'w-full pl-8 rounded border-gray-300 placeholder-gray-400' }}"
             placeholder="{{ $placeholder }}" autocomplete="off">
 
         <input type="hidden" name="{{ $field }}[city_id]" value="{{ $cityId }}">

@@ -517,9 +517,13 @@ Route::get('/admin/{any}', [HomeController::class, 'redirectToAdminDashboard'])
 // new logic for px post ride
 Route::post('{lang?}/post-ride/segment-distance-estimates', [RideController::class, 'segmentDistanceEstimates'])->name('post_ride.segment_distance_estimates')->middleware('auth');
 Route::get('{lang?}/search-rides', [RideSearchController::class, 'search'])->name('search_ride');
+Route::post('{lang?}/search-rides', [RideSearchController::class, 'validateAndSearch'])->name('search_ride.validate');
 Route::get('{lang?}/search-extra-care-rides', [RideSearchController::class, 'folk_ride_search'])->name('folk_ride');
+Route::post('{lang?}/search-extra-care-rides', [RideSearchController::class, 'validateAndFolkRideSearch'])->name('folk_ride.validate');
 Route::get('{lang?}/search-pink-rides', [RideSearchController::class, 'pink_ride_search'])->name('pink_ride');
+Route::post('{lang?}/search-pink-rides', [RideSearchController::class, 'validateAndPinkRideSearch'])->name('pink_ride.validate');
 Route::get('{lang?}/search-proximalocal-ride', [RideSearchController::class, 'proximalocal_ride_search'])->name('proximalocal_ride');
+Route::post('{lang?}/search-proximalocal-ride', [RideSearchController::class, 'validateAndProximaLocalRideSearch'])->name('proximalocal_ride.validate');
 
 
 

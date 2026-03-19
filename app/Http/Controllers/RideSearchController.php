@@ -88,6 +88,134 @@ class RideSearchController extends Controller
         return $this->search($request, $lang, 'search_proximalocal_ride');
     }
 
+    /**
+     * Validate search request and redirect to GET route with query params
+     */
+    public function validateAndSearch(Request $request, $lang = null)
+    {
+        return $this->validateAndRedirect($request, $lang, 'search_ride', 'search_ride');
+    }
+
+    public function validateAndFolkRideSearch(Request $request, $lang = null)
+    {
+        $extraCareFaqs = ExtraCareFaqDetail::where('language_id', $this->selectedLanguage->id)->get();
+        view()->share('extraCareFaqs', $extraCareFaqs);
+
+        return $this->validateAndRedirect($request, $lang, 'folk_ride', 'search_folk_ride');
+    }
+
+    public function validateAndPinkRideSearch(Request $request, $lang = null)
+    {
+        $pinkRideFaqs = PinkRideFaqDetail::where('language_id', $this->selectedLanguage->id)->get();
+        view()->share('pinkRideFaqs', $pinkRideFaqs);
+
+        return $this->validateAndRedirect($request, $lang, 'pink_ride', 'search_pink_ride');
+    }
+
+    public function validateAndProximaLocalRideSearch(Request $request, $lang = null)
+    {
+        $proximaLocalRideFaqs = [];
+        view()->share('proximaLocalRideFaqs', $proximaLocalRideFaqs);
+
+        return $this->validateAndRedirect($request, $lang, 'proximalocal_ride', 'search_proximalocal_ride');
+    }
+
+    /**
+     * Validate search request and redirect to GET route with query params
+     */
+    protected function validateAndRedirect(Request $request, $lang = null, $routeName, $view = 'search_ride')
+    {
+        $selectedLangId = optional($this->selectedLanguage)->id;
+        $defaultLangId = optional($this->defaultLang)->id;
+        $searchOptionGroups = $this->getSearchOptionGroups($selectedLangId, $defaultLangId);
+        $searchFilters = $this->getPxSearchFilters($request);
+        $hasActiveFilters = collect($searchFilters)->contains(function ($value) {
+            return $value !== null && $value !== '' && $value !== false;
+        });
+
+        $keyword = trim((string) $request->input('keyword'));
+        $originLabel = trim((string) $request->input('origin.label'));
+        $destinationLabel = trim((string) $request->input('destination.label'));
+        $originCityId = $request->input('origin.city_id');
+        $destinationCityId = $request->input('destination.city_id');
+        $departureDate = $request->input('departure_date');
+
+        // Validation rules
+        $validator = Validator::make($request->all(), [
+            'origin.label' => ['required_without:keyword'],
+            'destination.label' => ['required_without:keyword'],
+            'departure_date' => ['nullable', 'date'],
+            'origin.city_id' => ['required_without:keyword'],
+            'destination.city_id' => ['required_without:keyword'],
+        ]);
+
+        $invalidCityMessage = __('validation.custom.city_not_in_record.message')
+            ?? 'Please select a valid city from the dropdown.';
+
+
+        $validator->after(function ($validator) use ($request, $invalidCityMessage, $hasActiveFilters, $keyword, $originLabel, $destinationLabel, $originCityId, $destinationCityId) {
+            $hasValidOrigin = $originLabel !== '' && !empty($originCityId);
+            $hasValidDestination = $destinationLabel !== '' && !empty($destinationCityId);
+
+            if ($keyword === '' && $originLabel === '' && $destinationLabel === '' && !$hasActiveFilters) {
+                $validator->errors()->add('keyword', 'Enter a keyword, select at least one valid city from the dropdown, or choose a filter.');
+            }
+
+            if ($keyword === '' && ($originLabel !== '' || $destinationLabel !== '')) {
+                if ($hasValidOrigin && $destinationLabel === '') {
+                    $validator->errors()->add('destination.label', __('validation.custom.destination.label.required'));
+                }
+
+                if ($hasValidDestination && $originLabel === '') {
+                    $validator->errors()->add('origin.label', __('validation.custom.origin.label.required'));
+                }
+            }
+
+            if ($originLabel !== '' && empty($originCityId)) {
+                $validator->errors()->add('origin.label', $invalidCityMessage);
+            }
+
+            if ($destinationLabel !== '' && empty($destinationCityId)) {
+                $validator->errors()->add('destination.label', $invalidCityMessage);
+            }
+        });
+
+        if ($validator->fails()) {
+            return redirect()->route($routeName, ['lang' => $lang])
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        // Validation passed - redirect to GET route with query params
+        $queryParams = $request->only([
+            'origin',
+            'destination',
+            'departure_date',
+            'keyword',
+            'search',
+            'women_only',
+            'extra_care',
+            'hide_full_rides',
+            'driver_age',
+            'driver_rating',
+            'driver_phone',
+            'driver_name',
+            'ride_option_ids',
+            'booking_method',
+            'vehicle_type',
+            'luggage_size',
+            'smoking_allowed',
+            'pets_allowed',
+        ]);
+
+        // Ensure search=1 is set when submitting
+        if ($request->has('search')) {
+            $queryParams['search'] = 1;
+        }
+
+        return redirect()->route($routeName, array_merge(['lang' => $lang], $queryParams));
+    }
+
     public function search(Request $request, $lang = null, $view = 'search_ride')
     {
         $selectedLangId = optional($this->selectedLanguage)->id;

@@ -3,6 +3,15 @@
 @section('style')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <style>
+        .city-autocomplete-input {
+            background-color: white;
+            border: 1px solid gray;
+            border-radius: 4px;
+            padding-bottom: 12px;
+            padding-top: 12px;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -15,8 +24,8 @@
                 <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                     <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
                         <div
-                            class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
-                            <button onclick="closeModal('message-modal')"
+                            class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-12 sm:w-full sm:max-w-lg w-full modal-border">
+                            <button onclick="closeModal('message-moda12')"
                                 class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor">
@@ -27,11 +36,11 @@
                             <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                 <div class="sm:flex sm:items-start justify-center">
                                     <!-- <div
-                                            class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                            </svg>
-                                        </div> -->
+                                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                                </svg>
+                                            </div> -->
                                 </div>
                                 <div class="text-center w-full">
                                     <p class="can-exp-p text-center">{!! session('message') !!}</p>
@@ -66,11 +75,11 @@
                             <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                 <div class="sm:flex sm:items-start justify-center">
                                     <!-- <div class="mx-auto h-16 w-16">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                            </svg>
-                                        </div> -->
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                    stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                </svg>
+                                            </div> -->
                                 </div>
                                 <div class="mt-2 w-full">
                                     <p class="can-exp-p text-center">{!! session('success') !!}</p>
@@ -91,7 +100,8 @@
                 <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                     <div
                         class="relative flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
-                        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal()"></div>
+                        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal()">
+                        </div>
                         <div
                             class="relative animate__animated animate__fadeIn z-20 transform overflow-hidden rounded-2xl bg-white text-center shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
                             <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
@@ -107,7 +117,8 @@
                                     <div class="mx-auto h-16 w-16">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M4.5 12.75l6 6 9-13.5" />
                                         </svg>
                                     </div>
                                 </div>
@@ -156,103 +167,122 @@
                         @endisset
                     </div>
                 </div>
+                @php
+                    $oldOriginLabel = old('origin.label');
+                    $oldOriginCityId = old('origin.city_id');
+                    $oldDestinationLabel = old('destination.label');
+                    $oldDestinationCityId = old('destination.city_id');
+                    $oldDepartureDate = old('departure_date');
+                @endphp
+                    <form method="POST" action="{{ route('search_ride.validate', ['lang' => optional($selectedLanguage)->abbreviation]) }}" id="home-search-form">
                 <div class="flex flex-col md:ml-10 sm:flex-col md:flex-row lg:flex-row gap-4 px-4 md:px-8 xl:px-0">
-                    <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row md:items-center gap-2 relative">
-                        <div class="w-54 relative">
-                            <div class="relative">
-                                <div
-                                    class="bg-gray-100 absolute top-0 rounded-l w-8 flex justify-center items-center h-full">
-                                    <div class="w-6 h-6">
-                                        @isset($homePage->from_field_icon)
-                                            <img class="w-full h-full object-contain"
-                                                src="{{ asset('home_page_icons/' . $homePage->from_field_icon) }}"
-                                                alt="">
-                                        @endisset
+                        @csrf
+                        <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row md:items-center gap-2 relative">
+                            <div class="w-54 relative">
+                                @livewire(
+                                    'px.city-autocomplete',
+                                    [
+                                        'field' => 'origin',
+                                        'placeholder' => $findRidePage->search_section_from_placeholder ?? 'Origin',
+                                        'initialLabel' => $oldOriginLabel,
+                                        'initialCityId' => $oldOriginCityId,
+                                        'invalidErrorMessage' => __('validation.custom.city_not_in_record.message') ?? 'Please select a valid city from the dropdown',
+                                        'class' => 'h-full w-full border-0 bg-transparent pl-10 pr-4 font-semibold text-slate-900 placeholder-slate-900 focus:ring-0',
+                                    ],
+                                    key('px-search-origin')
+                                )
+                                @error('origin.label')
+                                    <div class="tooltip-error shadow-lg mt-1">
+                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        </div>
                                     </div>
-                                </div>
-                                <input id="fromInput" type="text"
-                                    @isset($homePage->slider_from_placeholder)
-                                    placeholder="{{ $homePage->slider_from_placeholder }}"
-                                @endisset
-                                    class="bg-white pl-10 bg-opacity-90 text-lg font-medium w-full rounded text-black p-1.5 placeholder:text-black outline-none ring-2 ring-blue-500 focus:ring-2 focus:ring-blue-500 caret-gray-800 border-0"
-                                    autocomplete="off">
-
+                                @enderror
                             </div>
-                            <div class="absolute hidden" id="fromInputError">
-                                <div class="tooltip-error">
+                            <div class="relative">
+                                <div class="flex justify-center items-center">
+                                    <button onclick="swapLocations()">
+                                        <div class="w-8 h-8">
+                                            @isset($homePage->swap_field_icon)
+                                                <img class="w-full h-full object-contain"
+                                                    src="{{ asset('home_page_icons/' . $homePage->swap_field_icon) }}"
+                                                    alt="">
+                                            @endisset
+                                        </div>
+                                    </button>
                                 </div>
+                            </div>
+                            <div class="w-54 relative">
+                                @livewire(
+                                    'px.city-autocomplete',
+                                    [
+                                        'field' => 'destination',
+                                        'placeholder' => $findRidePage->search_section_to_placeholder ?? 'Destination',
+                                        'initialLabel' => $oldDestinationLabel,
+                                        'initialCityId' => $oldDestinationCityId,
+                                        'invalidErrorMessage' => __('validation.custom.city_not_in_record.message') ?? 'Please select a valid city from the dropdown',
+                                        'class' => 'h-full w-full border-0 bg-transparent pl-10 pr-4 font-semibold text-slate-900 placeholder-slate-900 focus:ring-0',
+                                    ],
+                                    key('px-search-destination')
+                                )
+                                @error('destination.label')
+                                    <div class="tooltip-error shadow-lg mt-1">
+                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        </div>
+                                    </div>
+                                @enderror
                             </div>
                         </div>
-                        <div class="relative">
+                        <div class="mx-auto md:mx-0 md:w-auto flex flex-col sm:flex-col md:flex-row items-center gap-4">
+                            <div class="relative h-full">
+                                <div class="absolute inset-y-0 start-0 flex items-center pl-4 pointer-events-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                        fill="currentColor" aria-hidden="true">
+                                        <path fill="#888888" fill-rule="evenodd"
+                                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <input id="departure_date" name="departure_date" value="{{ $oldDepartureDate }}"
+                                    type="text" readonly
+                                    class="city-autocomplete-input h-full border-0 bg-transparent pl-10 pr-12 font-semibold text-slate-900 placeholder-slate-900 focus:ring-0"
+                                    placeholder="{{ $findRidePage->search_section_date_placeholder ?? 'Select date' }}"
+                                    autocomplete="off">
+                                <button type="button" id="departure-date-clear-button"
+                                    class="absolute right-4 top-1/2 hidden -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full bg-gray-200 text-gray-500 transition hover:bg-gray-300 hover:text-gray-700"
+                                    aria-label="Clear date">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
+                                        fill="currentColor" aria-hidden="true">
+                                        <path fill-rule="evenodd"
+                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                @error('departure_date')
+                                    <div class="tooltip-error shadow-lg mt-1">
+                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                        </div>
+                                    </div>
+                                @enderror
+                            </div>
                             <div class="flex justify-center items-center">
-                                <button onclick="swapLocations()">
-                                    <div class="w-8 h-8">
-                                        @isset($homePage->swap_field_icon)
+                                <button type="submit" class="bg-primary py-2 px-3 rounded button-exp-fill">
+                                    <span class="block md:hidden">{{ $siteText['search_btn_text'] ?? 'Search' }}</span>
+                                    <div class="w-auto h-6 hidden md:block">
+                                        @isset($homePage->search_field_icon)
                                             <img class="w-full h-full object-contain"
-                                                src="{{ asset('home_page_icons/' . $homePage->swap_field_icon) }}"
+                                                src="{{ asset('home_page_icons/' . $homePage->search_field_icon) }}"
                                                 alt="">
                                         @endisset
                                     </div>
                                 </button>
                             </div>
                         </div>
-                        <div class="w-54 relative">
-                            <div class="relative">
-                                <div
-                                    class="bg-gray-100 absolute top-0 rounded-l w-8 flex justify-center items-center h-full">
-                                    <div class="w-6 h-6">
-                                        @isset($homePage->to_field_icon)
-                                            <img class="w-full h-full object-contain"
-                                                src="{{ asset('home_page_icons/' . $homePage->to_field_icon) }}"
-                                                alt="">
-                                        @endisset
-                                    </div>
-                                </div>
-                                <input id="toInput" type="text"
-                                    @isset($homePage->slider_to_placeholder)
-                                    placeholder="{{ $homePage->slider_to_placeholder }}"
-                                @endisset
-                                    class="bg-white pl-10 bg-opacity-90 text-lg font-medium w-full rounded text-black p-1.5 placeholder:text-black outline-none ring-2 ring-blue-500 focus:ring-2 focus:ring-blue-500 caret-gray-800 border-0"
-                                    autocomplete="off">
-                            </div>
-                            <div class="absolute hidden" id="toInputError">
-                                <div class="tooltip-error">
-                                </div>
-                            </div>
-                        </div>
+                        <input type="hidden" name="search" value="1">
                     </div>
-                    <div class="mx-auto md:mx-0 md:w-auto flex flex-col sm:flex-col md:flex-row items-center gap-4">
-                        <div class="relative w-full">
-                            <div class="bg-gray-100 absolute top-0 rounded-l w-8 flex justify-center items-center h-full">
-                                <div class="w-6 h-6">
-                                    @isset($homePage->date_field_icon)
-                                        <img class="w-full h-full object-contain"
-                                            src="{{ asset('home_page_icons/' . $homePage->date_field_icon) }}"
-                                            alt="">
-                                    @endisset
-                                </div>
-                            </div>
-                            <input id="dateInput" type="text"
-                                @isset($homePage->slider_date_placeholder)
-                                placeholder="{{ $homePage->slider_date_placeholder }}"
-                            @endisset
-                                class="bg-white pl-10 bg-opacity-90 text-lg font-medium w-full rounded text-black p-1.5 placeholder:text-black outline-none ring-2 ring-blue-500 focus:ring-2 focus:ring-blue-500 caret-gray-800 border-0 cursor-pointer">
-                        </div>
-                        <div class="flex justify-center items-center">
-                            <button onclick="navigateToSearchRoute()"
-                                class="bg-primary py-2 px-3 rounded button-exp-fill">
-                                <span class="block md:hidden">{{ $siteText['search_btn_text'] ?? 'Search' }}</span>
-                                <div class="w-auto h-6 hidden md:block">
-                                    @isset($homePage->search_field_icon)
-                                        <img class="w-full h-full object-contain"
-                                            src="{{ asset('home_page_icons/' . $homePage->search_field_icon) }}"
-                                            alt="">
-                                    @endisset
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                </form>
             </section>
         </div>
     </div>
@@ -591,7 +621,8 @@
                                                 <div class="mt-8">
                                                     <div>
                                                         <p class="font-medium">
-                                                            {{ str_replace(':count', $ride->seats, $rideDetailPage->total_seats_label ?? 'Total :count seats') }}</p>
+                                                            {{ str_replace(':count', $ride->seats, $rideDetailPage->total_seats_label ?? 'Total :count seats') }}
+                                                        </p>
                                                     </div>
                                                     <p class="text-xl font-semibold text-primary">
                                                         ${{ number_format(floatval($defaultRideDetail ? $defaultRideDetail->price : 0), 2) }}
@@ -617,13 +648,15 @@
                                                                 </span>
                                                             </div>
                                                             <div class="ml-12 md:ml-20">
-                                                                <div class="font-bold text-black">{{$rideDetailPage->from_label ?? 'From'}}</div>
+                                                                <div class="font-bold text-black">
+                                                                    {{ $rideDetailPage->from_label ?? 'From' }}</div>
                                                                 <div
                                                                     class="text-primary font-FuturaMdCnBT text-xl md:text-2xl">
                                                                     {{ $from }}.
                                                                     @if (optional($ride)->pickup)
                                                                         <span class="text-sm text-gray-700">
-                                                                            {{ $rideDetailPage->pickup_at_label ?? 'Pick-up at' }}: {{ $ride->pickup }}
+                                                                            {{ $rideDetailPage->pickup_at_label ?? 'Pick-up at' }}:
+                                                                            {{ $ride->pickup }}
                                                                         </span>
                                                                     @endif
                                                                 </div>
@@ -641,13 +674,15 @@
                                                                 </span>
                                                             </div>
                                                             <div class="ml-12 md:ml-20">
-                                                                <div class="font-bold text-black">{{$rideDetailPage->to_label ?? 'To'}}</div>
+                                                                <div class="font-bold text-black">
+                                                                    {{ $rideDetailPage->to_label ?? 'To' }}</div>
                                                                 <div
                                                                     class="text-primary font-FuturaMdCnBT text-xl md:text-2xl">
                                                                     {{ $to }}.
                                                                     @if (optional($ride)->dropoff)
                                                                         <span class="text-sm text-gray-700">
-                                                                            {{ $rideDetailPage->dropoff_at_label ?? 'Drop-off at' }}: {{ $ride->dropoff }}
+                                                                            {{ $rideDetailPage->dropoff_at_label ?? 'Drop-off at' }}:
+                                                                            {{ $ride->dropoff }}
                                                                         </span>
                                                                     @endif
                                                                 </div>
@@ -693,126 +728,129 @@
                                                             : $iconPlaceholder;
                                                     };
                                                 @endphp
-                                                        <div
-                                                            class="col-span-4 p-4 flex justify-start items-center no-scrollbar overflow-x-auto space-x-2 md:space-x-4">
-                                                            <div class="flex-none w-12 h-12 bg-gray-100 border rounded-full">
-                                                                <img class="w-full h-full object-cover rounded-full"
-                                                                    src="{{ $ride->car_image ?? $iconPlaceholder }}"
-                                                                    alt="">
-                                                            </div>
-                                                            <div class="flex items-center space-x-1">
-                                                                @if ($ride->booking_method == ($postRidePage->booking_option1->features_setting_id ?? null))
+                                                            <div
+                                                                class="col-span-4 p-4 flex justify-start items-center no-scrollbar overflow-x-auto space-x-2 md:space-x-4">
+                                                                <div class="flex-none w-12 h-12 bg-gray-100 border rounded-full">
+                                                                    <img class="w-full h-full object-cover rounded-full"
+                                                                        src="{{ $ride->car_image ?? $iconPlaceholder }}"
+                                                                        alt="">
+                                                                </div>
+                                                                <div class="flex items-center space-x-1">
+                                                                    @if ($ride->booking_method == ($postRidePage->booking_option1->features_setting_id ?? null))
     <span class="inline-block cursor-help"
-                                                                        data-tippy-content="{{ $postRidePage->booking_option1_tooltip }}"><img
-                                                                            class="w-8 h-8"
-                                                                            src="{{ $iconSrc($postRidePage->booking_option1) }}"
-                                                                            alt=""></span>
+                                                                            data-tippy-content="{{ $postRidePage->booking_option1_tooltip }}"><img
+                                                                                class="w-8 h-8"
+                                                                                src="{{ $iconSrc($postRidePage->booking_option1) }}"
+                                                                                alt=""></span>
 @elseif ($ride->booking_method == ($postRidePage->booking_option2->features_setting_id ?? null))
     <span class="inline-block cursor-help"
-                                                                        data-tippy-content="{{ $postRidePage->booking_option2_tooltip }}"><img
-                                                                            class="w-8 h-8"
-                                                                            src="{{ $iconSrc($postRidePage->booking_option2) }}"
-                                                                            alt=""></span>
+                                                                            data-tippy-content="{{ $postRidePage->booking_option2_tooltip }}"><img
+                                                                                class="w-8 h-8"
+                                                                                src="{{ $iconSrc($postRidePage->booking_option2) }}"
+                                                                                alt=""></span>
     @endif
-                                                                @if ($ride->payment_method == ($findRidePage->payment_methods_option2->features_setting_id ?? null))
+                                                                    @if ($ride->payment_method == ($findRidePage->payment_methods_option2->features_setting_id ?? null))
     <span class="inline-block cursor-help"
-                                                                        data-tippy-content="{{ $postRidePage->payment_methods_option1_tooltip }}"><img
-                                                                            class="w-8 h-8"
-                                                                            src="{{ $iconSrc($findRidePage->payment_methods_option2) }}"
-                                                                            alt=""></span>
+                                                                            data-tippy-content="{{ $postRidePage->payment_methods_option1_tooltip }}"><img
+                                                                                class="w-8 h-8"
+                                                                                src="{{ $iconSrc($findRidePage->payment_methods_option2) }}"
+                                                                                alt=""></span>
 @elseif ($ride->payment_method == ($findRidePage->payment_methods_option3->features_setting_id ?? null))
     <span class="inline-block cursor-help"
-                                                                        data-tippy-content="{{ $postRidePage->payment_methods_option2_tooltip }}"><img
-                                                                            class="w-8 h-8"
-                                                                            src="{{ $iconSrc($findRidePage->payment_methods_option3) }}"
-                                                                            alt=""></span>
+                                                                            data-tippy-content="{{ $postRidePage->payment_methods_option2_tooltip }}"><img
+                                                                                class="w-8 h-8"
+                                                                                src="{{ $iconSrc($findRidePage->payment_methods_option3) }}"
+                                                                                alt=""></span>
 @elseif ($ride->payment_method == ($findRidePage->payment_methods_option4->features_setting_id ?? null))
     <span class="inline-block cursor-help"
-                                                                        data-tippy-content="{{ $postRidePage->payment_methods_option3_tooltip }}"><img
-                                                                            class="w-8 h-8"
-                                                                            src="{{ $iconSrc($findRidePage->payment_methods_option4) }}"
-                                                                            alt=""></span>
+                                                                            data-tippy-content="{{ $postRidePage->payment_methods_option3_tooltip }}"><img
+                                                                                class="w-8 h-8"
+                                                                                src="{{ $iconSrc($findRidePage->payment_methods_option4) }}"
+                                                                                alt=""></span>
     @endif
-                                                                @if ($ride->smoke == ($findRidePage->smoking_option1->features_setting_id ?? null))
+                                                                    @if ($ride->smoke == ($findRidePage->smoking_option1->features_setting_id ?? null))
     <span class="inline-block cursor-help"
-                                                                        data-tippy-content="{{ $postRidePage->smoking_option1_tooltip }}"><img
-                                                                            class="w-8 h-8"
-                                                                            src="{{ $iconSrc($findRidePage->smoking_option1) }}"
-                                                                            alt=""></span>
+                                                                            data-tippy-content="{{ $postRidePage->smoking_option1_tooltip }}"><img
+                                                                                class="w-8 h-8"
+                                                                                src="{{ $iconSrc($findRidePage->smoking_option1) }}"
+                                                                                alt=""></span>
 @elseif ($ride->smoke == ($findRidePage->smoking_option2->features_setting_id ?? null))
     <span class="inline-block cursor-help"
-                                                                        data-tippy-content="{{ $postRidePage->smoking_option2_tooltip }}"><img
-                                                                            class="w-8 h-8"
-                                                                            src="{{ $iconSrc($findRidePage->smoking_option2) }}"
-                                                                            alt=""></span>
+                                                                            data-tippy-content="{{ $postRidePage->smoking_option2_tooltip }}"><img
+                                                                                class="w-8 h-8"
+                                                                                src="{{ $iconSrc($findRidePage->smoking_option2) }}"
+                                                                                alt=""></span>
     @endif
-                                                                @if ($ride->animal_friendly == ($findRidePage->pets_allowed_option1->features_setting_id ?? null))
+                                                                    @if ($ride->animal_friendly == ($findRidePage->pets_allowed_option1->features_setting_id ?? null))
     <span class="inline-block cursor-help"
-                                                                        data-tippy-content="{{ $postRidePage->animals_option1_tooltip }}"><img
-                                                                            class="w-8 h-8"
-                                                                            src="{{ $iconSrc($findRidePage->pets_allowed_option1) }}"
-                                                                            alt=""></span>
+                                                                            data-tippy-content="{{ $postRidePage->animals_option1_tooltip }}"><img
+                                                                                class="w-8 h-8"
+                                                                                src="{{ $iconSrc($findRidePage->pets_allowed_option1) }}"
+                                                                                alt=""></span>
 @elseif ($ride->animal_friendly == ($findRidePage->pets_allowed_option2->features_setting_id ?? null))
     <span class="inline-block cursor-help"
-                                                                        data-tippy-content="{{ $postRidePage->animals_option2_tooltip }}"><img
-                                                                            class="w-8 h-8"
-                                                                            src="{{ $iconSrc($findRidePage->pets_allowed_option2) }}"
-                                                                            alt=""></span>
+                                                                            data-tippy-content="{{ $postRidePage->animals_option2_tooltip }}"><img
+                                                                                class="w-8 h-8"
+                                                                                src="{{ $iconSrc($findRidePage->pets_allowed_option2) }}"
+                                                                                alt=""></span>
 @elseif ($ride->animal_friendly == ($findRidePage->pets_allowed_option3->features_setting_id ?? null))
     <span class="inline-block cursor-help"
-                                                                        data-tippy-content="{{ $postRidePage->animals_option3_tooltip }}"><img
-                                                                            class="w-8 h-8"
-                                                                            src="{{ $iconSrc($findRidePage->pets_allowed_option3) }}"
-                                                                            alt=""></span>
+                                                                            data-tippy-content="{{ $postRidePage->animals_option3_tooltip }}"><img
+                                                                                class="w-8 h-8"
+                                                                                src="{{ $iconSrc($findRidePage->pets_allowed_option3) }}"
+                                                                                alt=""></span>
     @endif
-                                                                @if ($ride->luggage == ($findRidePage->luggage_option1->features_setting_id ?? null))
+                                                                    @if ($ride->luggage == ($findRidePage->luggage_option1->features_setting_id ?? null))
     <span class="inline-block cursor-help"
-                                                                        data-tippy-content="{{ $postRidePage->luggage_option1_tooltip }}"><img
-                                                                            class="w-8 h-8"
-                                                                            src="{{ $iconSrc($findRidePage->luggage_option1) }}"
-                                                                            alt=""></span>
+                                                                            data-tippy-content="{{ $postRidePage->luggage_option1_tooltip }}"><img
+                                                                                class="w-8 h-8"
+                                                                                src="{{ $iconSrc($findRidePage->luggage_option1) }}"
+                                                                                alt=""></span>
 @elseif ($ride->luggage == ($findRidePage->luggage_option2->features_setting_id ?? null))
     <span class="inline-block cursor-help"
-                                                                        data-tippy-content="{{ $postRidePage->luggage_option2_tooltip }}"><img
-                                                                            class="w-8 h-8"
-                                                                            src="{{ $iconSrc($findRidePage->luggage_option2) }}"
-                                                                            alt=""></span>
+                                                                            data-tippy-content="{{ $postRidePage->luggage_option2_tooltip }}"><img
+                                                                                class="w-8 h-8"
+                                                                                src="{{ $iconSrc($findRidePage->luggage_option2) }}"
+                                                                                alt=""></span>
 @elseif ($ride->luggage == ($findRidePage->luggage_option3->features_setting_id ?? null))
     <span class="inline-block cursor-help"
-                                                                        data-tippy-content="{{ $postRidePage->luggage_option3_tooltip }}"><img
-                                                                            class="w-8 h-8"
-                                                                            src="{{ $iconSrc($findRidePage->luggage_option3) }}"
-                                                                            alt=""></span>
+                                                                            data-tippy-content="{{ $postRidePage->luggage_option3_tooltip }}"><img
+                                                                                class="w-8 h-8"
+                                                                                src="{{ $iconSrc($findRidePage->luggage_option3) }}"
+                                                                                alt=""></span>
 @elseif ($ride->luggage == ($findRidePage->luggage_option4->features_setting_id ?? null))
     <span class="inline-block cursor-help"
-                                                                        data-tippy-content="{{ $postRidePage->luggage_option4_tooltip }}"><img
-                                                                            class="w-8 h-8"
-                                                                            src="{{ $iconSrc($findRidePage->luggage_option4) }}"
-                                                                            alt=""></span>
+                                                                            data-tippy-content="{{ $postRidePage->luggage_option4_tooltip }}"><img
+                                                                                class="w-8 h-8"
+                                                                                src="{{ $iconSrc($findRidePage->luggage_option4) }}"
+                                                                                alt=""></span>
 @elseif ($ride->luggage == ($findRidePage->luggage_option5->features_setting_id ?? null))
     <span class="inline-block cursor-help"
-                                                                        data-tippy-content="{{ $postRidePage->luggage_option5_tooltip }}"><img
-                                                                            class="w-8 h-8"
-                                                                            src="{{ $iconSrc($findRidePage->luggage_option5) }}"
-                                                                            alt=""></span>
+                                                                            data-tippy-content="{{ $postRidePage->luggage_option5_tooltip }}"><img
+                                                                                class="w-8 h-8"
+                                                                                src="{{ $iconSrc($findRidePage->luggage_option5) }}"
+                                                                                alt=""></span>
     @endif
-                                                                @include('partials.ride_feature_icons', [
-                                                                    'rideFeatures' => $ride->features,
-                                                                    'postRidePage' => $postRidePage,
-                                                                    'iconClass' => 'w-8 h-8 cursor-help',
-                                                                ])
-                                                            </div>
-                                                        </div> -->
+                                                                    @include(
+                                                                        'partials.ride_feature_icons',
+                                                                        [
+                                                                            'rideFeatures' => $ride->features,
+                                                                            'postRidePage' => $postRidePage,
+                                                                            'iconClass' => 'w-8 h-8 cursor-help',
+                                                                        ]
+                                                                    )
+                                                                </div>
+                                                            </div> -->
                                             </div>
                                             <div
                                                 class="border-t border-gray-300 grid grid-cols-1 divide-x divide-gray-300">
                                                 <div class="flex items-center justify-between p-4 w-full">
                                                     <div class="flex items-center space-x-2">
                                                         <!-- <div class="w-12 h-12 rounded-full overflow-hidden">
-                                                                    <img class="w-full h-full object-contain"
-                                                                        src="{{ $ride->driver?->profile_image ?? $iconPlaceholder }}"
-                                                                        alt="">
-                                                                </div> -->
+                                                                        <img class="w-full h-full object-contain"
+                                                                            src="{{ $ride->driver?->profile_image ?? $iconPlaceholder }}"
+                                                                            alt="">
+                                                                    </div> -->
                                                         <div class="text-center ml-4">
                                                             <p class="font-semibold">
                                                                 {{-- @isset($findRidePage->card_section_driver)
@@ -1657,24 +1695,24 @@
                 </div>
             </div>
             <!-- <div class="flex flex-wrap justify-center items-center gap-4 md:gap-8 mt-4 md:mt-6 xl:mt-10">
-                @foreach ($articles as $article)
-                    <div class="rounded bg-white shadow-3xl p-5">
-                        <div class="p-4">
-                            <div>
-                                <p class="text-2xl font-FuturaMdCnBT">{{ $article->articleDetail[0]->title }}</p>
-                                <p class="lg:text-sm md:text-base">Agency: {{ $article->agency }}</p>
-                                <p class="lg:text-sm md:text-base">Added by: {{ $article->added_by }}</p>
-                            </div>
-                            <div class="flex justify-center items-center mt-3">
-                                <a href="{{ route('news_detail', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $article->id]) }}"
-                                    class="bg-primary text-white py-2 px-3 rounded">
-                                    Read article
-                                </a>
+                    @foreach ($articles as $article)
+    <div class="rounded bg-white shadow-3xl p-5">
+                            <div class="p-4">
+                                <div>
+                                    <p class="text-2xl font-FuturaMdCnBT">{{ $article->articleDetail[0]->title }}</p>
+                                    <p class="lg:text-sm md:text-base">Agency: {{ $article->agency }}</p>
+                                    <p class="lg:text-sm md:text-base">Added by: {{ $article->added_by }}</p>
+                                </div>
+                                <div class="flex justify-center items-center mt-3">
+                                    <a href="{{ route('news_detail', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $article->id]) }}"
+                                        class="bg-primary text-white py-2 px-3 rounded">
+                                        Read article
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                @endforeach
-            </div> -->
+    @endforeach
+                </div> -->
         </div>
     </section>
 
@@ -1908,7 +1946,7 @@
 @section('script')
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     @php
-        $flatpickrLocale = match(app()->getLocale()) {
+        $flatpickrLocale = match (app()->getLocale()) {
             'ar' => 'ar',
             'es' => 'es',
             'fr' => 'fr',
@@ -1919,411 +1957,35 @@
             default => null,
         };
     @endphp
-    @if($flatpickrLocale)
+    @if ($flatpickrLocale)
         <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/{{ $flatpickrLocale }}.js"></script>
     @endif
-    {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
+
     <script>
-        var errorFromCityRequrired = @json(__('validation.custom.from.required')) ?? "The origin is required";
-        var errorToCityRequrired = @json(__('validation.custom.to.required')) ?? "The destination is required";
-        var errorCityMissing = @json(__('validation.custom.city_not_in_record.message')) ?? "Please select a valid city from the dropdown";
-
-        // Google Places Autocomplete initialization - Define function before loading Google Maps API
-        let fromAutocomplete, toAutocomplete, geocoder;
-        // Store selected place data for validation
-        let selectedFromPlace = null;
-        let selectedToPlace = null;
-        // Flag to prevent input event from interfering with place selection
-        let isSettingPlaceValue = false;
-        // Flag to prevent blur from clearing when user is selecting from dropdown
-        let isSelectingFromDropdown = false;
-
-        // This function will be called by Google Maps API when it loads
-        window.initGooglePlaces = function() {
-            geocoder = new google.maps.Geocoder();
-
-            // Initialize autocomplete for "From" input - Canada only
-            fromAutocomplete = new google.maps.places.Autocomplete(
-                document.getElementById('fromInput'), {
-                    componentRestrictions: {
-                        country: 'ca'
-                    }, // Restrict to Canada
-                    types: ['(cities)'], // Focus on cities
-                    fields: ['address_components', 'formatted_address', 'name', 'place_id']
-                }
-            );
-
-            // Initialize autocomplete for "To" input - Canada only
-            toAutocomplete = new google.maps.places.Autocomplete(
-                document.getElementById('toInput'), {
-                    componentRestrictions: {
-                        country: 'ca'
-                    }, // Restrict to Canada
-                    types: ['(cities)'], // Focus on cities
-                    fields: ['address_components', 'formatted_address', 'name', 'place_id']
-                }
-            );
-
-            // Handle place selection for "From" input
-            fromAutocomplete.addListener('place_changed', function() {
-                const place = fromAutocomplete.getPlace();
-                if (place.address_components && place.place_id) {
-                    isSettingPlaceValue = true; // Set flag to prevent input event interference
-                    isSelectingFromDropdown = true; // Set flag to prevent blur from clearing
-                    const formattedAddress = formatPlaceAddress(place);
-                    selectedFromPlace = {
-                        place_id: place.place_id,
-                        formatted_address: formattedAddress,
-                        value: formattedAddress
-                    };
-                    // Set the formatted address in the input
-                    document.getElementById('fromInput').value = formattedAddress;
-                    // Hide error message if it was showing
-                    const fromError = document.getElementById('fromInputError');
-                    if (fromError) fromError.classList.add('hidden');
-                    // Reset flags after a short delay to allow input event to process
-                    setTimeout(() => {
-                        isSettingPlaceValue = false;
-                        isSelectingFromDropdown = false;
-                    }, 100);
-                }
-            });
-
-            // Handle place selection for "To" input
-            toAutocomplete.addListener('place_changed', function() {
-                const place = toAutocomplete.getPlace();
-                if (place.address_components && place.place_id) {
-                    isSettingPlaceValue = true; // Set flag to prevent input event interference
-                    isSelectingFromDropdown = true; // Set flag to prevent blur from clearing
-                    const formattedAddress = formatPlaceAddress(place);
-                    selectedToPlace = {
-                        place_id: place.place_id,
-                        formatted_address: formattedAddress,
-                        value: formattedAddress
-                    };
-                    // Set the formatted address in the input
-                    document.getElementById('toInput').value = formattedAddress;
-                    // Hide error message if it was showing
-                    const toError = document.getElementById('toInputError');
-                    if (toError) toError.classList.add('hidden');
-                    // Reset flags after a short delay to allow input event to process
-                    setTimeout(() => {
-                        isSettingPlaceValue = false;
-                        isSelectingFromDropdown = false;
-                    }, 100);
-                }
-            });
-
-            // Clear selected place when user manually types in "From" input
-            document.getElementById('fromInput').addEventListener('input', function() {
-                // Don't clear selection if we're programmatically setting the value
-                if (isSettingPlaceValue) {
-                    return;
-                }
-                const currentValue = this.value.trim();
-                // If user manually edits and it doesn't match the selected place, clear the selection
-                if (selectedFromPlace && currentValue !== selectedFromPlace.value) {
-                    selectedFromPlace = null;
-                }
-            });
-
-            // Clear selected place when user manually types in "To" input
-            document.getElementById('toInput').addEventListener('input', function() {
-                // Don't clear selection if we're programmatically setting the value
-                if (isSettingPlaceValue) {
-                    return;
-                }
-                const currentValue = this.value.trim();
-                // If user manually edits and it doesn't match the selected place, clear the selection
-                if (selectedToPlace && currentValue !== selectedToPlace.value) {
-                    selectedToPlace = null;
-                }
-            });
-
-            document.getElementById('fromInput').addEventListener('keydown', async function(event) {
-                if (event.key !== 'Enter') {
-                    return;
-                }
-
-                const resolved = await resolveTypedCityValue(this.value, 'from');
-                if (resolved) {
-                    event.preventDefault();
-                }
-            });
-
-            document.getElementById('toInput').addEventListener('keydown', async function(event) {
-                if (event.key !== 'Enter') {
-                    return;
-                }
-
-                const resolved = await resolveTypedCityValue(this.value, 'to');
-                if (resolved) {
-                    event.preventDefault();
-                }
-            });
-
-            // Detect clicks on autocomplete dropdown to prevent blur from clearing
-            document.addEventListener('mousedown', function(e) {
-                // Check if click is on Google's autocomplete dropdown (pac-container)
-                if (e.target.closest('.pac-container')) {
-                    isSelectingFromDropdown = true;
-                } else {
-                    // If clicking outside dropdown, reset flag after a short delay
-                    setTimeout(() => {
-                        isSelectingFromDropdown = false;
-                    }, 50);
-                }
-            });
-
-            // Validate and show tooltip on blur if no valid place was selected
-            document.getElementById('fromInput').addEventListener('blur', function() {
-
-
-                // Don't validate if we're programmatically setting the value or selecting from dropdown
-                if (isSettingPlaceValue || isSelectingFromDropdown) {
-                    return;
-                }
-                // Add a small delay to allow place_changed event to fire if user selected from dropdown
-                setTimeout(async () => {
-                    // Check again if we're setting a place value or selecting from dropdown
-                    if (isSettingPlaceValue || isSelectingFromDropdown) {
-                        return;
-                    }
-                    let currentValue = this.value.trim();
-                    const fromInputError = document.getElementById('fromInputError');
-
-                    if (currentValue !== '' && (!selectedFromPlace || currentValue !==
-                            selectedFromPlace.value)) {
-                        await resolveTypedCityValue(currentValue, 'from');
-                        currentValue = this.value.trim();
-                    }
-
-                    // Validate: check if input has value but no valid place is selected
-                    if (currentValue === '' || !selectedFromPlace || currentValue !==
-                        selectedFromPlace.value) {
-                        // Clear the selection if invalid
-                        selectedFromPlace = null;
-
-                        // Show error tooltip: required when empty, city not found when invalid text
-                        if (fromInputError) {
-                            const tooltipError = fromInputError.querySelector('.tooltip-error');
-                            if (tooltipError) {
-                                tooltipError.textContent = currentValue === '' ?
-                                    errorFromCityRequrired :
-                                    errorCityMissing;
-                            }
-                            fromInputError.classList.remove('hidden');
-                        }
-                    } else {
-                        // Valid place selected, hide error if showing
-                        if (currentValue !== '' && fromInputError) {
-                            fromInputError.classList.add('hidden');
-                        }
-                    }
-                }, 200);
-            });
-
-            // Validate and show tooltip on blur if no valid place was selected
-            document.getElementById('toInput').addEventListener('blur', function() {
-                // Don't validate if we're programmatically setting the value or selecting from dropdown
-                if (isSettingPlaceValue || isSelectingFromDropdown) {
-                    return;
-                }
-                // Add a small delay to allow place_changed event to fire if user selected from dropdown
-                setTimeout(async () => {
-                    // Check again if we're setting a place value or selecting from dropdown
-                    if (isSettingPlaceValue || isSelectingFromDropdown) {
-                        return;
-                    }
-                    let currentValue = this.value.trim();
-                    const toInputError = document.getElementById('toInputError');
-
-                    if (currentValue !== '' && (!selectedToPlace || currentValue !== selectedToPlace
-                            .value)) {
-                        await resolveTypedCityValue(currentValue, 'to');
-                        currentValue = this.value.trim();
-                    }
-
-                    // Validate: check if input has value but no valid place is selected
-                    if (currentValue === '' || !selectedToPlace || currentValue !== selectedToPlace
-                        .value) {
-                        // Clear the selection if invalid
-                        selectedToPlace = null;
-
-                        // Show error tooltip: required when empty, city not found when invalid text
-                        if (toInputError) {
-                            const tooltipError = toInputError.querySelector('.tooltip-error');
-                            if (tooltipError) {
-                                tooltipError.textContent = currentValue === '' ?
-                                    errorToCityRequrired :
-                                    errorCityMissing;
-                            }
-                            toInputError.classList.remove('hidden');
-                        }
-                    } else {
-                        // Valid place selected, hide error if showing
-                        if (currentValue !== '' && toInputError) {
-                            toInputError.classList.add('hidden');
-                        }
-                    }
-                }, 200);
-            });
-
-            // Hide error tooltip when inputs get focus
-            document.getElementById('fromInput').addEventListener('focus', function() {
-                const fromInputError = document.getElementById('fromInputError');
-                if (fromInputError) {
-                    fromInputError.classList.add('hidden');
-                }
-            });
-
-            document.getElementById('toInput').addEventListener('focus', function() {
-                const toInputError = document.getElementById('toInputError');
-                if (toInputError) {
-                    toInputError.classList.add('hidden');
-                }
-            });
-        };
-
-        async function resolveTypedCityValue(rawValue, target) {
-            const value = (rawValue || '').trim();
-            if (!value || !geocoder) {
-                return false;
-            }
-
-            const inputId = target === 'from' ? 'fromInput' : 'toInput';
-            const input = document.getElementById(inputId);
-
-            try {
-                const response = await geocoder.geocode({
-                    address: value,
-                    componentRestrictions: {
-                        country: 'CA'
-                    }
-                });
-                const result = response?.results?.find((item) => item.address_components?.some((component) =>
-                    component.types.includes('locality') ||
-                    component.types.includes('administrative_area_level_2')
-                ));
-
-                if (!result) {
-                    return false;
-                }
-
-                const formattedAddress = formatPlaceAddress(result);
-                if (!formattedAddress) {
-                    return false;
-                }
-
-                isSettingPlaceValue = true;
-
-                const selectedPlace = {
-                    place_id: result.place_id,
-                    formatted_address: formattedAddress,
-                    value: formattedAddress
-                };
-
-                if (target === 'from') {
-                    selectedFromPlace = selectedPlace;
-                } else {
-                    selectedToPlace = selectedPlace;
-                }
-
-                if (input) {
-                    input.value = formattedAddress;
-                }
-
-                const errorEl = document.getElementById(target === 'from' ? 'fromInputError' : 'toInputError');
-                if (errorEl) {
-                    errorEl.classList.add('hidden');
-                }
-
-                setTimeout(() => {
-                    isSettingPlaceValue = false;
-                }, 100);
-
-                return true;
-            } catch (error) {
-                return false;
-            }
-        }
-
-        // Format place address to "City, Province, Canada" format
-        function formatPlaceAddress(place) {
-            let city = '';
-            let province = '';
-            let country = 'Canada'; // Default to Canada since we're restricting to CA
-
-            // First, try to extract from address components
-            for (const component of place.address_components) {
-                const types = component.types;
-
-                // Prioritize locality for city (this is the most reliable for cities)
-                if (!city && types.includes('locality')) {
-                    city = component.long_name;
-                }
-                // Fallback to administrative_area_level_2 if no locality found
-                else if (!city && types.includes('administrative_area_level_2')) {
-                    city = component.long_name;
-                }
-
-                // Get province/state (administrative_area_level_1)
-                if (!province && types.includes('administrative_area_level_1')) {
-                    province = component.short_name; // Use short name for province code (e.g., ON, BC)
-                }
-
-                // Get country
-                if (types.includes('country')) {
-                    country = component.long_name;
-                }
-            }
-
-            // If we still don't have a city, try parsing from place name
-            // The place.name is what's shown in the autocomplete dropdown
-            if (!city && place.name) {
-                // Parse "City, Province" or "City, Province, Country" format
-                const nameParts = place.name.split(',').map(part => part.trim());
-                if (nameParts.length >= 1) {
-                    city = nameParts[0];
-                }
-                if (nameParts.length >= 2 && !province) {
-                    // Check if second part is a province code (2-3 letters) or full name
-                    const secondPart = nameParts[1];
-                    if (secondPart.length <= 3) {
-                        province = secondPart.toUpperCase();
-                    }
-                }
-            }
-
-            // If still no city, try formatted_address as last resort
-            if (!city && place.formatted_address) {
-                const addrParts = place.formatted_address.split(',').map(part => part.trim());
-                if (addrParts.length >= 1) {
-                    city = addrParts[0];
-                }
-            }
-
-            // Format: "City, Province, Canada"
-            let formattedAddress = city || '';
-            if (province) {
-                formattedAddress += (formattedAddress ? ', ' : '') + province;
-            }
-            if (country && formattedAddress) {
-                formattedAddress += ', ' + country;
-            }
-
-            return formattedAddress || place.name || place.formatted_address || '';
-        }
-    </script>
-    <!-- Google Places Autocomplete API -->
-    <script
-        src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_API_KEY') }}&libraries=places&callback=initGooglePlaces"
-        async defer></script>
-    <script>
-        const dateInput = document.getElementById('dateInput');
+        const dateInput = document.getElementById('departure_date');
 
         const profileLocale = @json(app()->getLocale());
         const flatpickrLocaleKey = @json($flatpickrLocale);
+        let departureDatePicker = null;
+        const departureDateClearButton = document.getElementById('departure-date-clear-button');
+        
+        const syncDepartureDateClearButton = () => {
+            if (!departureDateClearButton || !dateInput) {
+                return;
+            }
+            const hasDateValue = dateInput.value.trim() !== '';
+            departureDateClearButton.classList.toggle('hidden', !hasDateValue);
+        };
+
+        const clearDepartureDate = () => {
+            if (departureDatePicker) {
+                departureDatePicker.clear();
+            } else if (dateInput) {
+                dateInput.value = '';
+            }
+            syncDepartureDateClearButton();
+        };
+
         const flatpickrOptions = {
             dateFormat: 'F d, Y', // Display format (e.g., "January 15, 2024")
             altInput: true,
@@ -2333,6 +1995,9 @@
             allowInput: true, // Allow manual input
             clickOpens: true, // Open calendar on click
             theme: 'default', // Use default theme
+            onChange: function(selectedDates, dateStr, instance) {
+                syncDepartureDateClearButton();
+            }
         };
 
         if (
@@ -2344,7 +2009,175 @@
             flatpickrOptions.locale = window.flatpickr.l10ns[flatpickrLocaleKey];
         }
 
-        flatpickr(dateInput, flatpickrOptions);
+        if (dateInput) {
+            departureDatePicker = flatpickr(dateInput, flatpickrOptions);
+        }
+
+        // Form validation function
+        const validateSearchForm = () => {
+            const originInput = document.querySelector('input[name="origin[label]"]:not([type="hidden"])');
+            const destinationInput = document.querySelector('input[name="destination[label]"]:not([type="hidden"])');
+            const originComponent = originInput?.closest('[wire\\:id]');
+            const destinationComponent = destinationInput?.closest('[wire\\:id]');
+            
+            let originCityId = null;
+            let destinationCityId = null;
+            let originLabel = '';
+            let destinationLabel = '';
+
+            // Get values from hidden inputs
+            if (originComponent) {
+                const originCityIdInput = originComponent.querySelector('input[name="origin[city_id]"]');
+                originCityId = originCityIdInput?.value?.trim() || null;
+                originLabel = originInput?.value?.trim() || '';
+            }
+
+            if (destinationComponent) {
+                const destinationCityIdInput = destinationComponent.querySelector('input[name="destination[city_id]"]');
+                destinationCityId = destinationCityIdInput?.value?.trim() || null;
+                destinationLabel = destinationInput?.value?.trim() || '';
+            }
+
+            // Also check Livewire component state if available
+            if (window.Livewire && originComponent && destinationComponent) {
+                const originWireId = originComponent.getAttribute('wire:id');
+                const destinationWireId = destinationComponent.getAttribute('wire:id');
+
+                if (originWireId && destinationWireId) {
+                    try {
+                        const originLivewire = window.Livewire.find(originWireId);
+                        const destinationLivewire = window.Livewire.find(destinationWireId);
+
+                        if (originLivewire) {
+                            const livewireCityId = originLivewire.get('cityId');
+                            if (livewireCityId) {
+                                originCityId = String(livewireCityId);
+                            }
+                            const livewireQuery = originLivewire.get('query')?.trim() || '';
+                            if (livewireQuery && !originLabel) {
+                                originLabel = livewireQuery;
+                            }
+                        }
+
+                        if (destinationLivewire) {
+                            const livewireCityId = destinationLivewire.get('cityId');
+                            if (livewireCityId) {
+                                destinationCityId = String(livewireCityId);
+                            }
+                            const livewireQuery = destinationLivewire.get('query')?.trim() || '';
+                            if (livewireQuery && !destinationLabel) {
+                                destinationLabel = livewireQuery;
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('Error accessing Livewire components:', e);
+                    }
+                }
+            }
+
+            // Validate: both origin and destination must have valid city IDs
+            const isValid = originCityId && destinationCityId && originLabel && destinationLabel;
+
+            return {
+                isValid,
+                originCityId,
+                destinationCityId,
+                originLabel,
+                destinationLabel
+            };
+        };
+
+        // Initialize button visibility and event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            syncDepartureDateClearButton();
+
+            // Handle departure date clear button
+            if (departureDateClearButton) {
+                departureDateClearButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    clearDepartureDate();
+                });
+            }
+
+            // Form submission validation
+            const homeSearchForm = document.getElementById('home-search-form');
+            if (homeSearchForm) {
+                homeSearchForm.addEventListener('submit', function(e) {
+                    const validation = validateSearchForm();
+                    
+                    if (!validation.isValid) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const originInput = document.querySelector('input[name="origin[label]"]:not([type="hidden"])');
+                        const destinationInput = document.querySelector('input[name="destination[label]"]:not([type="hidden"])');
+                        const originComponent = originInput?.closest('[wire\\:id]');
+                        const destinationComponent = destinationInput?.closest('[wire\\:id]');
+                        
+                        const invalidCityMessage = @json(__('validation.custom.city_not_in_record.message'));
+                        const originRequiredMessage = @json(__('validation.custom.origin.message'));
+                        const destinationRequiredMessage = @json(__('validation.custom.destination.message'));
+                        
+                        
+                        // Set error messages on Livewire components
+                        if (window.Livewire && originComponent && destinationComponent) {
+                            const originWireId = originComponent.getAttribute('wire:id');
+                            const destinationWireId = destinationComponent.getAttribute('wire:id');
+                            
+                            if (originWireId && destinationWireId) {
+                                try {
+                                    const originLivewire = window.Livewire.find(originWireId);
+                                    const destinationLivewire = window.Livewire.find(destinationWireId);
+                                    
+                                    if (originLivewire) {
+                                        if (!validation.originCityId || !validation.originLabel) {
+                                            originLivewire.set('errorMessage', validation.originLabel ? invalidCityMessage : originRequiredMessage);
+                                        } else {
+                                            originLivewire.set('errorMessage', null);
+                                        }
+                                    }
+                                    
+                                    if (destinationLivewire) {
+                                        if (!validation.destinationCityId || !validation.destinationLabel) {
+                                            destinationLivewire.set('errorMessage', validation.destinationLabel ? invalidCityMessage : destinationRequiredMessage);
+                                        } else {
+                                            destinationLivewire.set('errorMessage', null);
+                                        }
+                                    }
+                                } catch (err) {
+                                    console.warn('Error setting Livewire error messages:', err);
+                                }
+                            }
+                        }
+                        
+                        return false;
+                    } else {
+                        // Clear error messages if validation passes
+                        if (window.Livewire && originComponent && destinationComponent) {
+                            const originWireId = originComponent.getAttribute('wire:id');
+                            const destinationWireId = destinationComponent.getAttribute('wire:id');
+                            
+                            if (originWireId && destinationWireId) {
+                                try {
+                                    const originLivewire = window.Livewire.find(originWireId);
+                                    const destinationLivewire = window.Livewire.find(destinationWireId);
+                                    
+                                    if (originLivewire) {
+                                        originLivewire.set('errorMessage', null);
+                                    }
+                                    if (destinationLivewire) {
+                                        destinationLivewire.set('errorMessage', null);
+                                    }
+                                } catch (err) {
+                                    // Ignore errors when clearing
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
 
         const mobileCloseRedirectUrl = "{{ route('mobile_close_redirect') }}";
 
@@ -2362,9 +2195,7 @@
             closeModal('success-modal1');
         }
 
-        //  function closeModal() {
-        //     document.getElementById('my-modal').style.display = 'none';
-        // }
+
         function closeModal(modalId) {
             const modal = document.getElementById(modalId);
             if (modal) {
@@ -2382,43 +2213,6 @@
             fullReview.style.display = isExpanded ? 'none' : 'inline';
             shortReview.style.display = isExpanded ? 'inline' : 'none';
             toggleBtn.textContent = isExpanded ? 'Read More' : 'Read Less';
-        }
-
-        // Rest of your existing JavaScript...
-        // const togglePassword = document.getElementById('togglePassword');
-        // const password = document.getElementById('password');
-
-        // togglePassword.addEventListener('click', function () {
-        //     const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-        //     password.setAttribute('type', type);
-
-        //     if (type === 'password') {
-        //         togglePassword.innerHTML = `
-    //             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 cursor-pointer text-gray-600">
-    //                 <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
-    //                 <path fill-rule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 0 1 0-1.113ZM17.25 12a5.25 5.25 0 1 1-10.5 0 5.25 5.25 0 0 1 10.5 0Z" clip-rule="evenodd" />
-    //             </svg>`;
-        //     } else {
-        //         togglePassword.innerHTML = `
-    //         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" fill="currentColor" class="w-5 h-5 text-gray-600 cursor-pointer">
-    //             <path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c8.4-19.3 10.6-41.4 4.8-63.3c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2 6.1-7.4 11.7c2.1 6.4 3.3 13.2 3.3 20.3c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zM373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5L373 389.9z"/>
-    //         </svg>`;
-        //     }
-        // });
-
-        function swapLocations() {
-            // Get the values of the "From" and "To" input fields
-            const fromValue = document.getElementById('fromInput').value;
-            const toValue = document.getElementById('toInput').value;
-
-            // Swap the values
-            document.getElementById('fromInput').value = toValue;
-            document.getElementById('toInput').value = fromValue;
-
-            // Swap the selected place data as well
-            const tempPlace = selectedFromPlace;
-            selectedFromPlace = selectedToPlace;
-            selectedToPlace = tempPlace;
         }
 
 
@@ -2473,80 +2267,6 @@
         });
 
 
-        function navigateToSearchRoute() {
-            // Get the values of the "From," "To," and "Date" input fields
-            const fromValue = document.getElementById('fromInput').value.trim();
-            const toValue = document.getElementById('toInput').value.trim();
-            const dateValue = document.getElementById('dateInput').value;
-
-            // Get the tooltip error element
-            const fromInputError = document.getElementById('fromInputError');
-            const toInputError = document.getElementById('toInputError');
-
-            // Validate that both inputs contain valid selected places (not just any string)
-            let isValid = true;
-
-            // Check if "From" or "To" fields are empty
-            if (fromValue === '' || !selectedFromPlace || fromValue !== selectedFromPlace.value) {
-                // Show the tooltip
-                if (fromInputError) {
-                    const tooltipError = fromInputError.querySelector('.tooltip-error');
-                    if (tooltipError) {
-                        tooltipError.textContent = fromValue === '' ? errorFromCityRequrired :
-                            errorCityMissing; // Show required error if empty, otherwise show invalid error
-                    }
-                    fromInputError.classList.remove('hidden');
-                }
-                isValid = false;
-            }
-
-            if (toValue === '' || !selectedToPlace || toValue !== selectedToPlace.value) {
-                // Show the tooltip
-                if (toInputError) {
-                    const tooltipError = toInputError.querySelector('.tooltip-error');
-                    if (tooltipError) {
-                        tooltipError.textContent = toValue === '' ? errorToCityRequrired :
-                            errorCityMissing; // Show required error if empty, otherwise show invalid error
-                    }
-                    toInputError.classList.remove('hidden');
-                }
-                isValid = false;
-            }
-
-            if (!isValid) {
-                return; // If not valid, do not proceed with navigation
-            }
-
-            // Both fields are filled and valid, hide error tooltip if it's showing
-            if (fromInputError) {
-                fromInputError.classList.add('hidden');
-                const tooltipError = fromInputError.querySelector('.tooltip-error');
-                if (tooltipError) {
-                    tooltipError.textContent = ''; // Clear any previous error message
-                }
-            }
-            if (toInputError) {
-                toInputError.classList.add('hidden');
-                const tooltipError = toInputError.querySelector('.tooltip-error');
-                if (tooltipError) {
-                    tooltipError.textContent = ''; // Clear any previous error message
-                }
-            }
-
-            // Construct the URL with query parameters
-            let searchUrl =
-                `{{ route('search_ride', ['lang' => optional($selectedLanguage)->abbreviation]) }}?from=${encodeURIComponent(fromValue)}&to=${encodeURIComponent(toValue)}`;
-
-            // Check if a date is provided and append it to the URL if available
-            if (dateValue) {
-                searchUrl += `&date=${encodeURIComponent(dateValue)}`;
-            }
-
-            // Navigate to the constructed URL
-            window.location.href = searchUrl;
-        }
-
-
 
         function closeModal() {
             // Remove the modal from the DOM
@@ -2557,6 +2277,81 @@
 
             // Alternatively, if you want to hide it instead of removing:
             // modal.style.display = 'none';
+        }
+
+        function swapLocations() {
+            const originInput = document.querySelector('input[name="origin[label]"]:not([type="hidden"])');
+            const destinationInput = document.querySelector('input[name="destination[label]"]:not([type="hidden"])');
+            const originComponent = originInput?.closest('[wire\\:id]');
+            const destinationComponent = destinationInput?.closest('[wire\\:id]');
+            const originCityIdInput = originComponent?.querySelector('input[name="origin[city_id]"]');
+            const destinationCityIdInput = destinationComponent?.querySelector('input[name="destination[city_id]"]');
+            const originCityId = originCityIdInput?.value ? parseInt(originCityIdInput.value, 10) : null;
+            const destinationCityId = destinationCityIdInput?.value ? parseInt(destinationCityIdInput.value, 10) : null;
+            const originLabel = originInput?.value ?? '';
+            const destinationLabel = destinationInput?.value ?? '';
+
+            if (window.Livewire && originComponent && destinationComponent) {
+                const originWireId = originComponent.getAttribute('wire:id');
+                const destinationWireId = destinationComponent.getAttribute('wire:id');
+
+                if (originWireId && destinationWireId) {
+                    try {
+                        const originLivewire = window.Livewire.find(originWireId);
+                        const destinationLivewire = window.Livewire.find(destinationWireId);
+
+                        if (originLivewire && destinationLivewire) {
+                            if (destinationCityId) {
+                                originLivewire.call('selectCity', destinationCityId);
+                            } else {
+                                originLivewire.set('query', destinationLabel);
+                                originLivewire.set('cityId', null);
+                                originLivewire.set('suggestions', []);
+                                originLivewire.set('errorMessage', null);
+                            }
+
+                            if (originCityId) {
+                                destinationLivewire.call('selectCity', originCityId);
+                            } else {
+                                destinationLivewire.set('query', originLabel);
+                                destinationLivewire.set('cityId', null);
+                                destinationLivewire.set('suggestions', []);
+                                destinationLivewire.set('errorMessage', null);
+                            }
+                        }
+                    } catch (e) {
+                        if (originInput && destinationInput) {
+                            originInput.value = destinationLabel;
+                            destinationInput.value = originLabel;
+
+                            if (originCityIdInput) {
+                                originCityIdInput.value = destinationCityId ?? '';
+                            }
+                            if (destinationCityIdInput) {
+                                destinationCityIdInput.value = originCityId ?? '';
+                            }
+
+                            originInput.dispatchEvent(new Event('input', {
+                                bubbles: true
+                            }));
+                            destinationInput.dispatchEvent(new Event('input', {
+                                bubbles: true
+                            }));
+                        }
+                    }
+                }
+            } else {
+                if (originInput && destinationInput) {
+                    originInput.value = destinationLabel;
+                    destinationInput.value = originLabel;
+                    originInput.dispatchEvent(new Event('input', {
+                        bubbles: true
+                    }));
+                    destinationInput.dispatchEvent(new Event('input', {
+                        bubbles: true
+                    }));
+                }
+            }
         }
     </script>
 @endsection

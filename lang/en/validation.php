@@ -192,12 +192,19 @@ return
 			'city_not_in_record' => [
 				'message' => 'We could not find this city name in our records, please double-check the spelling.',
 			],
-
+			'origin' => [
+				'message' => 'The origin is required.',
+			],
+			'destination' => [
+				'message' => 'The destination is required.',
+			],
 			'origin.label' => [
 				'required' => 'The origin is required.',
+				'required_without' => 'The origin is required.'
 			],
 			'destination.label' => [
 				'required' => 'The destination is required.',
+				'required_without' => 'The destination is required.'
 			],
 			'date' => [
 				'required' => 'The date is required.',

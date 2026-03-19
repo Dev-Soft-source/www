@@ -1880,8 +1880,8 @@
         var toAutocompleteFolkRide = null;
         var isSettingPlaceValueFolkRide = false;
         var isSelectingFromDropdownFolkRide = false;
-        var errorFromRequiredFolkRide = @json(__('validation.custom.from.required'));
-        var errorToRequiredFolkRide = @json(__('validation.custom.to.required'));
+        var errorFromRequiredFolkRide = @json(__('validation.custom.origin.label.required'));
+        var errorToRequiredFolkRide = @json(__('validation.custom.destination.label.required'));
         var errorCityMissingFolkRide = @json(__('validation.custom.city_not_in_record.message'));
 
         // Function to close the hide ride modal
