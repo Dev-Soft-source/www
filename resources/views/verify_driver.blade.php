@@ -286,14 +286,31 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
     <script>
-        var hasErrors = {{ $errors->any() ? 'true' : 'false' }};
+        // Keep as number (0/1) to avoid JS linter confusion with Blade syntax.
+        var hasErrors = {{ $errors->any() ? 1 : 0 }};
         var uploadedImage = "{{ session('uploaded_image') }}";
         var hasUploadedImage = uploadedImage && uploadedImage !== "null";
         var vehicleImage = "{{ $user->driver_liscense }}";
         var hasVehicleImage = vehicleImage && vehicleImage !== "null";
+        let hasNewSelectedImage = false;
+
+        function setSubmitEnabled(enabled) {
+            const $btn = $(".submitBtn");
+            if (enabled) {
+                $btn.prop("disabled", false);
+                $btn.removeClass('disabled:bg-primary/20 cursor-not-allowed disabled:border-none');
+            } else {
+                $btn.prop("disabled", true);
+                $btn.addClass('disabled:bg-primary/20 cursor-not-allowed disabled:border-none');
+            }
+        }
 
         $(document).ready(function() {
-            if (hasErrors && hasUploadedImage || hasVehicleImage) {
+            // Enable only when we already have a selected upload in session,
+            // otherwise keep it disabled until the user picks a NEW image.
+            setSubmitEnabled(hasUploadedImage ? true : false);
+
+            if ((hasErrors === 1 && hasUploadedImage) || hasVehicleImage) {
                 $('#profile-image').removeClass('w-12');
                 $('#profile-image').removeClass('h-12');
                 $('#profile-image').removeClass('object-contain');
@@ -316,8 +333,8 @@
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
 
-                $(".submitBtn").removeAttr('disabled');
-                $(".submitBtn").removeClass('disabled:bg-primary/20 cursor-not-allowed disabled:border-none');
+                hasNewSelectedImage = true;
+                setSubmitEnabled(true);
 
                 reader.onload = function(e) {
                     profileImage.src = e.target.result;
@@ -375,6 +392,8 @@
                 success: function(result) {
                     // Show success modal
                     showLicenseDeletedModal();
+                    hasNewSelectedImage = false;
+                    setSubmitEnabled(false);
 
                     // Reset the image display
                     if (profileImage.src && profileImage.src !== '') {
@@ -407,8 +426,8 @@
                     }
                 },
                 error: function(xhr, status, error) {
+                    hasNewSelectedImage = false;
                     console.error('Error deleting license:', error);
-                    alert('An error occurred while deleting the license. Please try again.');
                 }
             });
         }
