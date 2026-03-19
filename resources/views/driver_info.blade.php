@@ -6,7 +6,7 @@
     <div class="bg-white border rounded py-4 border-gray-200 w-full md:w-[70%] mx-auto shadow">
         <div class=" px-4">
         <div class="pb-2 flex flex-col md:flex-row items-center justify-between">
-            <h1 class="mb-0">{{ optional($driverPage)->driver_info_heading ?? 'Driver info' }}</h1>
+            <h1 class="mb-0">{{ optional($driverPage)->driver_info_heading ?? 'Driver Info' }}</h1>
         </div>
         <div class="flex pb-2 justify-between">
             <div class="flex items-start">

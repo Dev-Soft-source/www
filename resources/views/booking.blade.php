@@ -34,7 +34,7 @@
                 <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
                     <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                         <div
-                            class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border">
+                            class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg w-full modal-border1">
                             <button type="button" onclick="closeModal()"
                                 class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -53,7 +53,7 @@
                                 </div>
                             </div>
                             <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                                <a href="javascript:void(0);" class="whitespace-nowrap inline-flex w-full justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">
+                                <a href="javascript:void(0);" onclick="closeModal()" class="whitespace-nowrap inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">
                                     {{ $siteText['close_btn_text'] }}</a>
                                 @if (session()->has('phone') && !is_null(session('phone')))
                                     <a href="{{ route('send_verification_code_booking', session('phone')->id) }}"
@@ -161,7 +161,7 @@
                 @csrf
 
                 <input type="hidden" name="ride_detail_id" value="{{ $ride->detail->id }}">
-                <input type="hidden" name="type" value="{{ $ride->booking_type }}">
+                <input type="hidden" name="type" value="{{ $ride->booking_type->features_setting_id }}">
                 <input type="hidden" name="id" value="{{ $ride->id }}">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-y-4 md:gap-4">
                     <div class="col-span-2 flex flex-wrap items-center justify-between gap-3 items-baseline">

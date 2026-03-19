@@ -488,17 +488,19 @@
                                         ->where('posted_by', auth()->user()->id)
                                         ->exists();
                                 $showReviewLink = $passengerBookingUuid && $rideIsPast && !$alreadyReviewedDriver;
+
+                                $isAvailableShowInfo = (auth()->user() && $ride->hasNonRejectedBookingForUser(auth()->user()));
                             @endphp
                             <h3
-                                class="bg-primary text-white hover:text-red-400 py-2 px-4 text-2xl xl:text-3xl cursor-pointer">
-                                @if ($showReviewLink && $passengerBookingUuid)
+                                class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl cursor-pointer">
+                                @if ($showReviewLink && $passengerBookingUuid && $isAvailableShowInfo)
                                     <a href="{{ route('review_driver', ['lang' => $selectedLanguage->abbreviation, 'id' => $passengerBookingUuid]) }}"
                                         class="w-full text-2xl xl:text-3xl text-white hover:text-red-400 no-underline cursor-pointer">
                                         @isset($rideDetailPage->review_driver_info_label)
                                             {{ $rideDetailPage->review_driver_info_label }}
                                         @endisset
                                     </a>
-                                @elseif ($ride->added_by)
+                                @elseif ($ride->added_by && $isAvailableShowInfo)
                                     <a href="{{ route('driver_info', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->added_by]) }}"
                                         class="w-full text-white text-2xl xl:text-3xl hover:text-red-400 no-underline cursor-pointer">
                                         @isset($rideDetailPage->driver_info_label)
@@ -547,10 +549,16 @@
                                         </div>
                                     @endif
                                     <div class="text-center">
+                                        @if(!$isAvailableShowInfo)
+                                        <div class="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                            <p class="text-yellow-800 text-sm w-full">
+                                                {{ $rideDetailPage->driver_info_show_label ?? 'Driver details are shared after booking confirmation.' }}
+                                            </p>
+                                        </div>
+                                        @endif
+                                        
                                         <p class="font-semibold text-lg">
-                                            @isset($rideDetailPage->driver_label)
-                                                {{ $rideDetailPage->driver_label }}
-                                            @endisset
+                                            {{ $rideDetailPage->driver_label ?? 'Verified Driver' }}:
                                             <span>
                                                 @if ($ride->driver?->type === '2')
                                                     {{ $ride->driver?->last_name }}
@@ -622,7 +630,7 @@
                                                 @if ($ride->driver?->email_verified == '1')
                                                     <span>|</span>
                                                     <span class="inline-block"
-                                                        data-tippy-content="{{ $rideDetailPage->verified_email_tooltip ?? (optional($rideDetailPage)->verified_email_tooltip ?? '') }}">
+                                                        data-tippy-content="{{ $rideDetailPage->verified_email_tooltip ?? 'Email Verified' }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                             viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
                                                             class="h-5">
@@ -635,7 +643,7 @@
                                                 @if ($hasVerifiedPhone)
                                                     <span>|</span>
                                                     <span class="inline-block"
-                                                        data-tippy-content="{{ $rideDetailPage->verified_phone_tooltip ?? (optional($rideDetailPage)->verified_phone_tooltip ?? '') }}">
+                                                        data-tippy-content="{{ $rideDetailPage->verified_phone_tooltip ?? 'Phone Number Verified' }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                             viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
                                                             class="h-5 ">

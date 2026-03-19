@@ -69,32 +69,46 @@
             </div>
         </div>
 
-        @php
-            $my_co_passengers_href = 'javascript:void(0);';
-            if (auth()->user() && $ride->hasNonRejectedBookingForUser(auth()->user())) {
-                $my_co_passengers_href = route('my_co_passengers', [
-                    'lang' => app()->getLocale(),
-                    'id' => $ride->id,
-                ]);
-            }
-        @endphp
 
         <div class="border-t border-gray-300 flex flex-col md:flex-row md:items-center justify-start md:space-x-2 p-4">
             <h4 class="font-medium text-xl xl:text-2xl md:text-center text-black mr-4 font-FuturaMdCnBT">
                 {{ $rideDetailPage->co_passenger_label ?? 'My Co-Passengers' }}:
             </h4>
             
+            @php
+                $user = auth()->user();
+
+                $href = ($user && $ride->hasNonRejectedBookingForUser($user))
+                    ? route('my_co_passengers', [
+                        'lang' => app()->getLocale(),
+                        'id' => $ride->id,
+                    ])
+                    : null;
+
+                $bookings = $ride->bookings()->notRejected()->get();
+            @endphp
+
             <div class="flex items-center space-x-2 no-scrollbar overflow-x-auto mt-2 md:mt-0">
-                <a href="{{ $my_co_passengers_href }}">
-                    @foreach ($ride->bookings()->notRejected()->get() as $booking)
+                @if ($href)
+                    <a class="flex" href="{{ $href }}">
+                @else
+                    <div class="flex">
+                @endif
+                    @foreach ($bookings as $booking)
                         @php
                             $image = $booking->passenger?->profile_image ?? asset('images/59-booked-seat.png');
                         @endphp
+
                         @for ($i = 0; $i < $booking->seats; $i++)
                             <img class="w-10 h-10 rounded-full" src="{{ $image }}" alt="">
                         @endfor
                     @endforeach
-                </a>
+                @if ($href)
+                    </a>
+                @else
+                    </div>
+                @endif
+
             </div>
         </div>
     </div>

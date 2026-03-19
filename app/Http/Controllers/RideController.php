@@ -33,7 +33,7 @@ use App\Models\NoShowHistory;
 use App\Models\RideDetailPageSettingDetail;
 use App\Models\SiteSetting;
 use App\Models\SuccessMessagesSettingDetail;
-use App\Models\SiteTextDetail;
+use App\Models\MyPassengerSettingDetail;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\SeatDetail;
@@ -186,55 +186,22 @@ class RideController extends Controller
     {
         $ride = Ride::where('id', $request->id)->first();
         $setting = ReviewSetting::first();
-        $languages = Language::all();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_option1', 'booking_option2', 'payment_methods_option1', 'payment_methods_option2', 'payment_methods_option3', 'smoking_option1', 'animals_option1', 'animals_option2', 'animals_option3', 'luggage_option1', 'luggage_option2', 'luggage_option3', 'luggage_option4', 'luggage_option5', 'features_option3', 'features_option4', 'features_option5', 'features_option6', 'features_option7', 'features_option8', 'features_option9', 'features_option10', 'features_option11', 'features_option12', 'features_option13', 'features_option14', 'features_option15', 'features_option16')->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_option1', 'booking_option2', 'payment_methods_option1', 'payment_methods_option2', 'payment_methods_option3', 'smoking_option1', 'animals_option1', 'animals_option2', 'animals_option3', 'luggage_option1', 'luggage_option2', 'luggage_option3', 'luggage_option4', 'luggage_option5', 'features_option3', 'features_option4', 'features_option5', 'features_option6', 'features_option7', 'features_option8', 'features_option9', 'features_option10', 'features_option11', 'features_option12', 'features_option13', 'features_option14', 'features_option15', 'features_option16')->first();
-            }
-        }
 
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
-                // Ratings where type is 1 and ride_id belongs to the user
-                $query->where('type', '1')
-                    ->whereHas('ride', function ($query) use ($user_id) {
-                        $query->where('added_by', $user_id);
-                    });
-            })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is 2 and booking_id belongs to the user
-                    $query->where('type', '2')
-                        ->whereHas('booking', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is null and receiver_id belongs to the user
-                    $query->where('type', null)
-                        ->whereHas('receiver', function ($query) use ($user_id) {
-                            $query->where('id', $user_id);
-                        });
-                })
-                ->orderBy('id', 'desc')
-                ->get();
-        }
-
+                
+        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $myPassengerPage = MyPassengerSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback(
+            $this->selectedLanguage->id,
+            $this->defaultLang->id
+        );
         $ratings = Rating::all();
-        return view('my_co_passengers', ['ride' => $ride, 'setting' => $setting, 'ratings' => $ratings, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'postRidePage' => $postRidePage]);
+        return view('my_co_passengers', [
+            'ride' => $ride, 'setting' => $setting, 
+            'ratings' => $ratings, 
+            'rideDetailPage' => $rideDetailPage, 
+            'myPassengerPage' => $myPassengerPage, 
+            
+            'postRidePage' => $postRidePage]);
     }
 
     public function EditRide($lang, $id, $routeType = 'edit')

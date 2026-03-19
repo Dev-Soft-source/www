@@ -56,17 +56,16 @@
             <div class="flex justify-between">
                 <div class="pt-4">
                     <p class="text-gray-900">
-                        {{ $editProfilePage->edit_profile_text ?? 'To be eligible for the "ProximaRide" and "Extra+ Rides" , you must complete all fields below' }}
+                        {{ $editProfilePage->edit_profile_text ?? 'Manage your profile details below. A government-issued photo ID is required to <strong>book or post</strong> Pink Rides or Extra+ Rides; <strong>additionally</strong>, drivers posting these rides must provide their residential address.' }}
                     </p>
                     <p class="text-base md:text-lg font-medium text-red-500">{{ $siteText['required_fields_label'] ?? '* Indicates required fields' }}</p>
                 </div>
             </div>
         @else
             <div class="">
-                <h1 class="mb-0">Welcome onboard {{ $user->first_name }}</h1>
+                <h1 class="mb-0">{{ $editProfilePage->welcome_onboard ?? 'Welcome onboard' }} {{ $user->first_name }}</h1>
             </div>
-            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pt-4">
-                <div class="flex-1 min-w-0">
+            <div class="pt-4">
                     @if ($user->gender == 'female' && in_array('Extra care rides', explode(';', $user->features)) && in_array('Pink rides', explode(';', $user->features)))
                         <p class="text-gray-900">You have selected the "ProximaRide" and the "My Extra+ Rides"</p>
                         <p class="text-gray-900">To be eligible to use them, you must provide your complete address, upload
@@ -85,10 +84,11 @@
                             yourself</p>
                         <p class="text-gray-900">Our members will not see your address or ID, but they will see your bio</p>
                     @else
-                        <p class="text-gray-900">{{ $editProfilePage->edit_profile_text ?? 'To be eligible for the "ProximaRide" and "Extra+ Rides" , you must complete all fields below' }}</p>
+                        <p class="text-gray-900">{!! $editProfilePage->edit_profile_text ?? 'Manage your profile details below. A government-issued photo ID is required to <strong>book or post</strong> Pink Rides or Extra+ Rides; <strong>additionally</strong>, drivers posting these rides must provide their residential address.' !!}</p>
                     @endif
+                <div class="flex justify-end">
+                    <p class="text-base md:text-lg font-medium text-red-500 sm:flex-shrink-0">{{ $siteText['required_fields_label'] ?? '* Indicates required fields' }}</p>
                 </div>
-                <p class="text-base md:text-lg font-medium text-red-500 sm:flex-shrink-0">{{ $siteText['required_fields_label'] ?? '* Indicates required fields' }}</p>
             </div>
             
         @endif

@@ -100,9 +100,7 @@
                 </div>
                 <a href="{{ route('profile.edit', ['lang' => $selectedLanguage->abbreviation]) }}"
                     class="button-exp-fill h-fit mt-3">
-                    @isset($editProfilePage->edit_profile_text)
-                        {{ $editProfilePage->edit_profile_text }}
-                    @endisset
+                    {{ $editProfilePage->edit_profile_btn_text ?? 'Edit Profile' }}
                 </a>
             </div>
             <div class="px-4 pb-2">

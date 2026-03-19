@@ -42,9 +42,6 @@
 
             <ul class="">
                 <li class="flex items-center space-x-1 text-xl md:text-2xl mb-2 font-FuturaMdCnBT ">
-                    {{-- @isset($sitePage->menu_icon_profile_setting)
-                        <img class="w-5 h-5 object-contain mt-1" src="{{ asset('home_page_icons/' . $sitePage->menu_icon_profile_setting)}}" alt="">
-                    @endisset --}}
                     @isset($ProfilePage->profile_setting_label)
                         <span>{{ $ProfilePage->profile_setting_label }}</span>
                     @endisset
@@ -57,9 +54,7 @@
                             <path id="Icon_ionic-md-arrow-dropup" data-name="Icon ionic-md-arrow-dropup"
                                 d="M9,22.5l9-9,9,9Z" transform="translate(22.5 -9) rotate(90)" fill="currentcolor" />
                         </svg>
-                        {{-- @isset($sitePage->profile_setting_profile_photo)
-                            <img class="w-5 h-5 object-contain mt-1" src="{{ asset('home_page_icons/' . $sitePage->profile_setting_profile_photo)}}" alt="">
-                        @endisset --}}
+
                         <span>
                             @isset($ProfileSetting->profile_photo_label)
                                 {{ $ProfileSetting->profile_photo_label }}
@@ -67,20 +62,35 @@
                         </span>
                     </a>
                 </li>
+                
                 <li class="py-2 group transition-all ease-in-out">
-                    <a href="{{ Route::currentRouteName() === 'profile.vehicle' ? '#' : route('profile.vehicle', ['lang' => $selectedLanguage->abbreviation]) }}"
+                    <a href="{{ Route::currentRouteName() === 'driver.verify' ? '#' : route('driver.verify', ['lang' => $selectedLanguage->abbreviation]) }}"
                         class="flex items-center gap-2 hover:text-blue-600 active:text-blue-600 focus:text-blue-600 font-FuturaMdCnBT text-base md:text-lg bg-primary/10 border p-2 rounded">
-                        <svg class="{{ Route::currentRouteName() === 'profile.vehicle' || Route::currentRouteName() === 'profile.vehicle.create' || Route::currentRouteName() === 'profile.vehicle.edit' ? 'block' : 'hidden group-hover:block' }}"
+                        <svg class="{{ Route::currentRouteName() === 'driver.verify' ? 'block' : 'hidden group-hover:block' }}"
                             xmlns="http://www.w3.org/2000/svg" width="9" height="12" viewBox="0 0 9 18">
                             <path id="Icon_ionic-md-arrow-dropup" data-name="Icon ionic-md-arrow-dropup"
                                 d="M9,22.5l9-9,9,9Z" transform="translate(22.5 -9) rotate(90)" fill="currentcolor" />
                         </svg>
-                        {{-- @isset($sitePage->profile_setting_my_vehicle)
-                            <img class="w-5 h-5 object-contain mt-1" src="{{ asset('home_page_icons/' . $sitePage->profile_setting_my_vehicle)}}" alt="">
-                        @endisset --}}
+
                         <span>
-                            @isset($ProfileSetting->my_vehicles_label)
-                                {{ $ProfileSetting->my_vehicles_label }}
+                            @isset($ProfileSetting->my_driver_license_label)
+                                {{ $ProfileSetting->my_driver_license_label }}
+                            @endisset
+                        </span>
+                    </a>
+                </li>
+                <li class="py-2 group transition-all ease-in-out">
+                    <a href="{{ Route::currentRouteName() === 'email' ? '#' : route('email', ['lang' => $selectedLanguage->abbreviation]) }}"
+                        class="flex items-center gap-2 hover:text-blue-600 active:text-blue-600 focus:text-blue-600 font-FuturaMdCnBT text-base md:text-lg bg-primary/10 border p-2 rounded">
+                        <svg class="{{ Route::currentRouteName() === 'email' ? 'block' : 'hidden group-hover:block' }}"
+                            xmlns="http://www.w3.org/2000/svg" width="9" height="12" viewBox="0 0 9 18">
+                            <path id="Icon_ionic-md-arrow-dropup" data-name="Icon ionic-md-arrow-dropup"
+                                d="M9,22.5l9-9,9,9Z" transform="translate(22.5 -9) rotate(90)" fill="currentcolor" />
+                        </svg>
+
+                        <span>
+                            @isset($ProfileSetting->my_email_address_label)
+                                {{ $ProfileSetting->my_email_address_label }}
                             @endisset
                         </span>
                     </a>
@@ -93,9 +103,7 @@
                             <path id="Icon_ionic-md-arrow-dropup" data-name="Icon ionic-md-arrow-dropup"
                                 d="M9,22.5l9-9,9,9Z" transform="translate(22.5 -9) rotate(90)" fill="currentcolor" />
                         </svg>
-                        {{-- @isset($sitePage->profile_setting_password)
-                            <img class="w-5 h-5 object-contain mt-1" src="{{ asset('home_page_icons/' . $sitePage->profile_setting_password)}}" alt="">
-                        @endisset --}}
+
                         <span>
                             @isset($ProfileSetting->password_label)
                                 {{ $ProfileSetting->password_label }}
@@ -111,9 +119,7 @@
                             <path id="Icon_ionic-md-arrow-dropup" data-name="Icon ionic-md-arrow-dropup"
                                 d="M9,22.5l9-9,9,9Z" transform="translate(22.5 -9) rotate(90)" fill="currentcolor" />
                         </svg>
-                        {{-- @isset($sitePage->profile_setting_my_phone_number)
-                            <img class="w-5 h-5 object-contain mt-1" src="{{ asset('home_page_icons/' . $sitePage->profile_setting_my_phone_number)}}" alt="">
-                        @endisset --}}
+
                         <span>
                             @isset($ProfileSetting->my_phone_number_label)
                                 {{ $ProfileSetting->my_phone_number_label }}
@@ -121,38 +127,19 @@
                         </span>
                     </a>
                 </li>
+                
                 <li class="py-2 group transition-all ease-in-out">
-                    <a href="{{ Route::currentRouteName() === 'email' ? '#' : route('email', ['lang' => $selectedLanguage->abbreviation]) }}"
+                    <a href="{{ Route::currentRouteName() === 'profile.referrals' ? '#' : route('profile.referrals', ['lang' => $selectedLanguage->abbreviation]) }}"
                         class="flex items-center gap-2 hover:text-blue-600 active:text-blue-600 focus:text-blue-600 font-FuturaMdCnBT text-base md:text-lg bg-primary/10 border p-2 rounded">
-                        <svg class="{{ Route::currentRouteName() === 'email' ? 'block' : 'hidden group-hover:block' }}"
+                        <svg class="{{ Route::currentRouteName() === 'profile.referrals' ? 'block' : 'hidden group-hover:block' }}"
                             xmlns="http://www.w3.org/2000/svg" width="9" height="12" viewBox="0 0 9 18">
                             <path id="Icon_ionic-md-arrow-dropup" data-name="Icon ionic-md-arrow-dropup"
                                 d="M9,22.5l9-9,9,9Z" transform="translate(22.5 -9) rotate(90)" fill="currentcolor" />
                         </svg>
-                        {{-- @isset($sitePage->profile_setting_my_email_address)
-                            <img class="w-5 h-5 object-contain mt-1" src="{{ asset('home_page_icons/' . $sitePage->profile_setting_my_email_address)}}" alt="">
-                        @endisset --}}
+
                         <span>
-                            @isset($ProfileSetting->my_email_address_label)
-                                {{ $ProfileSetting->my_email_address_label }}
-                            @endisset
-                        </span>
-                    </a>
-                </li>
-                <li class="py-2 group transition-all ease-in-out">
-                    <a href="{{ Route::currentRouteName() === 'driver.verify' ? '#' : route('driver.verify', ['lang' => $selectedLanguage->abbreviation]) }}"
-                        class="flex items-center gap-2 hover:text-blue-600 active:text-blue-600 focus:text-blue-600 font-FuturaMdCnBT text-base md:text-lg bg-primary/10 border p-2 rounded">
-                        <svg class="{{ Route::currentRouteName() === 'driver.verify' ? 'block' : 'hidden group-hover:block' }}"
-                            xmlns="http://www.w3.org/2000/svg" width="9" height="12" viewBox="0 0 9 18">
-                            <path id="Icon_ionic-md-arrow-dropup" data-name="Icon ionic-md-arrow-dropup"
-                                d="M9,22.5l9-9,9,9Z" transform="translate(22.5 -9) rotate(90)" fill="currentcolor" />
-                        </svg>
-                        {{-- @isset($sitePage->profile_setting_my_drivers_license)
-                            <img class="w-5 h-5 object-contain mt-1" src="{{ asset('home_page_icons/' . $sitePage->profile_setting_my_drivers_license)}}" alt="">
-                        @endisset --}}
-                        <span>
-                            @isset($ProfileSetting->my_driver_license_label)
-                                {{ $ProfileSetting->my_driver_license_label }}
+                            @isset($ProfileSetting->referrals_label)
+                                {{ $ProfileSetting->referrals_label }}
                             @endisset
                         </span>
                     </a>
@@ -176,19 +163,19 @@
                     </a>
                 </li>
                 <li class="py-2 group transition-all ease-in-out">
-                    <a href="{{ Route::currentRouteName() === 'profile.referrals' ? '#' : route('profile.referrals', ['lang' => $selectedLanguage->abbreviation]) }}"
+                    <a href="{{ Route::currentRouteName() === 'profile.vehicle' ? '#' : route('profile.vehicle', ['lang' => $selectedLanguage->abbreviation]) }}"
                         class="flex items-center gap-2 hover:text-blue-600 active:text-blue-600 focus:text-blue-600 font-FuturaMdCnBT text-base md:text-lg bg-primary/10 border p-2 rounded">
-                        <svg class="{{ Route::currentRouteName() === 'profile.referrals' ? 'block' : 'hidden group-hover:block' }}"
+                        <svg class="{{ Route::currentRouteName() === 'profile.vehicle' || Route::currentRouteName() === 'profile.vehicle.create' || Route::currentRouteName() === 'profile.vehicle.edit' ? 'block' : 'hidden group-hover:block' }}"
                             xmlns="http://www.w3.org/2000/svg" width="9" height="12" viewBox="0 0 9 18">
                             <path id="Icon_ionic-md-arrow-dropup" data-name="Icon ionic-md-arrow-dropup"
                                 d="M9,22.5l9-9,9,9Z" transform="translate(22.5 -9) rotate(90)" fill="currentcolor" />
                         </svg>
-                        {{-- @isset($sitePage->profile_setting_referrals)
-                            <img class="w-5 h-5 object-contain mt-1" src="{{ asset('home_page_icons/' . $sitePage->profile_setting_referrals)}}" alt="">
+                        {{-- @isset($sitePage->profile_setting_my_vehicle)
+                            <img class="w-5 h-5 object-contain mt-1" src="{{ asset('home_page_icons/' . $sitePage->profile_setting_my_vehicle)}}" alt="">
                         @endisset --}}
                         <span>
-                            @isset($ProfileSetting->referrals_label)
-                                {{ $ProfileSetting->referrals_label }}
+                            @isset($ProfileSetting->my_vehicles_label)
+                                {{ $ProfileSetting->my_vehicles_label }}
                             @endisset
                         </span>
                     </a>

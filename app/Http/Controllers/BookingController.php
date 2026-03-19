@@ -689,7 +689,7 @@ class BookingController extends Controller
                         "purchase_units" => [
                             [
                                 "amount" => [
-                                    "currency_code" => "USD",
+                                    "currency_code" => "CAD",
                                     "value" => number_format((float)$paypalPay, 2, '.', '')
                                 ]
                             ]
@@ -1530,6 +1530,21 @@ class BookingController extends Controller
 
         $request->validate($rules);
 
+        // If this passenger already has an active booking for the same ride + selected ride detail,
+        // reuse the update flow instead of creating a duplicate booking.
+        $rideId = $ride->id ?? $id;
+        $requestedRideDetailId = $ride->detail?->id;
+        $existingBooking = Booking::where('ride_id', $rideId)
+            ->where('user_id', $user->id)
+            ->when($requestedRideDetailId, fn ($q) => $q->where('ride_detail_id', $requestedRideDetailId))
+            ->whereNotIn('status', [Booking::STATUS_DECLINED, Booking::STATUS_CANCELLED])
+            ->latest('id')
+            ->first();
+
+        if ($existingBooking) {
+            return $this->updateInstantBooking($existingBooking->id, $request);
+        }
+
         $bookings = Booking::where('ride_id', $id)->where('status', '!=', '3')->where('status', '!=', '4')->get();
         $errorMsg = $this->successMessage;
 
@@ -1665,7 +1680,7 @@ class BookingController extends Controller
                         "purchase_units" => [
                             [
                                 "amount" => [
-                                    "currency_code" => "USD",
+                                    "currency_code" => "CAD",
                                     "value" => number_format((float)$paypalPay, 2, '.', '')
                                 ]
                             ]
@@ -3065,7 +3080,7 @@ class BookingController extends Controller
                                 "purchase_units" => [
                                     [
                                         "amount" => [
-                                            "currency_code" => "USD",
+                                            "currency_code" => "CAD",
                                             "value" => number_format((float)$paypalAmt, 2, '.', '')
                                         ]
                                     ]
@@ -3410,7 +3425,7 @@ class BookingController extends Controller
                                 "purchase_units" => [
                                     [
                                         "amount" => [
-                                            "currency_code" => "USD",
+                                            "currency_code" => "CAD",
                                             "value" => number_format((float)$paypalPay, 2, '.', '')
                                         ]
                                     ]
@@ -5693,7 +5708,7 @@ class BookingController extends Controller
                         "purchase_units" => [
                             [
                                 "amount" => [
-                                    "currency_code" => "USD",
+                                    "currency_code" => "CAD",
                                     "value" => number_format((float)$paypalPay, 2, '.', '')
                                 ]
                             ]
