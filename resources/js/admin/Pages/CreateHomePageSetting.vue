@@ -10474,7 +10474,7 @@ export default {
             // console.log(e.target.files[0], key, language);
             var file = new FormData();
             file.append("file", e.target.files[0]);
-            axios.post("/api/admin/media/image_again_upload", file).then((res) => {
+            axios.post("/api/web/media/image_again_upload", file).then((res) => {
                 this.handleInput(res?.data, language, key);
             });
         },

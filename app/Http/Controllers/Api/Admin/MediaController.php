@@ -62,6 +62,6 @@ class MediaController extends Controller
 
         $image->move($destinationPath, $name);
 
-        return $name;
+        return response()->json($name);
     }
 }

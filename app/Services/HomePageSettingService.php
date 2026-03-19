@@ -495,19 +495,39 @@ class HomePageSettingService
     {
         $fields = $this->fields($homePageSetting, $language, $request);
         $homePageSettingDetail = HomePageSettingDetail::whereHomePageSettingId($homePageSetting->id)->whereLanguageId($language->id)->exists();
-        if(!$homePageSettingDetail){
+        if (!$homePageSettingDetail) {
             $fields = $this->fields($homePageSetting, $language, $request);
-        HomePageSettingDetail::create($fields);
+            HomePageSettingDetail::create($fields);
+        } else {
+            $updateData = array_filter(
+                $fields,
+                static fn ($value) => $value !== null
+            );
+            HomePageSettingDetail::whereHomePageSettingId($homePageSetting->id)
+                ->whereLanguageId($language->id)
+                ->update($updateData);
         }
-        else{
 
-            HomePageSettingDetail::whereHomePageSettingId($homePageSetting->id)->whereLanguageId($language->id)->update($fields);
-        }
         return true;
     }
 
-    function data($request, $language, $name)
+    public function data($request, $language, $name)
     {
-        return isset($request[$name][$name . '_' . $language->id]) ? $request[$name][$name . '_' . $language->id] : null;
+        $key = $name . '_' . $language->id;
+        $dotKey = $name . '.' . $key;
+
+        if (method_exists($request, 'input')) {
+            if ($request->has($dotKey)) {
+                return $request->input($dotKey);
+            }
+            $nested = $request->input($name);
+            if (is_array($nested) && array_key_exists($key, $nested)) {
+                return $nested[$key];
+            }
+        }
+
+        $all = is_array($request) ? $request : $request->all();
+
+        return isset($all[$name][$key]) ? $all[$name][$key] : null;
     }
 }
