@@ -6,7 +6,9 @@
     <div class="w-full md:w-[70%] mx-auto px-4 md:px-0 ">
     <div class="bg-white border rounded p-4 border-gray-200 w-full shadow">
         <div class=" pb-2">
-            <h1 class="mb-0">Review</h1>
+            <h1 class="mb-0">
+                {{ optional($myReviewPage)->passenger_review_heading ?? 'Review' }}
+            </h1>
         </div>
         <div class="space-y-4 mt-4">
             <div>
@@ -26,7 +28,9 @@
                 <ul class="space-y-2 pb-4">
                     <li>
                         <div class="flex items-center">
-                            <p class="text-2xl lg:text-3xl font-FuturaMdCnBT text-black">Review criteria</p>
+                            <p class="text-2xl lg:text-3xl font-FuturaMdCnBT text-black">
+                                {{ optional($myReviewPage)->passenger_review_criteria_heading ?? 'Review criteria' }}
+                            </p>
                         </div>
                     </li>
                     <li>
@@ -42,7 +46,9 @@
                                     </div>
                                 @endfor
                             </div>
-                            <p class="md:ml-2 text-black md:w-[50%] text-left order-1 md:order-2">Conscious to passengers wellness</p>
+                            <p class="md:ml-2 text-black md:w-[50%] text-left order-1 md:order-2">
+                                {{ optional($myReviewPage)->passenger_review_conscious_label ?? 'Conscious to passengers wellness' }}
+                            </p>
                         </div>
                     </li>
                     <li>
@@ -58,7 +64,9 @@
                                     </div>
                                 @endfor
                             </div>
-                            <p class="md:md:ml-2 text-black md:w-[50%] text-left order-1 md:order-2">Comfort</p>
+                            <p class="md:md:ml-2 text-black md:w-[50%] text-left order-1 md:order-2">
+                                {{ optional($myReviewPage)->passenger_review_comfort_label ?? 'Comfort' }}
+                            </p>
                         </div>
                     </li>
                     <li>
@@ -74,7 +82,9 @@
                                     </div>
                                 @endfor
                             </div>
-                            <p class="md:ml-2 text-black md:w-[50%] text-left order-1 md:order-2">Communication</p>
+                            <p class="md:ml-2 text-black md:w-[50%] text-left order-1 md:order-2">
+                                {{ optional($myReviewPage)->passenger_review_communication_label ?? 'Communication' }}
+                            </p>
                         </div>
                     </li>
                     <li>
@@ -90,7 +100,9 @@
                                     </div>
                                 @endfor
                             </div>
-                            <p class="md:ml-2 text-black md:w-[50%] text-left order-1 md:order-2">Overall attitude</p>
+                            <p class="md:ml-2 text-black md:w-[50%] text-left order-1 md:order-2">
+                                {{ optional($myReviewPage)->passenger_review_attitude_label ?? 'Overall attitude' }}
+                            </p>
                         </div>
                     </li>
                     <li>
@@ -106,7 +118,9 @@
                                     </div>
                                 @endfor
                             </div>
-                            <p class="md:ml-2 text-black md:w-[50%] text-left order-1 md:order-2">Personal hygiene</p>
+                            <p class="md:ml-2 text-black md:w-[50%] text-left order-1 md:order-2">
+                                {{ optional($myReviewPage)->passenger_review_hygiene_label ?? 'Personal hygiene' }}
+                            </p>
                         </div>
                     </li>
                     <li>
@@ -122,7 +136,9 @@
                                     </div>
                                 @endfor
                             </div>
-                            <p class="md:ml-2 text-black md:w-[50%] text-left order-1 md:order-2">Respect and courtesy</p>
+                            <p class="md:ml-2 text-black md:w-[50%] text-left order-1 md:order-2">
+                                {{ optional($myReviewPage)->passenger_review_respect_label ?? 'Respect and courtesy' }}
+                            </p>
                         </div>
                     </li>
                     <li>
@@ -138,7 +154,9 @@
                                     </div>
                                 @endfor
                             </div>
-                            <p class="md:ml-2 text-black md:w-[50%] text-left order-1 md:order-2">Safety</p>
+                            <p class="md:ml-2 text-black md:w-[50%] text-left order-1 md:order-2">
+                                {{ optional($myReviewPage)->passenger_review_safety_label ?? 'Safety' }}
+                            </p>
                         </div>
                     </li>
                     <li>
@@ -154,7 +172,9 @@
                                     </div>
                                 @endfor
                             </div>
-                            <p class="md:ml-2 text-black md:w-[50%] text-left order-1 md:order-2">Timeliness</p>
+                            <p class="md:ml-2 text-black md:w-[50%] text-left order-1 md:order-2">
+                                {{ optional($myReviewPage)->passenger_review_timeliness_label ?? 'Timeliness' }}
+                            </p>
                         </div>
                     </li>
                 </ul>
