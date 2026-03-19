@@ -490,21 +490,19 @@
                                 $showReviewLink = $passengerBookingUuid && $rideIsPast && !$alreadyReviewedDriver;
                             @endphp
                             <h3
-                                class="bg-primary text-white hover:text-red-400 py-2 px-4 text-2xl xl:text-3xl cursor-pointer">
+                                class="bg-primary text-white  py-2 px-4 text-2xl xl:text-3xl">
                                 @if ($showReviewLink && $passengerBookingUuid)
-                                    <a href="{{ route('review_driver', ['lang' => $selectedLanguage->abbreviation, 'id' => $passengerBookingUuid]) }}"
-                                        class="w-full text-2xl xl:text-3xl text-white hover:text-red-400 no-underline cursor-pointer">
+                                    <div class="w-full text-2xl xl:text-3xl text-white  no-underline">
                                         @isset($rideDetailPage->review_driver_info_label)
                                             {{ $rideDetailPage->review_driver_info_label }}
                                         @endisset
-                                    </a>
+                                    </div>
                                 @elseif ($ride->added_by)
-                                    <a href="{{ route('driver_info', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->added_by]) }}"
-                                        class="w-full text-white text-2xl xl:text-3xl hover:text-red-400 no-underline cursor-pointer">
+                                    <div class="w-full text-white text-2xl xl:text-3xl  no-underline">
                                         @isset($rideDetailPage->driver_info_label)
                                             {{ $rideDetailPage->driver_info_label }}
                                         @endisset
-                                    </a>
+                                    </div>
                                 @else
                                     @if ($ride_cancelled)
                                         @isset($rideDetailPage->review_driver_info_label)
@@ -533,13 +531,12 @@
                                             @endphp
 
                                             @isset($uuid)
-                                                <a
-                                                    href="{{ route('review_driver', ['lang' => $selectedLanguage->abbreviation, 'id' => $uuid]) }}">
+                                                <div>
                                                     @isset($ride->driver?->profile_image)
                                                         <img class="w-full h-full object-cover"
                                                             src="{{ $ride->driver?->profile_image }}" alt="">
                                                     @endisset
-                                                </a>
+                                                </div>
                                             @else
                                                 <img class="w-full h-full object-cover"
                                                     src="{{ $ride->driver?->profile_image }}" alt="">
