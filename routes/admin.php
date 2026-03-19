@@ -24,18 +24,21 @@ use App\Http\Controllers\Api\Admin\{
     ReferralPageSettingController,
     CancellationPolicyPageSettingController,
     CancelRideSettingController,
+    CommunityGuidelinesPageSettingController,
     RegistrationRewardSettingController,
     ChatsPageSettingController,
     CityController,
     ClosedAccountMessageController,
     ContactUsPageSettingController,
     CostSharingPageSettingController,
+    DisclaimerPageSettingController,
     CountryController,
     DisputePolicyPageSettingController,
     DriverPageSettingController,
     ErrorPageSettingController,
     FeaturesSettingController,
     FindRidePageSettingController,
+    ForTouristsPageSettingController,
     FolkRideSettingController,
     ForgotPasswordPageSettingController,
     HomePageSettingController,
@@ -256,6 +259,18 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('/get-terms-of-use-page-setting', [TermsOfUsePageSettingController::class, 'show']);
     Route::post('/upload-terms-of-use-page-setting-excel', [TermsOfUsePageSettingController::class, 'uploadExcel']);
     Route::get('/download-terms-of-use-page-setting-template', [TermsOfUsePageSettingController::class, 'downloadTemplate']);
+    Route::post('/update-disclaimer-page-setting', [DisclaimerPageSettingController::class, 'update']);
+    Route::get('/get-disclaimer-page-setting', [DisclaimerPageSettingController::class, 'show']);
+    Route::post('/upload-disclaimer-page-setting-excel', [DisclaimerPageSettingController::class, 'uploadExcel']);
+    Route::get('/download-disclaimer-page-setting-template', [DisclaimerPageSettingController::class, 'downloadTemplate']);
+    Route::post('/update-for-tourists-page-setting', [ForTouristsPageSettingController::class, 'update']);
+    Route::get('/get-for-tourists-page-setting', [ForTouristsPageSettingController::class, 'show']);
+    Route::post('/upload-for-tourists-page-setting-excel', [ForTouristsPageSettingController::class, 'uploadExcel']);
+    Route::get('/download-for-tourists-page-setting-template', [ForTouristsPageSettingController::class, 'downloadTemplate']);
+    Route::post('/update-community-guidelines-page-setting', [CommunityGuidelinesPageSettingController::class, 'update']);
+    Route::get('/get-community-guidelines-page-setting', [CommunityGuidelinesPageSettingController::class, 'show']);
+    Route::post('/upload-community-guidelines-page-setting-excel', [CommunityGuidelinesPageSettingController::class, 'uploadExcel']);
+    Route::get('/download-community-guidelines-page-setting-template', [CommunityGuidelinesPageSettingController::class, 'downloadTemplate']);
     Route::post('/update-refund-policy-page-setting', [RefundPolicyPageSettingController::class, 'update']);
     Route::get('/get-refund-policy-page-setting', [RefundPolicyPageSettingController::class, 'show']);
     Route::post('/upload-refund-policy-page-setting-excel', [RefundPolicyPageSettingController::class, 'uploadExcel']);

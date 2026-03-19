@@ -69,6 +69,9 @@ import CreatePrivacyPolicyPageSetting from '../admin/Pages/CreatePrivacyPolicyPa
 import CreateCostSharingPageSetting from '../admin/Pages/CreateCostSharingPageSetting.vue'
 import CreateProfilePhotoGuidelinesPageSetting from '../admin/Pages/CreateProfilePhotoGuidelinesPageSetting.vue'
 import CreateTermsOfUsePageSetting from '../admin/Pages/CreateTermsOfUsePageSetting.vue'
+import CreateDisclaimerPageSetting from '../admin/Pages/CreateDisclaimerPageSetting.vue'
+import CreateForTouristsPageSetting from '../admin/Pages/CreateForTouristsPageSetting.vue'
+import CreateCommunityGuidelinesPageSetting from '../admin/Pages/CreateCommunityGuidelinesPageSetting.vue'
 import CreateRefundPolicyPageSetting from '../admin/Pages/CreateRefundPolicyPageSetting.vue'
 import CreateCancellationPageSetting from '../admin/Pages/CreateCancellationPageSetting.vue'
 import CreateFirmCancellationPageSetting from '../admin/Pages/CreateFirmCancellationPageSetting.vue'
@@ -909,6 +912,30 @@ const routes = [
         component: CreateTermsOfUsePageSetting,
         meta: {
             breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Terms of use page settings', 'routeName': 'admin.terms-of-use-page-setting.index', 'isCurrentRoute': 1}],
+        },
+    },
+    {
+        path: '/admin/pages/disclaimer-page-settings',
+        name: 'admin.disclaimer-page-setting.index',
+        component: CreateDisclaimerPageSetting,
+        meta: {
+            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Disclaimer page settings', 'routeName': 'admin.disclaimer-page-setting.index', 'isCurrentRoute': 1}],
+        },
+    },
+    {
+        path: '/admin/pages/for-tourists-page-settings',
+        name: 'admin.for-tourists-page-setting.index',
+        component: CreateForTouristsPageSetting,
+        meta: {
+            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'For tourists page settings', 'routeName': 'admin.for-tourists-page-setting.index', 'isCurrentRoute': 1}],
+        },
+    },
+    {
+        path: '/admin/pages/community-guidelines-page-settings',
+        name: 'admin.community-guidelines-page-setting.index',
+        component: CreateCommunityGuidelinesPageSetting,
+        meta: {
+            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Community guidelines page settings', 'routeName': 'admin.community-guidelines-page-setting.index', 'isCurrentRoute': 1}],
         },
     },
     {
