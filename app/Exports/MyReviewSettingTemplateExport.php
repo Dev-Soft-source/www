@@ -40,10 +40,12 @@ class MyReviewSettingTemplateExport implements FromCollection, WithHeadings, Wit
         $fields = [
             'review_left_label', 'review_received_label', 'main_heading', 'replied_label', 'response_label', 'reply_label', 'no_more_data_label', 'no_left_message', 'no_received_message', 'reply_heading_label', 'reply_placeholder', 'see_all_review_label', 'reply_submit_button_label', 'review_label',
             'already_reveiwed_label',
-            'passenger_review_heading', 'passenger_review_criteria_heading', 'passenger_review_condition_label', 'passenger_review_conscious_label', 'passenger_review_comfort_label', 'passenger_review_communication_label', 'passenger_review_attitude_label', 'passenger_review_hygiene_label', 'passenger_review_respect_label', 'passenger_review_safety_label', 'passenger_review_timeliness_label',
+            'passenger_review_heading', 'passenger_review_placeholder', 'passenger_review_submit_button_label', 'passenger_review_criteria_heading', 'passenger_review_condition_label', 'passenger_review_conscious_label', 'passenger_review_comfort_label', 'passenger_review_communication_label', 'passenger_review_attitude_label', 'passenger_review_hygiene_label', 'passenger_review_respect_label', 'passenger_review_safety_label', 'passenger_review_timeliness_label',
         ];
         $defaults = [
             'passenger_review_heading' => 'Review',
+            'passenger_review_placeholder' => "In the 'Passenger Remarks' section, you can include specific feedback, comments, or compliments about the passenger's behavior during the ride",
+            'passenger_review_submit_button_label' => 'Save',
             'passenger_review_criteria_heading' => 'Review criteria',
             'passenger_review_condition_label' => 'Condition of the vehicle',
             'passenger_review_conscious_label' => 'Conscious to passengers wellness',

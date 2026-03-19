@@ -21,7 +21,7 @@
                         <label for="meeting" class="text-gray-900 font-medium text-lg mb-2"></label>
                         <textarea id="meeting" rows="5" name="review"
                             class="block p-2.5 w-full text-gray-900 bg-white rounded border border-gray-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
-                            placeholder="In the 'Passenger Remarks' section, you can include specific feedback, comments, or compliments about the passenger's behavior during the ride">{{ old('review') }}</textarea>
+                            placeholder="{{ optional($reviewPage)->passenger_review_placeholder ?? 'In the \'Passenger Remarks\' section, you can include specific feedback, comments, or compliments about the passenger\'s behavior during the ride' }}">{{ old('review') }}</textarea>
                         @error('review')
                           <div class="relative tooltip -bottom-4 group-hover:flex">
                             <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
@@ -170,7 +170,9 @@
                     </ul>
                 </div>
                 <div class="md:col-span-2 flex justify-center">
-                    <button type="submit" class="button-exp-fill w-32">Save</button>
+                    <button type="submit" class="button-exp-fill w-32">
+                        {{ optional($reviewPage)->passenger_review_submit_button_label ?? 'Save' }}
+                    </button>
                 </div>
             </div>
         </form>

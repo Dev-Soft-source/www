@@ -56,6 +56,8 @@ class MyReviewSettingService
             'review_label' => $this->data($request, $language, 'review_label'),
             'already_reveiwed_label' => $this->data($request, $language, 'already_reveiwed_label'),
             'passenger_review_heading' => $this->data($request, $language, 'passenger_review_heading'),
+            'passenger_review_placeholder' => $this->data($request, $language, 'passenger_review_placeholder'),
+            'passenger_review_submit_button_label' => $this->data($request, $language, 'passenger_review_submit_button_label'),
             'passenger_review_criteria_heading' => $this->data($request, $language, 'passenger_review_criteria_heading'),
             'passenger_review_condition_label' => $this->data($request, $language, 'passenger_review_condition_label'),
             'passenger_review_conscious_label' => $this->data($request, $language, 'passenger_review_conscious_label'),
