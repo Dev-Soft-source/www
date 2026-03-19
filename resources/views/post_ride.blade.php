@@ -2471,6 +2471,8 @@
 
                     const suggestedMajor = toMajorFromMinor(suggestedMinor);
                     const maxMajor = toMajorFromMinor(maxMinor);
+                    const canEditSegmentPrice = suggestedMinor > 0 && !segmentDistanceState.pendingKey;
+                    input.disabled = !canEditSegmentPrice;
                     hint.textContent =
                         `Suggested: ${getSelectedCurrencySymbol()}${suggestedMajor} | Max: ${getSelectedCurrencySymbol()}${maxMajor} (${distanceSuffix})`;
                 });
@@ -2804,7 +2806,7 @@
                         priceInput.value = toMajorFromMinor(initialMinor);
                         priceInput.className = 'px-segment-price-input w-full rounded border-gray-300';
                         priceInput.placeholder = `e.g. ${getSelectedCurrencySymbol()}12.00`;
-                        priceInput.disabled = !!segmentDistanceState.pendingKey;
+                        priceInput.disabled = true;
                         priceInput.setAttribute('data-from-index', String(fromIndex));
                         priceInput.setAttribute('data-to-index', String(toIndex));
                         priceInput.setAttribute('data-distance-meters', '0');
