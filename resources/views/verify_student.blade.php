@@ -511,6 +511,9 @@
             if (selectedMonthIndex !== -1 && selectedYear) {
                 const lastDate = getLastDateOfMonth(selectedYear, selectedMonthIndex);
                 expiryDateInput.value = `${selectedYear}-${String(selectedMonthIndex + 1).padStart(2, '0')}-${lastDate}`;
+            } else {
+                // If we don't have a valid month/year selection (e.g. current year in December), clear expiry.
+                expiryDateInput.value = '';
             }
         }
 
@@ -542,7 +545,15 @@
             let startMonthIndex = 0;
 
             if (selectedYear === currentYear) {
-                startMonthIndex = currentMonth;
+                // For the current year, only allow months starting from NEXT month.
+                startMonthIndex = currentMonth + 1;
+            }
+
+            // If it's December and user selects current year, there are no valid "next month" months.
+            if (startMonthIndex > 11) {
+                monthInput.value = '';
+                expiryDateInput.value = '';
+                return;
             }
 
             months.slice(startMonthIndex).forEach(month => {
