@@ -762,6 +762,14 @@
                                             <input type="text" :name="`passenger_review_heading_${activeLanguageId}`" :id="`passenger_review_heading_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Review" :value="getCurrentValue('passenger_review_heading')" @input="handleInput($event.target.value, language, 'passenger_review_heading')" />
                                         </div>
                                         <div class="relative z-0 w-full group">
+                                            <label :for="`passenger_review_placeholder_${activeLanguageId}`">Passenger review placeholder</label>
+                                            <input type="text" :name="`passenger_review_placeholder_${activeLanguageId}`" :id="`passenger_review_placeholder_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. In the 'Passenger Remarks' section..." :value="getCurrentValue('passenger_review_placeholder')" @input="handleInput($event.target.value, language, 'passenger_review_placeholder')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <label :for="`passenger_review_submit_button_label_${activeLanguageId}`">Passenger review submit label</label>
+                                            <input type="text" :name="`passenger_review_submit_button_label_${activeLanguageId}`" :id="`passenger_review_submit_button_label_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Save" :value="getCurrentValue('passenger_review_submit_button_label')" @input="handleInput($event.target.value, language, 'passenger_review_submit_button_label')" />
+                                        </div>
+                                        <div class="relative z-0 w-full group">
                                             <label :for="`passenger_review_criteria_heading_${activeLanguageId}`">Review criteria heading</label>
                                             <input type="text" :name="`passenger_review_criteria_heading_${activeLanguageId}`" :id="`passenger_review_criteria_heading_${activeLanguageId}`" class="can-exp-input w-full block border border-gray-300 rounded" placeholder="e.g. Review criteria" :value="getCurrentValue('passenger_review_criteria_heading')" @input="handleInput($event.target.value, language, 'passenger_review_criteria_heading')" />
                                         </div>
@@ -910,6 +918,8 @@ export default {
                             this.handleInput("", language, "already_reveiwed_label");
                             this.handleInput("", language, "see_all_review_label");
                             this.handleInput("", language, "passenger_review_heading");
+                            this.handleInput("", language, "passenger_review_placeholder");
+                            this.handleInput("", language, "passenger_review_submit_button_label");
                             this.handleInput("", language, "passenger_review_criteria_heading");
                             this.handleInput("", language, "passenger_review_condition_label");
                             this.handleInput("", language, "passenger_review_conscious_label");
@@ -1015,6 +1025,8 @@ export default {
                                 "already_reveiwed_label"
                             );
                             this.handleInput(setting?.passenger_review_heading, setting?.language, "passenger_review_heading");
+                            this.handleInput(setting?.passenger_review_placeholder, setting?.language, "passenger_review_placeholder");
+                            this.handleInput(setting?.passenger_review_submit_button_label, setting?.language, "passenger_review_submit_button_label");
                             this.handleInput(setting?.passenger_review_criteria_heading, setting?.language, "passenger_review_criteria_heading");
                             this.handleInput(setting?.passenger_review_condition_label, setting?.language, "passenger_review_condition_label");
                             this.handleInput(setting?.passenger_review_conscious_label, setting?.language, "passenger_review_conscious_label");

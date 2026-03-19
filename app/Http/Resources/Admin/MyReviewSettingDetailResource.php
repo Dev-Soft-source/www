@@ -35,6 +35,8 @@ class MyReviewSettingDetailResource extends JsonResource
             'already_reveiwed_label' => $this->already_reveiwed_label,
             'already_reviewed_label' => $this->already_reviewed_label,
             'passenger_review_heading' => $this->passenger_review_heading,
+            'passenger_review_placeholder' => $this->passenger_review_placeholder,
+            'passenger_review_submit_button_label' => $this->passenger_review_submit_button_label,
             'passenger_review_criteria_heading' => $this->passenger_review_criteria_heading,
             'passenger_review_condition_label' => $this->passenger_review_condition_label,
             'passenger_review_conscious_label' => $this->passenger_review_conscious_label,
