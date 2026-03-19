@@ -181,11 +181,19 @@ return [
         'city_not_in_record' => [
             'message' => 'Hindi namin makita ang pangalan ng lungsod na ito sa aming talaan, pakisuri muli ang baybay.',
         ],
+        'origin' => [
+            'message' => 'Kinakailangan ang pinanggalingan.',
+        ],
+        'destination' => [
+            'message' => 'Kinakailangan ang patutunguhan.',
+        ],
         'origin.label' => [
             'required' => 'Kinakailangan ang pinanggalingan.',
+            'required_without' => 'Kinakailangan ang pinanggalingan.'
         ],
         'destination.label' => [
             'required' => 'Kinakailangan ang patutunguhan.',
+            'required_without' => 'Kinakailangan ang patutunguhan.'
         ],
         'date' => [
             'required' => 'Kinakailangan ang petsa.',

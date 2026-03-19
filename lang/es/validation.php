@@ -205,11 +205,19 @@ return [
         'city_not_in_record' => [
             'message' => 'No hemos encontrado este nombre de ciudad en nuestros registros, por favor verifica la ortografía.',
         ],
+        'origin' => [
+            'message' => 'El origen es obligatorio.',
+        ],
+        'destination' => [
+            'message' => 'El destino es obligatorio.',
+        ],
         'origin.label' => [
             'required' => 'El origen es obligatorio.',
+            'required_without' => 'El origen es obligatorio.'
         ],
         'destination.label' => [
             'required' => 'El destino es obligatorio.',
+            'required_without' => 'El destino es obligatorio.'
         ],
         'date' => [
             'required' => 'La fecha es obligatoria.',

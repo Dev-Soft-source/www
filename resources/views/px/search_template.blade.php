@@ -512,6 +512,7 @@
                                     :show-status="true" 
                                     :show-driver-info="true" 
                                     :show-options="true" 
+                                    :show-booking-button="true" 
                                     :price-minor="$ride->matched_segment_price_minor ?? $ride->price_minor" />
                                 @endforeach
                             </div>

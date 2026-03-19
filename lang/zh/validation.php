@@ -181,11 +181,19 @@ return [
         'city_not_in_record' => [
             'message' => '我们在记录中找不到该城市名称，请再次检查拼写。',
         ],
+        'origin' => [
+            'message' => '出发地点为必填项。',
+        ],
+        'destination' => [
+            'message' => '目的地为必填项。',
+        ],
         'origin.label' => [
             'required' => '出发地点为必填项。',
+            'required_without' => '出发地点为必填项。'
         ],
         'destination.label' => [
             'required' => '目的地为必填项。',
+            'required_without' => '目的地为必填项。'
         ],
         'date' => [
             'required' => '日期为必填项。',

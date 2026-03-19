@@ -181,11 +181,19 @@ return [
         'city_not_in_record' => [
             'message' => "Nous n'avons pas trouvé ce nom de ville dans nos enregistrements, veuillez vérifier l'orthographe.",
         ],
+        'origin' => [
+            'message' => "L'origine est obligatoire.",
+        ],
+        'destination' => [
+            'message' => 'La destination est obligatoire.',
+        ],
         'origin.label' => [
             'required' => "L'origine est obligatoire.",
+            'required_without' => "L'origine est obligatoire."
         ],
         'destination.label' => [
             'required' => 'La destination est obligatoire.',
+            'required_without' => 'La destination est obligatoire.'
         ],
         'date' => [
             'required' => 'La date est obligatoire.',

@@ -105,18 +105,6 @@ class RideController extends Controller
 
         $ride = $this->makeDetailOfRide($ride, $from_stop_id, $to_stop_id);
 
-        $featureIds = array_filter(explode('=', $ride->features ?? ''));
-        $ride->pink_ride = $postRidePage->features_option1 &&
-            in_array((string) $postRidePage->features_option1->features_setting_id, $featureIds)
-            ? $postRidePage->features_option1
-            : null;
-        $ride->extra_care_ride = $postRidePage->features_option2 &&
-            in_array((string) $postRidePage->features_option2->features_setting_id, $featureIds)
-            ? $postRidePage->features_option2
-            : null;
-
-
-
         $ride_cancelled = false;
         $completed_date_time = Carbon::parse($ride->completed_date . ' ' . $ride->completed_time);
         if (isset($ride_booking) && ($completed_date_time < Carbon::now() || $ride_booking->status == '3' || $ride_booking->status == '4')) {

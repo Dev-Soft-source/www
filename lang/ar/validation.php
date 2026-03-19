@@ -181,11 +181,19 @@ return [
         'city_not_in_record' => [
             'message' => 'لم نتمكن من العثور على اسم هذه المدينة في سجلاتنا، يرجى التحقق من التهجئة.',
         ],
+        'origin' => [
+            'message' => 'نقطة الانطلاق مطلوبة.',
+        ],
+        'destination' => [
+            'message' => 'نقطة الوصول مطلوبة.',
+        ],
         'origin.label' => [
             'required' => 'نقطة الانطلاق مطلوبة.',
+            'required_without' => 'نقطة الانطلاق مطلوبة.'
         ],
         'destination.label' => [
             'required' => 'نقطة الوصول مطلوبة.',
+            'required_without' => 'نقطة الوصول مطلوبة.'
         ],
         'date' => [
             'required' => 'التاريخ مطلوب.',

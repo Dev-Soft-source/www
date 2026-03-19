@@ -213,7 +213,7 @@
                             {{ $findRidePage->card_section_seats_left ?? 'seats available' }}
                         </p>
                     </div>
-
+                    @if($showBookingButton)
                     <div class="my-4">
                         @if ($ride->isInstantBooking() )
                             <a href="{{ route('ride_detail', ['lang' => app()->getLocale(), 'id' => $ride->id]) }}"
@@ -229,6 +229,7 @@
                             </a>
                         @endif
                     </div>
+                    @endif
                 </div>
             </div>
 

@@ -181,11 +181,19 @@ return [
         'city_not_in_record' => [
             'message' => 'हमारे रिकॉर्ड में इस शहर का नाम नहीं मिला, कृपया वर्तनी की दोबारा जाँच करें।',
         ],
+        'origin' => [
+            'message' => 'प्रस्थान स्थान आवश्यक है।',
+        ],
+        'destination' => [
+            'message' => 'गंतव्य स्थान आवश्यक है।',
+        ],
         'origin.label' => [
             'required' => 'प्रस्थान स्थान आवश्यक है।',
+            'required_without' => 'प्रस्थान स्थान आवश्यक है।'
         ],
         'destination.label' => [
             'required' => 'गंतव्य स्थान आवश्यक है।',
+            'required_without' => 'गंतव्य स्थान आवश्यक है।'
         ],
         'date' => [
             'required' => 'तारीख आवश्यक है।',

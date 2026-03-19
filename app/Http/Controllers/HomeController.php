@@ -23,7 +23,7 @@ use App\Models\RideDetail;
 use App\Models\Message;
 use App\Models\RideDetailPageSettingDetail;
 use App\Models\PostRidePageSettingDetail;
-use App\Models\FeaturesSettingDetail;
+use App\Models\FindRidePageSettingDetail;
 use App\Models\SuccessMessagesSettingDetail;
 use App\Models\User;
 use App\Models\Video;
@@ -39,6 +39,7 @@ use Stripe\Price;
 use Stripe\Product;
 use Stripe\Stripe;
 use Stripe\Subscription;
+use Illuminate\Support\Facades\View;
 
 class HomeController extends Controller
 {
@@ -48,7 +49,7 @@ class HomeController extends Controller
         
         $latestFilteredReviews = Rating::latest('added_on')->where('is_disply', 1)->get();
         
-        $findRidePage = $this->getFindRidePageWithSettingDetail();
+        // $findRidePage = $this->getFindRidePageWithSettingDetail();
         
         $postRidePage = $this->getPostRidePageWithSettingDetail();
         
@@ -82,6 +83,33 @@ class HomeController extends Controller
         })->with('articleDetail')->orderBy('id', 'desc')->limit(8)->get();
 
         $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+
+
+        // two rides
+        $rides = Ride::limit(2)->get();
+        
+        $postRidePage = $this->getPostRidePageWithSettingDetail();
+        
+        $searchOptionGroups = $this->getSearchOptionGroups(
+            $this->selectedLanguage->id,
+            $this->defaultLang->id
+        );
+        foreach($rides as $ride){
+            $ride->mapMultipleOptionColumnsToDetails(
+                ['luggage', 'payment_method', 'booking_type', 'animal_friendly', 'booking_method'],
+                $this->selectedLanguage->id,
+                $this->defaultLang->id,
+                false
+            );
+    
+            $ride = $this->makeDetailOfRide($ride);
+        }
+        $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        View::share([
+            'findRidePage' => $findRidePage,
+            'postRidePage' => $postRidePage,
+            'rideDetailPage' => $rideDetailPage,
+        ]);
 
         return view(
             'index',

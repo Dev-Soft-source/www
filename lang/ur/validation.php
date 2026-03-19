@@ -181,11 +181,19 @@ return [
         'city_not_in_record' => [
             'message' => 'ہم اپنے ریکارڈ میں اس شہر کا نام نہیں ڈھونڈ سکے، براہ کرم ہجے کو دوبارہ چیک کریں۔',
         ],
+        'origin' => [
+            'message' => 'روانگی کا مقام ضروری ہے۔',
+        ],
+        'destination' => [
+            'message' => 'منزل کا مقام ضروری ہے۔',
+        ],
         'origin.label' => [
             'required' => 'روانگی کا مقام ضروری ہے۔',
+            'required_without' => 'روانگی کا مقام ضروری ہے۔'
         ],
         'destination.label' => [
             'required' => 'منزل کا مقام ضروری ہے۔',
+            'required_without' => 'منزل کا مقام ضروری ہے۔'
         ],
         'date' => [
             'required' => 'تاریخ ضروری ہے۔',
