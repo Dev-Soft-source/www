@@ -506,7 +506,7 @@
                                         @isset($rideDetailPage->driver_info_label)
                                             {{ $rideDetailPage->driver_info_label }}
                                         @endisset
-                                    </a>
+                                    </div>
                                 @else
                                     @if ($ride_cancelled)
                                         @isset($rideDetailPage->review_driver_info_label)
@@ -519,8 +519,8 @@
                                     @endif
                                 @endif
                             </h3>
-
-                            <div class="flex items-center justify-between p-4 w-full">
+                            <div class="flex items-center justify-between px-4 pt-2 w-full">{{ $rideDetailPage->driver_info_show_label ?? 'Driver details are shared after booking confirmation.' }}</div>
+                            <div class="flex items-center justify-between p-4  pt-1 w-full">
                                 <div class="flex items-center space-x-2">
                                     @if (auth()->user() &&
                                             $ride->bookings &&
@@ -535,13 +535,12 @@
                                             @endphp
 
                                             @isset($uuid)
-                                                <a
-                                                    href="{{ route('review_driver', ['lang' => $selectedLanguage->abbreviation, 'id' => $uuid]) }}">
+                                                <div>
                                                     @isset($ride->driver?->profile_image)
                                                         <img class="w-full h-full object-cover"
                                                             src="{{ $ride->driver?->profile_image }}" alt="">
                                                     @endisset
-                                                </a>
+                                                </div>
                                             @else
                                                 <img class="w-full h-full object-cover"
                                                     src="{{ $ride->driver?->profile_image }}" alt="">
