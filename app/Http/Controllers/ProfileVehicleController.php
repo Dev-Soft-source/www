@@ -248,7 +248,6 @@ class ProfileVehicleController extends Controller
             'image' => 'required_without:existing_image|image|mimes:jpeg,png,jpg,gif|max:10240'
             // 'image' => $vehicle->image || $request->filled('remove_image') ? 'nullable|file|mimes:jpeg,png,jpg,gif|max:10240' : 'required|file|mimes:jpeg,png,jpg,gif|max:10240',
         ], $customMessages);
-
         if ($validator->fails()) {
             // Check if there are validation errors for the 'uploaded' attribute
             $hasRequiredError = $validator->errors()->has('image') && ($validator->errors()->first('image') === 'The image is not uploaded yet' || $validator->errors()->first('image') === 'The image failed to upload');
@@ -260,7 +259,7 @@ class ProfileVehicleController extends Controller
                     ->with('uploaded_image', $filename ?? null);
             }
         }
-
+        
         // Handle new image upload - check this FIRST before anything else
         if ($request->hasFile('image')) {
             $file = $request->file('image');
@@ -302,7 +301,7 @@ class ProfileVehicleController extends Controller
         $updateData = [
             'make' => $request->make,
             'model' => $request->model,
-            'type' => Vehicle::normalizeVehicleTypeId($request->type),
+            'type' => Vehicle::normalizeVehicleTypeId($request->vehicle_type),
             'license_no' => $request->license_no,
             'color' => $request->color,
             'year' => $request->year,
