@@ -205,7 +205,7 @@
                                     </p>
                                 </div>
                             </div>
-                            <input id="dropzone-file" name="vehicle_image" type="file" onchange="previewImage(this)" accept="image/*"
+                            <input id="dropzone-file" name="image" type="file" onchange="previewImage(this)" accept="image/*"
                                 class="hidden" />
                             @if (session('uploaded_image'))
                                 <input type="hidden" name="existing_image" value="{{ session('uploaded_image') }}">
@@ -219,7 +219,7 @@
                                 <input id="existing_image" type="hidden" name="existing_image"
                                     value="{{ $imageName }}">
                             @endif
-                            @error('vehicle_image')
+                            @error('image')
                                 @if ($message !== 'The image is not uploaded yet' && $message !== 'The image failed to upload')
                                     <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                 @endif
