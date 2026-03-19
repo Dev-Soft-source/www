@@ -342,7 +342,7 @@
         <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row justify-between md:items-center">
             <h1>
                 @if(($routeType) == 'edit')
-                Edit a Ride
+                {{ $postRidePage->main_heading_update ?? 'Edit Ride' }}
                 @elseif($routeType == 'copy')
                 {{ $postRidePage->main_heading ?? 'Post a Ride' }} <span class="text-gray-400 text-xl">COPY RIDE</span>
                 @elseif($routeType == 'repost')
