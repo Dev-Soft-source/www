@@ -123,16 +123,18 @@
     $wrapperStart = '';
     $wrapperEnd = '';
 
-    if ($ride->isPinkExtraCareRide()) {
-        $wrapperStart = '<div class="rounded-lg border-[3px] border-solid border-green-500 p-[2px] shadow-3xl">';
-        $wrapperEnd = '</div>';
-        $classes .= ' border-pink-500';
-    } elseif ($ride->isPinkRide()) {
-        $classes .= ' border-pink-500';
-    } elseif ($ride->isExtraCareRide()) {
-        $classes .= ' border-green-500';
-    } elseif ($ride->isShortDistanceRide()) {
-        $classes .= ' border-blue-500';
+    if($showKindBorder){
+        if ($ride->isPinkExtraCareRide()) {
+            $wrapperStart = '<div class="rounded-lg border-[3px] border-solid border-green-500 p-[2px] shadow-3xl">';
+            $wrapperEnd = '</div>';
+            $classes .= ' border-pink-500';
+        } elseif ($ride->isPinkRide()) {
+            $classes .= ' border-pink-500';
+        } elseif ($ride->isExtraCareRide()) {
+            $classes .= ' border-green-500';
+        } elseif ($ride->isShortDistanceRide()) {
+            $classes .= ' border-blue-500';
+        }
     }
 @endphp
 {!! $wrapperStart !!}

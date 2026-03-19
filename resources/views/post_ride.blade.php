@@ -1016,16 +1016,16 @@
                                 </div>
                                 <div class="flex flex-wrap items-center gap-12">
                                     <label class="inline-flex items-center gap-2 text-sm">
-                                        <input type="radio" name="vehicle_mode" value="skip"
-                                            class="form-check-input" @checked($oldVehicleMode === 'skip')>
-                                        {{ $postRidePage->skip_label ?? 'Skip This Time' }}
+                                        <input type="radio" name="vehicle_mode" value="add_new"
+                                        class="form-check-input" @checked($oldVehicleMode === 'add_new')>
+                                        {{ $postRidePage->add_vehicle_label ?? 'Add New Vehicle' }}
                                     </label>
                                 </div>
                                 <div class="flex flex-wrap items-center gap-12">
                                     <label class="inline-flex items-center gap-2 text-sm">
-                                        <input type="radio" name="vehicle_mode" value="add_new"
-                                            class="form-check-input" @checked($oldVehicleMode === 'add_new')>
-                                        {{ $postRidePage->add_vehicle_label ?? 'Add New Vehicle' }}
+                                        <input type="radio" name="vehicle_mode" value="skip"
+                                            class="form-check-input" @checked($oldVehicleMode === 'skip')>
+                                        {{ $postRidePage->skip_label ?? 'Skip This Time' }}
                                     </label>
                                 </div>
                             </div>

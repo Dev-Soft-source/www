@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire\Px;
 
+use Illuminate\Support\Str;
 use Livewire\Component;
 
 class StopsRepeater extends Component
@@ -61,6 +62,7 @@ class StopsRepeater extends Component
                 }
                 
                 return [
+                    '_key' => (string) ($stop['_key'] ?? Str::uuid()),
                     'label' => (string) ($stop['label'] ?? ''),
                     'city_id' => isset($stop['city_id']) && is_numeric($stop['city_id']) ? (int) $stop['city_id'] : null,
                     'price_delta_minor' => isset($stop['price_delta_minor']) && is_numeric($stop['price_delta_minor']) ? (int) $stop['price_delta_minor'] : 0,
@@ -83,6 +85,7 @@ class StopsRepeater extends Component
     public function addStop(): void
     {
         $this->stops[] = [
+            '_key' => (string) Str::uuid(),
             'label' => '',
             'city_id' => null,
             'price_delta_minor' => 0,

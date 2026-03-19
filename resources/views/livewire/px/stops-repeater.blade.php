@@ -2,7 +2,7 @@
     <label id="px-stops-origin-city" class="block mb-2 origin_city">{{ $originLabel }}</label>
     <label class="block mb-4">{{ $stopAlongTheWayLabel }}</label>
     @foreach ($stops as $index => $stop)
-        <div class="flex flex-col md:flex-row md:items-center gap-3 stop-row ml-8">
+        <div wire:key="stop-row-{{ $stop['_key'] ?? $index }}" class="flex flex-col md:flex-row md:items-center gap-3 stop-row ml-8">
             <div class="flex flex-col md:flex-row gap-2 items-stretch  min-w-0 w-full">
                 <div class="flex-1 min-w-0 w-full md:w-auto">
                     @livewire(
@@ -13,7 +13,7 @@
                             'initialLabel' => $stop['label'] ?? '',
                             'initialCityId' => $stop['city_id'] ?? null,
                         ],
-                        key('px-stop-city-' . $index . '-' . md5(($stop['label'] ?? '') . '|' . ($stop['city_id'] ?? '')))
+                        key('px-stop-city-' . ($stop['_key'] ?? $index))
                     )
                     <input type="hidden" name="stops[{{ $index }}][is_pickup]" value="1">
                     <input type="hidden" name="stops[{{ $index }}][is_dropoff]" value="1">
@@ -30,10 +30,17 @@
                                 <path fill="#888888" fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
                             </svg>
                         </div>
-                        <input type="text" name="stops[{{ $index }}][departure_at]"
+                        <div wire:ignore>
+                            <input type="text"
+                                value="{{ $stop['departure_at'] ?? old("stops.$index.departure_at") }}"
+                                class="w-full pl-8 rounded border-gray-300 placeholder-gray-400"
+                                data-stop-departure-picker="{{ $index }}"
+                                data-stop-departure-display
+                                placeholder="Select departure date and time" autocomplete="off">
+                        </div>
+                        <input type="hidden" name="stops[{{ $index }}][departure_at]" wire:model.defer="stops.{{ $index }}.departure_at"
                             value="{{ $stop['departure_at'] ?? old("stops.$index.departure_at") }}"
-                            class="w-full pl-8 rounded border-gray-300 placeholder-gray-400" data-stop-departure-picker="{{ $index }}"
-                            placeholder="Select departure date and time" autocomplete="off">
+                            data-stop-departure-value="{{ $index }}">
                     </div>
                     @error("stops.$index.departure_at")
                         <div class="tooltip-error shadow-lg">{{ $message }}</div>
@@ -196,10 +203,33 @@
                         return;
                     }
 
+                    function findStopValueInput(index) {
+                        return document.querySelector('[data-stop-departure-value="' + index + '"]');
+                    }
+
+                    function syncStopDepartureValue(index, value) {
+                        const hiddenInput = findStopValueInput(index);
+                        if (!hiddenInput) {
+                            return;
+                        }
+
+                        hiddenInput.value = value || '';
+                        hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+
                     // Find all stop departure inputs (date + time combined)
                     const stopDepartureInputs = document.querySelectorAll('[data-stop-departure-picker]');
                     stopDepartureInputs.forEach(function(input) {
-                        if (input.dataset.flatpickrInitialized) {
+                        const index = input.dataset.stopDeparturePicker;
+                        const hiddenInput = findStopValueInput(index);
+                        const currentValue = hiddenInput ? (hiddenInput.value || '') : (input.value || '');
+                        const existingInstance = input._flatpickr;
+
+                        if (existingInstance) {
+                            if (currentValue !== existingInstance.input.value) {
+                                existingInstance.setDate(currentValue, false, 'Y-m-d H:i');
+                            }
                             return;
                         }
 
@@ -211,8 +241,18 @@
                             minDate: 'today',
                             time_24hr: true,
                             minuteIncrement: 5,
+                            closeOnSelect: true,
+                            disableMobile: true,
+                            allowInput: true,
+                            defaultDate: currentValue || null,
+                            onChange: function(selectedDates, dateStr, instance) {
+                                syncStopDepartureValue(index, dateStr);
+                                instance.close();
+                            },
+                            onValueUpdate: function(selectedDates, dateStr, instance) {
+                                syncStopDepartureValue(index, dateStr);
+                            },
                         });
-                        input.dataset.flatpickrInitialized = 'true';
                     });
                 }
 
