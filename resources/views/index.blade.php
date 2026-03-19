@@ -177,7 +177,7 @@
                     <form method="POST" action="{{ route('search_ride.validate', ['lang' => optional($selectedLanguage)->abbreviation]) }}" id="home-search-form">
                 <div class="flex flex-col md:ml-10 sm:flex-col md:flex-row lg:flex-row gap-4 px-4 md:px-8 xl:px-0">
                         @csrf
-                        <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row md:items-center gap-2 relative">
+                        <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row md:items-center gap-1 relative">
                             <div class="w-54 relative">
                                 @livewire(
                                     'px.city-autocomplete',
@@ -234,7 +234,7 @@
                                 @enderror
                             </div>
                         </div>
-                        <div class="mx-auto md:mx-0 md:w-auto flex flex-col sm:flex-col md:flex-row items-center gap-4">
+                        <div class="mx-auto md:mx-0 md:w-auto flex flex-col sm:flex-col md:flex-row items-center gap-2">
                             <div class="relative h-full">
                                 <div class="absolute inset-y-0 start-0 flex items-center pl-4 pointer-events-none">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
@@ -246,7 +246,7 @@
                                 </div>
                                 <input id="departure_date" name="departure_date" value="{{ $oldDepartureDate }}"
                                     type="text" readonly
-                                    class="city-autocomplete-input h-full border-0 bg-transparent pl-10 pr-12 font-semibold text-slate-900 placeholder-slate-900 focus:ring-0"
+                                    class="city-autocomplete-input h-full border-0 bg-transparent pl-10 font-semibold text-slate-900 placeholder-slate-900 focus:ring-0"
                                     placeholder="{{ $findRidePage->search_section_date_placeholder ?? 'Select date' }}"
                                     autocomplete="off">
                                 <button type="button" id="departure-date-clear-button"
