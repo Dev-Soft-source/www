@@ -756,6 +756,16 @@ class Ride extends Model
         if (!empty($filters['hide_full_rides'])) {
             $query->whereHas('pendingSeatDetail');
         }
+        
+        if (!empty($filters['proximalocal'])) {
+            // Filter for rides where price per seat is less than $15
+            // Price is stored in cents, so $15 = 1500 cents
+            // pricePerSeat() divides by 100, so we filter where price < 1500
+            $query->whereHas('rideDetail', function ($detailQuery) {
+                $detailQuery->where('default_ride', '1')
+                    ->where('price', '<', 1500);
+            });
+        }
 
         if (!empty($filters['driver_rating'])) {
             $query->whereRaw(
