@@ -2142,6 +2142,7 @@
             }
 
             function toMajorFromMinor(minorValue) {
+                if(minorValue == 0) return '';
                 return (toMinorInt(minorValue) / 100).toFixed(2);
             }
 
@@ -2759,6 +2760,8 @@
                         routeLabelWrap.appendChild(expectedHint);
 
                         const priceInput = document.createElement('input');
+                        
+                        
                         priceInput.type = 'number';
                         priceInput.min = '0';
                         priceInput.step = '0.01';
@@ -3691,6 +3694,17 @@
 
         var priceWarningParagraph1 = @json(optional($postRidePage)->price_above_reimbursement_warning ?? 'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Québec.');
         var priceWarningParagraph2 = @json(optional($postRidePage)->price_reduction_suggestion_message ?? 'While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.');
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key !== 'Enter') {
+                return;
+            }
+
+            const target = event.target;
+            if (target instanceof HTMLInputElement && target.classList.contains('px-segment-price-input')) {
+                event.preventDefault();
+            }
+        });
 
     </script>
 
