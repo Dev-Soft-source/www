@@ -112,12 +112,49 @@
         </div>
         <div class="pb-2 px-4">
             @php
-                $heading = $ratings->count() > 0
-                    ? optional($driverPage)->reviews_heading ?? 'Reviews'
-                    : optional($driverPage)->no_reviews_label ?? 'No Reviews Yet';
+                $ratingsCount = $ratings->count();
+                $hasRatings = $ratingsCount > 0;
+
+                $overallAverage = $hasRatings ? ($ratings->avg('average_rating') ?? 0) : 0;
+                $formattedOverallAverage = number_format((float) $overallAverage, 1);
+
+                $fullStarsOverall = floor((float) $overallAverage);
+                $fractionOverall = (float) $overallAverage - $fullStarsOverall;
             @endphp
 
-            <h3 class="mb-0 text-2xl xl:text-3xl mt-8">{{ $heading }}</h3>            
+            @if ($hasRatings)
+                <div class="flex items-center gap-2 mt-8">
+                    <h3 class="mb-0 text-2xl xl:text-3xl font-semibold leading-none">{{ $formattedOverallAverage }}</h3>
+                    <div class="flex space-x-1">
+                        {{-- Full yellow stars --}}
+                        @for ($i = 1; $i <= $fullStarsOverall; $i++)
+                            <img src="{{ asset('assets/11-review-full-star.png') }}" class="w-5 h-5 mt-0.5" alt="">
+                        @endfor
+
+                        {{-- Fractional star + remaining grey stars --}}
+                        @if ($fractionOverall > 0)
+                            @if ($fractionOverall >= 0.75)
+                                <img src="{{ asset('assets/11-review-4.75-stars.png') }}" class="w-5 h-5 mt-0.5" alt="">
+                            @elseif ($fractionOverall >= 0.25)
+                                <img src="{{ asset('assets/11-review-4.5-stars.png') }}" class="w-5 h-5 mt-0.5" alt="">
+                            @else
+                                <img src="{{ asset('assets/11-review-4.25-stars.png') }}" class="w-5 h-5 mt-0.5" alt="">
+                            @endif
+
+                            @for ($i = $fullStarsOverall + 1; $i < 5; $i++)
+                                <img src="{{ asset('assets/11-review-full-star-grey.png') }}" class="w-5 h-5 mt-0.5" alt="">
+                            @endfor
+                        @else
+                            @for ($i = $fullStarsOverall; $i < 5; $i++)
+                                <img src="{{ asset('assets/11-review-full-star-grey.png') }}" class="w-5 h-5 mt-0.5" alt="">
+                            @endfor
+                        @endif
+                    </div>
+                </div>
+            @else
+                <h3 class="mb-0 text-2xl xl:text-3xl mt-8">{{ optional($driverPage)->no_reviews_label ?? 'No Reviews Yet' }}</h3>
+            @endif
+
             <div class="space-y-4 mt-4">
                 @php $displayLimit = 2; @endphp
                 
