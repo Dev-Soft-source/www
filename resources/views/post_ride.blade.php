@@ -170,6 +170,22 @@
             $oldVehicleMode = old('vehicle_mode', 'existing');
         }
 
+        $oldStops = collect($oldStops ?? [])
+            ->map(function ($stop) {
+                if (!is_array($stop)) {
+                    $stop = (array) $stop;
+                }
+
+                $stop['pickup_dropoff_location'] = $stop['pickup_dropoff_location']
+                    ?? $stop['pickup_location']
+                    ?? $stop['dropoff_location']
+                    ?? '';
+
+                return $stop;
+            })
+            ->values()
+            ->all();
+
         $stopsExpanded = !empty($oldStops);
         if (!$stopsExpanded && $errors->any()) {
             foreach ($errors->keys() as $errorKey) {

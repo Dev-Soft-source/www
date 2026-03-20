@@ -407,7 +407,11 @@ class Controller extends BaseController
                 'price_delta_minor' => $stop->price_delta_minor,
                 'is_pickup' => $stop->is_pickup,
                 'is_dropoff' => $stop->is_dropoff,
-                'pickup_dropoff_location' => $stop->pickup_dropoff_location,
+                'pickup_dropoff_location' => $stop->pickup_dropoff_location
+                    ?? $stop->pickup_location
+                    ?? $stop->dropoff_location,
+                'pickup_location' => $stop->pickup_location ?? null,
+                'dropoff_location' => $stop->dropoff_location ?? null,
             ])
             ->values()
             ->toArray();
