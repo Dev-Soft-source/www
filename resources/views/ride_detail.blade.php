@@ -932,7 +932,10 @@
                                                 $action = "showPhoneVerificationModal()";
                                             } elseif ($showPhotoIdRequiredForBooking) {
                                                 $action = "showPhotoIdRequiredModal()";
+                                            } elseif (!$isAuthenticated) {
+                                                $action = "togglePopupModal1()";
                                             }
+
                                         @endphp
 
                                         @if ($action)

@@ -1,5 +1,8 @@
 @foreach (($features ?? []) as $feature)
+
+@continue((int)$feature == 1 || (int)$feature == 2)
     @php
+    
         $featureOption = null;
         $featureLabel = $feature;
 
