@@ -192,7 +192,7 @@ class Ride extends Model
      */
     public function getMobileSeatFareTotal(): float
     {
-        $seatPrice = (float) ($this->rideDetail()->first()?->price ?? 0);
+        $seatPrice = (float) ($this->rideDetail()->first()?->price / 100 ?? 0);
 
         $bookedSeats = (int) $this->bookings()
             ->notRejected()
