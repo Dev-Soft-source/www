@@ -239,7 +239,12 @@
                                                                             {{ $rideDetailPage->at_label }}
                                                                             {{ $departureTimeLabel ?? 'N/A' }}
                                                                         </p>
-
+                                                                            @if($ride->isPinkRide())
+                                                                                <img class="w-12 h-12 ml-2" src="{{ asset('home_page_icons/' . $postRidePage->features_option1->icon) }}" alt="">
+                                                                            @endif
+                                                                            @if($ride->isExtraCareRide())
+                                                                                <img class="w-12 h-12 ml-2" src="{{ asset('home_page_icons/' . $postRidePage->features_option2->icon) }}" alt="">
+                                                                            @endif
                                                                            
                                                                         </div>
                                                                         <div class="relative mt-5 text-left">

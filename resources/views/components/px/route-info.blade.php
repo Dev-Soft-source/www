@@ -104,7 +104,14 @@
             </span>
         @endif
     </p>
-
+    @if($ride->isPinkRide())
+        <img class="w-12 h-12 ml-2" src="{{ asset('home_page_icons/' . $postRidePage->features_option1->icon) }}" alt=""
+        data-tippy-content="{{ $postRidePage->features_option1->tooltip }}">
+    @endif
+    @if($ride->isExtraCareRide())
+        <img class="w-12 h-12 ml-2" src="{{ asset('home_page_icons/' . $postRidePage->features_option2->icon) }}" alt=""
+        data-tippy-content="{{ $postRidePage->features_option2->tooltip }}">
+    @endif
     </div>
 @endif
 
