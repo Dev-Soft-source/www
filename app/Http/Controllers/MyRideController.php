@@ -49,6 +49,7 @@ use App\Models\SuccessMessagesSettingDetail;
 use App\Models\TopUpBalance;
 use App\Services\FCMService;
 use Srmklive\PayPal\Services\PayPal as PayPalClient;
+use Illuminate\Support\Facades\View;
 
 class MyRideController extends Controller
 {
@@ -99,6 +100,13 @@ class MyRideController extends Controller
             ->paginate(6);
         
         $searchOptionGroups = $this->getSearchOptionGroups($this->selectedLanguage->id, $this->defaultLang->id);
+
+        $postRidePage = $this->getPostRidePageWithSettingDetail();
+         View::share([
+            // 'findRidePage' => $findRidePage,
+            'postRidePage' => $postRidePage,
+            'rideDetailPage' => $rideDetailPage,
+        ]);
 
         return view('my_rides', [
             'rides' => $rides, 

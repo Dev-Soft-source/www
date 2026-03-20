@@ -8,6 +8,7 @@
     @if (in_array((string) $featureOption['id'], $selectedFeatureIds, true) 
     // && !empty($featureOption['icon'])
     )
+    @continue($featureOption['id'] == 1 || $featureOption['id'] == 2)
         <img
             class="{{ $iconClass }}"
             src="{{ asset('home_page_icons/' . $featureOption['icon']) }}"

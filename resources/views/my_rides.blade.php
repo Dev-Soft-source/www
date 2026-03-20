@@ -220,7 +220,6 @@
                                                                         live</span>
                                                                 @endif
                                                                 <div class="grid grid-cols-5 gap-4 p-4 items-start">
-                
                                                                     @php
                                                                         $displayDt = ($defaultDetail->date ?? $ride->date) . ' ' . ($defaultDetail->time ?? $ride->time ?? '00:00');
                                                                         $departureDateTime = formatDepartureDateTime(
@@ -234,11 +233,20 @@
                                                                             $departureDateTime['timeLabel'];
                                                                     @endphp
                                                                     <div class="col-span-3">
+                                                                        <div class="flex flex-row items-center">
                                                                         <p class="flex items-center space-x-2 font-semibold">
                                                                             {{ $departureDateLabel }}
                                                                             {{ $rideDetailPage->at_label }}
                                                                             {{ $departureTimeLabel ?? 'N/A' }}
                                                                         </p>
+
+                                                                            @if($ride->isPinkRide())
+                                                                                <img class="w-12 h-12 ml-2" src="{{ asset('home_page_icons/' . $postRidePage->features_option1->icon) }}" alt="">
+                                                                            @endif
+                                                                            @if($ride->isExtraCareRide())
+                                                                                <img class="w-12 h-12 ml-2" src="{{ asset('home_page_icons/' . $postRidePage->features_option2->icon) }}" alt="">
+                                                                            @endif
+                                                                        </div>
                                                                         <div class="relative mt-5 text-left">
                                                                             <div class="items-center relative">
                                                                                 <div

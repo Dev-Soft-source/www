@@ -85,9 +85,11 @@
     if ($departureDateTime) {
         $formattedDeparture = formatDepartureDateTime($departureDateTime, $selectedLanguage, $rideDetailPage);
     }
+
 @endphp
 
 @if ($formattedDeparture)
+<div class="flex flex-row items-center">
     <p class="flex items-center space-x-2 font-semibold">
         {{ $formattedDeparture['dateLabel'] }}
         {{ $rideDetailPage->at_label }}
@@ -102,6 +104,15 @@
             </span>
         @endif
     </p>
+    @if($ride->isPinkRide())
+        <img class="w-12 h-12 ml-2" src="{{ asset('home_page_icons/' . $postRidePage->features_option1->icon) }}" alt=""
+        data-tippy-content="{{ $postRidePage->features_option1->tooltip }}">
+    @endif
+    @if($ride->isExtraCareRide())
+        <img class="w-12 h-12 ml-2" src="{{ asset('home_page_icons/' . $postRidePage->features_option2->icon) }}" alt=""
+        data-tippy-content="{{ $postRidePage->features_option2->tooltip }}">
+    @endif
+    </div>
 @endif
 
 <div class="relative {{ $formattedDeparture ? 'mt-5' : '' }} text-left">
