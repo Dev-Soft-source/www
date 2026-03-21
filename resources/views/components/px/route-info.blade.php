@@ -90,7 +90,7 @@
 
 @if ($formattedDeparture)
 <div class="flex flex-row items-center">
-    <h4 class="flex items-center space-x-2">
+    <h4 class="flex items-center space-x-2 text-xl">
         {{ $formattedDeparture['dateLabel'] }}
         {{ $rideDetailPage->at_label }}
         {{ $formattedDeparture['timeLabel'] ?? 'N/A' }}
