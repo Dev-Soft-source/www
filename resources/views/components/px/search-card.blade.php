@@ -240,18 +240,28 @@
 
                 <div
                     class="border-t border-gray-300">
-                    <div class="flex items-center justify-between p-4 w-full">
+                    <div class="flex items-center justify-between px-4 py-2 w-full">
                         <div class="flex items-center space-x-2">
                             <div>
                                 <p class="font-semibold">
                                     {{ $ride->driver?->first_name }}
                                 </p>
-                                <p class="text-sm">
-                                    {{ $findRidePage->card_section_age }}: {{ $ride->driver?->getAge() }}
-                                </p>
-                                <p class="text-sm">
-                                    {{ $ride->driver?->getCompletedPassengerBookingsCount() }} {{ $findRidePage->card_section_driven }}
-                                </p>
+                                <div class="flex items-baseline gap-2">
+                                    <label class="text-md">
+                                        {{ $findRidePage->card_section_age }}: 
+                                    </label>
+                                    <p>
+                                        {{ $ride->driver?->getAge() }}
+                                    </p>
+                                </div>
+                                <div class="flex items-baseline gap-2">
+                                    <label class="text-md">
+                                        {{ $findRidePage->card_section_driven }}: 
+                                    </label>
+                                    <p>
+                                       {{ $ride->driver?->getCompletedPassengerBookingsCount() }}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                         <div class="flex items-center gap-2">

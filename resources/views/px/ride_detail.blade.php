@@ -349,7 +349,7 @@
 @section('style')
     <style>
         .ride-detail-page p {
-            font-family: 'Nunito', sans-serif;
+            font-family: 'Carlito', Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
         }
     </style>
 @endsection

@@ -34,7 +34,7 @@
                     {{ $rideDetailPage->booking_price_label ?? 'Booking Price' }}:
                 </h4>
                 <p class="text-lg font-normal text-left text-primary"
-                    style="font-family: 'Nunito', sans-serif;">
+                    style="font-family: 'Carlito', Calibri, Candara, Segoe, &quot;Segoe UI&quot;, Optima, Arial, sans-serif;">
                     ${{ number_format(floatval($ride->price_minor), 2) }}
                     @isset($rideDetailPage->per_seat_label)
                         {{ $rideDetailPage->per_seat_label }}

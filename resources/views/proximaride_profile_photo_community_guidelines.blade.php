@@ -13,7 +13,7 @@
             @isset($profilePhotoGuidelinesPage->main_text)
                 {!! $profilePhotoGuidelinesPage->main_text !!}
             @endisset
-            <h2 class="text-2xl md:text-3xl font-FuturaBdCnBT text-blue-600 mb-4 mt-8 text-center">{{ $profilePhotoGuidelinesPage->example_label ?? 'Here is a Good Example' }}</h2>
+            <h2 class="text-2xl md:text-3xl font-FuturaMdCnBT text-blue-600 mb-4 mt-8 text-center">{{ $profilePhotoGuidelinesPage->example_label ?? 'Here is a Good Example' }}</h2>
             <div class="flex justify-center mb-6">
                 <img class="max-w-full h-auto rounded-lg shadow-md" src="{{ asset('home_page_icons/1749147041-Profile Photo Guidelines-2.jpg') }}" alt="Good profile photo example" style="max-width: 400px;">
             </div>

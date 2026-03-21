@@ -68,13 +68,13 @@
                 {{ $closeAccountPage->mobile_indicate_required_field_label ?? '* Indicates required field' }}</p>
             <div class="pr-4">
                 <div class="rounded-lg py-3">
-                    <p>
+                    <label>
                         <span
                             class="text-primary text-xl md:text-2xl font-FuturaMdCnBT">{{ $closeAccountPage->apply_reason_label ?? 'You are closing your account' }}</span>
                         <span class="text-gray-900 text-xl md:text-1xl font-FuturaMdCnBT">
                             {{ $closeAccountPage->reason_label ?? 'select all the reasons that apply' }}</span><span
                             class="text-red-500 text-xl md:text-2xl font-bold">*</span>
-                    </p>
+                        </label>
                 </div>
                 <form method="POST" action="{{ route('close_account.update', $user->id) }}" id="close-account-form">
                     @csrf
@@ -179,11 +179,11 @@
                         </div>
 
                         <div class="rounded-lg pt-3 md:col-span-2">
-                            <p>
+                            <label>
                                 <span
                                     class="text-primary text-xl md:text-2xl font-FuturaMdCnBT">{{ $closeAccountPage->recommend_heading ?? 'Would you recommend ProximaRide to your friends?' }}</span><span
                                     class="text-red-500 text-xl md:text-2xl font-bold">*</span>
-                            </p>
+                            </label>
                         </div>
                         <div class="md:col-span-2">
                             <ul class="space-y-4">
@@ -218,13 +218,13 @@
                         </div>
 
                         <div class="md:col-span-2 mt-5">
-                            <p>
+                            <label>
                                 <span
-                                    class="text-primary text-base md:text-lg">{{ $closeAccountPage->why_closing_account_label ?? 'In your own words, please tell us why you’d like to close your account.' }}</span>
-                                <span class="text-gray-900 text-base md:text-lg">
+                                    class="text-primary text-xl md:text-2xl">{{ $closeAccountPage->why_closing_account_label ?? 'In your own words, please tell us why you’d like to close your account.' }}</span>
+                                <span class="text-gray-900 text-xl md:text-1xl">
                                     {{ $closeAccountPage->why_closing_account_placeholder ?? 'This is optional, but your feedback would be greatly appreciated.' }}</span><span
                                     class="text-red-500 text-xl md:text-2xl font-bold">*</span>
-                            </p>
+                                </label>
                             <textarea rows="5" name="close_account_reason" id="close_account_reason"
                                 class="block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 ">{{ old('close_account_reason') }}</textarea>
                             @error('close_account_reason')
@@ -236,13 +236,12 @@
                         </div>
 
                         <div class="md:col-span-2 mt-5">
-                            <p>
-                                <span
-                                    class="text-primary text-base md:text-lg">{{ $closeAccountPage->improve_label ?? 'We’d love to hear how we can improve.' }}</span>
-                                <span class="text-gray-900 text-base md:text-lg">
+                            <label>
+                                <span class="text-primary text-xl md:text-2xl">{{ $closeAccountPage->improve_label ?? 'We’d love to hear how we can improve.' }}</span>
+                                <span class="text-gray-900 text-xl">
                                     {{ $closeAccountPage->why_closing_account_placeholder ?? 'Sharing is optional, but your input would mean a lot.' }}</span><span
                                     class="text-red-500 text-xl md:text-2xl font-bold">*</span>
-                            </p>
+                                </label>
                             <textarea rows="5" name="improve_message" id="improve_message"
                                 class="block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 ">{{ old('improve_message') }}</textarea>
                             @error('improve_message')

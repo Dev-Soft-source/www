@@ -53,11 +53,11 @@
             The Booking Price may reasonably reflect a portion of:
         </p>
         <ul class="list-disc pl-6 space-y-2 text-base">
-            <li class="font-[Roboto]">Fuel</li>
+            <li class="font-FuturaMdCnBT">Fuel</li>
             <li>Highway tolls</li>
-            <li class="font-[Roboto]">Parking fees during the trip</li>
-            <li class="font-[Roboto]">Wear-and-tear as normally recognized in carpool cost-sharing models</li>
-            <li class="font-[Roboto]">Reasonable trip-related vehicle expenses</li>
+            <li class="font-FuturaMdCnBT">Parking fees during the trip</li>
+            <li class="font-FuturaMdCnBT">Wear-and-tear as normally recognized in carpool cost-sharing models</li>
+            <li class="font-FuturaMdCnBT">Reasonable trip-related vehicle expenses</li>
         </ul>
         <p class="leading-relaxed mt-4">
             The Booking Price is not wages or revenue. It is not compensation for time, effort, or driving service.

@@ -2,9 +2,9 @@
 
 @section('style')
     <style>
-        /* Match ride_detail: body text in Nunito, sizes from Tailwind (text-xl, text-sm) */
+        /* Match ride_detail: body text in Carlito, sizes from Tailwind (text-xl, text-sm) */
         .booking-page p {
-            font-family: 'Nunito', sans-serif;
+            font-family: 'Carlito', Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
         }
 
     </style>
@@ -327,12 +327,12 @@
                                 <div class="bg-white p-4 rounded-b-lg">
                                     <div class="flex items-center justify-between gap-2">
                                         <div class="flex items-center gap-2">
-                                            <p class="text-black">
+                                            <label class="text-xl text-black">
                                                 <span id="selectedSeats">1</span>
                                                 @isset($bookingPage->seat_label)
                                                     {{ $bookingPage->seat_label }}
                                                 @endisset
-                                            </p>
+                                            </label>
                                         </div>
                                         <p class="totalSeatsAmount text-black"></p>
                                         <input type="hidden" name="seats_amount" class="totalSeatsAmountInput form-control" readonly>
@@ -340,24 +340,24 @@
 
                                     @if ($ride->isFirmCancellation())
                                         <div class="flex items-center justify-between gap-2">
-                                            <p class="text-black">
+                                            <label class="text-xl text-black">
                                                 {{ $bookingPage->firm_discount_label_price_section ?? 'Discount' }}
-                                            </p>
+                                            </label>
                                             <p class="firmDiscountAmt text-black"></p>
                                         </div>
                                         <div class="flex items-center justify-between gap-2">
-                                            <p class="text-black">
+                                            <label class="text-xl text-black">
                                                 {{ $bookingPage->firm_your_price_label_price_section ?? 'Your price' }}
-                                            </p>
+                                            </label>
                                             <p class="yourPriceAmt text-black"></p>
                                         </div>
                                     @endif
 
                                     <div class="flex items-center justify-between gap-2 mt-1">
                                         <div class="flex items-center gap-2">
-                                            <p class="text-black">
+                                            <label class="text-xl text-black">
                                                     {{ $bookingPage->booking_fee_label }}
-                                            </p>
+                                            </label>
                                             @if ($user->isPendingStudent())
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                     fill="currentColor"
@@ -386,11 +386,11 @@
                                         <input type="hidden" value="{{ $setting->deduct_tax }}" name="deduct_tax">
                                         <input type="hidden" value="{{ $setting->tax_type }}" name="tax_type">
                                         <div class="flex items-center justify-between gap-2 mt-1">
-                                            <p class="text-black">
+                                            <label class="text-xl text-black">
                                                 @isset($bookingPage->tax_label)
                                                     {{ $bookingPage->tax_label ?? 'Tax' }}
                                                 @endisset
-                                            </p>
+                                            </label>
                                             <p class="taxAmount text-black">0</p>
                                             <input type="hidden" name="tax_amount" class="totalTaxAmountInput form-control" readonly>
                                         </div>
@@ -468,9 +468,9 @@
                                     @endif
                                     <input type="hidden" name="booked_by_wallet" class="bookedByWallet form-control" readonly>
                                     <div class="flex items-center justify-between gap-2 mt-1">
-                                        <p>
+                                        <label class="text-xl">
                                                 {{ $bookingPage->total_label }}
-                                        </p>
+                                        </label>
                                         <div>
                                             <p class="totalSum text-right"></p>
                                             <span id="discount" class="text-right"></span>
@@ -506,20 +506,22 @@
                                     </h3>
                                 </div>
                                 <div class="bg-white p-4">
-                                    
-                                            <p class="text-left">● @isset($bookingPage->booking_disclaimer_on_time)
-                                                    {!! $bookingPage->booking_disclaimer_on_time !!}
-                                                @endisset
-                                            </p>
-                                
-                                    <p class="text-left mt-4">●<strong> Pink Rides: </strong>
+                                    <div>
+                                    <label>● @isset($bookingPage->booking_disclaimer_on_time)
+                                            {!! $bookingPage->booking_disclaimer_on_time !!}
+                                        @endisset
+                                    </label>
+                                </div>
+                                <div>
+                                    <label>●<strong> Pink Rides: </strong>
                                                 {{ $bookingPage->booking_disclaimer_pink_ride ?? 'I know that ProximaRide are exclusive to ProximaRide female members. If I am booking on a Pink Ride, I will not be accompanied by male members who are above 12 years of age, nor will I send a male member in my place. If I do, the driver will not take me or them, and I will not be refunded' }}
-                                            </p>
-                                
-                                    <p class="text-left mt-4">●<strong> Extra+ Rides: </strong>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label>●<strong> Extra+ Rides: </strong>
                                                 {{ $bookingPage->booking_disclaimer_extra_care_ride ?? 'I know that Extra+ Rides are exclusive to members with highest review score. If I am booking on an Extra+ Ride, I will adhere to its standards' }}
-                                            </p>
-
+                                    </label>
+</div>
                                     <div class="relative">
                                         <div class="flex items-start my-4">
                                             <label class="flex items-start cursor-pointer font-normal text-gray-900">
@@ -534,7 +536,7 @@
                                             </label>
                                         </div>
                                     @error('agree_terms')
-                                            <div class="tooltip-error shadow-lg mt-1">{{ $bookingPage->aggreement_tooltip ?? $message }}</div>
+                                        <div class="tooltip-error shadow-lg mt-1">{{ $bookingPage->aggreement_tooltip ?? $message }}</div>
                                     @enderror
                                     </div>
 

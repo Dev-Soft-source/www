@@ -6,7 +6,7 @@
     <title>Email Verification - ProximaRide</title>
     <style>
         body {
-            font-family: 'Nunito', sans-serif;
+            font-family: 'Carlito', Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
             margin: 0;
             padding: 20px;
             background-color: #f5f5f5;

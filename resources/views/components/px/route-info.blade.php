@@ -143,9 +143,10 @@
                     {{ $origin }}.
                 </h3>
                 @if ($pickupLocation)
-                    <label class="text-sm mt-2">
-                        {{ $findRidePage->pickup_at_label ?? 'Pick-up at' }}: {{ $pickupLocation }}
+                    <label class="mt-2">
+                        {{ $findRidePage->pickup_at_label ?? 'Pick-up at' }}:
                     </label>
+                    <p>{{ $pickupLocation }}</p>
                 @endif
             </div>
         </div>
@@ -197,14 +198,15 @@
                     </span>
                 @endif
             </label>
-            <div class="flex gap-2">
+            <div class="flex gap-2 items-baseline">
                 <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                     {{ $destination }}.
                 </h3>
                 @if ($dropoffLocation)
-                    <label class="text-sm mt-2">
-                        {{ $findRidePage->dropoff_at_label ?? 'Drop-off at' }}: {{ $dropoffLocation }}
+                    <label class="">
+                        {{ $findRidePage->dropoff_at_label ?? 'Drop-off at' }}:
                     </label>
+                    <p>{{ $dropoffLocation }}</p>
                 @endif
             </div>
         </div>

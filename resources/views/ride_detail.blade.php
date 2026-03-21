@@ -2,9 +2,9 @@
 
 @section('style')
     <style>
-         /* Match ride_detail: body text in Nunito, sizes from Tailwind (text-xl, text-sm) */
+         /* Match ride_detail: body text in Carlito, sizes from Tailwind (text-xl, text-sm) */
         .ride-detail-page p {
-            font-family: 'Nunito', sans-serif;
+            font-family: 'Carlito', Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
         }
     </style>
 
@@ -434,7 +434,7 @@
                                 @endphp
                                 <div class="text-center">
                                     @if ($vehicleYear || $vehicleMake || $vehicleModel || $vehicleColor)
-                                        <div class="flex items-center flex-wrap justify-center gap-x-2 text-md text-black">
+                                        <div class="flex flex-flow items-center gap-x-1 text-md text-black">
                                             @if ($vehicleYear)
                                                 <p class="text-md font-semibold">{{ $vehicleYear }}</p>
                                                 @if ($vehicleMake || $vehicleModel || $vehicleColor)
@@ -553,25 +553,25 @@
                                             </p>
                                         </div>
                                         @endif
-                                        
-                                        <p class="font-semibold text-lg">
-                                            {{ $rideDetailPage->driver_label ?? 'Verified Driver' }}:
-                                            <span>
+                                        <div class="flex items-baseline gap-2">
+                                            <label class="text-xl">
+                                                {{ $rideDetailPage->driver_label ?? 'Verified Driver' }}:
+                                            </label>
+                                            <p class="text-primary"> 
                                                 @if ($ride->driver?->type === '2')
-                                                    {{ $ride->driver?->last_name }}
+                                                {{ $ride->driver?->last_name }}
                                                 @elseif ($ride->driver?->type === '3')
-                                                    {{ $ride->driver?->first_name }} {{ $ride->driver?->last_name }}
+                                                {{ $ride->driver?->first_name }} {{ $ride->driver?->last_name }}
                                                 @else
-                                                    {{ $ride->driver?->first_name }}
+                                                {{ $ride->driver?->first_name }}
                                                 @endif
-                                            </span>
-                                        </p>
-
-                                        <p class="font-semibold text-lg">
-                                            @isset($rideDetailPage->passengers_driven_label)
-                                                {{ $rideDetailPage->passengers_driven_label }}
-                                            @endisset
-                                            <span>
+                                            </p>
+                                        </div>
+                                        <div class="flex items-baseline gap-2">
+                                            <label class="text-xl">
+                                                {{ $rideDetailPage->passengers_driven_label ?? 'Passengers Driven' }}:
+                                            </label>
+                                            <p class="text-primary"> 
                                                 @php
                                                     $drivenNum = $ride->driver
                                                     ?->rides()->where('status', '!=', 2)->where(function ($query) {
@@ -583,8 +583,10 @@
                                                     })->sum();
                                                 @endphp
                                                 {{ $drivenNum > 100 ? '99+' : $drivenNum }}
-                                            </span>
-                                        </p>
+                                            </p>
+                                        </div>
+
+                                        
                                         <div class="flex items-center gap-4 w-full">
                                             <div class="flex items-center gap-1 w-auto">
                                                 @php
@@ -609,9 +611,9 @@
                                                             clip-rule="evenodd"></path>
                                                     </svg>
                                                 @else
-                                                    <p class="text-sm text-black">
+                                                    <label class="text-md text-black">
                                                         {{ $rideDetailPage->no_reviews_label ?? ($siteText['no_reviews_label'] ?? 'No Reviews') }}
-                                                    </p>
+                                                    </label>
                                                 @endif
                                             </div>
                                             @php
@@ -808,7 +810,7 @@
                                 @endif
                             </h3>
                             <div class=" p-4 w-full">
-                                <p class="text-left text-md font-semibold">
+                                <p class="text-left text-md">
                                     @php
                                         $route = null;
 
@@ -828,7 +830,7 @@
                                     @endphp
 
                                     @if ($route)
-                                        <a href="{{ $route }}" class="font-bold text-black no-underline hover:no-underline" target="_blank">
+                                        <a href="{{ $route }}" class="text-black no-underline hover:no-underline" target="_blank">
                                             {{ $ride->booking_type->name }}
                                         </a>
                                         <svg xmlns="http://www.w3.org/2000/svg"

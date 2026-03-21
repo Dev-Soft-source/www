@@ -22,7 +22,7 @@
 
         @foreach ($footerSettingDetail as $section)
         <div>
-            <p class="font-FuturaBdCnBT text-white text-lg">{{ $section->sectionTitle }}</p>
+            <p class="font-FuturaMdCnBT text-white text-lg">{{ $section->sectionTitle }}</p>
             <ul class="text-white space-y-2 mt-2">
                 @foreach ($section->menuItems as $item)
                     @php

@@ -193,7 +193,7 @@
                 {{ $rideDetailPage->payment_method_label ?? 'Payment method' }}:
                 <span class="text-primary font-normal text-lg"
                     data-tippy-content="{{ $bookingMethodTooltip }}"
-                    style="font-family: 'Nunito', sans-serif;">{{ $bookingMethodLabel ?? 'N/A' }}</span>
+                    style="font-family: 'Carlito', Calibri, Candara, Segoe, &quot;Segoe UI&quot;, Optima, Arial, sans-serif;">{{ $bookingMethodLabel ?? 'N/A' }}</span>
             </h4>
         </div>
         <div class="p-4 items-baseline">
@@ -206,7 +206,7 @@
             <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
                 {{ $rideDetailPage->booking_type_label ?? 'Booking method' }}:
                 <span class="text-primary font-normal text-lg" data-tippy-content="{{ $bookingModeTooltip }}"
-                    style="font-family: 'Nunito', sans-serif;">{{ $bookingModeLabel ?? 'N/A' }}</span>
+                    style="font-family: 'Carlito', Calibri, Candara, Segoe, &quot;Segoe UI&quot;, Optima, Arial, sans-serif;">{{ $bookingModeLabel ?? 'N/A' }}</span>
             </h4>
         </div>
     </div>
@@ -242,7 +242,7 @@
                 <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
                     {{ $rideDetailPage->booked_on_column_label ?? 'Booked' }}:
                 </h4>
-                <h4 class="text-primary font-normal text-lg ml-2" style="font-family: 'Nunito', sans-serif;">
+                <h4 class="text-primary font-normal text-lg ml-2" style="font-family: 'Carlito', Calibri, Candara, Segoe, &quot;Segoe UI&quot;, Optima, Arial, sans-serif;">
                     {{ $ride->seats_total - $ride->seats_available }}
                     {{ $ride->seats_total - $ride->seats_available == 1 ? $rideDetailPage->seat_on_column_label ?? 'seat' : $rideDetailPage->ride_seat_label ?? 'seats' }}
                 </h4>
