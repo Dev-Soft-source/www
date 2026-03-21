@@ -29,69 +29,65 @@ class MyTripController extends Controller
         // Get tab filter from query parameter (default to 'upcoming')
         $tab = request()->query('tab', 'upcoming');
 
-        // Build query based on tab
-        $query = Ride::where('added_by', $user_id);
-            // ->with(['detail','rideStops','rideStopSegments']);
+        $nowDate = now()->toDateString();
+        $nowTime = now()->toTimeString();
+
+        // Continue with passenger trips (users can be both drivers and passengers)
+        $bookingsQuery = Booking::where('bookings.user_id', $user_id)
+            ->join('rides', 'bookings.ride_id', '=', 'rides.id')
+            ->select('bookings.*', 'rides.date', 'rides.time', 'rides.completed_date', 'rides.completed_time');
 
         switch ($tab) {
-            case 'upcoming':
-                // include past rides even if they are not marked as completed, as long as their departure time has passed
-                $query->notCancelled()
-                    ->where(function ($query) {
-                        $query->where(function ($query) {
-                            $query->whereDate('completed_date', '>', now()->toDateString())
-                                ->orWhere(function ($query) {
-                                    $query->whereDate('completed_date', '=', now()->toDateString())
-                                        ->whereTime('completed_time', '>=', now()->toTimeString());
-                                });
-                        });
-                    });
-                break;
             case 'completed':
-                $query->notCancelled()
-                    ->where(function ($query) {
-                        $query->where(function ($query) {
-                            $query->whereDate('completed_date', '<', now()->toDateString())
-                                ->orWhere(function ($query) {
-                                    $query->whereDate('completed_date', '=', now()->toDateString())
-                                        ->whereTime('completed_time', '<', now()->toTimeString());
-                                });
-                        });
-                    });
+                $bookingsQuery
+                    ->where('bookings.status', '!=', Booking::STATUS_DECLINED)
+                    ->where('bookings.status', '!=', Booking::STATUS_CANCELLED)
+                    // Include rides already marked as completed, or rides whose trip end time has passed.
+                    ->where(function ($query) use ($nowDate, $nowTime) {
+                        $query->where('bookings.status', Booking::STATUS_COMPLETED)
+                            ->orWhere(function ($query) use ($nowDate, $nowTime) {
+                                $query->whereDate('rides.completed_date', '<', $nowDate)
+                                    ->orWhere(function ($query) use ($nowDate, $nowTime) {
+                                        $query->whereDate('rides.completed_date', '=', $nowDate)
+                                            ->whereTime('rides.completed_time', '<', $nowTime);
+                                    });
+                            });
+                    })
+                    ->orderBy('rides.date', 'desc')
+                    ->orderBy('rides.time', 'desc');
                 break;
+
             case 'cancelled':
-                $query->cancelled();
+                $bookingsQuery
+                    ->where('bookings.status', Booking::STATUS_CANCELLED)
+                    ->orderBy('rides.date', 'desc')
+                    ->orderBy('rides.time', 'desc');
                 break;
+
+            case 'upcoming':
             default:
+                $bookingsQuery
+                    ->where('bookings.status', '!=', Booking::STATUS_DECLINED)
+                    ->where('bookings.status', '!=', Booking::STATUS_CANCELLED)
+                    ->where(function ($query) use ($nowDate, $nowTime) {
+                        $query->whereDate('rides.completed_date', '>', $nowDate)
+                            ->orWhere(function ($query) use ($nowDate, $nowTime) {
+                                $query->whereDate('rides.completed_date', '=', $nowDate)
+                                    ->whereTime('rides.completed_time', '>=', $nowTime);
+                            });
+                    })
+                    ->orderBy('rides.date', 'asc')
+                    ->orderBy('rides.time', 'asc');
                 break;
         }
+
+        $bookings = $bookingsQuery->paginate(6);
         
-        // Continue with passenger trips (users can be both drivers and passengers)
-        $bookings = Booking::where('user_id', $user_id)
-            ->where('bookings.status', '!=', '3')
-            ->where('bookings.status', '!=', '4')
-            ->join('rides', 'bookings.ride_id', '=', 'rides.id')
-            ->where(function ($query) {
-                $query->where(function ($query) {
-                    $query->whereDate('completed_date', '>', now()->toDateString())
-                        ->orWhere(function ($query) {
-                            $query->whereDate('completed_date', '=', now()->toDateString())
-                                ->whereTime('completed_time', '>=', now()->toTimeString());
-                        });
-                });
-            })->select('bookings.*', 'rides.id', 'rides.date', 'rides.time', 'rides.completed_date', 'rides.completed_time') 
-            ->orderBy('rides.date', 'asc')
-            ->orderBy('rides.time', 'asc')
-            ->paginate(6);
-
-
         foreach($bookings as $booking){
             $from_stop_id = $booking->from_stop_id;
             $to_stop_id = $booking->to_stop_id;
             $booking->ride = $this->makeDetailOfRide($booking->ride, $from_stop_id, $to_stop_id);
         }
-
-        
 
         $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
         $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
@@ -115,6 +111,7 @@ class MyTripController extends Controller
             'ProfilePage' => $ProfilePage,
             'ProfileSetting' => $ProfileSetting,
             'bookings' => $bookings,
+            'activeTab' => $tab,
             'ratings' => $ratings,
             'tripsPage' => $tripsPage]);
     }
