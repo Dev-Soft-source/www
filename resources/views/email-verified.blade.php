@@ -6,7 +6,7 @@
     <title>Email Verification - ProximaRide</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Nunito', sans-serif;
             margin: 0;
             padding: 20px;
             background-color: #f5f5f5;

@@ -167,7 +167,7 @@
                 </div>
                 <div class="grid justify-items-end">
                     <div class="pr-2">
-                        <p class="font-medium text-2xl text-right">
+                        <p class="font-medium text-xl text-right">
                             {{ str_replace(':count', $ride->seats, $findRidePage->total_seats_label ?? 'Total :count seats') }}
                         </p>
                         <div class="flex items-center gap-2 text-primary justify-end">
@@ -247,7 +247,7 @@
                                     {{ $ride->driver?->first_name }}
                                 </p>
                                 <p class="text-sm">
-                                    {{ $findRidePage->card_section_age }} {{ $ride->driver?->getAge() }}
+                                    {{ $findRidePage->card_section_age }}: {{ $ride->driver?->getAge() }}
                                 </p>
                                 <p class="text-sm">
                                     {{ $ride->driver?->getCompletedPassengerBookingsCount() }} {{ $findRidePage->card_section_driven }}
@@ -256,13 +256,13 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="flex items-center justify-end">
-                                <span class="font-semibold text-gray-800">
+                                <h4 class="text-gray-800">
                                     @if ($ride->getDriverHasRatings())
                                         {{ number_format($ride->getDriverAverageRating(), 1) }}
                                     @else
                                         {{ $rideDetailPage->no_reviews_label ?? 'No Reviews' }}
                                     @endif
-                                </span>
+                                </h4>
 
                                 @if ($ride->getDriverHasRatings())
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"

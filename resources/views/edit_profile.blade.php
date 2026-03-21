@@ -11,7 +11,7 @@
     background: #c75b5b;
     color: #fff;
     border-radius: 8px;
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Nunito', sans-serif;
     font-size: 16px;
     font-weight: 400;
     line-height: 1.4;

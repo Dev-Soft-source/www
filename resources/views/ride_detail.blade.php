@@ -2,9 +2,9 @@
 
 @section('style')
     <style>
-         /* Match ride_detail: body text in Roboto, sizes from Tailwind (text-xl, text-sm) */
+         /* Match ride_detail: body text in Nunito, sizes from Tailwind (text-xl, text-sm) */
         .ride-detail-page p {
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Nunito', sans-serif;
         }
     </style>
 
