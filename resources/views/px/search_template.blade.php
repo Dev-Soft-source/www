@@ -14,8 +14,8 @@
         $preferenceGroup = $searchOptionGroups->get('preference');
         $smokingGroup = $searchOptionGroups->get('smoking_allowed');
         $petsGroup = $searchOptionGroups->get('pets_allowed');
-        $coPassengerOptionCodes = ['min_rating_5', 'min_rating_4', 'min_rating_3', 'existing_reviews_only'];
-        $extraOptionCodes = ['pink_rides', 'extra_plus_rides'];
+        $coPassengerOptionCodes = ['star5_passenger', 'star4_passenger', 'star3_passenger', 'with_review_passenger'];
+        $extraOptionCodes = ['pink_rides', 'extra_care_rides'];
         $vehicleTypes = [
             'Convertable',
             'Coupe',
