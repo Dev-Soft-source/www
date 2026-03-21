@@ -418,9 +418,9 @@
                             <div class="flex items-start space-x-4 p-4 w-full">
                                 @if (auth()->user() &&
                                         $ride->bookings &&
-                                        $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->isNotEmpty())
+                                        $ride->hasNonRejectedBookingForUser(auth()->user()))
                                     <div>
-                                        <div class="w-24 h-24 rounded-full overflow-hidden">
+                                        <div class="w-20 h-20 rounded-full overflow-hidden">
                                             <img class="w-full h-full object-cover" src="{{ $ride->car_image }}"
                                                 alt="">
                                         </div>
@@ -434,7 +434,7 @@
                                 @endphp
                                 <div class="text-center">
                                     @if ($vehicleYear || $vehicleMake || $vehicleModel || $vehicleColor)
-                                        <div class="flex items-center flex-wrap justify-center gap-x-2 text-md text-black">
+                                        <div class="flex flex-row items-center justify-center gap-x-1 text-md text-black">
                                             @if ($vehicleYear)
                                                 <p class="text-md font-semibold">{{ $vehicleYear }}</p>
                                                 @if ($vehicleMake || $vehicleModel || $vehicleColor)
@@ -522,27 +522,23 @@
                                 <div class="flex items-center space-x-4">
                                     @if (auth()->user() &&
                                             $ride->bookings &&
-                                            $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->isNotEmpty())
-                                        <div class="w-24 h-24 rounded-full overflow-hidden">
+                                            $ride->hasNonRejectedBookingForUser(auth()->user()))
+                                        <div class="w-20 h-20 rounded-full overflow-hidden">
                                             @php
-                                                $uuid = $ride->bookings
+                                                $hasBookedRide = $ride->bookings
                                                     ->where('user_id', auth()->user()->id)
                                                     ->where('status', 1)
-                                                    ->pluck('uuid')
-                                                    ->first();
+                                                    ->isNotEmpty();
+
+                                                $driverImage = $hasBookedRide
+                                                    ? asset('home_page_icons/1746188912-new-5-driver-female.png')
+                                                    : $ride->driver?->profile_image;
                                             @endphp
 
-                                            @isset($uuid)
-                                                <div>
-                                                    @isset($ride->driver?->profile_image)
-                                                        <img class="w-full h-full object-cover"
-                                                            src="{{ $ride->driver?->profile_image }}" alt="">
-                                                    @endisset
-                                                </div>
-                                            @else
+                                            @if ($driverImage)
                                                 <img class="w-full h-full object-cover"
-                                                    src="{{ $ride->driver?->profile_image }}" alt="">
-                                            @endisset
+                                                    src="{{ $driverImage }}" alt="">
+                                            @endif
                                         </div>
                                     @endif
                                     <div class="text-center">
@@ -556,22 +552,14 @@
                                         
                                         <p class="font-semibold text-lg">
                                             {{ $rideDetailPage->driver_label ?? 'Verified Driver' }}:
-                                            <span>
-                                                @if ($ride->driver?->type === '2')
-                                                    {{ $ride->driver?->last_name }}
-                                                @elseif ($ride->driver?->type === '3')
-                                                    {{ $ride->driver?->first_name }} {{ $ride->driver?->last_name }}
-                                                @else
-                                                    {{ $ride->driver?->first_name }}
-                                                @endif
+                                            <span class="text-primary">
+                                                {{ $ride->driver?->getDisplayName() }}
                                             </span>
                                         </p>
 
                                         <p class="font-semibold text-lg">
-                                            @isset($rideDetailPage->passengers_driven_label)
-                                                {{ $rideDetailPage->passengers_driven_label }}
-                                            @endisset
-                                            <span>
+                                            {{ $rideDetailPage->passengers_driven_label ?? 'Passengers Driven' }}:
+                                            <span class="text-primary">
                                                 @php
                                                     $drivenNum = $ride->driver
                                                     ?->rides()->where('status', '!=', 2)->where(function ($query) {
@@ -767,45 +755,9 @@
                             </div>
                         @endif
 
-                        <div
-                            class="bg-white rounded-lg shadow-3xl overflow-hidden {{ isset($ride->booking_type->name) && $ride->booking_type->name == 'Firm cancellation' ? 'border-4 border-red-500' : '' }}">
-                            <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl relative">
-                                {{-- Cancellation policy --}}
-                                @isset($rideDetailPage->cancellation_policy)
-                                    {{ $rideDetailPage->cancellation_policy }}
-                                @endisset
-                                @if ($ride->isFirmCancellation())
-                                    <div class="relative inline-flex group">
-                                        
-
-                                        <!-- Tooltip -->
-                                        <div
-                                            class="absolute z-50 hidden group-hover:block w-64 bottom-full left-1/2 transform -translate-x-1/2 mb-2">
-                                            <div class="bg-primary text-white rounded-lg shadow-lg p-4 relative">
-                                                <!-- Tooltip arrow -->
-                                                <div
-                                                    class="absolute top-full left-1/2 -translate-x-1/2 w-4 h-4 bg-primary text-white transform rotate-45 -mt-2">
-                                                </div>
-
-                                                <p class="text-white text-sm lg:text-base font-medium">
-                                                    {{ $rideDetailPage->cancellation_policy_tooltip ?? 'Cancellation policy information' }}
-                                                    @if (isset($rideDetailPage->cancellation_policy_tooltip_url))
-                                                        @php
-                                                            $url = $rideDetailPage->cancellation_policy_tooltip_url;
-                                                            if (!Str::startsWith($url, ['http://', 'https://'])) {
-                                                                $url = 'https://' . $url;
-                                                            }
-                                                        @endphp
-                                                        <a target="_blank" href="{{ $url }}"
-                                                            class="text-red-500 hover:text-red-500 text-sm lg:text-base font-medium block mt-1">
-                                                            {{ $rideDetailPage->cancellation_policy_tooltip_url }}
-                                                        </a>
-                                                    @endif
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
+                    <div class="bg-white rounded-lg shadow-3xl overflow-hidden {{ isset($ride->booking_type->name) && $ride->booking_type->name == 'Firm cancellation' ? 'border-4 border-red-500' : '' }}">
+                            <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl relative" >
+                                {{ $rideDetailPage->cancellation_policy ?? 'Cancellation Policy' }}
                             </h3>
                             <div class=" p-4 w-full">
                                 <p class="text-left text-md font-semibold">
@@ -817,11 +769,13 @@
                                                 'lang' => $selectedLanguage->abbreviation,
                                                 'type' => 'standard'
                                             ]);
+                                            $ride_cancellation_type_label = $rideFeatureOptions['cancellation']['standard']->name;
                                         } elseif ($ride->isFirmCancellation()) {
                                             $route = route('firm_cancellation_policy', [
                                                 'lang' => $selectedLanguage->abbreviation,
                                                 'type' => 'firm'
                                             ]);
+                                            $ride_cancellation_type_label = $rideFeatureOptions['cancellation']['firm']->name;
                                         }
 
                                         $tooltip = $rideDetailPage->view_cancellation_tooltip  ?? 'View our full Cancellation Policy';
@@ -829,7 +783,7 @@
 
                                     @if ($route)
                                         <a href="{{ $route }}" class="font-bold text-black no-underline hover:no-underline" target="_blank">
-                                            {{ $ride->booking_type->name }}
+                                            {{ $ride_cancellation_type_label }}
                                         </a>
                                         <svg xmlns="http://www.w3.org/2000/svg"
                                             width="16"
@@ -841,7 +795,7 @@
                                             <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
                                         </svg>
                                     @else
-                                        {{ $ride->booking_type->name ?? '' }}
+                                        {{ $ride_cancellation_type_label ?? 'N/A' }}
                                     @endif
                                 </p>
                             </div>
@@ -849,7 +803,7 @@
                         <div class="flex items-center gap-2 w-full justify-center lg:justify-center">
                             @if (auth()->user() &&
                                     $ride->bookings &&
-                                    $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->where('user_id', auth()->user()->id)->isNotEmpty())
+                                    $ride->hasNonRejectedBookingForUser(auth()->user()))
                                 @php
                                     $userBookingForEdit = $ride->bookings
                                         ->where('status', '<>', 3)

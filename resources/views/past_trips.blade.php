@@ -258,13 +258,7 @@
                                                                     <div class="text-center flex flex-wrap md:block">
                                                                         <p class="font-semibold">
                                                                             <span>
-                                                                                @if ($booking->ride->driver->type === '2')
-                                                                                    {{ $booking->ride->driver->last_name }}
-                                                                                @elseif ($booking->ride->driver->type === '3')
-                                                                                    {{ $booking->ride->driver->first_name }} {{ $booking->ride->driver->last_name }}
-                                                                                @else
-                                                                                    {{ $booking->ride->driver->first_name }}
-                                                                                @endif
+                                                                                {{ $booking->ride->driver->getDisplayName() }}
                                                                             </span>
                                                                         </p>
                                                                         @php

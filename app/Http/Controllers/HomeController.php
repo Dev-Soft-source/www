@@ -90,10 +90,7 @@ class HomeController extends Controller
         
         $postRidePage = $this->getPostRidePageWithSettingDetail();
         
-        $searchOptionGroups = $this->getSearchOptionGroups(
-            $this->selectedLanguage->id,
-            $this->defaultLang->id
-        );
+        
         foreach($rides as $ride){
             $ride->mapMultipleOptionColumnsToDetails(
                 ['luggage', 'payment_method', 'booking_type', 'animal_friendly', 'booking_method'],

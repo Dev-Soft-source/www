@@ -96,6 +96,9 @@
             </div>
         </div>
     @endif
+    @php
+        $seatPrice = ($ride->detail->price ?? 0) / 100;
+    @endphp
     <div class="container mx-auto my-10 xl:my-14 px-4 xl:px-0">
         @php
             $note = null;
@@ -180,7 +183,7 @@
                         </div>
                     @endif
                 @endif
-{{-- TODO : check more --}}
+
                 @if (strtotime($ride->date) > strtotime('today') || (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
                     @if (count($ride->bookings->where('status', 1)->where('secured_cash', 1)) > 0)
                         <div class="bg-white rounded-lg overflow-hidden shadow-3xl mb-6">
@@ -208,15 +211,10 @@
                                                     <p class="font-semibold leading-4 text-base mb-0 whitespace-nowrap">
                                                         {{ $booking->passenger->first_name }}</p>
                                                     <div class="flex items-center space-x-2">
-                                                        @php
-                                                            // Calculate the age based on the driver's date of birth
-                                                            $dob = \Carbon\Carbon::parse($booking->passenger->dob);
-                                                            $age = $dob->diffInYears(\Carbon\Carbon::now());
-                                                        @endphp
                                                         <p
                                                             class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
-                                                            {{ $rideDetailPage->driver_age_label ?? 'Age' }}:
-                                                            <span>{{ $age }}</span>
+                                                            Age:
+                                                            <span>{{ $booking->passenger->getAge() }}</span>
                                                         </p>
                                                         <p
                                                             class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
@@ -229,27 +227,11 @@
                                                         <p
                                                             class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
                                                             |</p>
-                                                        @php
-                                                            $user_id = $booking->passenger->id;
-
-                                                            // Assuming $ratings is a collection
-                                                            $filteredRatings = $ratings
-                                                                ->where('status', 1)
-                                                                ->where('type', '2')
-                                                                ->filter(function ($rating) use ($user_id) {
-                                                                    return $rating->booking &&
-                                                                        $rating->booking->user_id === $user_id;
-                                                                });
-
-                                                            $totalAverage =
-                                                                $filteredRatings->avg('average_rating') ?? 0;
-                                                            $hasReviews = $filteredRatings->isNotEmpty();
-                                                        @endphp
                                                         <p
                                                             class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
-                                                            @if ($hasReviews)
+                                                            @if ($booking->passenger->hasPassengerRatings())
                                                                 {{ $rideDetailPage->review_label ?? 'Review' }}:
-                                                                <span>{{ number_format($totalAverage, 1) }}</span>
+                                                                <span>{{ number_format($booking->passenger->getPassengerAverageRating(), 1) }}</span>
                                                             @else
                                                                 {{ $rideDetailPage->no_reviews_label ?? 'No Reviews' }}
                                                             @endif
@@ -277,14 +259,68 @@
                     @endif
                 @endif
                 <div class="bg-white rounded-lg shadow-3xl">
-                    <div class="flex flex-col p-4 pb-4 md:pb-0">
-                        <x-px.route-info
-                            :ride="$ride"
-                            :findRidePage="$findRidePage"
-                            :postRidePage="$postRidePage"
-                            :rideDetailPage="$rideDetailPage ?? null"
-                            :selectedLanguage="$selectedLanguage ?? null"
-                        />
+                    <div class="flex flex-col sm:flex-col lg:flex-row  justify-between gap-4 p-4">
+                        <div class="route-info">
+                            <x-px.route-info 
+                                :ride="$ride" 
+                            />
+                        </div>
+                        <div class="ride-seat-info">
+                            @php
+                                $ride_status = null;
+                                if ($ride->isCompleted()) {
+                                    $ride_status = [
+                                        'label' => $rideDetailPage->ride_completed_label,
+                                        'class' => 'bg-green-100 text-green-600',
+                                    ];
+                                } elseif ($ride->isCancelled()) {
+                                    $ride_status = [
+                                        'label' => $rideDetailPage->ride_cancelled_label,
+                                        'class' => 'bg-red-100 text-red-600',
+                                    ];
+                                }
+                            @endphp
+                            @if($ride_status)
+                                <p class="w-fit px-2 py-1 rounded text-sm {{ $ride_status['class'] }}">
+                                    {{ $ride_status['label'] }}
+                                </p>
+                            @endif
+
+                            <p class="font-medium text-2xl text-right">
+                                {{ str_replace(':count', $ride->seats, $rideDetailPage->total_seats_label ?? 'Total :count seats') }}
+                            </p>
+                            <div class="flex items-center gap-2 text-primary justify-end">
+                                @if (isset($firm_cancellation_discount) && $firm_cancellation_discount != '' && $ride->isFirmCancellation())
+                                    <span class="line-through">
+                                        ${{ number_format((float) $seatPrice, 2) }}
+                                    </span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="h-6">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                                    </svg>
+                                    <span>
+                                        ${{ $seatPrice - ($seatPrice * $firm_cancellation_discount) / 100 }}
+                                    </span>
+                                @else
+                                    ${{ number_format((float) $seatPrice, 2) }}
+                                @endif
+
+                                <small>
+                                    {{ $rideDetailPage->per_seat_label ?? 'per seat' }}
+                                </small>
+                                @if (isset($firm_cancellation_discount) && $firm_cancellation_discount != '' && $ride->isFirmCancellation())
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                        class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16"
+                                        data-tippy-content="{!! nl2br($rideFeatureOptions['cancellation']['firm']->tooltip) ??
+                                            'This ride has the Firm cancellation policy, so its booking price is reduced by 10%' !!}">
+                                        <path
+                                            d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                    </svg>
+                                @endif
+
+                            </div>
+                        </div>
                     </div>
                     <div class="border-t border-gray-300 grid grid-cols-2 divide-x divide-gray-300">
                         <div class="flex items-baseline p-4">
@@ -309,30 +345,36 @@
                     <div class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
                         <div class="p-4 items-baseline">
                             <div class="flex flex-wrap items-end gap-3">
+                                @php
+                                    $payment_method = $ride->resolvePaymentMethodOption($rideFeatureOptions['payment_method'] ?? []);
+                                @endphp
                                 <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
                                     {{ $rideDetailPage->payment_method_label ?? 'Payment Method' }}:
                                 </h4>
-                                <p class="text-lg text-primary font-normal inline-block cursor-pointer"
-                                    data-tippy-content="{{ optional($ride->payment_method)->tooltip }}">
-                                    {{ optional($ride->payment_method)->name }}
+                                <p class="text-lg text-primary font-normal inline-block cursor-pointer" data-tippy-content="{{ optional($payment_method)->tooltip }}">
+                                    {{ optional($payment_method)->name }}
                                 </p>
                             </div>
                         </div>
 
                         <div class="p-4 items-baseline">
                             <div class="flex flex-wrap items-end gap-3">
+                                @php
+                                    $booking_method = $ride->resolveBookingMethodOption($rideFeatureOptions['booking_method'] ?? []);
+                                @endphp
                                 <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
                                     {{ $rideDetailPage->booking_method_label ?? 'Booking Method' }}:
                                 </h4>
                                 <p class="text-lg text-primary font-normal inline-block cursor-pointer"
-                                    data-tippy-content="{{ optional($ride->booking_method)->tooltip }}">
-                                    {{ optional($ride->booking_method)->name }}
+                                    data-tippy-content="{{ optional($booking_method)->tooltip }}">
+                                    {{ optional($booking_method)->name }}
                                 </p>
                             </div>
                         </div>
                     </div>
+
                     <div class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
-                        <div class="p-4 flex items-baseline">
+                        <div class="p-4 flex items-center">
                             <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
                                 @php
                                     $bookedSeatsCount = $ride->getBookedSeats();
@@ -370,22 +412,14 @@
                             </div>
                         </div>
                     </div>
+
                 </div>
                 <div class="bg-white rounded-lg overflow-hidden shadow-3xl mt-4">
                     <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl">
                         {{ $rideDetailPage->ride_features_label ?? 'Ride features' }}</h3>
                     <div class="bg-white p-4 space-y-3">
-                        @include('partials.ride_preference_items', [
-                            'ride' => $ride,
-                            'rideDetailPage' => $rideDetailPage,
-                            'searchOptionGroups' => $searchOptionGroups,
-                        ])
-                        @php
-                            $features = !empty($ride->features) ? explode('=', $ride->features) : [];
-                        @endphp
-                        @include('partials.ride_feature_items', [
-                            'features' => $features,
-                        ])
+                        @include('partials.ride_preference_items', [ 'ride' => $ride ])
+                        @include('partials.ride_feature_items', [ 'features' => $ride->features ])
                     </div>
                 </div>
 
@@ -403,14 +437,11 @@
                                 @endif
                             </h3>
                             <a href="{{ route('my_passengers', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}">
-                                <div class="space-y-4 p-4">
+                                <div class="grid divide-y">
                                     @foreach ($ride->bookings->where('status', 1) as $booking)
                                         @if ($booking->passenger)
-                                            <div class="flex items-center space-x-2 w-full no-scrollbar overflow-x-auto">
+                                            <div class="flex items-center p-4 space-x-2 w-full no-scrollbar overflow-x-auto gap-2">
                                                 <div class="w-12 h-12 rounded-full flex-shrink-0">
-                                                    <img class="w-full h-full rounded-full object-cover"
-                                                        src="{{ $booking->passenger->profile_image }}" alt=""> 
-
                                                     @if (auth()->user())
                                                         @php
                                                             $uuid = $booking
@@ -420,65 +451,36 @@
                                                                 ->first();
                                                         @endphp
                                                     @endif
-                                                    @isset($uuid)
-                                                        {{-- {{ dd($booking->passenger->profile_image) }} --}}
-                                                        @if ($ride->status == '3')
-                                                            <a
-                                                                href="{{ route('review_passenger', ['lang' => $selectedLanguage->abbreviation, 'id' => $uuid]) }}">
-                                                                @isset($booking->passenger->profile_image)
-                                                                    <img class="w-full h-full object-cover"
-                                                                        src="{{ $booking->passenger->profile_image }}"
-                                                                        alt="">
-                                                                @endisset
-                                                            </a>
-                                                        @else
-                                                            <img class="w-full h-full object-cover"
-                                                                src="{{ $booking->passenger->profile_image }}"
-                                                                alt="">
-                                                        @endif
-                                                    @endisset
+                                                    @php
+                                                        $profile_image = $booking->passenger->profile_image ?? null;
+                                                    @endphp
+                                                    @if ($ride->isCompleted() && isset($uuid))
+                                                        <a href="{{ route('review_passenger', ['lang' => $selectedLanguage->abbreviation, 'id' => $uuid]) }}">
+                                                            <img class="w-full h-full rounded-full object-cover" src="{{ $profile_image }}" alt="">
+                                                        </a>
+                                                    @else
+                                                        <img class="w-full h-full rounded-full object-cover" src="{{ $profile_image }}" alt="">
+                                                    @endif
                                                 </div>
-                                                <div
-                                                    class="text-center flex-auto flex flex-row md:flex-col items-center md:items-start space-x-2 md:space-x-0">
-                                                    <p class="font-semibold leading-4 text-base mb-0 whitespace-nowrap">
+                                                <div class="text-center flex-auto flex flex-row md:flex-col items-center md:items-start space-x-2 md:space-x-0">
+                                                    <p class="font-semibold leading-4 text-md mb-0 whitespace-nowrap">
                                                         {{ $booking->passenger->first_name }} </p>
                                                     <div class="flex items-center space-x-2">
-                                                        @php
-                                                            // Calculate the age based on the driver's date of birth
-                                                            $dob = \Carbon\Carbon::parse($booking->passenger->dob);
-                                                            $age = $dob->diffInYears(\Carbon\Carbon::now());
-                                                        @endphp
                                                         <p
                                                             class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
                                                             {{ $rideDetailPage->passenger_age_label ?? 'Age' }}:
-                                                            <span>{{ $age }}</span></p>
+                                                            <span>{{ $booking->passenger->getAge() }}</span></p>
                                                         <p class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">|</p>
                                                         <p
                                                             class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
                                                             {{ $rideDetailPage->passenger_gender_label ?? 'Gender' }}:
                                                             <span>{{ ucfirst($booking->passenger->gender) }}</span></p>
                                                         <p class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">|</p>
-                                                        @php
-                                                            $user_id = $booking->passenger->id;
-
-                                                            // Assuming $ratings is a collection
-                                                            $filteredRatings = $ratings
-                                                                ->where('status', 1)
-                                                                ->where('type', '2')
-                                                                ->filter(function ($rating) use ($user_id) {
-                                                                    return $rating->booking &&
-                                                                        $rating->booking->user_id === $user_id;
-                                                                });
-
-                                                            $totalAverage =
-                                                                $filteredRatings->avg('average_rating') ?? 0;
-                                                            $hasReviews = $filteredRatings->isNotEmpty();
-                                                        @endphp
                                                         <p
                                                             class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
-                                                            @if ($hasReviews)
+                                                            @if ($booking->passenger->hasPassengerRatings())
                                                                 {{ $rideDetailPage->review_label ?? 'Review' }}:
-                                                                <span>{{ number_format($totalAverage, 1) }}</span>
+                                                                <span>{{ number_format($booking->passenger->getPassengerAverageRating(), 1) }}</span>
                                                             @else
                                                                 {{ $rideDetailPage->no_reviews_label ?? 'No Reviews' }}
                                                             @endif
@@ -508,26 +510,27 @@
                                         $ride->color,
                                     ]);
                                 @endphp
-                                <div class="flex items-center flex-wrap gap-x-2 text-sm text-black">
-                                    <p class="text-md font-semibold">{{ implode(' | ', $vehicleParts) }}</p>
-                                </div>
-                                <p class="text-md font-semibold text-black text-start">
+                                <p class="text-md font-semibold">{{ implode(' | ', $vehicleParts) }}</p>
+                                <p class="font-semibold text-xl text-left text-black">
                                     {{ $ride->license_no }}
                                 </p>
                                 @if ($ride->vehicle_type_label)
-                                    <p class="text-md font-semibold">{{ $ride->vehicle_type_label }}</p>
+                                    <p class="text-md">{{ $ride->vehicle_type_label }}</p>
                                 @endif
                             </div>
                         </div>
                     </div>
 
+                    @php
+                        $cancellation_method = $ride->resolveBookingTypeOption($rideFeatureOptions['cancellation'] ?? []);
+                    @endphp
                     <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                         <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl">
                             {{ $rideDetailPage->cancellation_policy_label ?? 'Cancellation policy' }}</h3>
                         <div class="flex items-center space-x-2 p-4 w-full">
                             <div class="flex items-center justify-between w-full">
-                                <p class="font-normal text-gray-900 flex space-x-1">
-                                    {{ $ride->booking_type->name }}
+                                <p class="text-left text-md font-semibold">
+                                    {{ optional($cancellation_method)->name }}
                                 </p>
                             </div>
                         </div>
@@ -1017,3 +1020,5 @@
         });
     </script>
 @endsection
+
+

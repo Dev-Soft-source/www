@@ -17,6 +17,7 @@ use App\Models\FindRidePageSettingDetail;
 use App\Models\FeaturesSetting;
 use App\Models\FeaturesSettingDetail;
 use App\Models\SiteTextDetail;
+use App\Models\SiteSetting;
 use App\Models\VideoDetail;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -72,16 +73,17 @@ class Controller extends BaseController
             }
 
             $languages = Language::all();
-            $featureOptions = $this->getFeatureOptionsByLanguage();
+            // $featureOptions = $this->getFeatureOptionsByLanguage();
+            $rideFeatureOptions = $this->getRideFeatureOptionGroups();
+            // dd($rideFeatureOptions);
+
             $this->successMessage = SuccessMessagesSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
             $siteText = SiteTextDetail::getByLanguageKeyedBySlug($this->selectedLanguage->id, $this->defaultLang->id);
 
             View::share([
                 'selectedLanguage' => $this->selectedLanguage,
                 'languages' => $languages,
-                'featureOptions' => $featureOptions,
-                'featureOptionsById' => $featureOptions->keyBy('id'),
-                'featureOptionsByLabel' => $featureOptions->keyBy('label'),
+                'rideFeatureOptions' => $rideFeatureOptions,
                 'siteText' => $siteText,
                 'successMessage' => $this->successMessage,
                 // 'ratings' => $ratings,
@@ -314,13 +316,77 @@ class Controller extends BaseController
         return $postRidePage;
     }
 
-    protected function getSearchOptionGroups($selectedLangId, $defaultLangId)
+
+    protected function getRideFeatureOptionGroups(?int $selectedLangId = null, ?int $defaultLangId = null)
     {
+        $selectedLangId = $selectedLangId ?: $this->selectedLanguage?->id ?: $this->defaultLang?->id;
+        $defaultLangId = $defaultLangId ?: $this->defaultLang?->id ?: $selectedLangId;
+
         $groupFeatureIds = [
             'features' => array_merge(range(1, 16), [47]),
             'luggage_size' => range(26, 30),
             'smoking_allowed' => [21, 22],
             'pets_allowed' => range(23, 25),
+            'booking_method' => range(31, 32),
+            'payment_method' => range(33, 35),
+            'cancellation' => range(36, 37),
+            'vehicle_type' => range(38, 46),
+        ];
+
+        $featureIds = collect($groupFeatureIds)->flatten()->unique()->values()->all();
+
+        $featureSlugs = FeaturesSetting::query()
+            ->whereIn('id', $featureIds)
+            ->pluck('slug', 'id');
+
+        $details = FeaturesSettingDetail::query()
+            ->whereIn('features_setting_id', $featureIds)
+            ->whereIn('language_id', array_unique(array_filter([$selectedLangId, $defaultLangId])))
+            ->get()
+            ->groupBy('features_setting_id');
+
+        $groups = collect($groupFeatureIds)->map(function ($ids, $code) use ($details, $featureSlugs, $selectedLangId, $defaultLangId) {
+            $options = collect($ids)
+                ->map(function ($id) use ($details, $featureSlugs, $selectedLangId, $defaultLangId) {
+                    $selected = $details->get($id, collect())
+                        ->firstWhere('language_id', $selectedLangId);
+                    $fallback = $details->get($id, collect())
+                        ->firstWhere('language_id', $defaultLangId);
+                    $detail = $selected ?: $fallback;
+
+                    if (!$detail) {
+                        return null;
+                    }
+
+                    return (object) [
+                        'id' => $id,
+                        'features_setting_id' => $id,
+                        'slug' => $featureSlugs->get($id),
+                        'icon' => $detail->icon ?? $fallback?->icon,
+                        'name' => $detail->name ?? $fallback?->name ?? $featureSlugs->get($id) ?? (string) $id,
+                        'tooltip' => $detail->display_tooltip ?? $fallback?->display_tooltip,
+                    ];
+                })
+                ->filter()
+                ->values();
+            return $options->keyBy('slug');
+        });
+        return $groups;
+    }
+
+
+    // will be removed in future
+    protected function getSearchOptionGroups(?int $selectedLangId = null, ?int $defaultLangId = null)
+    {
+        $selectedLangId = $selectedLangId ?: $this->selectedLanguage?->id ?: $this->defaultLang?->id;
+        $defaultLangId = $defaultLangId ?: $this->defaultLang?->id ?: $selectedLangId;
+
+        $groupFeatureIds = [
+            'features' => array_merge(range(1, 16), [47]),
+            'luggage_size' => range(26, 30),
+            'smoking_allowed' => [21, 22],
+            'pets_allowed' => range(23, 25),
+            'booking_method' => range(31, 32),
             'payment_method' => range(33, 35),
             'vehicle_type' => range(38, 46),
         ];

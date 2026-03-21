@@ -481,7 +481,7 @@ if (!function_exists('formatDepartureDateTime')) {
 
         // Format the time
         $departureTime = $departureAt
-            ? $departureAt->format('h:i A')
+            ? $departureAt->translatedFormat('h:i A')
             : null;
 
         // Handle special cases for noon and midnight
@@ -491,7 +491,10 @@ if (!function_exists('formatDepartureDateTime')) {
                 ? (optional($rideDetailPage)->midnight_label ?? 'Midnight') 
                 : $departureTime);
 
+        $atLabel = (optional($rideDetailPage)->at_label ?? 'at');
+
         return [
+            'dateTimeLabel' => implode(' ', [$departureDateLabel, $atLabel, $departureTimeLabel]),
             'dateLabel' => $departureDateLabel,
             'timeLabel' => $departureTimeLabel ?? 'N/A',
             'date' => $departureAt,

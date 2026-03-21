@@ -42,13 +42,7 @@
                                     <div>
                                         <h6 class='card-title leading-7 m-0'>
                                             @if ($reviewedUser)
-                                                @if ($reviewedUser->type === '2')
-                                                    {{ $reviewedUser->last_name }}
-                                                @elseif ($reviewedUser->type === '3')
-                                                    {{ $reviewedUser->first_name }} {{ $reviewedUser->last_name }}
-                                                @else
-                                                    {{ $reviewedUser->first_name }}
-                                                @endif
+                                                {{ $reviewedUser->getDisplayName() }}
                                             @endif
                                         </h6>
                                         <div class="flex space-x-1">

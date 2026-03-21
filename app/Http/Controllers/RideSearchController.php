@@ -13,7 +13,7 @@ use App\Models\Vehicle;
 use App\Models\TripsPageSettingDetail;
 use App\Models\RideDetailPageSettingDetail;
 use App\Models\SuccessMessagesSettingDetail;
-use App\Models\PinkRideSetting;
+use App\Models\SiteSetting;
 use App\Models\FolkRideSetting;
 use App\Models\PostRidePageSettingDetail;
 use App\Models\User;
@@ -218,16 +218,13 @@ class RideSearchController extends Controller
 
     public function search(Request $request, $lang = null, $view = 'search_ride')
     {
-        $selectedLangId = optional($this->selectedLanguage)->id;
-        $defaultLangId = optional($this->defaultLang)->id;
+
         $user = auth()->user();
         $isGuest = !$user;
         $per_page = 6;
         $excludedDriverIds = $user ? $this->getTemporarilyBlockedDriverIds($user->id) : [];
 
-        // $findRidePage = $this->getFindRidePageWithSettingDetail();
 
-        $searchOptionGroups = $this->getSearchOptionGroups($selectedLangId, $defaultLangId);
         $searchFilters = $this->getPxSearchFilters($request);
 
 
@@ -383,10 +380,6 @@ class RideSearchController extends Controller
             }
         }
         foreach ($rides as $ride) {
-            
-            // if (method_exists($this, 'translatePxRideOptions')) {
-            //     $this->translatePxRideOptions($ride, $selectedLangId, $defaultLangId);
-            // }
 
             $stopsSource = $ride->stops ?? $ride->rideStops ?? null;
             $orderedStops = $stopsSource
@@ -477,16 +470,18 @@ class RideSearchController extends Controller
         $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $postRidePage = $this->getPostRidePageWithSettingDetail();
 
+        $firm_cancellation_discount = SiteSetting::value('frim_discount');
+
         View::share([
             'findRidePage' => $findRidePage,
-            'postRidePage' => $postRidePage,
+            // 'postRidePage' => $postRidePage,
             'rideDetailPage' => $rideDetailPage,
+            'firm_cancellation_discount' => $firm_cancellation_discount,
         ]);
 
         return view($view, [
             'action_route' => $action_route,
             
-            'searchOptionGroups' => $searchOptionGroups,
             'rides' => $rides,
             'recentSearches' => $recentSearches,
             'hasSearch' => $hasSearch,

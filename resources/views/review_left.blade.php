@@ -15,13 +15,7 @@
                     <img class="w-full h-full object-contain rounded-full" src="{{ $rating->ride->driver->profile_image }}" alt="">
                 </div>
                 <p class="text-black text-2xl lg:text-3xl font-FuturaMdCnBT">
-                    @if ($rating->ride->driver->type === '2')
-                        {{ $rating->ride->driver->last_name }}
-                    @elseif ($rating->ride->driver->type === '3')
-                        {{ $rating->ride->driver->first_name }} {{ $rating->ride->driver->last_name }}
-                    @else
-                        {{ $rating->ride->driver->first_name }}
-                    @endif
+                    {{ $rating->ride->driver->getDisplayName() }}
                 </p>
                 </div>
                 <div class="mt-6">

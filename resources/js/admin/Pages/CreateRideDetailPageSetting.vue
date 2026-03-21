@@ -745,26 +745,26 @@
                                                     class="flex justify-between"
                                                 >
                                                     <label
-                                                        :for="`pickup_label_${activeLanguageId}`"
-                                                        >Pick up label</label
+                                                        :for="`depends_on_other_stops_tooltip_${activeLanguageId}`"
+                                                        >Depends on other stops tooltip</label
                                                     >
                                                 </div>
                                                 <input
                                                     type="text"
-                                                    :name="`pickup_label_${activeLanguageId}`"
-                                                    :id="`pickup_label_${activeLanguageId}`"
+                                                    :name="`depends_on_other_stops_tooltip_${activeLanguageId}`"
+                                                    :id="`depends_on_other_stops_tooltip_${activeLanguageId}`"
                                                     class="can-exp-input w-full block border border-gray-300 rounded"
                                                     placeholder=" "
                                                     :value="
                                                         getCurrentValue(
-                                                            'pickup_label'
+                                                            'depends_on_other_stops_tooltip'
                                                         )
                                                     "
                                                     @input="
                                                         handleInput(
                                                             $event.target.value,
                                                             language,
-                                                            'pickup_label'
+                                                            'depends_on_other_stops_tooltip'
                                                         )
                                                     "
                                                 />
@@ -773,12 +773,12 @@
                                                 class="mt-2 text-sm text-red-400"
                                                 v-if="
                                                     validationErros.has(
-                                                        `pickup_label.pickup_label_${activeLanguageId}`
+                                                        `depends_on_other_stops_tooltip.depends_on_other_stops_tooltip_${activeLanguageId}`
                                                     )
                                                 "
                                                 v-text="
                                                     validationErros.get(
-                                                        `pickup_label.pickup_label_${activeLanguageId}`
+                                                        `depends_on_other_stops_tooltip.depends_on_other_stops_tooltip_${activeLanguageId}`
                                                     )
                                                 "
                                             ></p>
@@ -833,26 +833,26 @@
                                                     class="flex justify-between"
                                                 >
                                                     <label
-                                                        :for="`dropoff_label_${activeLanguageId}`"
-                                                        >Drop off label</label
+                                                        :for="`departure_time_approximate_tooltip_${activeLanguageId}`"
+                                                        >Departure time approximate tooltip</label
                                                     >
                                                 </div>
                                                 <input
                                                     type="text"
-                                                    :name="`dropoff_label_${activeLanguageId}`"
-                                                    :id="`dropoff_label_${activeLanguageId}`"
+                                                    :name="`departure_time_approximate_tooltip_${activeLanguageId}`"
+                                                    :id="`departure_time_approximate_tooltip_${activeLanguageId}`"
                                                     class="can-exp-input w-full block border border-gray-300 rounded"
                                                     placeholder=" "
                                                     :value="
                                                         getCurrentValue(
-                                                            'dropoff_label'
+                                                            'departure_time_approximate_tooltip'
                                                         )
                                                     "
                                                     @input="
                                                         handleInput(
                                                             $event.target.value,
                                                             language,
-                                                            'dropoff_label'
+                                                            'departure_time_approximate_tooltip'
                                                         )
                                                     "
                                                 />
@@ -861,12 +861,144 @@
                                                 class="mt-2 text-sm text-red-400"
                                                 v-if="
                                                     validationErros.has(
-                                                        `dropoff_label.dropoff_label_${activeLanguageId}`
+                                                        `departure_time_approximate_tooltip.departure_time_approximate_tooltip_${activeLanguageId}`
                                                     )
                                                 "
                                                 v-text="
                                                     validationErros.get(
-                                                        `dropoff_label.dropoff_label_${activeLanguageId}`
+                                                        `departure_time_approximate_tooltip.departure_time_approximate_tooltip_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`stops_along_the_way_label_${activeLanguageId}`"
+                                                        >Stops along the way label</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`stops_along_the_way_label_${activeLanguageId}`"
+                                                    :id="`stops_along_the_way_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'stops_along_the_way_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'stops_along_the_way_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `stops_along_the_way_label.stops_along_the_way_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `stops_along_the_way_label.stops_along_the_way_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`ride_completed_label_${activeLanguageId}`"
+                                                        >Ride completed label</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`ride_completed_label_${activeLanguageId}`"
+                                                    :id="`ride_completed_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'ride_completed_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'ride_completed_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `ride_completed_label.ride_completed_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `ride_completed_label.ride_completed_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`ride_cancelled_label_${activeLanguageId}`"
+                                                        >Ride cancelled label</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`ride_cancelled_label_${activeLanguageId}`"
+                                                    :id="`ride_cancelled_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'ride_cancelled_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'ride_cancelled_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `ride_cancelled_label.ride_cancelled_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `ride_cancelled_label.ride_cancelled_label_${activeLanguageId}`
                                                     )
                                                 "
                                             ></p>
@@ -1218,26 +1350,26 @@
                                                     class="flex justify-between"
                                                 >
                                                     <label
-                                                        :for="`book_seats_btn_label_${activeLanguageId}`"
-                                                        >Book your seats label (Web)</label
+                                                        :for="`seat_available_label_${activeLanguageId}`"
+                                                        >Seat available label</label
                                                     >
                                                 </div>
                                                 <input
                                                     type="text"
-                                                    :name="`book_seats_btn_label_${activeLanguageId}`"
-                                                    :id="`book_seats_btn_label_${activeLanguageId}`"
+                                                    :name="`seat_available_label_${activeLanguageId}`"
+                                                    :id="`seat_available_label_${activeLanguageId}`"
                                                     class="can-exp-input w-full block border border-gray-300 rounded"
                                                     placeholder=" "
                                                     :value="
                                                         getCurrentValue(
-                                                            'book_seats_btn_label'
+                                                            'seat_available_label'
                                                         )
                                                     "
                                                     @input="
                                                         handleInput(
                                                             $event.target.value,
                                                             language,
-                                                            'book_seats_btn_label'
+                                                            'seat_available_label'
                                                         )
                                                     "
                                                 />
@@ -1246,12 +1378,12 @@
                                                 class="mt-2 text-sm text-red-400"
                                                 v-if="
                                                     validationErros.has(
-                                                        `book_seats_btn_label.book_seats_btn_label_${activeLanguageId}`
+                                                        `seat_available_label.seat_available_label_${activeLanguageId}`
                                                     )
                                                 "
                                                 v-text="
                                                     validationErros.get(
-                                                        `book_seats_btn_label.book_seats_btn_label_${activeLanguageId}`
+                                                        `seat_available_label.seat_available_label_${activeLanguageId}`
                                                     )
                                                 "
                                             ></p>
@@ -1429,50 +1561,6 @@
                                                 v-text="
                                                     validationErros.get(
                                                         `passengers_driven_label.passengers_driven_label_${activeLanguageId}`
-                                                    )
-                                                "
-                                            ></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div
-                                                    class="flex justify-between"
-                                                >
-                                                    <label
-                                                        :for="`driver_age_label_${activeLanguageId}`"
-                                                        >Driver age label (Web)</label
-                                                    >
-                                                </div>
-                                                <input
-                                                    type="text"
-                                                    :name="`driver_age_label_${activeLanguageId}`"
-                                                    :id="`driver_age_label_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" "
-                                                    :value="
-                                                        getCurrentValue(
-                                                            'driver_age_label'
-                                                        )
-                                                    "
-                                                    @input="
-                                                        handleInput(
-                                                            $event.target.value,
-                                                            language,
-                                                            'driver_age_label'
-                                                        )
-                                                    "
-                                                />
-                                            </div>
-                                            <p
-                                                class="mt-2 text-sm text-red-400"
-                                                v-if="
-                                                    validationErros.has(
-                                                        `driver_age_label.driver_age_label_${activeLanguageId}`
-                                                    )
-                                                "
-                                                v-text="
-                                                    validationErros.get(
-                                                        `driver_age_label.driver_age_label_${activeLanguageId}`
                                                     )
                                                 "
                                             ></p>
@@ -4825,18 +4913,21 @@ export default {
                             this.handleInput("", language, "seats_left_label");
                             this.handleInput("", language, "per_seat_label");
                             this.handleInput("", language, "pickup_dropoff_info_heading");
-                            this.handleInput("", language, "pickup_label");
                             this.handleInput("", language, "pickup_at_label");
-                            this.handleInput("", language, "dropoff_label");
                             this.handleInput("", language, "dropoff_at_label");
+                            this.handleInput("", language, "depends_on_other_stops_tooltip");
+                            this.handleInput("", language, "departure_time_approximate_tooltip");
+                            this.handleInput("", language, "stops_along_the_way_label");
                             this.handleInput("", language, "description_label");
                             this.handleInput("", language, "ride_features_label");
                             this.handleInput("", language, "ride_seat_label");
                             this.handleInput("", language, "all_seats_booked_label");
                             this.handleInput("", language, "ride_canceller_by_driver");
                             this.handleInput("", language, "ride_completed_text");
+                            this.handleInput("", language, "ride_completed_label");
+                            this.handleInput("", language, "ride_cancelled_label");
                             this.handleInput("", language, "book_seat_btn_label");
-                            this.handleInput("", language, "book_seats_btn_label");
+                            this.handleInput("", language, "seat_available_label");
                             this.handleInput("", language, "no_seat_available_label");
                             this.handleInput("", language, "no_ride_found_message");
                             this.handleInput("", language, "cancel_booking_btn_label");
@@ -4867,7 +4958,6 @@ this.handleInput("", language, "request_booking_label");
                             this.handleInput("", language, "driver_label");
                             this.handleInput("", language, "cancellation_policy");
                             this.handleInput("", language, "passengers_driven_label");
-                            this.handleInput("", language, "driver_age_label");
                             this.handleInput("", language, "driver_chat_heading");
                             this.handleInput("", language, "driver_chat_with");
                             this.handleInput("", language, "driver_chat_label");
@@ -5036,24 +5126,29 @@ this.handleInput("", language, "cancellation_policy_tooltip_url");
                                 "pickup_dropoff_info_heading"
                             );
                             this.handleInput(
-                                setting?.pickup_label,
-                                setting?.language,
-                                "pickup_label"
-                            );
-                            this.handleInput(
                                 setting?.pickup_at_label,
                                 setting?.language,
                                 "pickup_at_label"
                             );
                             this.handleInput(
-                                setting?.dropoff_label,
-                                setting?.language,
-                                "dropoff_label"
-                            );
-                            this.handleInput(
                                 setting?.dropoff_at_label,
                                 setting?.language,
                                 "dropoff_at_label"
+                            );
+                            this.handleInput(
+                                setting?.depends_on_other_stops_tooltip,
+                                setting?.language,
+                                "depends_on_other_stops_tooltip"
+                            );
+                            this.handleInput(
+                                setting?.departure_time_approximate_tooltip,
+                                setting?.language,
+                                "departure_time_approximate_tooltip"
+                            );
+                            this.handleInput(
+                                setting?.stops_along_the_way_label,
+                                setting?.language,
+                                "stops_along_the_way_label"
                             );
                             this.handleInput(
                                 setting?.description_label,
@@ -5086,14 +5181,24 @@ this.handleInput("", language, "cancellation_policy_tooltip_url");
                                 "ride_completed_text"
                             );
                             this.handleInput(
+                                setting?.ride_completed_label,
+                                setting?.language,
+                                "ride_completed_label"
+                            );
+                            this.handleInput(
+                                setting?.ride_cancelled_label,
+                                setting?.language,
+                                "ride_cancelled_label"
+                            );
+                            this.handleInput(
                                 setting?.book_seat_btn_label,
                                 setting?.language,
                                 "book_seat_btn_label"
                             );
                             this.handleInput(
-                                setting?.book_seats_btn_label,
+                                setting?.seat_available_label,
                                 setting?.language,
-                                "book_seats_btn_label"
+                                "seat_available_label"
                             );
                             this.handleInput(
                                 setting?.instant_btn_label,
@@ -5261,11 +5366,6 @@ this.handleInput(
                                 setting?.passengers_driven_label,
                                 setting?.language,
                                 "passengers_driven_label"
-                            );
-                            this.handleInput(
-                                setting?.driver_age_label,
-                                setting?.language,
-                                "driver_age_label"
                             );
                             this.handleInput(
                                 setting?.driver_chat_heading,
@@ -5550,16 +5650,19 @@ this.handleInput(
                     `pickup_dropoff_info_heading.pickup_dropoff_info_heading_${language.id}`
                 ) ||
                 validationErros.has(
-                    `pickup_label.pickup_label_${language.id}`
-                ) ||
-                validationErros.has(
                     `pickup_at_label.pickup_at_label_${language.id}`
                 ) ||
                 validationErros.has(
-                    `dropoff_label.dropoff_label_${language.id}`
+                    `dropoff_at_label.dropoff_at_label_${language.id}`
                 ) ||
                 validationErros.has(
-                    `dropoff_at_label.dropoff_at_label_${language.id}`
+                    `depends_on_other_stops_tooltip.depends_on_other_stops_tooltip_${language.id}`
+                ) ||
+                validationErros.has(
+                    `departure_time_approximate_tooltip.departure_time_approximate_tooltip_${language.id}`
+                ) ||
+                validationErros.has(
+                    `stops_along_the_way_label.stops_along_the_way_label_${language.id}`
                 ) ||
                 validationErros.has(
                     `description_label.description_label_${language.id}`
@@ -5580,10 +5683,16 @@ this.handleInput(
                     `ride_completed_text.ride_completed_text_${language.id}`
                 ) ||
                 validationErros.has(
+                    `ride_completed_label.ride_completed_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `ride_cancelled_label.ride_cancelled_label_${language.id}`
+                ) ||
+                validationErros.has(
                     `book_seat_btn_label.book_seat_btn_label_${language.id}`
                 ) ||
                 validationErros.has(
-                    `book_seats_btn_label.book_seats_btn_label_${language.id}`
+                    `seat_available_label.seat_available_label_${language.id}`
                 ) ||
                 validationErros.has(
                     `instant_btn_label.instant_btn_label_${language.id}`
@@ -5682,9 +5791,6 @@ this.handleInput(
                 ) ||
                 validationErros.has(
                     `passengers_driven_label.passengers_driven_label_${language.id}`
-                ) ||
-                validationErros.has(
-                    `driver_age_label.driver_age_label_${language.id}`
                 ) ||
                 validationErros.has(
                     `driver_chat_heading.driver_chat_heading_${language.id}`

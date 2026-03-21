@@ -7,15 +7,15 @@
     'searchOptionGroups' => null,
 ])
 
+@php
+    $seatPrice = ($ride->detail->price ?? 0) / 100;
+@endphp
+
 <div class="col-span-2">
     <div class="bg-white rounded-lg shadow-3xl">
         <div class="flex flex-col p-4 pb-4 md:pb-0">
             <x-px.route-info
                 :ride="$ride"
-                :findRidePage="$findRidePage"
-                :postRidePage="$postRidePage"
-                :rideDetailPage="$rideDetailPage ?? null"
-                :selectedLanguage="$selectedLanguage ?? null"
             />
         </div>
 
@@ -35,23 +35,25 @@
                 </h4>
                 <p class="text-lg font-normal text-left text-primary"
                     style="font-family: 'Roboto', sans-serif;">
-                    ${{ number_format(floatval($ride->price_minor), 2) }}
+                    ${{ number_format(floatval($seatPrice), 2) }}
                     @isset($rideDetailPage->per_seat_label)
                         {{ $rideDetailPage->per_seat_label }}
                     @endisset
                 </p>
             </div>
         </div>
-
         <div class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
             <div class="p-4 items-baseline">
                 <div class="flex flex-wrap items-end gap-3">
                     <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
                         {{ $rideDetailPage->payment_method_label ?? 'Payment Method' }}:
                     </h4>
+                    @php
+                        $payment_method = $ride->resolvePaymentMethodOption($rideFeatureOptions['payment_method'] ?? []);
+                    @endphp
                     <p class="text-lg text-primary font-normal inline-block cursor-pointer"
-                        data-tippy-content="{{ optional($ride->payment_method)->tooltip }}">
-                        {{ optional($ride->payment_method)->name }}
+                        data-tippy-content="{{ optional($payment_method)->tooltip }}">
+                        {{ optional($payment_method)->name }}
                     </p>
                 </div>
             </div>
@@ -61,9 +63,12 @@
                     <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
                         {{ $rideDetailPage->booking_method_label ?? 'Booking Method' }}:
                     </h4>
+                    @php
+                        $booking_method = $ride->resolveBookingMethodOption($rideFeatureOptions['booking_method'] ?? []);
+                    @endphp
                     <p class="text-lg text-primary font-normal inline-block cursor-pointer"
-                        data-tippy-content="{{ optional($ride->booking_method)->tooltip }}">
-                        {{ optional($ride->booking_method)->name }}
+                        data-tippy-content="{{ optional($booking_method)->tooltip }}">
+                        {{ optional($booking_method)->name }}
                     </p>
                 </div>
             </div>
@@ -88,19 +93,18 @@
                 $bookings = $ride->bookings()->notRejected()->get();
             @endphp
 
-            <div class="flex items-center space-x-2 no-scrollbar overflow-x-auto mt-2 md:mt-0">
+            <div class="flex items-center no-scrollbar overflow-x-auto mt-2 md:mt-0">
                 @if ($href)
                     <a class="flex" href="{{ $href }}">
                 @else
-                    <div class="flex">
+                    <div class="flex items-center">
                 @endif
                     @foreach ($bookings as $booking)
                         @php
                             $image = $booking->passenger?->profile_image ?? asset('images/59-booked-seat.png');
                         @endphp
-
                         @for ($i = 0; $i < $booking->seats; $i++)
-                            <img class="w-10 h-10 rounded-full" src="{{ $image }}" alt="">
+                            <img class="w-10 h-10 rounded-full -ml-3 first:ml-0 hover:z-10 transition" src="{{ $image }}" alt="">
                         @endfor
                     @endforeach
                 @if ($href)
@@ -118,15 +122,8 @@
             {{ $rideDetailPage->ride_features_label ?? 'Ride Preferences' }}
         </h3>
         <div class="bg-white p-4 space-y-3">
-            @php
-                $features = !empty($ride->features) ? explode('=', $ride->features) : [];
-            @endphp
-            @include('partials.ride_preference_items', [
-                'ride' => $ride,
-                'rideDetailPage' => $rideDetailPage,
-                'searchOptionGroups' => $searchOptionGroups,
-            ])
-            @include('partials.ride_feature_items', ['features' => $features])
+            @include('partials.ride_preference_items', [ 'ride' => $ride, ])
+            @include('partials.ride_feature_items', ['features' => $ride->features])
         </div>
     </div>
 </div>

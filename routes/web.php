@@ -301,10 +301,11 @@ Route::get('{lang?}/passenger', [PassengerController::class, 'index'])->name('pa
 Route::get('{lang?}/ride/{id}/{from_stop_id?}/{to_stop_id?}', [RideController::class, 'RideDetail'])->name('ride_detail');
 Route::get('{lang?}/my-co-passengers/{id}', [RideController::class, 'MyCoPassengers'])->name('my_co_passengers');
 
-Route::get('{lang?}/my-rides', [MyRideController::class, 'CurrentRides'])->name('my_rides')->middleware('auth');
-Route::get('{lang?}/past-rides', [MyRideController::class, 'PastRides'])->name('past_rides')->middleware('auth');
-Route::get('{lang?}/cancelled-rides', [MyRideController::class, 'CancelledRides'])->name('cancelled_rides')->middleware('auth');
+Route::get('{lang?}/my-rides', [MyRideController::class, 'MyRides'])->name('my_rides')->middleware('auth');
 Route::get('{lang?}/my-ride/{id}', [MyRideController::class, 'MyRideDetail'])->middleware('auth')->name('my_ride_detail');
+
+// Route::get('{lang?}/past-rides', [MyRideController::class, 'PastRides'])->name('past_rides')->middleware('auth');
+// Route::get('{lang?}/cancelled-rides', [MyRideController::class, 'CancelledRides'])->name('cancelled_rides')->middleware('auth');
 Route::get('{lang?}/my-passengers/{departure}/to/{destination}/{id}', [MyRideController::class, 'MyPassengers'])->name('my_passengers');
 Route::get('{lang?}/cancel-ride/{id}', [MyRideController::class, 'cancel'])->name('ride.cancel')->middleware('auth');
 Route::get('{lang?}/cancel-passenger/{id}', [MyRideController::class, 'cancelPassenger'])->name('passenger.cancel')->middleware('auth');
@@ -347,9 +348,10 @@ Route::get('{lang?}/driver-wallet-available', [DriverWalletController::class, 'a
 Route::get('{lang?}/driver-wallet-paid-out', [DriverWalletController::class, 'paid'])->name('driver_wallet_paid')->middleware('auth');
 Route::get('{lang?}/ride-fair-details/{id}', [DriverWalletController::class, 'detail'])->name('ride_fair_details')->middleware('auth');
 
-Route::get('{lang?}/my-trips', [MyTripController::class, 'CurrentTrips'])->name('my_trips')->middleware('auth');
-Route::get('{lang?}/past-trips', [MyTripController::class, 'PastTrips'])->name('past_trips')->middleware('auth');
-Route::get('{lang?}/cancelled-trips', [MyTripController::class, 'CancelledTrips'])->name('cancelled_trips')->middleware('auth');
+Route::get('{lang?}/my-trips', [MyTripController::class, 'MyTrips'])->name('my_trips')->middleware('auth');
+// Route::get('{lang?}/past-trips', [MyTripController::class, 'PastTrips'])->name('past_trips')->middleware('auth');
+// Route::get('{lang?}/cancelled-trips', [MyTripController::class, 'CancelledTrips'])->name('cancelled_trips')->middleware('auth');
+
 Route::get('{lang?}/welcome-on-board', [ProfileController::class, 'index'])->name('profile');
 Route::get('{lang?}/profile-info/{id}', [ProfileController::class, 'profileInfo'])->name('profile_info');
 Route::get('{lang?}/driver-info/{id}', [ProfileController::class, 'driverInfo'])->name('driver_info');

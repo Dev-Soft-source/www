@@ -57,7 +57,7 @@
                                         {{ $origin }}.
                                     </h3>
                                     @if ($pickupLocation)
-                                        <p class="text-gray-600 text-sm"><strong>{{ $rideDetailPage->pickup_label ?? 'Pick up' }}:</strong>
+                                        <p class="text-gray-600 text-sm"><strong>{{ $rideDetailPage->pickup_at_label ?? 'Pick-up at' }}:</strong>
                                             {{ $pickupLocation }}</p>
                                     @endif
                                 </div>
@@ -72,7 +72,7 @@
                             </div>
                             <div class="ml-12 md:ml-20 flex">
                                 <p class="font-bold text-xl text-black mb-2">
-                                    {{ $rideDetailPage->stops_label ?? 'Stops on the way' }}</p>
+                                    {{ $rideDetailPage->stops_along_the_way_label ?? 'Stops along the way' }}</p>
                                 <ul class="flex flex-col gap-1 text-sm ml-4 mb-4">
                                     @foreach ($segmentMode ? $segmentStops : $ride->stops->where('is_pickup', true)->where('is_dropoff', true) as $stop)
                                         <li
@@ -119,7 +119,7 @@
                                         {{ $destination }}.
                                     </h3>
                                     @if ($dropoffLocation)
-                                        <p class="text-gray-600 text-sm"><strong>{{ $rideDetailPage->dropoff_label ?? 'Drop off' }}:</strong>
+                                        <p class="text-gray-600 text-sm"><strong>{{ $rideDetailPage->dropoff_at_label ?? 'Drop-off at' }}:</strong>
                                             {{ $dropoffLocation }}</p>
                                     @endif
                                 </div>

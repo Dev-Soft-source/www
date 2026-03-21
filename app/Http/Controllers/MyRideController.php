@@ -53,7 +53,7 @@ use Illuminate\Support\Facades\View;
 
 class MyRideController extends Controller
 {
-    public function CurrentRides($lang = null)
+    public function MyRides($lang = null)
     {
         $user = auth()->user();
         $user_id = $user->id;
@@ -70,129 +70,78 @@ class MyRideController extends Controller
         if (!$hasPostedRides) {
             return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation]);
         }
-        
-        // Continue with driver rides if user has posted rides
-        $postRidePage = $this->getPostRidePageWithSettingDetail();
 
+
+        // Get tab filter from query parameter (default to 'upcoming')
+        $tab = request()->query('tab', 'upcoming');
+
+        // Build query based on tab
+        $query = Ride::where('added_by', $user_id)->with(['detail','rideStops','rideStopSegments']);
+
+        switch ($tab) {
+            case 'upcoming':
+                // include past rides even if they are not marked as completed, as long as their departure time has passed
+                $query->notCancelled()
+                    ->where(function ($query) {
+                        $query->where(function ($query) {
+                            $query->whereDate('completed_date', '>', now()->toDateString())
+                                ->orWhere(function ($query) {
+                                    $query->whereDate('completed_date', '=', now()->toDateString())
+                                        ->whereTime('completed_time', '>=', now()->toTimeString());
+                                });
+                        });
+                    });
+                break;
+            case 'completed':
+                $query->notCancelled()
+                    ->where(function ($query) {
+                        $query->where(function ($query) {
+                            $query->whereDate('completed_date', '<', now()->toDateString())
+                                ->orWhere(function ($query) {
+                                    $query->whereDate('completed_date', '=', now()->toDateString())
+                                        ->whereTime('completed_time', '<', now()->toTimeString());
+                                });
+                        });
+                    });
+                break;
+            case 'cancelled':
+                $query->cancelled();
+                break;
+            default:
+                break;
+        }
+
+        $rides = $query->orderBy('date', 'asc')
+            ->orderBy('time', 'asc')
+            ->paginate(6);
+
+        foreach($rides as $ride){
+            $ride = $this->makeDetailOfRide($ride);
+        }
+        
         $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
-        $findrideDetailPage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
         $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
         $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
         $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
         $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
         
-        $rides = Ride::where('added_by', auth()->user()->id)
-            ->notCancelled()
-            ->where(function ($query) {
-                $query->where(function ($query) {
-                    $query->whereDate('completed_date', '>', now()->toDateString())
-                        ->orWhere(function ($query) {
-                            $query->whereDate('completed_date', '=', now()->toDateString())
-                                ->whereTime('completed_time', '>=', now()->toTimeString());
-                        });
-                });
-            })
-            ->with(['rideDetail' => function ($q) {
-                $q->where('default_ride', '1');
-            }])
-            ->orderBy('date', 'asc')
-            ->orderBy('time', 'asc')
-            ->paginate(6);
-        
-        $searchOptionGroups = $this->getSearchOptionGroups($this->selectedLanguage->id, $this->defaultLang->id);
-
-        $postRidePage = $this->getPostRidePageWithSettingDetail();
-         View::share([
-            // 'findRidePage' => $findRidePage,
-            'postRidePage' => $postRidePage,
+        $firm_cancellation_discount = SiteSetting::value('frim_discount');
+       
+        View::share([
             'rideDetailPage' => $rideDetailPage,
+            'firm_cancellation_discount' => $firm_cancellation_discount,
         ]);
 
         return view('my_rides', [
             'rides' => $rides, 
+            'activeTab' => $tab,
             'reviewSetting' => $reviewSetting, 
             'ProfilePage' => $ProfilePage, 
             'ProfileSetting' => $ProfileSetting, 
             'rideDetailPage' => $rideDetailPage, 
-            'findrideDetailPage' => $findrideDetailPage, 
-            'searchOptionGroups' => $searchOptionGroups, 
             'tripsPage' => $tripsPage
             ]);
     }
-
-    public function PastRides($lang = null)
-    {
-        $pastRides = Ride::where('added_by', auth()->user()->id)
-            ->notCancelled()
-            ->where(function ($query) {
-                $query->where(function ($query) {
-                    $query->whereDate('completed_date', '<', now()->toDateString())
-                        ->orWhere(function ($query) {
-                            $query->whereDate('completed_date', '=', now()->toDateString())
-                                ->whereTime('completed_time', '<', now()->toTimeString());
-                        });
-                });
-            })
-            ->with(['rideDetail' => function ($q) {
-                $q->where('default_ride', '1');
-            }])
-            ->orderBy('date', 'asc')
-            ->orderBy('time', 'asc')
-            ->paginate(6);
-        
-            // Continue with driver rides if user has posted rides
-        $postRidePage = $this->getPostRidePageWithSettingDetail();
-
-        $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
-        $rideDetailPage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
-        $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
-        $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
-        $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
-
-        $searchOptionGroups = $this->getSearchOptionGroups($this->selectedLanguage->id, $this->defaultLang->id);
-
-        return view('past_rides', 
-        ['pastRides' => $pastRides, 
-        'reviewSetting' => $reviewSetting, 
-        'searchOptionGroups' => $searchOptionGroups, 
-        'ProfilePage' => $ProfilePage, 'ProfileSetting' => $ProfileSetting, 'rideDetailPage' => $rideDetailPage, 'tripsPage' => $tripsPage, 'postRidePage' => $postRidePage, 
-        ]);
-    }
-
-    public function CancelledRides($lang = null)
-    {
-        $cancelledRides = Ride::where('added_by', auth()->user()->id)
-            ->cancelled()
-            ->with(['rideDetail' => function ($q) {
-                $q->where('default_ride', '1');
-            }])
-            ->orderBy('date', 'asc')
-            ->orderBy('time', 'asc')
-            ->paginate(6);
-
-        // Continue with driver rides if user has posted rides
-        $postRidePage = $this->getPostRidePageWithSettingDetail();
-
-        $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
-        $rideDetailPage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
-        $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
-        $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
-        $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
-
-        $searchOptionGroups = $this->getSearchOptionGroups($this->selectedLanguage->id, $this->defaultLang->id);
-
-        return view('cancelled_rides', [
-            'successMessage'=>$this->successMessage,
-            'cancelledRides' => $cancelledRides, 'reviewSetting' => $reviewSetting, 
-            'ProfilePage' => $ProfilePage, 'ProfileSetting' => $ProfileSetting, 
-            'rideDetailPage' => $rideDetailPage, 
-            'searchOptionGroups' => $searchOptionGroups, 
-            'tripsPage' => $tripsPage, 
-            'postRidePage' => $postRidePage
-            ]);
-    }
-
-    
 
     protected function MyRideDetail(Request $request, $lang = null)
     {
@@ -227,11 +176,7 @@ class MyRideController extends Controller
         }
 
         $postRidePage = $this->getPostRidePageWithSettingDetail();
-        
-        $searchOptionGroups = $this->getSearchOptionGroups(
-            $this->selectedLanguage->id,
-            $this->defaultLang->id
-        );
+
 
         $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);  
         $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback(
@@ -244,12 +189,7 @@ class MyRideController extends Controller
         );
         $messages = $this->successMessage;
 
-        $ride->mapMultipleOptionColumnsToDetails(
-            ['luggage', 'payment_method', 'booking_type', 'animal_friendly', 'booking_method'],
-            $this->selectedLanguage->id,
-            $this->defaultLang->id,
-            false
-        );
+        
 
         $ride = $this->makeDetailOfRide($ride);
 
@@ -261,19 +201,23 @@ class MyRideController extends Controller
             $ride_cancelled = true;
         }
 
+        $firm_cancellation_discount = SiteSetting::value('frim_discount');
+        View::share([
+            'postRidePage' => $postRidePage,
+            'rideDetailPage' => $rideDetailPage,
+            'firm_cancellation_discount' => $firm_cancellation_discount,
+        ]);
+
         return view('my_ride_detail', [
             'ride' => $ride,
             'siteSetting' => $siteSetting,
             'ride_cancelled' => $ride_cancelled,
             'setting' => $setting,
             'ratings' => $ratings,
-            'postRidePage' => $postRidePage,
             'findRidePage' => $findRidePage,
             'cancelSetting' => $cancelSetting,
-            'rideDetailPage' => $rideDetailPage,
             'tripsPage' => $tripsPage,
             'messages' => $messages,
-            'searchOptionGroups' => $searchOptionGroups,
         ]);
     }
 

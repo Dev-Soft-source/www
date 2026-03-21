@@ -17,13 +17,7 @@
                             <img class="w-full h-full object-contain rounded-full" src="{{ $ride->driver?->profile_image }}" alt="">
                         </div>
                     <p class="text-black text-2xl lg:text-3xl font-FuturaMdCnBT">
-                        @if ($ride->driver?->type === '2')
-                            {{ $ride->driver?->last_name }}
-                        @elseif ($ride->driver?->type === '3')
-                            {{ $ride->driver?->first_name }} {{ $ride->driver?->last_name }}
-                        @else
-                            {{ $ride->driver?->first_name }}
-                        @endif
+                        {{ $ride->driver?->getDisplayName() }}
                     </p>
                     </div>
                     <div class="mt-6">

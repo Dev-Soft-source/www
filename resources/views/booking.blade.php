@@ -161,7 +161,9 @@
                 @csrf
 
                 <input type="hidden" name="ride_detail_id" value="{{ $ride->detail->id }}">
-                <input type="hidden" name="type" value="{{ $ride->booking_type->features_setting_id }}">
+                <input type="hidden" name="from_stop_id" value="{{ $ride->matched_from_stop_id ?? $ride->rideStops->first()?->id }}">
+                <input type="hidden" name="to_stop_id" value="{{ $ride->matched_to_stop_id ?? $ride->rideStops->last()?->id }}">
+                <input type="hidden" name="type" value="{{ $ride->booking_type }}">
                 <input type="hidden" name="id" value="{{ $ride->id }}">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-y-4 md:gap-4">
                     <div class="col-span-2 flex flex-wrap items-center justify-between gap-3 items-baseline">

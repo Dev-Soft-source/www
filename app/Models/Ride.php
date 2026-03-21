@@ -91,6 +91,79 @@ class Ride extends Model
         return $this->paymentMethodId() === self::PAYMENT_METHOD_SECURE_CASH;
     }
 
+    public function paymentMethodKey(): string
+    {
+        return match ($this->paymentMethodId()) {
+            self::PAYMENT_METHOD_CASH => 'cash',
+            self::PAYMENT_METHOD_ONLINE => 'online',
+            self::PAYMENT_METHOD_SECURE_CASH => 'secured',
+            default => 'secured',
+        };
+    }
+
+    public function resolvePaymentMethodOption($paymentMethodOptions)
+    {
+        $key = $this->paymentMethodKey();
+
+        if ($paymentMethodOptions instanceof \Illuminate\Support\Collection) {
+            return $paymentMethodOptions->get($key);
+        }
+
+        if (is_array($paymentMethodOptions)) {
+            return $paymentMethodOptions[$key] ?? null;
+        }
+
+        return null;
+    }
+
+    public function bookingMethodKey(): string
+    {
+        return match ($this->bookingMethodId()) {
+            self::INSTANT_BOOKING => 'instant',
+            self::REQUEST_BOOKING => 'manual',
+            default => 'manual',
+        };
+    }
+
+    public function resolveBookingMethodOption($bookingMethodOptions)
+    {
+        $key = $this->bookingMethodKey();
+
+        if ($bookingMethodOptions instanceof \Illuminate\Support\Collection) {
+            return $bookingMethodOptions->get($key);
+        }
+
+        if (is_array($bookingMethodOptions)) {
+            return $bookingMethodOptions[$key] ?? null;
+        }
+
+        return null;
+    }
+
+    public function bookingTypeKey(): string
+    {
+        return match ($this->bookingTypeId()) {
+            self::BOOKING_TYPE_STANDARD_CANCELLATION => 'standard',
+            self::BOOKING_TYPE_FIRM_CANCELLATION => 'firm',
+            default => 'standard',
+        };
+    }
+
+    public function resolveBookingTypeOption($bookingTypeOptions)
+    {
+        $key = $this->bookingTypeKey();
+
+        if ($bookingTypeOptions instanceof \Illuminate\Support\Collection) {
+            return $bookingTypeOptions->get($key);
+        }
+
+        if (is_array($bookingTypeOptions)) {
+            return $bookingTypeOptions[$key] ?? null;
+        }
+
+        return null;
+    }
+
     public function isStandardCancellation(): bool
     {
         return $this->bookingTypeId() === self::BOOKING_TYPE_STANDARD_CANCELLATION;
@@ -192,7 +265,7 @@ class Ride extends Model
      */
     public function getMobileSeatFareTotal(): float
     {
-        $seatPrice = (float) ($this->rideDetail()->first()?->price ?? 0);
+        $seatPrice = (float) ($this->rideDetail()->first()?->price / 100 ?? 0);
 
         $bookedSeats = (int) $this->bookings()
             ->notRejected()
@@ -237,7 +310,7 @@ class Ride extends Model
     }
 
     function rideDetail(){
-        return $this->hasMany(RideDetail::class, 'ride_id', 'id');
+        return $this->hasOne(RideDetail::class, 'ride_id', 'id');
     }
 
     public function rideStops()
@@ -878,3 +951,4 @@ class Ride extends Model
 
 
 }
+

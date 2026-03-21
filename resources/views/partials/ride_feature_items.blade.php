@@ -1,40 +1,32 @@
-@foreach (($features ?? []) as $feature)
+@php
+    $selectedFeatureIds = is_array($features ?? null) ? $features : explode('=', (string) ($features ?? ''));
+    $selectedFeatureIds = array_map('strval', array_filter($selectedFeatureIds));
+@endphp
 
-@continue((int)$feature == 1 || (int)$feature == 2)
-    @php
-    
-        $featureOption = null;
-        $featureLabel = $feature;
+@foreach (($rideFeatureOptions['features'] ?? collect()) as $featureOption)
+    @continue($featureOption->slug == 'pink_rides' || $featureOption->slug == 'extra_care_rides')
 
-        if (is_numeric($feature)) {
-            $featureOption = $featureOptionsById[(int) $feature] ?? null;
-            $featureLabel = $featureOption['label'] ?? $feature;
-        } else {
-            $featureOption = $featureOptionsByLabel[$feature] ?? null;
-            $featureLabel = $featureOption['label'] ?? $feature;
-        }
+    @if (in_array((string) $featureOption->id, $selectedFeatureIds, true))
 
-        $featureTooltip = $featureOption['tooltip'] ?? '';
-    @endphp
-    <div class="flex items-center gap-2">
-        @if (!empty($featureOption['icon']))
+        <div class="flex items-center gap-2">
+
             <img class="{{ $iconClass ?? 'w-8 h-8' }}"
-                src="{{ asset('home_page_icons/' . $featureOption['icon']) }}"
+                src="{{ asset('home_page_icons/' . $featureOption->icon) }}"
                 alt="">
-        @else
-            <input id="wi-fi" type="checkbox" name="features[]" value="" checked disabled
-                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
-        @endif
-        <p class="font-semibold flex items-center gap-1">
-            {{ $featureLabel }}
-            @if ($featureTooltip !== '')
+
+            <p class="font-semibold flex items-center gap-1">
+                {{ $featureOption->name }}
+            </p>
+            @if ($featureOption->tooltip !== '')
+            <span class="h-4 w-4">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                    class="bi bi-exclamation-circle-fill text-black cursor-help inline-block"
-                    data-tippy-content="{{ $featureTooltip }}" viewBox="0 0 16 16">
+                    class="cursor-help"
+                    data-tippy-content="{{ $featureOption->tooltip }}" viewBox="0 0 16 16">
                     <path
                         d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
                 </svg>
+            </span>
             @endif
-        </p>
-    </div>
+        </div>
+    @endif
 @endforeach

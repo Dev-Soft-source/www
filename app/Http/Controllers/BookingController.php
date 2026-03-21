@@ -130,6 +130,83 @@ class BookingController extends Controller
         return $bookingCredit;
     }
 
+    protected function loadRideForBooking(int $rideId, ?int $rideDetailId = null, $fromStopId = null, $toStopId = null): Ride
+    {
+        $ride = Ride::with([
+            'rideStops' => fn ($query) => $query->orderBy('stop_order'),
+            'rideStopSegments',
+            'rideDetail' => function ($query) use ($rideDetailId) {
+                $query->orderBy('id');
+
+                if ($rideDetailId) {
+                    $query->where('id', $rideDetailId);
+                }
+            },
+        ])->findOrFail($rideId);
+
+        $ride = $this->makeDetailOfRide($ride, $fromStopId, $toStopId);
+
+        if ($rideDetailId && $ride->rideDetail->isNotEmpty()) {
+            $ride->setRelation('detail', $ride->rideDetail->first());
+        }
+
+        return $ride;
+    }
+
+    protected function resolveBookingRouteData(Ride $ride, $fromStopId = null, $toStopId = null): array
+    {
+        $ride->loadMissing([
+            'rideStops' => fn ($query) => $query->orderBy('stop_order'),
+            'rideStopSegments',
+            'detail',
+            'rideDetail' => fn ($query) => $query->orderBy('id'),
+        ]);
+
+        $ride = $this->makeDetailOfRide($ride, $fromStopId, $toStopId);
+
+        $resolvedFromStopId = (int) ($ride->matched_from_stop_id ?? $ride->rideStops->first()?->id ?? 0);
+        $resolvedToStopId = (int) ($ride->matched_to_stop_id ?? $ride->rideStops->last()?->id ?? 0);
+
+        $fromStop = $ride->rideStops->firstWhere('id', $resolvedFromStopId);
+        $toStop = $ride->rideStops->firstWhere('id', $resolvedToStopId);
+
+        $departure = (string) ($fromStop?->label ?? $ride->detail?->departure ?? $ride->departure ?? '');
+        $destination = (string) ($toStop?->label ?? $ride->detail?->destination ?? $ride->destination ?? '');
+        $price = (string) ((int) ($ride->matched_segment_price_minor ?? $ride->detail?->price ?? 0));
+
+        $matchedRideDetail = $ride->rideDetail->first(function ($detail) use ($departure, $destination) {
+            return strcasecmp(trim((string) ($detail->departure ?? '')), trim($departure)) === 0
+                && strcasecmp(trim((string) ($detail->destination ?? '')), trim($destination)) === 0;
+        });
+
+        return [
+            'from_stop_id' => $resolvedFromStopId ?: null,
+            'to_stop_id' => $resolvedToStopId ?: null,
+            'departure' => $departure,
+            'destination' => $destination,
+            'price' => $price,
+            'ride_detail_id' => $matchedRideDetail?->id ?? $ride->detail?->id,
+        ];
+    }
+
+    protected function syncBookingRouteData(Booking $booking, Ride $ride, $fromStopId = null, $toStopId = null): Booking
+    {
+        $booking->update($this->resolveBookingRouteData($ride, $fromStopId, $toStopId));
+
+        return $booking->refresh();
+    }
+
+    protected function findExistingBookingForSegment(int $rideId, int $userId, $fromStopId = null, $toStopId = null): ?Booking
+    {
+        return Booking::where('ride_id', $rideId)
+            ->where('user_id', $userId)
+            ->whereIn('status', [Booking::STATUS_REQUESTED, Booking::STATUS_BOOKED])
+            ->where('from_stop_id', $fromStopId)
+            ->where('to_stop_id', $toStopId)
+            ->latest('id')
+            ->first();
+    }
+
     /**
      * Make a Booking of a Ride
      * @id: Ride's id
@@ -146,7 +223,7 @@ class BookingController extends Controller
             return back()->with('message', $this->successMessage['admin_block_account_message'] ?? 'Your account has been suspended by the admin');
         }
 
-        $ride = Ride::where('id', $id)->first();
+        $ride = $this->loadRideForBooking($id, null, $from_stop_id, $to_stop_id);
 
 
         $bookingPage = BookingPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
@@ -171,14 +248,12 @@ class BookingController extends Controller
         $coffeeBalance = CoffeeWallet::selectRaw('SUM(dr_amount) - SUM(cr_amount) as balance')
             ->value('balance');
             
-        $ride->mapMultipleOptionColumnsToDetails(
-                ['luggage', 'payment_method', 'booking_type', 'animal_friendly', 'booking_method'],
-                $this->selectedLanguage->id,
-                $this->defaultLang->id,
-                false
-            );
-            
-        $ride = $this->makeDetailOfRide($ride, $from_stop_id, $to_stop_id);
+        // $ride->mapMultipleOptionColumnsToDetails(
+        //     ['luggage', 'payment_method', 'booking_type', 'animal_friendly', 'booking_method'],
+        //     $this->selectedLanguage->id,
+        //     $this->defaultLang->id,
+        //     false
+        // );
 
         $searchOptionGroups = $this->getSearchOptionGroups(
             $this->selectedLanguage->id,
@@ -470,7 +545,12 @@ class BookingController extends Controller
         $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $messages = $this->successMessage;
         
-        $ride = Ride::where('id', $id)->first();
+        $ride = $this->loadRideForBooking(
+            $id,
+            $request->input('ride_detail_id'),
+            $request->input('from_stop_id'),
+            $request->input('to_stop_id')
+        );
         $type = FeaturesSetting::whereId($ride->payment_method)->first();
         $user = User::where('id', auth()->user()->id)->first();
         
@@ -490,20 +570,11 @@ class BookingController extends Controller
             return redirect()->route('step5to5', ['lang' => $this->selectedLanguage->abbreviation])->with(['error' => $messages->verified_number_message ?? "secured cash message", 'phone' => $phoneNumber]);
         }
 
-        $rideDetailId = isset($request->ride_detail_id) ? $request->ride_detail_id : 0;
-
-        $ride = Ride::where('id', $id);
-        if ($rideDetailId != 0) {
-            $ride = $ride->with(['rideDetail' => function ($q) use ($rideDetailId) {
-                $q->where('id', $rideDetailId);
-            }]);
-        } else {
-            $ride = $ride->with(['rideDetail' => function ($q) {
-                $q->where('default_ride', '1');
-            }]);
-        }
-
-        $ride = $ride->first();
+        $bookingRouteData = $this->resolveBookingRouteData(
+            $ride,
+            $request->input('from_stop_id'),
+            $request->input('to_stop_id')
+        );
 
         // Calculate expiry time based on ride date and time
         $currentTime = now();
@@ -604,18 +675,19 @@ class BookingController extends Controller
 
         // If this passenger already has an active booking for the same `ride_id`,
         // update it (instead of creating a duplicate) using the existing update flow.
-        $existingBooking = Booking::where('ride_id', $id)
-            ->where('user_id', $user->id)
-            ->whereIn('status', [Booking::STATUS_REQUESTED, Booking::STATUS_BOOKED])
-            ->latest('id')
-            ->first();
+        $existingBooking = $this->findExistingBookingForSegment(
+            $id,
+            $user->id,
+            $bookingRouteData['from_stop_id'],
+            $bookingRouteData['to_stop_id']
+        );
 
         $hasExistingBooking = (bool) $existingBooking;
         // Reuse the existing booking instead of creating a new one.
         $booking = $hasExistingBooking ? $existingBooking : null;
 
         // ProximaLocal: no booking fee on rides under $15 per seat
-        $pricePerSeat = (float) ($ride->detail?->price ?? 0) / 100;
+        $pricePerSeat = ((float) $bookingRouteData['price']) / 100;
         if ($pricePerSeat < 15) {
             $request->merge(['booking_credit' => '0']);
         }
@@ -737,7 +809,9 @@ class BookingController extends Controller
                                 'tax_amount' => isset($request->tax_amount) ? $request->tax_amount : 0,
                                 'tax_percentage' => isset($request->tax_percentage) ? $request->tax_percentage : 0,
                                 'tax_type' => isset($request->tax_type) ? $request->tax_type : NULL,
-                                'deduct_tax' => isset($request->deduct_tax) ? $request->deduct_tax : NULL
+                                'deduct_tax' => isset($request->deduct_tax) ? $request->deduct_tax : NULL,
+                                'from_stop_id' => $bookingRouteData['from_stop_id'],
+                                'to_stop_id' => $bookingRouteData['to_stop_id'],
                             ]),
                         ]
                     ]);
@@ -965,6 +1039,12 @@ class BookingController extends Controller
                             'tax_amount' => $newTaxAmount,
                             'booked_on' => Carbon::now(),
                         ]);
+                        $booking = $this->syncBookingRouteData(
+                            $booking,
+                            $ride,
+                            $bookingRouteData['from_stop_id'],
+                            $bookingRouteData['to_stop_id']
+                        );
                     } else {
                         $booking = Booking::create([
                             'user_id' => $user->id,
@@ -983,6 +1063,12 @@ class BookingController extends Controller
                             'price' => $ride->detail->price,
                             'ride_detail_id' => $ride->detail->id,
                         ]);
+                        $booking = $this->syncBookingRouteData(
+                            $booking,
+                            $ride,
+                            $bookingRouteData['from_stop_id'],
+                            $bookingRouteData['to_stop_id']
+                        );
                     }
 
                     $ids = $request->seats_id;
@@ -1250,6 +1336,12 @@ class BookingController extends Controller
                 'price' => $ride->detail->price,
                 'ride_detail_id' => $ride->detail->id,
             ]);
+            $booking = $this->syncBookingRouteData(
+                $booking,
+                $ride,
+                $bookingRouteData['from_stop_id'],
+                $bookingRouteData['to_stop_id']
+            );
         } else {
             $booking = Booking::create([
                 'user_id' => $user->id,
@@ -1268,6 +1360,12 @@ class BookingController extends Controller
                 'price' => $ride->detail->price,
                 'ride_detail_id' => $ride->detail->id,
             ]);
+            $booking = $this->syncBookingRouteData(
+                $booking,
+                $ride,
+                $bookingRouteData['from_stop_id'],
+                $bookingRouteData['to_stop_id']
+            );
         }
 
 
@@ -1512,21 +1610,18 @@ class BookingController extends Controller
      */
     public function instantBooking($id, Request $request)
     {
-        $ride = Ride::where('id', $request->id)->first();
+        $ride = $this->loadRideForBooking(
+            (int) $request->id,
+            $request->input('ride_detail_id'),
+            $request->input('from_stop_id'),
+            $request->input('to_stop_id')
+        );
         $type = FeaturesSetting::whereId($ride->payment_method)->first();
-        $ride = Ride::where('id', $request->id);
-        $rideDetailId = isset($request->ride_detail_id) ? $request->ride_detail_id : 0;
-        if ($rideDetailId != 0) {
-            $ride = $ride->with(['rideDetail' => function ($q) use ($rideDetailId) {
-                $q->where('id', $rideDetailId);
-            }]);
-        } else {
-            $ride = $ride->with(['rideDetail' => function ($q) {
-                $q->where('default_ride', '1');
-            }]);
-        }
-
-        $ride = $ride->first();
+        $bookingRouteData = $this->resolveBookingRouteData(
+            $ride,
+            $request->input('from_stop_id'),
+            $request->input('to_stop_id')
+        );
 
         $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $messages = $this->successMessage;
@@ -1625,11 +1720,12 @@ class BookingController extends Controller
 
         // If this passenger already has an active booking for the same `ride_id`,
         // reuse it (instead of creating a duplicate) inside this method.
-        $existingBooking = Booking::where('ride_id', $id)
-            ->where('user_id', $user->id)
-            ->whereIn('status', [Booking::STATUS_REQUESTED, Booking::STATUS_BOOKED])
-            ->latest('id')
-            ->first();
+        $existingBooking = $this->findExistingBookingForSegment(
+            $id,
+            $user->id,
+            $bookingRouteData['from_stop_id'],
+            $bookingRouteData['to_stop_id']
+        );
 
         $hasExistingBooking = (bool) $existingBooking;
         // Reuse existing booking and continue booking flow.
@@ -1669,7 +1765,7 @@ class BookingController extends Controller
         }
 
         // ProximaLocal: no booking fee on rides under $15 per seat
-        $pricePerSeat = (float) ($ride->detail->price ?? 0);
+        $pricePerSeat = ((float) $bookingRouteData['price']) / 100;
         if ($pricePerSeat < 15) {
             $request->merge(['booking_credit' => '0']);
         }
@@ -1975,6 +2071,12 @@ class BookingController extends Controller
                             'tax_amount' => $newTaxAmount,
                             'booked_on' => Carbon::now(),
                         ]);
+                        $booking = $this->syncBookingRouteData(
+                            $booking,
+                            $ride,
+                            $request->input('from_stop_id'),
+                            $request->input('to_stop_id')
+                        );
                     } else {
                         $booking = Booking::create([
                             'user_id' => $user->id,
@@ -1993,6 +2095,12 @@ class BookingController extends Controller
                             'price' => $ride->detail->price,
                             'ride_detail_id' => $ride->detail->id
                         ]);
+                        $booking = $this->syncBookingRouteData(
+                            $booking,
+                            $ride,
+                            $request->input('from_stop_id'),
+                            $request->input('to_stop_id')
+                        );
                     }
 
                     $ids = $request->seats_id;
@@ -2600,6 +2708,12 @@ class BookingController extends Controller
                     'price' => $ride->detail->price,
                     'ride_detail_id' => $ride->detail->id,
                 ]);
+                $booking = $this->syncBookingRouteData(
+                    $booking,
+                    $ride,
+                    $request->input('from_stop_id'),
+                    $request->input('to_stop_id')
+                );
             } else {
                 $booking = Booking::create([
                     'user_id' => $user->id,
@@ -2618,6 +2732,12 @@ class BookingController extends Controller
                     'price' => $ride->detail->price,
                     'ride_detail_id' => $ride->detail->id
                 ]);
+                $booking = $this->syncBookingRouteData(
+                    $booking,
+                    $ride,
+                    $request->input('from_stop_id'),
+                    $request->input('to_stop_id')
+                );
             }
 
             if ($secured_cash_code && isset($user->email_notification) && $user->email_notification == 1) {
@@ -3376,6 +3496,12 @@ class BookingController extends Controller
                                 'price' => $ride->detail->price,
                                 'ride_detail_id' => $ride->detail->id
                             ]);
+                            $newBooking = $this->syncBookingRouteData(
+                                $newBooking,
+                                $ride,
+                                $request->input('from_stop_id'),
+                                $request->input('to_stop_id')
+                            );
 
                             $ids = $request->seats_id;
                             $getSeatDetails = SeatDetail::whereIn('id', $ids)->get();
@@ -3726,6 +3852,12 @@ class BookingController extends Controller
                                 'price' => $ride->detail->price,
                                 'ride_detail_id' => $ride->detail->id
                             ]);
+                            $booking = $this->syncBookingRouteData(
+                                $booking,
+                                $ride,
+                                $request->input('from_stop_id'),
+                                $request->input('to_stop_id')
+                            );
 
                             $ids = $request->seats_id;
                             $getSeatDetails = SeatDetail::whereIn('id', $ids)->get();
@@ -3817,6 +3949,12 @@ class BookingController extends Controller
                         'price' => $ride->detail->price,
                         'ride_detail_id' => $ride->detail->id
                     ]);
+                    $booking = $this->syncBookingRouteData(
+                        $booking,
+                        $ride,
+                        $request->input('from_stop_id'),
+                        $request->input('to_stop_id')
+                    );
 
                     $transactionTaxAmt = $taxAmt - $transactionTaxSum;
 
@@ -3969,8 +4107,18 @@ class BookingController extends Controller
         $result = $paypal->capturePaymentOrder($request->get('token'));
 
         if ($result['status'] == 'COMPLETED') {
-            $ride = Ride::where('id', $id)->first();
+            $ride = $this->loadRideForBooking(
+                $id,
+                null,
+                $request->input('from_stop_id'),
+                $request->input('to_stop_id')
+            );
             $user = User::where('id', auth()->user()->id)->first();
+            $bookingRouteData = $this->resolveBookingRouteData(
+                $ride,
+                $request->input('from_stop_id'),
+                $request->input('to_stop_id')
+            );
 
             // Student booking fee waiver: Validate and apply waiver with card expiration check
             $booking_credit = $this->validateStudentBookingFee($user, $booking_credit);
@@ -4014,11 +4162,12 @@ class BookingController extends Controller
             // Payment successful, handle booking logic here.
             // If the user already has a booking for this ride, REUSE it and ADD new values to old ones
             // (PayPal flow does booking creation here, so this is where we must apply the "add to old" behavior).
-            $existingBooking = Booking::where('ride_id', $id)
-                ->where('user_id', $user->id)
-                ->whereIn('status', [Booking::STATUS_REQUESTED, Booking::STATUS_BOOKED])
-                ->latest('id')
-                ->first();
+            $existingBooking = $this->findExistingBookingForSegment(
+                $id,
+                $user->id,
+                $bookingRouteData['from_stop_id'],
+                $bookingRouteData['to_stop_id']
+            );
 
             if ($existingBooking) {
                 $booking = $existingBooking;
@@ -4037,6 +4186,12 @@ class BookingController extends Controller
                     'destination' => $ride->detail->destination,
                     'price' => $ride->detail->price,
                 ]);
+                $booking = $this->syncBookingRouteData(
+                    $booking,
+                    $ride,
+                    $bookingRouteData['from_stop_id'],
+                    $bookingRouteData['to_stop_id']
+                );
             } else {
                 $booking = Booking::create([
                     'user_id' => $user->id,
@@ -4055,6 +4210,12 @@ class BookingController extends Controller
                     'price' => $ride->detail->price,
                     'ride_detail_id' => $ride->detail->id
                 ]);
+                $booking = $this->syncBookingRouteData(
+                    $booking,
+                    $ride,
+                    $bookingRouteData['from_stop_id'],
+                    $bookingRouteData['to_stop_id']
+                );
             }
 
 
@@ -4217,8 +4378,18 @@ class BookingController extends Controller
 
         if ($result['status'] == 'COMPLETED') {
             $booking = Booking::where('id', $id)->first();
-            $ride = Ride::where('id', $booking->ride_id)->first();
+            $ride = $this->loadRideForBooking(
+                $booking->ride_id,
+                null,
+                $booking->from_stop_id,
+                $booking->to_stop_id
+            );
             $user = User::where('id', auth()->user()->id)->first();
+            $bookingRouteData = $this->resolveBookingRouteData(
+                $ride,
+                $booking->from_stop_id,
+                $booking->to_stop_id
+            );
 
             // Student booking fee waiver: Validate and apply waiver with card expiration check
             $booking_credit = $this->validateStudentBookingFee($user, $booking_credit);
@@ -4281,6 +4452,12 @@ class BookingController extends Controller
                     'price' => $ride->detail->price,
                     'ride_detail_id' => $ride->detail->id
                 ]);
+                $newBooking = $this->syncBookingRouteData(
+                    $newBooking,
+                    $ride,
+                    $booking->from_stop_id,
+                    $booking->to_stop_id
+                );
 
                 $seats_id_array = explode(',', $seats_id);
                 $getSeatDetails = SeatDetail::whereIn('id', $seats_id_array)->get();
@@ -4411,6 +4588,12 @@ class BookingController extends Controller
                     'price' => $ride->detail->price,
                     'ride_detail_id' => $ride->detail->id
                 ]);
+                $newBooking = $this->syncBookingRouteData(
+                    $newBooking,
+                    $ride,
+                    $booking->from_stop_id,
+                    $booking->to_stop_id
+                );
 
                 $transactionTotalPrice = Transaction::where('booking_id', $booking->id)->where('parent_id', '0')->sum('price');
                 $transactionBookingPrice = Transaction::where('booking_id', $booking->id)->where('parent_id', '0')->sum('booking_fee');
@@ -5394,8 +5577,18 @@ class BookingController extends Controller
         $result = $paypal->capturePaymentOrder($request->get('token'));
 
         if ($result['status'] == 'COMPLETED') {
-            $ride = Ride::where('id', $id)->first();
+            $ride = $this->loadRideForBooking(
+                $id,
+                null,
+                $request->input('from_stop_id'),
+                $request->input('to_stop_id')
+            );
             $user = User::where('id', auth()->user()->id)->first();
+            $bookingRouteData = $this->resolveBookingRouteData(
+                $ride,
+                $request->input('from_stop_id'),
+                $request->input('to_stop_id')
+            );
 
             // Student booking fee waiver: Validate and apply waiver with card expiration check
             $booking_credit = $this->validateStudentBookingFee($user, $booking_credit);
@@ -5484,6 +5677,12 @@ class BookingController extends Controller
                 'price' => $ride->detail->price,
                 'ride_detail_id' => $ride->detail->id
             ]);
+            $booking = $this->syncBookingRouteData(
+                $booking,
+                $ride,
+                $bookingRouteData['from_stop_id'],
+                $bookingRouteData['to_stop_id']
+            );
 
             if ($secured_cash_code && isset($user->email_notification) && $user->email_notification == 1) {
                 $driverPhoneNumber = PhoneNumber::where('user_id', $ride->driver->id)
@@ -5910,6 +6109,8 @@ class BookingController extends Controller
                                 'tax_percentage' => isset($request->tax_percentage) ? $request->tax_percentage : 0,
                                 'tax_type' => isset($request->tax_type) ? $request->tax_type : NULL,
                                 'deduct_tax' => isset($request->deduct_tax) ? $request->deduct_tax : NULL,
+                                'from_stop_id' => $bookingRouteData['from_stop_id'],
+                                'to_stop_id' => $bookingRouteData['to_stop_id'],
 
                             ]),
                         ]
@@ -6130,8 +6331,18 @@ class BookingController extends Controller
 
         if ($result['status'] == 'COMPLETED') {
             $booking = Booking::where('id', $id)->first();
-            $ride = Ride::where('id', $booking->ride_id)->first();
+            $ride = $this->loadRideForBooking(
+                $booking->ride_id,
+                null,
+                $booking->from_stop_id,
+                $booking->to_stop_id
+            );
             $user = User::where('id', auth()->user()->id)->first();
+            $bookingRouteData = $this->resolveBookingRouteData(
+                $ride,
+                $booking->from_stop_id,
+                $booking->to_stop_id
+            );
 
             $selectedLanguage = session('selectedLanguage');
             $findRidePage = null;
@@ -6155,6 +6366,12 @@ class BookingController extends Controller
                 'fare' => $fare,
                 'tax_amount' => $taxAmt
             ]);
+            $booking = $this->syncBookingRouteData(
+                $booking,
+                $ride,
+                $bookingRouteData['from_stop_id'],
+                $bookingRouteData['to_stop_id']
+            );
 
             $seats_id_array = explode(',', $seats_id);
             $getSeatDetails = SeatDetail::whereIn('id', $seats_id_array)->get();

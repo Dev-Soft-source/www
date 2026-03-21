@@ -9,24 +9,7 @@
     @php
 
         $searchRoute = route($action_route . '.validate', ['lang' => optional($selectedLanguage)->abbreviation]);
-        $bookingMethodGroup = $searchOptionGroups->get('booking_method');
-        $luggageGroup = $searchOptionGroups->get('luggage_size');
-        $preferenceGroup = $searchOptionGroups->get('preference');
-        $smokingGroup = $searchOptionGroups->get('smoking_allowed');
-        $petsGroup = $searchOptionGroups->get('pets_allowed');
-        $coPassengerOptionCodes = ['min_rating_5', 'min_rating_4', 'min_rating_3', 'existing_reviews_only'];
-        $extraOptionCodes = ['pink_rides', 'extra_plus_rides'];
-        $vehicleTypes = [
-            'Convertable',
-            'Coupe',
-            'Hatchback',
-            'Minivan',
-            'Sedan',
-            'Station wagon',
-            'SUV',
-            'Truck',
-            'Van',
-        ];
+        
         $showSearchResultsHeading = $hasSearch || $hasActiveFilters;
         $defaultResultsHeading = auth()->check() ? 'Recent Added Rides' : 'Upcoming Rides';
     @endphp
@@ -75,13 +58,6 @@
                                     $pinkRideLabel = $findRidePage->search_section_pink_ride_label ?? 'Pink Ride';
                                     $extraRideLabel = $findRidePage->search_section_extra_care_label ?? 'Extra+ Ride';
 
-                                    $pinkRideLabel =
-                                        $preferenceGroup->options->firstWhere('code', 'pink_rides')->display_label ??
-                                        $pinkRideLabel;
-                                    $extraRideLabel =
-                                        $preferenceGroup->options->firstWhere('code', 'extra_plus_rides')
-                                            ->display_label ?? $extraRideLabel;
-                                    //
                                     $extraRideDisabled = '';
                                     $pinkRideDisabled = '';
                                     if ($action_route === 'folk_ride') {
@@ -101,7 +77,7 @@
                                 @if ($searchFilters['proximalocal'])
                                     <div class="flex items-start justify-between p-3">
                                         <span class="text-green-500 text-lg font-medium">
-                                            ProximaLocal Rides — Under $15 per seat (no booking fee)
+                                            {{ $findRidePage->short_distance_ride_text ?? 'ProximaLocal Rides — Under $15 per seat (no booking fee)' }}
                                         </span>
                                         <span class="text-2xl text-gray-500 ml-1">✓</span>
                                     </div>
@@ -115,7 +91,7 @@
 
                                 <label class="flex items-center justify-between p-3">
                                     <span class="text-base md:text-lg text-gray-900">
-                                        {{ getTranslatedText('hide_full_ride_text', $selectedLanguage ?? getDefaultLanguage(true), [], 'Hide Full Rides') }}
+                                        {{ $findRidePage->hide_full_ride_text ?? 'Hide Full Rides' }}
                                     </span>
                                     <input type="checkbox" name="hide_full_rides" value="1" class="w-4 h-4 form-check-input"
                                         @checked(!empty($searchFilters['hide_full_rides']))>
@@ -166,56 +142,47 @@
                                 </div>
                             </div>
 
-                            @if ($preferenceGroup && $preferenceGroup->options->isNotEmpty())
-                                @php
-                                    $coPassengerOptions = $preferenceGroup->options
-                                        ->filter(function ($option) use ($coPassengerOptionCodes) {
-                                            return in_array($option->code, $coPassengerOptionCodes, true);
-                                        })
-                                        ->values();
-                                    $selectedCoPassengerOption =
-                                        (string) (collect((array) ($searchFilters['ride_option_ids'] ?? []))->first() ??
-                                            '');
-                                @endphp
-                                @if ($coPassengerOptions->isNotEmpty())
-                                    <div class="space-y-3">
-                                        <h3 class="text-primary text-2xl xl:text-3xl">
-                                            {{ $findRidePage->filter2_passengers_heading ?? 'Co-passengers' }}</h3>
-                                        <div>
-                                            <label for="coPassengerRating"
-                                                class="block mb-2 font-medium text-gray-900">{{ $findRidePage->passengers_rating_label ?? 'Co-passengers Rating' }}</label>
-                                            <select id="coPassengerRating" name="ride_option_ids[]"
-                                                class="bg-gray-100 text-base md:text-lg border-0 text-black rounded block w-full p-2.5">
-                                                <option value="">
-                                                    {{ $findRidePage->passengers_rating_placeholder ?? 'All' }}</option>
-                                                @foreach ($coPassengerOptions as $option)
-                                                    <option value="{{ $option->id }}" @selected($selectedCoPassengerOption === (string) $option->id)>
-                                                        {{ str_replace('passengers', 'co-passengers', $option->display_label) }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                @endif
-                            @endif
+                            @php
+                                $coPassengerOptions = ['star5_passenger', 'star4_passenger', 'star3_passenger'];
+                                $selectedCoPassengerOption = (string) (collect((array) ($searchFilters['ride_option_ids'] ?? []))->first() ?? '');
+                            @endphp
 
-                            @if ($bookingMethodGroup && $bookingMethodGroup->options->isNotEmpty())
-                                <div class="space-y-3">
-                                    <h3 class="text-primary text-2xl xl:text-3xl">
-                                        {{ $findRidePage->filter3_payment_methods_heading ?? 'Payment methods' }}</h3>
-                                    <div>
-                                        <select id="bookingMethod" name="booking_method"
-                                            class="bg-gray-100 text-base md:text-lg border-0 text-black rounded block w-full p-2.5">
-                                            <option value="">
-                                                {{ $findRidePage->payment_methods_label ?? 'Any payment method' }}</option>
-                                            @foreach ($bookingMethodGroup->options as $option)
-                                                <option value="{{ $option->id }}" @selected((string) ($searchFilters['booking_method'] ?? '') === (string) $option->id)>
-                                                    {{ $option->display_label }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                            <div class="space-y-3">
+                                <h3 class="text-primary text-2xl xl:text-3xl">
+                                    {{ $findRidePage->filter2_passengers_heading ?? 'Co-passengers' }}</h3>
+                                <div>
+                                    <label for="coPassengerRating" class="hidden mb-2 font-medium text-gray-900">{{ $findRidePage->passengers_rating_label ?? 'Co-passengers Rating' }}</label>
+                                    <select id="coPassengerRating" name="ride_option_ids[]"
+                                        class="bg-gray-100 text-base md:text-lg border-0 text-black rounded block w-full p-2.5">
+                                        <option value="">
+                                            {{ $findRidePage->passengers_rating_placeholder ?? 'All' }}</option>
+                                        @foreach ($rideFeatureOptions['features'] as $option)
+                                            @continue(!in_array($option->slug, $coPassengerOptions, true))
+                                            <option value="{{ $option->id }}" @selected($selectedCoPassengerOption === (string) $option->id)>
+                                                {{ str_replace('passengers', 'co-passengers', $option->name) }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                            @endif
+                            </div>
+
+                            
+                            
+                            <div class="space-y-3">
+                                <h3 class="text-primary text-2xl xl:text-3xl">
+                                    {{ $findRidePage->filter3_payment_methods_heading ?? 'Payment methods' }}</h3>
+                                <div>
+                                    <select id="bookingMethod" name="booking_method"
+                                        class="bg-gray-100 text-base md:text-lg border-0 text-black rounded block w-full p-2.5">
+                                        <option value="">
+                                            {{ $findRidePage->payment_methods_label ?? 'Any payment method' }}</option>
+                                        @foreach ($rideFeatureOptions['payment_method'] as $option)
+                                            <option value="{{ $option->id }}" @selected((string) ($searchFilters['booking_method'] ?? '') === (string) $option->id)>
+                                                {{ $option->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
 
                             <div class="space-y-3">
                                 <h3 class="text-primary text-2xl xl:text-3xl">
@@ -225,112 +192,105 @@
                                         class="bg-gray-100 text-base md:text-lg border-0 text-black rounded block w-full p-2.5">
                                         <option value="">
                                             {{ $findRidePage->vehicle_type_placeholder ?? 'Any vehicle type' }}</option>
-                                        @foreach ($vehicleTypes as $type)
-                                            <option value="{{ $type }}" @selected(($searchFilters['vehicle_type'] ?? '') === $type)>
-                                                {{ $type }}</option>
+                                        @foreach ($rideFeatureOptions['vehicle_type'] as $option)
+                                            <option value="{{ $option->id }}" @selected((string) ($searchFilters['vehicle_type'] ?? '') === (string) $option->id)>
+                                                {{ $option->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                             </div>
 
-                            @if ($preferenceGroup && $preferenceGroup->options->isNotEmpty())
-                                <div class="space-y-3">
-                                    <h3 class="text-primary text-2xl xl:text-3xl">
-                                        {{ $findRidePage->ride_preferences_label ?? 'Preference' }}</h3>
-                                    <div class="border rounded-md overflow-hidden divide-y">
-                                        @foreach ($preferenceGroup->options as $option)
-                                            @continue(in_array($option->code, $coPassengerOptionCodes, true))
-                                            @continue(in_array($option->code, $extraOptionCodes, true))
-                                            <div class="flex items-start gap-2 p-3">
-                                                <label class="flex gap-2 text-base md:text-lg">
-                                                <input type="checkbox" name="ride_option_ids[]"
-                                                    value="{{ $option->id }}" class="form-check-input"
-                                                    @checked(in_array($option->id, (array) ($searchFilters['ride_option_ids'] ?? [])))>
-                                                    <span>{{ $option->display_label }}</span>
-                                                </label>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
-
-                            @if ($luggageGroup && $luggageGroup->options->isNotEmpty())
-                                <div class="space-y-3">
-                                    <h3 class="text-primary text-2xl xl:text-3xl">
-                                        {{ $findRidePage->luggage_label ?? 'Luggage' }}</h3>
-                                    <div class="border rounded-md overflow-hidden divide-y">
-                                        @foreach ($luggageGroup->options as $option)
-                                            <div class="flex items-center justify-between p-3">
-                                                <label class="flex items-center gap-2 text-base md:text-lg">
-                                                    <input type="radio" name="luggage_size"
-                                                        value="{{ $option->id }}" class="w-4 h-4 form-check-input"
-                                                        @checked((string) ($searchFilters['luggage_size'] ?? '') === (string) $option->id)>
-                                                    <span>{{ $option->display_label }}</span>
-                                                </label>
-                                            </div>
-                                        @endforeach
-                                        <div class="flex items-center justify-between p-3">
-                                            <label class="flex items-center gap-2 text-base md:text-lg">
-                                                <input type="radio" name="luggage_size" value="" class="w-4 h-4 form-check-input"
-                                                    @checked(empty($searchFilters['luggage_size']))>
-                                                <span>{{ $findRidePage->luggage_any_label ?? 'Any' }}</span>
+                            <div class="space-y-3">
+                                <h3 class="text-primary text-2xl xl:text-3xl">
+                                    {{ $findRidePage->ride_preferences_label ?? 'Ride Preference' }}</h3>
+                                <div class="border rounded-md overflow-hidden divide-y">
+                                    @foreach ($rideFeatureOptions['features'] as $option)
+                                        @continue(in_array($option->slug, ['pink_rides', 'extra_care_rides', 'star5_passenger', 'star4_passenger', 'star3_passenger'], true))
+                                        <div class="flex items-start gap-2 p-3">
+                                            <label class="flex gap-2 text-base md:text-lg">
+                                            <input type="checkbox" name="ride_option_ids[]"
+                                                value="{{ $option->id }}" class="form-check-input"
+                                                @checked(in_array($option->id, (array) ($searchFilters['ride_option_ids'] ?? [])))>
+                                                <span>{{ $option->name }}</span>
                                             </label>
                                         </div>
-                                    </div>
+                                    @endforeach
                                 </div>
-                            @endif
+                            </div>
 
-                            @if ($smokingGroup && $smokingGroup->options->isNotEmpty())
-                                <div class="space-y-3">
-                                    <h3 class="text-primary text-2xl xl:text-3xl">
-                                        {{ $findRidePage->smoking_label ?? 'Smoking' }}</h3>
-                                    <div class="border rounded-md overflow-hidden divide-y">
-                                        @foreach ($smokingGroup->options as $option)
-                                            <div class="flex items-center justify-between p-3">
-                                                <label class="flex items-center gap-2 text-base md:text-lg">
-                                                    <input type="radio" name="smoking_allowed"
-                                                        value="{{ $option->id }}" class="w-4 h-4 form-check-input"
-                                                        @checked((string) ($searchFilters['smoking_allowed'] ?? '') === (string) $option->id)>
-                                                    <span>{{ $option->display_label }}</span>
-                                                </label>
-                                            </div>
-                                        @endforeach
+                            <div class="space-y-3">
+                                <h3 class="text-primary text-2xl xl:text-3xl">
+                                    {{ $findRidePage->luggage_label ?? 'Luggage' }}</h3>
+                                <div class="border rounded-md overflow-hidden divide-y">
+                                    @foreach ($rideFeatureOptions['luggage_size'] as $option)
                                         <div class="flex items-center justify-between p-3">
                                             <label class="flex items-center gap-2 text-base md:text-lg">
-                                                <input type="radio" name="smoking_allowed" value=""
-                                                    class="w-4 h-4 form-check-input" @checked(empty($searchFilters['smoking_allowed']))>
-                                                <span>{{ $findRidePage->smoking_any_label ?? 'Any' }}</span>
+                                                <input type="radio" name="luggage_size"
+                                                    value="{{ $option->id }}" class="w-4 h-4 form-check-input"
+                                                    @checked((string) ($searchFilters['luggage_size'] ?? '') === (string) $option->id)>
+                                                <span>{{ $option->name }}</span>
                                             </label>
                                         </div>
+                                    @endforeach
+                                    <div class="flex items-center justify-between p-3">
+                                        <label class="flex items-center gap-2 text-base md:text-lg">
+                                            <input type="radio" name="luggage_size" value="" class="w-4 h-4 form-check-input"
+                                                @checked(empty($searchFilters['luggage_size']))>
+                                            <span>{{ $findRidePage->luggage_any_label ?? 'Any' }}</span>
+                                        </label>
                                     </div>
                                 </div>
-                            @endif
+                            </div>
 
-                            @if ($petsGroup && $petsGroup->options->isNotEmpty())
-                                <div class="space-y-3">
-                                    <h3 class="text-primary text-2xl xl:text-3xl">
-                                        {{ $findRidePage->pets_allowed_label ?? 'Pets' }}</h3>
-                                    <div class="border rounded-md overflow-hidden divide-y">
-                                        @foreach ($petsGroup->options as $option)
-                                            <div class="flex items-center justify-between p-3">
-                                                <label class="flex items-center gap-2 text-base md:text-lg">
-                                                    <input type="radio" name="pets_allowed"
-                                                        value="{{ $option->id }}" class="w-4 h-4 form-check-input"
-                                                        @checked((string) ($searchFilters['pets_allowed'] ?? '') === (string) $option->id)>
-                                                    <span>{{ $option->display_label }}</span>
-                                                </label>
-                                            </div>
-                                        @endforeach
+
+                            <div class="space-y-3">
+                                <h3 class="text-primary text-2xl xl:text-3xl">
+                                    {{ $findRidePage->smoking_label ?? 'Smoking' }}</h3>
+                                <div class="border rounded-md overflow-hidden divide-y">
+                                    @foreach ($rideFeatureOptions['smoking_allowed'] as $option)
                                         <div class="flex items-center justify-between p-3">
                                             <label class="flex items-center gap-2 text-base md:text-lg">
-                                                <input type="radio" name="pets_allowed" value="" class="w-4 h-4 form-check-input"
-                                                    @checked(empty($searchFilters['pets_allowed']))>
-                                                <span>{{ $findRidePage->pets_any_label ?? 'Any' }}</span>
+                                                <input type="radio" name="smoking_allowed"
+                                                    value="{{ $option->id }}" class="w-4 h-4 form-check-input"
+                                                    @checked((string) ($searchFilters['smoking_allowed'] ?? '') === (string) $option->id)>
+                                                <span>{{ $option->name }}</span>
                                             </label>
                                         </div>
+                                    @endforeach
+                                    <div class="flex items-center justify-between p-3">
+                                        <label class="flex items-center gap-2 text-base md:text-lg">
+                                            <input type="radio" name="smoking_allowed" value=""
+                                                class="w-4 h-4 form-check-input" @checked(empty($searchFilters['smoking_allowed']))>
+                                            <span>{{ $findRidePage->smoking_any_label ?? 'Any' }}</span>
+                                        </label>
                                     </div>
                                 </div>
-                            @endif
+                            </div>
+
+
+                            <div class="space-y-3">
+                                <h3 class="text-primary text-2xl xl:text-3xl">
+                                    {{ $findRidePage->pets_allowed_label ?? 'Pets' }}</h3>
+                                <div class="border rounded-md overflow-hidden divide-y">
+                                    @foreach ($rideFeatureOptions['pets_allowed'] as $option)
+                                        <div class="flex items-center justify-between p-3">
+                                            <label class="flex items-center gap-2 text-base md:text-lg">
+                                                <input type="radio" name="pets_allowed"
+                                                    value="{{ $option->id }}" class="w-4 h-4 form-check-input"
+                                                    @checked((string) ($searchFilters['pets_allowed'] ?? '') === (string) $option->id)>
+                                                <span>{{ $option->name }}</span>
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                    <div class="flex items-center justify-between p-3">
+                                        <label class="flex items-center gap-2 text-base md:text-lg">
+                                            <input type="radio" name="pets_allowed" value="" class="w-4 h-4 form-check-input"
+                                                @checked(empty($searchFilters['pets_allowed']))>
+                                            <span>{{ $findRidePage->pets_any_label ?? 'Any' }}</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
 
                             <div class="flex gap-3 pt-2">
                                 <a href="{{ route('search_ride', ['lang' => optional($selectedLanguage)->abbreviation]) }}"

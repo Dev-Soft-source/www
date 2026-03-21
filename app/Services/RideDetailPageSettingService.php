@@ -61,11 +61,15 @@ class RideDetailPageSettingService
                 
                 $validationRule = array_merge($validationRule, ['ride_completed_text.ride_completed_text_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['ride_completed_text.ride_completed_text_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['ride_completed_label.ride_completed_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['ride_completed_label.ride_completed_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['ride_cancelled_label.ride_cancelled_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['ride_cancelled_label.ride_cancelled_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 
                 $validationRule = array_merge($validationRule, ['book_seat_btn_label.book_seat_btn_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['book_seat_btn_label.book_seat_btn_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['book_seats_btn_label.book_seats_btn_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['book_seats_btn_label.book_seats_btn_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['seat_available_label.seat_available_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['seat_available_label.seat_available_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['no_seat_available_label.no_seat_available_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['no_seat_available_label.no_seat_available_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['no_ride_found_message.no_ride_found_message_' . $language->id => ['required', 'string']]);
@@ -131,8 +135,6 @@ class RideDetailPageSettingService
                 $errorMessages = array_merge($errorMessages, ['cancellation_policy.cancellation_policy_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['passengers_driven_label.passengers_driven_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['passengers_driven_label.passengers_driven_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['driver_age_label.driver_age_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['driver_age_label.driver_age_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['driver_chat_heading.driver_chat_heading_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['driver_chat_heading.driver_chat_heading_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['driver_chat_label.driver_chat_label_' . $language->id => ['required', 'string']]);
@@ -173,14 +175,16 @@ class RideDetailPageSettingService
                 $errorMessages = array_merge($errorMessages, ['driver_note_label.driver_note_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['pickup_dropoff_info_heading.pickup_dropoff_info_heading_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['pickup_dropoff_info_heading.pickup_dropoff_info_heading_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['pickup_label.pickup_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['pickup_label.pickup_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['pickup_at_label.pickup_at_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['pickup_at_label.pickup_at_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['dropoff_label.dropoff_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['dropoff_label.dropoff_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['dropoff_at_label.dropoff_at_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['dropoff_at_label.dropoff_at_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['depends_on_other_stops_tooltip.depends_on_other_stops_tooltip_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['depends_on_other_stops_tooltip.depends_on_other_stops_tooltip_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['departure_time_approximate_tooltip.departure_time_approximate_tooltip_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['departure_time_approximate_tooltip.departure_time_approximate_tooltip_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['stops_along_the_way_label.stops_along_the_way_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['stops_along_the_way_label.stops_along_the_way_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['description_label.description_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['description_label.description_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['booking_type_label.booking_type_label_' . $language->id => ['required', 'string']]);
@@ -262,18 +266,21 @@ class RideDetailPageSettingService
             'seats_left_label' => $this->data($request, $language, 'seats_left_label'),
             'per_seat_label' => $this->data($request, $language, 'per_seat_label'),
             'pickup_dropoff_info_heading' => $this->data($request, $language, 'pickup_dropoff_info_heading'),
-            'pickup_label' => $this->data($request, $language, 'pickup_label'),
             'pickup_at_label' => $this->data($request, $language, 'pickup_at_label'),
-            'dropoff_label' => $this->data($request, $language, 'dropoff_label'),
             'dropoff_at_label' => $this->data($request, $language, 'dropoff_at_label'),
+            'depends_on_other_stops_tooltip' => $this->data($request, $language, 'depends_on_other_stops_tooltip'),
+            'departure_time_approximate_tooltip' => $this->data($request, $language, 'departure_time_approximate_tooltip'),
+            'stops_along_the_way_label' => $this->data($request, $language, 'stops_along_the_way_label'),
             'description_label' => $this->data($request, $language, 'description_label'),
             'ride_features_label' => $this->data($request, $language, 'ride_features_label'),
             'ride_seat_label' => $this->data($request, $language, 'ride_seat_label'),
             'all_seats_booked_label' => $this->data($request, $language, 'all_seats_booked_label'),
             'ride_canceller_by_driver' => $this->data($request, $language, 'ride_canceller_by_driver'),
             'ride_completed_text' => $this->data($request, $language, 'ride_completed_text'),
+            'ride_completed_label' => $this->data($request, $language, 'ride_completed_label'),
+            'ride_cancelled_label' => $this->data($request, $language, 'ride_cancelled_label'),
             'book_seat_btn_label' => $this->data($request, $language, 'book_seat_btn_label'),
-            'book_seats_btn_label' => $this->data($request, $language, 'book_seats_btn_label'),
+            'seat_available_label' => $this->data($request, $language, 'seat_available_label'),
             'no_seat_available_label' => $this->data($request, $language, 'no_seat_available_label'),
             'no_ride_found_message' => $this->data($request, $language, 'no_ride_found_message'),
             'cancel_booking_btn_label' => $this->data($request, $language, 'cancel_booking_btn_label'),
@@ -305,7 +312,6 @@ class RideDetailPageSettingService
             'driver_label' => $this->data($request, $language, 'driver_label'),
             'cancellation_policy' => $this->data($request, $language, 'cancellation_policy'),
             'passengers_driven_label' => $this->data($request, $language, 'passengers_driven_label'),
-            'driver_age_label' => $this->data($request, $language, 'driver_age_label'),
             'driver_chat_heading' => $this->data($request, $language, 'driver_chat_heading'),
             'driver_chat_label' => $this->data($request, $language, 'driver_chat_label'),
             'driver_chat_button_label' => $this->data($request, $language, 'driver_chat_button_label'),

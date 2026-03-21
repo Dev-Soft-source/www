@@ -857,10 +857,9 @@ class RideController extends Controller
 
         $recentSearches = RecentSearch::where('user_id', $user->id)->orderBy('updated_at', 'desc')->limit(10)->get();
 
-        $siteSettingDiscount = SiteSetting::value('frim_discount');
-        $firm_cancellation_discount = $siteSettingDiscount;
 
-        $data = ['rides' => $rides, 'recentSearches' => $recentSearches, 'firm_cancellation_discount' => $firm_cancellation_discount];
+
+        $data = ['rides' => $rides, 'recentSearches' => $recentSearches];
         return $this->successResponse($data, 'Success');
     }
 

@@ -28,8 +28,18 @@ class Booking extends Model
         return in_array((int) $this->status, self::rejectedStatuses(), true);
     }
 
+    public function isCompleted(): bool
+    {
+        return (int) $this->status === self::STATUS_COMPLETED;
+    }
+
+    public function isCancelled(): bool
+    {
+        return (int) $this->status === self::STATUS_CANCELLED;
+    }
+
     public $timestamps  = false;
-    protected $fillable = ['user_id', 'ride_id', 'seats', 'type', 'booked_on', 'status', 'booking_credit', 'fare', 'secured_cash', 'secured_cash_code', 'expires_at', 'removed_permanently', 'uuid', 'block_days', 'block_date_time', 'tax_amount', 'ride_detail_id', 'departure', 'destination', 'price', 'conversation_sid', 'participant_sid', 'phone_number'];
+    protected $fillable = ['user_id', 'ride_id', 'seats', 'type', 'booked_on', 'status', 'booking_credit', 'fare', 'secured_cash', 'secured_cash_code', 'expires_at', 'removed_permanently', 'uuid', 'block_days', 'block_date_time', 'tax_amount', 'ride_detail_id', 'from_stop_id', 'to_stop_id', 'departure', 'destination', 'price', 'conversation_sid', 'participant_sid', 'phone_number'];
 
     public static function statusLabels(): array
     {
@@ -51,6 +61,16 @@ class Booking extends Model
     public function ride()
     {
         return $this->belongsTo(Ride::class, 'ride_id');
+    }
+
+    public function fromStop()
+    {
+        return $this->belongsTo(RideStop::class, 'from_stop_id');
+    }
+
+    public function toStop()
+    {
+        return $this->belongsTo(RideStop::class, 'to_stop_id');
     }
 
     public function ratings()

@@ -96,12 +96,12 @@ class RideController extends Controller
             $this->defaultLang->id
         );
 
-        $ride->mapMultipleOptionColumnsToDetails(
-            ['luggage', 'payment_method', 'booking_type', 'animal_friendly', 'booking_method'],
-            $this->selectedLanguage->id,
-            $this->defaultLang->id,
-            false
-        );
+        // $ride->mapMultipleOptionColumnsToDetails(
+        //     ['luggage', 'payment_method', 'booking_type', 'animal_friendly', 'booking_method'],
+        //     $this->selectedLanguage->id,
+        //     $this->defaultLang->id,
+        //     false
+        // );
 
         $ride = $this->makeDetailOfRide($ride, $from_stop_id, $to_stop_id);
 

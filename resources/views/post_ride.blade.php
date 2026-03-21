@@ -139,6 +139,10 @@
             } else {
                 $oldVehicleMode = old('vehicle_mode', 'skip');
             }
+
+            $isAvailablePinkRide = $ride->isPinkRide();
+            $isAvailableExtraCareRide = $ride->isExtraCareRide();
+
         } else {
             // Create mode - use old() values
             $oldOriginLabel = old('origin.label');
@@ -168,6 +172,9 @@
             $oldRecurringTrips = old('recurring_trips', 0);
             $oldSelectedFeatures = old('features', []);
             $oldVehicleMode = old('vehicle_mode', 'existing');
+
+            $isAvailablePinkRide = false;
+            $isAvailableExtraCareRide = false;
         }
 
         $oldStops = collect($oldStops ?? [])
@@ -1207,28 +1214,25 @@
                     </div>
                     <div class="bg-white p-4">
                         <div class="border rounded-md divide-y">
-                            @if ($postRidePage->luggage_option1?->features_setting_id)
-                                @php
-                                    $luggageFirstId = $postRidePage->luggage_option1->features_setting_id;
-                                @endphp
+                            @foreach ($rideFeatureOptions['luggage_size'] as $luggageOption)
                                 <div class="flex items-center gap-4 p-3">
-                                    <label for="{{ $postRidePage->luggage_option1->features_setting_id }}"
-                                        class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
-                                        <input id="{{ $postRidePage->luggage_option1->features_setting_id }}"
-                                            type="radio" name="luggage"
-                                            value="{{ $postRidePage->luggage_option1->features_setting_id }}"
-                                            {{ ($oldLuggageSize && $oldLuggageSize == $luggageFirstId) || !$oldLuggageSize ? 'checked' : '' }}
+                                    <label for="{{ $luggageOption->slug }}"
+                                        class="font-normal text-gray-900 flex space-x-1 flex items-center gap-2 w-full">
+                                        <input id="{{ $luggageOption->slug }}"
+                                            name="luggage" type="radio"
+                                            value="{{ $luggageOption->id }}"
+                                            @checked($oldLuggageSize
+                                                ? $oldLuggageSize == $luggageOption->id
+                                                : $loop->first)
                                             class="form-check-input">
-                                        @isset($postRidePage->luggage_option1->icon)
+                                            @isset($luggageOption->icon)
                                             <img class="w-10 h-10"
-                                                src="{{ asset('home_page_icons/' . $postRidePage->luggage_option1->icon) }}"
+                                                src="{{ asset('home_page_icons/' . $luggageOption->icon) }}"
                                                 alt="">
-                                        @endisset
-                                        <span>
-                                            {{ $postRidePage->luggage_option1->name }}
-                                        </span>
+                                              @endisset  
+                                        {{ $luggageOption->name }}
                                         <span class="inline-flex cursor-help"
-                                            data-tippy-content="{{ $postRidePage->luggage_option1_tooltip ?? '' }}">
+                                            data-tippy-content="{{ $luggageOption->tooltip ?? '' }}">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                 fill="currentColor" class="bi bi-info-circle-fill text-black"
                                                 viewBox="0 0 16 16">
@@ -1238,133 +1242,7 @@
                                         </span>
                                     </label>
                                 </div>
-                            @endif
-                            @if ($postRidePage->luggage_option2?->features_setting_id)
-                                <div class="flex items-center gap-4 p-3">
-                                    <label for="{{ $postRidePage->luggage_option2->features_setting_id }}"
-                                        class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
-                                        <input type="radio"
-                                            id="{{ $postRidePage->luggage_option2->features_setting_id }}"
-                                            name="luggage"
-                                            value="{{ $postRidePage->luggage_option2->features_setting_id }}"
-                                            {{ $oldLuggageSize == $postRidePage->luggage_option2->features_setting_id ? 'checked' : '' }}
-                                            class="form-check-input">
-                                        @isset($postRidePage->luggage_option2->icon)
-                                            <img class="w-10 h-10"
-                                                src="{{ asset('home_page_icons/' . $postRidePage->luggage_option2->icon) }}"
-                                                alt="">
-                                        @endisset
-                                        <span class="">
-                                            {{ $postRidePage->luggage_option2->name }}
-                                        </span>
-                                        <span class="inline-flex cursor-help"
-                                            data-tippy-content="{{ $postRidePage->luggage_option2_tooltip ?? '' }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                fill="currentColor" class="bi bi-info-circle-fill text-black"
-                                                viewBox="0 0 16 16">
-                                                <path
-                                                    d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                                            </svg>
-                                        </span>
-                                    </label>
-                                </div>
-                            @endif
-                            @if ($postRidePage->luggage_option3?->features_setting_id)
-                                <div class="flex items-center gap-4 p-3">
-                                    <label for="{{ $postRidePage->luggage_option3->features_setting_id }}"
-                                        class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
-                                        <input type="radio"
-                                            id="{{ $postRidePage->luggage_option3->features_setting_id }}"
-                                            name="luggage"
-                                            value="{{ $postRidePage->luggage_option3->features_setting_id }}"
-                                            {{ $oldLuggageSize == $postRidePage->luggage_option3->features_setting_id ? 'checked' : '' }}
-                                            class="form-check-input">
-                                        @isset($postRidePage->luggage_option3->icon)
-                                            <img class="w-10 h-10"
-                                                src="{{ asset('home_page_icons/' . $postRidePage->luggage_option3->icon) }}"
-                                                alt="">
-                                        @endisset
-                                        <span>
-                                            {{ $postRidePage->luggage_option3->name }}
-                                        </span>
-                                        <span class="inline-flex cursor-help"
-                                            data-tippy-content="{{ $postRidePage->luggage_option3_tooltip ?? '' }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                fill="currentColor" class="bi bi-info-circle-fill text-black"
-                                                viewBox="0 0 16 16">
-                                                <path
-                                                    d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                                            </svg>
-                                        </span>
-                                    </label>
-                                </div>
-                            @endif
-                            @if ($postRidePage->luggage_option4?->features_setting_id)
-                                <div class="flex items-center gap-4 p-3">
-                                    <label for="{{ $postRidePage->luggage_option4->features_setting_id }}"
-                                        class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
-                                        <input type="radio"
-                                            id="{{ $postRidePage->luggage_option4->features_setting_id }}"
-                                            name="luggage"
-                                            value="{{ $postRidePage->luggage_option4->features_setting_id }}"
-                                            {{ $oldLuggageSize == $postRidePage->luggage_option4->features_setting_id ? 'checked' : '' }}
-                                            class="form-check-input">
-                                        @isset($postRidePage->luggage_option4->icon)
-                                            <img class="w-10 h-10"
-                                                src="{{ asset('home_page_icons/' . $postRidePage->luggage_option4->icon) }}"
-                                                alt="">
-                                        @endisset
-                                        <span>
-                                            {{ $postRidePage->luggage_option4->name }}
-                                        </span>
-                                        <span class="inline-flex cursor-help"
-                                            data-tippy-content="{{ $postRidePage->luggage_option4_tooltip ?? '' }}">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                fill="currentColor" class="bi bi-info-circle-fill text-black"
-                                                viewBox="0 0 16 16">
-                                                <path
-                                                    d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                                            </svg>
-                                        </span>
-                                    </label>
-                                </div>
-                            @endif
-                            @if ($postRidePage->luggage_option5?->features_setting_id)
-                                <div class="flex items-center gap-4 p-3">
-                                    <label for="{{ $postRidePage->luggage_option5->features_setting_id }}"
-                                        class="font-normal text-gray-900 flex items-center space-x-1 gap-2 w-full">
-                                        <input type="radio"
-                                            id="{{ $postRidePage->luggage_option5->features_setting_id }}"
-                                            name="luggage"
-                                            value="{{ $postRidePage->luggage_option5->features_setting_id }}"
-                                            {{ $oldLuggageSize == $postRidePage->luggage_option5->features_setting_id ? 'checked' : '' }}
-                                            class="form-check-input">
-                                        @isset($postRidePage->luggage_option5->icon)
-                                            <img class="w-10 h-10"
-                                                src="{{ asset('home_page_icons/' . $postRidePage->luggage_option5->icon) }}"
-                                                alt="">
-                                        @endisset
-                                        <div>
-                                            <p class="leading-normal mt-2">
-                                                {{ $postRidePage->luggage_option5->name }}
-                                            </p>
-                                            <div
-                                                class="font-normal text-gray-900 flex lg:block items-center space-x-0.5 2xl:pr-8">
-                                                <small>{{ $postRidePage->luggage_option5_label }}</small>
-                                                <span class="inline-flex cursor-help items-center"
-                                                    data-tippy-content="{{ $postRidePage->luggage_option5_tooltip ?? '' }}">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                        fill="currentColor" class="bi bi-info-circle-fill text-black"
-                                                        viewBox="0 0 16 16">
-                                                        <path
-                                                            d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                                                    </svg>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </label>
-                                </div>
-                            @endif
+                            @endforeach
                         </div>
                         @error('luggage')
                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
@@ -1397,36 +1275,21 @@
                     </div>
                     <div class="bg-white p-4">
                         <div class="border rounded-md overflow-hidden divide-y">
-                            @if ($postRidePage->smoking_option1?->features_setting_id)
-                                <div class="flex items-center gap-4 p-3 w-full">
-                                    <label for="{{ $postRidePage->smoking_option1->features_setting_id }}"
-                                        class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
-                                        <input id="{{ $postRidePage->smoking_option1->features_setting_id }}"
-                                            name="smoke" type="radio"
-                                            value="{{ $postRidePage->smoking_option1->features_setting_id }}"
-                                            {{ $isNewForm ? ($oldSmokingAllowed == $postRidePage->smoking_option1->features_setting_id ? 'checked' : (21 == $postRidePage->smoking_option1->features_setting_id ? 'checked' : '')) : (old('smoke', $ride->smoke) == $postRidePage->smoking_option1->features_setting_id ? 'checked' : '') }}
-                                            class="form-check-input">
-
-                                        <span class="">
-                                            {{ $postRidePage->smoking_option1->name }}
-                                        </span>
-                                    </label>
-
-                                </div>
-                            @endif
-                            @if ($postRidePage->smoking_option2?->features_setting_id)
+                            @foreach ($rideFeatureOptions['smoking_allowed'] as $smokingOption)
                                 <div class="flex items-center gap-4 p-3">
-                                    <label for="{{ $postRidePage->smoking_option2->features_setting_id }}"
-                                        class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
-                                        <input id="{{ $postRidePage->smoking_option2->features_setting_id }}"
+                                    <label for="{{ $smokingOption->slug }}"
+                                        class="font-normal text-gray-900 flex space-x-1 flex items-center gap-2 w-full">
+                                        <input id="{{ $smokingOption->slug }}"
                                             name="smoke" type="radio"
-                                            value="{{ $postRidePage->smoking_option2->features_setting_id }}"
-                                            {{ $isNewForm ? ($oldSmokingAllowed == $postRidePage->smoking_option2->features_setting_id ? 'checked' : '') : (old('smoke', $ride->smoke) == $postRidePage->smoking_option2->features_setting_id ? 'checked' : '') }}
+                                            value="{{ $smokingOption->id }}"
+                                            @checked($oldSmokingAllowed
+                                                ? $oldSmokingAllowed == $smokingOption->id
+                                                : $loop->first)
                                             class="form-check-input">
-                                        {{ $postRidePage->smoking_option2->name }}
+                                        {{ $smokingOption->name }}
                                     </label>
                                 </div>
-                            @endif
+                            @endforeach
                         </div>
                         @error('smoke')
                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
@@ -1445,45 +1308,21 @@
                     </div>
                     <div class="bg-white p-4">
                         <div class="border rounded-md overflow-hidden divide-y">
-                            @if ($postRidePage->animals_option1?->features_setting_id)
+                            @foreach ($rideFeatureOptions['pets_allowed'] as $animalOption)
                                 <div class="flex items-center gap-4 p-3">
-                                    <label for="{{ $postRidePage->animals_option1->features_setting_id }}"
-                                        class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
-                                        <input id="{{ $postRidePage->animals_option1->features_setting_id }}"
+                                    <label for="{{ $animalOption->slug }}"
+                                        class="font-normal text-gray-900 flex space-x-1 flex items-center gap-2 w-full">
+                                        <input id="{{ $animalOption->slug }}"
                                             name="animal_friendly" type="radio"
-                                            value="{{ $postRidePage->animals_option1->features_setting_id }}"
-                                            {{ $isNewForm ? ($oldPetsAllowed == $postRidePage->animals_option1->features_setting_id ? 'checked' : (23 == $postRidePage->animals_option1->features_setting_id ? 'checked' : '')) : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option1->features_setting_id ? 'checked' : '') }}
+                                            value="{{ $animalOption->id }}"
+                                            @checked($oldPetsAllowed
+                                                ? $oldPetsAllowed == $animalOption->id
+                                                : $loop->first)
                                             class="form-check-input">
-                                        {{ $postRidePage->animals_option1->name }}
+                                        {{ $animalOption->name }}
                                     </label>
                                 </div>
-                            @endif
-                            @if ($postRidePage->animals_option2?->features_setting_id)
-                                <div class="flex items-center gap-4 p-3">
-                                    <label for="{{ $postRidePage->animals_option2->features_setting_id }}"
-                                        class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
-                                        <input id="{{ $postRidePage->animals_option2->features_setting_id }}"
-                                            name="animal_friendly" type="radio"
-                                            value="{{ $postRidePage->animals_option2->features_setting_id }}"
-                                            {{ $isNewForm ? ($oldPetsAllowed == $postRidePage->animals_option2->features_setting_id ? 'checked' : '') : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option2->features_setting_id ? 'checked' : '') }}
-                                            class="form-check-input">
-                                        {{ $postRidePage->animals_option2->name }}
-                                    </label>
-                                </div>
-                            @endif
-                            @if ($postRidePage->animals_option3?->features_setting_id)
-                                <div class="flex items-center gap-4 p-3">
-                                    <label for="{{ $postRidePage->animals_option3->features_setting_id }}"
-                                        class="font-normal text-gray-900 flex space-x-1 flex items-center gap-4 w-full">
-                                        <input id="{{ $postRidePage->animals_option3->features_setting_id }}"
-                                            name="animal_friendly" type="radio"
-                                            value="{{ $postRidePage->animals_option3->features_setting_id }}"
-                                            {{ $isNewForm ? ($oldPetsAllowed == $postRidePage->animals_option3->features_setting_id ? 'checked' : '') : (old('animal_friendly', $ride->animal_friendly) == $postRidePage->animals_option3->features_setting_id ? 'checked' : '') }}
-                                            class="form-check-input">
-                                        {{ $postRidePage->animals_option3->name }}
-                                    </label>
-                                </div>
-                            @endif
+                            @endforeach
                         </div>
                         @error('animal_friendly')
                             <div class="tooltip-error shadow-lg">{{ $message }}</div>
@@ -1502,63 +1341,45 @@
                         </div>
                         <div class="bg-white p-4">
                             <div class="space-y-2">
-                                @foreach ($featureOptions as $featureOption)
+                                @foreach ($rideFeatureOptions['features'] as $featureOption)
                                     @php
+                                    
                                         $disabled = false;
-                                        $tooltipText = null;
+                                        $tooltipText = $featureOption->tooltip;
                                         $data_ride_option_code = '';
 
-                                        if ($featureOption['slug'] === 'pink_rides') {
+                                        if ($featureOption->slug === 'pink_rides') {
                                             $disabled = !$user->canUsePinkRide();
                                             $tooltipText = $user->pinkRideTooltip($postRidePage);
                                             $data_ride_option_code = 'pink_rides';
-                                            $pinkRideChecked = in_array($featureOption['id'], $oldSelectedFeatures);
+                                            $pinkRideChecked = in_array($featureOption->id, $oldSelectedFeatures);
                                         }
 
-                                        if ($featureOption['slug'] === 'extra_care_rides') {
-                                            $disabled = !$user->canUseExtraRide(
-                                                $setting ?? null,
-                                                $overallRating ?? null,
-                                                $totalRides ?? null,
-                                                $noShowsCount ?? null,
-                                                $cancellationCount ?? null,
-                                                $noshows ?? null,
-                                            );
-
-                                            $tooltipText = $user->extraRideTooltip(
-                                                $postRidePage,
-                                                $setting ?? null,
-                                                $overallRating ?? null,
-                                                $totalRides ?? null,
-                                                $noShowsCount ?? null,
-                                                $cancellationCount ?? null,
-                                                $noshows ?? null,
-                                            );
-
-                                            $extraCareRideChecked = in_array($featureOption['id'], $oldSelectedFeatures);
-
+                                        if ($featureOption->slug === 'extra_care_rides') {
+                                            $disabled = !$user->canUseExtraRide();
+                                            $tooltipText = $user->extraRideTooltip();
+                                            $extraCareRideChecked = in_array($featureOption->id, $oldSelectedFeatures);
                                             $data_ride_option_code = 'extra_care_rides';
                                         }
                                     @endphp
 
                                     <div class="flex items-center">
 
-                                        <input id="{{ $featureOption['slug'] }}" type="checkbox" name="features[]"
-                                            value="{{ $featureOption['id'] }}" @checked(in_array($featureOption['id'], $oldSelectedFeatures))
-                                            @disabled($disabled)
-                                            data-ride-option-code="{{$data_ride_option_code}}"
-                                            class="form-check-input">
-
-                                        <label for="{{ $featureOption['slug'] }}"
-                                            class="ml-2 font-normal text-gray-900 flex space-x-1">
-
+                                        <label for="{{ $featureOption->slug }}"
+                                            class="font-normal text-gray-900 flex space-x-1 flex items-center gap-2 w-full">
+                                            
+                                            <input id="{{ $featureOption->slug }}" type="checkbox" name="features[]"
+                                                value="{{ $featureOption->id }}" @checked(in_array($featureOption->id, $oldSelectedFeatures))
+                                                @disabled($disabled)
+                                                data-ride-option-code="{{$data_ride_option_code}}"
+                                                class="form-check-input">
                                             <span @class([
-                                                'text-pink-500 font-medium' => $featureOption['slug'] === 'pink_rides',
+                                                'text-pink-500 font-medium' => $featureOption->slug === 'pink_rides',
                                                 'text-green-500 font-medium' =>
-                                                    $featureOption['slug'] === 'extra_care_rides',
+                                                    $featureOption->slug === 'extra_care_rides',
                                                 'line-through' => $disabled,
                                             ])>
-                                                {{ $featureOption['label'] }}
+                                                {{ $featureOption->name }}
                                             </span>
                                             @if ($tooltipText)
                                                 <span class="inline-flex cursor-help"
@@ -1629,40 +1450,20 @@
                                         ) !!}
                                     @endisset
                                 </div>
-                                @php
-                                    $pinkFeatureId =
-                                        collect($featureOptions ?? [])->firstWhere('slug', 'pink_rides')['id'] ?? null;
-                                    $extraCareFeatureId =
-                                        collect($featureOptions ?? [])->firstWhere('slug', 'extra_care_rides')['id'] ??
-                                        null;
-                                    $featuresArray = $isNewForm
-                                        ? old('features', [])
-                                        : (old('features') ?:
-                                        (isset($ride->features)
-                                            ? explode('=', $ride->features)
-                                            : []));
-                                    $pinkRideChecked =
-                                        $pinkFeatureId &&
-                                        is_array($featuresArray) &&
-                                        in_array($pinkFeatureId, $featuresArray);
-                                    $extraCareRideChecked =
-                                        $extraCareFeatureId &&
-                                        is_array($featuresArray) &&
-                                        in_array($extraCareFeatureId, $featuresArray);
-                                @endphp
+                                
                                 <div id="pink-ride-disclaimer"
-                                    class="bg-white px-4 border-t border-gray-200 {{ $pinkRideChecked ? '' : 'hidden' }}">
+                                    class="bg-white px-4 border-t border-gray-200 {{ $isAvailablePinkRide ? '' : 'hidden' }}">
                                     <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
                                         <span>5. </span>
                                         {{ $postRidePage->pink_ride_disclaimer_text }}
                                     </p>
                                 </div>
                                 <div id="extra-care-ride-disclaimer"
-                                    class="bg-white px-4 border-t border-gray-200 {{ $extraCareRideChecked ? '' : 'hidden' }}">
+                                    class="bg-white px-4 border-t border-gray-200 {{ $isAvailableExtraCareRide ? '' : 'hidden' }}">
                                     <p class="border-gray-300 text-base lg:text-lg py-3 text-gray-900">
                                         <!-- {{ $postRidePage->extra_care_ride_disclaimer_text ?? 'I understand that this is an Extra+ Ride, exclusive to members with highest review score. I will adhere to its standards' }} -->
                                         <span
-                                            id="extra-care-disclaimer-number">{{ $pinkRideChecked ? '6.' : '5.' }}</span>
+                                            id="extra-care-disclaimer-number">{{ $isAvailablePinkRide ? '6.' : '5.' }}</span>
                                         {{ $postRidePage->extra_care_ride_disclaimer_text }}
                                     </p>
                                 </div>

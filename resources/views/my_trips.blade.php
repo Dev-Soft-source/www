@@ -53,10 +53,61 @@
     @endif
     <div class="grid grid-cols-12 gap-4 md:container md:mx-auto  my-6 md:my-10 xl:my-14 px-4 xl:px-0">
         @include('layouts.inc.profile_sidebar')
+
+        @php
+            $currentRoute = Route::currentRouteName();
+            $isPassengerSection = in_array($currentRoute, ['my_trips']);
+            $isDriverSection = in_array($currentRoute, ['my_rides']);
+            $activeTab = $activeTab ?? 'upcoming';
+            $tabSelected = 'border-blue-600 border leading-normal text-white bg-blue-600';
+            $tabUnselected = 'border-gray-100 border leading-normal text-blue-600 bg-white';
+        @endphp
+
         <div class="bg-white rounded pt-0 lg:px-4 w-full col-span-12 lg:col-span-9">
+            <ul class="flex mb-0 list-none flex-wrap pb-4 flex-row">
+                <li class="-mb-px mr-2 last:mr-0 flex-auto text-center">
+                    <a href="{{ route('my_trips', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
+                        class="text-2xl font-FuturaMdCnBT px-5 py-2 shadow-lg rounded block {{ $isPassengerSection ? $tabSelected : $tabUnselected }} cursor-pointer">
+                        {{ optional($tripsPage)->passenger_trips_heading ?? 'Passenger trips' }}
+                    </a>
+                </li>
+                <li class="-mb-px mr-2 last:mr-0 flex-auto text-center">
+                    <a href="{{ route('my_rides', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
+                        class="text-2xl font-FuturaMdCnBT px-5 py-2 shadow-lg rounded block {{ $isDriverSection ? $tabSelected : $tabUnselected }} cursor-pointer">
+                        {{ optional($tripsPage)->driver_rides_heading ?? 'Driver rides' }}
+                    </a>
+                </li>
+            </ul>
+
+            
             <div class="flex flex-wrap" id="tabs-id">
                 <div class="w-full">
-                    @include('layouts.inc.trips_tabs')
+                <ul class="flex mb-0 list-none flex-wrap pb-4 flex-row">
+                    <li class="-mb-px mr-2 last:mr-0 flex-auto text-center">
+                        <a href="{{ route('my_trips', ['lang' => optional($selectedLanguage)->abbreviation, 'tab' => 'upcoming']) }}"
+                            class="text-lg font-FuturaMdCnBT font-medium px-5 py-2 shadow-lg rounded block {{ $activeTab === 'upcoming' ? $tabSelected : $tabUnselected }} cursor-pointer">
+                            {{ optional($tripsPage)->upcoming_label ?? 'Upcoming' }}@if (($upcomingCount ?? 0) > 0)
+                                ({{ $upcomingCount }})
+                            @endif
+                        </a>
+                    </li>
+                    <li class="-mb-px mr-2 last:mr-0 flex-auto text-center">
+                        <a href="{{ route('my_trips', ['lang' => optional($selectedLanguage)->abbreviation, 'tab' => 'completed']) }}"
+                            class="text-lg font-FuturaMdCnBT font-medium px-5 py-2 shadow-lg rounded block {{ $activeTab === 'completed' ? $tabSelected : $tabUnselected }} cursor-pointer">
+                            {{ optional($tripsPage)->completed_label ?? 'Completed' }}@if (($completedCount ?? 0) > 0)
+                                ({{ $completedCount }})
+                            @endif
+                        </a>
+                    </li>
+                    <li class="-mb-px mr-2 last:mr-0 flex-auto text-center">
+                        <a href="{{ route('my_trips', ['lang' => optional($selectedLanguage)->abbreviation, 'tab' => 'cancelled']) }}"
+                            class="text-lg font-FuturaMdCnBT font-medium px-5 py-2 shadow-lg rounded block {{ $activeTab === 'cancelled' ? $tabSelected : $tabUnselected }} cursor-pointer">
+                            {{ optional($tripsPage)->cancelled_label ?? 'Cancelled' }}@if (($cancelledCount ?? 0) > 0)
+                                ({{ $cancelledCount }})
+                            @endif
+                        </a>
+                    </li>
+                </ul>
                     <div class="relative flex flex-col min-w-0 break-words bg-white w-full py-5 shadow-lg rounded">
                         <div class="">
                             <div class="px-4 flex-auto">
@@ -65,353 +116,23 @@
                                         <div class="space-y-4">
                                             @if (!empty($bookings) && count($bookings) > 0)
                                                 @foreach ($bookings as $booking)
-                                                    @php
-                                                        $from = $booking->departure;
-                                                        $to = $booking->destination;
-                                                        $userBookingId = $booking->ride
-                                                            ->bookings()
-                                                            ->where('user_id', auth()->user()->id)
-                                                            ->where('status', '<>', 3)
-                                                            ->where('status', '<>', 4)
-                                                            ->whereHas('passenger', function ($query) {
-                                                                $query->whereNull('deleted_at');
-                                                            })
-                                                            ->pluck('id')
-                                                            ->first();
-                                                        $exist = \App\Models\NoShowHistory::where(
-                                                            'ride_id',
-                                                            $booking->ride_id,
-                                                        )
-                                                            ->where('booking_id', $userBookingId)
-                                                            ->where('user_id', $booking->ride->added_by)
-                                                            ->where('type', 'driver')
-                                                            ->first();
-                                                        // dd($userBookingId);
-                                                    @endphp
                                                     <div class="relative even:bg-gray-100 odd:bg-white">
-
-                                                        <!-- @if (strtotime($booking->ride->date) < strtotime('today') ||
-                                                                (strtotime($booking->ride->date) == strtotime('today') && strtotime($booking->ride->time) < strtotime('now')))
-                                                            @if (!isset($exist))
-                                                                <div class="absolute right-4 top-32 md:top-28">
-                                                                    <a href="javascript:void(0)" id="noShowDriverButton"
-                                                                        data-booking-id="{{ $booking->ride->bookings()->where('user_id', auth()->user()->id)->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->pluck('id')->first() }}"
-                                                                        class="button-exp-fill me-1">
-                                                                        {{ $successMessage->no_show_driver_button ?? 'No show driver' }}
-
-                                                                    </a>
-                                                                </div>
-                                                            @else
-                                                                <div class="absolute right-4 top-32 md:top-28">
-                                                                    <a href="javascript:void(0)"
-                                                                        id="revertNoShowDriverButton"
-                                                                        data-booking-id="{{ $booking->ride->bookings()->where('user_id', auth()->user()->id)->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->pluck('id')->first() }}"
-                                                                        class="button-exp-fill me-1">
-                                                                        {{ $successMessage->revert_arbitration_button ?? 'Revert' }}
-
-                                                                    </a>
-                                                                </div>
-                                                            @endif
-                                                        @endif -->
-                                                        <a
-                                                            href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id]) }}">
-                                                            <div style="cursor:pointer;" onclick="window.location=''"
-                                                                style="cursor:pointer;">
-                                                                <div class="rounded-lg shadow-3xl border-[3px] border-solid  border-gray-100 "
-                                                                    id="ride-29">
-                                                                    <div class="flex items-center justify-between pb-0 p-4">
-                                                                        @php
-                                                                            $bookingSegment = $booking->ride_detail_id
-                                                                                ? $booking->ride->rideDetail->firstWhere('id', $booking->ride_detail_id)
-                                                                                : $booking->ride->rideDetail->first(fn($d) => (string) $d->departure === (string) $booking->departure);
-                                                                            $displayDt = $bookingSegment
-                                                                                ? (($bookingSegment->date ?? $booking->ride->date) . ' ' . ($bookingSegment->time ?? $booking->ride->time ?? '00:00'))
-                                                                                : ($booking->ride->date . ' ' . ($booking->ride->time ?? '00:00'));
-                                                                            $departureDateTime = formatDepartureDateTime($displayDt, $selectedLanguage ?? null, $rideDetailPage ?? null);
-                                                                            $departureDateLabel = $departureDateTime['dateLabel'];
-                                                                            $departureTimeLabel = $departureDateTime['timeLabel'];
-                                                                        @endphp
-                                                                        <p
-                                                                            class="flex items-center space-x-2 font-semibold">
-                                                                            {{ $departureDateLabel }}
-                                                                            @isset($rideDetailPage->card_section_at_label)
-                                                                                {{ $rideDetailPage->card_section_at_label }}
-                                                                            @endisset
-                                                                            {{ $departureTimeLabel ?? 'N/A' }}
-                                                                        </p>
-                                                                        {{-- <div class="pr-8">
-                                                                <p class="font-medium">
-                                                                    {{ $booking->ride->seats - $booking->ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function($query) { $query->whereNull('deleted_at'); })->sum('seats') }} seats left
-                                                            </div> --}}
-                                                                    </div>
-                                                                    <div
-                                                                        class="flex flex-col md:flex-row justify-between px-4 pb-4 md:pb-0">
-                                                                        <div class="w-full md:w-2/3 order-2 md:order-1">
-                                                                            <div class="relative mt-5 text-left">
-                                                                                <div class="flex items-center relative">
-                                                                                    <div
-                                                                                        class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
-                                                                                        <span
-                                                                                            class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
-                                                                                            <img class="w-5 h-5 object-contain"
-                                                                                                src="{{ asset('./images/new-21-search-bar-from.png') }}"
-                                                                                                alt="">
-                                                                                        </span>
-                                                                                    </div>
-                                                                                    <div class="ml-12 md:ml-20">
-                                                                                        <p
-                                                                                            class="font-bold text-xl text-black">
-                                                                                            @isset($rideDetailPage->card_section_from_label)
-                                                                                                {{ $rideDetailPage->card_section_from_label }}
-                                                                                            @endisset
-                                                                                        </p>
-                                                                                        <div class="flex gap-2">
-                                                                                            <h3
-                                                                                                class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
-                                                                                                {{ $from }}.
-                                                                                            </h3>
-                                                                                            <p class="text-sm mt-2">
-                                                                                                Pick-up at:
-                                                                                                {{ $booking->ride->pickup }}
-                                                                                            </p>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-
-                                                                                <div class="flex items-center relative">
-                                                                                    <div
-                                                                                        class="border-r-2 border-black border-solid absolute h-0 left-3 md:left-5 top-2 z-10">
-                                                                                        <span
-                                                                                            class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
-                                                                                            <img class="w-5 h-5 object-contain"
-                                                                                                src="{{ asset('./images/new-21-search-bar-to.png') }}"
-                                                                                                alt="">
-                                                                                        </span>
-                                                                                    </div>
-                                                                                    <div class="ml-12 md:ml-20">
-                                                                                        <p
-                                                                                            class="font-bold text-xl text-black">
-                                                                                            @isset($rideDetailPage->card_section_to_label)
-                                                                                                {{ $rideDetailPage->card_section_to_label }}
-                                                                                            @endisset
-                                                                                        </p>
-                                                                                        <div class="flex gap-2">
-                                                                                            <h3
-                                                                                                class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
-                                                                                                {{ $to }}.
-                                                                                            </h3>
-                                                                                            <p class="text-sm mt-2">
-                                                                                                Drop-off at:
-                                                                                                {{ $booking->ride->dropoff }}
-                                                                                            </p>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="mt-4 order-1 md:order-2">
-                                                                            <p class="text-xl font-semibold text-primary">
-                                                                                ${{ number_format(floatval($booking->price / 100), 2) }}
-                                                                                <small>
-                                                                                    @isset($rideDetailPage->card_section_per_seat)
-                                                                                        {{ $rideDetailPage->card_section_per_seat }}
-                                                                                    @endisset
-                                                                                </small></p>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div
-                                                                        class="border-t border-gray-300 grid grid-cols-2 divide-x divide-gray-300">
-                                                                        <div
-                                                                            class="flex items-center justify-center p-2 md:p-4">
-                                                                            <p class="">
-                                                                                {{ $booking->ride->bookings()->where('user_id', auth()->user()->id)->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') }}
-                                                                                @isset($rideDetailPage->trips_card_section_seat_booked)
-                                                                                    {{ $rideDetailPage->trips_card_section_seat_booked }}
-                                                                                @endisset
-                                                                            </p>
-                                                                        </div>
-                                                                        <div
-                                                                            class="flex items-center justify-center p-2 md:p-4">
-                                                                            <p class="">
-                                                                                {{ intval($booking->ride->seats) -intval($booking->ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}
-                                                                                @isset($rideDetailPage->trips_card_section_seat_available)
-                                                                                    {{ $rideDetailPage->trips_card_section_seat_available }}
-                                                                                @endisset
-                                                                            </p>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div
-                                                                        class="border-t border-gray-300 no-scrollbar overflow-x-auto flex items-center space-x-2 p-4">
-                                                                        @if ($booking->ride->booking_method == $postRidePage->booking_option1->features_setting_id)
-                                                                            <img class="w-8 h-8"
-                                                                                src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
-                                                                                alt="">
-                                                                        @elseif ($booking->ride->booking_method == $postRidePage->booking_option2->features_setting_id)
-                                                                            <img class="w-8 h-8"
-                                                                                src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
-                                                                                alt="">
-                                                                        @endif
-                                                                        @if ($booking->ride->payment_method == $postRidePage->payment_methods_option1->features_setting_id)
-                                                                            <img class="w-8 h-8"
-                                                                                src="{{ asset('home_page_icons/' . $postRidePage->payment_methods_option1->icon) }}"
-                                                                                alt="">
-                                                                        @elseif ($booking->ride->payment_method == $postRidePage->payment_methods_option2->features_setting_id)
-                                                                            <img class="w-8 h-8"
-                                                                                src="{{ asset('home_page_icons/' . $postRidePage->payment_methods_option2->icon) }}"
-                                                                                alt="">
-                                                                        @elseif ($booking->ride->payment_method == $postRidePage->payment_methods_option3->features_setting_id)
-                                                                            <img class="w-8 h-8"
-                                                                                src="{{ asset('home_page_icons/' . $postRidePage->payment_methods_option3->icon) }}"
-                                                                                alt="">
-                                                                        @endif
-                                                                        @if ($booking->ride->smoke == $postRidePage->smoking_option1->features_setting_id)
-                                                                            <img class="w-8 h-8"
-                                                                                src="{{ asset('home_page_icons/' . $postRidePage->smoking_option1->icon) }}"
-                                                                                alt="">
-                                                                        @elseif ($booking->ride->smoke == $postRidePage->smoking_option2->features_setting_id)
-                                                                            <img class="w-8 h-8"
-                                                                                src="{{ asset('home_page_icons/' . $postRidePage->smoking_option2->icon) }}"
-                                                                                alt="">
-                                                                        @endif
-                                                                        @if ($booking->ride->animal_friendly == $postRidePage->animals_option1->features_setting_id)
-                                                                            <img class="w-8 h-8"
-                                                                                src="{{ asset('home_page_icons/' . $postRidePage->animals_option1->icon) }}"
-                                                                                alt="">
-                                                                        @elseif ($booking->ride->animal_friendly == $postRidePage->animals_option2->features_setting_id)
-                                                                            <img class="w-8 h-8"
-                                                                                src="{{ asset('home_page_icons/' . $postRidePage->animals_option2->icon) }}"
-                                                                                alt="">
-                                                                        @elseif ($booking->ride->animal_friendly == $postRidePage->animals_option3->features_setting_id)
-                                                                            <img class="w-8 h-8"
-                                                                                src="{{ asset('home_page_icons/' . $postRidePage->animals_option3->icon) }}"
-                                                                                alt="">
-                                                                        @endif
-                                                                        @if ($booking->ride->luggage == $postRidePage->luggage_option1->features_setting_id)
-                                                                            <img class="w-8 h-8"
-                                                                                src="{{ asset('home_page_icons/' . $postRidePage->luggage_option1->icon) }}"
-                                                                                alt="">
-                                                                        @elseif ($booking->ride->luggage == $postRidePage->luggage_option2->features_setting_id)
-                                                                            <img class="w-8 h-8"
-                                                                                src="{{ asset('home_page_icons/' . $postRidePage->luggage_option2->icon) }}"
-                                                                                alt="">
-                                                                        @elseif ($booking->ride->luggage == $postRidePage->luggage_option3->features_setting_id)
-                                                                            <img class="w-8 h-8"
-                                                                                src="{{ asset('home_page_icons/' . $postRidePage->luggage_option3->icon) }}"
-                                                                                alt="">
-                                                                        @elseif ($booking->ride->luggage == $postRidePage->luggage_option4->features_setting_id)
-                                                                            <img class="w-8 h-8"
-                                                                                src="{{ asset('home_page_icons/' . $postRidePage->luggage_option4->icon) }}"
-                                                                                alt="">
-                                                                        @elseif ($booking->ride->luggage == $postRidePage->luggage_option5->features_setting_id)
-                                                                            <img class="w-8 h-8"
-                                                                                src="{{ asset('home_page_icons/' . $postRidePage->luggage_option5->icon) }}"
-                                                                                alt="">
-                                                                        @endif
-                                                                        @include('partials.ride_feature_icons', [
-                                                                            'rideFeatures' => $booking->ride->features,
-                                                                            'postRidePage' => $postRidePage,
-                                                                        ])
-                                                                    </div>
-                                                                    @if ($booking->ride->driver)
-                                                                        <div
-                                                                            class="border-t border-gray-300 flex items-center justify-between p-4 w-full">
-                                                                            <div class="flex items-center space-x-2">
-                                                                                <div
-                                                                                    class="w-12 h-12 rounded-full overflow-hidden">
-                                                                                    <img class="w-full h-full object-cover"
-                                                                                        src="{{ $booking->ride->driver->profile_image }}"
-                                                                                        alt="">
-                                                                                </div>
-                                                                                <div class="text-center">
-                                                                                    <p class="font-semibold">
-                                                                                        <span>
-                                                                                            @if ($booking->ride->driver->type === '2')
-                                                                                                {{ $booking->ride->driver->last_name }}
-                                                                                                @elseif ($booking->ride->driver->type === '3')
-                                                                                                {{ $booking->ride->driver->first_name }}
-                                                                                                {{ $booking->ride->driver->last_name }}
-                                                                                            @else
-                                                                                                {{ $booking->ride->driver->first_name }}
-                                                                                            @endif
-                                                                                        </span>
-                                                                                    </p>
-                                                                                    @php
-                                                                                        // Calculate the age based on the driver's date of birth
-                                                                                        $dob = \Carbon\Carbon::parse(
-                                                                                            $booking->ride->driver->dob,
-                                                                                        );
-                                                                                        $age = $dob->diffInYears(
-                                                                                            \Carbon\Carbon::now(),
-                                                                                        );
-                                                                                    @endphp
-                                                                                    <div
-                                                                                        class="flex items-center gap-2 flex-wrap">
-                                                                                        <p
-                                                                                            class="mb-0 text-sm font-medium border-r border-gray-600 pr-2">
-                                                                                            @isset($rideDetailPage->card_section_age)
-                                                                                                {{ $rideDetailPage->card_section_age }}
-                                                                                            @endisset
-                                                                                            : {{ $age }}</p>
-                                                                                        <p
-                                                                                            class="mb-0 text-sm font-medium border-r border-gray-600 pr-2">
-                                                                                            {{ ucfirst($booking->ride->driver?->gender) }}
-                                                                                        </p>
-                                                                                        <p
-                                                                                            class="mb-0 text-sm font-medium border-r border-gray-600 pr-2">
-                                                                                            @isset($rideDetailPage->card_section_driven)
-                                                                                                {{ $rideDetailPage->card_section_driven }}
-                                                                                            @endisset
-                                                                                            :
-                                                                                            {{ $booking->ride->driver->rides()->where('status', '!=', 2)->where(function ($query) {
-                                                                                                    $query->whereDate('rides.date', '<', now()->toDateString())->orWhere(function ($query) {
-                                                                                                        $query->whereDate('rides.date', '=', now()->toDateString())->whereTime('rides.time', '<=', now()->toTimeString());
-                                                                                                    });
-                                                                                                })->get()->flatMap(function ($ride) {
-                                                                                                    return $ride->bookings()->pluck('seats');
-                                                                                                })->sum() }}
-                                                                                        </p>
-                                                                                        @php
-                                                                                            $filteredRatings = $ratings
-                                                                                                ->where('status', 1)
-                                                                                                ->where('type', '1')
-                                                                                                ->filter(function (
-                                                                                                    $rating,
-                                                                                                ) use ($booking) {
-                                                                                                    return $rating->ride &&
-                                                                                                        $booking->ride &&
-                                                                                                        $rating->ride
-                                                                                                            ->added_by ===
-                                                                                                            $booking
-                                                                                                                ->ride
-                                                                                                                ->added_by;
-                                                                                                });
-
-                                                                                            $totalAverage =
-                                                                                                $filteredRatings->avg(
-                                                                                                    'average_rating',
-                                                                                                ) ?? 0;
-                                                                                        @endphp
-                                                                                        <p
-                                                                                            class="mb-0 text-sm font-medium">
-                                                                                            @isset($rideDetailPage->card_section_review)
-                                                                                                {{ $rideDetailPage->card_section_review }}
-                                                                                            @endisset
-                                                                                            :
-                                                                                            {{ number_format($totalAverage, 1) }}
-                                                                                        </p>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    @endif
-                                                                </div>
-                                                            </div>
-                                                        </a>
+                                                        <x-px.my-book 
+                                                            :booking="$booking" 
+                                                            :detail-route="'ride_detail'" 
+                                                            :show-kind-border="false" 
+                                                            />
                                                     </div>
                                                 @endforeach
                                                 {{ $bookings->links() }}
                                             @else
-                                                <p>{{ $tripsPage->no_upcoming_trips_label ?? 'You have no upcoming trips scheduled.' }}</p>
+                                                @if ($activeTab === 'upcoming')
+                                                    <p>{{ $tripsPage->no_upcoming_trips_label ?? 'You have no upcoming trips scheduled.' }}</p>
+                                                @elseif ($activeTab === 'completed')
+                                                    <p>{{ $tripsPage->no_completed_trips_label ?? 'You have no completed trips' }}</p>
+                                                @elseif ($activeTab === 'cancelled')
+                                                    <p>{{ $tripsPage->no_cancelled_trips_label ?? 'You have no cancelled trips' }}</p>
+                                                @endif
                                             @endif
                                         </div>
                                     </div>

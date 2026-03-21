@@ -457,12 +457,7 @@ class User extends Authenticatable
 
     public function extraRideTooltip(
         ?PostRidePageSettingDetail $postRidePage = null,
-        ?FolkRideSetting $folkRideSetting = null,
-        ?float $overallRating = null,
-        ?int $totalRides = null,
-        ?int $noShowsCount = null,
-        ?int $cancellationCount = null,
-        ?int $noshows = null
+        ?FolkRideSetting $folkRideSetting = null
     ): string {
         $postRidePage = $postRidePage ?: $this->currentPostRidePage();
 
@@ -616,6 +611,15 @@ class User extends Authenticatable
         return $this->age();
     }
 
+    public function getDisplayName(): string
+    {
+        return match ((string) ($this->type ?? '')) {
+            '2' => trim((string) ($this->last_name ?? '')),
+            '3' => trim(((string) ($this->first_name ?? '')) . ' ' . ((string) ($this->last_name ?? ''))),
+            default => trim((string) ($this->first_name ?? '')),
+        };
+    }
+
     /**
      * Get the number of passengers whose bookings are completed on rides created by this user (as a driver).
      *
@@ -628,6 +632,46 @@ class User extends Authenticatable
             })
             ->where('status', Booking::STATUS_COMPLETED)
             ->count();
+    }
+
+    public function getPassengersDrivenCount(): int
+    {
+        $now = now();
+
+        return $this->rides()
+            ->where('status', '!=', 2)
+            ->where(function ($query) use ($now) {
+                $query->whereDate('rides.date', '<', $now->toDateString())
+                    ->orWhere(function ($query) use ($now) {
+                        $query->whereDate('rides.date', '=', $now->toDateString())
+                            ->whereTime('rides.time', '<=', $now->toTimeString());
+                    });
+            })
+            ->get()
+            ->flatMap(function ($ride) {
+                return $ride->bookings()->pluck('seats');
+            })
+            ->sum();
+    }
+
+    public function getPassengerAverageRating(): float
+    {
+        return (float) Rating::where('status', 1)
+            ->where('type', '2')
+            ->whereHas('booking', function ($query) {
+                $query->where('user_id', $this->id);
+            })
+            ->avg('average_rating');
+    }
+
+    public function hasPassengerRatings(): bool
+    {
+        return Rating::where('status', 1)
+            ->where('type', '2')
+            ->whereHas('booking', function ($query) {
+                $query->where('user_id', $this->id);
+            })
+            ->exists();
     }
 
     protected function displayDriverOverallRating(): float
