@@ -77,7 +77,7 @@
 @endphp
 
 <div class="flex flex-row items-center">
-    <p class="flex items-center space-x-2 font-semibold">
+    <h4 class="flex items-center space-x-2">
         {{ $formattedDeparture['dateTimeLabel'] ?? 'N/A' }}
         @if ($showParentRouteHint && $parentOrigin)
             <span class="inline-block cursor-help ml-2" 
@@ -87,7 +87,7 @@
                 </svg>
             </span>
         @endif
-    </p>
+        </h4>
     @if($ride->isPinkRide())
         <img class="w-12 h-12 ml-2" src="{{ asset('home_page_icons/' . $rideFeatureOptions['features']['pink_rides']->icon) }}" alt=""
         data-tippy-content="{{ $rideFeatureOptions['features']['pink_rides']->tooltip }}">
@@ -108,7 +108,7 @@
             </span>
         </div>
         <div class="ml-12 md:ml-20">
-            <p class="flex gap-2 items-baseline font-bold text-xl text-black">
+            <h4 class="flex gap-2 items-baseline text-xl text-black">
                 {{ $rideDetailPage->from_label }}
                 @if ($originIsMiddleOfParentRoute)
                     <span class="w-4 h-4 ml-2" data-tippy-content="{{ $rideDetailPage->depends_on_other_stops_tooltip }}">
@@ -121,21 +121,21 @@
                         </svg>
                     </span>
                 @endif
-            </p>
+            </h4>
             <div class="flex gap-2 items-baseline">
                 <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                     {{ $origin }}.
                 </h3>
                 @if ($pickupLocation)
-                    <p class="text-sm mt-2">
+                    <label class="text-sm mt-2">
                         {{ $rideDetailPage->pickup_at_label }}: {{ $pickupLocation }}
-                    </p>
+                    </label>
                 @endif
             </div>
         </div>
         @if ($orderedStops->isNotEmpty())
             <div class="ml-12 md:ml-20 flex">
-                <p class="font-bold text-xl text-black">{{ $rideDetailPage->stops_along_the_way_label }}</p>
+                <h4 class="text-xl text-black">{{ $rideDetailPage->stops_along_the_way_label }}</h4>
                 <ul class="flex flex-col gap-2 text-sm ml-4 mt-1 mb-4">
                     @foreach ($orderedStops as $stop)
                         <li class="flex items-center px-2 py-0.5 rounded border border-gray-300 bg-gray-50 text-gray-700">
@@ -150,7 +150,9 @@
                                     </g>
                                 </svg>
                             </span>
+                            <label>
                             {{ $stop->label }}
+                            </label>
                         </li>
                     @endforeach
                 </ul>
@@ -165,7 +167,7 @@
             </span>
         </div>
         <div class="ml-12 md:ml-20 items-baseline">
-            <p class="flex gap-2 items-baseline font-bold text-xl text-black">
+            <h4 class="flex gap-2 items-baseline text-xl text-black">
                 {{ $rideDetailPage->to_label }}
                 @if ($departureIsMiddleOfParentRoute)
                     <span class="w-4 h-4 ml-2" data-tippy-content="{{ $rideDetailPage->depends_on_other_stops_tooltip }}">
@@ -178,15 +180,15 @@
                         </svg>
                     </span>
                 @endif
-            </p>
+                </h4>
             <div class="flex gap-2">
                 <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                     {{ $destination }}.
                 </h3>
                 @if ($dropoffLocation)
-                    <p class="text-sm mt-2">
+                    <label class="text-sm mt-2">
                         {{ $rideDetailPage->dropoff_at_label }}: {{ $dropoffLocation }}
-                    </p>
+                    </label>
                 @endif
             </div>
         </div>

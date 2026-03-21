@@ -127,7 +127,7 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <div class="flex items-center justify-end">
-                            <span class="font-semibold text-gray-800">
+                            <h4 class="text-gray-800">
                                 @if ($ride->getDriverHasRatings())
                                     {{ number_format($ride->getDriverAverageRating(), 1) }}
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
@@ -139,7 +139,7 @@
                                 @else
                                     {{ $rideDetailPage->no_reviews_label ?? 'No Reviews' }}
                                 @endif
-                            </span>
+                                </h4>
                         </div>
                     </div>
                 </div>
