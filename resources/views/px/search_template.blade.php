@@ -1,9 +1,10 @@
 @extends('layouts.template')
 
-@section('style')
-    
-    
-@endsection
+ {{-- <style>
+    label.features_label span{
+        font-family: Roboto, sans-serif;
+    }
+ </style>    --}}
 
 @section('content')
     @php
@@ -143,7 +144,7 @@
                             </div>
 
                             @php
-                                $coPassengerOptions = ['star5_passenger', 'star4_passenger', 'star3_passenger'];
+                                $coPassengerOptions = ['star5_passenger', 'star4_passenger', 'star3_passenger', 'with_review_passenger'];
                                 $selectedCoPassengerOption = (string) (collect((array) ($searchFilters['ride_option_ids'] ?? []))->first() ?? '');
                             @endphp
 
@@ -205,9 +206,9 @@
                                     {{ $findRidePage->ride_preferences_label ?? 'Ride Preference' }}</h3>
                                 <div class="border rounded-md overflow-hidden divide-y">
                                     @foreach ($rideFeatureOptions['features'] as $option)
-                                        @continue(in_array($option->slug, ['pink_rides', 'extra_care_rides', 'star5_passenger', 'star4_passenger', 'star3_passenger'], true))
+                                        @continue(in_array($option->slug, ['pink_rides', 'extra_care_rides', 'star5_passenger', 'star4_passenger', 'star3_passenger', 'with_review_passenger'], true))
                                         <div class="flex items-start gap-2 p-3">
-                                            <label class="flex gap-2 text-base md:text-lg">
+                                            <label class="flex w-full gap-2 text-base md:text-lg features_label">
                                             <input type="checkbox" name="ride_option_ids[]"
                                                 value="{{ $option->id }}" class="form-check-input"
                                                 @checked(in_array($option->id, (array) ($searchFilters['ride_option_ids'] ?? [])))>
@@ -224,7 +225,7 @@
                                 <div class="border rounded-md overflow-hidden divide-y">
                                     @foreach ($rideFeatureOptions['luggage_size'] as $option)
                                         <div class="flex items-center justify-between p-3">
-                                            <label class="flex items-center gap-2 text-base md:text-lg">
+                                            <label class="flex w-full items-center gap-2 text-base md:text-lg">
                                                 <input type="radio" name="luggage_size"
                                                     value="{{ $option->id }}" class="w-4 h-4 form-check-input"
                                                     @checked((string) ($searchFilters['luggage_size'] ?? '') === (string) $option->id)>
@@ -233,7 +234,7 @@
                                         </div>
                                     @endforeach
                                     <div class="flex items-center justify-between p-3">
-                                        <label class="flex items-center gap-2 text-base md:text-lg">
+                                        <label class="flex w-full items-center gap-2 text-base md:text-lg">
                                             <input type="radio" name="luggage_size" value="" class="w-4 h-4 form-check-input"
                                                 @checked(empty($searchFilters['luggage_size']))>
                                             <span>{{ $findRidePage->luggage_any_label ?? 'Any' }}</span>
@@ -249,7 +250,7 @@
                                 <div class="border rounded-md overflow-hidden divide-y">
                                     @foreach ($rideFeatureOptions['smoking_allowed'] as $option)
                                         <div class="flex items-center justify-between p-3">
-                                            <label class="flex items-center gap-2 text-base md:text-lg">
+                                            <label class="flex w-full items-center gap-2 text-base md:text-lg">
                                                 <input type="radio" name="smoking_allowed"
                                                     value="{{ $option->id }}" class="w-4 h-4 form-check-input"
                                                     @checked((string) ($searchFilters['smoking_allowed'] ?? '') === (string) $option->id)>
@@ -258,7 +259,7 @@
                                         </div>
                                     @endforeach
                                     <div class="flex items-center justify-between p-3">
-                                        <label class="flex items-center gap-2 text-base md:text-lg">
+                                        <label class="flex w-full items-center gap-2 text-base md:text-lg">
                                             <input type="radio" name="smoking_allowed" value=""
                                                 class="w-4 h-4 form-check-input" @checked(empty($searchFilters['smoking_allowed']))>
                                             <span>{{ $findRidePage->smoking_any_label ?? 'Any' }}</span>
@@ -274,7 +275,7 @@
                                 <div class="border rounded-md overflow-hidden divide-y">
                                     @foreach ($rideFeatureOptions['pets_allowed'] as $option)
                                         <div class="flex items-center justify-between p-3">
-                                            <label class="flex items-center gap-2 text-base md:text-lg">
+                                            <label class="flex w-full items-center gap-2 text-base md:text-lg">
                                                 <input type="radio" name="pets_allowed"
                                                     value="{{ $option->id }}" class="w-4 h-4 form-check-input"
                                                     @checked((string) ($searchFilters['pets_allowed'] ?? '') === (string) $option->id)>
@@ -283,7 +284,7 @@
                                         </div>
                                     @endforeach
                                     <div class="flex items-center justify-between p-3">
-                                        <label class="flex items-center gap-2 text-base md:text-lg">
+                                        <label class="flex w-full items-center gap-2 text-base md:text-lg">
                                             <input type="radio" name="pets_allowed" value="" class="w-4 h-4 form-check-input"
                                                 @checked(empty($searchFilters['pets_allowed']))>
                                             <span>{{ $findRidePage->pets_any_label ?? 'Any' }}</span>
