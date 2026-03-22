@@ -223,11 +223,11 @@ class StageFourController extends GetxController {
   Future<void> _getLabelTextDetail() async {
     try {
       final resp = await StageProvider().getLabelTextDetail(
-          serviceController.langId.value, step4Page, serviceController.token);
+          serviceController.langId.value, step5Page, serviceController.token);
 
       if (resp['status'] != null && resp['status'] == "Success") {
-        if (resp['data'] != null && resp['data']['step4Page'] != null) {
-          labelTextDetail.addAll(resp['data']['step4Page']);
+        if (resp['data'] != null && resp['data']['step5Page'] != null) {
+          labelTextDetail.addAll(resp['data']['step5Page']);
         }
 
         if (resp['data'] != null && resp['data']['messages'] != null) {

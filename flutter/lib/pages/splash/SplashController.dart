@@ -34,7 +34,7 @@ class SplashController extends GetxController {
           return;
         } else if (serviceController.loginUserDetail['step'].toString() ==
             '4') {
-          Get.offAllNamed('/stage_four');
+          Get.offAllNamed('/stage_four_vehicle');
           return;
         } else {
           Get.offNamed('/navigation');

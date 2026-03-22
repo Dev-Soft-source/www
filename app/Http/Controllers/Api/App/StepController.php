@@ -384,4 +384,36 @@ class StepController extends Controller
         $data = ['step4Page' => $step4Page, 'messages' => $messages, 'validationMessages' => $validationMessages];
         return $this->successResponse($data, 'Step4 page get successfully');
     }
+    
+    public function step5Index(Request $request)
+    {
+        $step5Page = null;
+        if ($request->lang_id && $request->lang_id != 0) {
+            $selectedLanguage = Language::where('id', $request->lang_id)->first();
+            // Retrieve the Step5PageSettingDetail associated with the selected language
+            $step5Page = Step5PageSettingDetail::where('language_id', $request->lang_id)->first();
+            $messages = SuccessMessagesSettingDetail::where('language_id', $request->lang_id)->select('enter_code_message')->first();
+        } else {
+            $selectedLanguage = Language::where('is_default', 1)->first();
+            if ($selectedLanguage) {
+                $step5Page = Step5PageSettingDetail::where('language_id', $selectedLanguage->id)->first();
+                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('enter_code_message')->first();
+            }
+        }
+
+        if ($selectedLanguage) {
+            $locale = $selectedLanguage->abbreviation;
+        } else {
+            $locale = 'en';
+        }
+
+        App::setLocale($locale);
+
+        $validationMessages = [
+            'required' => trans('validation.required'),
+        ];
+
+        $data = ['step5Page' => $step5Page, 'messages' => $messages, 'validationMessages' => $validationMessages];
+        return $this->successResponse($data, 'Step5 page get successfully');
+    }
 }

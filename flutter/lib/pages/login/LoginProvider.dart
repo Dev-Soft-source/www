@@ -103,23 +103,27 @@ class LoginProvider extends GetConnect {
 
   Future loginUser(var email, var password, langId) async {
     try {
+      final loginUrl = "$baseUrl/$login";
       final data = {
         "email": email.toString(),
         "password": password.toString(),
         "lang_id": langId.toString()
       };
+      logger.info(
+          "Login Request env=$apiEnvironment url=$loginUrl email=${email.toString()} lang_id=${langId.toString()}");
       final response = await http.post(
-        Uri.parse("$baseUrl/$login"),
+        Uri.parse(loginUrl),
         headers: {
           'Accept': 'application/json',
         },
         body: data,
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final responseBody =
           response.body.isNotEmpty ? jsonDecode(response.body) : null;
 
-      logger.info("Login Response $responseBody");
+      logger.info(
+          "Login Response status=${response.statusCode} reason=${response.reasonPhrase} body=$responseBody");
       if (response.statusCode >= 400) {
         if (response.statusCode == 0) {
           return Future.error({
@@ -307,7 +311,7 @@ class LoginProvider extends GetConnect {
           'Accept': 'application/json',
         },
         body: data,
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final responseBody =
           response.body.isNotEmpty ? jsonDecode(response.body) : null;

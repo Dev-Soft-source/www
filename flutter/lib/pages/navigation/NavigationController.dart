@@ -17,6 +17,14 @@ class NavigationController extends GetxController {
   final serviceController = Get.find<Service>();
   final PusherService _pusherService = PusherService();
 
+  int _readIntId(dynamic value) {
+    if (value is int) return value;
+    if (value is String) {
+      return int.tryParse(value) ?? 0;
+    }
+    return 0;
+  }
+
   @override
   void onInit() async {
     // TODO: implement onInit
@@ -49,7 +57,7 @@ class NavigationController extends GetxController {
       logger.info('Initializing Pusher for chat...');
 
       // Get user ID
-      final userId = serviceController.loginUserDetail['id'] as int;
+      final userId = _readIntId(serviceController.loginUserDetail['id']);
 
       if (userId == 0) {
         logger.error('Cannot subscribe to chat: User ID is not available');
@@ -150,13 +158,18 @@ class NavigationController extends GetxController {
           if (chatController.myChats.isNotEmpty) {
             // Find the chat where the sender and receiver IDs match (checking both directions)
             final chatIndex = chatController.myChats.indexWhere((chat) {
-              final chatSenderId = chat['sender']['id'];
-              final chatReceiverId = chat['receiver']['id'];
+              final sender = chat['sender'];
+              final receiver = chat['receiver'];
+              final chatSenderId =
+                  sender is Map ? sender['id']?.toString() : null;
+              final chatReceiverId =
+                  receiver is Map ? receiver['id']?.toString() : null;
               // Match if: (chat sender = message sender AND chat receiver = message receiver) OR
               //           (chat sender = message receiver AND chat receiver = message sender)
-              return (chatSenderId == senderId &&
-                      chatReceiverId == receiverId) ||
-                  (chatSenderId == receiverId && chatReceiverId == senderId);
+              return (chatSenderId == senderId.toString() &&
+                      chatReceiverId == receiverId.toString()) ||
+                  (chatSenderId == receiverId.toString() &&
+                      chatReceiverId == senderId.toString());
             });
             logger.info("Found chat index: $chatIndex");
             if (chatIndex != -1) {

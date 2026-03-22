@@ -926,7 +926,7 @@ class Service extends GetxService {
               } else if (page == "step3") {
                 await Get.offAllNamed('/stage_three_vehicle');
               } else if (page == "step4") {
-                await Get.offAllNamed('/stage_four');
+                await Get.offAllNamed('/stage_four_vehicle');
               } else {
                 await Get.offAllNamed('/navigation');
               }
@@ -951,7 +951,7 @@ class Service extends GetxService {
           } else if (page == "step3") {
             Get.offAllNamed('/stage_three_vehicle');
           } else if (page == "step4") {
-            Get.offAllNamed('/stage_four');
+            Get.offAllNamed('/stage_four_vehicle');
           } else {
             Get.offAllNamed('/navigation');
           }

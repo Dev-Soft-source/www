@@ -110,39 +110,43 @@ class ChatPage extends GetView<ChatController> {
                               child: ListView.separated(
                                 itemCount: controller.myChats.length,
                                 itemBuilder: (context, index) {
-                                  String otherUser =
-                                      controller.userId.toString() ==
-                                              controller.myChats[index]
-                                                      ['sender']['id']
-                                                  .toString()
-                                          ? "receiver"
-                                          : "sender";
+                                  final chat = controller.myChats[index];
+                                  final sender =
+                                      chat['sender'] is Map ? chat['sender'] : {};
+                                  final receiver = chat['receiver'] is Map
+                                      ? chat['receiver']
+                                      : {};
+                                  final senderId =
+                                      sender['id']?.toString() ?? "";
+                                  final createdAt =
+                                      chat['created_at']?.toString() ?? "";
+                                  final otherUser =
+                                      controller.userId.toString() == senderId
+                                          ? receiver
+                                          : sender;
                                   return chatCard(
                                       context: context,
-                                      image: controller.myChats[index]
-                                              [otherUser]['profile_image'] ??
-                                          "",
+                                      image:
+                                          otherUser['profile_image'] ?? "",
                                       name:
-                                          "${controller.myChats[index][otherUser]['first_name'] ?? ""} ${controller.myChats[index][otherUser]['last_name'] ?? ""}",
+                                          "${otherUser['first_name'] ?? ""} ${otherUser['last_name'] ?? ""}",
                                       controller: controller,
-                                      time: controller.myChats[index]
-                                              ['created_at']
-                                          .substring(11, 16),
-                                      message: controller.myChats[index]
-                                          ['message'],
-                                      numberOfMessages: controller
-                                          .myChats[index]['unread_count'],
-                                      chatObj: controller.myChats[index],
+                                      time: createdAt.length >= 16
+                                          ? createdAt.substring(11, 16)
+                                          : "",
+                                      message: chat['message'],
+                                      numberOfMessages: chat['unread_count'],
+                                      chatObj: chat,
                                       onTap: () {
                                         // Use ride_id from chat object if available, otherwise use 0
-                                        var chatRideId = controller
-                                                .myChats[index]['ride_id']
-                                                ?.toString() ??
-                                            controller.myChats[index]['rideId']
-                                                ?.toString() ??
+                                        var chatRideId =
+                                            chat['ride_id']?.toString() ??
+                                            chat['rideId']?.toString() ??
                                             '0';
+                                        final otherUserId =
+                                            otherUser['id']?.toString() ?? '0';
                                         Get.toNamed(
-                                            '/messaging_page/${controller.myChats[index][otherUser]['id']}/$chatRideId/new');
+                                            '/messaging_page/$otherUserId/$chatRideId/new');
                                       });
                                 },
                                 separatorBuilder: (context, index) {

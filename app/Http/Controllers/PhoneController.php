@@ -13,7 +13,7 @@ use App\Models\Notification;
 use App\Models\PhoneNumber;
 use App\Models\ProfilePageSettingDetail;
 use App\Models\ProfileSettingDetail;
-use App\Models\Step4PageSettingDetail;
+use App\Models\Step5PageSettingDetail;
 use App\Models\SuccessMessagesSettingDetail;
 use App\Models\User;
 use App\Services\FCMService;
@@ -483,7 +483,7 @@ class PhoneController extends Controller
         }
         $selectedLanguage = session('selectedLanguage') ? Language::where('abbreviation', session('selectedLanguage'))->first() : Language::where('is_default', 1)->first();
 
-        $step4Page = $selectedLanguage ? Step4PageSettingDetail::where('language_id', $selectedLanguage->id)->first() : null;
+        $step5Page = $selectedLanguage ? Step5PageSettingDetail::where('language_id', $selectedLanguage->id)->first() : null;
 
         if (auth()->user()) {
             $user = auth()->user();
@@ -512,7 +512,7 @@ class PhoneController extends Controller
                 }
             }
 
-            return view('phone_code_step', compact('user', 'phone_numbers', 'step4Page', 'notifications', 'languages', 'selectedLanguage'));
+            return view('phone_code_step', compact('user', 'phone_numbers', 'step5Page', 'notifications', 'languages', 'selectedLanguage'));
         }
         return redirect()->route('home', ['lang' => $this->selectedLanguage->abbreviation]);
     }

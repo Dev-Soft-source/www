@@ -71,6 +71,7 @@ Route::group(['prefix' => 'app/v1'], function () {
     Route::get('step2-page', [StepController::class, 'step2Index'])->name('app.auth.step2_page');
     Route::get('step3-page', [StepController::class, 'step3Index'])->name('app.auth.step3_page');
     Route::get('step4-page', [StepController::class, 'step4Index'])->name('app.auth.step4_page');
+    Route::get('step5-page', [StepController::class, 'step5Index'])->name('app.auth.step5_page');
     Route::get('chats-page', [MyChatsController::class, 'chatsIndex'])->name('app.auth.chats_page');
     Route::post('delete-chat', [MyChatsController::class, 'deleteChat'])->name('app.auth.delete_chat');
     Route::get('trips-page', [MyTripController::class, 'tripsIndex'])->name('app.auth.trips_page');

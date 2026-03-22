@@ -978,7 +978,7 @@ class RegisterController extends GetxController {
           } else if (serviceController.loginUserDetail['step'] == "3") {
             Get.offAllNamed('/stage_three_vehicle');
           } else if (serviceController.loginUserDetail['step'] == "4") {
-            Get.offAllNamed('/stage_four');
+            Get.offAllNamed('/stage_four_vehicle');
           } else if (serviceController.loginUserDetail['step'] == "5") {
             Get.offAllNamed('/navigation');
           } else {

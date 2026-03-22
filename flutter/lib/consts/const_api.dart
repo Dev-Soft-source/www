@@ -24,6 +24,15 @@ String _envValue(String key, String fallback) {
   return _normalizeUrl(value);
 }
 
+String _envRawValue(String key, [String fallback = '']) {
+  final value = dotenv.env[key];
+  if (value == null) {
+    return fallback;
+  }
+
+  return value.trim();
+}
+
 Future<bool> _isReachable(String rawUrl) async {
   try {
     final response = await http
@@ -39,6 +48,8 @@ void _setResolvedUrls(String appUrl, String apiUrl, String environment) {
   _resolvedUrl = _normalizeUrl(appUrl);
   _resolvedBaseUrl = _normalizeUrl(apiUrl);
   _apiEnvironment = environment;
+  debugPrint(
+      '[API CONFIG] env=$environment url=$_resolvedUrl baseUrl=$_resolvedBaseUrl');
 }
 
 Future<void> initializeApiConfig() async {
@@ -62,6 +73,8 @@ Future<void> initializeApiConfig() async {
   );
   final productionAppUrl = _envValue('PROD_APP_URL', lanAppUrl);
   final productionApiUrl = _envValue('PROD_API_URL', lanApiUrl);
+  final androidDebugTarget =
+      _envRawValue('ANDROID_DEBUG_TARGET', 'auto').toLowerCase();
 
   if (kReleaseMode) {
     _setResolvedUrls(productionAppUrl, productionApiUrl, 'production');
@@ -74,21 +87,36 @@ Future<void> initializeApiConfig() async {
   }
 
   if (defaultTargetPlatform == TargetPlatform.android) {
+    if (androidDebugTarget == 'emulator') {
+      _setResolvedUrls(
+          emulatorAppUrl, emulatorApiUrl, 'android-emulator-forced');
+      return;
+    }
+
+    if (androidDebugTarget == 'phone') {
+      _setResolvedUrls(
+          productionAppUrl, productionApiUrl, 'android-phone-production-forced');
+      return;
+    }
+
     if (await _isReachable(emulatorAppUrl)) {
       _setResolvedUrls(emulatorAppUrl, emulatorApiUrl, 'android-emulator');
       return;
     }
+    
+    _setResolvedUrls(productionAppUrl, productionApiUrl, 'android-phone-production');
+    return;
+  } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+    _setResolvedUrls(productionAppUrl, productionApiUrl, 'ios-phone-production');
+    return;
+  }
 
-    if (await _isReachable(lanAppUrl)) {
-      _setResolvedUrls(lanAppUrl, lanApiUrl, 'android-lan');
-      return;
-    }
-  } else if (await _isReachable(lanAppUrl)) {
+  if (await _isReachable(lanAppUrl)) {
     _setResolvedUrls(lanAppUrl, lanApiUrl, 'lan');
     return;
   }
 
-  _setResolvedUrls(lanAppUrl, lanApiUrl, 'lan-fallback');
+  _setResolvedUrls(productionAppUrl, productionApiUrl, 'production-fallback');
 }
 
 String get apiEnvironment => _apiEnvironment;
@@ -218,6 +246,7 @@ const step1Page = "step1-page";
 const step2Page = "step2-page";
 const step3Page = "step3-page";
 const step4Page = "step4-page";
+const step5Page = "step5-page";
 const chatPage = "chats-page";
 const thankYouPage = "thank-you-page";
 const profilePageSetting = "profile-page-setting";

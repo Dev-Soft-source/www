@@ -71,7 +71,7 @@ import 'package:proximaride_app/pages/search_ride/search_ride_result.dart';
 import 'package:proximaride_app/pages/signup/signup.dart';
 import 'package:proximaride_app/pages/splash/show_ride.dart';
 import 'package:proximaride_app/pages/splash/splash.dart';
-import 'package:proximaride_app/pages/stages/stage_five.dart';
+import 'package:proximaride_app/pages/stages/stage_four_vehicle.dart';
 import 'package:proximaride_app/pages/stages/stage_four.dart';
 import 'package:proximaride_app/pages/stages/stage_one.dart';
 import 'package:proximaride_app/pages/stages/stage_three_vehicle.dart';

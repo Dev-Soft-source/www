@@ -57,7 +57,7 @@
                 <div class="relative animate__animated animate__fadeIn transform overflow-hidden rounded bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md">
                     <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                         <div class="mt-2">
-                            <p class="text-left">{{ $step4Page->verify_code_label }}</p>
+                            <p class="text-left">{{ $step5Page->verify_code_label }}</p>
                             <div id="resendMessage" class="hidden text-center text-green-600 mb-2"></div>
                             <p class="text-center mt-2">Enter code</p>
                             <div class="flex justify-center mt-4 space-x-2">

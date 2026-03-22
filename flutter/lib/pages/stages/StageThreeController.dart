@@ -861,7 +861,7 @@ class StageThreeController extends GetxController {
           // driverLicensePathOriginal.value = "";
           // driverLicenseNameOriginal.value = "";
 
-          Get.toNamed('/stage_four');
+          Get.toNamed('/');
           // serviceController.showDialogue(resp['message'].toString());
         }
         isOverlayLoading(false);

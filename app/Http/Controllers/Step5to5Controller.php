@@ -53,12 +53,12 @@ class Step5to5Controller extends Controller
         $selectedLanguage = $sessionLang
             ? Language::where('abbreviation', $sessionLang)->first() ?? Language::where('is_default', 1)->first()
             : Language::where('is_default', 1)->first();
-        $step4Page = $selectedLanguage ? Step5PageSettingDetail::where('language_id', $selectedLanguage->id)->first() : null;
+        $step5Page = $selectedLanguage ? Step5PageSettingDetail::where('language_id', $selectedLanguage->id)->first() : null;
         $message = $selectedLanguage
             ? SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('admin_block_account_message')->first()
             : null;
 
-        $niceNames = ['phone' => $step4Page->phone_error ?? ''];
+        $niceNames = ['phone' => $step5Page->phone_error ?? ''];
 
         // Normalize phone
         $countryDialCode = optional(Country::find($request->country))->dial_code ?: $request->country_code;
@@ -79,7 +79,7 @@ class Step5to5Controller extends Controller
         // Validate phone
         $country = optional(Country::find($request->country))->iso_code ?: 'US';
         if (!validatePhoneNumber($request->phone, $country)) {
-            return back()->withErrors(['phone' => $step4Page->phone_error_label])->withInput();
+            return back()->withErrors(['phone' => $step5Page->phone_error_label])->withInput();
         }
 
         $request->validate([
@@ -238,13 +238,13 @@ class Step5to5Controller extends Controller
             : $request->country_code;
         $normalizedPhone = normalizePhoneNumber($request->phone, $countryDialCode);
 
-        $step4Page = Step5PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $step5Page = Step5PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $country = $request->country
             ? optional(Country::find($request->country))->iso_code
             : 'US';
         if (!validatePhoneNumber($request->phone, $country)) {
-            return response()->json(['success' => false, 'message' => $step4Page->phone_error_label], 422);
+            return response()->json(['success' => false, 'message' => $step5Page->phone_error_label], 422);
         }
 
         $existingPhone = PhoneNumber::where('phone', $normalizedPhone)->first();

@@ -491,7 +491,7 @@ class LoginController extends GetxController {
           } else if (serviceController.loginUserDetail['step'] == "3") {
             Get.offAllNamed('/stage_three_vehicle');
           } else if (serviceController.loginUserDetail['step'] == "4") {
-            Get.offAllNamed('/stage_four');
+            Get.offAllNamed('/stage_four_vehicle');
           } else if (serviceController.loginUserDetail['step'] == "5") {
             serviceController.navigationIndex.value = 0;
             Get.offAllNamed('/navigation');
@@ -909,7 +909,7 @@ class LoginController extends GetxController {
         } else if (step == "3") {
           Get.offAllNamed('/stage_three_vehicle');
         } else if (step == "4") {
-          Get.offAllNamed('/stage_four');
+          Get.offAllNamed('/stage_four_vehicle');
         } else if (step == "5") {
           serviceController.navigationIndex.value = 0;
           Get.offAllNamed('/navigation');
@@ -1069,7 +1069,7 @@ class LoginController extends GetxController {
           } else if (serviceController.loginUserDetail['step'] == "3") {
             Get.offAllNamed('/stage_three_vehicle');
           } else if (serviceController.loginUserDetail['step'] == "4") {
-            Get.offAllNamed('/stage_four');
+            Get.offAllNamed('/stage_four_vehicle');
           } else if (serviceController.loginUserDetail['step'] == "5") {
             serviceController.navigationIndex.value = 0;
             Get.offAllNamed('/navigation');
