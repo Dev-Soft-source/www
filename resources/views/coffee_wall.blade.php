@@ -420,19 +420,19 @@
                 <div id="donors-faq" class="hidden p-6 bg-gray-50 border-t">
                     <div class="space-y-4 text-gray-700">
                         <div>
-                            <h4 class="font-semibold mb-2">{{ $coffeeWallPage->faq_donors_1_question }}</h4>
+                            <h4 class="mb-2">{{ $coffeeWallPage->faq_donors_1_question }}</h4>
                             <p>{{ $coffeeWallPage->faq_donors_1_answer }}</p>
                         </div>
                         <div>
-                            <h4 class="font-semibold mb-2">{{ $coffeeWallPage->faq_donors_2_question }}</h4>
+                            <h4 class="mb-2">{{ $coffeeWallPage->faq_donors_2_question }}</h4>
                             <p>{{ $coffeeWallPage->faq_donors_2_answer }}</p>
                         </div>
                         <div>
-                            <h4 class="font-semibold mb-2">{{ $coffeeWallPage->faq_donors_3_question }}</h4>
+                            <h4 class="mb-2">{{ $coffeeWallPage->faq_donors_3_question }}</h4>
                             <p>{{ $coffeeWallPage->faq_donors_3_answer }}</p>
                         </div>
                         <div>
-                            <h4 class="font-semibold mb-2">{{ $coffeeWallPage->faq_donors_4_question }}</h4>
+                            <h4 class="mb-2">{{ $coffeeWallPage->faq_donors_4_question }}</h4>
                             <p>{{ $coffeeWallPage->faq_donors_4_answer }}</p>
                         </div>
                     </div>
@@ -453,19 +453,19 @@
                 <div id="beneficiary-faq" class="hidden p-6 bg-gray-50 border-t">
                     <div class="space-y-4 text-gray-700">
                         <div>
-                            <h4 class="font-semibold mb-2">{{ $coffeeWallPage->faq_beneficiary_1_question }}</h4>
+                            <h4 class="mb-2">{{ $coffeeWallPage->faq_beneficiary_1_question }}</h4>
                             <p>{{ $coffeeWallPage->faq_beneficiary_1_answer }}</p>
                         </div>
                         <div>
-                            <h4 class="font-semibold mb-2">{{ $coffeeWallPage->faq_beneficiary_2_question }}</h4>
+                            <h4 class="mb-2">{{ $coffeeWallPage->faq_beneficiary_2_question }}</h4>
                             <p>{{ $coffeeWallPage->faq_beneficiary_2_answer }}</p>
                         </div>
                         <div>
-                            <h4 class="font-semibold mb-2">{{ $coffeeWallPage->faq_beneficiary_3_question }}</h4>
+                            <h4 class="mb-2">{{ $coffeeWallPage->faq_beneficiary_3_question }}</h4>
                             <p>{{ $coffeeWallPage->faq_beneficiary_3_answer }}</p>
                         </div>
                         <div>
-                            <h4 class="font-semibold mb-2">{{ $coffeeWallPage->faq_beneficiary_4_question }}</h4>
+                            <h4 class="mb-2">{{ $coffeeWallPage->faq_beneficiary_4_question }}</h4>
                             <p>{{ $coffeeWallPage->faq_beneficiary_4_answer }}</p>
                         </div>
                     </div>
@@ -519,7 +519,14 @@
         </div>
     @endif
 @endsection
+@section('style')
+<style>
 
+label p {
+    font-family: FuturaMdCnBT, cursive;
+}
+</style>
+@endsection
 @section('script')
     <script src="https://js.stripe.com/v3/"></script>
     <script>

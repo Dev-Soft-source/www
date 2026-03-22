@@ -42,7 +42,7 @@
                         @endisset
                     </p>
                     <div class="flex justify-center mb-8">
-                        <a href="{{ route('coffee_on_wall', ['lang' => $selectedLanguage->abbreviation ?? 'en']) }}" class="inline-flex items-center justify-center bg-primary text-white px-6 py-3 rounded-xl font-medium hover:opacity-90 transition-opacity shadow-sm">
+                        <a href="{{ route('coffee_on_wall', ['lang' => $selectedLanguage->abbreviation ?? 'en']) }}" class="button-exp-fill">
                             @isset($coffeeWallPage->back_to_coffee_on_wall_button_text) {{ $coffeeWallPage->back_to_coffee_on_wall_button_text }} @endisset
                         </a>
                     </div>
