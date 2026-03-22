@@ -58,7 +58,7 @@
     @if (!$on_card)
         <div class="p-3">
             <label for="credit_card"
-                class="relative text-primary text-2xl flex items-center justify-center w-full p-2 bg-[#e0f2fe] border-2 border-blue-500 rounded cursor-pointer peer-checked:border-red-500 peer-checked:border-2 peer-checked:text-red-500 hover:border-2 hover:border-red-500">
+                class="relative text-primary text-2xl flex items-center justify-center w-full p-2 bg-[#e0f2fe] border-2 border-blue-300 rounded cursor-pointer peer-checked:border-red-500 peer-checked:border-2 peer-checked:text-red-500 hover:border-2 hover:border-red-500">
                 <div class="mr-2 text-primary">
                     <svg class="h-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
