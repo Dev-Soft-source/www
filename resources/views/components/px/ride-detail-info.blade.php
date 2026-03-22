@@ -21,7 +21,7 @@
 
         <div class="border-t border-gray-300 grid grid-cols-2 divide-x divide-gray-300">
             <div class="flex flex-wrap items-end gap-3 p-4 items-baseline">
-                <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
+                <h4 class="text-black text-xl xl:text-2xl ">
                     {{ $rideDetailPage->seats_left_label ?? 'Seats Left' }}:
                 </h4>
                 <p class="text-xl text-primary font-normal ml-2">
@@ -30,11 +30,10 @@
             </div>
 
             <div class="flex flex-wrap items-end gap-3 p-4 items-baseline">
-                <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
+                <h4 class="text-black text-xl xl:text-2xl ">
                     {{ $rideDetailPage->booking_price_label ?? 'Booking Price' }}:
                 </h4>
-                <p class="text-lg font-normal text-left text-primary"
-                    style="font-family: 'Roboto', sans-serif;">
+                <p class="text-lg font-normal text-left text-primary">
                     ${{ number_format(floatval($seatPrice), 2) }}
                     @isset($rideDetailPage->per_seat_label)
                         {{ $rideDetailPage->per_seat_label }}
@@ -45,7 +44,7 @@
         <div class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
             <div class="p-4 items-baseline">
                 <div class="flex flex-wrap items-end gap-3">
-                    <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
+                    <h4 class="font-medium text-xl xl:text-2xl text-left text-black ">
                         {{ $rideDetailPage->payment_method_label ?? 'Payment Method' }}:
                     </h4>
                     @php
@@ -60,7 +59,7 @@
 
             <div class="p-4 items-baseline">
                 <div class="flex flex-wrap items-end gap-3">
-                    <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
+                    <h4 class="text-black text-xl xl:text-2xl ">
                         {{ $rideDetailPage->booking_method_label ?? 'Booking Method' }}:
                     </h4>
                     @php
@@ -76,7 +75,7 @@
 
 
         <div class="border-t border-gray-300 flex flex-col md:flex-row md:items-center justify-start md:space-x-2 p-4">
-            <h4 class="font-medium text-xl xl:text-2xl md:text-center text-black mr-4 font-FuturaMdCnBT">
+            <h4 class="font-medium text-xl xl:text-2xl md:text-center text-black mr-4 ">
                 {{ $rideDetailPage->co_passenger_label ?? 'My Co-Passengers' }}:
             </h4>
             

@@ -32,7 +32,7 @@
                                     class="text-gray-600 hover:text-primary transition-colors duration-200">
                                     <p class="text-xl text-gray-600">
                                         <strong>Original route: </strong>
-                                        <span class="text-primary font-FuturaMdCnBT">{{ $parentOrigin }} →
+                                        <span class="text-primary ">{{ $parentOrigin }} →
                                             {{ $parentDestination }}</span>
                                     </p>
                                 </a>
@@ -53,7 +53,7 @@
                                 {{ $rideDetailPage->from_label ?? 'From' }}</p>
                             <div class="flex flex-col gap-1">
                                 <div class="flex gap-2 items-baseline">
-                                    <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                    <h3 class="text-primary  text-xl md:text-2xl md:mb-4">
                                         {{ $origin }}.
                                     </h3>
                                     @if ($pickupLocation)
@@ -87,7 +87,7 @@
                                                     </svg>
                                                 </span>
                                                 <span
-                                                    class="text-primary font-FuturaMdCnBT text-xl md:text-lg ">{{ $stop->label }}</span>
+                                                    class="text-primary  text-xl md:text-lg ">{{ $stop->label }}</span>
                                                 @if ($stop->pickup_dropoff_location)
                                                     <div class="ml-6 text-xs text-gray-600">
                                                         <strong>{{ $rideDetailPage->pickup_dropoff_info_heading ?? 'Pick up/Drop off' }}:</strong>
@@ -115,7 +115,7 @@
                                 {{ $rideDetailPage->to_label ?? 'To' }}</p>
                             <div class="flex flex-col gap-1">
                                 <div class="flex gap-2 items-baseline">
-                                    <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                    <h3 class="text-primary  text-xl md:text-2xl md:mb-4">
                                         {{ $destination }}.
                                     </h3>
                                     @if ($dropoffLocation)
@@ -161,7 +161,7 @@
 
     <div class="border-t border-gray-300 grid grid-cols-2 divide-x divide-gray-300">
         <div class="flex items-baseline p-4">
-            <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
+            <h4 class="font-medium text-xl xl:text-2xl text-left text-black ">
                 {{ $rideDetailPage->seats_left_label ?? 'Seats left' }}:
             </h4>
             <p class="text-xl text-primary font-normal ml-2">
@@ -189,11 +189,10 @@
                     $bookingMethodTooltip = optional($postRidePage)->payment_methods_option3_tooltip ?? '';
                 }
             @endphp
-            <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
+            <h4 class="font-medium text-xl xl:text-2xl text-left text-black ">
                 {{ $rideDetailPage->payment_method_label ?? 'Payment method' }}:
                 <span class="text-primary font-normal text-lg"
-                    data-tippy-content="{{ $bookingMethodTooltip }}"
-                    style="font-family: 'Roboto', sans-serif;">{{ $bookingMethodLabel ?? 'N/A' }}</span>
+                    data-tippy-content="{{ $bookingMethodTooltip }}">{{ $bookingMethodLabel ?? 'N/A' }}</span>
             </h4>
         </div>
         <div class="p-4 items-baseline">
@@ -203,10 +202,9 @@
                         ? optional($postRidePage)->booking_option2_tooltip ?? ''
                         : optional($postRidePage)->booking_option1_tooltip ?? '';
             @endphp
-            <h4 class="font-medium text-xl xl:text-2xl text-left text-black font-FuturaMdCnBT">
+            <h4 class="font-medium text-xl xl:text-2xl text-left text-black ">
                 {{ $rideDetailPage->booking_type_label ?? 'Booking method' }}:
-                <span class="text-primary font-normal text-lg" data-tippy-content="{{ $bookingModeTooltip }}"
-                    style="font-family: 'Roboto', sans-serif;">{{ $bookingModeLabel ?? 'N/A' }}</span>
+                <span class="text-primary font-normal text-lg" data-tippy-content="{{ $bookingModeTooltip }}">{{ $bookingModeLabel ?? 'N/A' }}</span>
             </h4>
         </div>
     </div>
@@ -215,7 +213,7 @@
     @if ($type !== 'my_ride_detail')
         <div class="border-t border-gray-300 flex flex-col md:flex-row md:items-center justify-start md:space-x-2 p-4">
             <div>
-                <h4 class="font-medium text-xl xl:text-2xl md:text-center text-black mr-4 font-FuturaMdCnBT">
+                <h4 class="font-medium text-xl xl:text-2xl md:text-center text-black mr-4 ">
                     {{ $rideDetailPage->co_passenger_label ?? 'Co-passengers' }} :
                 </h4>
             </div>
@@ -239,17 +237,17 @@
         <div
             class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
             <div class="p-4 flex items-baseline">
-                <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
+                <h4 class="text-black text-xl xl:text-2xl ">
                     {{ $rideDetailPage->booked_on_column_label ?? 'Booked' }}:
                 </h4>
-                <h4 class="text-primary font-normal text-lg ml-2" style="font-family: 'Roboto', sans-serif;">
+                <h4 class="text-primary font-normal text-lg ml-2">
                     {{ $ride->seats_total - $ride->seats_available }}
                     {{ $ride->seats_total - $ride->seats_available == 1 ? $rideDetailPage->seat_on_column_label ?? 'seat' : $rideDetailPage->ride_seat_label ?? 'seats' }}
                 </h4>
             </div>
             <div class="p-4">
                 <div class="flex items-center justify-between">
-                    <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
+                    <h4 class="text-black text-xl xl:text-2xl ">
                         {{ $rideDetailPage->mobile_seat_fare_label ?? 'Fare' }}:
                     </h4>
                     <p>
@@ -257,13 +255,13 @@
                     </p>
                 </div>
                 <div class="flex items-center justify-between">
-                    <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
+                    <h4 class="text-black text-xl xl:text-2xl ">
                         {{ $rideDetailPage->booking_fee_label ?? 'Booking Fee' }}:
                     </h4>
                     <p>{{ $currency }}</p>
                 </div>
                 <div class="flex items-center justify-between">
-                    <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
+                    <h4 class="text-black text-xl xl:text-2xl ">
                         {{ $rideDetailPage->total_amount_label ?? 'Total Amount' }}:
                     </h4>
                     <p>{{ $currency }}</p>

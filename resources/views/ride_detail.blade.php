@@ -3,9 +3,7 @@
 @section('style')
     <style>
          /* Match ride_detail: body text in Roboto, sizes from Tailwind (text-xl, text-sm) */
-        .ride-detail-page p {
-            font-family: 'Roboto', sans-serif;
-        }
+        
     </style>
 
     <!-- Scripts -->
@@ -18,7 +16,7 @@
 @endsection
 
 @section('content')
-    <div class="font-FuturaMdCnBT ride-detail-page">
+    <div class="">
         @if (session('message'))
             <div id="my-modal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
@@ -432,7 +430,7 @@
                                     $vehicleModel = $ride->model ?: optional($ride->vehicle)->model;
                                     $vehicleColor = $ride->color ?: optional($ride->vehicle)->color;
                                 @endphp
-                                <div class="text-center">
+                                <div class="text-left">
                                     @if ($vehicleYear || $vehicleMake || $vehicleModel || $vehicleColor)
                                         <div class="flex flex-row items-center justify-center gap-x-1 text-md text-black">
                                             @if ($vehicleYear)
@@ -459,7 +457,7 @@
                                         </div>
                                     @endif
                                     @if ($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->exists())
-                                        <p class="font-semibold text-xl text-left text-black">{{ $ride->license_no }}</p>
+                                        <label class="text-xl text-left text-black">{{ $ride->license_no }}</label>
                                     @endif
                                     @if ($ride->vehicle_type_label)
                                         <p class="text-md">{{ $ride->vehicle_type_label }}</p>
@@ -549,16 +547,19 @@
                                             </p>
                                         </div>
                                         @endif
-                                        
-                                        <p class="font-semibold text-lg">
-                                            {{ $rideDetailPage->driver_label ?? 'Verified Driver' }}:
+                                        <div class="flex items-baseline gap-2">
+                                            <label class="text-xl">
+                                                {{ $rideDetailPage->driver_label ?? 'Verified Driver' }}:
+                                            </label>
                                             <span class="text-primary">
                                                 {{ $ride->driver?->getDisplayName() }}
                                             </span>
-                                        </p>
-
-                                        <p class="font-semibold text-lg">
-                                            {{ $rideDetailPage->passengers_driven_label ?? 'Passengers Driven' }}:
+                                        </div>
+                                        
+                                        <div class="flex items-baseline gap-2">
+                                            <label class="text-xl">
+                                                {{ $rideDetailPage->passengers_driven_label ?? 'Passengers Driven' }}:
+                                            </label>
                                             <span class="text-primary">
                                                 @php
                                                     $drivenNum = $ride->driver
@@ -572,7 +573,8 @@
                                                 @endphp
                                                 {{ $drivenNum > 100 ? '99+' : $drivenNum }}
                                             </span>
-                                        </p>
+                                        </div>
+
                                         <div class="flex items-center gap-4 w-full">
                                             <div class="flex items-center gap-1 w-auto">
                                                 @php

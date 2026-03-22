@@ -77,7 +77,7 @@
 @endphp
 
 <div class="flex flex-row items-center">
-    <h4 class="flex items-center space-x-2">
+    <p class="flex items-center font-semibold space-x-2">
         {{ $formattedDeparture['dateTimeLabel'] ?? 'N/A' }}
         @if ($showParentRouteHint && $parentOrigin)
             <span class="inline-block cursor-help ml-2" 
@@ -87,7 +87,7 @@
                 </svg>
             </span>
         @endif
-        </h4>
+    </p>
     @if($ride->isPinkRide())
         <img class="w-12 h-12 ml-2" src="{{ asset('home_page_icons/' . $rideFeatureOptions['features']['pink_rides']->icon) }}" alt=""
         data-tippy-content="{{ $rideFeatureOptions['features']['pink_rides']->tooltip }}">
@@ -123,13 +123,16 @@
                 @endif
             </h4>
             <div class="flex gap-2 items-baseline">
-                <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                <h3 class="text-primary text-xl md:text-2xl md:mb-4">
                     {{ $origin }}.
                 </h3>
                 @if ($pickupLocation)
-                    <label class="text-sm mt-2">
-                        {{ $rideDetailPage->pickup_at_label }}: {{ $pickupLocation }}
-                    </label>
+                    <div class="flex itmes-end text-gray-700 gap-1">
+                        <label class="">
+                            {{ $rideDetailPage->pickup_at_label }}: 
+                        </label>
+                        <p>{{ $pickupLocation }}</p>
+                </div>
                 @endif
             </div>
         </div>
@@ -181,14 +184,17 @@
                     </span>
                 @endif
                 </h4>
-            <div class="flex gap-2">
-                <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+            <div class="flex gap-2 items-end md:mb-4">
+                <h3 class="text-primary text-xl md:text-2xl ">
                     {{ $destination }}.
                 </h3>
                 @if ($dropoffLocation)
-                    <label class="text-sm mt-2">
-                        {{ $rideDetailPage->dropoff_at_label }}: {{ $dropoffLocation }}
+                <div class="flex itmes-end text-gray-700 gap-1">
+                    <label class="">
+                        {{ $rideDetailPage->dropoff_at_label }}: 
                     </label>
+                    <p>{{ $dropoffLocation }}</p>
+                </div>
                 @endif
             </div>
         </div>

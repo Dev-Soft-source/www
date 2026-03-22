@@ -347,7 +347,7 @@
                                             'initialLabel' => $oldOriginLabel,
                                             'initialCityId' => $oldOriginCityId,
                                             'invalidErrorMessage' => __('validation.custom.city_not_in_record.message') ?? 'Please select a valid city from the dropdown',
-                                            'class' => 'h-full w-full border-0 bg-transparent pl-10 pr-4 font-semibold text-slate-900 placeholder-slate-900 focus:ring-0',
+                                            'class' => 'h-full w-full border-0 bg-transparent pl-10 pr-4 text-slate-900 placeholder-slate-900 focus:ring-0',
                                         ],
                                         key('px-search-origin')
                                     )
@@ -381,7 +381,7 @@
                                             'initialLabel' => $oldDestinationLabel,
                                             'initialCityId' => $oldDestinationCityId,
                                             'invalidErrorMessage' => $siteText['invalid_city_error_text'] ?? 'Please select a valid city from the dropdown',
-                                            'class' => 'h-full w-full border-0 bg-transparent pl-10 pr-4 font-semibold text-slate-900 placeholder-slate-900 focus:ring-0',
+                                            'class' => 'h-full w-full border-0 bg-transparent pl-10 pr-4 text-slate-900 placeholder-slate-900 focus:ring-0',
                                         ],
                                         key('px-search-destination')
                                     )
@@ -400,7 +400,7 @@
                                     </div>
                                     <input id="departure_date" name="departure_date" value="{{ $oldDepartureDate }}"
                                         type="text" readonly
-                                        class="h-full w-full border-0 bg-transparent pl-10 pr-12 font-semibold text-slate-900 placeholder-slate-900 focus:ring-0"
+                                        class="h-full w-full border-0 bg-transparent pl-10 pr-12 text-slate-900 placeholder-slate-900 focus:ring-0"
                                         placeholder="{{ $findRidePage->search_section_date_placeholder ?? 'Select date' }}"
                                         autocomplete="off">
                                     <button type="button" id="departure-date-clear-button"
@@ -434,7 +434,7 @@
                             </div>
                             <div class="relative">
                                 <input name="keyword" type="text"
-                                    class="px-search-shell text-base md:text-lg w-full px-4 py-3 pr-12 font-semibold text-slate-900"
+                                    class="px-search-shell text-base md:text-lg w-full px-4 py-3 pr-12 text-slate-900"
                                     placeholder="{{ $findRidePage->search_section_keyword_placeholder ?? 'Search notes, route, or stops' }}"
                                     value="{{ $oldKeyword ?? '' }}">
                                 <button type="button" id="keyword-clear-button"
@@ -520,10 +520,10 @@
                                                     <span
                                                         class="mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary text-white">A</span>
                                                     <div>
-                                                        <div class="text-sm font-semibold text-gray-700">
+                                                        <label class="text-xl text-gray-700">
                                                             {{ $findRidePage->search_section_from_placeholder ?? 'Origin' }}
-                                                        </div>
-                                                        <div class="text-primary">{{ $recentSearch->origin_label }}</div>
+                                                        </label>
+                                                        <h3 class="text-primary text-xl md:text-2xl ">{{ $recentSearch->origin_label }}</h3>
                                                     </div>
                                                 </div>
 
@@ -531,11 +531,11 @@
                                                     <span
                                                         class="mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-gray-300 text-gray-800">B</span>
                                                     <div>
-                                                        <div class="text-sm font-semibold text-gray-700">
+                                                        <label class="text-xl text-gray-700">
                                                             {{ $findRidePage->search_section_to_placeholder ?? 'Destination' }}
-                                                        </div>
-                                                        <div class="text-primary">{{ $recentSearch->destination_label }}
-                                                        </div>
+                                                        </label>
+                                                        <h3 class="text-primary text-xl md:text-2xl ">{{ $recentSearch->destination_label }}
+                                                        </h3>
                                                     </div>
                                                 </div>
                                             </div>

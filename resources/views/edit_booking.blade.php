@@ -199,7 +199,7 @@
                                                         {{ $bookingPage->seats_left_label }}
                                                     @endisset
                                                 </a>
-                                                <p class="text-xl text-primary font-normal ml-2" style="font-family: 'Roboto', sans-serif;">{{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}</p>
+                                                <p class="text-xl text-primary font-normal ml-2">{{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}</p>
                                             </div>                                            
                                         @endif
                                     @endif
@@ -216,7 +216,7 @@
                                                     {{ $bookingPage->seats_left_label }}
                                                 @endisset
                                             </a>
-                                            <p class="text-xl text-primary font-normal ml-2" style="font-family: 'Roboto', sans-serif;">{{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}</p>                                            
+                                            <p class="text-xl text-primary font-normal ml-2">{{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}</p>                                            
                                         </div>
                                     @endif
                                 @endif
@@ -228,7 +228,7 @@
                             <h4 class="text-black text-xl xl:text-2xl">
                                 Booking Price:
                             </h4>
-                            <p class="text-lg font-normal text-left text-primary" style="font-family: 'Roboto', sans-serif;">${{ $booking->price }}
+                            <p class="text-lg font-normal text-left text-primary">${{ $booking->price }}
                                 @isset($rideDetailPage->per_seat_label)
                                     {{ $rideDetailPage->per_seat_label }}
                                 @endisset
@@ -242,7 +242,7 @@
                                 @isset($rideDetailPage->payment_method_label)
                                     {{ $rideDetailPage->payment_method_label }}
                                 @endisset
-                                <span class="text-lg text-primary font-normal inline-block cursor-help" style="font-family: 'Roboto', sans-serif;"
+                                <span class="text-lg text-primary font-normal inline-block cursor-help"
                                     @if (optional($ride->payment_method)->features_setting_id === (optional($postRidePage->payment_methods_option1)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option1_tooltip ?? '' }}"
                                     @elseif (optional($ride->payment_method)->features_setting_id === (optional($postRidePage->payment_methods_option2)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option2_tooltip ?? '' }}"
                                     @elseif (optional($ride->payment_method)->features_setting_id === (optional($postRidePage->payment_methods_option3)->features_setting_id ?? null)) data-tippy-content="{{ optional($postRidePage)->payment_methods_option3_tooltip ?? '' }}"
@@ -256,7 +256,7 @@
                                     Booking Method:
                                 </h4>
                                 @isset($ride->booking_method->features_setting_id)
-                                    <div class="text-lg text-primary font-normal inline-block cursor-pointer" style="font-family: 'Roboto', sans-serif;"
+                                    <div class="text-lg text-primary font-normal inline-block cursor-pointer"
                                         @if ($ride->booking_method->features_setting_id == (optional($postRidePage->booking_option1)->features_setting_id ?? null))
                                             data-tippy-content="{{ optional($postRidePage)->booking_option1_tooltip ?? '' }}"
                                         @elseif ($ride->booking_method->features_setting_id == (optional($postRidePage->booking_option2)->features_setting_id ?? null))

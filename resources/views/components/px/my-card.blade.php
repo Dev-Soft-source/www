@@ -107,13 +107,13 @@
                                 {{ $rideDetailPage->seats_left_label }}:
                             @endisset                                
                         </h4>
-                        <p class="text-xl text-primary font-normal ml-2" style="font-family: 'Roboto', sans-serif;">{{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}</p>
+                        <p class="text-xl text-primary font-normal ml-2">{{ intval($ride->seats) -intval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats')) }}</p>
                     </div>
                     <div class="flex flex-wrap items-center gap-3 p-4 items-baseline">
                         <h4 class="text-black text-xl xl:text-2xl">
                             {{ $rideDetailPage->booking_price_label ?? 'Booking Price' }}:
                         </h4>
-                        <p class="text-lg text-primary font-normal" style="font-family: 'Roboto', sans-serif;">${{ number_format(floatval($ride->detail->price/100), 2) }}
+                        <p class="text-lg text-primary font-normal">${{ number_format(floatval($ride->detail->price/100), 2) }}
                             @isset($rideDetailPage->per_seat_label)
                                 {{ $rideDetailPage->per_seat_label }}
                             @endisset
@@ -160,7 +160,7 @@
                         @endphp
                         {{ $rideDetailPage->booked_on_column_label ?? 'Booked' }}: 
                     </h4>
-                    <p class="text-primary font-normal text-lg ml-2" style="font-family: 'Roboto', sans-serif;">
+                    <p class="text-primary font-normal text-lg ml-2">
                         {{ $bookedSeatsCount }}
                         {{ $bookedSeatsCount == 1
                             ? ($rideDetailPage->seat_on_column_label ?? 'seat')

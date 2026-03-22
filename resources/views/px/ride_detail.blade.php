@@ -348,8 +348,6 @@
 
 @section('style')
     <style>
-        .ride-detail-page p {
-            font-family: 'Roboto', sans-serif;
-        }
+
     </style>
 @endsection

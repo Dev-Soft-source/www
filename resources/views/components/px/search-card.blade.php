@@ -45,7 +45,7 @@
             </div>
             <div class="booking-info">
                 <div class="pr-2">
-                    <p class="font-medium text-2xl text-right">
+                    <p class="font-medium text-xl text-right">
                         {{ str_replace(':count', $ride->seats, $rideDetailPage->total_seats_label ?? 'Total :count seats') }}
                     </p>
                     <div class="flex items-center gap-2 text-primary justify-end">
@@ -116,13 +116,18 @@
                             <p class="font-semibold">
                                 {{ $ride->driver?->first_name }}
                             </p>
-                            <p class="text-sm">
-                                {{ $rideDetailPage->passenger_age_label }} {{ $ride->driver?->getAge() }}
-                            </p>
-                            <p class="text-sm">
-                                {{ $ride->driver?->getCompletedPassengerBookingsCount() }}
-                                {{ $rideDetailPage->passengers_driven_label }}
-                            </p>
+                            <div class="flex items-end gap-2">
+                                <label class="text-black">{{ $rideDetailPage->passenger_age_label }}:</label>
+                                <p class="">
+                                     {{ $ride->driver?->getAge() }}
+                                </p>
+                            </div>
+                            <div class="flex items-end gap-2">
+                                <label class="text-black">{{ $rideDetailPage->passengers_driven_label }}:</label>
+                                <p class="">
+                                     {{ $ride->driver?->getCompletedPassengerBookingsCount() }}
+                                </p>
+                            </div>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">

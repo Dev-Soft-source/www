@@ -3,15 +3,13 @@
 @section('style')
     <style>
         /* Match ride_detail: body text in Roboto, sizes from Tailwind (text-xl, text-sm) */
-        .booking-page p {
-            font-family: 'Roboto', sans-serif;
-        }
+
 
     </style>
 @endsection
 
 @section('content')
-    <div class="font-FuturaMdCnBT booking-page">
+    <div class="booking-page">
 
         @if ($setting)
             @php
@@ -53,7 +51,7 @@
                                 </div>
                             </div>
                             <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                                <a href="javascript:void(0);" onclick="closeModal()" class="whitespace-nowrap inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">
+                                <a href="javascript:void(0);" onclick="closeModal()" class="whitespace-nowrap inline-flex justify-center rounded bg-red-500 px-3 py-2 text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">
                                     {{ $siteText['close_btn_text'] }}</a>
                                 @if (session()->has('phone') && !is_null(session('phone')))
                                     <a href="{{ route('send_verification_code_booking', session('phone')->id) }}"
@@ -410,7 +408,7 @@
                                                     value="1" class="form-control hidden peer"
                                                     {{ $bookingFeeZero ? 'disabled' : '' }}>
                                                 <label for="apply_coffee_wall" class="inline-flex items-center justify-center w-full px-2 py-0.5 text-primary bg-white border-2 border-primary rounded {{ $bookingFeeZero ? 'cursor-not-allowed' : 'cursor-pointer' }} peer-checked:bg-primary peer-checked:text-white">
-                                                    <span class="font-medium font-FuturaMdCnBT text-xl line-clamp-2 max-w-36 w-full">
+                                                    <span class="font-medium text-xl line-clamp-2 max-w-36 w-full">
                                                         {{ $bookingPage->coffee_from_wall_label ?? 'Pay booking fee with Coffee from the Wall' }}
                                                     </span>
                                                 </label>
@@ -683,7 +681,7 @@
                             </div>
                             <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                                 <button type="button" id="close-popup"
-                                    class="inline-flex justify-center rounded bg-blue-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-24">
+                                    class="inline-flex justify-center rounded bg-blue-500 px-3 py-2 text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:ml-3 sm:w-24">
                                     Close
                                 </button>
                             </div>
@@ -722,7 +720,7 @@
                             </div>
                             <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                                 <div class="">
-                                    <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4"
+                                    <h3 class="text-3xl text-center text-gray-900 mb-4"
                                         id="student-seat-limit-modal-title">Seat Limit Reached</h3>
                                 </div>
                                 <div class="mt-2 w-full">
@@ -732,7 +730,7 @@
                         </div>
                         <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center">
                             <button type="button" onclick="closeStudentSeatLimitModal()"
-                                class="inline-flex justify-center rounded bg-primary px-6 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-600">
+                                class="inline-flex justify-center rounded bg-primary px-6 py-2 text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-600">
                                 {{ $siteText['ok_btn_text'] }}
                             </button>
                         </div>

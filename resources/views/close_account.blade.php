@@ -220,8 +220,8 @@
                         <div class="md:col-span-2 mt-5">
                             <p>
                                 <span
-                                    class="text-primary text-base md:text-lg">{{ $closeAccountPage->why_closing_account_label ?? 'In your own words, please tell us why you’d like to close your account.' }}</span>
-                                <span class="text-gray-900 text-base md:text-lg">
+                                    class="text-primary text-xl md:text-2xl font-FuturaMdCnBT">{{ $closeAccountPage->why_closing_account_label ?? 'In your own words, please tell us why you’d like to close your account.' }}</span>
+                                <span class="text-gray-900 text-xl md:text-1xl font-FuturaMdCnBT">
                                     {{ $closeAccountPage->why_closing_account_placeholder ?? 'This is optional, but your feedback would be greatly appreciated.' }}</span><span
                                     class="text-red-500 text-xl md:text-2xl font-bold">*</span>
                             </p>
@@ -238,8 +238,8 @@
                         <div class="md:col-span-2 mt-5">
                             <p>
                                 <span
-                                    class="text-primary text-base md:text-lg">{{ $closeAccountPage->improve_label ?? 'We’d love to hear how we can improve.' }}</span>
-                                <span class="text-gray-900 text-base md:text-lg">
+                                    class="text-primary text-xl md:text-2xl font-FuturaMdCnBT">{{ $closeAccountPage->improve_label ?? 'We’d love to hear how we can improve.' }}</span>
+                                <span class="text-gray-900 text-xl md:text-1xl font-FuturaMdCnBT">
                                     {{ $closeAccountPage->why_closing_account_placeholder ?? 'Sharing is optional, but your input would mean a lot.' }}</span><span
                                     class="text-red-500 text-xl md:text-2xl font-bold">*</span>
                             </p>

@@ -164,7 +164,7 @@
                                         $query->whereDate('rides.date', '<', now()->toDateString())->orWhere(function ($query) {
                                             $query->whereDate('rides.date', '=', now()->toDateString())->whereTime('rides.time', '<=', now()->toTimeString());
                                         });
-                                    })->with('rideDetail')->get()->sum(fn($r) => $r->rideDetail->sum(fn($rd) => floatval($rd->total_distance ?? 0))),
+                                    })->with('rideDetail')->get()->sum(fn($ride) => (float) ($ride->rideDetail?->total_distance ?? 0)),
                                 0,
                             ) }}
                         </p>

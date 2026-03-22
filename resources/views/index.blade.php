@@ -187,7 +187,7 @@
                                         'initialLabel' => $oldOriginLabel,
                                         'initialCityId' => $oldOriginCityId,
                                         'invalidErrorMessage' => __('validation.custom.city_not_in_record.message') ?? 'Please select a valid city from the dropdown',
-                                        'class' => 'h-full w-full border-0 bg-transparent pl-10 pr-4 font-semibold text-slate-900 placeholder-slate-900 focus:ring-0',
+                                        'class' => 'h-full w-full border-0 bg-transparent pl-10 pr-4 text-slate-900 placeholder-slate-900 focus:ring-0',
                                     ],
                                     key('px-search-origin')
                                 )
@@ -221,7 +221,7 @@
                                         'initialLabel' => $oldDestinationLabel,
                                         'initialCityId' => $oldDestinationCityId,
                                         'invalidErrorMessage' => __('validation.custom.city_not_in_record.message') ?? 'Please select a valid city from the dropdown',
-                                        'class' => 'h-full w-full border-0 bg-transparent pl-10 pr-4 font-semibold text-slate-900 placeholder-slate-900 focus:ring-0',
+                                        'class' => 'h-full w-full border-0 bg-transparent pl-10 pr-4 text-slate-900 placeholder-slate-900 focus:ring-0',
                                     ],
                                     key('px-search-destination')
                                 )
@@ -246,7 +246,7 @@
                                 </div>
                                 <input id="departure_date" name="departure_date" value="{{ $oldDepartureDate }}"
                                     type="text" readonly
-                                    class="city-autocomplete-input h-full border-0 bg-transparent pl-10 font-semibold text-slate-900 placeholder-slate-900 focus:ring-0"
+                                    class="city-autocomplete-input h-full border-0 bg-transparent pl-10 text-slate-900 placeholder-slate-900 focus:ring-0"
                                     placeholder="{{ $findRidePage->search_section_date_placeholder ?? 'Select date' }}"
                                     autocomplete="off">
                                 <button type="button" id="departure-date-clear-button"
@@ -569,7 +569,7 @@
                 <div class="flex flex-col space-y-4">
                     @if (!empty($rides))
                         @foreach ($rides as $ride)
-                        <a href="{{ route('ride_detail', ['lang'=>app()->getLocale(), 'id'=>$ride->id]) }}" >
+                        <a href="{{ route('ride_detail', ['lang'=>app()->getLocale(), 'id'=>$ride->id]) }}" class="text-gray" >
                             <x-px.search-card 
                                 :ride="$ride" 
                                 :lang="optional($selectedLanguage)->abbreviation" 
