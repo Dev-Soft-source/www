@@ -163,7 +163,7 @@
                                                         src="{{ $iconUrl }}" alt="">
                                                 @endif
                                             </div>
-                                            <p class="text-blue-600">{{ $name }}</p>
+                                            <p class="text-blue-600 font-FuturaMdCnBT">{{ $name }}</p>
                                         </button>
                                     @elseif ($isPostRideWithoutVerifiedPhone)
                                         <button type="button" onclick="openPhoneRequiredModal()"
@@ -174,7 +174,7 @@
                                                         src="{{ $iconUrl }}" alt="">
                                                 @endif
                                             </div>
-                                            <p class="text-blue-600">{{ $name }}</p>
+                                            <p class="text-blue-600 font-FuturaMdCnBT">{{ $name }}</p>
                                         </button>
                                     @else
                                         <a href="{{ route($link, ['lang' => $langAbbr]) }}"
@@ -185,7 +185,7 @@
                                                         src="{{ $iconUrl }}" alt="">
                                                 @endif
                                             </div>
-                                            <p class="text-blue-600">{{ $name }}</p>
+                                            <p class="text-blue-600 font-FuturaMdCnBT">{{ $name }}</p>
                                         </a>
                                     @endif
                                 </li>
