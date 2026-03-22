@@ -153,6 +153,7 @@
             @php
                 $action = $ride->isInstantBooking() ? route('instant_booking', $ride->id)
                     : ($ride->isRequestBooking() ? route('booking_request', $ride->id) : '');
+
             @endphp
 
             <form id="submitForm" method="POST" action="{{ $action }}" enctype="multipart/form-data">
@@ -507,10 +508,10 @@
                                 </div>
                                 <div class="bg-white p-4">
                                     
-                                            <p class="text-left">● @isset($bookingPage->booking_disclaimer_on_time)
-                                                    {!! $bookingPage->booking_disclaimer_on_time !!}
-                                                @endisset
-                                            </p>
+                                    <p class="text-left">● @isset($bookingPage->booking_disclaimer_on_time)
+                                            {!! $bookingPage->booking_disclaimer_on_time !!}
+                                        @endisset
+                                    </p>
                                 
                                     <p class="text-left mt-4">●<strong> Pink Rides: </strong>
                                                 {{ $bookingPage->booking_disclaimer_pink_ride ?? 'I know that ProximaRide are exclusive to ProximaRide female members. If I am booking on a Pink Ride, I will not be accompanied by male members who are above 12 years of age, nor will I send a male member in my place. If I do, the driver will not take me or them, and I will not be refunded' }}

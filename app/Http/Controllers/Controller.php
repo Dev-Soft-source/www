@@ -492,6 +492,7 @@ class Controller extends BaseController
             $to_stop_id   = $ride->rideStops->last()?->id;
         
             $ride->matched_segment_price_minor = $ride->detail->price;
+            $ride->city_id = $ride->rideStops->first()?->city_id;
         } else {
         
             $stopSegment = $ride->rideStopSegments()
@@ -503,9 +504,10 @@ class Controller extends BaseController
         
             $stopOfFrom = $ride->rideStops->firstWhere('id', $from_stop_id);
             $stopOfTo   = $ride->rideStops->firstWhere('id', $to_stop_id);
+            $ride->city_id = $stopOfFrom->city_id;
         
             $ride->matched_segment_price_minor = $stopSegment?->price_minor;
-        
+
             $ride->matched_from_stop_index = $stopOfFrom
                 ? ((int) $stopOfFrom->stop_order - 1)
                 : 0;

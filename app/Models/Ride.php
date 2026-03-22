@@ -560,13 +560,12 @@ class Ride extends Model
 
     public function pricePerSeat(): float
     {
-        return (float) ($this->rideDetail->first()?->price/100 ?? 0);
+        return (float) ($this->rideDetail?->price / 100 ?? 0);
     }
 
     public function isShortDistanceRide(): bool
     {
         $pricePerSeat = $this->pricePerSeat();
-
         return $pricePerSeat > 0 && $pricePerSeat <= 15;
     }
 

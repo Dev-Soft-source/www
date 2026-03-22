@@ -135,20 +135,13 @@ class BookingController extends Controller
         $ride = Ride::with([
             'rideStops' => fn ($query) => $query->orderBy('stop_order'),
             'rideStopSegments',
-            'rideDetail' => function ($query) use ($rideDetailId) {
-                $query->orderBy('id');
-
-                if ($rideDetailId) {
-                    $query->where('id', $rideDetailId);
-                }
-            },
-        ])->findOrFail($rideId);
+            'detail'])->findOrFail($rideId);
 
         $ride = $this->makeDetailOfRide($ride, $fromStopId, $toStopId);
 
-        if ($rideDetailId && $ride->rideDetail->isNotEmpty()) {
-            $ride->setRelation('detail', $ride->rideDetail->first());
-        }
+        // if ($rideDetailId && $ride->detail) {
+        //     $ride->setRelation('detail', $ride->detail);
+        // }
 
         return $ride;
     }
@@ -158,8 +151,7 @@ class BookingController extends Controller
         $ride->loadMissing([
             'rideStops' => fn ($query) => $query->orderBy('stop_order'),
             'rideStopSegments',
-            'detail',
-            'rideDetail' => fn ($query) => $query->orderBy('id'),
+            'detail'
         ]);
 
         $ride = $this->makeDetailOfRide($ride, $fromStopId, $toStopId);
@@ -174,10 +166,10 @@ class BookingController extends Controller
         $destination = (string) ($toStop?->label ?? $ride->detail?->destination ?? $ride->destination ?? '');
         $price = (string) ((int) ($ride->matched_segment_price_minor ?? $ride->detail?->price ?? 0));
 
-        $matchedRideDetail = $ride->rideDetail->first(function ($detail) use ($departure, $destination) {
-            return strcasecmp(trim((string) ($detail->departure ?? '')), trim($departure)) === 0
-                && strcasecmp(trim((string) ($detail->destination ?? '')), trim($destination)) === 0;
-        });
+        // $matchedRideDetail = $ride->rideDetail->first(function ($detail) use ($departure, $destination) {
+        //     return strcasecmp(trim((string) ($detail->departure ?? '')), trim($departure)) === 0
+        //         && strcasecmp(trim((string) ($detail->destination ?? '')), trim($destination)) === 0;
+        // });
 
         return [
             'from_stop_id' => $resolvedFromStopId ?: null,
@@ -185,7 +177,7 @@ class BookingController extends Controller
             'departure' => $departure,
             'destination' => $destination,
             'price' => $price,
-            'ride_detail_id' => $matchedRideDetail?->id ?? $ride->detail?->id,
+            'ride_detail_id' => $ride->detail?->id,
         ];
     }
 
@@ -264,7 +256,7 @@ class BookingController extends Controller
         $settingTaxPercentage = 0;
         if (isset($setting->deduct_tax) && $setting->deduct_tax == "deduct_from_passenger") {
             if($setting->tax_type == "state_wise_tax"){
-                $getFromState = City::with('state:id,tax')->where('status', '1')->where('id',  $cityIdOfRide)->first();
+                $getFromState = City::with('state:id,tax')->where('status', '1')->where('id',  $ride->city_id)->first();
                 if (isset($getFromState) && !empty($getFromState)) {
                     $settingTaxPercentage = $getFromState->state->tax;
                 }
@@ -272,6 +264,8 @@ class BookingController extends Controller
                 $settingTaxPercentage = $setting->tax;
             }
         }
+
+        $settingTaxPercentage = 5;
 
         return view('booking', 
             [
