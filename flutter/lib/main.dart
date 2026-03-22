@@ -87,15 +87,29 @@ import 'package:proximaride_app/services/service.dart';
 //import 'package:tiktok_login_flutter/tiktok_login_flutter.dart';
 import 'consts/constFileLink.dart';
 
+Future<void> _initializeStripe({String? publishableKey}) async {
+  if (kIsWeb) {
+    logger.info('Skipping Stripe initialization on web.');
+    return;
+  }
+
+  if (publishableKey != null && publishableKey.isNotEmpty) {
+    Stripe.publishableKey = publishableKey;
+  }
+  Stripe.merchantIdentifier = 'merchant.flutter.stripe.test';
+  Stripe.urlScheme = 'flutterstripe';
+  await Stripe.instance.applySettings();
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   logger.intialize();
 
-  Stripe.publishableKey = 'pk_test_51PQ40hHySwupjfTMAKFhcggJHnPhCgsnASCOyIFfNixqiReRCXa4v1w3Zds3OuOzADlGg2Uk0xbLbLU9CvSyrBSH000NbZbLzR';
-  Stripe.merchantIdentifier = 'merchant.flutter.stripe.test';
-  Stripe.urlScheme = 'flutterstripe';
-  await Stripe.instance.applySettings();
+  await _initializeStripe(
+    publishableKey:
+        'pk_test_51PQ40hHySwupjfTMAKFhcggJHnPhCgsnASCOyIFfNixqiReRCXa4v1w3Zds3OuOzADlGg2Uk0xbLbLU9CvSyrBSH000NbZbLzR',
+  );
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -134,6 +148,10 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 instalData() async {
   await dotenv.load(fileName: "assets/.env");
+  await initializeApiConfig();
+  logger.info("API environment: $apiEnvironment");
+  logger.info("Resolved app URL: $url");
+  logger.info("Resolved API URL: $baseUrl");
   await initService();
 
   NotificationService().initNotification();
@@ -174,8 +192,9 @@ instalData() async {
     }
   });
 
-  Stripe.publishableKey = "${dotenv.env['STRIPE_KEY']}";
-  await Stripe.instance.applySettings();
+  await _initializeStripe(
+    publishableKey: dotenv.env['STRIPE_KEY'],
+  );
 
   //await TiktokLoginFlutter.initializeTiktokLogin("sbawj9a1vuvtt3arxd");
 
@@ -444,7 +463,6 @@ class MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     logger.info("base url: $baseUrl");
-    print("base url: $baseUrl");
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: appName,

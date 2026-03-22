@@ -12,6 +12,7 @@
     <application
         android:label="ProximaRide.Atif"
         android:name="${applicationName}"
+        android:usesCleartextTraffic="true"
         android:icon="@drawable/logo_notification">
 <!--    android:icon="@mipmap/ic_launcher">-->
 

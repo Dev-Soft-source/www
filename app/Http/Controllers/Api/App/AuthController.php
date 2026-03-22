@@ -158,7 +158,7 @@ class AuthController extends Controller
             $ratings = Rating::where('status', 1)->where('type', '1')->get();
             // Calculate average rating
             $filteredRatings = $ratings->filter(function ($rating) use ($user) {
-                return $rating->ride->added_by === $user->id;
+                return optional($rating->ride)->added_by === $user->id;
             });
 
             $driver_total_ratings = $filteredRatings->count();
@@ -168,7 +168,7 @@ class AuthController extends Controller
             $ratings = Rating::where('status', 1)->where('type', '2')->get();
             // Calculate average rating
             $filteredRatings = $ratings->filter(function ($rating) use ($user) {
-                return $rating->booking->user_id === $user->id;
+                return optional($rating->booking)->user_id === $user->id;
             });
 
             $passenger_total_ratings = $filteredRatings->count();
@@ -275,7 +275,7 @@ class AuthController extends Controller
                 $ratings = Rating::where('status', 1)->where('type', '1')->get();
                 // Calculate average rating
                 $filteredRatings = $ratings->filter(function ($rating) use ($existingUser) {
-                    return $rating->ride->added_by === $existingUser->id;
+                    return optional($rating->ride)->added_by === $existingUser->id;
                 });
     
                 $driver_total_ratings = $filteredRatings->count();
@@ -285,7 +285,7 @@ class AuthController extends Controller
                 $ratings = Rating::where('status', 1)->where('type', '2')->get();
                 // Calculate average rating
                 $filteredRatings = $ratings->filter(function ($rating) use ($existingUser) {
-                    return $rating->booking->user_id === $existingUser->id;
+                    return optional($rating->booking)->user_id === $existingUser->id;
                 });
     
                 $passenger_total_ratings = $filteredRatings->count();
@@ -351,7 +351,7 @@ class AuthController extends Controller
         $ratings = Rating::where('status', 1)->where('type', '1')->get();
         // Calculate average rating
         $filteredRatings = $ratings->filter(function ($rating) use ($newUser) {
-            return $rating->ride->added_by === $newUser->id;
+            return optional($rating->ride)->added_by === $newUser->id;
         });
 
         $driver_total_ratings = $filteredRatings->count();
@@ -361,7 +361,7 @@ class AuthController extends Controller
         $ratings = Rating::where('status', 1)->where('type', '2')->get();
         // Calculate average rating
         $filteredRatings = $ratings->filter(function ($rating) use ($newUser) {
-            return $rating->booking->user_id === $newUser->id;
+            return optional($rating->booking)->user_id === $newUser->id;
         });
 
         $passenger_total_ratings = $filteredRatings->count();

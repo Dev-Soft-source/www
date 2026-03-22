@@ -14,9 +14,10 @@ import 'AddCardProvider.dart';
 
 class AddCardController extends GetxController {
   final serviceController = Get.find<Service>();
-  var paymentOptionController = Get.find<PaymentOptionController>();
-  var bookSeatController;
-  var myWalletController;
+  PaymentOptionController paymentOptionController =
+      Get.find<PaymentOptionController>();
+  BookSeatController? bookSeatController;
+  MyWalletController? myWalletController;
   var errorList = List.empty(growable: true).obs;
   var isLoading = false.obs;
   var isOverlayLoading = false.obs;
@@ -47,7 +48,7 @@ class AddCardController extends GetxController {
   var startYear = 2025;
   var editCardId = 0;
 
-  var pageTypeFrom;
+  String pageTypeFrom = "";
 
   var labelTextDetail = {}.obs;
   var validationMessageDetail = {}.obs;
@@ -696,7 +697,7 @@ class AddCardController extends GetxController {
                 cards.refresh();
               }
               if (pageTypeFrom == 'bookSeat') {
-                var cards = bookSeatController.cards;
+                var cards = bookSeatController!.cards;
                 var newCard = resp['data']['card'];
                 if (cards.isEmpty) {
                   cards.add(newCard);
@@ -712,7 +713,7 @@ class AddCardController extends GetxController {
               }
 
               if (pageTypeFrom == 'myWallet') {
-                var cards = myWalletController.cards;
+                var cards = myWalletController!.cards;
                 var newCard = resp['data']['card'];
                 if (cards.isEmpty) {
                   cards.add(newCard);

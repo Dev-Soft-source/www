@@ -360,9 +360,9 @@ class MyWallet extends GetView<MyWalletController> {
                                                                     "${controller.passengerRewardList[index]['reward_point_setting']['point']}",
                                                                 cell2:
                                                                     "${controller.passengerRewardList[index]['reward_name']}",
-                                                                onTap: () {
-                                                                  // Handle reward row tap
-                                                                  print(
+                                                                  onTap: () {
+                                                                    // Handle reward row tap
+                                                                  debugPrint(
                                                                       'Selected reward: ${controller.passengerRewardList[index]['reward_name']}');
                                                                 }),
                                                           ]
@@ -763,7 +763,7 @@ class MyWallet extends GetView<MyWalletController> {
                                                                       "${controller.driverRewardList[index]['reward_name']}",
                                                                   onTap: () {
                                                                     // Handle reward row tap
-                                                                    print(
+                                                                    debugPrint(
                                                                         'Selected reward: ${controller.driverRewardList[index]['reward_name']}');
                                                                   }),
                                                             ]

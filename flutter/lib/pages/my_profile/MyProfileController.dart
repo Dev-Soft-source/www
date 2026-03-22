@@ -111,7 +111,7 @@ class MyProfileController extends GetxController {
         .getLabelTextDetail(serviceController.langId.value, profilePageSetting,
             serviceController.token)
         .then((resp) async {
-      logger.info("My Profile Label Text Detail: ${resp.toString()}");
+      logger.info("My Profile Label Text Detail: $resp");
       if (resp['status'] != null && resp['status'] == "Success") {
         if (resp['data'] != null && resp['data']['myProfilePage'] != null) {
           labelTextDetail.addAll(resp['data']['myProfilePage']);

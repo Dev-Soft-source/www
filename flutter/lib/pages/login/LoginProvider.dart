@@ -1,13 +1,26 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:get/get_connect/connect.dart';
 import 'package:get/get_connect/http/src/exceptions/exceptions.dart';
+import 'package:http/http.dart' as http;
 import 'package:proximaride_app/consts/const_api.dart';
 import 'package:proximaride_app/helpers/percentage_to_pipe.dart';
 import 'package:proximaride_app/services/logger_service.dart';
 
 class LoginProvider extends GetConnect {
   final getConnect = GetConnect(timeout: const Duration(seconds: 120));
+
+  Map<String, String> _networkError([Object? error]) {
+    final message = error == null
+        ? "Could not reach the API server at $baseUrl. Check that the backend is running and that this device can access it."
+        : "Could not reach the API server at $baseUrl. Check that the backend is running and that this device can access it. Details: $error";
+
+    return {
+      "type": "network",
+      "message": message,
+    };
+  }
 
   Future getLanguages() async {
     try {
@@ -16,11 +29,8 @@ class LoginProvider extends GetConnect {
       });
       if (response.status.hasError) {
         if (response.status.connectionError) {
-          return Future.error({
-            "type": "network",
-            "message":
-                "No internet connection. Please check your network and try again."
-          });
+          logger.error("Connection error in getLanguages for $baseUrl");
+          return Future.error(_networkError(response.statusText));
         }
         if (response.status.code == 422) {
           return response.body;
@@ -29,12 +39,9 @@ class LoginProvider extends GetConnect {
       } else {
         return response.body;
       }
-    } on SocketException {
-      return Future.error({
-        "type": "network",
-        "message":
-            "No internet connection. Please check your network and try again."
-      });
+    } on SocketException catch (e) {
+      logger.error("Socket error in getLanguages for $baseUrl: $e");
+      return Future.error(_networkError(e));
     } on TimeoutException {
       return Future.error({
         "type": "network",
@@ -64,11 +71,8 @@ class LoginProvider extends GetConnect {
 
       if (response.status.hasError) {
         if (response.status.connectionError) {
-          return Future.error({
-            "type": "network",
-            "message":
-                "No internet connection. Please check your network and try again."
-          });
+          logger.error("Connection error in getLabelTextDetail for $url");
+          return Future.error(_networkError(response.statusText));
         }
         if (response.status.code == 422) {
           return response.body;
@@ -77,12 +81,9 @@ class LoginProvider extends GetConnect {
       } else {
         return response.body;
       }
-    } on SocketException {
-      return Future.error({
-        "type": "network",
-        "message":
-            "No internet connection. Please check your network and try again."
-      });
+    } on SocketException catch (e) {
+      logger.error("Socket error in getLabelTextDetail for $url: $e");
+      return Future.error(_networkError(e));
     } on TimeoutException {
       return Future.error({
         "type": "network",
@@ -107,31 +108,36 @@ class LoginProvider extends GetConnect {
         "password": password.toString(),
         "lang_id": langId.toString()
       };
-      final response = await getConnect.post("$baseUrl/$login", data,
-          headers: {'X-Requested-With': 'XMLHttpRequest'});
+      final response = await http.post(
+        Uri.parse("$baseUrl/$login"),
+        headers: {
+          'Accept': 'application/json',
+        },
+        body: data,
+      );
 
-      logger.info("Login Response ${response.body}");
-      if (response.status.hasError) {
-        if (response.status.connectionError) {
+      final responseBody =
+          response.body.isNotEmpty ? jsonDecode(response.body) : null;
+
+      logger.info("Login Response $responseBody");
+      if (response.statusCode >= 400) {
+        if (response.statusCode == 0) {
           return Future.error({
             "type": "network",
             "message":
                 "No internet connection. Please check your network and try again."
           });
         }
-        if (response.status.code == 422) {
-          return response.body;
+        if (response.statusCode == 422) {
+          return responseBody;
         }
-        return Future.error(response.statusText as Object);
+        return Future.error(response.reasonPhrase ?? 'Request failed');
       } else {
-        return response.body;
+        return responseBody;
       }
-    } on SocketException {
-      return Future.error({
-        "type": "network",
-        "message":
-            "No internet connection. Please check your network and try again."
-      });
+    } on SocketException catch (e) {
+      logger.error("Socket error in loginUser for $baseUrl/$login: $e");
+      return Future.error(_networkError(e));
     } on TimeoutException {
       return Future.error({
         "type": "network",
@@ -158,11 +164,8 @@ class LoginProvider extends GetConnect {
       });
       if (response.status.hasError) {
         if (response.status.connectionError) {
-          return Future.error({
-            "type": "network",
-            "message":
-                "No internet connection. Please check your network and try again."
-          });
+          logger.error("Connection error in loginWithToken for $baseUrl/$myProfileInfo");
+          return Future.error(_networkError(response.statusText));
         }
         if (response.status.code == 422) {
           return response.body;
@@ -171,12 +174,9 @@ class LoginProvider extends GetConnect {
       } else {
         return response.body;
       }
-    } on SocketException {
-      return Future.error({
-        "type": "network",
-        "message":
-            "No internet connection. Please check your network and try again."
-      });
+    } on SocketException catch (e) {
+      logger.error("Socket error in loginWithToken for $baseUrl/$myProfileInfo: $e");
+      return Future.error(_networkError(e));
     } on TimeoutException {
       return Future.error({
         "type": "network",
@@ -301,22 +301,31 @@ class LoginProvider extends GetConnect {
         "photourl": photoUrl.toString(),
         "lang_id": langId.toString()
       };
-      final response = await getConnect.post("$baseUrl/$socialLoginPost", data,
-          headers: {'X-Requested-With': 'XMLHttpRequest'});
-      if (response.status.hasError) {
-        if (response.status.connectionError) {
+      final response = await http.post(
+        Uri.parse("$baseUrl/$socialLoginPost"),
+        headers: {
+          'Accept': 'application/json',
+        },
+        body: data,
+      );
+
+      final responseBody =
+          response.body.isNotEmpty ? jsonDecode(response.body) : null;
+
+      if (response.statusCode >= 400) {
+        if (response.statusCode == 0) {
           return Future.error({
             "type": "network",
             "message":
                 "No internet connection. Please check your network and try again."
           });
         }
-        if (response.status.code == 422) {
-          return response.body;
+        if (response.statusCode == 422) {
+          return responseBody;
         }
-        return Future.error(response.statusText as Object);
+        return Future.error(response.reasonPhrase ?? 'Request failed');
       } else {
-        return response.body;
+        return responseBody;
       }
     } on SocketException {
       return Future.error({
@@ -343,11 +352,11 @@ class LoginProvider extends GetConnect {
 
   Future loginWithToken(String token, int langId) async {
     try {
-      logger.info("Token: ${token}");
+      logger.info("Token: $token");
 
       token = convertPercentToPipe(token);
 
-      logger.info("Token after conversion: ${token}");
+      logger.info("Token after conversion: $token");
       final response = await getConnect.get(
         "$baseUrl/$myProfileInfo?lang_id=$langId",
         headers: {
@@ -356,7 +365,7 @@ class LoginProvider extends GetConnect {
         },
       );
 
-      logger.info("Lang Id: ${langId}");
+      logger.info("Lang Id: $langId");
 
       logger.info("Login with token response: ${response.body}");
 

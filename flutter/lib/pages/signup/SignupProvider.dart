@@ -14,12 +14,12 @@ class SignupProvider extends GetConnect {
       if (langId != 0) {
         url = "$url?lang_id=$langId";
       }
-      print("URL: $url");
+      logger.info("URL: $url");
       final response = await getConnect.get(url, headers: {
         'Accept': 'application/json',
       });
 
-      print("Response: ${response.body.toString()}");
+      logger.info("Response: ${response.body}");
 
       if (response.status.hasError) {
         if (response.status.connectionError) {

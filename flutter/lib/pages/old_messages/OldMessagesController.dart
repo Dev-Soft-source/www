@@ -16,7 +16,7 @@ class OldMessagesController extends GetxController {
   var isLoading = false.obs;
   var oldMessagesList = List<dynamic>.empty(growable: true).obs;
   var chatId = "";
-  var userId;
+  dynamic userId;
   var labelTextDetail = {}.obs;
 
   @override

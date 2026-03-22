@@ -16,9 +16,9 @@ class MessagingController extends GetxController {
   late final ConnectivityService connectivityService;
 
   var isLoading = true.obs;
-  var userId;
-  var rideId;
-  var type;
+  dynamic userId;
+  String rideId = "";
+  String type = "";
 
   var chatUserInfo = {}.obs;
   var messagesList = List<dynamic>.empty(growable: true).obs;
@@ -334,10 +334,8 @@ class MessagingController extends GetxController {
     String validRideId = "0";
 
     // Check if rideId from parameters is valid (not empty, not "0", not null)
-    if (rideId != null &&
-        rideId.toString().trim().isNotEmpty &&
-        rideId.toString() != "0") {
-      validRideId = rideId.toString();
+    if (rideId.trim().isNotEmpty && rideId != "0") {
+      validRideId = rideId;
       logger.info('Using rideId from parameters: $validRideId');
     } else {
       // Try to get ride_id from existing messages

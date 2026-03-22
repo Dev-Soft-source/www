@@ -19,7 +19,7 @@ import 'package:proximaride_app/services/service.dart';
 class LocationController extends GetxController {
   final serviceController = Get.find<Service>();
   final errorStateManager = ErrorStateManager();
-  var tempController;
+  dynamic tempController;
 
   var isCountry = "";
   var isState = "";

@@ -1,10 +1,99 @@
-// const baseUrl = "https://xelentride.shop/api/app/v1";
-// const baseUrl = 'https://13b2407bb966.ngrok-free.app/api/app/v1';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
 
-const baseUrl = 'http://127.0.0.1:8000/api/app/v1';
-// const url = "https://xelentride.com";
-// const url = "https://13b2407bb966.ngrok-free.app";
-const url = "http://127.0.0.1:8000";
+String? _resolvedBaseUrl;
+String? _resolvedUrl;
+String _apiEnvironment = 'fallback';
+
+String _normalizeUrl(String value) {
+  final trimmed = value.trim();
+  if (trimmed.endsWith('/')) {
+    return trimmed.substring(0, trimmed.length - 1);
+  }
+
+  return trimmed;
+}
+
+String _envValue(String key, String fallback) {
+  final value = dotenv.env[key];
+  if (value == null || value.trim().isEmpty) {
+    return _normalizeUrl(fallback);
+  }
+
+  return _normalizeUrl(value);
+}
+
+Future<bool> _isReachable(String rawUrl) async {
+  try {
+    final response = await http
+        .head(Uri.parse(rawUrl))
+        .timeout(const Duration(milliseconds: 800));
+    return response.statusCode > 0;
+  } catch (_) {
+    return false;
+  }
+}
+
+void _setResolvedUrls(String appUrl, String apiUrl, String environment) {
+  _resolvedUrl = _normalizeUrl(appUrl);
+  _resolvedBaseUrl = _normalizeUrl(apiUrl);
+  _apiEnvironment = environment;
+}
+
+Future<void> initializeApiConfig() async {
+  if (_resolvedUrl != null && _resolvedBaseUrl != null) {
+    return;
+  }
+
+  final lanAppUrl = _envValue(
+    'LAN_APP_URL',
+    _envValue('APP_URL', 'http://192.168.0.140:8000'),
+  );
+  final lanApiUrl = _envValue(
+    'LAN_API_URL',
+    _envValue('API_URL', 'http://192.168.0.140:8000/api/app/v1'),
+  );
+  final emulatorAppUrl =
+      _envValue('EMULATOR_APP_URL', 'http://10.0.2.2:8000');
+  final emulatorApiUrl = _envValue(
+    'EMULATOR_API_URL',
+    'http://10.0.2.2:8000/api/app/v1',
+  );
+  final productionAppUrl = _envValue('PROD_APP_URL', lanAppUrl);
+  final productionApiUrl = _envValue('PROD_API_URL', lanApiUrl);
+
+  if (kReleaseMode) {
+    _setResolvedUrls(productionAppUrl, productionApiUrl, 'production');
+    return;
+  }
+
+  if (kIsWeb) {
+    _setResolvedUrls(lanAppUrl, lanApiUrl, 'web-lan');
+    return;
+  }
+
+  if (defaultTargetPlatform == TargetPlatform.android) {
+    if (await _isReachable(emulatorAppUrl)) {
+      _setResolvedUrls(emulatorAppUrl, emulatorApiUrl, 'android-emulator');
+      return;
+    }
+
+    if (await _isReachable(lanAppUrl)) {
+      _setResolvedUrls(lanAppUrl, lanApiUrl, 'android-lan');
+      return;
+    }
+  } else if (await _isReachable(lanAppUrl)) {
+    _setResolvedUrls(lanAppUrl, lanApiUrl, 'lan');
+    return;
+  }
+
+  _setResolvedUrls(lanAppUrl, lanApiUrl, 'lan-fallback');
+}
+
+String get apiEnvironment => _apiEnvironment;
+String get baseUrl => _resolvedBaseUrl ?? _envValue('API_URL', 'http://127.0.0.1:8000/api/app/v1');
+String get url => _resolvedUrl ?? _envValue('APP_URL', 'http://127.0.0.1:8000');
 
 const signup = "signup";
 const login = "login";

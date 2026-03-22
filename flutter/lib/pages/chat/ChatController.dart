@@ -18,7 +18,7 @@ class ChatController extends GetxController {
   var isOverlayLoading = false.obs;
   var myChats = List<dynamic>.empty(growable: true).obs;
   var chatId = "";
-  var userId;
+  dynamic userId;
   var labelTextDetail = {}.obs;
 
   @override

@@ -15,7 +15,18 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => [
+        'api/*',
+        'sanctum/csrf-cookie',
+        'flag_icons/*',
+        'users_images/*',
+        'users_government_ids/*',
+        'driver_liscenses/*',
+        'student_cards/*',
+        'car_images/*',
+        'images/*',
+        'assets/*',
+    ],
 
     'allowed_methods' => ['*'],
 
@@ -25,7 +36,10 @@ return [
         env('APP_URL') ? ','.parse_url(env('APP_URL'), PHP_URL_SCHEME).'://'.parse_url(env('APP_URL'), PHP_URL_HOST) : ''
     )))),
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [
+        '#^http://localhost(:\d+)?$#',
+        '#^http://127\.0\.0\.1(:\d+)?$#',
+    ],
 
     'allowed_headers' => ['*'],
 

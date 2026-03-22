@@ -12,10 +12,10 @@ class RideFairDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var controller = Get.find<MyWalletController>();
+    final MyWalletController controller = Get.find<MyWalletController>();
 
-    var getData;
-    var rideId = Get.parameters['rideId'];
+    dynamic getData;
+    final String? rideId = Get.parameters['rideId'];
     if(Get.parameters['type'] == "paidOut"){
       getData = controller.driverPaidOutList.firstWhereOrNull((element) => element['ride_id'] == int.parse(rideId.toString()));
     }else if(Get.parameters['type'] == "available"){
