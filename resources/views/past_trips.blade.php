@@ -79,7 +79,7 @@
                                                 <a href="{{ route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id]) }}">
                                                     <div style="cursor:pointer;" onclick="window.location=''" style="cursor:pointer;">
                                                     <div class=" rounded-lg shadow-3xl border-[3px] border-solid  border-gray-100 " id="ride-29">
-                                                        <div class="flex flex-col md:flex-row gap-2 items-start justify-between pb-0 p-4">
+                                                        <div class="grid grid-cols-5 gap-4 p-4 items-start">
                                                             @php
                                                                 $bookingSegment = $booking->ride_detail_id
                                                                     ? $booking->ride->rideDetail->firstWhere('id', $booking->ride_detail_id)
@@ -90,46 +90,102 @@
                                                                 $departureDateTime = formatDepartureDateTime($displayDt, $selectedLanguage ?? null, $rideDetailPage ?? null);
                                                                 $departureDateLabel = $departureDateTime['dateLabel'];
                                                                 $departureTimeLabel = $departureDateTime['timeLabel'];
+
+                                                                $rideForRoute = $booking->ride;
+                                                                $orderedStops = ($rideForRoute->rideStops ?? collect())->sortBy('stop_order')->values();
+                                                                $matchedFromStopIndex =
+                                                                    isset($rideForRoute->matched_from_stop_index) &&
+                                                                    $rideForRoute->matched_from_stop_index !== null
+                                                                        ? (int) $rideForRoute->matched_from_stop_index
+                                                                        : null;
+                                                                $segmentFromIndex = 0;
+                                                                if (
+                                                                    $matchedFromStopIndex !== null &&
+                                                                    $orderedStops->has($matchedFromStopIndex)
+                                                                ) {
+                                                                    $segmentFromIndex = $matchedFromStopIndex;
+                                                                }
+                                                                $originIsMiddleOfParentRoute =
+                                                                    $orderedStops->count() >= 2 && $segmentFromIndex > 0;
                                                             @endphp
-                                                            <p class="flex items-center space-x-2 font-semibold w-full">
-                                                                {{ $departureDateLabel }}
-                                                                @isset($rideDetailPage->card_section_at_label)
-                                                                    {{ $rideDetailPage->card_section_at_label }}
-                                                                @endisset
-                                                                {{ $departureTimeLabel ?? 'N/A' }}
-                                                            </p>
-                                                            <div class="flex items-center justify-end w-full">
-                                                                <span class="text-green-600 p-1 px-2 rounded text-sm bg-green-100">
-                                                                    Completed</span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="flex flex-col md:flex-row justify-between px-4 pb-4 md:pb-0">
-                                                            <div class="w-full md:w-2/3 order-2 md:order-1">
+                                                            <div class="col-span-3">
+                                                                <div class="flex flex-row items-center flex-wrap gap-2">
+                                                                    <p class="flex items-center space-x-2 font-semibold">
+                                                                        {{ $departureDateLabel }}
+                                                                        {{ $rideDetailPage->card_section_at_label ?? $rideDetailPage->at_label ?? 'at' }}
+                                                                        {{ $departureTimeLabel ?? 'N/A' }}
+                                                                    </p>
+                                                                    @if ($booking->ride->isPinkRide())
+                                                                        <img class="w-12 h-12 ml-2" src="{{ asset('home_page_icons/' . $postRidePage->features_option1->icon) }}" alt="">
+                                                                    @endif
+                                                                    @if ($booking->ride->isExtraCareRide())
+                                                                        <img class="w-12 h-12 ml-2" src="{{ asset('home_page_icons/' . $postRidePage->features_option2->icon) }}" alt="">
+                                                                    @endif
+                                                                </div>
                                                                 <div class="relative mt-5 text-left">
-                                                                    <div class="flex items-center relative">
+                                                                    <div class="items-center relative">
                                                                         <div
                                                                             class="border-r-2 border-black border-solid absolute h-full left-3 md:left-6 top-2 z-10">
                                                                             <span
                                                                                 class="bg-primary rounded-full w-7 h-7 -top-[2px] -ml-[13px] absolute flex justify-center items-center">
                                                                                 <img class="w-5 h-5 object-contain"
-                                                                                    src="{{ asset('./images/new-21-search-bar-from.png') }}" alt="">
+                                                                                    src="{{ asset('./images/new-21-search-bar-from.png') }}"
+                                                                                    alt="">
                                                                             </span>
                                                                         </div>
                                                                         <div class="ml-12 md:ml-20">
-                                                                            <p class="font-bold text-xl text-black">
-                                                                                @isset($rideDetailPage->card_section_from_label)
-                                                                                    {{ $rideDetailPage->card_section_from_label }}
-                                                                                @endisset
-                                                                            </p>
-                                                                            <div class="flex gap-2">
-                                                                                <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                                            <h4 class="flex gap-2 items-baseline text-xl text-black">
+                                                                                {{ $rideDetailPage->card_section_from_label ?? 'From' }}
+                                                                                @if ($originIsMiddleOfParentRoute)
+                                                                                    <span class="w-4 h-4 ml-2" data-tippy-content="{{ optional($findRidePage ?? null)->depends_on_other_stops_tooltip ?? 'This location depends on other stops' }}">
+                                                                                        <svg width="20px" height="20px" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                                                                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                                                                            <g id="SVGRepo_iconCarrier">
+                                                                                                <path d="M1.5 0C0.671573 0 0 0.671573 0 1.5C0 2.32843 0.671573 3 1.5 3C2.15311 3 2.70873 2.5826 2.91465 2H4.5C5.88071 2 7 3.11929 7 4.5V10.5C7 12.433 8.567 14 10.5 14H12.0854C12.2913 14.5826 12.8469 15 13.5 15C14.3284 15 15 14.3284 15 13.5C15 12.6716 14.3284 12 13.5 12C12.8469 12 12.2913 12.4174 12.0854 13H10.5C9.11929 13 8 11.8807 8 10.5V4.5C8 2.567 6.433 1 4.5 1H2.91465C2.70873 0.417404 2.15311 0 1.5 0Z" fill="#0066eb"></path>
+                                                                                            </g>
+                                                                                        </svg>
+                                                                                    </span>
+                                                                                @endif
+                                                                            </h4>
+                                                                            <div class="flex gap-2 items-baseline">
+                                                                                <h3
+                                                                                    class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                                                                                     {{ $from }}.
                                                                                 </h3>
-                                                                                <p class="text-sm mt-2">
-                                                                                    Pick-up at: {{ $booking->ride->pickup }}
+                                                                                <label class="text-black">
+                                                                                    {{ $rideDetailPage->pickup_at_label ?? 'Pick-up at' }}:
+                                                                                </label>
+                                                                                <p class="">
+                                                                                    {{ $booking->ride->pickup }}
                                                                                 </p>
                                                                             </div>
                                                                         </div>
+                                                                        @if ($booking->ride->rideStops->isNotEmpty() && $booking->ride->rideStops->count() > 2)
+                                                                            <div class="ml-12 md:ml-20 flex">
+                                                                                <label class="text-xl text-black">Stops on the way</label>
+                                                                                <ul class="flex flex-col gap-2 text-sm ml-4 mt-1 mb-4">
+                                                                                    @foreach ($booking->ride->rideStops as $stop)
+                                                                                        @continue($loop->first || $loop->last)
+                                                                                        <li
+                                                                                            class="flex items-center px-2 py-0.5 rounded border border-gray-300 bg-gray-50 text-gray-700">
+                                                                                            <span class="h-4 w-4 inline-flex mr-2">
+                                                                                                <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"
+                                                                                                    fill="#000000">
+                                                                                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                                                                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
+                                                                                                        stroke-linejoin="round"></g>
+                                                                                                    <g id="SVGRepo_iconCarrier">
+                                                                                                        <path fill="#666666"
+                                                                                                            d="M256 17.108c-75.73 0-137.122 61.392-137.122 137.122.055 23.25 6.022 46.107 11.58 56.262L256 494.892l119.982-274.244h-.063c11.27-20.324 17.188-43.18 17.202-66.418C393.122 78.5 331.73 17.108 256 17.108zm0 68.56a68.56 68.56 0 0 1 68.56 68.562A68.56 68.56 0 0 1 256 222.79a68.56 68.56 0 0 1-68.56-68.56A68.56 68.56 0 0 1 256 85.67z">
+                                                                                                        </path>
+                                                                                                    </g>
+                                                                                                </svg>
+                                                                                            </span>{{ $stop->label }}</li>
+                                                                                    @endforeach
+                                                                                </ul>
+                                                                            </div>
+                                                                        @endif
                                                                     </div>
 
                                                                     <div class="flex items-center relative">
@@ -138,33 +194,50 @@
                                                                             <span
                                                                                 class="bg-gray-200 rounded-full w-7 h-7 -top-[6px] -ml-[12px] md:-ml-[9px] absolute flex justify-center items-center">
                                                                                 <img class="w-5 h-5 object-contain"
-                                                                                    src="{{ asset('./images/new-21-search-bar-to.png') }}" alt="">
+                                                                                    src="{{ asset('./images/new-21-search-bar-to.png') }}"
+                                                                                    alt="">
                                                                             </span>
                                                                         </div>
-                                                                        <div class="ml-12 md:ml-20">
-                                                                            <p class="font-bold text-xl text-black">
-                                                                                @isset($rideDetailPage->card_section_to_label)
-                                                                                    {{ $rideDetailPage->card_section_to_label }}
-                                                                                @endisset
-                                                                            </p>
-                                                                            <div class="flex gap-2">
-                                                                                <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
+                                                                        <div class="ml-12 md:ml-20 items-baseline">
+                                                                            <h4 class="flex gap-2 items-baseline text-xl text-black">
+                                                                                {{ $rideDetailPage->card_section_to_label ?? 'To' }}
+                                                                            </h4>
+                                                                            <div class="flex gap-2 items-baseline">
+                                                                                <h3
+                                                                                    class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                                                                                     {{ $to }}.
                                                                                 </h3>
-                                                                                <p class="text-sm mt-2">
-                                                                                    Drop-off at: {{ $booking->ride->dropoff }}
+                                                                                <label class="text-black">
+                                                                                    {{ $rideDetailPage->dropoff_at_label ?? 'Drop-off at' }}:
+                                                                                </label>
+                                                                                <p class="">
+                                                                                    {{ $booking->ride->dropoff }}
                                                                                 </p>
                                                                             </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <div class="mt-1 md:mt-4 order-1 md:order-2 md:mb-4">
-                                                                <p class="text-xl font-semibold text-primary">${{ number_format(floatval($booking->price), 2) }} <small>
-                                                                    @isset($rideDetailPage->card_section_per_seat)
-                                                                    {{ $rideDetailPage->card_section_per_seat }}
-                                                                @endisset
-                                                                </small></p>
+
+                                                            <div class="col-span-2 px-4">
+                                                                <div class="grid justify-end mt-4">
+                                                                    <div class="flex items-center justify-end gap-2 mb-2">
+                                                                        <span class="text-green-600 p-1 px-2 rounded text-sm bg-green-100">
+                                                                            Completed
+                                                                        </span>
+                                                                    </div>
+                                                                    <div class="pr-8">
+                                                                        <p class="font-medium">
+                                                                            {{ str_replace(':count', $booking->ride->seats, $rideDetailPage->total_seats_label ?? 'Total :count seats') }}
+                                                                        </p>
+                                                                    </div>
+                                                                    <p class="text-xl font-semibold text-primary">
+                                                                        ${{ number_format(floatval($booking->price / 100), 2) }}
+                                                                        <small>
+                                                                            {{ $rideDetailPage->card_section_per_seat ?? '' }}
+                                                                        </small>
+                                                                    </p>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         <div class="border-t border-gray-300 grid grid-cols-2 divide-x divide-gray-300">

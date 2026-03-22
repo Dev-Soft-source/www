@@ -207,6 +207,22 @@
                                                         $defaultDetail = $ride->rideDetail->first();
                                                         $from = optional($defaultDetail)->departure;
                                                         $to = optional($defaultDetail)->destination;
+
+                                                        $orderedStops = ($ride->rideStops ?? collect())->sortBy('stop_order')->values();
+                                                        $matchedFromStopIndex =
+                                                            isset($ride->matched_from_stop_index) &&
+                                                            $ride->matched_from_stop_index !== null
+                                                                ? (int) $ride->matched_from_stop_index
+                                                                : null;
+                                                        $segmentFromIndex = 0;
+                                                        if (
+                                                            $matchedFromStopIndex !== null &&
+                                                            $orderedStops->has($matchedFromStopIndex)
+                                                        ) {
+                                                            $segmentFromIndex = $matchedFromStopIndex;
+                                                        }
+                                                        $originIsMiddleOfParentRoute =
+                                                            $orderedStops->count() >= 2 && $segmentFromIndex > 0;
                                                     @endphp
                                                     @if ($defaultDetail)
                                                     <div class="relative even:bg-gray-200 odd:bg-white">
@@ -233,19 +249,18 @@
                                                                             $departureDateTime['timeLabel'];
                                                                     @endphp
                                                                     <div class="col-span-3">
-                                                                        <div class="flex flex-row items-center">
-                                                                        <p class="flex items-center space-x-2 font-semibold">
-                                                                            {{ $departureDateLabel }}
-                                                                            {{ $rideDetailPage->at_label }}
-                                                                            {{ $departureTimeLabel ?? 'N/A' }}
-                                                                        </p>
+                                                                        <div class="flex flex-row items-center flex-wrap gap-2">
+                                                                            <p class="flex items-center space-x-2 font-semibold">
+                                                                                {{ $departureDateLabel }}
+                                                                                {{ $rideDetailPage->at_label }}
+                                                                                {{ $departureTimeLabel ?? 'N/A' }}
+                                                                            </p>
                                                                             @if($ride->isPinkRide())
                                                                                 <img class="w-12 h-12 ml-2" src="{{ asset('home_page_icons/' . $postRidePage->features_option1->icon) }}" alt="">
                                                                             @endif
                                                                             @if($ride->isExtraCareRide())
                                                                                 <img class="w-12 h-12 ml-2" src="{{ asset('home_page_icons/' . $postRidePage->features_option2->icon) }}" alt="">
                                                                             @endif
-                                                                           
                                                                         </div>
                                                                         <div class="relative mt-5 text-left">
                                                                             <div class="items-center relative">
@@ -259,26 +274,37 @@
                                                                                     </span>
                                                                                 </div>
                                                                                 <div class="ml-12 md:ml-20">
-                                                                                    <p
-                                                                                        class="font-bold text-xl text-black">
-                                                                                        @isset($rideDetailPage->card_section_from_label)
-                                                                                            {{ $rideDetailPage->card_section_from_label }}
-                                                                                        @endisset
-                                                                                    </p>
+                                                                                    <h4
+                                                                                        class="flex gap-2 items-baseline text-xl text-black">
+                                                                                        {{ $findrideDetailPage->card_section_from_label ?? $rideDetailPage->from_label ?? 'From' }}
+                                                                                        @if ($originIsMiddleOfParentRoute)
+                                                                                            <span class="w-4 h-4 ml-2" data-tippy-content="{{ optional($findRidePage ?? null)->depends_on_other_stops_tooltip ?? 'This location depends on other stops' }}">
+                                                                                                <svg width="20px" height="20px" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                                                                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                                                                                    <g id="SVGRepo_iconCarrier">
+                                                                                                        <path d="M1.5 0C0.671573 0 0 0.671573 0 1.5C0 2.32843 0.671573 3 1.5 3C2.15311 3 2.70873 2.5826 2.91465 2H4.5C5.88071 2 7 3.11929 7 4.5V10.5C7 12.433 8.567 14 10.5 14H12.0854C12.2913 14.5826 12.8469 15 13.5 15C14.3284 15 15 14.3284 15 13.5C15 12.6716 14.3284 12 13.5 12C12.8469 12 12.2913 12.4174 12.0854 13H10.5C9.11929 13 8 11.8807 8 10.5V4.5C8 2.567 6.433 1 4.5 1H2.91465C2.70873 0.417404 2.15311 0 1.5 0Z" fill="#0066eb"></path>
+                                                                                                    </g>
+                                                                                                </svg>
+                                                                                            </span>
+                                                                                        @endif
+                                                                                    </h4>
                                                                                     <div class="flex gap-2 items-baseline">
                                                                                         <h3
                                                                                             class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                                                                                             {{ $from }}.
                                                                                         </h3>
-                                                                                        <p class="text-sm mt-2">
+                                                                                        <label class="text-black">
                                                                                             {{ $rideDetailPage->pickup_at_label ?? 'Pick-up at' }}:
+                                                                                        </label>
+                                                                                        <p class="">
                                                                                             {{ $ride->pickup }}
                                                                                         </p>
                                                                                     </div>
                                                                                 </div>
                                                                                 @if ($ride->rideStops->isNotEmpty() && $ride->rideStops->count() > 2)
                                                                                     <div class="ml-12 md:ml-20 flex">
-                                                                                        <p class="font-bold text-xl text-black">Stops on the way</p>
+                                                                                        <label class="text-xl text-black">Stops on the way</label>
                                                                                         <ul class="flex flex-col gap-2 text-sm ml-4 mt-1 mb-4">
                                                                                             @foreach ($ride->rideStops as $stop)
                                                                                                 @continue($loop->first || $loop->last)
@@ -315,17 +341,17 @@
                                                                                     </span>
                                                                                 </div>
                                                                                 <div class="ml-12 md:ml-20 items-baseline">
-                                                                                    <p class="font-bold text-xl text-black">
-                                                                                        @isset($rideDetailPage->card_section_to_label)
-                                                                                            {{ $rideDetailPage->card_section_to_label }}
-                                                                                        @endisset
-                                                                                    </p>
-                                                                                    <div class="flex gap-2">
+                                                                                    <h4 class="flex gap-2 items-baseline text-xl text-black">
+                                                                                        {{ $findrideDetailPage->card_section_to_label ?? $rideDetailPage->to_label ?? 'To' }}
+                                                                                    </h4>
+                                                                                    <div class="flex gap-2 items-baseline">
                                                                                         <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                                                                                             {{ $to }}.
                                                                                         </h3>
-                                                                                        <p class="text-sm mt-2">
+                                                                                        <label class="text-black">
                                                                                             {{ $rideDetailPage->dropoff_at_label ?? 'Drop-off at' }}:
+                                                                                        </label>
+                                                                                        <p class="">
                                                                                             {{ $ride->dropoff }}
                                                                                         </p>
                                                                                     </div>
@@ -333,7 +359,7 @@
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                    
+
                                                                     <div class="col-span-2 px-4">
                                                                         <div class="grid justify-end mt-4">
                                                                             <div class="pr-8">
@@ -342,11 +368,9 @@
                                                                                 </p>
                                                                             </div>
                                                                             <p class="text-xl font-semibold text-primary">
-                                                                                ${{ number_format(floatval($ride->detail->price/100), 2) }}
+                                                                                ${{ number_format(floatval($defaultDetail->price / 100), 2) }}
                                                                                 <small>
-                                                                                    @isset($rideDetailPage->card_section_per_seat)
-                                                                                        {{ $rideDetailPage->card_section_per_seat }}
-                                                                                    @endisset
+                                                                                    {{ $findrideDetailPage->card_section_per_seat ?? $rideDetailPage->per_seat_label }}
                                                                                 </small>
                                                                             </p>
                                                                             @php
@@ -379,14 +403,14 @@
                                                                 <div
                                                                     class="border-t border-gray-300 grid sm:grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-300">
                                                                     <div class="flex items-center justify-start p-4">
-                                                                        <p class="font-semibold">
+                                                                        <label class="text-black">
                                                                             @isset($findrideDetailPage->card_section_booked)
                                                                                 {{ $findrideDetailPage->card_section_booked }}:
                                                                             @endisset
-                                                                        </p>
+                                                                        </label>
                                                                         <p class="text-primary font-semibold ml-2">
                                                                             {{ $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {
-                                                                                    $query->whereNull('deleted_at'); // Exclude soft deleted users
+                                                                                    $query->whereNull('deleted_at');
                                                                                 })->sum('seats') }}
                                                                             @isset($findrideDetailPage->card_section_seats)
                                                                                 {{ $findrideDetailPage->card_section_seats }}
@@ -395,36 +419,38 @@
                                                                     </div>
                                                                     <div class="p-4">
                                                                         <div class="flex items-center justify-between">
-                                                                            <p class="font-semibold">
+                                                                            <label class="text-black">
                                                                                 @isset($findrideDetailPage->card_section_seats_fee)
                                                                                     {{ $findrideDetailPage->card_section_seats_fee }}
                                                                                 @endisset
-                                                                                : </p>
+                                                                                :
+                                                                            </label>
                                                                             <p class="text-primary font-semibold">
 
-                                                                                ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') * floatval($ride->detail->price) / 100),2) }}
+                                                                                ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') * floatval($defaultDetail->price) / 100),2) }}
                                                                             </p>
                                                                         </div>
 
                                                                         <div class="flex items-center justify-between">
-                                                                            <p class="font-semibold">
+                                                                            <label class="text-black">
                                                                                 @isset($findrideDetailPage->card_section_booking_fee)
                                                                                     {{ $findrideDetailPage->card_section_booking_fee }}
                                                                                 @endisset
-                                                                                : </p>
+                                                                                :
+                                                                            </label>
                                                                             <p class="text-primary font-semibold">
                                                                                 ${{ number_format(floatval($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')), 2) }}
                                                                             </p>
                                                                         </div>
 
                                                                         <div class="flex items-center justify-between">
-                                                                            <p class="font-semibold">
+                                                                            <label class="text-black">
                                                                                 @isset($findrideDetailPage->card_section_amount)
                                                                                     {{ $findrideDetailPage->card_section_amount }}
                                                                                 @endisset
-                                                                                : </p>
+                                                                                : </label>
                                                                             <p class="text-primary font-semibold">
-                                                                                ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') *floatval($ride->detail->price / 100) + $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')),2) }}
+                                                                                ${{ number_format(floatval($ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') *floatval($defaultDetail->price / 100) + $ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)->sum('booking_credit')),2) }}
                                                                             </p>
                                                                         </div>
                                                                     </div>

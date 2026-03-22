@@ -184,7 +184,7 @@
             </span>
         </div>
         <div class="ml-12 md:ml-20 items-baseline">
-            <label class="flex gap-2 items-baseline text-xl text-black">
+            <h4 class="flex gap-2 items-baseline text-xl text-black">
                 {{ $findRidePage->card_section_to_label }}
                 @if ($departureIsMiddleOfParentRoute)
                     <span class="w-4 h-4 ml-2" data-tippy-content="{{ $findRidePage->depends_on_other_stops_tooltip }}">
@@ -197,7 +197,7 @@
                         </svg>
                     </span>
                 @endif
-            </label>
+            </h4>
             <div class="flex gap-2 items-baseline">
                 <h3 class="text-primary font-FuturaMdCnBT text-xl md:text-2xl md:mb-4">
                     {{ $destination }}.
