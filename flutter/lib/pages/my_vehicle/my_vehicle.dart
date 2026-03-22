@@ -40,7 +40,7 @@ class MyVehiclePage extends GetView<MyVehicleController> {
                 Container(
                   padding: const EdgeInsets.all(15.0),
                   child: SingleChildScrollView(
-                    controller: controller.scrollController,
+                    controller: controller.listScrollController,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

@@ -2,6 +2,86 @@ import 'package:flutter/material.dart';
 
 import '../../consts/constFileLink.dart';
 
+TextStyle appButtonTextStyle({Color textColor = Colors.white, context}) {
+  return TextStyle(
+    color: textColor,
+    fontFamily: buttonFontFamily,
+    fontSize: context == null
+        ? buttonFontSize
+        : getValueForScreenType<double>(
+            context: context,
+            mobile: buttonFontSize,
+            tablet: buttonFontSize,
+          ),
+  );
+}
+
+TextStyle appPlaceholderTextStyle(
+    {Color textColor = Colors.grey, context, double? opacity}) {
+  final resolvedColor =
+      opacity == null ? textColor : textColor.withOpacity(opacity);
+  return TextStyle(
+    color: resolvedColor,
+    fontFamily: placeholderFontFamily,
+    fontSize: context == null
+        ? placeholderFontSize
+        : getValueForScreenType<double>(
+            context: context,
+            mobile: placeholderFontSize,
+            tablet: placeholderFontSize,
+          ),
+  );
+}
+
+TextStyle appDescriptiveTextStyle(
+    {Color textColor = textColor, context, double? opacity}) {
+  final resolvedColor =
+      opacity == null ? textColor : textColor.withOpacity(opacity);
+  return TextStyle(
+    color: resolvedColor,
+    fontFamily: descriptiveFontFamily,
+    fontSize: context == null
+        ? descriptiveFontSize
+        : getValueForScreenType<double>(
+            context: context,
+            mobile: descriptiveFontSize,
+            tablet: descriptiveFontSize,
+          ),
+  );
+}
+
+Widget descriptiveText(
+    {String title = "",
+    Color textColor = textColor,
+    context,
+    double? opacity,
+    TextAlign? textAlign}) {
+  return Text(
+    title,
+    textAlign: textAlign,
+    style: appDescriptiveTextStyle(
+      textColor: textColor,
+      context: context,
+      opacity: opacity,
+    ),
+  );
+}
+
+Widget buttonLabelText(
+    {String title = "",
+    Color textColor = Colors.white,
+    context,
+    TextAlign textAlign = TextAlign.center}) {
+  return Text(
+    title,
+    textAlign: textAlign,
+    style: appButtonTextStyle(
+      textColor: textColor,
+      context: context,
+    ),
+  );
+}
+
 Widget txt44Size(
     {String title = "",
     String fontFamily = regular,

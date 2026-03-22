@@ -35,7 +35,8 @@ class MyVehicleController extends GetxController {
   var errorList = List.empty(growable: true).obs;
   final errors = [].obs;
   var vehicleId = 0.obs;
-  ScrollController scrollController = ScrollController();
+  final ScrollController listScrollController = ScrollController();
+  final ScrollController formScrollController = ScrollController();
   var page = 1;
   var removeCarPhoto = false.obs;
 
@@ -167,7 +168,8 @@ class MyVehicleController extends GetxController {
   @override
   void onClose() {
     super.onClose();
-    scrollController.dispose();
+    listScrollController.dispose();
+    formScrollController.dispose();
     makeTextEditingController.dispose();
     modelTextEditingController.dispose();
     licenseNumberTextEditingController.dispose();
@@ -305,9 +307,13 @@ class MyVehicleController extends GetxController {
   }
 
   void paginateVehicleList() {
-    scrollController.addListener(() async {
-      if (scrollController.position.pixels ==
-          scrollController.position.maxScrollExtent) {
+    listScrollController.addListener(() async {
+      if (!listScrollController.hasClients || isOverlayLoading.value) {
+        return;
+      }
+
+      final position = listScrollController.position;
+      if (position.pixels >= position.maxScrollExtent) {
         page++;
         await getMoreVehicleList();
       }
@@ -664,7 +670,7 @@ class MyVehicleController extends GetxController {
     }
 
     // Scroll to the calculated position with some margin
-    scrollController.animateTo(
+    formScrollController.animateTo(
       position - screenHeight / 4, // This adjusts the position dynamically
       duration: Duration(milliseconds: 300),
       curve: Curves.easeInOut,

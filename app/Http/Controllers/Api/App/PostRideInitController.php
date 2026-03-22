@@ -173,8 +173,13 @@ class PostRideInitController extends Controller
             'min' => trans('validation.min.numeric'),
         ];
 
+        $postRidePageData = $postRidePage ? $postRidePage->toArray() : null;
+        if ($postRidePageData !== null) {
+            $postRidePageData['indicates_required_field_text'] = $postRidePage->indicates_required_field_text;
+        }
+
         return [
-            'postRidePage' => $postRidePage,
+            'postRidePage' => $postRidePageData,
             'messages' => $messages,
             'validationMessages' => $validationMessages,
         ];
@@ -306,32 +311,28 @@ class PostRideInitController extends Controller
      */
     private function getPreferencesData($langId)
     {
-        $preferencesOptions = PostRidePageSettingDetail::select(
-            'post_ride_page_setting_detail.smoking_option1',
-            'post_ride_page_setting_detail.smoking_option2',
-            'post_ride_page_setting_detail.animals_option1',
-            'post_ride_page_setting_detail.animals_option2',
-            'post_ride_page_setting_detail.animals_option3'
-        )
-        ->join('languages', 'languages.id', '=', 'post_ride_page_setting_detail.language_id')
-        ->where('languages.id', $langId)
-        ->first();
+        $groups = $this->getRideFeatureOptionGroups($langId);
+        $smokingOptions = collect($groups->get('smoking_allowed', collect()))
+            ->sortBy('id')
+            ->values();
+        $petOptions = collect($groups->get('pets_allowed', collect()))
+            ->sortBy('id')
+            ->values();
 
-        if ($preferencesOptions) {
-            // Add labels for each option
-            $preferencesOptions->smoking_option1_label = $preferencesOptions->smoking_option1 ?
-                FeaturesSettingDetail::whereFeaturesSettingId($preferencesOptions->smoking_option1)->whereLanguageId($langId)->value('name') : null;
-            $preferencesOptions->smoking_option2_label = $preferencesOptions->smoking_option2 ?
-                FeaturesSettingDetail::whereFeaturesSettingId($preferencesOptions->smoking_option2)->whereLanguageId($langId)->value('name') : null;
-            $preferencesOptions->animals_option1_label = $preferencesOptions->animals_option1 ?
-                FeaturesSettingDetail::whereFeaturesSettingId($preferencesOptions->animals_option1)->whereLanguageId($langId)->value('name') : null;
-            $preferencesOptions->animals_option2_label = $preferencesOptions->animals_option2 ?
-                FeaturesSettingDetail::whereFeaturesSettingId($preferencesOptions->animals_option2)->whereLanguageId($langId)->value('name') : null;
-            $preferencesOptions->animals_option3_label = $preferencesOptions->animals_option3 ?
-                FeaturesSettingDetail::whereFeaturesSettingId($preferencesOptions->animals_option3)->whereLanguageId($langId)->value('name') : null;
-        }
-
-        return ['preferencesOptions' => $preferencesOptions];
+        return [
+            'preferencesOptions' => [
+                'smoking_option1' => $smokingOptions->get(0)?->features_setting_id,
+                'smoking_option2' => $smokingOptions->get(1)?->features_setting_id,
+                'smoking_option1_label' => $smokingOptions->get(0)?->name,
+                'smoking_option2_label' => $smokingOptions->get(1)?->name,
+                'animals_option1' => $petOptions->get(0)?->features_setting_id,
+                'animals_option2' => $petOptions->get(1)?->features_setting_id,
+                'animals_option3' => $petOptions->get(2)?->features_setting_id,
+                'animals_option1_label' => $petOptions->get(0)?->name,
+                'animals_option2_label' => $petOptions->get(1)?->name,
+                'animals_option3_label' => $petOptions->get(2)?->name,
+            ],
+        ];
     }
 
     /**
@@ -339,38 +340,16 @@ class PostRideInitController extends Controller
      */
     private function getRideFeaturesData($langId)
     {
-        $featuresLabels = [];
-        $featuresOptions = PostRidePageSettingDetail::select(
-            'post_ride_page_setting_detail.features_option1', 'post_ride_page_setting_detail.features_option2',
-            'post_ride_page_setting_detail.features_option3', 'post_ride_page_setting_detail.features_option4',
-            'post_ride_page_setting_detail.features_option5', 'post_ride_page_setting_detail.features_option6',
-            'post_ride_page_setting_detail.features_option7', 'post_ride_page_setting_detail.features_option8',
-            'post_ride_page_setting_detail.features_option9', 'post_ride_page_setting_detail.features_option10',
-            'post_ride_page_setting_detail.features_option11', 'post_ride_page_setting_detail.features_option12',
-            'post_ride_page_setting_detail.features_option13', 'post_ride_page_setting_detail.features_option14',
-            'post_ride_page_setting_detail.features_option15', 'post_ride_page_setting_detail.features_option16'
-        )
-        ->join('languages', 'languages.id', '=', 'post_ride_page_setting_detail.language_id')
-        ->where('languages.id', $langId)
-        ->first();
+        $featureGroup = $this->getRideFeatureOptionGroups($langId)->get('features', collect());
 
-        if ($featuresOptions) {
-            for ($i = 1; $i <= 16; $i++) {
-                $optionField = "features_option{$i}";
-                if ($featuresOptions->$optionField) {
-                    $name = FeaturesSettingDetail::whereFeaturesSettingId($featuresOptions->$optionField)
-                        ->whereLanguageId($langId)
-                        ->value('name');
-                    $featuresLabels[] = $name ?? null;
-                } else {
-                    $featuresLabels[] = null;
-                }
-            }
-        }
+        $orderedFeatures = collect($featureGroup)
+            ->sortBy('id')
+            ->filter(fn($feature) => $feature->id >= 1 && $feature->id <= 16)
+            ->values();
 
         return [
-            'featuresOptions' => $featuresOptions ? array_values($featuresOptions->toArray()) : [],
-            'featuresLabels' => $featuresLabels,
+            'featuresOptions' => $orderedFeatures->pluck('features_setting_id')->values()->all(),
+            'featuresLabels' => $orderedFeatures->pluck('name')->values()->all(),
         ];
     }
 
@@ -407,36 +386,23 @@ class PostRideInitController extends Controller
      */
     private function getBookingOptionsData($langId)
     {
-        $bookingLabels = [];
-        $bookingOptions = PostRidePageSettingDetail::select('post_ride_page_setting_detail.booking_option1', 'post_ride_page_setting_detail.booking_option2')
-            ->join('languages', 'languages.id', '=', 'post_ride_page_setting_detail.language_id')
-            ->where('languages.id', $langId)
-            ->first();
-
-        if ($bookingOptions) {
-            if ($bookingOptions->booking_option1) {
-                $name = FeaturesSettingDetail::whereFeaturesSettingId($bookingOptions->booking_option1)->whereLanguageId($langId)->value('name');
-                $bookingLabels[] = $name ?? null;
-            } else {
-                $bookingLabels[] = null;
-            }
-            if ($bookingOptions->booking_option2) {
-                $name = FeaturesSettingDetail::whereFeaturesSettingId($bookingOptions->booking_option2)->whereLanguageId($langId)->value('name');
-                $bookingLabels[] = $name ?? null;
-            } else {
-                $bookingLabels[] = null;
-            }
-        }
-
-        $bookingTooltips = PostRidePageSettingDetail::select('post_ride_page_setting_detail.booking_option1_tooltip', 'post_ride_page_setting_detail.booking_option2_tooltip')
-            ->join('languages', 'languages.id', '=', 'post_ride_page_setting_detail.language_id')
-            ->where('languages.id', $langId)
-            ->first();
+        $bookingMethodOptions = collect($this->getRideFeatureOptionGroups($langId)->get('booking_method', collect()))
+            ->sortBy('id')
+            ->values();
 
         return [
-            'bookingOptions' => $bookingOptions ? array_values($bookingOptions->toArray()) : [],
-            'bookingLabels' => $bookingLabels,
-            'bookingTooltips' => $bookingTooltips ? array_values($bookingTooltips->toArray()) : [],
+            'bookingOptions' => $bookingMethodOptions
+                ->pluck('features_setting_id')
+                ->values()
+                ->all(),
+            'bookingLabels' => $bookingMethodOptions
+                ->pluck('name')
+                ->values()
+                ->all(),
+            'bookingTooltips' => $bookingMethodOptions
+                ->pluck('tooltip')
+                ->values()
+                ->all(),
         ];
     }
 
@@ -445,36 +411,23 @@ class PostRideInitController extends Controller
      */
     private function getCancellationOptionsData($langId)
     {
-        $cancellationLabels = [];
-        $cancellationOptions = PostRidePageSettingDetail::select('post_ride_page_setting_detail.cancellation_policy_label1', 'post_ride_page_setting_detail.cancellation_policy_label2')
-            ->join('languages', 'languages.id', '=', 'post_ride_page_setting_detail.language_id')
-            ->where('languages.id', $langId)
-            ->first();
-
-        if ($cancellationOptions) {
-            if ($cancellationOptions->cancellation_policy_label1) {
-                $name = FeaturesSettingDetail::whereFeaturesSettingId($cancellationOptions->cancellation_policy_label1)->whereLanguageId($langId)->value('name');
-                $cancellationLabels[] = $name ?? null;
-            } else {
-                $cancellationLabels[] = null;
-            }
-            if ($cancellationOptions->cancellation_policy_label2) {
-                $name = FeaturesSettingDetail::whereFeaturesSettingId($cancellationOptions->cancellation_policy_label2)->whereLanguageId($langId)->value('name');
-                $cancellationLabels[] = $name ?? null;
-            } else {
-                $cancellationLabels[] = null;
-            }
-        }
-
-        $cancellationTooltips = PostRidePageSettingDetail::select('post_ride_page_setting_detail.cancellation_policy_label1_tooltip', 'post_ride_page_setting_detail.cancellation_policy_label2_tooltip')
-            ->join('languages', 'languages.id', '=', 'post_ride_page_setting_detail.language_id')
-            ->where('languages.id', $langId)
-            ->first();
+        $cancellationOptions = collect($this->getRideFeatureOptionGroups($langId)->get('cancellation', collect()))
+            ->sortBy('id')
+            ->values();
 
         return [
-            'cancellationOptions' => $cancellationOptions ? array_values($cancellationOptions->toArray()) : [],
-            'cancellationLabels' => $cancellationLabels,
-            'cancellationTooltips' => $cancellationTooltips ? array_values($cancellationTooltips->toArray()) : [],
+            'cancellationOptions' => $cancellationOptions
+                ->pluck('features_setting_id')
+                ->values()
+                ->all(),
+            'cancellationLabels' => $cancellationOptions
+                ->pluck('name')
+                ->values()
+                ->all(),
+            'cancellationTooltips' => $cancellationOptions
+                ->pluck('tooltip')
+                ->values()
+                ->all(),
         ];
     }
 
@@ -483,45 +436,23 @@ class PostRideInitController extends Controller
      */
     private function getLuggageOptionsData($langId)
     {
-        $luggageLabels = [];
-        $luggageOptions = PostRidePageSettingDetail::select(
-            'post_ride_page_setting_detail.luggage_option1',
-            'post_ride_page_setting_detail.luggage_option2',
-            'post_ride_page_setting_detail.luggage_option3',
-            'post_ride_page_setting_detail.luggage_option4',
-            'post_ride_page_setting_detail.luggage_option5'
-        )
-        ->join('languages', 'languages.id', '=', 'post_ride_page_setting_detail.language_id')
-        ->where('languages.id', $langId)
-        ->first();
-
-        if ($luggageOptions) {
-            for ($i = 1; $i <= 5; $i++) {
-                $optionField = "luggage_option{$i}";
-                if ($luggageOptions->$optionField) {
-                    $name = FeaturesSettingDetail::whereFeaturesSettingId($luggageOptions->$optionField)->whereLanguageId($langId)->value('name');
-                    $luggageLabels[] = $name ?? null;
-                } else {
-                    $luggageLabels[] = null;
-                }
-            }
-        }
-
-        $luggageTooltips = PostRidePageSettingDetail::select(
-            'post_ride_page_setting_detail.luggage_option1_tooltip',
-            'post_ride_page_setting_detail.luggage_option2_tooltip',
-            'post_ride_page_setting_detail.luggage_option3_tooltip',
-            'post_ride_page_setting_detail.luggage_option4_tooltip',
-            'post_ride_page_setting_detail.luggage_option5_tooltip'
-        )
-        ->join('languages', 'languages.id', '=', 'post_ride_page_setting_detail.language_id')
-        ->where('languages.id', $langId)
-        ->first();
+        $luggageOptions = collect($this->getRideFeatureOptionGroups($langId)->get('luggage_size', collect()))
+            ->sortBy('id')
+            ->values();
 
         return [
-            'luggageOptions' => $luggageOptions ? array_values($luggageOptions->toArray()) : [],
-            'luggageLabels' => $luggageLabels,
-            'luggageTooltips' => $luggageTooltips ? array_values($luggageTooltips->toArray()) : [],
+            'luggageOptions' => $luggageOptions
+                ->pluck('features_setting_id')
+                ->values()
+                ->all(),
+            'luggageLabels' => $luggageOptions
+                ->pluck('name')
+                ->values()
+                ->all(),
+            'luggageTooltips' => $luggageOptions
+                ->pluck('tooltip')
+                ->values()
+                ->all(),
         ];
     }
 
@@ -530,41 +461,23 @@ class PostRideInitController extends Controller
      */
     private function getPaymentOptionsData($langId)
     {
-        $paymentLabels = [];
-        $paymentOptions = PostRidePageSettingDetail::select(
-            'post_ride_page_setting_detail.payment_methods_option1',
-            'post_ride_page_setting_detail.payment_methods_option2',
-            'post_ride_page_setting_detail.payment_methods_option3'
-        )
-        ->join('languages', 'languages.id', '=', 'post_ride_page_setting_detail.language_id')
-        ->where('languages.id', $langId)
-        ->first();
-
-        if ($paymentOptions) {
-            for ($i = 1; $i <= 3; $i++) {
-                $optionField = "payment_methods_option{$i}";
-                if ($paymentOptions->$optionField) {
-                    $name = FeaturesSettingDetail::whereFeaturesSettingId($paymentOptions->$optionField)->whereLanguageId($langId)->value('name');
-                    $paymentLabels[] = $name ?? null;
-                } else {
-                    $paymentLabels[] = null;
-                }
-            }
-        }
-
-        $paymentTooltips = PostRidePageSettingDetail::select(
-            'post_ride_page_setting_detail.payment_methods_option1_tooltip',
-            'post_ride_page_setting_detail.payment_methods_option2_tooltip',
-            'post_ride_page_setting_detail.payment_methods_option3_tooltip'
-        )
-        ->join('languages', 'languages.id', '=', 'post_ride_page_setting_detail.language_id')
-        ->where('languages.id', $langId)
-        ->first();
+        $paymentOptions = collect($this->getRideFeatureOptionGroups($langId)->get('payment_method', collect()))
+            ->sortBy('id')
+            ->values();
 
         return [
-            'paymentOptions' => $paymentOptions ? array_values($paymentOptions->toArray()) : [],
-            'paymentLabels' => $paymentLabels,
-            'paymentTooltips' => $paymentTooltips ? array_values($paymentTooltips->toArray()) : [],
+            'paymentOptions' => $paymentOptions
+                ->pluck('features_setting_id')
+                ->values()
+                ->all(),
+            'paymentLabels' => $paymentOptions
+                ->pluck('name')
+                ->values()
+                ->all(),
+            'paymentTooltips' => $paymentOptions
+                ->pluck('tooltip')
+                ->values()
+                ->all(),
         ];
     }
 

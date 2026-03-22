@@ -86,7 +86,7 @@ class PostRidePage extends GetView<PostRideController> {
                                 context: context,
                                 textColor: Colors.red,
                                 title:
-                                    '* ${controller.labelTextDetail['indicates_required_field_text'] ?? "* Indicates required fields"}'),
+                                    '* ${controller.labelTextDetail['indicates_required_field_text'] ?? "Indicates required fields"}'),
                             10.heightBox,
                             rideInfoWidget(
                               context: context,

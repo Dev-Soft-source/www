@@ -42,10 +42,10 @@ Widget userInfoWidget(
       // Sub-line
       Padding(
         padding: const EdgeInsets.only(bottom: 16.0),
-        child: txt20Size(
+        child: descriptiveText(
           title: "This is your profile. You can edit it from here.",
-          fontFamily: regular,
-          textColor: textColor.withOpacity(0.7),
+          textColor: textColor,
+          opacity: 0.7,
           context: context,
         ),
       ),
@@ -87,8 +87,8 @@ Widget userInfoWidget(
                               margin: Margins.zero,
                               padding: HtmlPaddings.zero,
                               color: Colors.white,
-                              fontFamily: regular,
-                              fontSize: FontSize(22),
+                              fontFamily: buttonFontFamily,
+                              fontSize: FontSize(buttonFontSize),
                               textAlign: TextAlign.center,
                             ),
                             "p": Style(
@@ -101,15 +101,14 @@ Widget userInfoWidget(
                             ),
                             "span": Style(
                               color: Colors.white,
-                              fontFamily: regular,
-                              fontSize: FontSize(22),
+                              fontFamily: buttonFontFamily,
+                              fontSize: FontSize(buttonFontSize),
                             ),
                           },
                         )
-                      : txt22Size(
+                      : buttonLabelText(
                           title: editProfileLabel,
                           textColor: Colors.white,
-                          fontFamily: regular,
                           context: context,
                         ),
                   onPressed: () {

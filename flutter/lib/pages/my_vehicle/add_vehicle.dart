@@ -45,7 +45,7 @@ class AddVehiclePage extends StatelessWidget {
                       tablet: 15.0,
                     )),
                     child: SingleChildScrollView(
-                      controller: controller.scrollController,
+                      controller: controller.formScrollController,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

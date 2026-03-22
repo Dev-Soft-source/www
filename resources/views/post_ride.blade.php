@@ -375,7 +375,7 @@
                 @endif
             </h1>
             <p>
-                <span class="text-red-500">* {{ $postRideSubDetailPage->feilds_required_text ?? 'Indicates required fields' }} </span>
+                <span class="text-red-500">* {{ $postRidePage->indicates_required_field_text ?? 'Indicates required fields' }} </span>
             </p>
         </div>
         <form method="POST"

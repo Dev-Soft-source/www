@@ -4119,7 +4119,12 @@ class RideController extends Controller
             'min' => trans('validation.min.numeric'),
         ];
 
-        $data = ['postRidePage' => $postRidePage, 'messages' => $messages, 'validationMessages' => $validationMessages];
+        $postRidePageData = $postRidePage ? $postRidePage->toArray() : null;
+        if ($postRidePageData !== null) {
+            $postRidePageData['indicates_required_field_text'] = $postRidePage->indicates_required_field_text;
+        }
+
+        $data = ['postRidePage' => $postRidePageData, 'messages' => $messages, 'validationMessages' => $validationMessages];
         return $this->successResponse($data, 'Post ride page get successfully');
     }
 

@@ -9,6 +9,7 @@ import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/helpers/format_message.dart';
 import 'package:proximaride_app/pages/stages/StageProvider.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
+import 'package:proximaride_app/services/logger_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../pages/navigation/navigationProvider.dart';
 
@@ -159,6 +160,39 @@ class Service extends GetxService {
     token = await secureStorage.read(key: "token") ?? "";
   }
 
+  Future<void> _clearLocalSessionAndNavigateToLogin() async {
+    token = "";
+    await secureStorage.deleteAll();
+    loginUserDetail.assignAll({
+      "id": 0,
+      "first_name": "",
+      "last_name": "",
+      "gender": "",
+      "profile_image": "",
+      "profile_original_image": "",
+      "countryId": "",
+      "country_code": "",
+      "email": "",
+      "step": "0",
+      "student": "0",
+      "driver": "0",
+      "student_card_exp_date": "",
+      "driver_average_rating": "",
+      "passenger_average_rating": "",
+      "user_average_rating": "",
+      "driver_total_ratings": "",
+      "passenger_total_ratings": "",
+      "user_total_ratings": "",
+      "langId": "",
+      "driver_liscense": ""
+    });
+    languages.clear();
+    langId.value = 0;
+    langIcon.value = "";
+    isOverlayLoading(false);
+    Get.offAllNamed('/login');
+  }
+
   logoutUser() async {
     bool isConfirmed = await showConfirmationDialog(
         "${logoutLabelTextDetail['confirmation_message_heading'] ?? "Are you sure you want to log out?"}");
@@ -167,42 +201,16 @@ class Service extends GetxService {
       try {
         isOverlayLoading.value = true;
         final currentToken = token;
-        await secureStorage.deleteAll();
-        NavigationProvider().removeFcmToken(currentToken).then((resp) async {
-          token = "";
-          loginUserDetail.assignAll({
-            "id": 0,
-            "first_name": "",
-            "last_name": "",
-            "gender": "",
-            "profile_image": "",
-            "profile_original_image": "",
-            "countryId": "",
-            "country_code": "",
-            "email": "",
-            "step": "0",
-            "student": "0",
-            "driver": "0",
-            "student_card_exp_date": "",
-            "driver_average_rating": "",
-            "passenger_average_rating": "",
-            "user_average_rating": "",
-            "driver_total_ratings": "",
-            "passenger_total_ratings": "",
-            "user_total_ratings": "",
-            "langId": "",
-            "driver_liscense": ""
-          });
-          languages.clear();
-          langId.value = 0;
-          langIcon.value = "";
-          isOverlayLoading(false);
-          Get.offAllNamed('/login');
-        }, onError: (err) {
-          isOverlayLoading(false);
-          showDialogue(err.toString(), type: "error");
-        });
+        if (currentToken.isNotEmpty) {
+          try {
+            await NavigationProvider().removeFcmToken(currentToken);
+          } catch (err) {
+            logger.warning("removeFcmToken failed during logout: $err");
+          }
+        }
+        await _clearLocalSessionAndNavigateToLogin();
       } catch (exception) {
+        isOverlayLoading(false);
         showDialogue(exception.toString(), type: "error");
       }
     }
@@ -219,42 +227,17 @@ class Service extends GetxService {
       try {
         isOverlayLoading.value = true;
         final currentToken = token;
-        await secureStorage.deleteAll();
-        NavigationProvider().removeFcmToken(currentToken).then((resp) async {
-          token = "";
-          loginUserDetail.assignAll({
-            "id": 0,
-            "first_name": "",
-            "last_name": "",
-            "gender": "",
-            "profile_image": "",
-            "profile_original_image": "",
-            "countryId": "",
-            "country_code": "",
-            "email": "",
-            "step": "0",
-            "student": "0",
-            "driver": "0",
-            "student_card_exp_date": "",
-            "driver_average_rating": "",
-            "passenger_average_rating": "",
-            "user_average_rating": "",
-            "driver_total_ratings": "",
-            "passenger_total_ratings": "",
-            "user_total_ratings": "",
-            "langId": "",
-            "driver_liscense": ""
-          });
-          languages.clear();
-          langId.value = 0;
-          langIcon.value = "";
-          isOverlayLoading(false);
-          Get.offAllNamed('/login');
-        }, onError: (err) {
-          isOverlayLoading(false);
-          showDialogue(err.toString(), type: "error");
-        });
+        if (currentToken.isNotEmpty) {
+          try {
+            await NavigationProvider().removeFcmToken(currentToken);
+          } catch (err) {
+            logger.warning(
+                "removeFcmToken failed during staged logout: $err");
+          }
+        }
+        await _clearLocalSessionAndNavigateToLogin();
       } catch (exception) {
+        isOverlayLoading(false);
         showDialogue(exception.toString(), type: "error");
       }
     }

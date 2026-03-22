@@ -2655,7 +2655,7 @@ h6,
   }
 
   .can-exp-a {
-    @apply text-base text-primary hover:text-secondary
+    @apply text-base text-primary hover:text-secondary;
   }
 
 
@@ -2693,7 +2693,7 @@ h6,
   }
 
   h6 {
-    @apply text-primary text-[28px] font-FuturaMdCnBT
+    @apply text-primary text-[28px] font-FuturaMdCnBT;
   }
 
   p {
@@ -2703,7 +2703,7 @@ h6,
   }
 
   a {
-    @apply text-base text-primary hover:text-secondary
+    @apply text-base text-primary hover:text-secondary;
   }
 
   /* Buttons */
@@ -2735,22 +2735,22 @@ h6,
   /* Footer */
 
   .footer-exp-heading {
-    @apply text-primary text-[28px] font-FuturaMdCnBT
+    @apply text-primary text-[28px] font-FuturaMdCnBT;
   }
 
   .footer-exp ul {
-    @apply font-FuturaMdCnBT text-primary
+    @apply font-FuturaMdCnBT text-primary;
   }
 
   .footer-exp ul li a {
-    @apply text-base text-white
+    @apply text-base text-white;
     font-family: 'Carlito', Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
   }
 
   /* Cards & input */
 
   .card-heading {
-    @apply text-xl font-FuturaMdCnBT text-secondary
+    @apply text-xl font-FuturaMdCnBT text-secondary;
   }
 
   .responsive-heading {
@@ -2760,15 +2760,15 @@ h6,
   }
 
   .card {
-    @apply rounded-md text-lg font-semibold text-secondary
+    @apply rounded-md text-lg font-semibold text-secondary;
   }
 
   .card-footer {
-    @apply text-lg text-white
+    @apply text-lg text-white;
   }
 
   .can-exp-input {
-    @apply border border-gray-300 text-base block w-full rounded px-3 py-1.5 focus:ring-blue-600 focus:ring-1
+    @apply border border-gray-300 text-base block w-full rounded px-3 py-1.5 focus:ring-blue-600 focus:ring-1;
   }
 
   label {
@@ -2832,7 +2832,7 @@ h6,
     }
 
     .card-heading {
-      @apply text-2xl font-FuturaMdCnBT text-secondary
+      @apply text-2xl font-FuturaMdCnBT text-secondary;
     }
 
     .button-exp-fill {
@@ -2860,20 +2860,20 @@ h6,
     }
 
     a {
-      @apply text-base text-primary hover:text-secondary
+      @apply text-base text-primary hover:text-secondary;
     }
 
     .can-exp-a {
-      @apply text-base text-primary hover:text-secondary
+      @apply text-base text-primary hover:text-secondary;
     }
 
     .footer-exp ul li a {
-      @apply text-base text-white
+      @apply text-base text-white;
       font-family: 'Carlito', Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
     }
 
     .can-exp-input {
-      @apply border border-gray-300 text-base block w-full rounded px-3 py-1.5 focus:ring-blue-600 focus:ring-1
+      @apply border border-gray-300 text-base block w-full rounded px-3 py-1.5 focus:ring-blue-600 focus:ring-1;
     }
 
     label {
@@ -2943,7 +2943,7 @@ h6,
     }
 
     .card-heading {
-      @apply text-3xl font-FuturaMdCnBT text-secondary
+      @apply text-3xl font-FuturaMdCnBT text-secondary;
     }
 
     .button-exp-fill {
@@ -2971,20 +2971,20 @@ h6,
     }
 
     a {
-      @apply text-lg text-primary hover:text-secondary
+      @apply text-lg text-primary hover:text-secondary;
     }
 
     .can-exp-a {
-      @apply text-lg text-primary hover:text-secondary
+      @apply text-lg text-primary hover:text-secondary;
     }
 
     .footer-exp ul li a {
-      @apply text-lg text-white
+      @apply text-lg text-white;
       font-family: 'Carlito', Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
     }
 
     .can-exp-input {
-      @apply border border-gray-300 text-lg block w-full rounded px-3 py-1.5 focus:ring-blue-600 focus:ring-1
+      @apply border border-gray-300 text-lg block w-full rounded px-3 py-1.5 focus:ring-blue-600 focus:ring-1;
     }
 
     label {
