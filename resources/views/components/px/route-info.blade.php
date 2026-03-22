@@ -90,7 +90,7 @@
 
 @if ($formattedDeparture)
 <div class="flex flex-row items-center">
-    <h4 class="flex items-center space-x-2 text-xl">
+    <p class="flex items-center font-semibold space-x-2 text-xl">
         {{ $formattedDeparture['dateLabel'] }}
         {{ $rideDetailPage->at_label }}
         {{ $formattedDeparture['timeLabel'] ?? 'N/A' }}
@@ -103,7 +103,7 @@
                 </svg>
             </span>
         @endif
-    </h4>
+    </p>
     @if($ride->isPinkRide())
         <img class="w-12 h-12 ml-2" src="{{ asset('home_page_icons/' . $postRidePage->features_option1->icon) }}" alt=""
         data-tippy-content="{{ $postRidePage->features_option1->tooltip }}">
