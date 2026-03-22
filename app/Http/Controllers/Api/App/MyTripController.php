@@ -576,7 +576,7 @@ class MyTripController extends Controller
             $ratings = Rating::where('status', 1)->where('type', '1')->get();
             // Calculate average rating
             $filteredRatings = $ratings->filter(function ($rating) use ($booking) {
-                return $rating->ride->added_by === $booking->ride->added_by;
+                return optional($rating->ride)->added_by === optional($booking->ride)->added_by;
             });
 
             $totalAverage = $filteredRatings->avg('average_rating');
@@ -1154,7 +1154,7 @@ class MyTripController extends Controller
             $ratings = Rating::where('status', 1)->where('type', '1')->get();
             // Calculate average rating
             $filteredRatings = $ratings->filter(function ($rating) use ($booking) {
-                return $rating->ride->added_by === $booking->ride->added_by;
+                return optional($rating->ride)->added_by === optional($booking->ride)->added_by;
             });
 
             $totalAverage = $filteredRatings->avg('average_rating');
@@ -1709,7 +1709,7 @@ class MyTripController extends Controller
             $ratings = Rating::where('status', 1)->where('type', '1')->get();
             // Calculate average rating
             $filteredRatings = $ratings->filter(function ($rating) use ($booking) {
-                return $rating->ride->added_by === $booking->ride->added_by;
+                return optional($rating->ride)->added_by === optional($booking->ride)->added_by;
             });
 
             $totalAverage = $filteredRatings->avg('average_rating');
@@ -3102,7 +3102,7 @@ class MyTripController extends Controller
             $ratings = Rating::where('status', 1)->where('type', '1')->get();
             // Calculate average rating
             $filteredRatings = $ratings->filter(function ($rating) use ($booking) {
-                return $rating->ride->added_by === $booking->ride->added_by;
+                return optional($rating->ride)->added_by === optional($booking->ride)->added_by;
             });
 
             $totalAverage = $filteredRatings->avg('average_rating');

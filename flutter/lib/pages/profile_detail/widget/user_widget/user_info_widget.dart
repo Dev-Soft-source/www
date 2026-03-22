@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/pages/profile_detail/widget/profile_image_widget.dart';
 import 'package:proximaride_app/pages/widgets/button_Widget.dart';
@@ -23,6 +24,7 @@ Widget userInfoWidget(
 
   // Extract first name from userName (which is "FirstName LastName")
   final firstName = userName.split(' ').first;
+  final hasHtml = editProfileLabel.contains('<') && editProfileLabel.contains('>');
 
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,12 +75,43 @@ Widget userInfoWidget(
                 8.heightBox,
                 // Edit Profile button below name
                 elevatedButtonWidget(
-                  textWidget: txt22Size(
-                    title: editProfileLabel,
-                    textColor: Colors.white,
-                    fontFamily: regular,
-                    context: context,
-                  ),
+                  textWidget: hasHtml
+                      ? Html(
+                          data: editProfileLabel,
+                          style: {
+                            "html": Style(
+                              margin: Margins.zero,
+                              padding: HtmlPaddings.zero,
+                            ),
+                            "body": Style(
+                              margin: Margins.zero,
+                              padding: HtmlPaddings.zero,
+                              color: Colors.white,
+                              fontFamily: regular,
+                              fontSize: FontSize(22),
+                              textAlign: TextAlign.center,
+                            ),
+                            "p": Style(
+                              margin: Margins.zero,
+                              padding: HtmlPaddings.zero,
+                            ),
+                            "div": Style(
+                              margin: Margins.zero,
+                              padding: HtmlPaddings.zero,
+                            ),
+                            "span": Style(
+                              color: Colors.white,
+                              fontFamily: regular,
+                              fontSize: FontSize(22),
+                            ),
+                          },
+                        )
+                      : txt22Size(
+                          title: editProfileLabel,
+                          textColor: Colors.white,
+                          fontFamily: regular,
+                          context: context,
+                        ),
                   onPressed: () {
                     Get.toNamed('/edit_profile');
                   },
