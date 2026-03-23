@@ -34,6 +34,7 @@ import 'package:proximaride_app/pages/edit_profile/edit_profile.dart';
 import 'package:proximaride_app/pages/location/state.dart';
 import 'package:proximaride_app/pages/email_address/update_email_address.dart';
 import 'package:proximaride_app/pages/login/login.dart';
+import 'package:proximaride_app/pages/messaging_page/MessagingController.dart';
 import 'package:proximaride_app/pages/messaging_page/messaging_page.dart';
 import 'package:proximaride_app/pages/my_phone_number/my_phone_number.dart';
 import 'package:proximaride_app/pages/my_phone_number/phone_number_verification.dart';
@@ -585,6 +586,11 @@ class MyAppState extends State<MyApp> {
         GetPage(
           name: '/messaging_page/:userId/:rideId/:type',
           page: () => const MessagingPage(),
+          binding: BindingsBuilder(() {
+            if (!Get.isRegistered<MessagingController>()) {
+              Get.lazyPut<MessagingController>(() => MessagingController());
+            }
+          }),
         ),
         GetPage(
           name: '/cancel_booking/:pageType',

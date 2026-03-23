@@ -94,6 +94,15 @@ class MessagingController extends GetxController {
     });
   }
 
+  bool _isNearBottom({double threshold = 120}) {
+    if (!scrollController.hasClients) {
+      return true;
+    }
+
+    final position = scrollController.position;
+    return (position.maxScrollExtent - position.pixels) <= threshold;
+  }
+
   void scrollToBottom({bool animated = true}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!scrollController.hasClients) {
@@ -138,6 +147,9 @@ class MessagingController extends GetxController {
     }
 
     if (data['messages'] is List) {
+      final shouldAutoScroll =
+          messagesList.isEmpty || !scrollController.hasClients || _isNearBottom();
+
       final pendingMessages = messagesList
           .where((message) => message is Map && message['delivery_status'] == 'pending')
           .map((message) => Map<String, dynamic>.from(message))
@@ -182,7 +194,10 @@ class MessagingController extends GetxController {
         messagesList.clear();
       }
       messagesList.assignAll(incomingMessages);
-      scrollToBottom(animated: false);
+
+      if (shouldAutoScroll) {
+        scrollToBottom(animated: false);
+      }
     }
 
     if (data['chatsPage'] is Map) {
@@ -628,11 +643,14 @@ class MessagingController extends GetxController {
       }
 
       // Add the transformed message to the list
+      final shouldAutoScroll = _isNearBottom();
       messagesList.add(transformedMessage);
 
       // Refresh the list to trigger UI update
       messagesList.refresh();
-      scrollToBottom();
+      if (shouldAutoScroll) {
+        scrollToBottom();
+      }
 
       logger.info(
           'Message added to messagesList. Total messages: ${messagesList.length}');

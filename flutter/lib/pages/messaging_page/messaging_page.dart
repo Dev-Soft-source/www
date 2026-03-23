@@ -244,8 +244,15 @@ import '../widgets/network_cache_image_widget.dart';
 import '../widgets/progress_circular_widget.dart';
 import 'MessagingController.dart';
 
-class MessagingPage extends GetView<MessagingController> {
+class MessagingPage extends StatelessWidget {
   const MessagingPage({super.key});
+
+  MessagingController get controller {
+    if (Get.isRegistered<MessagingController>()) {
+      return Get.find<MessagingController>();
+    }
+    return Get.put(MessagingController());
+  }
 
   List<dynamic> _sortedMessages() {
     final sorted = List<dynamic>.from(controller.messagesList);
