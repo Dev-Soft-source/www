@@ -28,7 +28,10 @@ class SearchRideResultPage extends StatelessWidget {
           appBar: AppBar(
             backgroundColor: primaryColor,
             title: Obx(() => secondAppBarWidget(context: context, title: "${controller.labelTextDetail['main_heading'] ?? "Search result"}")),
-            leading: const BackButton(color: Colors.white),
+            leading: IconButton(
+              onPressed: controller.handleBackNavigation,
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+            ),
           ),
           body: Obx(() {
             if (controller.isLoading.value == true) {
@@ -132,7 +135,17 @@ class SearchRideResultPage extends StatelessWidget {
 
                               return InkWell(
                                 onTap: () async {
-                                    await controller.checkBooking(controller.rides[index]['id'], controller.rides[index]['ride_detail'][0]['id']);
+                                    final rideDetail = controller.rides[index]['ride_detail'];
+                                    final tripDetailId =
+                                        rideDetail != null &&
+                                                rideDetail is List &&
+                                                rideDetail.isNotEmpty &&
+                                                rideDetail[0] != null
+                                            ? (rideDetail[0]['id'] ?? 0)
+                                            : 0;
+                                    await controller.checkBooking(
+                                        controller.rides[index]['id'],
+                                        tripDetailId);
                                 },
                                 child: Card(
                                   shape: RoundedRectangleBorder(

@@ -619,11 +619,13 @@ class Ride extends Model
 
     public static function searchRides(array $filters, ?User $user = null): LengthAwarePaginator
     {
+        \Log::info('filter', $filters);
         $query = static::query()
             ->with([
                 'driver',
                 'vehicle',
                 'bookings',
+                'detail',
                 'rideStops' => fn ($q) => $q->orderBy('stop_order'),
                 'rideStopSegments',
                 'rideDetail',
@@ -795,20 +797,30 @@ class Ride extends Model
             $query->where('booking_method', $filters['booking_method']);
         }
 
+        if (!empty($filters['payment_method'])) {
+            $query->where('payment_method', $filters['payment_method']);
+        }
+
         if (!empty($filters['vehicle_type'])) {
             $query->where('vehicle_type', self::normalizeRideVehicleTypeId($filters['vehicle_type']));
         }
 
         if (!empty($filters['luggage_size'])) {
-            $query->where('luggage', $filters['luggage_size']);
+            is_array($filters['luggage_size'])
+                ? $query->whereIn('luggage', array_map('intval', $filters['luggage_size']))
+                : $query->where('luggage', $filters['luggage_size']);
         }
 
         if (!empty($filters['smoking_allowed'])) {
-            $query->where('smoke', $filters['smoking_allowed']);
+            is_array($filters['smoking_allowed'])
+                ? $query->whereIn('smoke', array_map('intval', $filters['smoking_allowed']))
+                : $query->where('smoke', $filters['smoking_allowed']);
         }
 
         if (!empty($filters['pets_allowed'])) {
-            $query->where('animal_friendly', $filters['pets_allowed']);
+            is_array($filters['pets_allowed'])
+                ? $query->whereIn('animal_friendly', array_map('intval', $filters['pets_allowed']))
+                : $query->where('animal_friendly', $filters['pets_allowed']);
         }
 
         if (!empty($filters['women_only'])) {

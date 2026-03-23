@@ -20,7 +20,9 @@ class SearchRidePage extends GetView<SearchRideController> {
   const SearchRidePage({super.key});
   @override
   Widget build(BuildContext context) {
-    Get.put(SearchRideController());
+    final controller = Get.isRegistered<SearchRideController>()
+        ? Get.find<SearchRideController>()
+        : Get.put(SearchRideController());
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
@@ -28,7 +30,10 @@ class SearchRidePage extends GetView<SearchRideController> {
             context: context,
             title:
                 "${controller.labelTextDetail['main_heading'] ?? "Search ride"}")),
-        leading: const BackButton(color: Colors.white),
+        leading: IconButton(
+          onPressed: controller.handleBackNavigation,
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+        ),
       ),
       body: SafeArea(
         child: Obx(() {
@@ -126,12 +131,7 @@ class SearchRidePage extends GetView<SearchRideController> {
                             const Spacer(),
                             InkWell(
                                 onTap: () {
-                                  String temp =
-                                      controller.fromTextEditingController.text;
-                                  controller.fromTextEditingController.text =
-                                      controller.toTextEditingController.text;
-                                  controller.toTextEditingController.text =
-                                      temp;
+                                  controller.swapLocations();
                                 },
                                 child: Image.asset(locationSwapIcon,
                                     width: 35, height: 35)),
@@ -322,13 +322,8 @@ class SearchRidePage extends GetView<SearchRideController> {
                                   toText: controller.recentSearchList[index]
                                       ['to'],
                                   onTap: () async {
-                                    controller.fromTextEditingController.text =
-                                        controller.recentSearchList[index]
-                                            ['from'];
-                                    controller.toTextEditingController.text =
-                                        controller.recentSearchList[index]
-                                            ['to'];
-
+                                    controller.applyRecentSearch(
+                                        controller.recentSearchList[index]);
                                     await controller.getSearchRide(1);
                                   },
                                   cardBgColor: index % 2 == 0

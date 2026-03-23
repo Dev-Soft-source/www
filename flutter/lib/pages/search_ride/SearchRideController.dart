@@ -59,6 +59,8 @@ class SearchRideController extends GetxController {
   var noMoreData = false.obs;
   var filter = false.obs;
   var actionType = "".obs;
+  var fromCityId = 0.obs;
+  var toCityId = 0.obs;
   var pageLimit = 10;
   var page = 1;
   var searchTotal = 0.obs;
@@ -272,6 +274,8 @@ class SearchRideController extends GetxController {
         .getSearchRide(
             toTextEditingController.text,
             fromTextEditingController.text,
+            toCityId.value,
+            fromCityId.value,
             keywordTextEditingController.text,
             dateTextEditingController.text,
             driverNameEditingController.text,
@@ -387,6 +391,8 @@ class SearchRideController extends GetxController {
           .getSearchRide(
               toTextEditingController.text,
               fromTextEditingController.text,
+              toCityId.value,
+              fromCityId.value,
               keywordTextEditingController.text,
               dateTextEditingController.text,
               driverNameEditingController.text,
@@ -552,8 +558,14 @@ class SearchRideController extends GetxController {
                     "/book_seat/$rideId/${resp['data']['seats']}/$tripDetailId");
                 isAlreadyBooked.value = true;
               } else {
+                final query = Uri(queryParameters: {
+                  'from': fromTextEditingController.text,
+                  'to': toTextEditingController.text,
+                  'from_city_id': fromCityId.value.toString(),
+                  'to_city_id': toCityId.value.toString(),
+                }).query;
                 Get.toNamed(
-                    '/trip_detail/$rideId/findRide/findRide/$tripDetailId');
+                    '/trip_detail/$rideId/findRide/findRide/$tripDetailId?$query');
               }
             }
           }
@@ -741,6 +753,8 @@ class SearchRideController extends GetxController {
           .getSearchRide(
               toTextEditingController.text,
               fromTextEditingController.text,
+              toCityId.value,
+              fromCityId.value,
               keywordTextEditingController.text,
               dateTextEditingController.text,
               driverNameEditingController.text,
@@ -824,6 +838,42 @@ class SearchRideController extends GetxController {
     pet.value = "";
   }
 
+  void setOriginLocation({required String label, required int cityId}) {
+    fromTextEditingController.text = label;
+    fromCityId.value = cityId;
+    _removeFieldError('from');
+  }
+
+  void setDestinationLocation({required String label, required int cityId}) {
+    toTextEditingController.text = label;
+    toCityId.value = cityId;
+    _removeFieldError('to');
+  }
+
+  void swapLocations() {
+    final tempLabel = fromTextEditingController.text;
+    final tempCityId = fromCityId.value;
+    fromTextEditingController.text = toTextEditingController.text;
+    fromCityId.value = toCityId.value;
+    toTextEditingController.text = tempLabel;
+    toCityId.value = tempCityId;
+  }
+
+  void applyRecentSearch(Map<String, dynamic> recentSearch) {
+    fromTextEditingController.text = recentSearch['from']?.toString() ?? '';
+    toTextEditingController.text = recentSearch['to']?.toString() ?? '';
+    fromCityId.value = int.tryParse(
+            recentSearch['from_city_id']?.toString() ??
+                recentSearch['origin_city_id']?.toString() ??
+                '') ??
+        0;
+    toCityId.value = int.tryParse(
+            recentSearch['to_city_id']?.toString() ??
+                recentSearch['destination_city_id']?.toString() ??
+                '') ??
+        0;
+  }
+
   getPostRideSetting() async {
     try {
       PostRideProvider()
@@ -897,12 +947,18 @@ class SearchRideController extends GetxController {
 
   void _listenToFieldChanges() {
     fromTextEditingController.addListener(() {
+      if (fromTextEditingController.text.trim().isEmpty) {
+        fromCityId.value = 0;
+      }
       if (fromTextEditingController.text.trim().isNotEmpty) {
         _removeFieldError('from');
       }
     });
 
     toTextEditingController.addListener(() {
+      if (toTextEditingController.text.trim().isEmpty) {
+        toCityId.value = 0;
+      }
       if (toTextEditingController.text.trim().isNotEmpty) {
         _removeFieldError('to');
       }
@@ -915,5 +971,14 @@ class SearchRideController extends GetxController {
     if (index != -1) {
       errors.removeAt(index);
     }
+  }
+
+  void handleBackNavigation() {
+    if (Get.key.currentState?.canPop() ?? false) {
+      Get.back();
+      return;
+    }
+
+    Get.offNamed('/navigation');
   }
 }

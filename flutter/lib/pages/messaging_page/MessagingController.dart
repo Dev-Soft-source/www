@@ -126,6 +126,40 @@ class MessagingController extends GetxController {
     }
   }
 
+  void _syncChatUnreadCounts() {
+    if (!Get.isRegistered<ChatController>()) {
+      return;
+    }
+
+    final chatController = Get.find<ChatController>();
+    final currentUserId =
+        serviceController.loginUserDetail['id']?.toString() ?? '';
+
+    for (int i = 0; i < chatController.myChats.length; i++) {
+      final chat = chatController.myChats[i];
+      final senderId = chat['sender'] is Map
+          ? chat['sender']['id']?.toString() ?? ''
+          : '';
+      final receiverId = chat['receiver'] is Map
+          ? chat['receiver']['id']?.toString() ?? ''
+          : '';
+
+      if (senderId.isEmpty || receiverId.isEmpty) {
+        continue;
+      }
+
+      if (senderId == currentUserId) {
+        if (receiverId == userId.toString()) {
+          chatController.myChats[i]['unread_count'] = 0;
+        }
+      } else if (receiverId == userId.toString()) {
+        chatController.myChats[i]['unread_count'] = 0;
+      }
+    }
+
+    chatController.myChats.refresh();
+  }
+
   Future<void> _getMessages() async {
     isLoading(true);
     logger.info('Getting messages...');
@@ -147,27 +181,7 @@ class MessagingController extends GetxController {
           data != null &&
           data is Map &&
           data['messages'] != null) {
-        bool isRegistered = Get.isRegistered<ChatController>();
-
-        if (isRegistered) {
-          var chatController = Get.find<ChatController>();
-
-          for (int i = 0; i < chatController.myChats.length; i++) {
-            if (chatController.myChats[i]['sender']['id'].toString() ==
-                serviceController.loginUserDetail['id'].toString()) {
-              if (chatController.myChats[i]['receiver']['id'].toString() ==
-                  userId.toString()) {
-                chatController.myChats[i]['unread_count'] = 0;
-              }
-            } else {
-              if (chatController.myChats[i]['receiver']['id'].toString() ==
-                  userId.toString()) {
-                chatController.myChats[i]['unread_count'] = 0;
-              }
-            }
-          }
-          chatController.myChats.refresh();
-        }
+        _syncChatUnreadCounts();
         if (data['user'] is Map) {
           chatUserInfo.addAll(data['user']);
         } else {
@@ -222,27 +236,7 @@ class MessagingController extends GetxController {
             data != null &&
             data is Map &&
             data['messages'] != null) {
-          bool isRegistered = Get.isRegistered<ChatController>();
-
-          if (isRegistered) {
-            var chatController = Get.find<ChatController>();
-
-            for (int i = 0; i < chatController.myChats.length; i++) {
-              if (chatController.myChats[i]['sender']['id'].toString() ==
-                  serviceController.loginUserDetail['id'].toString()) {
-                if (chatController.myChats[i]['receiver']['id'].toString() ==
-                    userId.toString()) {
-                  chatController.myChats[i]['unread_count'] = 0;
-                }
-              } else {
-                if (chatController.myChats[i]['receiver']['id'].toString() ==
-                    userId.toString()) {
-                  chatController.myChats[i]['unread_count'] = 0;
-                }
-              }
-            }
-            chatController.myChats.refresh();
-          }
+          _syncChatUnreadCounts();
           if (data['user'] is Map) {
             chatUserInfo.clear();
             chatUserInfo.addAll(data['user']);

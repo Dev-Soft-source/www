@@ -66,10 +66,11 @@ class SearchRideProvider extends GetConnect {
   Future checkBooking(rideId, token) async {
     try {
       logger.info("Check Booking - Ride ID: $rideId");
+      final url =
+          "$baseUrl/$checkIsAlreadyBooked?ride_id=${Uri.encodeQueryComponent(rideId.toString())}";
 
-      final response = await getConnect.post(
-        "$baseUrl/$checkIsAlreadyBooked",
-        {'ride_id': rideId.toString()},
+      final response = await getConnect.get(
+        url,
         headers: {
           'Accept': 'application/json',
           'Authorization': 'Bearer $token',
@@ -120,6 +121,8 @@ class SearchRideProvider extends GetConnect {
   Future getSearchRide(
       to,
       from,
+      toCityId,
+      fromCityId,
       keyword,
       date,
       driverName,
@@ -139,32 +142,38 @@ class SearchRideProvider extends GetConnect {
       page,
       token) async {
     try {
-      final data = FormData({});
-      data.fields.add(MapEntry("to", to));
-      data.fields.add(MapEntry("from", from));
-      data.fields.add(MapEntry("keyword", keyword));
-      data.fields.add(MapEntry("date", date));
-      data.fields.add(MapEntry("driver_name", driverName));
-      data.fields.add(MapEntry("driver_age", driverAge.toString()));
-      data.fields.add(MapEntry("driver_rating", driverRating.toString()));
-      data.fields.add(MapEntry("driver_phone", driverPhone.toString()));
-      data.fields.add(MapEntry("passenger_rating", passengerRating.toString()));
-      data.fields.add(MapEntry("payment_method", paymentMethod.toString()));
-      data.fields.add(MapEntry("vehicle_type", vehicleType.toString()));
-      data.fields.add(MapEntry("features", features.toString()));
-      data.fields.add(MapEntry("luggage", luggage.toString()));
-      data.fields.add(MapEntry("smoking", smoking.toString()));
-      data.fields.add(MapEntry("pet", pet.toString()));
-      data.fields.add(MapEntry("pink_ride", pinkRideCheck == true ? "1" : "0"));
-      data.fields
-          .add(MapEntry("extra_care", extraCareCheck == true ? "1" : "0"));
-      data.fields.add(MapEntry("limit", pageLimit.toString()));
-      data.fields.add(MapEntry("page", page.toString()));
+      final queryParams = <String, String>{
+        "to": to.toString(),
+        "from": from.toString(),
+        "to_city_id": toCityId.toString(),
+        "from_city_id": fromCityId.toString(),
+        "keyword": keyword.toString(),
+        "date": date.toString(),
+        "driver_name": driverName.toString(),
+        "driver_age": driverAge.toString(),
+        "driver_rating": driverRating.toString(),
+        "driver_phone": driverPhone.toString(),
+        "passenger_rating": passengerRating.toString(),
+        "payment_method": paymentMethod.toString(),
+        "vehicle_type": vehicleType.toString(),
+        "features": features.toString(),
+        "luggage": luggage.toString(),
+        "smoking": smoking.toString(),
+        "pet": pet.toString(),
+        "pink_ride": pinkRideCheck == true ? "1" : "0",
+        "extra_care": extraCareCheck == true ? "1" : "0",
+        "limit": pageLimit.toString(),
+        "page": page.toString(),
+      };
 
-      logger.info("Search Ride Data: ${data.fields.toString()}");
+      final encodedQuery = Uri(queryParameters: queryParams).query;
+      final url = "$baseUrl/$searchRideDetail?$encodedQuery";
+
+      logger.info("Search Ride Data: ${queryParams.toString()}");
+      logger.info("Search Ride URL: $url");
 
       final response = await getConnect.get(
-          "$baseUrl/$searchRideDetail?${data.fields.toString()}",
+          url,
           headers: {
             'Accept': 'application/json',
             'Authorization': 'Bearer $token',

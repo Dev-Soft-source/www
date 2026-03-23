@@ -67,7 +67,7 @@ class NotificationAddReviewController extends GetxController {
       isLoading(true);
       TripDetailProvider()
           .getTripDetail(rideId, rideDetailId, serviceController.token,
-              serviceController.langId.value)
+              serviceController.langId.value, '', '', '0', '0')
           .then((resp) async {
         if (resp['status'] != null && resp['status'] == "Success") {
           if (resp['data'] != null && resp['data']['ride'] != null) {

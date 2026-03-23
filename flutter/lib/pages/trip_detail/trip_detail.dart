@@ -118,30 +118,37 @@ class TripDetailPage extends GetView<TripDetailController> {
                                   controller: controller),
                               10.heightBox,
                             ],
-                            fromToWidget(
-                                context: context,
-                                from: controller.ride['ride_detail'][0]
-                                    ['departure'],
-                                to: controller.ride['ride_detail'][0]
-                                    ['destination'],
-                                date: tripDate,
-                                time: tripTime,
-                                perSeat: controller.ride['ride_detail'][0]
-                                    ['price'],
-                                leftSeat:
-                                    controller.ride['seats_left'].toString(),
-                                fromLabel:
-                                    "${controller.labelTextDetail['from_label'] ?? "From"}",
-                                toLabel:
-                                    "${controller.labelTextDetail['to_label'] ?? "To"}",
-                                atLabel:
-                                    "${controller.labelTextDetail['at_label'] ?? "at"}",
-                                seatLeftLabel:
-                                    "${controller.labelTextDetail['seats_left_label'] ?? "seat left"}",
-                                perSeatLabel:
-                                    "${controller.labelTextDetail['per_seat_label'] ?? "per seat"}",
-                                type: controller.type,
-                                moreSpots: controller.ride['more_ride_detail']),
+                            (() {
+                              final rideDetail = controller.ride['ride_detail'];
+                              final detail = rideDetail is List &&
+                                      rideDetail.isNotEmpty &&
+                                      rideDetail[0] != null
+                                  ? rideDetail[0]
+                                  : <String, dynamic>{};
+
+                              return fromToWidget(
+                                  context: context,
+                                  from: detail['departure'] ?? '',
+                                  to: detail['destination'] ?? '',
+                                  date: tripDate,
+                                  time: tripTime,
+                                  perSeat: (detail['price'] ?? '0').toString(),
+                                  leftSeat:
+                                      controller.ride['seats_left'].toString(),
+                                  fromLabel:
+                                      "${controller.labelTextDetail['from_label'] ?? "From"}",
+                                  toLabel:
+                                      "${controller.labelTextDetail['to_label'] ?? "To"}",
+                                  atLabel:
+                                      "${controller.labelTextDetail['at_label'] ?? "at"}",
+                                  seatLeftLabel:
+                                      "${controller.labelTextDetail['seats_left_label'] ?? "seat left"}",
+                                  perSeatLabel:
+                                      "${controller.labelTextDetail['per_seat_label'] ?? "per seat"}",
+                                  type: controller.type,
+                                  moreSpots:
+                                      controller.ride['more_ride_detail']);
+                            })(),
                             if (controller.ride['seats_left'] != null &&
                                 controller.ride['seats_left'] <= 0) ...[
                               10.heightBox,

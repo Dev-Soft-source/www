@@ -9,10 +9,20 @@ import 'package:proximaride_app/services/logger_service.dart';
 class TripDetailProvider extends GetConnect {
   final getConnect = GetConnect(timeout: const Duration(seconds: 180));
 
-  Future getTripDetail(rideId, rideDetailId, token, langId) async {
+  Future getTripDetail(
+      rideId, rideDetailId, token, langId, from, to, fromCityId, toCityId) async {
     try {
+      final queryParams = <String, String>{
+        'id': rideId.toString(),
+        'lang_id': langId.toString(),
+        'ride_detail_id': rideDetailId.toString(),
+        'from': from.toString(),
+        'to': to.toString(),
+        'from_city_id': fromCityId.toString(),
+        'to_city_id': toCityId.toString(),
+      };
       final response = await getConnect.get(
-          "$baseUrl/$rideDetail?id=$rideId&lang_id=$langId&ride_detail_id=$rideDetailId",
+          "$baseUrl/$rideDetail?${Uri(queryParameters: queryParams).query}",
           headers: {
             'Accept': 'application/json',
             'Authorization': 'Bearer $token',

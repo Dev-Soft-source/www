@@ -106,11 +106,27 @@ class CityPage extends GetView<LocationController> {
                                                     .text =
                                                 "${controller.searchCities[index]['name']}, ${controller.searchCities[index]['state']['abrv']}, ${controller.searchCities[index]['state']['country']['name']}";
                                           } else {
-                                            controller
-                                                    .tempController
-                                                    .fromTextEditingController
-                                                    .text =
+                                            final label =
                                                 "${controller.searchCities[index]['name']}, ${controller.searchCities[index]['state']['abrv']}, ${controller.searchCities[index]['state']['country']['name']}";
+                                            if (controller
+                                                .isSearchControllerRegistered) {
+                                              controller.tempController
+                                                  .setOriginLocation(
+                                                      label: label,
+                                                      cityId: int.tryParse(
+                                                              controller
+                                                                  .searchCities[
+                                                                      index]
+                                                                      ['id']
+                                                                  .toString()) ??
+                                                          0);
+                                            } else {
+                                              controller
+                                                      .tempController
+                                                      .fromTextEditingController
+                                                      .text =
+                                                  label;
+                                            }
                                           }
                                         } else if (controller.isCity.value ==
                                             "destination") {
@@ -122,11 +138,27 @@ class CityPage extends GetView<LocationController> {
                                                     .text =
                                                 "${controller.searchCities[index]['name']}, ${controller.searchCities[index]['state']['abrv']}, ${controller.searchCities[index]['state']['country']['name']}";
                                           } else {
-                                            controller
-                                                    .tempController
-                                                    .toTextEditingController
-                                                    .text =
+                                            final label =
                                                 "${controller.searchCities[index]['name']}, ${controller.searchCities[index]['state']['abrv']}, ${controller.searchCities[index]['state']['country']['name']}";
+                                            if (controller
+                                                .isSearchControllerRegistered) {
+                                              controller.tempController
+                                                  .setDestinationLocation(
+                                                      label: label,
+                                                      cityId: int.tryParse(
+                                                              controller
+                                                                  .searchCities[
+                                                                      index]
+                                                                      ['id']
+                                                                  .toString()) ??
+                                                          0);
+                                            } else {
+                                              controller
+                                                      .tempController
+                                                      .toTextEditingController
+                                                      .text =
+                                                  label;
+                                            }
                                           }
                                         }
 

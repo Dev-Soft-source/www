@@ -13,6 +13,10 @@ class TripDetailController extends GetxController {
   var tripId = "";
   var tripDetailId = "";
   var type = "";
+  var from = "";
+  var to = "";
+  var fromCityId = "";
+  var toCityId = "";
   var cancelSetting = {};
   var reviewSetting = {};
   var ride = {}.obs;
@@ -32,6 +36,10 @@ class TripDetailController extends GetxController {
     tripDetailId = Get.parameters['rideDetailId'] ?? "0";
     type = Get.parameters['type'] ?? "";
     status = Get.parameters['status'] ?? "";
+    from = Get.parameters['from'] ?? "";
+    to = Get.parameters['to'] ?? "";
+    fromCityId = Get.parameters['from_city_id'] ?? "0";
+    toCityId = Get.parameters['to_city_id'] ?? "0";
     amountTextEditingController = TextEditingController();
     securedCashTextEditingController = TextEditingController();
     await getTripDetail();
@@ -49,7 +57,7 @@ class TripDetailController extends GetxController {
       isLoading(true);
       TripDetailProvider()
           .getTripDetail(tripId, tripDetailId, serviceController.token,
-              serviceController.langId.value)
+              serviceController.langId.value, from, to, fromCityId, toCityId)
           .then((resp) async {
         if (resp['status'] != null && resp['status'] == "Success") {
           if (resp['data'] != null && resp['data']['ride'] != null) {
