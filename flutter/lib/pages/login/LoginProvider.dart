@@ -119,8 +119,14 @@ class LoginProvider extends GetConnect {
         body: data,
       ).timeout(const Duration(seconds: 20));
 
-      final responseBody =
-          response.body.isNotEmpty ? jsonDecode(response.body) : null;
+      dynamic responseBody;
+      if (response.body.isNotEmpty) {
+        try {
+          responseBody = jsonDecode(response.body);
+        } catch (_) {
+          responseBody = response.body;
+        }
+      }
 
       logger.info(
           "Login Response status=${response.statusCode} reason=${response.reasonPhrase} body=$responseBody");
@@ -135,7 +141,15 @@ class LoginProvider extends GetConnect {
         if (response.statusCode == 422) {
           return responseBody;
         }
-        return Future.error(response.reasonPhrase ?? 'Request failed');
+        if (responseBody is Map<String, dynamic>) {
+          return responseBody;
+        }
+        return Future.error({
+          "type": "server",
+          "message": responseBody?.toString() ??
+              response.reasonPhrase ??
+              'Request failed'
+        });
       } else {
         return responseBody;
       }
