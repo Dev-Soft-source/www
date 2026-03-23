@@ -3,8 +3,6 @@
 @section('style')
     <style>
         /* Match ride_detail: body text in Roboto, sizes from Tailwind (text-xl, text-sm) */
-
-
     </style>
 @endsection
 
@@ -25,8 +23,7 @@
 
 
         @if (session('failure'))
-
-        {{-- todo  --}}
+            {{-- todo  --}}
             <div id="myModal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
                 <div onclick="closeModal()" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
                 <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
@@ -51,7 +48,8 @@
                                 </div>
                             </div>
                             <div class="px-4 pb-6 pt-4  sm:flex sm:flex-row-reverse sm:px-6 justify-center">
-                                <a href="javascript:void(0);" onclick="closeModal()" class="whitespace-nowrap inline-flex justify-center rounded bg-red-500 px-3 py-2 text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">
+                                <a href="javascript:void(0);" onclick="closeModal()"
+                                    class="whitespace-nowrap inline-flex justify-center rounded bg-red-500 px-3 py-2 text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 sm:ml-3">
                                     {{ $siteText['close_btn_text'] }}</a>
                                 @if (session()->has('phone') && !is_null(session('phone')))
                                     <a href="{{ route('send_verification_code_booking', session('phone')->id) }}"
@@ -99,9 +97,9 @@
                 </div>
             </div>
         @endif
-        
+
         @if (session('phone_code'))
-        {{-- TODO multilingual --}}
+            {{-- TODO multilingual --}}
             <form method="POST" action="{{ route('verify_number') }}">
                 @csrf
                 <input type="hidden" name="page" value="booking">
@@ -116,7 +114,8 @@
                                 <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                     {{-- <h1 class="mt-4 mb-0">Enter verfication code</h1> --}}
                                     <div class="mt-2">
-                                        <p class="text-left">Please enter the four digit code you received on your phone number</p>
+                                        <p class="text-left">Please enter the four digit code you received on your phone
+                                            number</p>
                                         <p class="text-center mt-4">Enter code</p>
                                         <div class="flex justify-center mt-4 space-x-2">
                                             <input type="text" name="code[]" maxlength="1"
@@ -151,8 +150,11 @@
         @endif
         <div class="container mx-auto my-10 xl:my-14 px-4 xl:px-0">
             @php
-                $action = $ride->isInstantBooking() ? route('instant_booking', $ride->id)
-                    : ($ride->isRequestBooking() ? route('booking_request', $ride->id) : '');
+                $action = $ride->isInstantBooking()
+                    ? route('instant_booking', $ride->id)
+                    : ($ride->isRequestBooking()
+                        ? route('booking_request', $ride->id)
+                        : '');
 
             @endphp
 
@@ -160,8 +162,10 @@
                 @csrf
 
                 <input type="hidden" name="ride_detail_id" value="{{ $ride->detail->id }}">
-                <input type="hidden" name="from_stop_id" value="{{ $ride->matched_from_stop_id ?? $ride->rideStops->first()?->id }}">
-                <input type="hidden" name="to_stop_id" value="{{ $ride->matched_to_stop_id ?? $ride->rideStops->last()?->id }}">
+                <input type="hidden" name="from_stop_id"
+                    value="{{ $ride->matched_from_stop_id ?? $ride->rideStops->first()?->id }}">
+                <input type="hidden" name="to_stop_id"
+                    value="{{ $ride->matched_to_stop_id ?? $ride->rideStops->last()?->id }}">
                 <input type="hidden" name="type" value="{{ $ride->booking_type }}">
                 <input type="hidden" name="id" value="{{ $ride->id }}">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-y-4 md:gap-4">
@@ -180,10 +184,13 @@
 
                         if ($isShortDistanceRide ?? false) {
                             $bg = 'blue';
-                            $text = $siteText['proximalocal_ride_description'] ?? 'This is a Short-Distance Ride, and ProximaRide does not apply any Booking Fee.';
+                            $text =
+                                $siteText['proximalocal_ride_description'] ??
+                                'This is a Short-Distance Ride, and ProximaRide does not apply any Booking Fee.';
                         } elseif ($ride->isPinkExtraCareRide()) {
                             $bg = 'orange';
-                            $text = $siteText['pink_extra_ride_description'] ?? 'This is a Pink Ride and an Extra+ Ride.';
+                            $text =
+                                $siteText['pink_extra_ride_description'] ?? 'This is a Pink Ride and an Extra+ Ride.';
                         } elseif ($ride->isExtraCareRide()) {
                             $bg = 'green';
                             $text = $siteText['extra_ride_description'] ?? 'This is a Extra+ Ride.';
@@ -195,29 +202,24 @@
 
                     @if ($bg && $text)
                         <div class="col-span-3 w-full">
-                        <div class="bg-{{ $bg }}-100 border-l-4 border-{{ $bg }}-500 text-{{ $bg }}-800 px-4 py-2 rounded flex items-center"
+                            <div class="bg-{{ $bg }}-100 border-l-4 border-{{ $bg }}-500 text-{{ $bg }}-800 px-4 py-2 rounded flex items-center"
                                 role="alert">
 
-                            <svg class="w-6 h-6 mr-2 text-{{ $bg }}-500 flex-shrink-0" fill="none"
+                                <svg class="w-6 h-6 mr-2 text-{{ $bg }}-500 flex-shrink-0" fill="none"
                                     stroke="currentColor" viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" />
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"
+                                        fill="none" />
                                     <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2"
                                         stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
 
-                            <span class="text-lg">{{ $text }}</span>
-                                    </div>
-                                                    </div>
-                                                @endif
+                                <span class="text-lg">{{ $text }}</span>
+                            </div>
+                        </div>
+                    @endif
 
-                    <x-px.ride-detail-info
-                        :ride="$ride"
-                        :findRidePage="$findRidePage"
-                        :postRidePage="$postRidePage"
-                        :rideDetailPage="$rideDetailPage"
-                        :selectedLanguage="$selectedLanguage ?? null"
-                        :searchOptionGroups="$searchOptionGroups"
-                    />
+                    <x-px.ride-detail-info :ride="$ride" :findRidePage="$findRidePage" :postRidePage="$postRidePage" :rideDetailPage="$rideDetailPage"
+                        :selectedLanguage="$selectedLanguage ?? null" :searchOptionGroups="$searchOptionGroups" />
 
 
                     <div class="col-span-1">
@@ -242,10 +244,11 @@
                                                 </h3>
                                             </div>
                                         </div>
-                                        @if($user->isStudent() && $ride->isCashPayment())
+                                        @if ($user->isStudent() && $ride->isCashPayment())
                                             <div class="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                                                 <p class="text-yellow-800 text-sm">
-                                                    {!! $bookingPage->note_for_students_text ?? '<strong>Note for Students:</strong> You are limited to booking a maximum of 2 seats per ride for Cash payment rides.' !!}
+                                                    {!! $bookingPage->note_for_students_text ??
+                                                        '<strong>Note for Students:</strong> You are limited to booking a maximum of 2 seats per ride for Cash payment rides.' !!}
                                                 </p>
                                             </div>
                                         @endif
@@ -254,14 +257,20 @@
                                             {{-- TODO : to check more --}}
                                             @foreach ($ride->seatDetail as $detail)
                                                 @php
-                                               
-                                                    $availableForSegment = $availableSeatIdsForSegment ?? $ride->seatDetail->pluck('id')->all();
+
+                                                    $availableForSegment =
+                                                        $availableSeatIdsForSegment ??
+                                                        $ride->seatDetail->pluck('id')->all();
                                                     $isBooked = $detail->status === 'booked';
                                                     $isHeldByOthers =
                                                         $detail->status === 'hold' &&
                                                         $detail->user_id != optional(auth()->user())->id;
-                                                    $isUnavailableForSegment = !in_array($detail->id, $availableForSegment);
-                                                    $isUnavailable = $isBooked || $isHeldByOthers || $isUnavailableForSegment;
+                                                    $isUnavailableForSegment = !in_array(
+                                                        $detail->id,
+                                                        $availableForSegment,
+                                                    );
+                                                    $isUnavailable =
+                                                        $isBooked || $isHeldByOthers || $isUnavailableForSegment;
                                                     $isSelectedByMe =
                                                         !$isUnavailable &&
                                                         ($detail->user_id == optional(auth()->user())->id ||
@@ -309,7 +318,8 @@
                                             @endforeach
                                         </div>
                                         @error('seats')
-                                            <div id="seats-laravel-error" class="tooltip-error shadow-lg mt-1">{{ $bookingPage->seats_available_tooltip ?? $message }}</div>
+                                            <div id="seats-laravel-error" class="tooltip-error shadow-lg mt-1">
+                                                {{ $bookingPage->seats_available_tooltip ?? $message }}</div>
                                         @enderror
                                         <!-- Hidden input to store count -->
                                         <input type="hidden" id="seat-count" name="seats" value="">
@@ -336,7 +346,8 @@
                                             </p>
                                         </div>
                                         <p class="totalSeatsAmount text-black"></p>
-                                        <input type="hidden" name="seats_amount" class="totalSeatsAmountInput form-control" readonly>
+                                        <input type="hidden" name="seats_amount"
+                                            class="totalSeatsAmountInput form-control" readonly>
                                     </div>
 
                                     @if ($ride->isFirmCancellation())
@@ -357,7 +368,7 @@
                                     <div class="flex items-center justify-between gap-2 mt-1">
                                         <div class="flex items-center gap-2">
                                             <p class="text-black">
-                                                    {{ $bookingPage->booking_fee_label }}
+                                                {{ $bookingPage->booking_fee_label }}
                                             </p>
                                             @if ($user->isPendingStudent())
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -380,7 +391,8 @@
                                             @endif
                                         </div>
                                         <p class="totalAmount text-black"></p>
-                                        <input type="hidden" name="booking_credit" class="totalAmountInput form-control" readonly>
+                                        <input type="hidden" name="booking_credit" class="totalAmountInput form-control"
+                                            readonly>
                                     </div>
                                     @if (isset($setting->deduct_tax) && $setting->deduct_tax == 'deduct_from_passenger')
                                         <input type="hidden" value="{{ $settingTaxPercentage }}" name="tax_percentage">
@@ -393,7 +405,8 @@
                                                 @endisset
                                             </p>
                                             <p class="taxAmount text-black">0</p>
-                                            <input type="hidden" name="tax_amount" class="totalTaxAmountInput form-control" readonly>
+                                            <input type="hidden" name="tax_amount"
+                                                class="totalTaxAmountInput form-control" readonly>
                                         </div>
                                     @endif
 
@@ -408,18 +421,25 @@
                                                 <input type="checkbox" id="apply_coffee_wall" name="coffee_wall"
                                                     value="1" class="form-control hidden peer"
                                                     {{ $bookingFeeZero ? 'disabled' : '' }}>
-                                                <label for="apply_coffee_wall" class="inline-flex items-center justify-center w-full px-2 py-0.5 text-primary bg-white border-2 border-primary rounded {{ $bookingFeeZero ? 'cursor-not-allowed' : 'cursor-pointer' }} peer-checked:bg-primary peer-checked:text-white">
+                                                <label for="apply_coffee_wall"
+                                                    class="inline-flex items-center justify-center w-full px-2 py-0.5 text-primary bg-white border-2 border-primary rounded {{ $bookingFeeZero ? 'cursor-not-allowed' : 'cursor-pointer' }} peer-checked:bg-primary peer-checked:text-white">
                                                     <span class="font-medium text-xl line-clamp-2 max-w-36 w-full">
                                                         {{ $bookingPage->coffee_from_wall_label ?? 'Pay booking fee with Coffee from the Wall' }}
                                                     </span>
                                                 </label>
                                                 @php
-                                                    if($ride->isCashPayment())
-                                                        $paymentMethodTooltipText = $bookingPage->coffee_wall_cash_text ?? "To be paid in cash directly to the driver at the time of the ride.";
-                                                    elseif ($ride->isOnlinePayment()) {
-                                                        $paymentMethodTooltipText = $bookingPage->coffee_wall_online_payment_text ?? "ProximaRide will transfer this amount to the driver only after the ride is completed.";
+                                                    if ($ride->isCashPayment()) {
+                                                        $paymentMethodTooltipText =
+                                                            $bookingPage->coffee_wall_cash_text ??
+                                                            'To be paid in cash directly to the driver at the time of the ride.';
+                                                    } elseif ($ride->isOnlinePayment()) {
+                                                        $paymentMethodTooltipText =
+                                                            $bookingPage->coffee_wall_online_payment_text ??
+                                                            'ProximaRide will transfer this amount to the driver only after the ride is completed.';
                                                     } else {
-                                                        $paymentMethodTooltipText = $bookingPage->coffee_wall_secure_cash_text ?? "This amount is pre-authorized to ProximaRide now and will be refunded to you once you meet the driver and pay them in cash.";
+                                                        $paymentMethodTooltipText =
+                                                            $bookingPage->coffee_wall_secure_cash_text ??
+                                                            'This amount is pre-authorized to ProximaRide now and will be refunded to you once you meet the driver and pay them in cash.';
                                                     }
                                                 @endphp
                                                 <div class="flex items-center gap-1 ml-2">
@@ -450,27 +470,18 @@
                                         </div>
                                     @endif
 
-                                    <input type="hidden" value="{{ $ride->isCashPayment() ? 'cash' : 'online' }}" id="check_payment_method">
+                                    <input type="hidden" value="{{ $ride->isCashPayment() ? 'cash' : 'online' }}"
+                                        id="check_payment_method">
 
-                                    @if ($ride->isCashPayment())
-                                        <div class="flex items-center justify-between gap-2 mt-1">
-                                            <input type="hidden" name="online_payment" class="totalAmountIn form-control" readonly>
-                                        </div>
-                                        <div class="flex items-center justify-between gap-2 mt-1">
-                                            <input type="hidden" name="cash_payment" class="totalSeatsAmountInput form-control" readonly>
-                                        </div>
-                                    @else
-                                        <div class="flex items-center justify-between gap-2 mt-1">
-                                            <input type="hidden" name="online_payment" class="totalSumIn form-control" readonly>
-                                        </div>
-                                        <div class="flex items-center justify-between gap-2 mt-1">
-                                            <input type="hidden" name="cash_payment" value="0" class="form-control" readonly>
-                                        </div>
-                                    @endif
-                                    <input type="hidden" name="booked_by_wallet" class="bookedByWallet form-control" readonly>
+                                    <input type="hidden" name="online_payment" id="online-payment-input"
+                                        class="form-control" readonly>
+                                    <input type="hidden" name="cash_payment" id="cash-payment-input"
+                                        class="form-control" readonly>
+                                    <input type="hidden" name="booked_by_wallet" id="booked-by-wallet-input"
+                                        class="form-control" readonly>
                                     <div class="flex items-center justify-between gap-2 mt-1">
                                         <p>
-                                                {{ $bookingPage->total_label }}
+                                            {{ $bookingPage->total_label }}
                                         </p>
                                         <div>
                                             <p class="totalSum text-right"></p>
@@ -494,7 +505,8 @@
                                             class="block p-2.5 w-full text-gray-900 bg-white rounded border border-gray-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
                                             placeholder="{{ $bookingPage->message_driver_placeholder ?? '' }}">{{ old('driver_message') }}</textarea>
                                         @error('driver_message')
-                                            <div class="tooltip-error shadow-lg mt-1">{{ $bookingPage->chat_with_driver_tooltip ?? $message }}</div>
+                                            <div class="tooltip-error shadow-lg mt-1">
+                                                {{ $bookingPage->chat_with_driver_tooltip ?? $message }}</div>
                                         @enderror
                                     </div>
                                 </div>
@@ -507,24 +519,25 @@
                                     </h3>
                                 </div>
                                 <div class="bg-white p-4">
-                                    
+
                                     <p class="text-left">● @isset($bookingPage->booking_disclaimer_on_time)
                                             {!! $bookingPage->booking_disclaimer_on_time !!}
                                         @endisset
                                     </p>
-                                
+
                                     <p class="text-left mt-4">●<strong> Pink Rides: </strong>
-                                                {{ $bookingPage->booking_disclaimer_pink_ride ?? 'I know that ProximaRide are exclusive to ProximaRide female members. If I am booking on a Pink Ride, I will not be accompanied by male members who are above 12 years of age, nor will I send a male member in my place. If I do, the driver will not take me or them, and I will not be refunded' }}
-                                            </p>
-                                
+                                        {{ $bookingPage->booking_disclaimer_pink_ride ?? 'I know that ProximaRide are exclusive to ProximaRide female members. If I am booking on a Pink Ride, I will not be accompanied by male members who are above 12 years of age, nor will I send a male member in my place. If I do, the driver will not take me or them, and I will not be refunded' }}
+                                    </p>
+
                                     <p class="text-left mt-4">●<strong> Extra+ Rides: </strong>
-                                                {{ $bookingPage->booking_disclaimer_extra_care_ride ?? 'I know that Extra+ Rides are exclusive to members with highest review score. If I am booking on an Extra+ Ride, I will adhere to its standards' }}
-                                            </p>
+                                        {{ $bookingPage->booking_disclaimer_extra_care_ride ?? 'I know that Extra+ Rides are exclusive to members with highest review score. If I am booking on an Extra+ Ride, I will adhere to its standards' }}
+                                    </p>
 
                                     <div class="relative">
                                         <div class="flex items-start my-4">
                                             <label class="flex items-start cursor-pointer font-normal text-gray-900">
-                                                <input id="" type="checkbox" name="agree_terms" value="1" @checked(old('agree_terms'))
+                                                <input id="" type="checkbox" name="agree_terms" value="1"
+                                                    @checked(old('agree_terms'))
                                                     class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-500  focus:ring-2">
                                                 <span class="ml-2">
                                                     @isset($bookingPage->booking_term_agree_text)
@@ -534,9 +547,10 @@
                                                 </span>
                                             </label>
                                         </div>
-                                    @error('agree_terms')
-                                            <div class="tooltip-error shadow-lg mt-1">{{ $bookingPage->aggreement_tooltip ?? $message }}</div>
-                                    @enderror
+                                        @error('agree_terms')
+                                            <div class="tooltip-error shadow-lg mt-1">
+                                                {{ $bookingPage->aggreement_tooltip ?? $message }}</div>
+                                        @enderror
                                     </div>
 
                                     <div class="relative">
@@ -563,23 +577,25 @@
                                                 </label>
                                             </div>
                                             @error('firm_agree_terms')
-                                                <div class="tooltip-error shadow-lg mt-1">{{ $bookingPage->booking_disclaimer_firm_tooltip ?? $message }}</div>
+                                                <div class="tooltip-error shadow-lg mt-1">
+                                                    {{ $bookingPage->booking_disclaimer_firm_tooltip ?? $message }}</div>
                                             @enderror
 
-                                                {{-- Second checkbox for Firm Cancellation Policy --}}
-                                                <div class="flex items-start my-4">
-                                                    <label class="flex items-start cursor-pointer font-normal text-gray-900">
-                                                        <input id="firm_cancellation_understand" type="checkbox"
-                                                        name="firm_cancellation_understand" value="1" @checked(old('firm_cancellation_understand'))
-                                                            class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-500 focus:ring-2">
-                                                        <span class="ml-2">
-                                                            @isset($bookingPage->firm_cancellation_understand_text)
-                                                                {!! $bookingPage->firm_cancellation_understand_text !!}
-                                                            @endisset
-                                                            <span class="text-red-500">*</span>
-                                                        </span>
-                                                    </label>
-                                                </div>
+                                            {{-- Second checkbox for Firm Cancellation Policy --}}
+                                            <div class="flex items-start my-4">
+                                                <label class="flex items-start cursor-pointer font-normal text-gray-900">
+                                                    <input id="firm_cancellation_understand" type="checkbox"
+                                                        name="firm_cancellation_understand" value="1"
+                                                        @checked(old('firm_cancellation_understand'))
+                                                        class="w-4 h-4 text-blue-600 cursor-pointer bg-white mt-2 border-gray-600 rounded focus:ring-blue-500 focus:ring-2">
+                                                    <span class="ml-2">
+                                                        @isset($bookingPage->firm_cancellation_understand_text)
+                                                            {!! $bookingPage->firm_cancellation_understand_text !!}
+                                                        @endisset
+                                                        <span class="text-red-500">*</span>
+                                                    </span>
+                                                </label>
+                                            </div>
                                             @error('firm_cancellation_understand')
                                                 <div class="tooltip-error shadow-lg mt-1">{{ $message }}</div>
                                             @enderror
@@ -601,9 +617,9 @@
                                             </label>
                                         </div>
                                         @error('pink_ride_agree_terms')
-                                            <div class="tooltip-error shadow-lg mt-1">{{ $bookingPage->pink_ride_tooltip ?? $message }}</div>
+                                            <div class="tooltip-error shadow-lg mt-1">
+                                                {{ $bookingPage->pink_ride_tooltip ?? $message }}</div>
                                         @enderror
-
                                     @endif
 
                                     @if ($ride->isExtraCareRide())
@@ -623,7 +639,7 @@
                                         @error('extra_care_ride_agree_terms')
                                             <div class="tooltip-error shadow-lg">
                                                 {{ $bookingPage->extra_care_ride_tooltip ?? $message }}
-                                        </div>
+                                            </div>
                                         @enderror
                                     @endif
 
@@ -638,11 +654,11 @@
                                         </div>
                                     @endif
 
-                                        <div class="flex justify-center items-center mt-4">
-                                            <button id="submitButton" class="button-exp-fill" type="submit">
+                                    <div class="flex justify-center items-center mt-4">
+                                        <button id="submitButton" class="button-exp-fill" type="submit">
                                             {{ $bookingPage->pay_and_request_to_book_btn_text ?? 'Pay and Request to Book' }}
-                                            </button>
-                                        </div>
+                                        </button>
+                                    </div>
 
                                 </div>
                             </div>
@@ -725,7 +741,8 @@
                                         id="student-seat-limit-modal-title">Seat Limit Reached</h3>
                                 </div>
                                 <div class="mt-2 w-full">
-                                    <p class="can-exp-p text-center">Students are limited to booking a maximum of 2 seats per ride for Cash payment rides.</p>
+                                    <p class="can-exp-p text-center">Students are limited to booking a maximum of 2 seats
+                                        per ride for Cash payment rides.</p>
                                 </div>
                             </div>
                         </div>
@@ -762,14 +779,16 @@
             const MAX_STUDENT_SEATS = 2;
             const BOOKING_FEE_PERCENTAGE = 0.10; // 10%
             const MIN_PRICE_FOR_BOOKING_FEE = 15;
+            const topUpBalance = parseFloat(@json((float) ($topUpBalance ?? 0)));
 
             // Calculate booking price based on user status and ride price
-            const chargeBooking = {{ auth()->user() && auth()->user()->charge_booking ? auth()->user()->charge_booking : '1' }};
+            const chargeBooking =
+                {{ auth()->user() && auth()->user()->charge_booking ? auth()->user()->charge_booking : '1' }};
             const isStudentFeeWaived = (chargeBooking == '2');
             const pricePerSeat = parseFloat(@json($ride->price_minor ?? 0));
-            const bookingPrice = (isStudentFeeWaived || pricePerSeat < MIN_PRICE_FOR_BOOKING_FEE) 
-                ? 0.0 
-                : parseFloat(pricePerSeat * BOOKING_FEE_PERCENTAGE);
+            const bookingPrice = (isStudentFeeWaived || pricePerSeat < MIN_PRICE_FOR_BOOKING_FEE) ?
+                0.0 :
+                parseFloat(pricePerSeat * BOOKING_FEE_PERCENTAGE);
 
             // Ride configuration
             const rideConfig = {
@@ -783,7 +802,7 @@
             // ============================================
             // Verification Code Input Handler
             // ============================================
-        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function() {
                 const codeInputs = document.querySelectorAll('input[name="code[]"]');
                 if (codeInputs.length === 0) return;
 
@@ -796,8 +815,8 @@
                         }
                     });
 
-                input.addEventListener('keydown', function(e) {
-                    if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
+                    input.addEventListener('keydown', function(e) {
+                        if (e.key === 'Backspace' && this.value.length === 0 && index > 0) {
                             codeInputs[index - 1].focus();
                         } else if (e.key === 'ArrowLeft' && index > 0) {
                             codeInputs[index - 1].focus();
@@ -808,21 +827,22 @@
                         }
                     });
 
-                input.addEventListener('paste', function(e) {
-                    e.preventDefault();
-                    const pasteData = e.clipboardData.getData('text').trim();
+                    input.addEventListener('paste', function(e) {
+                        e.preventDefault();
+                        const pasteData = e.clipboardData.getData('text').trim();
                         const maxIndex = Math.min(index + pasteData.length, codeInputs.length);
-                        
-                        for (let i = 0; i < pasteData.length && (index + i) < codeInputs.length; i++) {
+
+                        for (let i = 0; i < pasteData.length && (index + i) < codeInputs
+                            .length; i++) {
                             codeInputs[index + i].value = pasteData[i];
                         }
-                        
+
                         if (maxIndex > 0) {
                             codeInputs[Math.min(maxIndex - 1, codeInputs.length - 1)].focus();
                         }
+                    });
                 });
             });
-        });
 
             // ============================================
             // Seat Selection Management
@@ -837,10 +857,10 @@
                         const id = $(this).val();
                         const shouldCheck = savedIds.indexOf(id) !== -1;
                         $(this).prop('checked', shouldCheck);
-                        
+
                         const $seatImage = $(".seat-image.seat-unselect-" + id);
                         const $seatNumber = $(".seat-number.seat-number-" + id);
-                        
+
                         $seatImage.attr('src', shouldCheck ? SEAT_IMAGES.selected : SEAT_IMAGES.unselected);
                         $seatNumber.toggleClass('text-green-300', shouldCheck);
                     });
@@ -864,7 +884,7 @@
             function updateSeatUI(seatIds) {
                 $(".seat-image").attr('src', SEAT_IMAGES.unselected);
                 $(".seat-number").removeClass('text-green-300');
-                
+
                 seatIds.forEach(function(id) {
                     $(".seat-image.seat-unselect-" + id).attr('src', SEAT_IMAGES.selected);
                     $(".seat-number.seat-number-" + id).addClass('text-green-300');
@@ -881,8 +901,9 @@
                     return;
                 }
                 modal.classList.remove('hidden');
-                modal.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; z-index: 50 !important;';
-                
+                modal.style.cssText =
+                    'display: block !important; visibility: visible !important; opacity: 1 !important; z-index: 50 !important;';
+
                 const backdrop = modal.querySelector('.fixed.inset-0.bg-gray-500');
                 if (backdrop) {
                     backdrop.style.display = 'block';
@@ -928,6 +949,10 @@
                 };
             }
 
+            function roundCurrency(value) {
+                return Math.max(0, Math.round((parseFloat(value) || 0) * 100) / 100);
+            }
+
             function updateTotalAmount() {
                 const selectedSeats = $("input[name='seats_id[]']:checked").length;
                 const seatCountInput = document.getElementById('seat-count');
@@ -935,75 +960,91 @@
                     seatCountInput.value = selectedSeats;
                 }
 
-                let totalAmount = bookingPrice * selectedSeats;
-                let totalSeatsAmount = rideConfig.seatPrice * selectedSeats;
+                let totalAmount = roundCurrency(bookingPrice * selectedSeats);
+                let totalSeatsAmount = roundCurrency(rideConfig.seatPrice * selectedSeats);
                 const totalRideSeatAmount = totalSeatsAmount;
 
                 // Apply firm ride discount
                 if (rideConfig.isFirmRide && rideConfig.firmDiscount > 0) {
-                    const firmDiscountAmount = (totalSeatsAmount * rideConfig.firmDiscount) / 100;
-                    totalSeatsAmount -= firmDiscountAmount;
+                    const firmDiscountAmount = roundCurrency((totalSeatsAmount * rideConfig.firmDiscount) / 100);
+                    totalSeatsAmount = roundCurrency(totalSeatsAmount - firmDiscountAmount);
                     $(".firmDiscountAmt").text('$' + firmDiscountAmount.toFixed(2));
                     $(".yourPriceAmt").text('$' + totalSeatsAmount.toFixed(2));
                 }
 
                 // Calculate tax
-                const taxAmount = (totalAmount * rideConfig.taxPercentage) / 100;
-                let totalSum = totalAmount + totalSeatsAmount + taxAmount;
+                const taxAmount = roundCurrency((totalAmount * rideConfig.taxPercentage) / 100);
+                const totalSum = roundCurrency(totalAmount + totalSeatsAmount + taxAmount);
                 let totalAmountIn = totalAmount;
                 let totalSumIn = totalSum;
+                const isCashPayment = rideConfig.paymentMethod === 'cash';
+                let displayedTotalSum = totalSum;
 
                 // Handle coffee wall option
                 const isCoffeeWallChecked = $('input[name="coffee_wall"]:checked').val() === '1';
                 const hideBookingFeeDiv = document.getElementById('hideBookingFee');
-                
+
                 if (isCoffeeWallChecked) {
-                    totalSumIn = totalSum - totalAmount;
-                    totalSum = totalSum - totalAmount;
                     totalAmountIn = 0;
-                if (hideBookingFeeDiv) {
+                    totalSumIn = roundCurrency(totalSum - totalAmount);
+                    displayedTotalSum = totalSumIn;
+                    if (hideBookingFeeDiv) {
                         hideBookingFeeDiv.classList.remove('hidden');
                         hideBookingFeeDiv.classList.add('flex');
-                }
-            } else {
-                if (hideBookingFeeDiv) {
+                    }
+                } else {
+                    if (hideBookingFeeDiv) {
                         hideBookingFeeDiv.classList.add('hidden');
                         hideBookingFeeDiv.classList.remove('flex');
                     }
                 }
 
+                const chargeTarget = isCashPayment ? totalAmountIn : totalSumIn;
+                const walletCoversCharge = chargeTarget > 0 && topUpBalance >= chargeTarget;
+                const onlinePayment = walletCoversCharge ? 0 : chargeTarget;
+                const cashPayment = isCashPayment ? totalSeatsAmount : 0;
+
                 // Show/hide payment section based on terms
                 const terms = getCheckedTerms();
-                const allTermsChecked = terms.agreeTerms && terms.firmTerms && 
-                                       terms.pinkRideTerms && terms.extraCareTerms;
-                
-                ['paymentSection', 'paymentSectionGPay'].forEach(sectionId => {
-                    const section = document.getElementById(sectionId);
-                    if (section && allTermsChecked) {
-                        section.classList.remove('hidden');
-                    }
-                });
+                const allTermsChecked = terms.agreeTerms && terms.firmTerms &&
+                    terms.pinkRideTerms && terms.extraCareTerms;
+                const shouldShowPaymentSection = allTermsChecked && onlinePayment > 0;
+
+                // ['paymentSection', 'paymentSectionGPay'].forEach(sectionId => {
+                //     const section = document.getElementById(sectionId);
+                //     if (!section) {
+                //         return;
+                //     }
+
+                //     if (shouldShowPaymentSection) {
+                //         section.classList.remove('hidden');
+                //     } else {
+                //         section.classList.add('hidden');
+                //     }
+                // });
 
                 // Update UI
-            $('#selectedSeats').text(selectedSeats);
+                $('#selectedSeats').text(selectedSeats);
                 $('.totalAmount').text('$' + totalAmount.toFixed(2));
                 $('.taxAmount').text('$' + taxAmount.toFixed(2));
                 $('.totalSeatsAmount').text('$' + totalRideSeatAmount.toFixed(2));
-                $('.totalSum').text('$' + totalSum.toFixed(2));
-                
+                $('.totalSum').text('$' + displayedTotalSum.toFixed(2));
+
                 // Update hidden inputs
                 $('.totalTaxAmountInput').val(taxAmount);
-            $('.totalAmountInput').val(totalAmount);
-            $('.totalAmountIn').val(totalAmountIn);
-            $('.totalSeatsAmountInput').val(totalSeatsAmount);
-            $('.totalSumIn').val(totalSumIn);
+                $('.totalAmountInput').val(totalAmount);
+                $('.totalAmountIn').val(totalAmountIn);
+                $('.totalSeatsAmountInput').val(totalSeatsAmount);
+                $('.totalSumIn').val(totalSumIn);
                 $('.totalSumInput').val(totalSum);
+                $('#online-payment-input').val(onlinePayment.toFixed(2));
+                $('#cash-payment-input').val(cashPayment.toFixed(2));
+                $('#booked-by-wallet-input').val(walletCoversCharge ? 1 : 0);
 
                 // Update payment request if available
-            if (typeof paymentRequest !== 'undefined' && paymentRequest && typeof paymentRequest.update === 'function') {
-                    const chargeAmount = rideConfig.paymentMethod === 'cash' 
-                        ? totalAmountIn + taxAmount 
-                        : totalSumIn;
+                if (typeof paymentRequest !== 'undefined' && paymentRequest && typeof paymentRequest.update ===
+                    'function') {
+                    const chargeAmount = onlinePayment;
                     paymentRequest.update({
                         total: {
                             label: 'Total',
@@ -1016,22 +1057,23 @@
             // ============================================
             // Seat Selection Handler
             // ============================================
-        function seat_selected(event, clickedSeatId, clickedSeatNumber) {
-            event.preventDefault();
-            event.stopPropagation();
+            function seat_selected(event, clickedSeatId, clickedSeatNumber) {
+                event.preventDefault();
+                event.stopPropagation();
 
-                const isStudent = {{ auth()->user() && (auth()->user()->student == '1' || auth()->user()->student == '2') ? 'true' : 'false' }};
+                const isStudent =
+                    {{ auth()->user() && (auth()->user()->student == '1' || auth()->user()->student == '2') ? 'true' : 'false' }};
                 const paymentMethod = $('#check_payment_method').val();
                 const isCashPayment = (paymentMethod === 'cash');
 
                 // Build sorted list of available seats
                 const availableSeats = [];
-            $('#seat-selection-container .seat-item[data-is-booked="0"]').each(function() {
-                availableSeats.push({
+                $('#seat-selection-container .seat-item[data-is-booked="0"]').each(function() {
+                    availableSeats.push({
                         id: $(this).data('seat-id'),
                         seatNumber: parseInt($(this).data('seat-number'), 10)
+                    });
                 });
-            });
                 availableSeats.sort((a, b) => a.seatNumber - b.seatNumber);
 
                 // Get seats to select (all seats <= clicked seat)
@@ -1040,53 +1082,53 @@
                 // Apply student limit for cash payments
                 if (isStudent && isCashPayment && seatsToSelect.length > MAX_STUDENT_SEATS) {
                     seatsToSelect = seatsToSelect.slice(0, MAX_STUDENT_SEATS);
-                showStudentSeatLimitModal();
-            }
+                    showStudentSeatLimitModal();
+                }
 
                 // Get currently selected seats
                 const currentlySelectedIds = [];
-            $("input.seat-checkbox:checked").each(function() {
+                $("input.seat-checkbox:checked").each(function() {
                     currentlySelectedIds.push(parseInt($(this).val(), 10));
                 });
 
                 // Find rightmost selected seat number
-                const rightmostSelected = currentlySelectedIds.length > 0
-                    ? Math.max(...currentlySelectedIds.map(id => {
+                const rightmostSelected = currentlySelectedIds.length > 0 ?
+                    Math.max(...currentlySelectedIds.map(id => {
                         const seat = availableSeats.find(s => s.id === id);
                         return seat ? seat.seatNumber : 0;
-                    }))
-                    : 0;
+                    })) :
+                    0;
 
                 // Determine new selection (toggle off if clicking rightmost)
-                const newSelectionIds = (rightmostSelected === clickedSeatNumber && currentlySelectedIds.length > 0)
-                    ? []
-                    : seatsToSelect.map(s => s.id);
+                const newSelectionIds = (rightmostSelected === clickedSeatNumber && currentlySelectedIds.length > 0) ?
+                    [] :
+                    seatsToSelect.map(s => s.id);
 
                 // Update checkboxes
-            $("input.seat-checkbox").prop('checked', false);
+                $("input.seat-checkbox").prop('checked', false);
                 newSelectionIds.forEach(id => {
-                $("#number-of-seat-" + id).prop('checked', true);
-            });
+                    $("#number-of-seat-" + id).prop('checked', true);
+                });
 
                 // Update error visibility
                 const seatsErrorEl = document.getElementById('seats-laravel-error') ||
-                document.querySelector('#seat-selection-container + .tooltip-error');
+                    document.querySelector('#seat-selection-container + .tooltip-error');
                 const seatsErrorContainer = document.getElementById('seats-error');
-                
-            if (newSelectionIds.length > 0) {
-                if (seatsErrorEl) {
-                    seatsErrorEl.classList.add('hidden');
-                    seatsErrorEl.style.display = 'none';
-                }
-                if (seatsErrorContainer) {
-                    seatsErrorContainer.classList.add('hidden');
-                    seatsErrorContainer.style.display = 'none';
-                }
-            } else {
-                if (seatsErrorEl) {
-                    seatsErrorEl.classList.remove('hidden');
-                    seatsErrorEl.style.display = '';
-                }
+
+                if (newSelectionIds.length > 0) {
+                    if (seatsErrorEl) {
+                        seatsErrorEl.classList.add('hidden');
+                        seatsErrorEl.style.display = 'none';
+                    }
+                    if (seatsErrorContainer) {
+                        seatsErrorContainer.classList.add('hidden');
+                        seatsErrorContainer.style.display = 'none';
+                    }
+                } else {
+                    if (seatsErrorEl) {
+                        seatsErrorEl.classList.remove('hidden');
+                        seatsErrorEl.style.display = '';
+                    }
                     if (seatsErrorContainer) {
                         seatsErrorContainer.classList.add('hidden');
                     }
@@ -1109,51 +1151,56 @@
                 // Make API calls to hold/release seats
                 const apiCalls = [];
                 [...toRelease, ...toHold].forEach(seatId => {
-                apiCalls.push($.ajax({
+                    apiCalls.push($.ajax({
                         url: SEAT_HOLD_ROUTE,
-                    type: 'POST',
-                        data: { seat_id: seatId, _token: CSRF_TOKEN }
-                }));
-            });
+                        type: 'POST',
+                        data: {
+                            seat_id: seatId,
+                            _token: CSRF_TOKEN
+                        }
+                    }));
+                });
 
                 const seatHoldInfoMessage = {!! json_encode(
-                $bookingPage->seats_available_info_text_ ??
-                    "Your selected seat(s) will be held for 10 minutes. If the booking isn't completed within that time, the seat(s) will be released and made available to others.",
-            ) !!};
-                
+                    $bookingPage->seats_available_info_text_ ??
+                        "Your selected seat(s) will be held for 10 minutes. If the booking isn't completed within that time, the seat(s) will be released and made available to others.",
+                ) !!};
+
                 const isSuccessMessage = (msg) => {
-                if (!msg) return false;
+                    if (!msg) return false;
                     return msg === 'Seat on hold successfully' || msg.indexOf('will be held for 10 minutes') !== -1;
                 };
 
                 $.when(...apiCalls).done(function() {
                     const responses = arguments.length === 1 ? [arguments[0]] : Array.from(arguments);
-                    const hasError = responses.some(r => r[0] && r[0].message && !isSuccessMessage(r[0].message));
-                    
+                    const hasError = responses.some(r => r[0] && r[0].message && !isSuccessMessage(r[0]
+                        .message));
+
                     const modalMessageEl = document.querySelector('#bookingModal .text-md.text-gray-500');
                     const bookingModal = document.getElementById('bookingModal');
-                    
-                if (hasError) {
-                        const errMsg = (responses.find(r => r[0] && r[0].message && !isSuccessMessage(r[0].message)) || [{}])[0].message;
+
+                    if (hasError) {
+                        const errMsg = (responses.find(r => r[0] && r[0].message && !isSuccessMessage(r[0]
+                            .message)) || [{}])[0].message;
                         if (modalMessageEl) modalMessageEl.textContent = errMsg || 'Seat could not be held.';
                         if (bookingModal) bookingModal.classList.remove('hidden');
-                } else if (toHold.length > 0) {
+                    } else if (toHold.length > 0) {
                         if (modalMessageEl) modalMessageEl.textContent = seatHoldInfoMessage;
                         if (bookingModal) bookingModal.classList.remove('hidden');
-                }
-                    
-                updateTotalAmount();
-                persistSeatSelection();
-            }).fail(function() {
-                // Revert on error
-                $("input.seat-checkbox").prop('checked', false);
+                    }
+
+                    updateTotalAmount();
+                    persistSeatSelection();
+                }).fail(function() {
+                    // Revert on error
+                    $("input.seat-checkbox").prop('checked', false);
                     currentlySelectedIds.forEach(id => {
-                    $("#number-of-seat-" + id).prop('checked', true);
-                });
+                        $("#number-of-seat-" + id).prop('checked', true);
+                    });
                     updateSeatUI(currentlySelectedIds);
-                updateTotalAmount();
-            });
-        }
+                    updateTotalAmount();
+                });
+            }
 
             // Make seat_selected globally available
             window.seat_selected = seat_selected;
@@ -1192,20 +1239,21 @@
                 }
             });
 
-        // Close modal on Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeStudentSeatLimitModal();
-            }
-        });
+            // Close modal on Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeStudentSeatLimitModal();
+                }
+            });
 
             // Handle browser back button
             window.addEventListener("pageshow", function() {
-            const navEntries = performance.getEntriesByType("navigation");
-            if (navEntries.length > 0 && navEntries[0].type === "back_forward") {
-                    window.location.replace('{{ route('my_trips', ['lang' => $selectedLanguage->abbreviation ?? 'en']) }}');
-            }
-        });
+                const navEntries = performance.getEntriesByType("navigation");
+                if (navEntries.length > 0 && navEntries[0].type === "back_forward") {
+                    window.location.replace(
+                        '{{ route('my_trips', ['lang' => $selectedLanguage->abbreviation ?? 'en']) }}');
+                }
+            });
         })();
     </script>
 @endsection

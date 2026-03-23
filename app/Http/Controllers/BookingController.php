@@ -130,6 +130,45 @@ class BookingController extends Controller
         return $bookingCredit;
     }
 
+    protected function normalizeBookingPaymentAmounts(Request $request, Ride $ride): array
+    {
+        $bookingCredit = round((float) $request->input('booking_credit', 0), 2);
+        $seatsAmount = round((float) $request->input('seats_amount', 0), 2);
+        $taxAmount = round((float) $request->input('tax_amount', 0), 2);
+        $total = round((float) $request->input('total', 0), 2);
+        $coffeeWall = (string) $request->input('coffee_wall') === '1';
+        $walletCovered = (string) $request->input('booked_by_wallet') === '1';
+        $isCashRide = $ride->isCashPayment();
+
+        $baseOnlinePayment = $isCashRide ? $bookingCredit : $total;
+        if ($coffeeWall) {
+            $baseOnlinePayment = $isCashRide
+                ? 0.0
+                : round(max(0, $total - $bookingCredit), 2);
+        }
+
+        $onlinePayment = $walletCovered
+            ? 0.0
+            : round((float) $request->input('online_payment', $baseOnlinePayment), 2);
+
+        if (!$walletCovered) {
+            $onlinePayment = $baseOnlinePayment;
+        }
+
+        return [
+            'booking_credit' => $bookingCredit,
+            'seats_amount' => $seatsAmount,
+            'tax_amount' => $taxAmount,
+            'total' => $total,
+            'online_payment' => $onlinePayment,
+            'cash_payment' => $isCashRide ? $seatsAmount : 0.0,
+            'wallet_charge' => $walletCovered ? $baseOnlinePayment : 0.0,
+            'coffee_wall' => $coffeeWall,
+            'booked_by_wallet' => $walletCovered,
+            'is_cash_ride' => $isCashRide,
+        ];
+    }
+
     protected function loadRideForBooking(int $rideId, ?int $rideDetailId = null, $fromStopId = null, $toStopId = null): Ride
     {
         $ride = Ride::with([
@@ -264,8 +303,6 @@ class BookingController extends Controller
                 $settingTaxPercentage = $setting->tax;
             }
         }
-
-        $settingTaxPercentage = 5;
 
         return view('booking', 
             [
@@ -825,6 +862,7 @@ class BookingController extends Controller
                 //Booking Method
                 $secured_cash = null;
                 $secured_cash_code = null;
+                $paymentAmounts = $this->normalizeBookingPaymentAmounts($request, $ride);
 
                 // Helper to redirect back with a generic error
                 $genericErrorResponse = function () use ($messages) {
@@ -834,23 +872,16 @@ class BookingController extends Controller
                 };
 
                 // Helper: charge via Stripe PaymentIntent using a Stripe payment method id (card / Google Pay / Apple Pay)
-                $chargeWithStripePaymentMethod = function (string $stripePaymentMethodId, float $amount) use ($user, $taxAmt, $request, $genericErrorResponse) {
+                $chargeWithStripePaymentMethod = function (string $stripePaymentMethodId, float $amount) use ($user, $genericErrorResponse) {
                     if (!$user->stripe_customer_id) {
                         return $genericErrorResponse();
                     }
 
                     Stripe::setApiKey(env('STRIPE_SECRET'));
 
-                    $stripePay = 0;
-                    if ($request->cash_payment > 0) {
-                        $stripePay = $amount + $taxAmt;
-                    } else {
-                        $stripePay = $amount;
-                    }
-
                     try {
                         $paymentIntent = PaymentIntent::create([
-                            'amount'        => round(($stripePay * 100), 0),
+                            'amount'        => round(($amount * 100), 0),
                             'currency'      => 'CAD',
                             'customer'      => $user->stripe_customer_id,
                             'payment_method'=> $stripePaymentMethodId,
@@ -917,8 +948,8 @@ class BookingController extends Controller
 
                         $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
 
-                        if ($request->online_payment > '0') {
-                            $paymentIntentOrResponse = $chargeWithStripePaymentMethod($paymentMethod->id, (float) $request->online_payment);
+                        if ($paymentAmounts['online_payment'] > 0) {
+                            $paymentIntentOrResponse = $chargeWithStripePaymentMethod($paymentMethod->id, $paymentAmounts['online_payment']);
                             if ($paymentIntentOrResponse instanceof \Illuminate\Http\RedirectResponse) {
                                 return $paymentIntentOrResponse;
                             }
@@ -953,8 +984,8 @@ class BookingController extends Controller
                                 ->with(['failure' => $messages->general_error_message ?? 'Payment method not found. Please add a card first.']);
                         }
 
-                        if ($request->online_payment > '0') {
-                            $paymentIntentOrResponse = $chargeWithStripePaymentMethod($card->stripe_payment_method_id, (float) $request->online_payment);
+                        if ($paymentAmounts['online_payment'] > 0) {
+                            $paymentIntentOrResponse = $chargeWithStripePaymentMethod($card->stripe_payment_method_id, $paymentAmounts['online_payment']);
                             if ($paymentIntentOrResponse instanceof \Illuminate\Http\RedirectResponse) {
                                 return $paymentIntentOrResponse;
                             }
@@ -995,8 +1026,8 @@ class BookingController extends Controller
                         $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
                         $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
 
-                        if ($request->online_payment > '0') {
-                            $paymentIntentOrResponse = $chargeWithStripePaymentMethod($card->stripe_payment_method_id, (float) $request->online_payment);
+                        if ($paymentAmounts['online_payment'] > 0) {
+                            $paymentIntentOrResponse = $chargeWithStripePaymentMethod($card->stripe_payment_method_id, $paymentAmounts['online_payment']);
                             if ($paymentIntentOrResponse instanceof \Illuminate\Http\RedirectResponse) {
                                 return $paymentIntentOrResponse;
                             }
@@ -1091,32 +1122,21 @@ class BookingController extends Controller
                         }
                     }
 
-                    if ($request->online_payment > '0') {
-                        $onlinePayment = $request->input('online_payment');
-                        if (isset($request->coffee_wall) && $request->coffee_wall == "1") {
-                            $onlinePayment = $request->input('online_payment') + $request->booking_credit;
-                        }
-
-                        if ($request->cash_payment > 0) {
-                            $onlinePayment = $onlinePayment;
-                        } else {
-                            $onlinePayment = $onlinePayment - $taxAmt;
-                        }
-
+                    if ($paymentAmounts['online_payment'] > 0) {
                         $transaction = Transaction::create([
                             'booking_id' => $booking->id,
                             'type' => '1',
                             'booking_fee' => $request->booking_credit,
-                            'price' => $onlinePayment,
+                            'price' => $paymentAmounts['online_payment'],
                             'stripe_id' => $stripId,
-                            'coffee_from_wall' => isset($request->coffee_wall) && $request->coffee_wall == "1" ? true : false,
+                            'coffee_from_wall' => $paymentAmounts['coffee_wall'],
                             'tax_amount' => $taxAmt,
                             'tax_percentage' => isset($request->tax_percentage) ? $request->tax_percentage : 0,
                             'tax_type' => isset($request->tax_type) ? $request->tax_type : NULL,
                             'deduct_type' => isset($request->deduct_tax) ? $request->deduct_tax : NULL,
                         ]);
 
-                        if (isset($request->coffee_wall) && $request->coffee_wall == "1") {
+                        if ($paymentAmounts['coffee_wall']) {
                             $coffeeWallet = CoffeeWallet::create([
                                 'booking_id' => $booking->id,
                                 'ride_id' => $ride->id,
@@ -1204,7 +1224,7 @@ class BookingController extends Controller
                         $topUpBalance = TopUpBalance::create([
                             'booking_id' => $booking->id,
                             'user_id' => $user->id,
-                            'cr_amount' => $request->cash_payment > 0 ? ($request->booking_credit + $taxAmt) : (isset($request->coffee_wall) && $request->coffee_wall == "1" ? ($request->seats_amount + $taxAmt) : $request->total),
+                            'cr_amount' => $paymentAmounts['online_payment'],
                             'added_date' => date('Y-m-d'),
                         ]);
                         $card = isset($request->card_id) ? Card::find($request->card_id) : null;
@@ -1301,6 +1321,7 @@ class BookingController extends Controller
         //Booking Method
         $secured_cash = null;
         $secured_cash_code = null;
+        $paymentAmounts = $this->normalizeBookingPaymentAmounts($request, $ride);
 
         // Ensure type is a valid string (use ride->booking_type as fallback, limit length to prevent truncation errors)
         $bookingType = (string) ($request->type ?? $ride->booking_type ?? 'standard');
@@ -1391,7 +1412,7 @@ class BookingController extends Controller
 
         $transcationId = "";
 
-        if (isset($request->coffee_wall) && $request->coffee_wall == "1") {
+        if ($paymentAmounts['coffee_wall']) {
             $transaction = Transaction::create([
                 'booking_id' => $booking->id,
                 'type' => '1',
@@ -1410,16 +1431,16 @@ class BookingController extends Controller
                 'booking_id' => $booking->id,
                 'ride_id' => $ride->id,
                 'user_id' => $booking->user_id,
-                'cr_amount' => $request->booking_credit + $taxAmt,
+                'cr_amount' => $request->booking_credit,
             ]);
         }
 
-        if (isset($request->booked_by_wallet) && $request->booked_by_wallet == "1") {
+        if ($paymentAmounts['booked_by_wallet']) {
             $transaction = Transaction::create([
                 'booking_id' => $booking->id,
                 'type' => '1',
-                'booking_fee' => isset($request->coffee_wall) && $request->coffee_wall == "1" ? '0' : $request->booking_credit,
-                'price' => $request->cash_payment > 0 ? $request->booking_credit : (isset($request->coffee_wall) && $request->coffee_wall == "1" ? $request->seats_amount : $request->total - $taxAmt),
+                'booking_fee' => $paymentAmounts['coffee_wall'] ? '0' : $request->booking_credit,
+                'price' => $paymentAmounts['wallet_charge'],
                 'pay_by_account' => true,
                 'tax_amount' => $taxAmt,
                 'tax_percentage' => isset($request->tax_percentage) ? $request->tax_percentage : 0,
@@ -1432,7 +1453,7 @@ class BookingController extends Controller
             $topUpBalance = TopUpBalance::create([
                 'booking_id' => $booking->id,
                 'user_id' => $user->id,
-                'cr_amount' => $request->cash_payment > 0 ? ($request->booking_credit + $taxAmt) : (isset($request->coffee_wall) && $request->coffee_wall == "1" ? ($request->seats_amount + $taxAmt) : $request->total),
+                'cr_amount' => $paymentAmounts['wallet_charge'],
                 'added_date' => date('Y-m-d'),
             ]);
         }
@@ -1734,6 +1755,7 @@ class BookingController extends Controller
         if ($hasExistingBooking) {
             $seatsBooked -= (int) ($existingBooking->seats ?? 0);
         }
+        Log::info($hasExistingBooking);
         if ($seatsBooked > $ride->seats) {
             return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->detail->departure, 'to' => $ride->detail->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])
             ->with(['failure' => $errorMsg->seat_unavailable_message]);
@@ -1767,9 +1789,10 @@ class BookingController extends Controller
         // Student booking fee waiver: Validate and apply waiver with card expiration check
         $adjustedBookingCredit = $this->validateStudentBookingFee($user, $request->booking_credit);
         $request->merge(['booking_credit' => $adjustedBookingCredit]);
+        $paymentAmounts = $this->normalizeBookingPaymentAmounts($request, $ride);
 
 
-        if ($request->online_payment > '0') {
+        if ($paymentAmounts['online_payment'] > 0) {
             /**
              * Map card_id (paypal / credit_card / google_pay / apple_pay / saved card id)
              * to the legacy payment_method field so existing PayPal/Stripe flows keep working.
@@ -1817,7 +1840,7 @@ class BookingController extends Controller
                 'stripeToken' => 'required_if:card_id,credit_card',
             ];
 
-            if ($ride->booking_type == "37") {
+            if ($ride->isFirmCancellation()) {
                 $rules['firm_agree_terms'] = 'accepted|required';
                 $rules['firm_cancellation_understand'] = 'accepted|required';
             }
@@ -1851,14 +1874,8 @@ class BookingController extends Controller
                 $token = $paypal->getAccessToken();
                 $paypal->setAccessToken($token);
 
-                if ($request->online_payment > 0) {
-
-                    $paypalPay = 0;
-                    if ($request->cash_payment > 0) {
-                        $paypalPay = $request->input('online_payment') + $taxAmt;
-                    } else {
-                        $paypalPay = $request->input('online_payment');
-                    }
+                if ($paymentAmounts['online_payment'] > 0) {
+                    $paypalPay = $paymentAmounts['online_payment'];
 
                     $order = $paypal->createOrder([
                         "intent" => "CAPTURE",
@@ -1879,11 +1896,11 @@ class BookingController extends Controller
                                 'seats_amount' => $request->seats_amount,
                                 'booking_credit' => $request->booking_credit,
                                 'fare' => $request->seats_amount,
-                                'online_payment' => $request->online_payment,
-                                'cash_payment' => $request->cash_payment,
+                                'online_payment' => $paymentAmounts['online_payment'],
+                                'cash_payment' => $paymentAmounts['cash_payment'],
                                 'total' => $request->total,
                                 'seats_id' => implode(',', $request->seats_id),
-                                'coffee_wall' => isset($request->coffee_wall) ? $request->coffee_wall : '0',
+                                'coffee_wall' => $paymentAmounts['coffee_wall'] ? '1' : '0',
                                 'transactionTaxSum' => 0,
                                 'ride' => $ride,
                                 'tax_amount' => isset($request->tax_amount) ? $request->tax_amount : 0,
@@ -1909,7 +1926,7 @@ class BookingController extends Controller
                 $stripId = null;
 
                 try {
-                    if ($ride->payment_method == "35" && $ride->booking_method == "31") {
+                    if ($ride->isSecureCashPayment() && $ride->isInstantBooking()) {
                         $phoneNumber = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->where('default', '1')->first();
                         if (!$phoneNumber) {
                             $phoneNumber = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->first();
@@ -1971,7 +1988,7 @@ class BookingController extends Controller
                         $secured_cash_code = null;
                     }
 
-                    if ($request->online_payment > '0') {
+                    if ($paymentAmounts['online_payment'] > 0) {
 
                         if (isset($request->gPayApplePayId) && $request->gPayApplePayId != '') {
                             $stripId = $request->gPayApplePayId;
@@ -2025,17 +2042,9 @@ class BookingController extends Controller
                                 $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
                                 $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
                             }
-
-
-                            $stripePay = 0;
-                            if ($request->cash_payment > 0) {
-                                $stripePay = $request->input('online_payment') + $taxAmt;
-                            } else {
-                                $stripePay = $request->input('online_payment');
-                            }
                             // Create a payment intent
                             $paymentIntent = PaymentIntent::create([
-                                'amount' => round(($stripePay * 100), 0),
+                                'amount' => round(($paymentAmounts['online_payment'] * 100), 0),
                                 'currency' => 'cad',
                                 'customer' => $user->stripe_customer_id,
                                 'payment_method' => $paymentMethod->id,
@@ -2123,32 +2132,21 @@ class BookingController extends Controller
                         }
                     }
 
-                    if ($request->online_payment > '0') {
-                        $onlinePayment = $request->input('online_payment');
-                        if (isset($request->coffee_wall) && $request->coffee_wall == "1") {
-                            $onlinePayment = $request->input('online_payment') + $request->booking_credit;
-                        }
-
-                        if ($request->cash_payment > 0) {
-                            $onlinePayment = $onlinePayment;
-                        } else {
-                            $onlinePayment = $onlinePayment - $taxAmt;
-                        }
-
+                    if ($paymentAmounts['online_payment'] > 0) {
                         $transaction = Transaction::create([
                             'booking_id' => $booking->id,
                             'type' => '1',
                             'booking_fee' => $request->booking_credit,
-                            'price' => $onlinePayment,
+                            'price' => $paymentAmounts['online_payment'],
                             'stripe_id' => $stripId,
-                            'coffee_from_wall' => isset($request->coffee_wall) && $request->coffee_wall == "1" ? true : false,
+                            'coffee_from_wall' => $paymentAmounts['coffee_wall'],
                             'tax_amount' => $taxAmt,
                             'tax_percentage' => isset($request->tax_percentage) ? $request->tax_percentage : 0,
                             'tax_type' => isset($request->tax_type) ? $request->tax_type : NULL,
                             'deduct_type' => isset($request->deduct_tax) ? $request->deduct_tax : NULL,
                         ]);
 
-                        if (isset($request->coffee_wall) && $request->coffee_wall == "1") {
+                        if ($paymentAmounts['coffee_wall']) {
                             $coffeeWallet = CoffeeWallet::create([
                                 'booking_id' => $booking->id,
                                 'ride_id' => $ride->id,
@@ -2322,8 +2320,8 @@ class BookingController extends Controller
                         'seats' => $booking->seats,
                         'seats_amount' => $request->seats_amount,
                         'booking_credit' => $booking->booking_credit,
-                        'online_payment' => $request->online_payment,
-                        'cash_payment' => $request->cash_payment,
+                        'online_payment' => $paymentAmounts['online_payment'],
+                        'cash_payment' => $paymentAmounts['cash_payment'],
                         'total' => $request->total
                     ];
                     Mail::to($user->email)->queue(new PaymentInvoiceMail($data));
@@ -2614,7 +2612,7 @@ class BookingController extends Controller
             }
         } else {
 
-            if ($ride->payment_method == "35" && $ride->booking_method == "31") {
+            if ($ride->isSecureCashPayment() && $ride->isInstantBooking()) {
                 $phoneNumber = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->where('default', '1')->first();
                 if (!$phoneNumber) {
                     $phoneNumber = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->first();
@@ -2814,7 +2812,7 @@ class BookingController extends Controller
                 }
             }
 
-            if (isset($request->coffee_wall) && $request->coffee_wall == "1") {
+            if ($paymentAmounts['coffee_wall']) {
                 $transaction = Transaction::create([
                     'booking_id' => $booking->id,
                     'type' => '1',
@@ -2831,16 +2829,16 @@ class BookingController extends Controller
                     'booking_id' => $booking->id,
                     'ride_id' => $ride->id,
                     'user_id' => $booking->user_id,
-                    'cr_amount' => $request->booking_credit + $taxAmt,
+                    'cr_amount' => $request->booking_credit,
                 ]);
             }
 
-            if (isset($request->booked_by_wallet) && $request->booked_by_wallet == "1") {
+            if ($paymentAmounts['booked_by_wallet']) {
                 $transaction = Transaction::create([
                     'booking_id' => $booking->id,
                     'type' => '1',
-                    'booking_fee' => isset($request->coffee_wall) && $request->coffee_wall == "1" ? '0' : $request->booking_credit,
-                    'price' => $request->cash_payment > 0 ? $request->booking_credit : (isset($request->coffee_wall) && $request->coffee_wall == "1" ? $request->seats_amount : $request->total - $taxAmt),
+                    'booking_fee' => $paymentAmounts['coffee_wall'] ? '0' : $request->booking_credit,
+                    'price' => $paymentAmounts['wallet_charge'],
                     'pay_by_account' => true,
                     'tax_amount' => $taxAmt,
                     'tax_percentage' => isset($request->tax_percentage) ? $request->tax_percentage : 0,
@@ -2851,7 +2849,7 @@ class BookingController extends Controller
                 $topUpBalance = TopUpBalance::create([
                     'booking_id' => $booking->id,
                     'user_id' => $user->id,
-                    'cr_amount' => $request->cash_payment > 0 ? $request->booking_credit + $taxAmt : (isset($request->coffee_wall) && $request->coffee_wall == "1" ? $request->seats_amount + $taxAmt : $request->total),
+                    'cr_amount' => $paymentAmounts['wallet_charge'],
                     'added_date' => date('Y-m-d'),
                 ]);
             }
@@ -3227,7 +3225,7 @@ class BookingController extends Controller
             'agree_terms' => 'accepted|required'
         ];
 
-        if ($ride->booking_type == "37") {
+        if ($ride->isFirmCancellation()) {
             $rules['firm_agree_terms'] = 'accepted|required';
             $rules['firm_cancellation_understand'] = 'accepted|required';
         }
@@ -5652,25 +5650,51 @@ class BookingController extends Controller
                 $secured_cash_code = null;
             }
 
+            // Payment successful, handle booking logic here.
+            // Reuse the active booking for the same ride segment if one already exists.
+            $existingBooking = $this->findExistingBookingForSegment(
+                $id,
+                $user->id,
+                $bookingRouteData['from_stop_id'],
+                $bookingRouteData['to_stop_id']
+            );
 
-            // Payment successful, handle booking logic here
-            $booking = Booking::create([
-                'user_id' => $user->id,
-                'ride_id' => $id,
-                'seats' => $seats,
-                'type' => $type,
-                'booked_on' => Carbon::now(),
-                'status' => '1',
-                'booking_credit' => $booking_credit,
-                'fare' => $fare,
-                'tax_amount' => $taxAmt,
-                'secured_cash' => $secured_cash,
-                'secured_cash_code' => $secured_cash_code,
-                'departure' => $ride->detail->departure,
-                'destination' => $ride->detail->destination,
-                'price' => $ride->detail->price,
-                'ride_detail_id' => $ride->detail->id
-            ]);
+            if ($existingBooking) {
+                $booking = $existingBooking;
+                $booking->update([
+                    'seats' => (int) ($booking->seats ?? 0) + (int) $seats,
+                    'booking_credit' => (float) ($booking->booking_credit ?? 0) + (float) $booking_credit,
+                    'fare' => (float) ($booking->fare ?? 0) + (float) $fare,
+                    'tax_amount' => (float) ($booking->tax_amount ?? 0) + (float) $taxAmt,
+                    'type' => $type,
+                    'status' => Booking::STATUS_BOOKED,
+                    'booked_on' => Carbon::now(),
+                    'secured_cash' => $secured_cash,
+                    'secured_cash_code' => $secured_cash_code,
+                    'departure' => $ride->detail->departure,
+                    'destination' => $ride->detail->destination,
+                    'price' => $ride->detail->price,
+                    'ride_detail_id' => $ride->detail->id,
+                ]);
+            } else {
+                $booking = Booking::create([
+                    'user_id' => $user->id,
+                    'ride_id' => $id,
+                    'seats' => $seats,
+                    'type' => $type,
+                    'booked_on' => Carbon::now(),
+                    'status' => '1',
+                    'booking_credit' => $booking_credit,
+                    'fare' => $fare,
+                    'tax_amount' => $taxAmt,
+                    'secured_cash' => $secured_cash,
+                    'secured_cash_code' => $secured_cash_code,
+                    'departure' => $ride->detail->departure,
+                    'destination' => $ride->detail->destination,
+                    'price' => $ride->detail->price,
+                    'ride_detail_id' => $ride->detail->id
+                ]);
+            }
             $booking = $this->syncBookingRouteData(
                 $booking,
                 $ride,
