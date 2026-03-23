@@ -123,23 +123,35 @@ class NotificationController extends GetxController {
   }
 
   Future<void> requestPermissionAndGetToken() async {
-    final notificationSettings =
-        await FirebaseMessaging.instance.requestPermission(provisional: true);
+    try {
+      final notificationSettings =
+          await FirebaseMessaging.instance.requestPermission(
+        provisional: true,
+      );
 
-    if (notificationSettings.authorizationStatus ==
-        AuthorizationStatus.authorized) {
-      // Notification permission granted.
+      final isPermissionGranted =
+          notificationSettings.authorizationStatus ==
+                  AuthorizationStatus.authorized ||
+              notificationSettings.authorizationStatus ==
+                  AuthorizationStatus.provisional;
+
+      if (!isPermissionGranted) {
+        logger.warning(
+            "Notification permission not granted: ${notificationSettings.authorizationStatus}");
+        return;
+      }
+
       final fcmToken = await FirebaseMessaging.instance.getToken();
-      logger.info("FCM Token: $fcmToken");
-      // You can now store or send this token to your application server.
-    } else {
-      // Notification permission NOT granted.
-      logger.info("Notification permission NOT granted");
-      // You might want to handle this case and request permission again.
-    }
+      if (fcmToken == null || fcmToken.isEmpty) {
+        logger.warning("FCM token is null or empty in NotificationController");
+        return;
+      }
 
-    final fcmToken = await FirebaseMessaging.instance.getToken();
-    logger.info("FCM Token: $fcmToken");
+      logger.info("FCM Token: $fcmToken");
+    } catch (e, stackTrace) {
+      logger.error("Failed to get FCM token in NotificationController: $e");
+      logger.error(stackTrace.toString());
+    }
   }
 
   // Private method for initial load (no dialog on error, throws to loadInitialData)

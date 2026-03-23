@@ -476,7 +476,10 @@ class SignupPage extends GetView<RegisterController> {
                                   // },
                                   decoration: InputDecoration(
                                     hintMaxLines: 10,
-                                    hintStyle: const TextStyle(fontSize: 18),
+                                    hintStyle:
+                                        appPlaceholderTextStyle().copyWith(
+                                      fontSize: 18,
+                                    ),
                                     // hintText: "Select Password",
                                     // hintText:
                                     //     "${controller.labelTextDetail['password_placeholder'] ?? 'Your password must be at least 8 characters long, including a lowercase letter, an uppercase letter, a number, and a special character'}",
@@ -629,7 +632,9 @@ class SignupPage extends GetView<RegisterController> {
                             return null;
                           },
                           decoration: InputDecoration(
-                            hintStyle: const TextStyle(fontSize: 18),
+                            hintStyle: appPlaceholderTextStyle().copyWith(
+                              fontSize: 18,
+                            ),
                             // hintText: "Confirm Password",
                             // hintText:
                             //     "${controller.labelTextDetail['confirm_password_placeholder'] ?? 'Confirm your password'}",

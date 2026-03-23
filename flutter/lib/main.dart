@@ -84,6 +84,7 @@ import 'package:proximaride_app/pages/trip_detail/trip_detail.dart';
 import 'package:proximaride_app/services/logger_service.dart';
 import 'package:proximaride_app/services/notification_service.dart';
 import 'package:proximaride_app/services/service.dart';
+import 'package:proximaride_app/pages/widgets/textWidget.dart';
 //import 'package:tiktok_login_flutter/tiktok_login_flutter.dart';
 import 'consts/constFileLink.dart';
 
@@ -470,6 +471,9 @@ class MyAppState extends State<MyApp> {
         scaffoldBackgroundColor: Colors.white,
         appBarTheme: const AppBarTheme(backgroundColor: Colors.white),
         fontFamily: regular,
+        inputDecorationTheme: InputDecorationTheme(
+          hintStyle: appPlaceholderTextStyle(),
+        ),
       ),
       initialRoute: '/',
       defaultTransition: Transition.leftToRightWithFade,

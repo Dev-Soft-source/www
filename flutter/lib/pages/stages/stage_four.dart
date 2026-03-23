@@ -199,10 +199,11 @@ class StageFour extends GetView<StageFourController> {
                                         counter: const SizedBox.shrink(),
                                         // isDense: true,
                                         hintText: "(with area code)",
-                                        hintStyle: const TextStyle(
-                                            fontSize: 18,
-                                            fontFamily: regular,
-                                            color: textColor),
+                                        hintStyle:
+                                            appPlaceholderTextStyle().copyWith(
+                                          fontSize: 18,
+                                          fontFamily: regular,
+                                        ),
                                         enabledBorder: OutlineInputBorder(
                                             borderRadius:
                                                 BorderRadius.circular(5.0),

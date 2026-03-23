@@ -456,7 +456,8 @@ class MessagingPage extends GetView<MessagingController> {
                                         hintText:
                                             // "Please avoid sharing any contact details such as phone numbers, email addresses, or website links. Do not offer or agree to communicate or arrange payments outside the ProximaRide platform.",
                                             "${controller.labelTextDetail['type_message_placeholder'] ?? "Please avoid sharing any contact details such as phone numbers, email addresses, or website links. Do not offer or agree to communicate or arrange payments outside the ProximaRide platform.'"}", // Add hint text
-                                        hintStyle: const TextStyle(
+                                        hintStyle:
+                                            appPlaceholderTextStyle().copyWith(
                                           fontSize: 18,
                                           fontFamily: regular,
                                         ),

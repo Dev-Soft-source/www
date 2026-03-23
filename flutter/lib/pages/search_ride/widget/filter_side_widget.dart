@@ -267,7 +267,7 @@ Widget filterSideWidget({context, controller, double screenWidth = 0.0, double s
                   10.heightBox,
                   txt20Size(title: "${controller.labelTextDetail['driver_know_label'] ?? "Driver you know"}", context: context),
                   5.heightBox,
-                  fieldsWidget(textController: controller.driverNameEditingController, fieldType: "text", fontSize: 18.0, fontFamily: regular, placeHolder: "${controller.labelTextDetail['driver_know_placeholder'] ?? "Enter"}", readonly: false, hintTextColor: textColor),
+                  fieldsWidget(textController: controller.driverNameEditingController, fieldType: "text", fontSize: 18.0, fontFamily: regular, placeHolder: "${controller.labelTextDetail['driver_know_placeholder'] ?? "Enter"}", readonly: false, hintTextColor: placeHolderColor),
                   10.heightBox,
                   txt24Size(title: "${controller.labelTextDetail['filter2_passengers_heading'] ?? "Passenger travelling in same car"}", context: context, textColor: primaryColor),
                   10.heightBox,

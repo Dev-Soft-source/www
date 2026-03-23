@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../consts/constFileLink.dart';
+import 'textWidget.dart';
 
 Widget fieldsWidget(
     {textController,
@@ -11,7 +12,7 @@ Widget fieldsWidget(
     String placeHolder = "",
     suffix,
     prefixIcon,
-    hintTextColor = textColor,
+    hintTextColor = placeHolderColor,
     bool isError = false,
     maxLength = 500,
     int maxLines = 1,
@@ -54,8 +55,13 @@ Widget fieldsWidget(
         prefixIcon: prefixIcon,
         hintText: placeHolder,
         hintMaxLines: hintMaxLines,
-        hintStyle: TextStyle(
-            fontSize: 18, fontFamily: fontFamily, color: hintTextColor),
+        hintStyle: appPlaceholderTextStyle(
+          textColor: hintTextColor,
+          context: null,
+        ).copyWith(
+          fontSize: 18,
+          fontFamily: fontFamily,
+        ),
         fillColor: inputColor,
         contentPadding:
             const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0)),

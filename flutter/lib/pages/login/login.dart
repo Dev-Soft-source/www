@@ -1023,7 +1023,9 @@ class LoginPage extends GetView<LoginController> {
                               // },
 
                               decoration: InputDecoration(
-                                hintStyle: const TextStyle(fontSize: 18),
+                                hintStyle: appPlaceholderTextStyle().copyWith(
+                                  fontSize: 18,
+                                ),
                                 // hintText: "Password",
                                 errorStyle: const TextStyle(
                                     color: primaryColor, fontSize: 16),

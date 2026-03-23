@@ -210,18 +210,33 @@ class NavigationController extends GetxController {
   }
 
   Future<void> requestPermissionAndGetToken() async {
-    final notificationSettings =
-        await FirebaseMessaging.instance.requestPermission(
-      provisional: true,
-      sound: false,
-      alert: true,
-      announcement: true,
-      badge: true,
-    );
+    try {
+      final notificationSettings =
+          await FirebaseMessaging.instance.requestPermission(
+        provisional: true,
+        sound: false,
+        alert: true,
+        announcement: true,
+        badge: true,
+      );
 
-    if (notificationSettings.authorizationStatus ==
-        AuthorizationStatus.authorized) {
+      final isPermissionGranted =
+          notificationSettings.authorizationStatus ==
+                  AuthorizationStatus.authorized ||
+              notificationSettings.authorizationStatus ==
+                  AuthorizationStatus.provisional;
+
+      if (!isPermissionGranted) {
+        logger.warning(
+            "Notification permission not granted: ${notificationSettings.authorizationStatus}");
+        return;
+      }
+
       final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken == null || fcmToken.isEmpty) {
+        logger.warning("FCM token is null or empty");
+        return;
+      }
 
       logger.info("FCM Token: $fcmToken");
       NavigationProvider()
@@ -231,9 +246,12 @@ class NavigationController extends GetxController {
         serviceController.notificationCount.value =
             int.parse(resp['data']['notificationCount'].toString());
       }, onError: (err) {
-        // serviceController.showDialogue(err.toString(), type: "error");
+        logger.error("Failed to update user FCM token: $err");
       });
-    } else {}
+    } catch (e, stackTrace) {
+      logger.error("Failed to get FCM token in NavigationController: $e");
+      logger.error(stackTrace.toString());
+    }
   }
 
   Future<void> getNotificationCount() async {

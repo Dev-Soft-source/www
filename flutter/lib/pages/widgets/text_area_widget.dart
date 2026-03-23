@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../consts/constFileLink.dart';
+import 'textWidget.dart';
 
 Widget textAreaWidget(
     {textController,
@@ -37,8 +38,12 @@ Widget textAreaWidget(
           borderRadius: BorderRadius.circular(5.0),
           borderSide: const BorderSide(color: primaryColor)),
       hintText: placeHolder,
-      hintStyle: TextStyle(
-          fontSize: fontSize != null ? fontSize - 2 : null, fontFamily: fontFamily, color: textColor),
+      hintStyle: appPlaceholderTextStyle(
+        context: null,
+      ).copyWith(
+        fontSize: fontSize != null ? fontSize - 2 : null,
+        fontFamily: fontFamily,
+      ),
       hintMaxLines: hintMaxLines,
       filled: true,
       fillColor: inputColor,

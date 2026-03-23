@@ -92,7 +92,7 @@ class SearchRidePage extends GetView<SearchRideController> {
                               context: context, imagePath: fromLocationImage),
                           placeHolder:
                               "${controller.labelTextDetail['search_section_from_placeholder'] ?? "Origin"}",
-                          hintTextColor: textColor,
+                          hintTextColor: placeHolderColor,
                           onChanged: (value) {
                             if (controller.errors.firstWhereOrNull(
                                     (element) => element['title'] == "from") !=
@@ -151,7 +151,7 @@ class SearchRidePage extends GetView<SearchRideController> {
                               context: context, imagePath: toLocationImage),
                           placeHolder:
                               "${controller.labelTextDetail['search_section_to_placeholder'] ?? "Destination"}",
-                          hintTextColor: textColor,
+                          hintTextColor: placeHolderColor,
                           onChanged: (value) {
                             if (controller.errors.firstWhereOrNull(
                                     (element) => element['title'] == "to") !=

@@ -17,7 +17,7 @@ TextStyle appButtonTextStyle({Color textColor = Colors.white, context}) {
 }
 
 TextStyle appPlaceholderTextStyle(
-    {Color textColor = Colors.grey, context, double? opacity}) {
+    {Color textColor = placeHolderColor, context, double? opacity}) {
   final resolvedColor =
       opacity == null ? textColor : textColor.withOpacity(opacity);
   return TextStyle(
@@ -578,7 +578,8 @@ Widget txt20SizeCapitalize(
     String fontFamily = regular,
     Color textColor = textColor,
     context}) {
-  return title.text
+  final safeTitle = title.trim().isEmpty ? "N/A" : title;
+  return safeTitle.text
       .size(getValueForScreenType<double>(
         context: context,
         mobile: 20.0,
