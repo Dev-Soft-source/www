@@ -1172,5 +1172,14 @@
             document.body.appendChild(form);
             form.submit();
         }
+
+        // Handle browser back button
+        window.addEventListener("pageshow", function() {
+            const navEntries = performance.getEntriesByType("navigation");
+            if (navEntries.length > 0 && navEntries[0].type === "back_forward") {
+                window.location.replace(
+                    '{{ route('my_trips', ['lang' => $selectedLanguage->abbreviation ?? 'en']) }}');
+            }
+        });
     </script>
 @endsection
