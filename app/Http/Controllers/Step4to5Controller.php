@@ -67,7 +67,8 @@ class Step4to5Controller extends Controller
                     'driver_license_original_upload' => null,
                     'driver_license_upload' => null,
                     'driver' => 2,
-                    'step4' => 1
+                    'step4' => 1,
+                    'step' => 5
                 ]);
             } elseif ($request->hasFile('driver_liscense')) {
                 $file = $request->file('driver_liscense');
@@ -79,7 +80,8 @@ class Step4to5Controller extends Controller
                     'driver_license_original_upload' => $filename,
                     'driver_license_upload' => Carbon::now(),
                     'driver' => 2,
-                    'step4' => 1
+                    'step4' => 1,
+                    'step' => 5
                 ]);
             }
         }

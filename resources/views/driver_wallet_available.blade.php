@@ -126,27 +126,27 @@
                                                                     class="border-gray-300 flex items-center justify-between space-x-2 p-4">
                                                                     <p>{{ $walletSettingPage->driver_available_ride_id_label ?? 'Ride ID' }}
                                                                     </p>
-                                                                    <p>{{ $balance->ride->random_id }}</p>
+                                                                    <p>{{ $balance->ride?->random_id }}</p>
                                                                 </div>
                                                                 <div
                                                                     class="border-t border-gray-300 flex items-center justify-between space-x-2 p-4">
                                                                     <p>{{ $walletSettingPage->driver_available_from_label ?? 'From' }}
                                                                     </p>
-                                                                    <p>{{ $balance->ride->defaultRideDetail[0]->departure }}
+                                                                    <p>{{ $balance->ride?->detail->departure }}
                                                                     </p>
                                                                 </div>
                                                                 <div
                                                                     class="border-t border-gray-300 flex items-center justify-between space-x-2 p-4">
                                                                     <p>{{ $walletSettingPage->driver_available_to_label ?? 'To' }}
                                                                     </p>
-                                                                    <p>{{ $balance->ride->defaultRideDetail[0]->destination }}
+                                                                    <p>{{ $balance->ride?->detail->destination }}
                                                                     </p>
                                                                 </div>
                                                                 <div
                                                                     class="border-t border-gray-300 flex items-center justify-between space-x-2 p-4">
                                                                     <p>{{ $walletSettingPage->driver_available_date_label ?? 'Date' }}
                                                                     </p>
-                                                                    <p>{{ $balance->ride->completed_date }}</p>
+                                                                    <p>{{ $balance->ride?->completed_date }}</p>
                                                                 </div>
                                                                 <div
                                                                     class="border-t border-gray-300 flex items-center justify-between space-x-2 p-4">

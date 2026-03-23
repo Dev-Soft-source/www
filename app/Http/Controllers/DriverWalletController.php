@@ -181,44 +181,20 @@ class DriverWalletController extends Controller
             }
         }
 
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
-                // Ratings where type is 1 and ride_id belongs to the user
-                $query->where('type', '1')
-                      ->whereHas('ride', function ($query) use ($user_id) {
-                          $query->where('added_by', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($user_id) {
-                          $query->where('user_id', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is null and receiver_id belongs to the user
-                $query->where('type', null)
-                      ->whereHas('receiver', function ($query) use ($user_id) {
-                          $query->where('id', $user_id);
-                      });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
-        }
+        
 
         $currentDate = date('Y-m-d H:i:s');
         $getAvailableBalance = Payout::with(['ride:id,destination,departure,added_by,completed_date,completed_time,random_id','ride.defaultRideDetail:id,ride_id,destination,departure,price', 'ride.bookings:id,ride_id,user_id,ride_detail_id,destination,departure,price', 'ride.bookings.booking_transaction_sum', 'ride.bookings.booking_cancel_transaction_sum', 'ride.bookings.booking_credit_sum', 'ride.bookings.booking_credit_cancel_sum', 'ride.bookings.passenger', 'driver'])
             ->select('ride_id' ,DB::raw('MAX(status) as status') ,DB::raw('SUM(amount) as total_payout_cost'))
-            ->where('user_id', $user_id)
+            ->where('user_id', auth()->user()->id)
             ->whereIn('status', ['pending', 'request'])
             ->where('available_date', '<=', $currentDate)
             ->groupBy('ride_id')
             ->get();
 
-        return view('driver_wallet_available',['reviewSetting' => $reviewSetting,'messages' => $messages,'walletSettingPage' => $walletSettingPage,'ProfilePage' => $ProfilePage,'ProfileSetting' => $ProfileSetting,'getAvailableBalance' => $getAvailableBalance,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
+        return view('driver_wallet_available',['reviewSetting' => $reviewSetting,'messages' => $messages,
+        'walletSettingPage' => $walletSettingPage,'ProfilePage' => $ProfilePage,'ProfileSetting' => $ProfileSetting,
+        'getAvailableBalance' => $getAvailableBalance,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
     }
 
     public function paid($lang = null){

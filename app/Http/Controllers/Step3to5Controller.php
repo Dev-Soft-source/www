@@ -91,7 +91,7 @@ class Step3to5Controller extends Controller
         ]);
 
 
-        User::whereId($id)->update(['step3' => 1]);
+        User::whereId($id)->update(['step3' => 1, 'step' => 4]);
 
         session()->forget('uploaded_profile_image');
 

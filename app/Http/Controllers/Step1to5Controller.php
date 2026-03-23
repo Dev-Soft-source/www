@@ -170,6 +170,7 @@ class Step1to5Controller extends Controller
             'city' => $cityValue,
             'zipcode' => $request->zipcode,
             'about' => $request->bio,
+            'step' => 2,
             'step1' => 1
         ]);
 
