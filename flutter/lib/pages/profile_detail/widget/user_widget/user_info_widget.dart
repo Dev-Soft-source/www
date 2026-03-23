@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/pages/profile_detail/widget/profile_image_widget.dart';
+import 'package:proximaride_app/pages/widgets/app_html_text.dart';
 import 'package:proximaride_app/pages/widgets/button_Widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
@@ -76,35 +76,14 @@ Widget userInfoWidget(
                 // Edit Profile button below name
                 elevatedButtonWidget(
                   textWidget: hasHtml
-                      ? Html(
+                      ? AppHtmlText(
                           data: editProfileLabel,
-                          style: {
-                            "html": Style(
-                              margin: Margins.zero,
-                              padding: HtmlPaddings.zero,
-                            ),
-                            "body": Style(
-                              margin: Margins.zero,
-                              padding: HtmlPaddings.zero,
-                              color: Colors.white,
-                              fontFamily: buttonFontFamily,
-                              fontSize: FontSize(buttonFontSize),
-                              textAlign: TextAlign.center,
-                            ),
-                            "p": Style(
-                              margin: Margins.zero,
-                              padding: HtmlPaddings.zero,
-                            ),
-                            "div": Style(
-                              margin: Margins.zero,
-                              padding: HtmlPaddings.zero,
-                            ),
-                            "span": Style(
-                              color: Colors.white,
-                              fontFamily: buttonFontFamily,
-                              fontSize: FontSize(buttonFontSize),
-                            ),
-                          },
+                          fontSize: buttonFontSize,
+                          fontFamily: buttonFontFamily,
+                          textColor: Colors.white,
+                          linkColor: Colors.white,
+                          textAlign: TextAlign.center,
+                          openLinksExternally: false,
                         )
                       : buttonLabelText(
                           title: editProfileLabel,

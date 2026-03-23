@@ -1,12 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:proximaride_app/pages/widgets/card_shadow_widget.dart';
+import 'package:proximaride_app/pages/widgets/app_html_text.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/pages/post_ride/widget/post_ride_widget.dart';
 Widget pricingWidget({context, controller, screenWidth}){
+  final int selectedSeatCount =
+      (controller.seatAvailable.value as num).toInt() +
+          (controller.currentUserBookedSeat.value as num).toInt();
+  final int payableSeatCount =
+      (controller.seatAvailable.value as num).toInt();
 
+  void showHtmlTooltip(String html) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        contentPadding: const EdgeInsets.all(16),
+        content: SingleChildScrollView(
+          child: AppHtmlText(
+            data: html,
+            fontSize: 18,
+            linkColor: primaryColor,
+          ),
+        ),
+      ),
+    );
+  }
 
-  var amount = double.parse(controller.ride['ride_detail']!= null && controller.ride['ride_detail'][0] != null ? controller.ride['ride_detail'][0]['price'] : '0.0') * (int.parse(controller.seatAvailable.value.toString()) + controller.currentUserBookedSeat.value);
+  Widget infoTooltipButton(String html) {
+    return InkWell(
+      onTap: () => showHtmlTooltip(html),
+      child: Image.asset(
+        infoImage,
+        color: Colors.black,
+        width: getValueForScreenType<double>(
+          context: context,
+          mobile: 20.0,
+          tablet: 20.0,
+        ),
+        height: getValueForScreenType<double>(
+          context: context,
+          mobile: 20.0,
+          tablet: 20.0,
+        ),
+      ),
+    );
+  }
+
+  var amount = controller.rideUnitPrice() * selectedSeatCount;
   var bookingFee = controller.calculateBookingFee(double.parse(controller.setting['booking_price'] != null ? controller.setting['booking_price'].toString() : "0"));
   var coffeeBookingFee = controller.calculateBookingFee(double.parse(controller.setting['booking_price'] != null ? controller.setting['booking_price'].toString() : "0"), method: "coffee");
 
@@ -31,7 +72,7 @@ Widget pricingWidget({context, controller, screenWidth}){
 
 
 
-  var payableAmount = double.parse(controller.ride['ride_detail']!= null && controller.ride['ride_detail'][0] != null ? controller.ride['ride_detail'][0]['price'] : '0.0') * (int.parse(controller.seatAvailable.value.toString()));
+  var payableAmount = controller.rideUnitPrice() * payableSeatCount;
   var payableBookingFee = controller.calculateBookingFee(double.parse(controller.setting['booking_price'] != null ? controller.setting['booking_price'].toString() : "0"), payable: true);
 
   if(controller.policyType == 'firm') {
@@ -129,9 +170,9 @@ Widget pricingWidget({context, controller, screenWidth}){
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  txt20Size(context: context, title: "${int.parse(controller.seatAvailable.value.toString()) + controller.currentUserBookedSeat.value} ${controller.labelTextDetail['seat_label'] ?? "Seat"}"),
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                  txt20Size(context: context, title: "$selectedSeatCount ${controller.labelTextDetail['seat_label'] ?? "Seat"}"),
                   txt20Size(context: context, title: "\$${seatAmount.toStringAsFixed(1)}")
                 ],
               ),
@@ -164,45 +205,10 @@ Widget pricingWidget({context, controller, screenWidth}){
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        txt20Size(context: context, title: "\$${bookingFee.toStringAsFixed(1)}"),
                         5.widthBox,
-                        Tooltip(
-                          margin: EdgeInsets.fromLTRB(
-                              getValueForScreenType<double>(
-                                context: context,
-                                mobile: 15.0,
-                                tablet: 15.0,
-                              ),
-                              getValueForScreenType<double>(
-                                context: context,
-                                mobile: 0.0,
-                                tablet: 0.0,
-                              ),
-                              getValueForScreenType<double>(
-                                context: context,
-                                mobile: 15.0,
-                                tablet: 15.0,
-                              ),
-                              getValueForScreenType<double>(
-                                context: context,
-                                mobile: 0.0,
-                                tablet: 0.0,
-                              )),
-                          triggerMode: TooltipTriggerMode.tap,
-                          message: "${controller.labelTextDetail['coffee_from_wall_tooltip'] ?? "Coffee from the wall"}",
-                          textStyle: const TextStyle(fontSize: 20,color: Colors.white),
-                          showDuration: const Duration(days: 100),
-                          waitDuration: Duration.zero,
-                          child: Image.asset(infoImage,color: Colors.black, width: getValueForScreenType<double>(
-                            context: context,
-                            mobile: 20.0,
-                            tablet: 20.0,
-                          ), height: getValueForScreenType<double>(
-                            context: context,
-                            mobile: 20.0,
-                            tablet: 20.0,
-                          )),
-                        ),
+                        infoTooltipButton("${controller.labelTextDetail['coffee_from_wall_tooltip'] ?? "Coffee from the wall"}"),
+                        5.widthBox,
+                        txt20Size(context: context, title: "\$${bookingFee.toStringAsFixed(1)}"),
                       ],
                     )
                   ],
@@ -232,81 +238,76 @@ Widget pricingWidget({context, controller, screenWidth}){
                 10.heightBox,
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Row(
-                      children: [
-                        InkWell(
-                          onTap: controller.coffeeDisable.value == false ? () {
-                            controller.showGPayBtn.value = false;
-                            controller.showGPayBtn.refresh();
-                            controller.coffeeFromWall.value = controller.coffeeFromWall.value == true ? false : true;
-                            Future.delayed(const Duration(milliseconds: 500), () {
-                              if(controller.coffeeFromWall.value == false){
-                                controller.showGPayBtn.value = true;
+                    Flexible(
+                      child: InkWell(
+                        onTap: controller.coffeeDisable.value == false
+                            ? () {
+                                controller.showGPayBtn.value = false;
                                 controller.showGPayBtn.refresh();
+                                controller.coffeeFromWall.value =
+                                    controller.coffeeFromWall.value == true
+                                        ? false
+                                        : true;
+                                Future.delayed(
+                                    const Duration(milliseconds: 500), () {
+                                  if (controller.coffeeFromWall.value == false) {
+                                    controller.showGPayBtn.value = true;
+                                    controller.showGPayBtn.refresh();
+                                  }
+                                });
                               }
-                            });
-
-                            } : null,
-                          child: Container(
-                            padding: EdgeInsets.all(5.0),
+                            : null,
+                        child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8.0, vertical: 6.0),
                             decoration: BoxDecoration(
-                              color: controller.coffeeFromWall.value == true ? primaryColor.withOpacity(0.1) : Colors.white,
+                              color: controller.coffeeFromWall.value == true
+                                  ? primaryColor.withOpacity(0.1)
+                                  : Colors.white,
                               borderRadius: BorderRadius.circular(5.0),
-                              border: Border.all(color: controller.coffeeFromWall.value == true ? primaryColor.withOpacity(0.1) : Colors.grey.shade500, style: BorderStyle.solid, width: 1),
+                              border: Border.all(
+                                  color: controller.coffeeFromWall.value == true
+                                      ? primaryColor.withOpacity(0.1)
+                                      : Colors.grey.shade500,
+                                  style: BorderStyle.solid,
+                                  width: 1),
                             ),
-                              child: txt20Size(
+                            child: Text(
+                              (controller.labelTextDetail[
+                                          'coffee_from_wall_label'] ??
+                                      "Coffee from the wall")
+                                  .replaceFirst(' from ', '\nfrom '),
+                              softWrap: true,
+                              maxLines: 2,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: getValueForScreenType<double>(
                                   context: context,
-                                  title: "${controller.labelTextDetail['coffee_from_wall_label'] ?? "Coffee from the wall"}",
-                                  fontFamily: regular,
-                                textColor: controller.coffeeFromWall.value == true ? primaryColor : textColor
-                              )
-                          )
-                        ),
-                        5.widthBox,
-                        Tooltip(
-                          margin: EdgeInsets.fromLTRB(
-                              getValueForScreenType<double>(
-                                context: context,
-                                mobile: 15.0,
-                                tablet: 15.0,
+                                  mobile: 18.0,
+                                  tablet: 20.0,
+                                ),
+                                fontFamily: regular,
+                                color: controller.coffeeFromWall.value == true
+                                    ? primaryColor
+                                    : textColor,
                               ),
-                              getValueForScreenType<double>(
-                                context: context,
-                                mobile: 0.0,
-                                tablet: 0.0,
-                              ),
-                              getValueForScreenType<double>(
-                                context: context,
-                                mobile: 15.0,
-                                tablet: 15.0,
-                              ),
-                              getValueForScreenType<double>(
-                                context: context,
-                                mobile: 0.0,
-                                tablet: 0.0,
-                              )),
-                          triggerMode: TooltipTriggerMode.tap,
-                          message: "${controller.labelTextDetail['coffee_from_wall_tooltip'] ?? "Coffee from the wall"}",
-                          textStyle: const TextStyle(fontSize: 20,color: Colors.white),
-                          showDuration: const Duration(days: 100),
-                          waitDuration: Duration.zero,
-                          child: Image.asset(infoImage,color: Colors.black, width: getValueForScreenType<double>(
-                            context: context,
-                            mobile: 20.0,
-                            tablet: 20.0,
-                          ), height: getValueForScreenType<double>(
-                            context: context,
-                            mobile: 20.0,
-                            tablet: 20.0,
-                          )),
-                        ),
-
-                      ],
+                            )),
+                      ),
                     ),
-                    if(controller.coffeeFromWall.value == true)...[
-                      txt20Size(context: context, title: "-\$${bookingFee.toStringAsFixed(1)}", textColor: Colors.red)
-                    ]
+                    8.widthBox,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        infoTooltipButton("${controller.labelTextDetail['coffee_from_wall_tooltip'] ?? "Coffee from the wall"}"),
+                        if(controller.coffeeFromWall.value == true)...[
+                          4.widthBox,
+                          txt20Size(context: context, title: "-\$${bookingFee.toStringAsFixed(1)}", textColor: Colors.red)
+                        ]
+                      ],
+                    )
                   ],
                 )
               ],
@@ -318,7 +319,7 @@ Widget pricingWidget({context, controller, screenWidth}){
                   txt20Size(context: context, title: "\$${total.toStringAsFixed(1)}", textColor: primaryColor)
                 ],
               ),
-              if(controller.seatAvailable.value.toString() != "0" && controller.currentUserBookedSeat.value != 0)...[
+              if(payableSeatCount > 0)...[
                 10.heightBox,
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -27,8 +27,7 @@ class NotificationController extends Controller
         $user = Auth::guard('sanctum')->user();
         $user_id = $user->id;
 
-        $notifications = null;
-        $notifications = Notification::where('is_delete', '0')->where('is_read', '0');
+        $notifications = Notification::where('is_delete', '0');
 
         $bookingType = $paymentMethod = "";
         if(isset($request->booking_type) && $request->booking_type != ""){
@@ -41,55 +40,50 @@ class NotificationController extends Controller
 
         if($bookingType == "" && $paymentMethod == ""){
             $notifications = $notifications->where(function ($query) use ($user_id) {
-                // Ratings where type is 1 and ride_id belongs to the user
-                $query->where('type', '1')
-                      ->whereHas('ride', function ($query) use ($user_id) {
-                          $query->where('added_by', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($user_id) {
-                          $query->where('user_id', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                $query->where('type', null)
-                ->whereHas('receiver', function ($query) use ($user_id) {
-                    $query->where('id', $user_id);
+                $query->where(function ($query) use ($user_id) {
+                    $query->where('type', '1')
+                        ->whereHas('ride', function ($query) use ($user_id) {
+                            $query->where('added_by', $user_id);
+                        });
+                })->orWhere(function ($query) use ($user_id) {
+                    $query->where('type', '2')
+                        ->whereHas('booking', function ($query) use ($user_id) {
+                            $query->where('user_id', $user_id);
+                        });
+                })->orWhere(function ($query) use ($user_id) {
+                    $query->whereNull('type')
+                        ->where('receiver_id', $user_id);
                 });
             });
         }else{
             $notifications = $notifications->where(function ($query) use ($user_id, $bookingType, $paymentMethod) {
-                // Ratings where type is 1 and ride_id belongs to the user
-                $query->where('type', '1')
-                      ->whereHas('ride', function ($query) use ($user_id, $bookingType, $paymentMethod) {
-                          $query->where('added_by', $user_id);
-                          if($bookingType != ""){
-                            $query->where('booking_method', $bookingType);
-                          }
-                          if($paymentMethod != ""){
-                            $query->where('payment_method', $paymentMethod);
-                          }
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id, $bookingType, $paymentMethod) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($user_id, $bookingType, $paymentMethod) {
-                          $query->where('user_id', $user_id);
-                          if($bookingType != ""){
-                            $query->whereHas('ride', function($q) use($bookingType){
-                                $q->where('booking_method', $bookingType);
-                            });
-                          }
-                          if($paymentMethod != ""){
-                            $query->whereHas('ride', function($q) use($paymentMethod){
-                                $q->where('payment_method', $paymentMethod);
-                            });
-                          }
-                      });
+                $query->where(function ($query) use ($user_id, $bookingType, $paymentMethod) {
+                    $query->where('type', '1')
+                        ->whereHas('ride', function ($query) use ($user_id, $bookingType, $paymentMethod) {
+                            $query->where('added_by', $user_id);
+                            if($bookingType != ""){
+                                $query->where('booking_method', $bookingType);
+                            }
+                            if($paymentMethod != ""){
+                                $query->where('payment_method', $paymentMethod);
+                            }
+                        });
+                })->orWhere(function ($query) use ($user_id, $bookingType, $paymentMethod) {
+                    $query->where('type', '2')
+                        ->whereHas('booking', function ($query) use ($user_id, $bookingType, $paymentMethod) {
+                            $query->where('user_id', $user_id);
+                            if($bookingType != ""){
+                                $query->whereHas('ride', function($q) use($bookingType){
+                                    $q->where('booking_method', $bookingType);
+                                });
+                            }
+                            if($paymentMethod != ""){
+                                $query->whereHas('ride', function($q) use($paymentMethod){
+                                    $q->where('payment_method', $paymentMethod);
+                                });
+                            }
+                        });
+                });
             });
         }
 
@@ -112,7 +106,7 @@ class NotificationController extends Controller
         }
 
         foreach ($notifications as $notification) {
-            if ($notification->from->gender) {
+            if ($notification->from && $notification->from->gender) {
                 if ($notification->from->gender === 'male') {
                     $notification->from->gender_label = $genderLabel->male_option_label ?? null;
                 } elseif ($notification->from->gender === 'female') {

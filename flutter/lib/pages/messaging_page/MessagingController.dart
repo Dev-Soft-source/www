@@ -14,6 +14,7 @@ class MessagingController extends GetxController {
   final serviceController = Get.find<Service>();
   final errorStateManager = ErrorStateManager();
   late final ConnectivityService connectivityService;
+  final ScrollController scrollController = ScrollController();
 
   var isLoading = true.obs;
   dynamic userId;
@@ -31,6 +32,9 @@ class MessagingController extends GetxController {
 
   var labelTextDetail = {}.obs;
   var popupTextDetail = {}.obs;
+  Timer? _messageRefreshTimer;
+  String _routeSignature = "";
+  var isSendingMessage = false.obs;
 
   @override
   void onInit() async {
@@ -43,25 +47,152 @@ class MessagingController extends GetxController {
       connectivityService = Get.put(ConnectivityService());
     }
 
-    chatUserId = Get.parameters['userId'] ?? "";
-    logger.info('Chat User ID: $chatUserId');
-    var rideIdParam = Get.parameters['rideId'] ?? "";
-    logger.info('Ride ID: $rideIdParam');
-    // Store rideId - if it's "0" or empty, keep it as is for now (will try to get from messages when sending)
-    rideId = (rideIdParam.isNotEmpty && rideIdParam != "0") ? rideIdParam : "";
-    type = Get.parameters['type'] ?? "";
-    logger.info('Type: $type');
     userId = serviceController.loginUserDetail['id'];
-    logger.info('User ID: $userId');
     typedMessageController = TextEditingController();
-
+    _syncRouteParams();
+    _startMessageRefresh();
     await loadInitialData();
   }
 
   @override
   void onClose() {
     super.onClose();
+    _messageRefreshTimer?.cancel();
+    scrollController.dispose();
     typedMessageController.dispose();
+  }
+
+  void ensureRouteState() {
+    final previousSignature = _routeSignature;
+    _syncRouteParams();
+
+    if (previousSignature == _routeSignature) {
+      return;
+    }
+
+    Future.microtask(loadInitialData);
+  }
+
+  void _syncRouteParams() {
+    chatUserId = Get.parameters['userId'] ?? "";
+    final rideIdParam = Get.parameters['rideId'] ?? "";
+    rideId = (rideIdParam.isNotEmpty && rideIdParam != "0") ? rideIdParam : "";
+    type = Get.parameters['type'] ?? "";
+    userId = serviceController.loginUserDetail['id'];
+    _routeSignature = "$chatUserId|$rideId|$type";
+
+    logger.info('Chat User ID: $chatUserId');
+    logger.info('Ride ID: $rideIdParam');
+    logger.info('Type: $type');
+    logger.info('User ID: $userId');
+  }
+
+  void _startMessageRefresh() {
+    _messageRefreshTimer?.cancel();
+    _messageRefreshTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+      refreshMessagesSilently();
+    });
+  }
+
+  void scrollToBottom({bool animated = true}) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!scrollController.hasClients) {
+        return;
+      }
+
+      final target = scrollController.position.maxScrollExtent;
+
+      if (animated) {
+        scrollController.animateTo(
+          target,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+      } else {
+        scrollController.jumpTo(target);
+      }
+    });
+  }
+
+  void _applyMessagesPayload(
+    Map resp, {
+    bool clearMessages = false,
+    bool clearUser = false,
+  }) {
+    final data = resp['data'];
+
+    if (resp['status'] == null ||
+        data == null ||
+        data is! Map ||
+        data['messages'] == null) {
+      return;
+    }
+
+    _syncChatUnreadCounts();
+
+    if (data['user'] is Map) {
+      if (clearUser) {
+        chatUserInfo.clear();
+      }
+      chatUserInfo.addAll(Map<String, dynamic>.from(data['user']));
+    }
+
+    if (data['messages'] is List) {
+      final pendingMessages = messagesList
+          .where((message) => message is Map && message['delivery_status'] == 'pending')
+          .map((message) => Map<String, dynamic>.from(message))
+          .toList();
+
+      final incomingMessages = List<dynamic>.from(data['messages']);
+      for (final message in incomingMessages) {
+        if (message is Map) {
+          message['delivery_status'] = 'sent';
+        }
+      }
+
+      for (final pendingMessage in pendingMessages) {
+        final alreadyExists = incomingMessages.any((message) {
+          if (message is! Map) {
+            return false;
+          }
+
+          return message['message']?.toString().trim() ==
+                  pendingMessage['message']?.toString().trim() &&
+              message['sender'] != null &&
+              message['sender'].toString().contains(userId.toString());
+        });
+
+        if (!alreadyExists) {
+          incomingMessages.add(pendingMessage);
+        }
+      }
+
+      incomingMessages.sort((a, b) {
+        final aTime = DateTime.tryParse(a['created_at']?.toString() ?? '');
+        final bTime = DateTime.tryParse(b['created_at']?.toString() ?? '');
+
+        if (aTime == null || bTime == null) {
+          return 0;
+        }
+
+        return aTime.compareTo(bTime);
+      });
+
+      if (clearMessages) {
+        messagesList.clear();
+      }
+      messagesList.assignAll(incomingMessages);
+      scrollToBottom(animated: false);
+    }
+
+    if (data['chatsPage'] is Map) {
+      labelTextDetail.assignAll(Map<String, dynamic>.from(data['chatsPage']));
+    }
+
+    if (data['messageSetting'] is Map) {
+      popupTextDetail
+          .assignAll(Map<String, dynamic>.from(data['messageSetting']));
+    }
   }
 
   Future<void> loadInitialData() async {
@@ -181,29 +312,7 @@ class MessagingController extends GetxController {
           data != null &&
           data is Map &&
           data['messages'] != null) {
-        _syncChatUnreadCounts();
-        if (data['user'] is Map) {
-          chatUserInfo.addAll(data['user']);
-        } else {
-          logger.error('User is not a Map: ${data['user']}');
-        }
-        if (data['messages'] is List) {
-          messagesList.addAll(List.from(data['messages']));
-        } else {
-          logger.error('Messages is not a List: ${data['messages']}');
-        }
-
-        if (data['chatsPage'] != null && data['chatsPage'] is Map) {
-          labelTextDetail.addAll(data['chatsPage']);
-        } else {
-          logger.error('Chats Page is not a Map: ${data['chatsPage']}');
-        }
-        if (data['messageSetting'] != null && data['messageSetting'] is Map) {
-          popupTextDetail.addAll(data['messageSetting']);
-        } else {
-          logger
-              .error('Message Setting is not a Map: ${data['messageSetting']}');
-        }
+        _applyMessagesPayload(resp, clearMessages: true, clearUser: true);
       }
       isLoading(false);
     }, onError: (error) {
@@ -236,31 +345,7 @@ class MessagingController extends GetxController {
             data != null &&
             data is Map &&
             data['messages'] != null) {
-          _syncChatUnreadCounts();
-          if (data['user'] is Map) {
-            chatUserInfo.clear();
-            chatUserInfo.addAll(data['user']);
-          } else {
-            logger.error('User is not a Map: ${data['user']}');
-          }
-          if (data['messages'] is List) {
-            messagesList.clear();
-            messagesList.addAll(List.from(data['messages']));
-          } else {
-            logger.error('Messages is not a List: ${data['messages']}');
-          }
-
-          if (data['chatsPage'] != null && data['chatsPage'] is Map) {
-            labelTextDetail.addAll(data['chatsPage']);
-          } else {
-            logger.error('Chats Page is not a Map: ${data['chatsPage']}');
-          }
-          if (data['messageSetting'] != null && data['messageSetting'] is Map) {
-            popupTextDetail.addAll(data['messageSetting']);
-          } else {
-            logger.error(
-                'Message Setting is not a Map: ${data['messageSetting']}');
-          }
+          _applyMessagesPayload(resp, clearMessages: true, clearUser: true);
         }
       }, onError: (error) {
         logger.error('Error getting messages: $error');
@@ -298,12 +383,33 @@ class MessagingController extends GetxController {
     }
   }
 
+  Future<void> refreshMessagesSilently() async {
+    if (chatUserId.isEmpty) {
+      return;
+    }
+
+    try {
+      final resp = await MessagingProvider()
+          .getMessages(serviceController.token, chatUserId, rideId, type);
+
+      if (resp is Map) {
+        _applyMessagesPayload(resp, clearMessages: true, clearUser: true);
+      }
+    } catch (error) {
+      logger.warning('Silent message refresh skipped: $error');
+    }
+  }
+
   Future sendMessage() async {
     if (typedMessageController.text == "") {
       return;
     }
 
     final messageText = typedMessageController.text.trim();
+    if (messageText.isEmpty || isSendingMessage.value) {
+      return;
+    }
+
     if (isURL(messageText)) {
       typedMessageController.text = "";
       logger.error('URL is not allowed: $messageText');
@@ -353,19 +459,33 @@ class MessagingController extends GetxController {
       }
     }
 
+    final optimisticMessage = _buildOptimisticMessage(messageText, validRideId);
+    final optimisticMessageId = optimisticMessage['id'].toString();
+
+    messagesList.add(optimisticMessage);
+    messagesList.refresh();
+    typedMessageController.clear();
+    scrollToBottom();
+
     try {
-      isOverlayLoading(true);
+      isSendingMessage(true);
       MessagingProvider()
           .sendNewMessage(serviceController.token, validRideId,
-              chatUserId.toString(), typedMessageController.text)
+              chatUserId.toString(), messageText)
           .then((resp) async {
         if (resp['data'] == null && resp['message'] != null) {
           logger.info('Message: ${resp['message']}');
+          _removeMessageById(optimisticMessageId);
+          typedMessageController.text = messageText;
           serviceController.showDialogue(resp['message']);
         } else if (resp["data"] != null) {
-          messagesList.add(resp["data"]);
-          messagesList.refresh();
-          typedMessageController.clear();
+          final serverMessage = Map<String, dynamic>.from(resp["data"]);
+          serverMessage['delivery_status'] = 'sent';
+          _replaceMessageById(optimisticMessageId, serverMessage);
+          scrollToBottom();
+          Future.delayed(const Duration(milliseconds: 600), () {
+            refreshMessagesSilently();
+          });
           bool isRegistered = Get.isRegistered<ChatController>();
           if (isRegistered == true) {
             var chatController = Get.find<ChatController>();
@@ -373,10 +493,12 @@ class MessagingController extends GetxController {
           } else {}
         }
 
-        isOverlayLoading(false);
+        isSendingMessage(false);
       }, onError: (error) {
         logger.error('Error sending message: $error');
-        isOverlayLoading(false);
+        _removeMessageById(optimisticMessageId);
+        typedMessageController.text = messageText;
+        isSendingMessage(false);
         if (error is Map &&
             error.containsKey('type') &&
             error.containsKey('message')) {
@@ -393,7 +515,9 @@ class MessagingController extends GetxController {
       });
     } catch (exception) {
       logger.error('Error sending message: $exception');
-      isOverlayLoading(false);
+      _removeMessageById(optimisticMessageId);
+      typedMessageController.text = messageText;
+      isSendingMessage(false);
       if (exception is Map &&
           exception.containsKey('type') &&
           exception.containsKey('message')) {
@@ -460,6 +584,7 @@ class MessagingController extends GetxController {
       // but Pusher might send them as integers or strings
       Map<String, dynamic> transformedMessage =
           Map<String, dynamic>.from(messagePayload);
+      transformedMessage['delivery_status'] = 'sent';
 
       // Transform sender if it's an integer or string to an object with 'id'
       if (messagePayload['sender'] == null) {
@@ -507,6 +632,7 @@ class MessagingController extends GetxController {
 
       // Refresh the list to trigger UI update
       messagesList.refresh();
+      scrollToBottom();
 
       logger.info(
           'Message added to messagesList. Total messages: ${messagesList.length}');
@@ -522,15 +648,24 @@ class MessagingController extends GetxController {
           for (int i = 0; i < chatController.myChats.length; i++) {
             logger.info('ChatController myChats: ${chatController.myChats[i]}');
             if (chatController.myChats[i] != null) {
-              if (chatController.myChats[i]['sender']['id'].toString() ==
-                  userId.toString()) {
-                if (chatController.myChats[i]['receiver']['id'].toString() ==
-                    chatUserId.toString()) {
+              final senderId = chatController.myChats[i]['sender'] is Map
+                  ? chatController.myChats[i]['sender']['id']?.toString() ?? ''
+                  : '';
+              final receiverId = chatController.myChats[i]['receiver'] is Map
+                  ? chatController.myChats[i]['receiver']['id']?.toString() ??
+                      ''
+                  : '';
+
+              if (senderId.isEmpty || receiverId.isEmpty) {
+                continue;
+              }
+
+              if (senderId == userId.toString()) {
+                if (receiverId == chatUserId.toString()) {
                   chatController.myChats[i]['unread_count'] = 0;
                 }
               } else {
-                if (chatController.myChats[i]['receiver']['id'].toString() ==
-                    chatUserId.toString()) {
+                if (receiverId == chatUserId.toString()) {
                   chatController.myChats[i]['unread_count'] = 0;
                 }
               }
@@ -544,5 +679,50 @@ class MessagingController extends GetxController {
     } catch (e) {
       logger.error('Error handling new real-time message: $e');
     }
+  }
+
+  Map<String, dynamic> _buildOptimisticMessage(
+      String messageText, String validRideId) {
+    final tempId = 'temp_${DateTime.now().microsecondsSinceEpoch}';
+
+    return {
+      'id': tempId,
+      'ride_id': validRideId,
+      'ride_detail_id': null,
+      'message': messageText,
+      'sender': {
+        'id': userId,
+        'first_name': serviceController.loginUserDetail['first_name'] ?? '',
+        'last_name': serviceController.loginUserDetail['last_name'] ?? '',
+        'profile_image': serviceController.loginUserDetail['profile_image'] ?? '',
+      },
+      'receiver': {
+        'id': chatUserId,
+      },
+      'redirect': '0',
+      'created_at': DateTime.now().toIso8601String(),
+      'delivery_status': 'pending',
+    };
+  }
+
+  void _replaceMessageById(String messageId, Map<String, dynamic> newMessage) {
+    final index = messagesList.indexWhere(
+      (msg) => msg['id'] != null && msg['id'].toString() == messageId,
+    );
+
+    if (index == -1) {
+      messagesList.add(newMessage);
+    } else {
+      messagesList[index] = newMessage;
+    }
+
+    messagesList.refresh();
+  }
+
+  void _removeMessageById(String messageId) {
+    messagesList.removeWhere(
+      (msg) => msg['id'] != null && msg['id'].toString() == messageId,
+    );
+    messagesList.refresh();
   }
 }

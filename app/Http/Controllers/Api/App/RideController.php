@@ -332,6 +332,8 @@ class RideController extends Controller
 
         $rides->setCollection(
             $rides->getCollection()->map(function (Ride $ride) use ($userId, $fromLabel, $toLabel, $fromCityId, $toCityId) {
+                $ride->fromCityId = $fromCityId > 0 ? $fromCityId : null;
+                $ride->toCityId = $toCityId > 0 ? $toCityId : null;
                 $bookings = collect($ride->bookings ?? [])->filter(function ($booking) use ($userId) {
                     return $userId > 0
                         && (int) ($booking->user_id ?? 0) === $userId
@@ -725,6 +727,9 @@ class RideController extends Controller
         $toLabel = trim((string) $request->input('to'));
         $fromCityId = (int) $request->input('from_city_id', 0);
         $toCityId = (int) $request->input('to_city_id', 0);
+
+        $ride->fromCityId = $fromCityId > 0 ? $fromCityId : null;
+        $ride->toCityId = $toCityId > 0 ? $toCityId : null;
 
         if ($fromLabel === '' && $toLabel === '' && $fromCityId === 0 && $toCityId === 0) {
             return $ride;

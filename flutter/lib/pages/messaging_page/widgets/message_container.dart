@@ -133,6 +133,7 @@ Widget messageContainer(
     message = "N/A",
     time = "12:00:00",
     msgType = 0,
+    deliveryStatus = "sent",
     from = "",
     to = "",
     date = "",
@@ -154,182 +155,186 @@ Widget messageContainer(
   // Check if this is a ride details message
   bool isRideDetails = from != "";
 
+  final bubbleRadius = BorderRadius.only(
+    topLeft: const Radius.circular(22),
+    topRight: const Radius.circular(22),
+    bottomLeft:
+        msgType == 1 ? const Radius.circular(22) : const Radius.circular(6),
+    bottomRight:
+        msgType == 1 ? const Radius.circular(6) : const Radius.circular(22),
+  );
+
   return InkWell(
     onTap: onTap,
-    child: Container(
-      decoration: BoxDecoration(
-        // Use gradient for ride details, solid color for regular messages
-        gradient: isRideDetails
-            ? LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: msgType == 1
-                    ? [
-                        Color(0xFF2E7D32),
-                        Color(0xFF4CAF50)
-                      ] // Green gradient for sent ride details
-                    : [
-                        Color(0xFF1565C0),
-                        Color(0xFF2196F3)
-                      ], // Blue gradient for received ride details
-              )
-            : null,
-        color: isRideDetails
-            ? null
-            : (msgType == 1 ? primaryColor : Colors.grey[200]),
-        borderRadius: BorderRadius.only(
-            bottomRight: msgType == 1
-                ? const Radius.circular(0.0)
-                : const Radius.circular(10.0),
-            bottomLeft: msgType == 1
-                ? const Radius.circular(10.0)
-                : const Radius.circular(0.0),
-            topLeft: const Radius.circular(10.0),
-            topRight: const Radius.circular(10.0)),
-        // Add shadow for ride details
-        boxShadow: isRideDetails
-            ? [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: Offset(0, 2),
-                ),
-              ]
-            : null,
-      ),
-      padding: EdgeInsets.all(getValueForScreenType<double>(
-        context: context,
-        mobile: isRideDetails ? 16.0 : 10.0,
-        tablet: isRideDetails ? 16.0 : 10.0,
-      )),
-      constraints:
-          BoxConstraints(maxWidth: isRideDetails ? 350 : 300, minWidth: 100),
-      child: Column(
-        crossAxisAlignment:
-            msgType == 1 ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        children: [
-          if (from == "") ...[
-            // Regular message UI (unchanged)
-            txt20Size(
-                title: message.toString(),
-                fontFamily: bold,
-                context: context,
-                textColor: msgType == 1 ? Colors.white : Colors.black),
-            2.heightBox,
-            txt20Size(
-                title: time,
-                fontFamily: regular,
-                context: context,
-                textColor: msgType == 1 ? Colors.white : Colors.black),
-          ] else ...[
-            // Enhanced Ride Details UI
-            Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.2),
-                  width: 1,
-                ),
+    borderRadius: bubbleRadius,
+    child: Column(
+      crossAxisAlignment:
+          msgType == 1 ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            gradient: isRideDetails
+                ? LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: msgType == 1
+                        ? const [Color(0xFF2563EB), Color(0xFF3B82F6)]
+                        : const [Color(0xFFCBD5E1), Color(0xFFE2E8F0)],
+                  )
+                : null,
+            color: isRideDetails
+                ? null
+                : (msgType == 1 ? const Color(0xFF3B82F6) : const Color(0xFFE2E8F0)),
+            borderRadius: bubbleRadius,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(msgType == 1 ? 0.10 : 0.06),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
               ),
-              child: Column(
-                children: [
-                  // Header with icon
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+            ],
+          ),
+          padding: EdgeInsets.all(getValueForScreenType<double>(
+            context: context,
+            mobile: isRideDetails ? 16.0 : 14.0,
+            tablet: isRideDetails ? 18.0 : 16.0,
+          )),
+          constraints:
+              BoxConstraints(maxWidth: isRideDetails ? 360 : 300, minWidth: 96),
+          child: Column(
+            crossAxisAlignment:
+                msgType == 1 ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            children: [
+              if (!isRideDetails) ...[
+                Text(
+                  message.toString(),
+                  style: TextStyle(
+                    color: msgType == 1 ? Colors.white : const Color(0xFF1E293B),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    height: 1.45,
+                    fontFamily: regular,
+                  ),
+                ),
+              ] else ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(msgType == 1 ? 0.12 : 0.42),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(msgType == 1 ? 0.18 : 0.55),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.directions_car,
-                        color: Colors.white,
-                        size: 24,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.directions_car_rounded,
+                            color: msgType == 1 ? Colors.white : const Color(0xFF2563EB),
+                            size: 18,
+                          ),
+                          8.widthBox,
+                          Text(
+                            "Ride Details",
+                            style: TextStyle(
+                              color: msgType == 1 ? Colors.white : const Color(0xFF0F172A),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: bold,
+                            ),
+                          ),
+                        ],
                       ),
-                      8.widthBox,
-                      txt20Size(
-                          title: "Ride Details",
-                          fontFamily: bold,
-                          context: context,
-                          textColor: Colors.white),
+                      12.heightBox,
+                      _buildLocationRow(
+                        icon: Icons.my_location_rounded,
+                        label: "From",
+                        location: from.toString(),
+                        context: context,
+                        isSent: msgType == 1,
+                      ),
+                      10.heightBox,
+                      _buildLocationRow(
+                        icon: Icons.location_on_rounded,
+                        label: "To",
+                        location: to.toString(),
+                        context: context,
+                        isSent: msgType == 1,
+                      ),
+                      14.heightBox,
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color:
+                              Colors.white.withOpacity(msgType == 1 ? 0.14 : 0.5),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.schedule_rounded,
+                              color: msgType == 1
+                                  ? Colors.white
+                                  : const Color(0xFF2563EB),
+                              size: 16,
+                            ),
+                            6.widthBox,
+                            Text(
+                              "$tripDate • $tripTime",
+                              style: TextStyle(
+                                color: msgType == 1
+                                    ? Colors.white
+                                    : const Color(0xFF1E293B),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
-
-                  8.heightBox,
-
-                  // From location
-                  _buildLocationRow(
-                    icon: Icons.my_location,
-                    label: "From",
-                    location: from.toString(),
-                    context: context,
-                  ),
-
-                  8.heightBox,
-
-                  // 8.heightBox,
-
-                  // To location
-                  _buildLocationRow(
-                    icon: Icons.location_on,
-                    label: "To",
-                    location: to.toString(),
-                    context: context,
-                  ),
-
-                  16.heightBox,
-
-                  // Date and time container
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.schedule,
-                          color: Colors.white,
-                          size: 16,
-                        ),
-                        6.widthBox,
-                        txt20Size(
-                          title: tripDate,
-                          context: context,
-                          textColor: Colors.white,
-                        ),
-                        8.widthBox,
-                        Container(
-                          width: 1,
-                          height: 12,
-                          color: Colors.white.withOpacity(0.5),
-                        ),
-                        8.widthBox,
-                        txt20Size(
-                          title: tripTime,
-                          context: context,
-                          textColor: Colors.white,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                ),
+              ],
+            ],
+          ),
+        ),
+        6.heightBox,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                time.toString(),
+                style: TextStyle(
+                  color: msgType == 1
+                      ? const Color(0xFF3B82F6)
+                      : const Color(0xFF94A3B8),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: regular,
+                ),
               ),
-            ),
-
-            // 12.heightBox,
-
-            // // Timestamp
-            // Align(
-            //   child: txt14Size(
-            //       title: time,
-            //       fontFamily: regular,
-            //       context: context,
-            //       textColor: Colors.white70),
-            // ),
-          ]
-        ],
-      ),
+              if (msgType == 1 && deliveryStatus.toString() == 'sent') ...[
+                4.widthBox,
+                const Icon(
+                  Icons.done_rounded,
+                  size: 14,
+                  color: Color(0xFF3B82F6),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
     ),
   );
 }
@@ -340,6 +345,7 @@ Widget _buildLocationRow({
   required String label,
   required String location,
   required BuildContext context,
+  required bool isSent,
 }) {
   return Row(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -347,12 +353,12 @@ Widget _buildLocationRow({
       Container(
         padding: EdgeInsets.all(6),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withOpacity(isSent ? 0.2 : 0.55),
           borderRadius: BorderRadius.circular(6),
         ),
         child: Icon(
           icon,
-          color: Colors.white,
+          color: isSent ? Colors.white : const Color(0xFF2563EB),
           size: 16,
         ),
       ),
@@ -361,14 +367,24 @@ Widget _buildLocationRow({
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            txt20Size(
-                title: label, context: context, textColor: Colors.white70),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                color: isSent ? Colors.white70 : const Color(0xFF64748B),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             2.heightBox,
-            txt20Size(
-                title: location,
+            Text(
+              location,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
                 fontFamily: bold,
-                context: context,
-                textColor: Colors.white),
+                color: isSent ? Colors.white : const Color(0xFF0F172A),
+              ),
+            ),
           ],
         ),
       ),

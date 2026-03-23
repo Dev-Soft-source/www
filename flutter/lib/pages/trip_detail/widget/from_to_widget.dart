@@ -29,71 +29,79 @@ Widget fromToWidget({context, String from = "", String to = "", String date = ""
               mobile: 0.0,
               tablet: 0.0,
             )),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: RichText(
+                    text: TextSpan(
+                      children: [
+                        textSpan(title: date, context: context, fontFamily: bold, textColor: textColor, textSize: 18.0),
+                        textSpan(title: " $atLabel ", context: context, fontFamily: bold, textColor: textColor, textSize: 18.0),
+                        textSpan(title: time, context: context, fontFamily: bold, textColor: textColor, textSize: 18.0),
+                      ],
+                    ),
+                  ),
+                ),
+                8.heightBox,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 20,
-                      height: 20,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(50),
-                          color: primaryColor
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 50,
-                      child: Padding(
-                        padding: EdgeInsets.only(left: 9),
-                        child: DottedLine(
-                          direction: Axis.vertical,
-                          alignment: WrapAlignment.center,
-                          lineLength: double.infinity,
-                          lineThickness: 1.0,
-                          dashLength: 2.0,
-                          dashColor: Colors.black,
-                          dashRadius: 0.0,
-                          dashGapLength: 1.0,
-                          dashGapColor: Colors.transparent,
-                          dashGapRadius: 0.0,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 20,
-                      height: 20,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(50),
-                          color: Colors.grey.shade400
-                      ),
-                    ),
-                  ],
-                ),
-                10.widthBox,
-                Expanded(
-                    child: Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        txt20Size(title: fromLabel, context: context),
-                        txt20Size(title: from, context: context, fontFamily: bold),
-                        5.heightBox,
-                        txt20Size(title: toLabel, context: context),
-                        txt20Size(title: to, context: context, fontFamily: bold),
+                        Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50),
+                              color: primaryColor
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 50,
+                          child: Padding(
+                            padding: EdgeInsets.only(left: 9),
+                            child: DottedLine(
+                              direction: Axis.vertical,
+                              alignment: WrapAlignment.center,
+                              lineLength: double.infinity,
+                              lineThickness: 1.0,
+                              dashLength: 2.0,
+                              dashColor: Colors.black,
+                              dashRadius: 0.0,
+                              dashGapLength: 1.0,
+                              dashGapColor: Colors.transparent,
+                              dashGapRadius: 0.0,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50),
+                              color: Colors.grey.shade400
+                          ),
+                        ),
                       ],
-                    )
-                ),
-                10.widthBox,
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      textSpan(title: date, context: context, fontFamily: bold, textColor: textColor, textSize: 18.0),
-                      textSpan(title: " $atLabel ", context: context, fontFamily: bold, textColor: textColor, textSize: 18.0),
-                      textSpan(title: time, context: context, fontFamily: bold, textColor: textColor, textSize: 18.0),
-                    ],
-                  ),
+                    ),
+                    10.widthBox,
+                    Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            txt20Size(title: fromLabel, context: context),
+                            txt20Size(title: from, context: context, fontFamily: bold),
+                            5.heightBox,
+                            txt20Size(title: toLabel, context: context),
+                            txt20Size(title: to, context: context, fontFamily: bold),
+                          ],
+                        )
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -120,61 +128,66 @@ Widget fromToWidget({context, String from = "", String to = "", String date = ""
                     mobile: 0.0,
                     tablet: 0.0,
                   )),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            width: 20,
-                            height: 20,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(50),
-                                color: primaryColor
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 50,
-                            child: Padding(
-                              padding: EdgeInsets.only(left: 9),
-                              child: DottedLine(
-                                direction: Axis.vertical,
-                                alignment: WrapAlignment.center,
-                                lineLength: double.infinity,
-                                lineThickness: 1.0,
-                                dashLength: 2.0,
-                                dashColor: Colors.black,
-                                dashRadius: 0.0,
-                                dashGapLength: 1.0,
-                                dashGapColor: Colors.transparent,
-                                dashGapRadius: 0.0,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            width: 20,
-                            height: 20,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(50),
-                                color: Colors.grey.shade400
-                            ),
-                          ),
-                        ],
-                      ),
-                      10.widthBox,
-                      Expanded(
-                          child: Column(
+                          Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              txt20Size(title: fromLabel, context: context),
-                              txt20Size(title: moreSpots[i]['departure'].toString(), context: context, fontFamily: bold),
-                              5.heightBox,
-                              txt20Size(title: toLabel, context: context),
-                              txt20Size(title: moreSpots[i]['destination'].toString(), context: context, fontFamily: bold),
+                              Container(
+                                width: 20,
+                                height: 20,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(50),
+                                    color: primaryColor
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 50,
+                                child: Padding(
+                                  padding: EdgeInsets.only(left: 9),
+                                  child: DottedLine(
+                                    direction: Axis.vertical,
+                                    alignment: WrapAlignment.center,
+                                    lineLength: double.infinity,
+                                    lineThickness: 1.0,
+                                    dashLength: 2.0,
+                                    dashColor: Colors.black,
+                                    dashRadius: 0.0,
+                                    dashGapLength: 1.0,
+                                    dashGapColor: Colors.transparent,
+                                    dashGapRadius: 0.0,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                width: 20,
+                                height: 20,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(50),
+                                    color: Colors.grey.shade400
+                                ),
+                              ),
                             ],
-                          )
+                          ),
+                          10.widthBox,
+                          Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  txt20Size(title: fromLabel, context: context),
+                                  txt20Size(title: moreSpots[i]['departure'].toString(), context: context, fontFamily: bold),
+                                  5.heightBox,
+                                  txt20Size(title: toLabel, context: context),
+                                  txt20Size(title: moreSpots[i]['destination'].toString(), context: context, fontFamily: bold),
+                                ],
+                              )
+                          ),
+                        ],
                       ),
                     ],
                   ),

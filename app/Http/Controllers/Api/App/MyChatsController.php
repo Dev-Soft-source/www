@@ -264,43 +264,10 @@ class MyChatsController extends Controller
             }
         }
         
-        if ($lastMessage) {
-            $lastMessageTime = $lastMessage->created_at;
-            $timeDifference = now()->diffInMinutes($lastMessageTime);
-    
-            if ($timeDifference > 5) {
-                $receiver = User::find($request->receiver_id);
-                
-                $notification = Notification::create([
-                    'type' => null,
-                    'ride_id' => $request->ride_id == 0 ? null : $request->ride_id,
-                    'posted_by' => $user->id,
-                    'receiver_id' => $receiver->id,
-                    'message' => getNotificationMessageText(
-                        'chat_new_message_received',
-                        $receiver,
-                        ['first_name' => $user->first_name],
-                        'New message received from {first_name}'
-                    ),
-                    'status' => 'completed',
-                    'notification_type' => 'chat'
-                ]);
+        $receiver = User::find($request->receiver_id);
 
-                // Generate and send email
-
-                $booking = Booking::where('ride_id', $request->ride_id)->first();
-                if(isset($booking) && !empty($booking)){
-                    $data = ['receiverFirstName' => $receiver->first_name, 'senderFirstName' => $user->first_name, 'senderLastName' => $user->last_name, 'seats' => $booking->seats, 'price' => $booking->fare, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => $booking->ride->date, 'time' => $booking->ride->time];
-                
-                    Mail::to($receiver->email)->queue(new ReceiveChatMessageMail($data));
-                }
-                
-            }
-        }else if(!isset($rideFirstMessage) && empty($rideFirstMessage)){
-
-            $receiver = User::find($request->receiver_id);
-                
-            $notification = Notification::create([
+        if ($receiver) {
+            Notification::create([
                 'type' => null,
                 'ride_id' => $request->ride_id == 0 ? null : $request->ride_id,
                 'posted_by' => $user->id,
@@ -315,38 +282,22 @@ class MyChatsController extends Controller
                 'notification_type' => 'chat'
             ]);
 
-
-            // Generate and send email
-
             $booking = Booking::where('ride_id', $request->ride_id)->first();
-            if(isset($booking) && !empty($booking)){
-                $data = ['receiverFirstName' => $receiver->first_name, 'senderFirstName' => $user->first_name, 'senderLastName' => $user->last_name, 'seats' => $booking->seats, 'price' => $booking->fare, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => $booking->ride->date, 'time' => $booking->ride->time];
-                Mail::to($receiver->email)->queue(new ReceiveChatMessageMail($data));    
+            if (isset($booking) && !empty($booking)) {
+                $data = [
+                    'receiverFirstName' => $receiver->first_name,
+                    'senderFirstName' => $user->first_name,
+                    'senderLastName' => $user->last_name,
+                    'seats' => $booking->seats,
+                    'price' => $booking->fare,
+                    'from' => $booking->departure,
+                    'to' => $booking->destination,
+                    'date' => $booking->ride->date,
+                    'time' => $booking->ride->time,
+                ];
+
+                Mail::to($receiver->email)->queue(new ReceiveChatMessageMail($data));
             }
-        } else {
-            $receiver = User::find($request->receiver_id);
-                
-            $notification = Notification::create([
-                'type' => null,
-                'ride_id' => $request->ride_id == 0 ? null : $request->ride_id,
-                'posted_by' => $user->id,
-                'receiver_id' => $receiver->id,
-                'message' => getNotificationMessageText(
-                    'chat_new_message_received',
-                    $receiver,
-                    ['first_name' => $user->first_name],
-                    'New message received from {first_name}'
-                ),
-                'status' => 'completed',
-                'notification_type' => 'chat'
-            ]);
-
-
-            // Generate and send email
-
-            $booking = Booking::where('ride_id', $request->ride_id)->first();
-            $data = ['receiverFirstName' => $receiver->first_name, 'senderFirstName' => $user->first_name, 'senderLastName' => $user->last_name, 'seats' => $booking->seats, 'price' => $booking->fare, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => $booking->ride->date, 'time' => $booking->ride->time];
-            Mail::to($receiver->email)->queue(new ReceiveChatMessageMail($data));
         }
 
 

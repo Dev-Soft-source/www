@@ -144,10 +144,7 @@ class BookSeatController extends GetxController {
 
     if (isStudent()) {}
 
-    var price = double.parse(
-        ride['ride_detail'] != null && ride['ride_detail'][0] != null
-            ? ride['ride_detail'][0]['price']
-            : '0.0');
+    var price = rideUnitPrice();
     if (price <= 15) {
       returnValue = 0;
     } else if (price <= 30) {
@@ -164,6 +161,32 @@ class BookSeatController extends GetxController {
     } else {}
 
     return returnValue;
+  }
+
+  double rideUnitPrice() {
+    if (ride['price_minor'] != null) {
+      return double.tryParse(ride['price_minor'].toString()) ?? 0.0;
+    }
+
+    if (ride['matched_segment_price_minor'] != null) {
+      return double.tryParse(ride['matched_segment_price_minor'].toString()) ??
+          0.0;
+    }
+
+    if (ride['ride_detail'] != null &&
+        ride['ride_detail'] is List &&
+        ride['ride_detail'].isNotEmpty &&
+        ride['ride_detail'][0] != null &&
+        ride['ride_detail'][0]['price'] != null) {
+      return double.tryParse(ride['ride_detail'][0]['price'].toString()) ??
+          0.0;
+    }
+
+    if (ride['price'] != null) {
+      return double.tryParse(ride['price'].toString()) ?? 0.0;
+    }
+
+    return 0.0;
   }
 
   getBookSeatDetail() async {
@@ -567,7 +590,7 @@ class BookSeatController extends GetxController {
                 double.parse(setting['booking_price'].toString()))
             .toStringAsFixed(1);
         //bookingCredit = (double.parse(bookingCredit.toString()) - (double.parse(bookingCredit.toString()) * double.parse(data.toString()))).toStringAsFixed(1);
-        seatAmount = (double.parse(ride['ride_detail'][0]['price'].toString()) *
+        seatAmount = (rideUnitPrice() *
                 (int.parse(seatAvailable.value.toString()) +
                     currentUserBookedSeat.value))
             .toStringAsFixed(1);
@@ -600,7 +623,7 @@ class BookSeatController extends GetxController {
         bookingCredit = calculateBookingFee(
                 double.parse(setting['booking_price'].toString()))
             .toStringAsFixed(1);
-        seatAmount = (double.parse(ride['ride_detail'][0]['price'].toString()) *
+        seatAmount = (rideUnitPrice() *
                 (int.parse(seatAvailable.value.toString()) +
                     currentUserBookedSeat.value))
             .toStringAsFixed(1);
@@ -636,7 +659,7 @@ class BookSeatController extends GetxController {
                 double.parse(setting['booking_price'].toString()))
             .toStringAsFixed(1);
         //bookingCredit = (double.parse(bookingCredit.toString()) - (double.parse(bookingCredit.toString()) * double.parse(data.toString()))).toStringAsFixed(1);
-        seatAmount = (double.parse(ride['ride_detail'][0]['price'].toString()) *
+        seatAmount = (rideUnitPrice() *
                 (int.parse(seatAvailable.value.toString()) +
                     currentUserBookedSeat.value))
             .toStringAsFixed(1);
@@ -670,7 +693,7 @@ class BookSeatController extends GetxController {
         bookingCredit = calculateBookingFee(
                 double.parse(setting['booking_price'].toString()))
             .toStringAsFixed(1);
-        seatAmount = (double.parse(ride['ride_detail'][0]['price'].toString()) *
+        seatAmount = (rideUnitPrice() *
                 (int.parse(seatAvailable.value.toString()) +
                     currentUserBookedSeat.value))
             .toStringAsFixed(1);
@@ -704,7 +727,7 @@ class BookSeatController extends GetxController {
                 double.parse(setting['booking_price'].toString()))
             .toStringAsFixed(1);
         //bookingCredit = (double.parse(bookingCredit.toString()) - (double.parse(bookingCredit.toString()) * double.parse(data.toString()))).toStringAsFixed(1);
-        seatAmount = (double.parse(ride['ride_detail'][0]['price'].toString()) *
+        seatAmount = (rideUnitPrice() *
                 (int.parse(seatAvailable.value.toString()) +
                     currentUserBookedSeat.value))
             .toStringAsFixed(1);
@@ -736,7 +759,7 @@ class BookSeatController extends GetxController {
         bookingCredit = calculateBookingFee(
                 double.parse(setting['booking_price'].toString()))
             .toStringAsFixed(1);
-        seatAmount = (double.parse(ride['ride_detail'][0]['price'].toString()) *
+        seatAmount = (rideUnitPrice() *
                 (int.parse(seatAvailable.value.toString()) +
                     currentUserBookedSeat.value))
             .toStringAsFixed(1);
@@ -792,7 +815,7 @@ class BookSeatController extends GetxController {
                   method: "paypal")
               .toStringAsFixed(1);
           var seatAmount1 =
-              (double.parse(ride['ride_detail'][0]['price'].toString()) *
+              (rideUnitPrice() *
                       int.parse(seatAvailable.value.toString()))
                   .toStringAsFixed(1);
 
@@ -839,7 +862,7 @@ class BookSeatController extends GetxController {
                   method: "paypal")
               .toStringAsFixed(1);
           var seatAmount1 =
-              (double.parse(ride['ride_detail'][0]['price'].toString()) *
+              (rideUnitPrice() *
                       int.parse(seatAvailable.value.toString()))
                   .toStringAsFixed(1);
           if (policyType.value == 'firm') {

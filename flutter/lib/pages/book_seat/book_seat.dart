@@ -4,6 +4,7 @@ import 'package:proximaride_app/pages/book_seat/BookSeatController.dart';
 import 'package:proximaride_app/pages/book_seat/widget/online_payment_widget.dart';
 import 'package:proximaride_app/pages/book_seat/widget/pricing_widget.dart';
 import 'package:proximaride_app/pages/book_seat/widget/seat_available_widget.dart';
+import 'package:proximaride_app/pages/widgets/app_html_text.dart';
 import 'package:proximaride_app/pages/widgets/check_box_widget.dart';
 import 'package:proximaride_app/pages/widgets/overlay_widget.dart';
 import 'package:proximaride_app/pages/widgets/progress_circular_widget.dart';
@@ -27,7 +28,18 @@ class BookSeatPage extends GetView<BookSeatController> {
               title:
                   "${controller.labelTextDetail['main_heading'] ?? "Book your seat(s)"}",
               context: context)),
-          leading: const BackButton(color: Colors.white),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              if (Get.key.currentState?.canPop() ?? false) {
+                Get.back();
+              } else if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
+              } else {
+                Get.offNamed('/navigation');
+              }
+            },
+          ),
         ),
         body: Obx(() {
           if (controller.isLoading.value == true) {
@@ -104,23 +116,44 @@ class BookSeatPage extends GetView<BookSeatController> {
                                   (element) => element['title'] == "message"))
                         ],
                         10.heightBox,
-                        txt20Size(
-                            title:
-                                "${controller.labelTextDetail['booking_disclaimer_on_time'] ?? "I will show up at least ten minutes before the time of the ride. If I am late, the driver has the right to leave without me and I will not be refunded"}",
-                            fontFamily: bold,
-                            context: context),
-                        3.heightBox,
-                        txt20Size(
-                            title:
-                                "${controller.labelTextDetail['booking_disclaimer_pink_ride'] ?? "I know that Pink Rides are exclusive to ProximaRide female members. If I am booking on a Pink Ride, I will not be accompanied by male members who are above 12 years of age, nor will I send a male member in my place. If I do, the driver will not take me or them, and I will not be refunded"}",
-                            fontFamily: bold,
-                            context: context),
-                        3.heightBox,
-                        txt20Size(
-                            title:
-                                "${controller.labelTextDetail['booking_disclaimer_extra_care_ride'] ?? "I know that Extra-Care Rides are exclusive to members with highest review score. If I am booking on an Extra-Care Ride, I will adhere to its standards"}",
-                            fontFamily: bold,
-                            context: context),
+                        ...[
+                          controller.labelTextDetail[
+                                  'booking_disclaimer_on_time'] ??
+                              "I will show up at least ten minutes before the time of the ride. If I am late, the driver has the right to leave without me and I will not be refunded",
+                          controller.labelTextDetail[
+                                  'booking_disclaimer_pink_ride'] ??
+                              "I know that Pink Rides are exclusive to ProximaRide female members. If I am booking on a Pink Ride, I will not be accompanied by male members who are above 12 years of age, nor will I send a male member in my place. If I do, the driver will not take me or them, and I will not be refunded",
+                          controller.labelTextDetail[
+                                  'booking_disclaimer_extra_care_ride'] ??
+                              "I know that Extra-Care Rides are exclusive to members with highest review score. If I am booking on an Extra-Care Ride, I will adhere to its standards",
+                        ].map((disclaimer) => Padding(
+                              padding: const EdgeInsets.only(bottom: 3),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 10, right: 8),
+                                    child: Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: const BoxDecoration(
+                                        color: Color.fromARGB(255, 0, 21, 66),
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: AppHtmlText(
+                                      data: disclaimer,
+                                      fontSize: 20,
+                                      fontFamily: bold,
+                                      linkColor: primaryColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )),
                         3.heightBox,
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -175,11 +208,14 @@ class BookSeatPage extends GetView<BookSeatController> {
                                     controller.errors.add(err);
                                   }
                                 },
-                                child: txt20Size(
-                                    title:
-                                        "${controller.labelTextDetail['booking_term_agree_text'] ?? "I agree to these rules, and I have read, and agree to ProximaRide's terms and conditions. I also confirm that I am at least 18 years of age"}",
-                                    fontFamily: bold,
-                                    context: context),
+                                child: AppHtmlText(
+                                  data:
+                                      controller.labelTextDetail['booking_term_agree_text'] ??
+                                          "I agree to these rules, and I have read, and agree to ProximaRide's terms and conditions. I also confirm that I am at least 18 years of age",
+                                  fontSize: 20,
+                                  fontFamily: bold,
+                                  linkColor: primaryColor,
+                                ),
                               ),
                             ),
                           ],
