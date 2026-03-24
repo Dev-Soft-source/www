@@ -256,11 +256,8 @@ class BookingController extends Controller
 
         $ride = $this->loadRideForBooking($id, null, $from_stop_id, $to_stop_id);
 
-
         $bookingPage = BookingPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $paymentSettingDetail = BillingAddressSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         
         $cards = Card::where('user_id', $user_id)->orderBy('id', 'desc')->get();
@@ -279,18 +276,6 @@ class BookingController extends Controller
         $coffeeBalance = CoffeeWallet::selectRaw('SUM(dr_amount) - SUM(cr_amount) as balance')
             ->value('balance');
             
-        // $ride->mapMultipleOptionColumnsToDetails(
-        //     ['luggage', 'payment_method', 'booking_type', 'animal_friendly', 'booking_method'],
-        //     $this->selectedLanguage->id,
-        //     $this->defaultLang->id,
-        //     false
-        // );
-
-        $searchOptionGroups = $this->getSearchOptionGroups(
-            $this->selectedLanguage->id,
-            $this->defaultLang->id
-        );
-
         $setting = SiteSetting::first();
         $settingTaxPercentage = 0;
         if (isset($setting->deduct_tax) && $setting->deduct_tax == "deduct_from_passenger") {
@@ -310,15 +295,12 @@ class BookingController extends Controller
                 'bookingPage' => $bookingPage, 
                 'rideDetailPage' => $rideDetailPage,
                 'ride' => $ride, 
-                'searchOptionGroups' => $searchOptionGroups,
                 'cards' => $cards, 
                 'paymentSettingDetail' => $paymentSettingDetail,
                 'topUpBalance' => $topBalance,
                 'setting' => $setting, 
                 'settingTaxPercentage' => $settingTaxPercentage, 
                 'coffeeBalance' => $coffeeBalance, 
-                'postRidePage' => $postRidePage, 
-                'findRidePage' => $findRidePage, 
             ]);
     }
 
@@ -586,7 +568,7 @@ class BookingController extends Controller
         $user = User::where('id', auth()->user()->id)->first();
         
         $phoneNumber = PhoneNumber::where('user_id', $user->id)->first();
-        if (is_null($phoneNumber) && $type->slug == 'secured') {
+        if (is_null($phoneNumber) && $ride->isSecureCashPayment()) {
             // Store return URL to redirect back after add phone
             $returnUrl = url()->current() . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
             session(['return_url_after_action' => $returnUrl]);
@@ -594,11 +576,15 @@ class BookingController extends Controller
         }
 
         $phoneVerification = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->first();
-        if (!$phoneVerification && $type->slug == 'secured') {
+        if (!$phoneVerification && $ride->isSecureCashPayment()) {
             // Store return URL to redirect back after phone verification
             $returnUrl = url()->current() . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
             session(['return_url_after_action' => $returnUrl]);
             return redirect()->route('step5to5', ['lang' => $this->selectedLanguage->abbreviation])->with(['error' => $messages->verified_number_message ?? "secured cash message", 'phone' => $phoneNumber]);
+        }
+
+        if ($user->isBlockedBooking()) {
+            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->detail->departure, 'to' => $ride->detail->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $message->block_booking_message ?? null]);
         }
 
         $bookingRouteData = $this->resolveBookingRouteData(
@@ -626,9 +612,7 @@ class BookingController extends Controller
 
         $taxAmt = isset($request->tax_amount) ? $request->tax_amount : 0;
 
-        if ($user->block_booking == '1') {
-            return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->detail->departure, 'to' => $ride->detail->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])->with(['failure' => $message->block_booking_message ?? null]);
-        }
+        
 
         // Passenger gatekeeping logic for Pink Ride and Extra Care Ride
         $featuresArray = explode('=', $ride->features);

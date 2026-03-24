@@ -218,9 +218,10 @@
                         </div>
                     @endif
 
-                    <x-px.ride-detail-info :ride="$ride" :findRidePage="$findRidePage" :postRidePage="$postRidePage" :rideDetailPage="$rideDetailPage"
-                        :selectedLanguage="$selectedLanguage ?? null" :searchOptionGroups="$searchOptionGroups" />
-
+                    <x-px.ride-detail-info 
+                    :ride="$ride" 
+                    :rideDetailPage="$rideDetailPage"
+                    />
 
                     <div class="col-span-1">
                         <div class="">

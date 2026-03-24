@@ -1,10 +1,6 @@
 @props([
     'ride',
-    'findRidePage' => null,
-    'postRidePage' => null,
     'rideDetailPage' => null,
-    'selectedLanguage' => null,
-    'searchOptionGroups' => null,
 ])
 
 @php
