@@ -125,7 +125,7 @@ class StageProvider extends GetConnect {
         data.files.add(MapEntry(
             "image", MultipartFile(File(imagePath), filename: "$imageName")));
         data.files.add(MapEntry("profile_original_image",
-            MultipartFile(File(imagePath), filename: "$imageName")));
+            MultipartFile(File(imagePathOriginal), filename: "$imageNameOriginal")));
       }
       data.fields.add(MapEntry("skip", skip));
 
@@ -297,6 +297,68 @@ class StageProvider extends GetConnect {
       data.fields.add(MapEntry("skip", skip));
 
       final response = await getConnect.post(url, data, headers: {
+        'Authorization': 'Bearer $token',
+        'X-Requested-With': 'XMLHttpRequest',
+      });
+
+      if (response.status.hasError) {
+        if (response.status.connectionError) {
+          return Future.error({
+            "type": "network",
+            "message":
+                "No internet connection. Please check your network and try again."
+          });
+        }
+        if (response.status.code == 422) {
+          return response.body;
+        }
+        return Future.error(response.statusText as Object);
+      } else {
+        return response.body;
+      }
+    } on SocketException {
+      return Future.error({
+        "type": "network",
+        "message":
+            "No internet connection. Please check your network and try again."
+      });
+    } on TimeoutException {
+      return Future.error({
+        "type": "network",
+        "message": "Request timed out. Please try again."
+      });
+    } catch (exception) {
+      return Future.error({"type": "unknown", "message": exception.toString()});
+    }
+  }
+
+  Future setStageFourLicense(
+    imageName,
+    imagePath,
+    imageNameOriginal,
+    imagePathOriginal,
+    token,
+    skip,
+  ) async {
+    try {
+      final data = FormData({});
+      data.fields.add(const MapEntry("_method", "POST"));
+
+      if (skip == "0") {
+        data.files.add(MapEntry(
+            "driver_liscense",
+            MultipartFile(File(imagePath), filename: "$imageName")));
+        data.files.add(MapEntry(
+            "driver_license_original_upload",
+            MultipartFile(File(imagePathOriginal),
+                filename: "$imageNameOriginal")));
+      }
+
+      data.fields.add(const MapEntry("skip", "0"));
+      data.fields.add(const MapEntry("skip_vehicle", "1"));
+      data.fields.add(MapEntry("skip_license", skip));
+
+      final response = await getConnect.post("$baseUrl/$step3", data, headers: {
         'Authorization': 'Bearer $token',
         'X-Requested-With': 'XMLHttpRequest',
       });

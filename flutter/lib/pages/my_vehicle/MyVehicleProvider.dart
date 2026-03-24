@@ -94,7 +94,7 @@ class MyVehicleProvider extends GetConnect {
       data.fields.add(MapEntry("license_no", licenseNumber));
       data.fields.add(MapEntry("color", color.toString()));
       data.fields.add(MapEntry("year", year));
-      data.fields.add(MapEntry("car_type", fuel.toString()));
+      data.fields.add(MapEntry("power_type", fuel.toString()));
       data.fields.add(MapEntry('remove_image', removeImage.toString()));
       if (imageName != "") {
         data.files.add(MapEntry(

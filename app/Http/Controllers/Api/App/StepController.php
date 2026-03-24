@@ -108,7 +108,7 @@ class StepController extends Controller
         ];
 
         $request->validate([
-            'image' => 'nullable|file|mimes:jpeg,png,gif|max:10240',
+            'image' => 'nullable|file|mimes:jpeg,jpg,png,gif|max:10240',
         ], $customMessages);
 
         if ($request->hasFile('image')) {
@@ -116,8 +116,17 @@ class StepController extends Controller
             $filename = $file->getClientOriginalName();
             $destination_path = public_path('/users_images');
             $file->move($destination_path, $filename);
+
+            $fileOriginal = $request->file('profile_original_image');
+            $filenameOriginal = $filename;
+            if ($fileOriginal) {
+                $filenameOriginal = $fileOriginal->getClientOriginalName();
+                $fileOriginal->move($destination_path, $filenameOriginal);
+            }
+
             User::whereId($user_id)->update([
                 'profile_image' => $filename,
+                'profile_original_image' => $filenameOriginal,
             ]);
         }
 

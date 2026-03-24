@@ -344,7 +344,7 @@ class StageTowController extends GetxController {
           // profileImageNameOriginal.value = "";
           // profileImagePathOriginal.value = "";
 
-          Get.toNamed('/stage_three_vehicle');
+          Get.toNamed('/stage_three');
           if (skip == false) {
             // serviceController.showDialogue(resp['message'].toString());
           }

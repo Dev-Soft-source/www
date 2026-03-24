@@ -62,132 +62,161 @@ class MyVehiclePage extends GetView<MyVehicleController> {
                             onTap: () {
                               logger.info(controller.vehicleList[i]['image']);
                             },
-                            child: Card(
-                              surfaceTintColor: i % 2 == 0
-                                  ? Colors.white
-                                  : Colors.grey.shade100,
-                              color: i % 2 == 0
-                                  ? Colors.white
-                                  : Colors.grey.shade100,
-                              elevation: 1,
-                              child: Container(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      width: 66.0,
-                                      height: 66.0,
-                                      decoration: BoxDecoration(
-                                        color: Colors.blueAccent.shade100,
-                                        borderRadius:
-                                            BorderRadius.circular(50.0),
-                                      ),
-                                      child: Align(
-                                        alignment: Alignment.center,
-                                        child: ClipRRect(
+                            child: Builder(builder: (context) {
+                              final isPrimary = controller.isPrimaryVehicle(
+                                controller.vehicleList[i],
+                              );
+                              return Card(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  side: BorderSide(
+                                    color: isPrimary
+                                        ? Colors.green
+                                        : Colors.transparent,
+                                    width: isPrimary ? 2 : 0,
+                                  ),
+                                ),
+                                surfaceTintColor: i % 2 == 0
+                                    ? Colors.white
+                                    : Colors.grey.shade100,
+                                color: i % 2 == 0
+                                    ? Colors.white
+                                    : Colors.grey.shade100,
+                                elevation: 1,
+                                child: Container(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        width: 66.0,
+                                        height: 66.0,
+                                        decoration: BoxDecoration(
+                                          color: Colors.blueAccent.shade100,
                                           borderRadius:
                                               BorderRadius.circular(50.0),
-                                          child: networkCacheImageWidget(
-                                            "${controller.vehicleList[i]['image']}",
-                                            BoxFit.contain,
-                                            56.0,
-                                            56.0,
+                                          border: Border.all(
+                                            color: isPrimary
+                                                ? Colors.green
+                                                : Colors.transparent,
+                                            width: isPrimary ? 2 : 0,
+                                          ),
+                                        ),
+                                        child: Align(
+                                          alignment: Alignment.center,
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(50.0),
+                                            child: KeyedSubtree(
+                                              key: ValueKey(
+                                                'vehicle-image-${controller.vehicleList[i]['id']}-${controller.vehicleList[i]['image']}',
+                                              ),
+                                              child: networkCacheImageWidget(
+                                                "${controller.vehicleList[i]['image']}",
+                                                BoxFit.contain,
+                                                56.0,
+                                                56.0,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    5.widthBox,
-                                    Expanded(
-                                        child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      mainAxisSize: MainAxisSize.max,
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              // Vehicle title line: 20px
-                                              txt20Size(
-                                                  title:
-                                                      "${controller.vehicleList[i]['year']} ${controller.vehicleList[i]['make']} ${controller.vehicleList[i]['model']}",
-                                                  context: context,
-                                                  fontFamily: regular,
-                                                  textColor: textColor),
-                                              // License number: 20px body
-                                              txt20Size(
-                                                  title:
-                                                      "${controller.vehicleList[i]['license_no']}",
-                                                  textColor: textColor,
-                                                  context: context,
-                                                  fontFamily: regular),
-                                              // Car type: 20px body
-                                              txt20Size(
-                                                  title:
-                                                      controller.getVehicleCardTypeLabel(
-                                                          controller
-                                                              .vehicleList[i]),
-                                                  textColor: textColor,
-                                                  context: context,
-                                                  fontFamily: regular)
-                                            ],
-                                          ),
-                                        ),
-                                        5.widthBox,
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            SizedBox(
-                                              height: 30,
-                                              width: 132,
-                                              child: elevatedButtonWidget(
-                                                  textWidget: txt22Size(
-                                                      title:
-                                                          "${controller.labelTextDetail['edit_vehicle_button_text'] ?? "Edit vehicle"}",
-                                                      context: context,
-                                                      fontFamily: regular,
-                                                      textColor: Colors.white),
-                                                  onPressed: () async {
-                                                    await controller
-                                                        .getVehicleDetail(
+                                      5.widthBox,
+                                      Expanded(
+                                          child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                // Vehicle title line: 20px
+                                                txt20Size(
+                                                    title:
+                                                        "${controller.vehicleList[i]['year']} ${controller.vehicleList[i]['make']} ${controller.vehicleList[i]['model']}",
+                                                    context: context,
+                                                    fontFamily: regular,
+                                                    textColor: textColor),
+                                                // License number: 20px body
+                                                txt20Size(
+                                                    title:
+                                                        "${controller.vehicleList[i]['license_no']}",
+                                                    textColor: textColor,
+                                                    context: context,
+                                                    fontFamily: regular),
+                                                // Car type: 20px body
+                                                txt20Size(
+                                                    title: controller
+                                                        .getVehicleCardTypeLabel(
                                                             controller
-                                                                    .vehicleList[
-                                                                i]['id']);
-                                                  },
-                                                  context: context),
+                                                                .vehicleList[i]),
+                                                    textColor: textColor,
+                                                    context: context,
+                                                    fontFamily: regular)
+                                              ],
                                             ),
-                                            5.heightBox,
-                                            SizedBox(
-                                              height: 30,
-                                              width: 132,
-                                              child: elevatedButtonWidget(
-                                                  textWidget: txt22Size(
-                                                      title:
-                                                          "${controller.labelTextDetail['remove_vehicle_button_text'] ?? "Remove vehicle"}",
-                                                      context: context,
-                                                      fontFamily: regular,
-                                                      textColor: Colors.white),
-                                                  btnColor: Colors.red,
-                                                  onPressed: () async {
-                                                    await controller
-                                                        .removeVehicle(controller
-                                                                .vehicleList[i]
-                                                            ['id']);
-                                                  },
-                                                  context: context),
-                                            )
-                                          ],
-                                        )
-                                      ],
-                                    ))
-                                  ],
+                                          ),
+                                          5.widthBox,
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              SizedBox(
+                                                height: 30,
+                                                width: 132,
+                                                child: elevatedButtonWidget(
+                                                    textWidget: txt22Size(
+                                                        title:
+                                                            "${controller.labelTextDetail['edit_vehicle_button_text'] ?? "Edit vehicle"}",
+                                                        context: context,
+                                                        fontFamily: regular,
+                                                        textColor:
+                                                            Colors.white),
+                                                    onPressed: () async {
+                                                      await controller
+                                                          .getVehicleDetail(
+                                                              controller
+                                                                      .vehicleList[
+                                                                  i]['id']);
+                                                    },
+                                                    context: context),
+                                              ),
+                                              5.heightBox,
+                                              SizedBox(
+                                                height: 30,
+                                                width: 132,
+                                                child: elevatedButtonWidget(
+                                                    textWidget: txt22Size(
+                                                        title:
+                                                            "${controller.labelTextDetail['remove_vehicle_button_text'] ?? "Remove vehicle"}",
+                                                        context: context,
+                                                        fontFamily: regular,
+                                                        textColor:
+                                                            Colors.white),
+                                                    btnColor: Colors.red,
+                                                    onPressed: () async {
+                                                      await controller
+                                                          .removeVehicle(
+                                                              controller
+                                                                      .vehicleList[
+                                                                  i]['id']);
+                                                    },
+                                                    context: context),
+                                              )
+                                            ],
+                                          )
+                                        ],
+                                      ))
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ),
+                              );
+                            }),
                           )
                         ],
                         80.heightBox,

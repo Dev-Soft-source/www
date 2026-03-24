@@ -54,6 +54,9 @@ class VerifyDriverController extends Controller
             'driver_liscense' => 'required|file|mimes:pdf,jpeg,png,gif|max:10240',
         ], $customMessages);
 
+        $userId = $request->id ?? Auth::guard('sanctum')->id();
+        $user = User::whereId($userId)->firstOrFail();
+
         if ($request->hasFile('driver_liscense')) {
             $file = $request->file('driver_liscense');
             $filename = $file->getClientOriginalName();
@@ -61,10 +64,14 @@ class VerifyDriverController extends Controller
             $file->move($destination_path,$filename);
 
             $fileOriginal = $request->file('driver_license_original_upload');
-            $filenameOriginal = $fileOriginal->getClientOriginalName();
-            $destination_path = public_path('/driver_liscenses');
-            $fileOriginal->move($destination_path,$filenameOriginal);
-            User::whereId($request->id)->update([
+            $filenameOriginal = $filename;
+            if ($fileOriginal) {
+                $filenameOriginal = $fileOriginal->getClientOriginalName();
+                $destination_path = public_path('/driver_liscenses');
+                $fileOriginal->move($destination_path,$filenameOriginal);
+            }
+
+            User::whereId($userId)->update([
                 'driver_liscense' => $filename,
                 'driver_license_original_upload' => $filenameOriginal,
                 'driver_license_upload' => Carbon::now(),
@@ -72,22 +79,23 @@ class VerifyDriverController extends Controller
             ]);
         }
 
-        $user = User::whereId($request->id)->first();
+        $user = User::whereId($userId)->first();
         $country = Country::whereId($user->country)->first();
         $admin = Admin::first();
 
-        $data = [
-            'username' => $admin->username,
-            'first_name' => $user->first_name,
-            'last_name' => $user->last_name,
-            'email' => $user->email,
-            'phone' => $user->phone,
-            'country' => $country->name,
-            'driver_liscense' => $user->driver_liscense,
-            'upload_date' => \Carbon\Carbon::now()->format('M d, Y H:i:s'),
-        ];
-        // Send upload email
-        Mail::to($admin->admin_email)->queue(new DriverLicenseUploadMail($data));
+        if ($admin && !empty($admin->admin_email)) {
+            $data = [
+                'username' => $admin->username ?? 'Admin',
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'country' => $country->name ?? '',
+                'driver_liscense' => $user->driver_liscense,
+                'upload_date' => \Carbon\Carbon::now()->format('M d, Y H:i:s'),
+            ];
+            Mail::to($admin->admin_email)->queue(new DriverLicenseUploadMail($data));
+        }
 
         $message = null;
         $selectedLanguage = app()->getLocale();
@@ -106,9 +114,12 @@ class VerifyDriverController extends Controller
             }
         }
 
-        $user = User::whereId($request->id)->first();
+        $user = User::whereId($userId)->first();
         $data = ['user' => $user];
-        return $this->successResponse($data, strip_tags($message->license_upload_message));
+        return $this->successResponse(
+            $data,
+            strip_tags($message->license_upload_message ?? 'Driver license uploaded successfully')
+        );
     }
 
     public function remove(){

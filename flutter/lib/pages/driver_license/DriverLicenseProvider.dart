@@ -59,6 +59,7 @@ class DriverLicenseProvider extends GetConnect {
     try {
       final data = FormData({});
       data.fields.add(const MapEntry("_method", "PUT"));
+      data.fields.add(MapEntry("id", userId.toString()));
       if (imageName != "") {
         data.files.add(MapEntry("driver_liscense",
             MultipartFile(File(imagePath), filename: "$imageName")));

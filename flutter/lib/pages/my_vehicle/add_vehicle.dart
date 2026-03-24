@@ -508,19 +508,19 @@ class AddVehiclePage extends StatelessWidget {
                                           if (controller.errors
                                                   .firstWhereOrNull((element) =>
                                                       element['title'] ==
-                                                      "car_type") !=
+                                                      "power_type") !=
                                               null) {
                                             controller.errors.remove(controller
                                                 .errors
                                                 .firstWhereOrNull((element) =>
                                                     element['title'] ==
-                                                    "car_type"));
+                                                    "power_type"));
                                           }
                                         },
                                         isError: controller.errors
                                                 .firstWhereOrNull((element) =>
                                                     element['title'] ==
-                                                    "car_type") !=
+                                                    "power_type") !=
                                             null),
                                   ),
                                   5.widthBox,
@@ -536,13 +536,13 @@ class AddVehiclePage extends StatelessWidget {
                                       if (controller.errors.firstWhereOrNull(
                                               (element) =>
                                                   element['title'] ==
-                                                  "car_type") !=
+                                                  "power_type") !=
                                           null) {
                                         controller.errors.remove(controller
                                             .errors
                                             .firstWhereOrNull((element) =>
                                                 element['title'] ==
-                                                "car_type"));
+                                                "power_type"));
                                       }
                                     },
                                     child: txt16Size(
@@ -580,19 +580,19 @@ class AddVehiclePage extends StatelessWidget {
                                           if (controller.errors
                                                   .firstWhereOrNull((element) =>
                                                       element['title'] ==
-                                                      "car_type") !=
+                                                      "power_type") !=
                                               null) {
                                             controller.errors.remove(controller
                                                 .errors
                                                 .firstWhereOrNull((element) =>
                                                     element['title'] ==
-                                                    "car_type"));
+                                                    "power_type"));
                                           }
                                         },
                                         isError: controller.errors
                                                 .firstWhereOrNull((element) =>
                                                     element['title'] ==
-                                                    "car_type") !=
+                                                    "power_type") !=
                                             null),
                                   ),
                                   5.widthBox,
@@ -608,13 +608,13 @@ class AddVehiclePage extends StatelessWidget {
                                       if (controller.errors.firstWhereOrNull(
                                               (element) =>
                                                   element['title'] ==
-                                                  "car_type") !=
+                                                  "power_type") !=
                                           null) {
                                         controller.errors.remove(controller
                                             .errors
                                             .firstWhereOrNull((element) =>
                                                 element['title'] ==
-                                                "car_type"));
+                                                "power_type"));
                                       }
                                     },
                                     child: txt16Size(
@@ -649,19 +649,19 @@ class AddVehiclePage extends StatelessWidget {
                                           if (controller.errors
                                                   .firstWhereOrNull((element) =>
                                                       element['title'] ==
-                                                      "car_type") !=
+                                                      "power_type") !=
                                               null) {
                                             controller.errors.remove(controller
                                                 .errors
                                                 .firstWhereOrNull((element) =>
                                                     element['title'] ==
-                                                    "car_type"));
+                                                    "power_type"));
                                           }
                                         },
                                         isError: controller.errors
                                                 .firstWhereOrNull((element) =>
                                                     element['title'] ==
-                                                    "car_type") !=
+                                                    "power_type") !=
                                             null),
                                   ),
                                   5.widthBox,
@@ -675,13 +675,13 @@ class AddVehiclePage extends StatelessWidget {
                                       if (controller.errors.firstWhereOrNull(
                                               (element) =>
                                                   element['title'] ==
-                                                  "car_type") !=
+                                                  "power_type") !=
                                           null) {
                                         controller.errors.remove(controller
                                             .errors
                                             .firstWhereOrNull((element) =>
                                                 element['title'] ==
-                                                "car_type"));
+                                                "power_type"));
                                       }
                                     },
                                     child: txt16Size(
@@ -695,12 +695,12 @@ class AddVehiclePage extends StatelessWidget {
                             ],
                           ),
                           if (controller.errors.firstWhereOrNull((element) =>
-                                  element['title'] == "car_type") !=
+                                  element['title'] == "power_type") !=
                               null) ...[
                             toolTip(
                                 tip: controller.errors.firstWhereOrNull(
                                     (element) =>
-                                        element['title'] == "car_type"))
+                                        element['title'] == "power_type"))
                           ],
                           // Only show "Set as primary vehicle" section if user has existing vehicles
                           if (controller.vehicleList.isNotEmpty) ...[

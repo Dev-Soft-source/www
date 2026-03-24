@@ -24,24 +24,10 @@ class StageThreeController extends GetxController {
   var finishBtn = false.obs;
   Timer? timer;
   var secondsRemaining = 5.obs;
-  var currentStep = 1.obs;
-
   RxBool isVehicleSkipped = false.obs;
-  RxBool isLicenseSkipped = false.obs;
 
   /// Controls whether the vehicle step "Next/Add Vehicle" button is enabled.
   final isVehicleFormValid = false.obs;
-
-  /// Controls whether the license step "Next/Add" button is enabled.
-  final isLicenseFormValid = false.obs;
-
-  void switchToDriverStep() {
-    currentStep.value = 2;
-  }
-
-  void switchToVehicleStep() {
-    currentStep.value = 1;
-  }
 
   bool validateVehicleFields() {
     errors.clear();
@@ -161,116 +147,6 @@ class StageThreeController extends GetxController {
     return true;
   }
 
-  bool validateLicenseFields() {
-    errors.clear();
-
-    if (driverLicensePathOriginal.value.isEmpty) {
-      var message = validationMessageDetail['required'];
-      message = message.replaceAll(":Attribute",
-          labelTextDetail['driver_license_error'] ?? 'Driver license');
-      var err = {
-        'title': "driver_license",
-        'eList': [message ?? 'Driver license field is required']
-      };
-      errors.add(err);
-      return false;
-    }
-
-    // Validate license image size
-    if (driverLicensePathOriginal.value != "") {
-      final file = File(driverLicensePathOriginal.value);
-      int sizeInBytes = file.lengthSync();
-      double sizeInMb = sizeInBytes / (1024 * 1024);
-      if (sizeInMb > 10) {
-        var message = validationMessageDetail['max.file'];
-        message = message.replaceAll(":attribute",
-            labelTextDetail['driver_license_error'] ?? 'driver license image');
-        message = message.replaceAll(":max", '10');
-        serviceController.showDialogue(
-            message ?? 'Can not upload image size greater than 10MB');
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  submitFinalForm() async {
-    logger.debug(
-        "StageThreeController.submitFinalForm called with carImageName=${carImageName.value}, carImageNameOriginal=${carImageNameOriginal.value}, carImagePath=${carImagePath.value}, carImagePathOriginal=${carImagePathOriginal.value}, driverLicenseName=${driverLicenseName.value}, driverLicenseNameOriginal=${driverLicenseNameOriginal.value}, driverLicensePath=${driverLicensePath.value}, driverLicensePathOriginal=${driverLicensePathOriginal.value}, isVehicleSkipped=${isVehicleSkipped.value}, isLicenseSkipped=${isLicenseSkipped.value}");
-    try {
-      isOverlayLoading(true);
-      logger
-          .debug("StageThreeController.submitFinalForm overlay loading shown");
-
-      StageProvider()
-          .setStageThree(
-        isVehicleSkipped.value ? '' : makeTextEditingController.text,
-        isVehicleSkipped.value ? '' : modelTextEditingController.text,
-        isVehicleSkipped.value ? '' : licenseNumberTextEditingController.text,
-        isVehicleSkipped.value ? '' : colorTextEditingController.text,
-        isVehicleSkipped.value ? '' : yearTextEditingController.text,
-        isVehicleSkipped.value ? '' : vehicleType.value,
-        isVehicleSkipped.value ? '' : fuel.value,
-        isVehicleSkipped.value ? '' : carImagePath.value,
-        isVehicleSkipped.value ? '' : carImageName.value,
-        isVehicleSkipped.value ? '' : carImagePathOriginal.value,
-        isVehicleSkipped.value ? '' : carImageNameOriginal.value,
-        isLicenseSkipped.value ? '' : driverLicensePath.value,
-        isLicenseSkipped.value ? '' : driverLicenseName.value,
-        isLicenseSkipped.value ? '' : driverLicensePathOriginal.value,
-        isLicenseSkipped.value ? '' : driverLicenseNameOriginal.value,
-        isVehicleSkipped.value ? "0" : "1",
-        isVehicleSkipped.value ? "1" : "0",
-        isLicenseSkipped.value ? "1" : "0",
-        serviceController.token,
-        "0",
-      )
-          .then((resp) async {
-        logger.debug(
-            "StageThreeController.submitFinalForm received response: ${resp.toString()}");
-        if (resp['status'] != null && resp['status'] == "Error") {
-          logger.warning(
-              "StageThreeController.submitFinalForm backend returned error status with message=${resp['message']}");
-          serviceController.showDialogue(resp['message'].toString());
-        } else if (resp != null && resp['errors'] != null) {
-          logger.warning(
-              "StageThreeController.submitFinalForm backend returned validation errors: ${resp['errors']}");
-          if (resp['errors']['image'] != null) {
-            errorList.addAll(resp['errors']['image']);
-          }
-        } else if (resp['status'] != null && resp['status'] == "Success") {
-          logger.info(
-              "StageThreeController.submitFinalForm success, updating user step to 4");
-          serviceController.loginUserDetail['step'] = "4";
-          serviceController.loginUserDetail.refresh();
-          serviceController.secureStorage.write(
-              key: "userInfo",
-              value: jsonEncode(serviceController.loginUserDetail));
-          stepNo.value = serviceController.loginUserDetail['step'].toString();
-
-          Get.toNamed('/stage_four');
-        } else {
-          logger.warning(
-              "StageThreeController.submitFinalForm received unexpected response format: ${resp.toString()}");
-        }
-        isOverlayLoading(false);
-        logger.debug(
-            "StageThreeController.submitFinalForm overlay loading hidden after response");
-      }, onError: (err) {
-        isOverlayLoading(false);
-        logger.error(
-            "StageThreeController.submitFinalForm encountered onError: $err");
-        serviceController.showDialogue(err.toString(), type: "error");
-      });
-    } catch (exception) {
-      isOverlayLoading(false);
-      logger.error(
-          "StageThreeController.submitFinalForm threw exception: $exception");
-      serviceController.showDialogue(exception.toString(), type: "error");
-    }
-  }
-
 // 7. Add method to clear form data
   void clearFormData() {
     makeTextEditingController.text = "";
@@ -284,12 +160,7 @@ class StageThreeController extends GetxController {
     carImageName.value = "";
     carImagePathOriginal.value = "";
     carImageNameOriginal.value = "";
-    driverLicensePath.value = "";
-    driverLicenseName.value = "";
-    driverLicensePathOriginal.value = "";
-    driverLicenseNameOriginal.value = "";
     isVehicleSkipped.value = false;
-    isLicenseSkipped.value = false;
   }
 
   late TextEditingController makeTextEditingController,
@@ -308,14 +179,9 @@ class StageThreeController extends GetxController {
   var vehicleList = List.empty(growable: true).obs;
   var isVehicleSet = false.obs;
 
-  var driverLicenseName = "".obs;
-  var driverLicensePath = "".obs;
-  var driverLicenseNameOriginal = "".obs;
-  var driverLicensePathOriginal = "".obs;
   var imageType = 0.obs;
   var labelTextDetail = {}.obs;
   var step3MainHeading = "".obs;
-  var step4MainHeading = "".obs;
   var vehicleTypeList = [].obs;
   var vehicleTypeLabelList = [].obs;
   var validationMessageDetail = {}.obs;
@@ -341,11 +207,9 @@ class StageThreeController extends GetxController {
     ever(fuel, (_) => validateVehicleFormFields());
 
     // Re‑validate license form when the selected license image changes.
-    ever(driverLicensePathOriginal, (_) => validateLicenseFormFields());
 
     // Initial validation in case data is pre‑filled.
     validateVehicleFormFields();
-    validateLicenseFormFields();
 
     fuel.value = "Gas";
 
@@ -455,12 +319,6 @@ class StageThreeController extends GetxController {
   }
 
   /// Lightweight client‑side validation for license fields to drive button state.
-  /// This does not add errors or show dialogs; it only toggles `isLicenseFormValid`.
-  void validateLicenseFormFields() {
-    isLicenseFormValid.value =
-        driverLicensePathOriginal.value.trim().isNotEmpty;
-  }
-
   Future<void> _getLanguages() async {
     try {
       final resp = await LoginProvider().getLanguages();
@@ -529,7 +387,6 @@ class StageThreeController extends GetxController {
           labelTextDetail.addAll(resp['data']['step3Page'] ?? {});
           step3MainHeading.value = labelTextDetail['main_heading'] ??
               "Step 3 of 5 - Vehicle Information";
-          step4MainHeading.value = "Step 4 of 5 - Your Driver's License";
           _populateVehicleTypes(
             details: labelTextDetail,
             vehicleTypeOptions: resp['data']['vehicleTypeOptions'],
@@ -683,27 +540,12 @@ class StageThreeController extends GetxController {
   void getImage(ImageSource imageSource) async {
     final croppedFile = await serviceController.imageCropper(imageSource);
     if (croppedFile != null) {
-      if (stepNo.value == "3") {
-        if (imageType.value == 1) {
-          carImagePath.value = croppedFile.path;
-          carImageName.value = croppedFile.path.split('/').last;
-          carImagePathOriginal.value =
-              serviceController.originalImagePath.value;
-          serviceController.originalImagePath.value = "";
-          carImageNameOriginal.value =
-              serviceController.originalImageName.value;
-          serviceController.originalImageName.value = "";
-        } else if (imageType.value == 2) {
-          driverLicensePath.value = croppedFile.path;
-          driverLicenseName.value = croppedFile.path.split('/').last;
-          driverLicensePathOriginal.value =
-              serviceController.originalImagePath.value;
-          serviceController.originalImagePath.value = "";
-          driverLicenseNameOriginal.value =
-              serviceController.originalImageName.value;
-          serviceController.originalImageName.value = "";
-        }
-      }
+      carImagePath.value = croppedFile.path;
+      carImageName.value = croppedFile.path.split('/').last;
+      carImagePathOriginal.value = serviceController.originalImagePath.value;
+      serviceController.originalImagePath.value = "";
+      carImageNameOriginal.value = serviceController.originalImageName.value;
+      serviceController.originalImageName.value = "";
       Get.back();
     }
   }
@@ -720,7 +562,7 @@ class StageThreeController extends GetxController {
     }
   }
 
-  setStageThree(skip, skipVehicle, skipLicense) {
+  setStageThree(skip, skipVehicle) {
     if (skip == true) {
       try {
         StageProvider()
@@ -737,7 +579,7 @@ class StageThreeController extends GetxController {
                 value: jsonEncode(serviceController.loginUserDetail));
             stepNo.value = serviceController.loginUserDetail['step'].toString();
 
-            Get.toNamed('/stage_four');
+            Get.toNamed('/stage_five');
           }
           isOverlayLoading(false);
         }, onError: (err) {
@@ -850,35 +692,6 @@ class StageThreeController extends GetxController {
       }
     }
 
-    if (skipLicense == false) {
-      if (driverLicensePathOriginal.value.isEmpty) {
-        var message = validationMessageDetail['required'];
-        message = message.replaceAll(":Attribute",
-            labelTextDetail['driver_license_error'] ?? 'Driver license');
-        var err = {
-          'title': "driver_license",
-          'eList': [message ?? 'Driver license field is required']
-        };
-        errors.add(err);
-      }
-
-      if (driverLicensePathOriginal.value != "") {
-        final file = File(driverLicensePathOriginal.value);
-        int sizeInBytes = file.lengthSync();
-        double sizeInMb = sizeInBytes / (1024 * 1024);
-        if (sizeInMb > 10) {
-          var message = validationMessageDetail['max.file'];
-          message = message.replaceAll(
-              ":attribute",
-              labelTextDetail['driver_license_error'] ??
-                  'driver license image');
-          message = message.replaceAll(":max", '10');
-          serviceController.showDialogue(
-              message ?? 'Can not upload image size greater than 10MB');
-          return;
-        }
-      }
-    }
     try {
       logger.info(
           "The value is $carImageName $carImageNameOriginal $carImagePath $carImagePathOriginal");
@@ -896,13 +709,13 @@ class StageThreeController extends GetxController {
         carImageName.value,
         carImagePathOriginal.value,
         carImageNameOriginal.value,
-        driverLicensePath.value,
-        driverLicenseName.value,
-        driverLicensePathOriginal.value,
-        driverLicenseNameOriginal.value,
+        '',
+        '',
+        '',
+        '',
         skipVehicle == true ? "0" : "1",
         skipVehicle == true ? "1" : "0",
-        skipLicense == true ? "1" : "0",
+        "1",
         serviceController.token,
         "0",
       )
@@ -932,11 +745,6 @@ class StageThreeController extends GetxController {
           // carImageName.value = "";
           // carImagePathOriginal.value = "";
           // carImageNameOriginal.value = "";
-          // driverLicensePath.value = "";
-          // driverLicenseName.value = "";
-          // driverLicensePathOriginal.value = "";
-          // driverLicenseNameOriginal.value = "";
-
           Get.toNamed('/');
           // serviceController.showDialogue(resp['message'].toString());
         }

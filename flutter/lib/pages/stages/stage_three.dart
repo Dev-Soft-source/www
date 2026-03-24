@@ -16,43 +16,21 @@ import 'package:proximaride_app/pages/widgets/step_appbar_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import '../widgets/tool_tip.dart';
 
-class StageThreeVehicle extends GetView<StageThreeController> {
-  const StageThreeVehicle({super.key});
+class StageThree extends GetView<StageThreeController> {
+  const StageThree({super.key});
 
   @override
   Widget build(BuildContext context) {
     Get.put(StageThreeController());
-    return WillPopScope(
-      onWillPop: () async {
-        // If on driver step, go back to vehicle step instead of leaving the page
-        if (controller.currentStep.value == 2) {
-          controller.switchToVehicleStep();
-          return false;
-        }
-        // Otherwise, allow normal back navigation
-        return true;
-      },
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
-          leading: Obx(() {
-            // When on driver step, back should return to vehicle step
-            if (controller.currentStep.value == 2) {
-              return IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  controller.switchToVehicleStep();
-                },
-              );
-            }
-            // On vehicle step, use normal navigation back
-            return IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                Navigator.of(context).maybePop();
-              },
-            );
-          }),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.of(context).maybePop();
+            },
+          ),
           title: Obx(
             () => stepAppBarWidget(
               context: context,
@@ -88,7 +66,6 @@ class StageThreeVehicle extends GetView<StageThreeController> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (controller.currentStep.value == 1) ...[
                               Center(
                                   child: txt25Size(
                                       title: controller.step3MainHeading.value,
@@ -918,8 +895,7 @@ class StageThreeVehicle extends GetView<StageThreeController> {
                                             .validateVehicleFields()) {
                                           controller.isVehicleSkipped.value =
                                               false;
-                                          controller
-                                              .switchToDriverStep(); // Move to step 2
+                                          Get.toNamed('/stage_four');
                                         }
                                       },
                                     ),
@@ -938,250 +914,13 @@ class StageThreeVehicle extends GetView<StageThreeController> {
                                         context: context,
                                         fontFamily: bold),
                                     onPressed: () async {
-                                      // Mark vehicle as skipped and move to driver step
                                       controller.isVehicleSkipped.value = true;
-                                      controller
-                                          .switchToDriverStep(); // Move to step 2
+                                      Get.toNamed('/stage_four');
                                     },
                                     btnColor: primaryColor,
                                   )),
                                 ],
                               )
-                            ] else if (controller.currentStep.value == 2) ...[
-                              Center(
-                                  child: txt25Size(
-                                      // title:
-                                      //     "Step 4 of 5 - Your Valid Driver's License",
-                                      //     // "${controller.labelTextDetail['main_heading'] ?? "Step 3 of 5 - Vehicle Information"}",
-                                      title: controller.step4MainHeading.value,
-                                      context: context)),
-                              10.heightBox,
-                              Html(
-                                data:
-                                    "<p>To post Pink Rides or Extra-Care Rides, you must upload your <strong>valid driver&rsquo;s license</strong>. This helps us verify that all drivers meet our community standards.</p><p>&nbsp;</p><p>If you&rsquo;re planning to use ProximaRide as a&nbsp;<strong>passenger only</strong>, this step does not apply to you. You may simply click &ldquo;Skip&rdquo; below</p>",
-                                style: {
-                                  "body": Style(
-                                      padding: HtmlPaddings.zero,
-                                      margin: Margins.zero),
-                                  'p': Style(
-                                    fontSize: FontSize(20),
-                                    padding: HtmlPaddings.zero,
-                                    margin: Margins.zero,
-                                  ),
-                                  'div': Style(
-                                    fontSize: FontSize(20),
-                                    padding: HtmlPaddings.zero,
-                                    margin: Margins.zero,
-                                  )
-                                },
-                              ),
-                              // txt16Size(
-                              //     title:
-                              //         "${controller.labelTextDetail['sub_main_label'] ?? "If you intend to use ProximaRide as a passenger only, then this point is not applicable to you. You may 'Skip' it"}",
-                              //     context: context),
-                              // Driver License Step Content
-
-                              // Container(
-                              //   padding: EdgeInsets.all(5.0),
-                              //   width: context.screenWidth,
-                              //   decoration: BoxDecoration(
-                              //       border: Border.all(
-                              //           color: primaryColor,
-                              //           style: BorderStyle.solid),
-                              //       color: primaryColor),
-                              //   child: txt18Size(
-                              //       title:
-                              //           "${controller.labelTextDetail['liecense_section_heading'] ?? "Step 2 of 2 - Your driver's license"}",
-                              //       context: context,
-                              //       textColor: Colors.white),
-                              // ),
-                              // 10.heightBox,
-                              // Html(
-                              //   data: controller.labelTextDetail[
-                              //           'driver_license_label'] ??
-                              //       "Driver license",
-                              //   style: {
-                              //     "body": Style(
-                              //         padding: HtmlPaddings.zero,
-                              //         margin: Margins.zero),
-                              //     'p': Style(
-                              //       fontSize: FontSize(20),
-                              //       padding: HtmlPaddings.zero,
-                              //       margin: Margins.zero,
-                              //     ),
-                              //     'div': Style(
-                              //       fontSize: FontSize(20),
-                              //       padding: HtmlPaddings.zero,
-                              //       margin: Margins.zero,
-                              //     )
-                              //   },
-                              // ),
-                              // // txt16Size(
-                              // //     title:
-                              // //         "${controller.labelTextDetail['driver_license_label'] ?? "Driver license"}",
-                              // //     fontFamily: regular,
-                              // //     context: context),
-                              // 5.heightBox,
-                              // Html(
-                              //   data: controller.labelTextDetail[
-                              //           'driver_license_sub_label'] ??
-                              //       'To be eligible to post "Pink rides" and "Extra-care rides", you must upload your driver\'s license',
-                              //   style: {
-                              //     "body": Style(
-                              //         padding: HtmlPaddings.zero,
-                              //         margin: Margins.zero),
-                              //     'p': Style(
-                              //       fontSize: FontSize(20),
-                              //       padding: HtmlPaddings.zero,
-                              //       margin: Margins.zero,
-                              //     ),
-                              //     'div': Style(
-                              //       fontSize: FontSize(20),
-                              //       padding: HtmlPaddings.zero,
-                              //       margin: Margins.zero,
-                              //     )
-                              //   },
-                              // ),
-                              // txt16Size(
-                              //     title:
-                              //         "${controller.labelTextDetail['driver_license_sub_label'] ?? 'To be eligible to post "Pink rides" and "Extra-care rides", you must upload your driver\'s license'}",
-                              //     fontFamily: regular,
-                              //     textColor: textColor,
-                              //     context: context),
-                              30.heightBox,
-                              imageUploadWidget(
-                                  context: context,
-                                  onTap: () async {
-                                    controller.imageType.value = 2;
-                                    await imageUploadBottomSheet(
-                                        controller, context);
-                                  },
-                                  title: "Upload Driver's License",
-                                  // title:
-                                  //     "${controller.labelTextDetail['driver_license_label'] ?? "Driver license"}.",
-                                  title1:
-                                      "${controller.labelTextDetail['mobile_driver_choose_file_label'] ?? "Choose file"}",
-                                  title2:
-                                      "${controller.labelTextDetail['photo_detail_label'] ?? "(Only JPG, PNG, JPEG and GIF are allowed. Max. 10MB)"}",
-                                  imageFile:
-                                      controller.driverLicenseName.value == ""
-                                          ? null
-                                          : controller.driverLicensePath.value,
-                                  screenWidth: context.screenWidth),
-                              if (controller.errors.firstWhereOrNull(
-                                      (element) =>
-                                          element['title'] ==
-                                          "driver_license") !=
-                                  null) ...[
-                                // toolTip(
-                                //     tip: controller.errors.firstWhereOrNull(
-                                //         (element) =>
-                                //             element['title'] == "driver_license"))
-                                toolTip(
-                                    tip: "Driver's License is required",
-                                    type: 'string')
-                              ],
-
-                              // Driver License Step Buttons
-                              20.heightBox,
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  // Expanded(
-                                  //     child: elevatedButtonWidget(
-                                  //   textWidget: txt28Size(
-                                  //       title:
-                                  //           "${controller.labelTextDetail['skip_license'] ?? "Skip License"}",
-                                  //       textColor: Colors.white,
-                                  //       context: context,
-                                  //       fontFamily: regular),
-                                  //   onPressed: () async {
-                                  //     await controller.setStageThree(
-                                  //       false, false, true,
-                                  //       // isVehicleStep: false
-                                  //     );
-                                  //   },
-                                  //   btnColor: primaryColor,
-                                  // )),
-                                  // 2.widthBox,
-                                  // Expanded(
-                                  //     child: elevatedButtonWidget(
-                                  //   textWidget: txt28Size(
-                                  //       title:
-                                  //           "${controller.labelTextDetail['finish_button_label'] ?? "Finish"}",
-                                  //       textColor: Colors.white,
-                                  //       context: context,
-                                  //       fontFamily: regular),
-                                  //   onPressed: () async {
-                                  //     await controller.setStageThree(
-                                  //       false, false, false,
-                                  //       // isVehicleStep: false
-                                  //     );
-                                  //   },
-                                  // )),
-                                ],
-                              ),
-                              // 10.heightBox,
-                              // Back to Vehicle Button
-                              Row(
-                                children: [
-                                  Expanded(
-                                      child: elevatedButtonWidget(
-                                    enabled:
-                                        controller.isLicenseFormValid.value,
-                                    textWidget: txt22Size(
-                                        title:
-                                            "${controller.labelTextDetail['next_button_label'] ?? "Add"}",
-                                        textColor: Colors.white,
-                                        context: context,
-                                        fontFamily: regular),
-                                    onPressed: () async {
-                                      // Validate license and call final API
-                                      if (controller.validateLicenseFields()) {
-                                        controller.isLicenseSkipped.value =
-                                            false;
-                                        await controller.submitFinalForm();
-                                      }
-                                    },
-                                  )),
-                                  // Expanded(
-                                  //     child: elevatedButtonWidget(
-                                  //   textWidget: txt28Size(
-                                  //       title:
-                                  //           "${controller.labelTextDetail['back_to_vehicle'] ?? "Back to Vehicle"}",
-                                  //       textColor: Colors.white,
-                                  //       context: context,
-                                  //       fontFamily: regular),
-                                  //   onPressed: () async {
-                                  //     controller.switchToVehicleStep();
-                                  //   },
-                                  //   btnColor: Colors.grey,
-                                  // )),
-                                ],
-                              ),
-                              10.heightBox,
-                              Row(
-                                children: [
-                                  Expanded(
-                                      child: elevatedButtonWidget(
-                                    textWidget: txt22Size(
-                                        title:
-                                            "${controller.labelTextDetail['skip_license'] ?? "Skip License"}",
-                                        textColor: Colors.white,
-                                        context: context,
-                                        fontFamily: bold),
-                                    onPressed: () async {
-                                      // Mark license as skipped and call final API
-                                      controller.isLicenseSkipped.value = true;
-                                      await controller.submitFinalForm();
-                                    },
-                                    btnColor: primaryColor,
-                                  )),
-                                ],
-                              ),
-                            ],
                           ],
                         ),
                       )
@@ -2013,7 +1752,6 @@ class StageThreeVehicle extends GetView<StageThreeController> {
             );
           }
         }),
-      ),
-    );
+      );
   }
 }

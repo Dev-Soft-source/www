@@ -30,11 +30,11 @@ class SplashController extends GetxController {
           return;
         } else if (serviceController.loginUserDetail['step'].toString() ==
             '3') {
-          Get.offAllNamed('/stage_three_vehicle');
+          Get.offAllNamed('/stage_three');
           return;
         } else if (serviceController.loginUserDetail['step'].toString() ==
             '4') {
-          Get.offAllNamed('/stage_four_vehicle');
+          Get.offAllNamed('/stage_four');
           return;
         } else {
           Get.offNamed('/navigation');

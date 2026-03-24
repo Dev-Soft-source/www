@@ -395,29 +395,77 @@ class MyVehicleController extends GetxController {
     }
 
     final String rawCarType =
-        vehicle['car_type']?.toString().trim().toLowerCase() ?? "";
-    if (rawCarType.isNotEmpty) {
-      switch (rawCarType) {
-        case 'electric':
-          return labelTextDetail['electric_checkbox_label']?.toString() ??
-              "Electric";
-        case 'hybrid':
-          return labelTextDetail['hybrid_checkbox_label']?.toString() ??
-              "Hybrid";
-        case 'gas':
-          return labelTextDetail['gas_checkbox_label']?.toString() ?? "Gas";
-      }
-    }
+        vehicle['power_type']?.toString().trim().toLowerCase() ?? "";
+    // if (rawCarType.isNotEmpty) {
+    //   switch (rawCarType) {
+    //     case 'electric':
+    //       return labelTextDetail['electric_checkbox_label']?.toString() ??
+    //           "Electric";
+    //     case 'hybrid':
+    //       return labelTextDetail['hybrid_checkbox_label']?.toString() ??
+    //           "Hybrid";
+    //     case 'gas':
+    //       return labelTextDetail['gas_checkbox_label']?.toString() ?? "Gas";
+    //   }
+    // }
 
-    final String vehicleTypeId = vehicle['type']?.toString().trim() ?? "";
-    if (vehicleTypeId.isNotEmpty) {
-      final int index = vehicleTypeList.indexOf(vehicleTypeId);
-      if (index >= 0 && index < vehicleTypeLabelList.length) {
-        return vehicleTypeLabelList[index].toString();
-      }
-    }
+    // final String vehicleTypeId = vehicle['type']?.toString().trim() ?? "";
+    // if (vehicleTypeId.isNotEmpty) {
+    //   final int index = vehicleTypeList.indexOf(vehicleTypeId);
+    //   if (index >= 0 && index < vehicleTypeLabelList.length) {
+    //     return vehicleTypeLabelList[index].toString();
+    //   }
+    // }
 
     return rawCarType.isNotEmpty ? rawCarType : "";
+  }
+
+  bool isPrimaryVehicle(dynamic vehicle) {
+    if (vehicle is! Map) {
+      return false;
+    }
+    return vehicle['primary_vehicle']?.toString() == "1";
+  }
+
+  void upsertVehicleInList(dynamic rawVehicle) {
+    if (rawVehicle is! Map) {
+      return;
+    }
+
+    final updatedVehicle = Map<String, dynamic>.from(rawVehicle);
+    final updatedVehicleId = updatedVehicle['id'];
+    final updatedIsPrimary = isPrimaryVehicle(updatedVehicle);
+
+    if (updatedIsPrimary) {
+      for (var i = 0; i < vehicleList.length; i++) {
+        final item = vehicleList[i];
+        if (item is Map) {
+          final normalized = Map<String, dynamic>.from(item);
+          normalized['primary_vehicle'] =
+              normalized['id'] == updatedVehicleId ? "1" : "0";
+          vehicleList[i] = normalized;
+        }
+      }
+    }
+
+    final existingIndex =
+        vehicleList.indexWhere((element) => element['id'] == updatedVehicleId);
+
+    if (existingIndex != -1) {
+      vehicleList.removeAt(existingIndex);
+    }
+
+    if (updatedIsPrimary) {
+      vehicleList.insert(0, updatedVehicle);
+      setPrimary.value = "no";
+      return;
+    }
+
+    if (existingIndex != -1 && existingIndex <= vehicleList.length) {
+      vehicleList.insert(existingIndex, updatedVehicle);
+    } else {
+      vehicleList.add(updatedVehicle);
+    }
   }
 
   void paginateVehicleList() {
@@ -573,8 +621,8 @@ class MyVehicleController extends GetxController {
             scrollField = true;
           }
         }
-        if (resp['errors']['car_type'] != null) {
-          var err = {'title': "car_type", 'eList': resp['errors']['car_type']};
+        if (resp['errors']['power_type'] != null) {
+          var err = {'title': "power_type", 'eList': resp['errors']['power_type']};
           errors.add(err);
           if (scrollField == false) {
             scrollError(context, 7, screenHeight);
@@ -587,21 +635,7 @@ class MyVehicleController extends GetxController {
         }
       } else if (resp['status'] != null && resp['status'] == "Success") {
         if (resp['data']['vehicle'] != null) {
-          if (vehicleId.value != 0) {
-            vehicleList
-                .removeWhere((element) => element['id'] == vehicleId.value);
-          }
-          if (resp['data']['vehicle']['primary_vehicle'] == "1") {
-            if (vehicleList.isNotEmpty) {
-              vehicleList.add(vehicleList[0]);
-              vehicleList[0] = resp['data']['vehicle'];
-            } else {
-              vehicleList.add(resp['data']['vehicle']);
-            }
-            setPrimary.value = "no";
-          } else {
-            vehicleList.add(resp['data']['vehicle']);
-          }
+          upsertVehicleInList(resp['data']['vehicle']);
         }
         vehicleList.refresh();
         Get.back();
@@ -751,7 +785,7 @@ class MyVehicleController extends GetxController {
               vehicle['license_no']?.toString() ?? "";
           colorTextEditingController.text = vehicle['color']?.toString() ?? "";
           yearTextEditingController.text = vehicle['year']?.toString() ?? "";
-          fuel.value = vehicle['car_type']?.toString() ?? "";
+          fuel.value = vehicle['power_type']?.toString() ?? "";
           vehicleType.value = vehicle['type']?.toString() ?? "";
           oldCarImagePath.value = vehicle['image']?.toString() ?? "";
           oldCarImagePathOriginal.value =

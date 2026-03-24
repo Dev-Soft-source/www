@@ -83,7 +83,7 @@ class ProfileVehicleController extends Controller
             'license_no' => 'required|max:8',
             'color' => 'required|max:15',
             'year' => 'required|max:4',
-            'car_type' => 'required',
+            'power_type' => 'required',
             'image' => 'file|mimes:jpeg,png,gif|max:10240',
         ], $customMessages);
 
@@ -96,10 +96,10 @@ class ProfileVehicleController extends Controller
         $userVehicleCount = Vehicle::where('user_id', $user->id)->count();
         if ($userVehicleCount == 0) {
             $primaryVehicle = 1;
-        } elseif (isset($request->primary_vehicle) && $request->primary_vehicle != "") {
+        } elseif ((string) $request->primary_vehicle === '1') {
             // If user is setting this vehicle as primary, clear other vehicles' primary status
             DB::table('vehicles')->where('user_id', $user->id)->update(['primary_vehicle' => 0]);
-            $primaryVehicle = $request->primary_vehicle;
+            $primaryVehicle = 1;
         }
 
         $filename = "";
@@ -128,7 +128,7 @@ class ProfileVehicleController extends Controller
             'license_no' => $request->license_no,
             'color' => $request->color,
             'year' => $request->year,
-            'car_type' => $request->car_type,
+            'power_type' => $request->power_type,
             'image' => $filename,
             'original_image' => $filenameOriginal,
             'remove_image' => $request->remove_image ? $request->remove_image : 0,
@@ -194,20 +194,21 @@ class ProfileVehicleController extends Controller
             'license_no' => 'required|max:8',
             'color' => 'required|max:15',
             'year' => 'required|max:4',
-            'car_type' => 'required',
+            'power_type' => 'required',
         ]);
 
         $user = Auth::guard('sanctum')->user();
-        $primaryVehicle = 0;
 
-        if (isset($request->primary_vehicle) && $request->primary_vehicle != "") {
+        // Preserve the current primary flag unless the request explicitly
+        // promotes this vehicle to primary.
+        $vehicle = Vehicle::whereId($request->id)->first();
+        $primaryVehicle = $vehicle?->primary_vehicle ?? 0;
+
+        if ((string) $request->primary_vehicle === '1') {
             // Only update vehicles belonging to this user (not all vehicles)
             DB::table('vehicles')->where('user_id', $user->id)->update(['primary_vehicle' => 0]);
             $primaryVehicle = 1;
         }
-
-        // Get vehicle before update to access old image paths
-        $vehicle = Vehicle::whereId($request->id)->first();
 
         // Handle image removal if requested
         if (isset($request->remove_image) && $request->remove_image == "1") {
@@ -247,7 +248,7 @@ class ProfileVehicleController extends Controller
             'license_no' => $request->license_no,
             'color' => $request->color,
             'year' => $request->year,
-            'car_type' => $request->car_type,
+            'power_type' => $request->power_type,
             'primary_vehicle' => $primaryVehicle
         ]);
 

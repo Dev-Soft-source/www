@@ -924,9 +924,9 @@ class Service extends GetxService {
               } else if (page == "step2") {
                 await Get.offAllNamed('/stage_two');
               } else if (page == "step3") {
-                await Get.offAllNamed('/stage_three_vehicle');
+                await Get.offAllNamed('/stage_three');
               } else if (page == "step4") {
-                await Get.offAllNamed('/stage_four_vehicle');
+                await Get.offAllNamed('/stage_four');
               } else {
                 await Get.offAllNamed('/navigation');
               }
@@ -949,9 +949,9 @@ class Service extends GetxService {
           } else if (page == "step2") {
             Get.offAllNamed('/stage_two');
           } else if (page == "step3") {
-            Get.offAllNamed('/stage_three_vehicle');
+            Get.offAllNamed('/stage_three');
           } else if (page == "step4") {
-            Get.offAllNamed('/stage_four_vehicle');
+            Get.offAllNamed('/stage_four');
           } else {
             Get.offAllNamed('/navigation');
           }

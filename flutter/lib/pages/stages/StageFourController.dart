@@ -1,78 +1,45 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/material.dart';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
-import 'package:proximaride_app/consts/color.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:proximaride_app/consts/const_api.dart';
-import 'package:proximaride_app/consts/font.dart';
 import 'package:proximaride_app/helpers/error_state_manager.dart';
-import 'package:proximaride_app/helpers/format_message.dart';
+import 'package:proximaride_app/pages/driver_license/DriverLicenseProvider.dart';
 import 'package:proximaride_app/pages/login/LoginProvider.dart';
-import 'package:proximaride_app/pages/my_phone_number/MyPhoneNumberProvider.dart';
-import 'package:proximaride_app/pages/navigation/NavigationController.dart';
 import 'package:proximaride_app/pages/stages/StageProvider.dart';
-import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import 'package:proximaride_app/services/logger_service.dart';
 import 'package:proximaride_app/services/service.dart';
 
 class StageFourController extends GetxController {
-  var isOverlayLoading = false.obs;
-  var isLoading = false.obs;
   final serviceController = Get.find<Service>();
   final errorStateManager = ErrorStateManager();
-  var errorList = List.empty(growable: true).obs;
-  var errors = [].obs;
   final secureStorage = const FlutterSecureStorage();
-  var stepNo = "0".obs;
-  var finishBtn = false.obs;
-  Timer? timer;
-  var secondsRemaining = 5.obs;
 
-  /// Controls whether phone fields (code + number) are filled enough to proceed.
-  final isPhoneFormValid = false.obs;
+  final isOverlayLoading = false.obs;
+  final isLoading = false.obs;
+  final errors = [].obs;
+  final stepNo = "0".obs;
+  final imageType = 0.obs;
+  final isLicenseFormValid = false.obs;
+  final isLicenseSkipped = false.obs;
 
-  /// Controls whether a verification code has been entered.
-  final isVerificationCodeEntered = false.obs;
+  final labelTextDetail = {}.obs;
+  final validationMessageDetail = {}.obs;
+  final popupTextDetail = {}.obs;
+  final step4MainHeading = "Step 4 of 5 - Driver's License".obs;
 
-  var labelTextDetail = {}.obs;
-  var popupTextDetail = {}.obs;
-  var validationMessageDetail = {}.obs;
-
-  late TextEditingController countryCodeTextEditingController,
-      phoneNumberTextEditingController;
-
-  var verificationCode = "";
+  final driverLicenseName = "".obs;
+  final driverLicensePath = "".obs;
+  final driverLicenseNameOriginal = "".obs;
+  final driverLicensePathOriginal = "".obs;
 
   @override
   void onInit() async {
     super.onInit();
-
-    countryCodeTextEditingController = TextEditingController();
-    phoneNumberTextEditingController = TextEditingController();
-
-    logger.info(
-        "Country Code: ${serviceController.loginUserDetail['country_code']}");
-
-    if (serviceController.loginUserDetail['country_code'].toString() !=
-        "null") {
-      countryCodeTextEditingController.text =
-          (serviceController.loginUserDetail['country_code']).toString();
-    } else {
-      countryCodeTextEditingController.text = "+1";
-    }
-
     stepNo.value = serviceController.loginUserDetail['step'].toString();
-
-    // Re‑validate phone form whenever user edits either field.
-    countryCodeTextEditingController.addListener(validatePhoneFormFields);
-    phoneNumberTextEditingController.addListener(validatePhoneFormFields);
-
-    // Initial validation based on any pre‑filled data.
-    validatePhoneFormFields();
-
-    // Load initial data with error handling
     await loadInitialData();
   }
 
@@ -85,11 +52,11 @@ class StageFourController extends GetxController {
         await _getLanguages();
       }
       await _getLabelTextDetail();
+      validateLicenseFields(showError: false);
 
       errorStateManager.setSuccess();
       isLoading(false);
     } on SocketException {
-      logger.error("Network error in loadInitialData: SocketException");
       isLoading(false);
       errorStateManager.setError(
         "No internet connection. Please check your network and try again.",
@@ -97,7 +64,6 @@ class StageFourController extends GetxController {
         loadInitialData,
       );
     } on TimeoutException {
-      logger.error("Timeout error in loadInitialData");
       isLoading(false);
       errorStateManager.setError(
         "Request timed out. Please check your connection and try again.",
@@ -105,7 +71,6 @@ class StageFourController extends GetxController {
         loadInitialData,
       );
     } catch (error) {
-      logger.error("Error in loadInitialData: $error");
       isLoading(false);
 
       if (error is Map &&
@@ -114,14 +79,6 @@ class StageFourController extends GetxController {
         errorStateManager.setError(
           error["message"],
           _parseErrorType(error["type"]),
-          loadInitialData,
-        );
-      } else if (error.toString().contains("SocketException") ||
-          error.toString().contains("Network is unreachable") ||
-          error.toString().contains("Connection refused")) {
-        errorStateManager.setError(
-          "No internet connection. Please check your network and try again.",
-          ErrorType.network,
           loadInitialData,
         );
       } else {
@@ -145,27 +102,6 @@ class StageFourController extends GetxController {
     }
   }
 
-  @override
-  void onClose() {
-    super.onClose();
-    countryCodeTextEditingController.dispose();
-    phoneNumberTextEditingController.dispose();
-  }
-
-  /// Lightweight client‑side validation for phone fields to drive button state.
-  /// This does not add errors or show dialogs; it only toggles `isPhoneFormValid`.
-  void validatePhoneFormFields() {
-    final hasCode = countryCodeTextEditingController.text.trim().isNotEmpty;
-    final hasNumber = phoneNumberTextEditingController.text.trim().isNotEmpty;
-    isPhoneFormValid.value = hasCode && hasNumber;
-  }
-
-  /// Keeps `verificationCode` and `isVerificationCodeEntered` in sync.
-  void updateVerificationCodeEntered(String code) {
-    verificationCode = code;
-    isVerificationCodeEntered.value = verificationCode.trim().isNotEmpty;
-  }
-
   Future<void> _getLanguages() async {
     try {
       final resp = await LoginProvider().getLanguages();
@@ -176,7 +112,7 @@ class StageFourController extends GetxController {
           serviceController.languages.addAll(resp['data']['languages']);
 
           if (serviceController.langId.value == 0) {
-            var getDefaultLanguage = serviceController.languages
+            final getDefaultLanguage = serviceController.languages
                 .firstWhereOrNull((element) => element['is_default'] == "1");
             if (getDefaultLanguage != null) {
               serviceController.langId.value =
@@ -184,7 +120,7 @@ class StageFourController extends GetxController {
             }
           }
 
-          var getLanguage = serviceController.languages.firstWhereOrNull(
+          final getLanguage = serviceController.languages.firstWhereOrNull(
               (element) => element['id'] == serviceController.langId.value);
           if (getLanguage != null) {
             serviceController.langIcon.value = getLanguage['flag_icon'];
@@ -223,15 +159,13 @@ class StageFourController extends GetxController {
   Future<void> _getLabelTextDetail() async {
     try {
       final resp = await StageProvider().getLabelTextDetail(
-          serviceController.langId.value, step5Page, serviceController.token);
+          serviceController.langId.value, step4Page, serviceController.token);
 
       if (resp['status'] != null && resp['status'] == "Success") {
-        if (resp['data'] != null && resp['data']['step5Page'] != null) {
-          labelTextDetail.addAll(resp['data']['step5Page']);
-        }
-
-        if (resp['data'] != null && resp['data']['messages'] != null) {
-          popupTextDetail.addAll(resp['data']['messages']);
+        if (resp['data'] != null && resp['data']['step4Page'] != null) {
+          labelTextDetail.addAll(resp['data']['step4Page']);
+          step4MainHeading.value = labelTextDetail['main_heading'] ??
+              "Step 4 of 5 - Driver's License";
         }
 
         if (resp['data'] != null &&
@@ -239,7 +173,11 @@ class StageFourController extends GetxController {
           validationMessageDetail.addAll(resp['data']['validationMessages']);
         }
 
-        var getLanguage = serviceController.languages.firstWhereOrNull(
+        if (resp['data'] != null && resp['data']['messages'] != null) {
+          popupTextDetail.addAll(resp['data']['messages']);
+        }
+
+        final getLanguage = serviceController.languages.firstWhereOrNull(
             (element) => element['id'] == serviceController.langId.value);
         if (getLanguage != null) {
           serviceController.langIcon.value = getLanguage['flag_icon'];
@@ -274,368 +212,132 @@ class StageFourController extends GetxController {
     }
   }
 
-  void startTimer() {
-    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (secondsRemaining.value == 0) {
-        timer.cancel();
-      }
-      if (secondsRemaining.value > 0) {
-        secondsRemaining.value--;
-      }
-    });
-  }
-
-  setStageFour(skip) async {
-    errors.clear();
-    try {
-      logger.info("setStageFour called with skip= $skip");
-      logger.info(
-          "countryCodeTextEditingController.text= ${countryCodeTextEditingController.text}");
-      logger.info(
-          "phoneNumberTextEditingController.text= ${phoneNumberTextEditingController.text}");
-      if (skip == false) {
-        logger.info(
-            "countryCodeTextEditingController.text is empty: ${countryCodeTextEditingController.text == ""}");
-        logger.info(
-            "phoneNumberTextEditingController.text is empty: ${phoneNumberTextEditingController.text == ""}");
-        if (countryCodeTextEditingController.text == "" ||
-            phoneNumberTextEditingController.text == "") {
-          logger.info("inside if");
-          if (countryCodeTextEditingController.text == "") {
-            var message = validationMessageDetail['required'];
-            message = message.replaceAll(
-                ":Attribute", labelTextDetail['country_code_error'] ?? 'Code');
-            var err = {
-              'title': "code",
-              'eList': [message ?? 'Code is required']
-            };
-            errors.add(err);
-          }
-          if (phoneNumberTextEditingController.text == "") {
-            var message = validationMessageDetail['required'];
-            message = message.replaceAll(
-                ":Attribute", labelTextDetail['phone_error'] ?? 'Phone number');
-            var err = {
-              'title': "number",
-              'eList': [message ?? 'Number is required']
-            };
-            errors.add(err);
-          }
-
-          return;
-        }
-      }
-      isOverlayLoading(true);
-      StageProvider()
-          .setStageFour(
-              "${countryCodeTextEditingController.text} ${phoneNumberTextEditingController.text}",
-              serviceController.token,
-              skip == true ? "1" : "0")
-          .then((resp) async {
-        logger.info("setStageFour response: $resp");
-        // if (resp['status'] != null && resp['status'] == "Success") {
-        //   serviceController.loginUserDetail['step'] = "5";
-        //   serviceController.loginUserDetail.refresh();
-        //   serviceController.secureStorage.write(
-        //       key: "userInfo",
-        //       value: jsonEncode(serviceController.loginUserDetail));
-        //   stepNo.value = serviceController.loginUserDetail['step'].toString();
-        //   countryCodeTextEditingController.text = "";
-        //   phoneNumberTextEditingController.text = "";
-        //   // serviceController
-        //   //     .showDialogue("Your profile is all set. Welcome to ProximaRide!");
-        //   Get.offAllNamed('/navigation');
-        //   Get.defaultDialog(
-        //     title: "Welcome!",
-        //     titlePadding: const EdgeInsets.symmetric(vertical: 12),
-        //     contentPadding:
-        //         const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        //     radius: 10,
-        //     barrierDismissible: false,
-        //     titleStyle: const TextStyle(
-        //       fontSize: 22,
-        //       fontWeight: FontWeight.bold,
-        //     ),
-        //     middleText: "Your profile is all set. Welcome to ProximaRide!",
-        //     middleTextStyle: const TextStyle(
-        //       fontSize: 18,
-        //       fontWeight: FontWeight.normal,
-        //     ),
-        //     actions: [
-        //       ElevatedButton(
-        //         onPressed: () {
-        //           Get.back();
-        //         },
-        //         style: ElevatedButton.styleFrom(
-        //           backgroundColor: btnPrimaryColor,
-        //           shape: RoundedRectangleBorder(
-        //             borderRadius: BorderRadius.circular(5),
-        //           ),
-        //         ),
-        //         child: txt16SizeWithOutContext(
-        //           title: "Close",
-        //           textColor: Colors.white,
-        //           fontFamily: regular,
-        //         ),
-        //       ),
-        //     ],
-        //   );
-
-        if (resp['status'] != null && resp['status'] == "Success") {
-          serviceController.loginUserDetail['step'] = "5";
-          serviceController.loginUserDetail.refresh();
-          serviceController.secureStorage.write(
-            key: "userInfo",
-            value: jsonEncode(serviceController.loginUserDetail),
-          );
-          stepNo.value = serviceController.loginUserDetail['step'].toString();
-          countryCodeTextEditingController.text = "";
-          phoneNumberTextEditingController.text = "";
-
-          if (skip) {
-            await Get.defaultDialog(
-              title: "Important!",
-              titlePadding: const EdgeInsets.symmetric(vertical: 12),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              radius: 10,
-              barrierDismissible: false,
-              titleStyle: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-              middleText: formatMessage(
-                  "Please keep in mind that you are not permitted to use Pink Rides and Extra-Care Rides until you verify your phone number."),
-              middleTextStyle: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.normal,
-              ),
-              actions: [
-                ElevatedButton(
-                  onPressed: () {
-                    Get.back(); // closes dialog
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: btnPrimaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-                  child: txt16SizeWithOutContext(
-                    title: "Noted",
-                    textColor: Colors.white,
-                    fontFamily: regular,
-                  ),
-                ),
-              ],
-            );
-          } else {
-            await Get.defaultDialog(
-              title: "Important!",
-              titlePadding: const EdgeInsets.symmetric(vertical: 12),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              radius: 10,
-              barrierDismissible: false,
-              titleStyle: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-              middleText: formatMessage(
-                  "Your phone number is saved Unverified. Keep in mind that you are not permitted to use Pink Rides and Extra-Care Rides until you verify it."),
-              middleTextStyle: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.normal,
-              ),
-              actions: [
-                ElevatedButton(
-                  onPressed: () {
-                    Get.back(); // closes dialog
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: btnPrimaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-                  child: txt16SizeWithOutContext(
-                    title: "Noted",
-                    textColor: Colors.white,
-                    fontFamily: regular,
-                  ),
-                ),
-              ],
-            );
-          }
-
-          await Get.defaultDialog(
-            title: "Welcome to ProximaRide!",
-            titlePadding: const EdgeInsets.symmetric(vertical: 12),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            radius: 10,
-            barrierDismissible: false,
-            titleStyle: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-            middleText: "Your profile is all set. Let’s get started.",
-            middleTextStyle: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.normal,
-            ),
-            actions: [
-              ElevatedButton(
-                onPressed: () {
-                  Get.back(); // closes dialog
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: btnPrimaryColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                ),
-                child: txt16SizeWithOutContext(
-                  title: "OK",
-                  textColor: Colors.white,
-                  fontFamily: regular,
-                ),
-              ),
-            ],
-          );
-
-          Get.put(NavigationController()); // register if not already done
-          Get.offAllNamed('/navigation');
-
-          if (skip == false) {
-            // serviceController.showDialogue(resp['message'].toString());
-          }
-        } else if (resp['status'] != null && resp['status'] == "Error") {
-          serviceController.showDialogue(resp['message'].toString(),
-              type: "error");
-        }
-        isOverlayLoading(false);
-      }, onError: (error) {
-        serviceController.showDialogue(error.toString(), type: "error");
-        isOverlayLoading(false);
-      });
-    } catch (exception) {
-      serviceController.showDialogue(exception.toString(), type: "error");
-      isOverlayLoading(false);
-    }
-  }
-
-  sendVerificationCode({phoneId = "0"}) {
-    String phoneNumber = "";
-    errors.clear();
-    if (phoneId == "0") {
-      if (countryCodeTextEditingController.text == "" ||
-          phoneNumberTextEditingController.text == "") {
-        var message = validationMessageDetail['required'];
-        message = message.replaceAll(":Attribute",
-            labelTextDetail['phone_error'] ?? 'Code and phone number');
-        var err = {
-          'title': "number",
-          'eList': [message ?? 'Code and phone number field is required']
-        };
-        errors.add(err);
-        return;
-      }
-    }
-    phoneNumber = countryCodeTextEditingController.text +
-        phoneNumberTextEditingController.text;
-    serviceController.showDialogue('Verification code sent to your phone.',
-        type: "info");
-    MyPhoneNumberProvider()
-        .sendVerificationCode(serviceController.token, phoneNumber, phoneId);
-    secondsRemaining.value = 10;
-    startTimer();
-    finishBtn.value = true;
-    //Get.toNamed('/phone_number_verification');
-  }
-
-  verifyPhoneNumber() async {
-    if (verificationCode == "") {
-      serviceController.showDialogue(
-          "${popupTextDetail['enter_code_message'] ?? "Please enter code first"}",
-          type: "warning");
+  void getImage(ImageSource imageSource) async {
+    final croppedFile = await serviceController.imageCropper(imageSource);
+    if (croppedFile == null) {
       return;
     }
 
-    isOverlayLoading(true);
+    driverLicensePath.value = croppedFile.path;
+    driverLicenseName.value = croppedFile.path.split('/').last;
+    driverLicensePathOriginal.value = serviceController.originalImagePath.value;
+    serviceController.originalImagePath.value = "";
+    driverLicenseNameOriginal.value = serviceController.originalImageName.value;
+    serviceController.originalImageName.value = "";
+
+    errors.removeWhere((element) => element['title'] == "driver_license");
+    validateLicenseFields(showError: false);
+    Get.back();
+  }
+
+  bool validateLicenseFields({bool showError = true}) {
+    final hasLicense = driverLicensePathOriginal.value.trim().isNotEmpty;
+    isLicenseFormValid.value = hasLicense;
+
+    if (!showError) {
+      return hasLicense;
+    }
+
+    errors.removeWhere((element) => element['title'] == "driver_license");
+    if (!hasLicense) {
+      var message = validationMessageDetail['required'];
+      message = (message ?? ":Attribute is required").replaceAll(
+        ":Attribute",
+        labelTextDetail['driver_license_error'] ?? "Driver's License",
+      );
+      errors.add({
+        'title': "driver_license",
+        'eList': [message]
+      });
+    }
+
+    return hasLicense;
+  }
+
+  Future<void> submitFinalForm() async {
+    errors.clear();
+
+    if (!isLicenseSkipped.value && !validateLicenseFields()) {
+      return;
+    }
+
+    if (!isLicenseSkipped.value && driverLicensePathOriginal.value.isNotEmpty) {
+      final file = File(driverLicensePathOriginal.value);
+      final sizeInMb = file.lengthSync() / (1024 * 1024);
+      if (sizeInMb > 10) {
+        var message = validationMessageDetail['max.file'] ??
+            validationMessageDetail['file'];
+        message = (message ?? "Can not upload image size greater than :max MB")
+            .replaceAll(
+                ":attribute",
+                labelTextDetail['driver_license_error'] ??
+                    "driver license")
+            .replaceAll(":Attribute",
+                labelTextDetail['driver_license_error'] ?? "driver license")
+            .replaceAll(":max", "10");
+        errors.add({
+          'title': "driver_license",
+          'eList': [message]
+        });
+        return;
+      }
+    }
+
     try {
-      final resp = await MyPhoneNumberProvider()
-          .verifyPhone(serviceController.token, verificationCode);
-      if (resp['status'] != null && resp['status'] == "Success") {
-        await _setPrimaryPhoneFromResponse(resp['data']);
-        serviceController.loginUserDetail['step'] = "5";
-        serviceController.loginUserDetail.refresh();
-        serviceController.secureStorage.write(
-            key: "userInfo",
-            value: jsonEncode(serviceController.loginUserDetail));
-        stepNo.value = serviceController.loginUserDetail['step'].toString();
-        verificationCode = "";
-        await Get.defaultDialog(
-          title: "Welcome!",
-          titlePadding: const EdgeInsets.symmetric(vertical: 12),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          radius: 10,
-          barrierDismissible: false,
-          titleStyle: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
-          middleText: "Your profile is all set. Welcome to ProximaRide!",
-          middleTextStyle: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.normal,
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Get.back(); // closes dialog
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: btnPrimaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                ),
-              ),
-              child: txt16SizeWithOutContext(
-                title: "Close",
-                textColor: Colors.white,
-                fontFamily: regular,
-              ),
-            ),
-          ],
-        );
-        Get.put(NavigationController());
-        Get.offAllNamed('/navigation');
+      isOverlayLoading(true);
+
+      dynamic resp;
+
+      if (isLicenseSkipped.value) {
+        resp = {'status': 'Success'};
       } else {
+        resp = await DriverLicenseProvider().updateDriverLicense(
+          driverLicenseName.value,
+          driverLicensePath.value,
+          driverLicenseNameOriginal.value,
+          driverLicensePathOriginal.value,
+          serviceController.token,
+          serviceController.loginUserDetail['id'],
+        );
+      }
+
+      if (resp['status'] != null && resp['status'] == "Error") {
         serviceController.showDialogue(resp['message'].toString(),
             type: "error");
+      } else if (resp['errors'] != null) {
+        final licenseErrors = resp['errors']['driver_liscense'] ??
+            resp['errors']['driver_license_original_upload'] ??
+            resp['errors']['driver_license'];
+        if (licenseErrors != null) {
+          errors.add({
+            'title': "driver_license",
+            'eList': List<String>.from(licenseErrors)
+          });
+        }
+      } else if (resp['status'] != null && resp['status'] == "Success") {
+        if (!isLicenseSkipped.value && resp['data']?['user'] != null) {
+          serviceController.loginUserDetail['driver_liscense'] =
+              resp['data']['user']['driver_liscense']?.toString() ?? "";
+        }
+        serviceController.loginUserDetail.refresh();
+        await secureStorage.write(
+          key: "userInfo",
+          value: jsonEncode(serviceController.loginUserDetail),
+        );
+
+        stepNo.value = serviceController.loginUserDetail['step'].toString();
+        Get.toNamed('/stage_five');
+      } else {
+        serviceController.showDialogue(
+          resp['message']?.toString() ?? "Unable to continue to the next step.",
+          type: "error",
+        );
       }
     } catch (error) {
+      logger.error("Stage four submit failed: $error");
       serviceController.showDialogue(error.toString(), type: "error");
     } finally {
       isOverlayLoading(false);
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> _setPrimaryPhoneFromResponse(dynamic data) async {
-    try {
-      final phoneId = data?['phone_number']?['id']?.toString() ??
-          data?['phone_number_id']?.toString();
-      if (phoneId == null || phoneId.isEmpty) {
-        return;
-      }
-      await MyPhoneNumberProvider()
-          .setAsDefaultNumber(serviceController.token, phoneId);
-    } catch (error) {
-      logger.warning(
-          'Failed to auto-set primary phone during stage four: $error');
     }
   }
 }

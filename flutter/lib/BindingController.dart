@@ -35,7 +35,7 @@ import 'package:proximaride_app/pages/search_ride/SearchRideController.dart';
 import 'package:proximaride_app/pages/signup/RegisterController.dart';
 import 'package:proximaride_app/pages/splash/SplashController.dart';
 import 'package:proximaride_app/pages/stages/StageController.dart';
-import 'package:proximaride_app/pages/stages/StageFourController.dart';
+import 'package:proximaride_app/pages/stages/StageFiveController.dart';
 import 'package:proximaride_app/pages/stages/StageThreeController.dart';
 import 'package:proximaride_app/pages/stages/StageTowController.dart';
 import 'package:proximaride_app/pages/student_card/StudentCardController.dart';
@@ -85,7 +85,7 @@ class BindingController implements Bindings{
     Get.lazyPut<StageController>(() => StageController());
     Get.lazyPut<StageTowController>(() => StageTowController());
     Get.lazyPut<StageThreeController>(() => StageThreeController());
-    Get.lazyPut<StageFourController>(() => StageFourController());
+    Get.lazyPut<StageFiveController>(() => StageFiveController());
     Get.lazyPut<LocationController>(() => LocationController());
     Get.lazyPut<NotificationAddReviewController>(() => NotificationAddReviewController());
     Get.lazyPut<ThankYouController>(() => ThankYouController());
