@@ -14,6 +14,7 @@ use App\Traits\StatusResponser;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class VerifyDriverController extends Controller
@@ -51,7 +52,7 @@ class VerifyDriverController extends Controller
             'max' => 'Can not upload image size greater than 10MB',
         ];
         $request->validate([
-            'driver_liscense' => 'required|file|mimes:pdf,jpeg,png,gif|max:10240',
+            'driver_liscense' => 'required|file|mimes:pdf,jpeg,jpg,png,gif|max:10240',
         ], $customMessages);
 
         $userId = $request->id ?? Auth::guard('sanctum')->id();
@@ -61,13 +62,15 @@ class VerifyDriverController extends Controller
             $file = $request->file('driver_liscense');
             $filename = $file->getClientOriginalName();
             $destination_path = public_path('/driver_liscenses');
+            if (!is_dir($destination_path)) {
+                mkdir($destination_path, 0755, true);
+            }
             $file->move($destination_path,$filename);
 
             $fileOriginal = $request->file('driver_license_original_upload');
             $filenameOriginal = $filename;
             if ($fileOriginal) {
                 $filenameOriginal = $fileOriginal->getClientOriginalName();
-                $destination_path = public_path('/driver_liscenses');
                 $fileOriginal->move($destination_path,$filenameOriginal);
             }
 
@@ -94,7 +97,14 @@ class VerifyDriverController extends Controller
                 'driver_liscense' => $user->driver_liscense,
                 'upload_date' => \Carbon\Carbon::now()->format('M d, Y H:i:s'),
             ];
-            Mail::to($admin->admin_email)->queue(new DriverLicenseUploadMail($data));
+            try {
+                Mail::to($admin->admin_email)->queue(new DriverLicenseUploadMail($data));
+            } catch (\Throwable $exception) {
+                Log::warning('Driver license upload email queue failed', [
+                    'user_id' => $userId,
+                    'message' => $exception->getMessage(),
+                ]);
+            }
         }
 
         $message = null;
