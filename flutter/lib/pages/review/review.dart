@@ -27,7 +27,7 @@ class ReviewPage extends GetView<ReviewController> {
                         : "",
                 context: context),
           ),
-          leading: const BackButton(color: Colors.white),
+          leading: safeBackButton(context),
         ),
         body: Obx(() {
           if (controller.errorStateManager.isLoading.value) {

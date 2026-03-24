@@ -28,7 +28,7 @@ class TripDetailProvider extends GetConnect {
             'Authorization': 'Bearer $token',
           });
 
-      logger.info("Get Trip Detail Response: ${response.body.toString()}");
+      logger.info("Get Trip Detail Response:${queryParams} ${response.body.toString()}");
 
       if (response.status.hasError) {
         if (response.status.connectionError) {

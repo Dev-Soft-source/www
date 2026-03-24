@@ -22,7 +22,18 @@ class MyVehiclePage extends GetView<MyVehicleController> {
             title:
                 "${controller.labelTextDetail['main_heading'] ?? "My vehicles"}",
             context: context)),
-        leading: const BackButton(color: Colors.white),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            if (Get.key.currentState?.canPop() ?? false) {
+              Get.back();
+            } else if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              Get.offNamed('/profile_setting');
+            }
+          },
+        ),
       ),
       body: SafeArea(
         child: Obx(() {
@@ -109,14 +120,16 @@ class MyVehiclePage extends GetView<MyVehicleController> {
                                               // License number: 20px body
                                               txt20Size(
                                                   title:
-                                                      "${controller.vehicleList[i]['liscense_no']}",
+                                                      "${controller.vehicleList[i]['license_no']}",
                                                   textColor: textColor,
                                                   context: context,
                                                   fontFamily: regular),
                                               // Car type: 20px body
                                               txt20Size(
                                                   title:
-                                                      "${controller.vehicleList[i]['car_type']}",
+                                                      controller.getVehicleCardTypeLabel(
+                                                          controller
+                                                              .vehicleList[i]),
                                                   textColor: textColor,
                                                   context: context,
                                                   fontFamily: regular)
@@ -194,7 +207,7 @@ class MyVehiclePage extends GetView<MyVehicleController> {
                         textWidget: txt22Size(
                             title: controller.vehicleList.isEmpty
                                 ? "${controller.labelTextDetail['add_vehicle_button_text'] ?? "Add Vehicle"}"
-                                : "Add a New Vehicle",
+                                : "${controller.labelTextDetail['add_vehicle_button_text'] ?? "Add Vehicle"}",
                             textColor: Colors.white,
                             context: context,
                             fontFamily: regular),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/pages/profile_photo/ProfilePhotoController.dart';
 import 'package:proximaride_app/pages/widgets/button_Widget.dart';
+import 'package:proximaride_app/pages/widgets/app_html_text.dart';
 import 'package:proximaride_app/pages/widgets/image_upload_bottom_sheet.dart';
 import 'package:proximaride_app/pages/widgets/image_upload_widget.dart';
 import 'package:proximaride_app/pages/widgets/network_cache_image_widget.dart';
@@ -27,7 +28,7 @@ class ProfilePhotoPage extends GetView<ProfilePhotoController> {
               title:
                   "${controller.labelTextDetail['main_heading'] ?? "Profile photo"}",
               context: context)),
-          leading: const BackButton(color: Colors.white),
+          leading: safeBackButton(context),
         ),
         body: SafeArea(
           child: Obx(() {
@@ -49,11 +50,12 @@ class ProfilePhotoPage extends GetView<ProfilePhotoController> {
                         mobile: 15.0,
                         tablet: 15.0,
                       )),
-                      child: Stack(
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.only(bottom: 90.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                               // txt20Size(
                               //     title:
                               //         "${controller.labelTextDetail['mobile_indicate_required_field_label'] ?? "* Indicates required fields"}",
@@ -119,10 +121,12 @@ class ProfilePhotoPage extends GetView<ProfilePhotoController> {
                               // ),
                               // 15.heightBox,
                               // Main explanatory text: 20px body
-                              txt20Size(
-                                  title:
-                                      "${controller.labelTextDetail['sub_heading_text'] ?? "If you are signing up as a driver, then please note that to be eligible to post Pink Rides and Extra-Care Rides, you must upload your profile photo"}",
-                                  context: context),
+                              AppHtmlText(
+                                data:
+                                    "${controller.labelTextDetail['sub_heading_text'] ?? "If you are signing up as a driver, then please note that to be eligible to post Pink Rides and Extra-Care Rides, you must upload your profile photo"}",
+                                fontSize: 20,
+                                fontFamily: regular,
+                              ),
 
                               15.heightBox,
                               Row(
@@ -153,7 +157,8 @@ class ProfilePhotoPage extends GetView<ProfilePhotoController> {
                                   onTap: () {
                                     controller
                                             .serviceController.showImage.value =
-                                        controller.profileImagePathOld.value;
+                                        controller
+                                            .profileImagePathOriginalOld.value;
 
                                     logger.info(controller
                                         .profileImagePathOriginalOld.value);
@@ -233,9 +238,8 @@ class ProfilePhotoPage extends GetView<ProfilePhotoController> {
                                       btnColor: primaryColor),
                                 )
                               ],
-                            ],
-                          ),
-                        ],
+                          ],
+                        ),
                       )),
                   Align(
                     alignment: Alignment.bottomCenter,
@@ -270,3 +274,4 @@ class ProfilePhotoPage extends GetView<ProfilePhotoController> {
         ));
   }
 }
+

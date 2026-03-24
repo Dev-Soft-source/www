@@ -446,6 +446,50 @@ class Controller extends BaseController
         return $groups;
     }
 
+    protected function resolveApiLanguage($langId = null): ?Language
+    {
+        if (!empty($langId)) {
+            $language = Language::find($langId);
+            if ($language) {
+                return $language;
+            }
+        }
+
+        if ($this->selectedLanguage) {
+            return $this->selectedLanguage;
+        }
+
+        return $this->defaultLang ?: Language::where('is_default', 1)->first();
+    }
+
+    protected function getApiSuccessMessage(?Language $language = null)
+    {
+        $language = $language ?: $this->selectedLanguage;
+
+        if (!$language) {
+            return $this->successMessage;
+        }
+
+        $defaultLangId = $this->defaultLang?->id ?: $language->id;
+
+        return SuccessMessagesSettingDetail::getByLanguageWithFallback($language->id, $defaultLangId);
+    }
+
+    protected function getApiSuccessMessageFields(array $fields, ?Language $language = null)
+    {
+        $message = $this->getApiSuccessMessage($language);
+
+        if (!$message) {
+            return null;
+        }
+
+        if (empty($fields)) {
+            return $message;
+        }
+
+        return (object) $message->only($fields);
+    }
+
     protected function extractIntermediateStopsForForm(Ride $ride): array
     {
         $originLabel = $ride->detail->departure ?? '';

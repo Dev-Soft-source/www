@@ -242,7 +242,7 @@ class SearchRideResultPage extends StatelessWidget {
                                                     var make = controller.rides[index]['vehicle'] != null ? controller.rides[index]['vehicle']['make'] : controller.rides[index]['make'];
                                                     var model = controller.rides[index]['vehicle'] != null ? controller.rides[index]['vehicle']['model'] : controller.rides[index]['model'];
                                                     var year = controller.rides[index]['vehicle'] != null ? controller.rides[index]['vehicle']['year'] : controller.rides[index]['year'];
-                                                    var licenseNo = controller.rides[index]['vehicle'] != null ? controller.rides[index]['vehicle']['liscense_no'] : controller.rides[index]['license_no'];
+                                                    var licenseNo = controller.rides[index]['vehicle'] != null ? controller.rides[index]['vehicle']['license_no'] : controller.rides[index]['license_no'];
                                                     var carType = controller.rides[index]['vehicle'] != null ? controller.rides[index]['vehicle']['car_type'] : controller.rides[index]['car_type'];
                                                     controller.serviceController.showDialogue("$year,$make,$model\n$licenseNo\n$carType", title: "Vehicle Info");
                                                   },

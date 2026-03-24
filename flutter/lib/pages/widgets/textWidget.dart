@@ -167,16 +167,20 @@ Widget txt22SizeCapitalized(
     String fontFamily = regular,
     Color textColor = textColor,
     context}) {
-  return title.text
+  final textBuilder = title.text
       .size(getValueForScreenType<double>(
         context: context,
         mobile: 22.0,
         tablet: 22.0,
       ))
       .color(textColor)
-      .fontFamily(fontFamily)
-      .capitalize
-      .make();
+      .fontFamily(fontFamily);
+
+  if (title.trim().isEmpty) {
+    return textBuilder.make();
+  }
+
+  return textBuilder.capitalize.make();
 }
 
 Widget txt20Size(

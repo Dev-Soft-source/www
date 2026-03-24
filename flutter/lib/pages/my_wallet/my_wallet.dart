@@ -23,7 +23,7 @@ class MyWallet extends GetView<MyWalletController> {
     Get.put(MyWalletController());
     return Scaffold(
         appBar: AppBar(
-          leading: const BackButton(color: Colors.white),
+          leading: safeBackButton(context),
           title: Obx(() => secondAppBarWidget(
               context: context,
               title:
@@ -838,3 +838,4 @@ class MyWallet extends GetView<MyWalletController> {
         ));
   }
 }
+

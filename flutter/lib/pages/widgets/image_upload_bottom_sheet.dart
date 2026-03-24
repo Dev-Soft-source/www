@@ -28,41 +28,47 @@ imageUploadBottomSheet(controller, context) {
 }
 
 getBottomSheet(controller, context) {
-  return SizedBox(
-    height: 120,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        InkWell(
-          child: Ink(
-            child: Row(
-              children: [
-                Image.asset(cameraImage,
-                    width: 50, height: 50, fit: BoxFit.fill),
-                "Camera".text.sm.semiBold.make()
-              ],
+  final bottomInset = MediaQuery.of(context).padding.bottom;
+
+  return SafeArea(
+    top: false,
+    child: Padding(
+      padding: EdgeInsets.fromLTRB(16, 12, 16, bottomInset > 0 ? bottomInset : 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            child: Ink(
+              child: Row(
+                children: [
+                  Image.asset(cameraImage,
+                      width: 50, height: 50, fit: BoxFit.fill),
+                  "Camera".text.sm.semiBold.make()
+                ],
+              ),
             ),
+            onTap: () async {
+              controller.getImage(ImageSource.camera);
+            },
           ),
-          onTap: () async {
-            controller.getImage(ImageSource.camera);
-          },
-        ),
-        const Divider(),
-        InkWell(
-          child: Ink(
-            child: Row(
-              children: [
-                Image.asset(galleryImage,
-                    width: 50, height: 50, fit: BoxFit.fill),
-                "Gallery".text.sm.semiBold.make()
-              ],
+          const Divider(),
+          InkWell(
+            child: Ink(
+              child: Row(
+                children: [
+                  Image.asset(galleryImage,
+                      width: 50, height: 50, fit: BoxFit.fill),
+                  "Gallery".text.sm.semiBold.make()
+                ],
+              ),
             ),
-          ),
-          onTap: () async {
-            controller.getImage(ImageSource.gallery);
-          },
-        )
-      ],
+            onTap: () async {
+              controller.getImage(ImageSource.gallery);
+            },
+          )
+        ],
+      ),
     ),
   );
 }

@@ -20,7 +20,7 @@ class OldMessages extends GetView<OldMessagesController> {
             context: context,
             title:
                 "${controller.labelTextDetail['old_chat_page_main_heading'] ?? "Old messages"}")),
-        leading: const BackButton(color: Colors.white),
+        leading: safeBackButton(context),
       ),
       body: Obx(() {
         if (controller.errorStateManager.isLoading.value) {
@@ -99,3 +99,4 @@ class OldMessages extends GetView<OldMessagesController> {
     );
   }
 }
+

@@ -20,7 +20,7 @@ class RemovePassengerPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: const BackButton(color: Colors.white),
+        leading: safeBackButton(context),
         //title: Obx(() => secondAppBarWidget(context: context, title:"${controller.labelTextTripDetail['remove_passenger_heading'] ?? "Remove this passenger"}")),
         title: secondAppBarWidget(context: context, title:""),
         backgroundColor: primaryColor,
@@ -235,3 +235,4 @@ class RemovePassengerPage extends StatelessWidget {
     );
   }
 }
+

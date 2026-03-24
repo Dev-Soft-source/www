@@ -16,7 +16,7 @@ class ReviewPassengerPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: const BackButton(color: Colors.white),
+        leading: safeBackButton(context),
         title: Obx(() => secondAppBarWidget(context: context, title: "${controller.labelTextTripDetail['review_passengers_heading'] ?? "Review passengers"}")),
         backgroundColor: primaryColor,
       ),
@@ -134,3 +134,4 @@ class ReviewPassengerPage extends StatelessWidget {
     );
   }
 }
+

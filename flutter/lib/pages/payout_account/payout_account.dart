@@ -27,7 +27,7 @@ class PayoutAccountPage extends GetView<PayoutAccountController> {
               title:
                   "${controller.labelTextDetail['main_heading'] ?? "Payout Options"}",
               context: context),
-          leading: const BackButton(color: Colors.white),
+          leading: safeBackButton(context),
         ),
         body: SafeArea(
           child: Obx(() {
@@ -1091,3 +1091,4 @@ class PayoutAccountPage extends GetView<PayoutAccountController> {
         )));
   }
 }
+

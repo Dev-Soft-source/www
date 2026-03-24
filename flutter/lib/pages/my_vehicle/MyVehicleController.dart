@@ -98,7 +98,7 @@ class MyVehicleController extends GetxController {
             );
           } else if (i == 3) {
             validateField(
-              'liscense_no',
+              'license_no',
               licenseNumberTextEditingController.text,
             );
           } else if (i == 4) {
@@ -190,7 +190,7 @@ class MyVehicleController extends GetxController {
       } else if (fieldName == "model") {
         message = message.replaceAll(
             ":Attribute", labelTextDetail['model_error'] ?? "Model");
-      } else if (fieldName == "liscense_no") {
+      } else if (fieldName == "license_no") {
         message = message.replaceAll(
             ":Attribute", labelTextDetail['license_error'] ?? "License no");
       } else if (fieldName == "color") {
@@ -264,8 +264,10 @@ class MyVehicleController extends GetxController {
         if (resp['data'] != null &&
             resp['data']['vehicleSettingPage'] != null) {
           labelTextDetail.addAll(resp['data']['vehicleSettingPage']);
-          // ... Populate type lists ...
-          _populateVehicleTypes(labelTextDetail); // Extracted helper method
+          _populateVehicleTypes(
+            details: labelTextDetail,
+            vehicleTypeOptions: resp['data']['vehicleTypeOptions'],
+          );
         }
 
         if (resp['data'] != null &&
@@ -282,28 +284,140 @@ class MyVehicleController extends GetxController {
     });
   }
 
-  void _populateVehicleTypes(Map<dynamic, dynamic> details) {
-    vehicleTypeLabelList
-        .add(details['vehicle_type_convertible_text'] ?? "Convertable");
-    vehicleTypeList.add(details['vehicle_type_convertible_value']);
-    vehicleTypeLabelList.add(details['vehicle_type_coupe_text'] ?? "Coupe");
-    vehicleTypeList.add(details['vehicle_type_coupe_value']);
-    vehicleTypeLabelList
-        .add(details['vehicle_type_hatchback_text'] ?? "Hatchback");
-    vehicleTypeList.add(details['vehicle_type_hatchback_value']);
-    vehicleTypeLabelList.add(details['vehicle_type_minivan_text'] ?? "Minivan");
-    vehicleTypeList.add(details['vehicle_type_minivan_value']);
-    vehicleTypeLabelList.add(details['vehicle_type_sedan_text'] ?? "Sedan");
-    vehicleTypeList.add(details['vehicle_type_sedan_value']);
-    vehicleTypeLabelList
-        .add(details['vehicle_type_station_wagon_text'] ?? "Station wagon");
-    vehicleTypeList.add(details['vehicle_type_station_wagon_value']);
-    vehicleTypeLabelList.add(details['vehicle_type_suv_text'] ?? "SUV");
-    vehicleTypeList.add(details['vehicle_type_suv_value']);
-    vehicleTypeLabelList.add(details['vehicle_type_truck_text'] ?? "Truck");
-    vehicleTypeList.add(details['vehicle_type_truck_value']);
-    vehicleTypeLabelList.add(details['vehicle_type_van_text'] ?? "Van");
-    vehicleTypeList.add(details['vehicle_type_van_value']);
+  void _populateVehicleTypes({
+    required Map<dynamic, dynamic> details,
+    dynamic vehicleTypeOptions,
+  }) {
+    vehicleTypeList.clear();
+    vehicleTypeLabelList.clear();
+
+    final normalizedVehicleTypeOptions = vehicleTypeOptions is List
+        ? vehicleTypeOptions
+        : vehicleTypeOptions is Map
+            ? vehicleTypeOptions.values.toList()
+            : vehicleTypeOptions is Iterable
+                ? vehicleTypeOptions.toList()
+                : const [];
+
+// logger.info('normalizedVehicleTypeOptions ${normalizedVehicleTypeOptions}');
+    if (normalizedVehicleTypeOptions.isNotEmpty) {
+      final seenValues = <String>{};
+      for (final option in normalizedVehicleTypeOptions) {
+        if (option is! Map) {
+          continue;
+        }
+
+        final value = option['features_setting_id']?.toString() ??
+            option['id']?.toString() ??
+            "";
+        final label = option['name']?.toString() ??
+            option['label']?.toString() ??
+            option['slug']?.toString() ??
+            "";
+
+        if (value.isEmpty || label.isEmpty || seenValues.contains(value)) {
+          continue;
+        }
+
+        seenValues.add(value);
+        vehicleTypeList.add(value);
+        vehicleTypeLabelList.add(label);
+      }
+
+      if (vehicleType.value.isNotEmpty &&
+          !vehicleTypeList.contains(vehicleType.value)) {
+        vehicleType.value = "";
+      }
+      return;
+    }
+
+    final options = [
+      {
+        'label': details['vehicle_type_convertible_text'] ?? "Convertable",
+        'value': details['vehicle_type_convertible_value'],
+      },
+      {
+        'label': details['vehicle_type_coupe_text'] ?? "Coupe",
+        'value': details['vehicle_type_coupe_value'],
+      },
+      {
+        'label': details['vehicle_type_hatchback_text'] ?? "Hatchback",
+        'value': details['vehicle_type_hatchback_value'],
+      },
+      {
+        'label': details['vehicle_type_minivan_text'] ?? "Minivan",
+        'value': details['vehicle_type_minivan_value'],
+      },
+      {
+        'label': details['vehicle_type_sedan_text'] ?? "Sedan",
+        'value': details['vehicle_type_sedan_value'],
+      },
+      {
+        'label': details['vehicle_type_station_wagon_text'] ?? "Station wagon",
+        'value': details['vehicle_type_station_wagon_value'],
+      },
+      {
+        'label': details['vehicle_type_suv_text'] ?? "SUV",
+        'value': details['vehicle_type_suv_value'],
+      },
+      {
+        'label': details['vehicle_type_truck_text'] ?? "Truck",
+        'value': details['vehicle_type_truck_value'],
+      },
+      {
+        'label': details['vehicle_type_van_text'] ?? "Van",
+        'value': details['vehicle_type_van_value'],
+      },
+    ];
+
+
+    final seenValues = <String>{};
+    for (final option in options) {
+      final value = option['value']?.toString() ?? "";
+      if (value.isEmpty || seenValues.contains(value)) {
+        continue;
+      }
+
+      seenValues.add(value);
+      vehicleTypeLabelList.add(option['label']?.toString() ?? "");
+      vehicleTypeList.add(value);
+    }
+
+    if (vehicleType.value.isNotEmpty &&
+        !vehicleTypeList.contains(vehicleType.value)) {
+      vehicleType.value = "";
+    }
+  }
+
+  String getVehicleCardTypeLabel(dynamic vehicle) {
+    if (vehicle is! Map) {
+      return "";
+    }
+
+    final String rawCarType =
+        vehicle['car_type']?.toString().trim().toLowerCase() ?? "";
+    if (rawCarType.isNotEmpty) {
+      switch (rawCarType) {
+        case 'electric':
+          return labelTextDetail['electric_checkbox_label']?.toString() ??
+              "Electric";
+        case 'hybrid':
+          return labelTextDetail['hybrid_checkbox_label']?.toString() ??
+              "Hybrid";
+        case 'gas':
+          return labelTextDetail['gas_checkbox_label']?.toString() ?? "Gas";
+      }
+    }
+
+    final String vehicleTypeId = vehicle['type']?.toString().trim() ?? "";
+    if (vehicleTypeId.isNotEmpty) {
+      final int index = vehicleTypeList.indexOf(vehicleTypeId);
+      if (index >= 0 && index < vehicleTypeLabelList.length) {
+        return vehicleTypeLabelList[index].toString();
+      }
+    }
+
+    return rawCarType.isNotEmpty ? rawCarType : "";
   }
 
   void paginateVehicleList() {
@@ -432,10 +546,10 @@ class MyVehicleController extends GetxController {
             scrollField = true;
           }
         }
-        if (resp['errors']['liscense_no'] != null) {
+        if (resp['errors']['license_no'] != null) {
           var err = {
-            'title': "liscense_no",
-            'eList': resp['errors']['liscense_no']
+            'title': "license_no",
+            'eList': resp['errors']['license_no']
           };
           errors.add(err);
           if (scrollField == false) {
@@ -621,34 +735,50 @@ class MyVehicleController extends GetxController {
       MyVehicleProvider()
           .getVehicleInfo(vehicleId.value, serviceController.token)
           .then((resp) async {
+        if (isClosed) {
+          return;
+        }
+
         if (resp['status'] != null &&
             resp['status'] == "Success" &&
             resp['data'] != null &&
             resp['data']['vehicle'] != null) {
-          makeTextEditingController.text = resp['data']['vehicle']['make'];
-          modelTextEditingController.text = resp['data']['vehicle']['model'];
+          final vehicle =
+              Map<String, dynamic>.from(resp['data']['vehicle'] as Map);
+          makeTextEditingController.text = vehicle['make']?.toString() ?? "";
+          modelTextEditingController.text = vehicle['model']?.toString() ?? "";
           licenseNumberTextEditingController.text =
-              resp['data']['vehicle']['liscense_no'];
-          colorTextEditingController.text = resp['data']['vehicle']['color'];
-          yearTextEditingController.text = resp['data']['vehicle']['year'];
-          fuel.value = resp['data']['vehicle']['car_type'];
-          vehicleType.value = resp['data']['vehicle']['type'];
-          oldCarImagePath.value = resp['data']['vehicle']['image'] ?? "";
+              vehicle['license_no']?.toString() ?? "";
+          colorTextEditingController.text = vehicle['color']?.toString() ?? "";
+          yearTextEditingController.text = vehicle['year']?.toString() ?? "";
+          fuel.value = vehicle['car_type']?.toString() ?? "";
+          vehicleType.value = vehicle['type']?.toString() ?? "";
+          oldCarImagePath.value = vehicle['image']?.toString() ?? "";
           oldCarImagePathOriginal.value =
-              resp['data']['vehicle']['original_image'] ?? "";
+              vehicle['original_image']?.toString().isNotEmpty == true
+                  ? vehicle['original_image'].toString()
+                  : oldCarImagePath.value;
           setPrimary.value =
-              resp['data']['vehicle']['primary_vehicle'] == "1" ? "yes" : "no";
+              vehicle['primary_vehicle']?.toString() == "1" ? "yes" : "no";
           isOverlayLoading(false);
-          Get.toNamed('/add_vehicle');
+          if (!isClosed) {
+            Get.toNamed('/add_vehicle');
+          }
         }
-        isOverlayLoading(false);
+        if (!isClosed) {
+          isOverlayLoading(false);
+        }
       }, onError: (err) {
-        isOverlayLoading(false);
-        _handleActionError(err);
+        if (!isClosed) {
+          isOverlayLoading(false);
+          _handleActionError(err);
+        }
       });
     } catch (exception) {
-      isOverlayLoading(false);
-      _handleActionError(exception);
+      if (!isClosed) {
+        isOverlayLoading(false);
+        _handleActionError(exception);
+      }
     }
   }
 

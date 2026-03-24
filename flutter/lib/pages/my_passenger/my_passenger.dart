@@ -24,7 +24,7 @@ class MyPassengerPage extends GetView<MyPassengerController> {
               title:
                   "${controller.labelTextDetail['main_heading'] ?? "My passengers"}",
               context: context)),
-          leading: const BackButton(color: Colors.white),
+          leading: safeBackButton(context),
         ),
         body: Obx(() {
           if (controller.errorStateManager.isLoading.value) {
@@ -256,3 +256,4 @@ class MyPassengerPage extends GetView<MyPassengerController> {
         }));
   }
 }
+

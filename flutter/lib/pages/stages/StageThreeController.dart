@@ -89,7 +89,7 @@ class StageThreeController extends GetxController {
         message = message.replaceAll(
             ":Attribute", labelTextDetail['license_error'] ?? 'License number');
         var err = {
-          'title': "liscense_no",
+          'title': "license_no",
           'eList': [message ?? 'License number field is required']
         };
         errors.add(err);
@@ -530,38 +530,10 @@ class StageThreeController extends GetxController {
           step3MainHeading.value = labelTextDetail['main_heading'] ??
               "Step 3 of 5 - Vehicle Information";
           step4MainHeading.value = "Step 4 of 5 - Your Driver's License";
-
-          vehicleTypeLabelList.add(
-              labelTextDetail['vehicle_type_convertible_text'] ??
-                  "Convertable");
-          vehicleTypeList
-              .add(labelTextDetail['vehicle_type_convertible_value']);
-          vehicleTypeLabelList
-              .add(labelTextDetail['vehicle_type_coupe_text'] ?? "Coupe");
-          vehicleTypeList.add(labelTextDetail['vehicle_type_coupe_value']);
-          vehicleTypeLabelList.add(
-              labelTextDetail['vehicle_type_hatchback_text'] ?? "Hatchback");
-          vehicleTypeList.add(labelTextDetail['vehicle_type_hatchback_value']);
-          vehicleTypeLabelList
-              .add(labelTextDetail['vehicle_type_minivan_text'] ?? "Minivan");
-          vehicleTypeList.add(labelTextDetail['vehicle_type_minivan_value']);
-          vehicleTypeLabelList
-              .add(labelTextDetail['vehicle_type_sedan_text'] ?? "Sedan");
-          vehicleTypeList.add(labelTextDetail['vehicle_type_sedan_value']);
-          vehicleTypeLabelList.add(
-              labelTextDetail['vehicle_type_station_wagon_text'] ??
-                  "Station wagon");
-          vehicleTypeList
-              .add(labelTextDetail['vehicle_type_station_wagon_value']);
-          vehicleTypeLabelList
-              .add(labelTextDetail['vehicle_type_suv_text'] ?? "SUV");
-          vehicleTypeList.add(labelTextDetail['vehicle_type_suv_value']);
-          vehicleTypeLabelList
-              .add(labelTextDetail['vehicle_type_truck_text'] ?? "Truck");
-          vehicleTypeList.add(labelTextDetail['vehicle_type_truck_value']);
-          vehicleTypeLabelList
-              .add(labelTextDetail['vehicle_type_van_text'] ?? "Van");
-          vehicleTypeList.add(labelTextDetail['vehicle_type_van_value']);
+          _populateVehicleTypes(
+            details: labelTextDetail,
+            vehicleTypeOptions: resp['data']['vehicleTypeOptions'],
+          );
         }
 
         if (resp['data'] != null &&
@@ -601,6 +573,110 @@ class StageThreeController extends GetxController {
         "type": "unknown",
         "message": "Unable to load page details. Please try again."
       };
+    }
+  }
+
+  void _populateVehicleTypes({
+    required Map<dynamic, dynamic> details,
+    dynamic vehicleTypeOptions,
+  }) {
+    vehicleTypeList.clear();
+    vehicleTypeLabelList.clear();
+
+    final normalizedVehicleTypeOptions = vehicleTypeOptions is List
+        ? vehicleTypeOptions
+        : vehicleTypeOptions is Map
+            ? vehicleTypeOptions.values.toList()
+            : vehicleTypeOptions is Iterable
+                ? vehicleTypeOptions.toList()
+                : const [];
+
+    if (normalizedVehicleTypeOptions.isNotEmpty) {
+      final seenValues = <String>{};
+
+      for (final option in normalizedVehicleTypeOptions) {
+        if (option is! Map) {
+          continue;
+        }
+
+        final value = option['features_setting_id']?.toString() ??
+            option['id']?.toString() ??
+            "";
+        final label = option['name']?.toString() ??
+            option['label']?.toString() ??
+            option['slug']?.toString() ??
+            "";
+
+        if (value.isEmpty || label.isEmpty || seenValues.contains(value)) {
+          continue;
+        }
+
+        seenValues.add(value);
+        vehicleTypeList.add(value);
+        vehicleTypeLabelList.add(label);
+      }
+
+      if (vehicleType.value.isNotEmpty &&
+          !vehicleTypeList.contains(vehicleType.value)) {
+        vehicleType.value = "";
+      }
+      return;
+    }
+
+    final options = [
+      {
+        'label': details['vehicle_type_convertible_text'] ?? "Convertable",
+        'value': details['vehicle_type_convertible_value'],
+      },
+      {
+        'label': details['vehicle_type_coupe_text'] ?? "Coupe",
+        'value': details['vehicle_type_coupe_value'],
+      },
+      {
+        'label': details['vehicle_type_hatchback_text'] ?? "Hatchback",
+        'value': details['vehicle_type_hatchback_value'],
+      },
+      {
+        'label': details['vehicle_type_minivan_text'] ?? "Minivan",
+        'value': details['vehicle_type_minivan_value'],
+      },
+      {
+        'label': details['vehicle_type_sedan_text'] ?? "Sedan",
+        'value': details['vehicle_type_sedan_value'],
+      },
+      {
+        'label': details['vehicle_type_station_wagon_text'] ?? "Station wagon",
+        'value': details['vehicle_type_station_wagon_value'],
+      },
+      {
+        'label': details['vehicle_type_suv_text'] ?? "SUV",
+        'value': details['vehicle_type_suv_value'],
+      },
+      {
+        'label': details['vehicle_type_truck_text'] ?? "Truck",
+        'value': details['vehicle_type_truck_value'],
+      },
+      {
+        'label': details['vehicle_type_van_text'] ?? "Van",
+        'value': details['vehicle_type_van_value'],
+      },
+    ];
+
+    final seenValues = <String>{};
+    for (final option in options) {
+      final value = option['value']?.toString() ?? "";
+      if (value.isEmpty || seenValues.contains(value)) {
+        continue;
+      }
+
+      seenValues.add(value);
+      vehicleTypeLabelList.add(option['label']?.toString() ?? "");
+      vehicleTypeList.add(value);
+    }
+
+    if (vehicleType.value.isNotEmpty &&
+        !vehicleTypeList.contains(vehicleType.value)) {
+      vehicleType.value = "";
     }
   }
 
@@ -721,7 +797,7 @@ class StageThreeController extends GetxController {
           message = message.replaceAll(":Attribute",
               labelTextDetail['license_error'] ?? 'License number');
           var err = {
-            'title': "liscense_no",
+            'title': "license_no",
             'eList': [message ?? 'License number field is required']
           };
           errors.add(err);

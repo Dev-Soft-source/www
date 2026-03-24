@@ -1,6 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
+import 'package:proximaride_app/pages/widgets/app_network_image.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
 Widget linkWidget(
@@ -35,23 +35,27 @@ Widget linkWidget(
                     ? CircleAvatar(
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(50.0),
-                          child: CachedNetworkImage(
+                          child: appNetworkImage(
                             imageUrl: imagePath,
                             width: double.infinity,
                             height: double.infinity,
                             fit: BoxFit.cover,
-                            errorWidget: (context, url, error) => controller
+                            errorChild: controller
                                         .serviceController
                                         .loginUserDetail['gender'] ==
                                     'female'
-                                ? Image.asset(defaultFemaleImage,
+                                ? Image.asset(
+                                    defaultFemaleImage,
                                     width: double.infinity,
                                     height: double.infinity,
-                                    fit: BoxFit.cover)
-                                : Image.asset(defaultMaleImage,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Image.asset(
+                                    defaultMaleImage,
                                     width: double.infinity,
                                     height: double.infinity,
-                                    fit: BoxFit.cover),
+                                    fit: BoxFit.cover,
+                                  ),
                           ),
                         ),
                         radius: getValueForScreenType<double>(

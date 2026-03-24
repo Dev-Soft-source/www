@@ -23,7 +23,7 @@ class EmailAddressPage extends GetView<EmailAddressController> {
               title:
                   "${controller.labelTextDetail['main_heading'] ?? "My e-mail address"}",
               context: context)),
-          leading: const BackButton(color: Colors.white),
+          leading: safeBackButton(context),
         ),
         body: SafeArea(
           child: Obx(() {
@@ -127,3 +127,4 @@ class EmailAddressPage extends GetView<EmailAddressController> {
         ));
   }
 }
+

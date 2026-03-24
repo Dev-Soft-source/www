@@ -30,17 +30,12 @@ class ProfileVehicleController extends Controller
         $user_id = $user->id;
         $vehicles = Vehicle::where('user_id', $user_id)->orderBy('primary_vehicle', 'desc')->orderBy('id', 'desc')->get();
 
-        $vehicleSettingPage = null;
-        if ($request->lang_id && $request->lang_id != 0) {
-            $vehicleSettingPage = MyVehicleSettingDetail::where('language_id', $request->lang_id)->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $request->lang_id)->select('delete_vehicle_message')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $vehicleSettingPage = MyVehicleSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_vehicle_message')->first();
-            }
-        }
+        $vehicleSettingPage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $vehicleTypeOptions = $this->getRideFeatureOptionGroups(
+            $this->selectedLanguage->id,
+            $this->defaultLang->id
+        )->get('vehicle_type', collect())->values();
+        $messages = $this->successMessage;
 
         $validationMessages = [
             'required' => trans('validation.required'),
@@ -49,7 +44,13 @@ class ProfileVehicleController extends Controller
             'max' => trans('validation.max.file'),
         ];
 
-        $data = ['vehicles' => $vehicles, 'vehicleSettingPage' => $vehicleSettingPage, 'messages' => $messages, 'validationMessages' => $validationMessages];
+        $data = [
+            'vehicles' => $vehicles,
+            'vehicleSettingPage' => $vehicleSettingPage,
+            'vehicleTypeOptions' => $vehicleTypeOptions,
+            'messages' => $messages,
+            'validationMessages' => $validationMessages,
+        ];
         return $this->successResponse($data, 'Get vehicles successfully');
     }
 

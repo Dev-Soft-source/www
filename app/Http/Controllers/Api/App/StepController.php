@@ -320,6 +320,7 @@ class StepController extends Controller
     public function step3Index(Request $request)
     {
         $step3Page = null;
+        $step4Page = null;
         if ($request->lang_id && $request->lang_id != 0) {
 
             $selectedLanguage = Language::where('id', $request->lang_id)->first();
@@ -349,7 +350,17 @@ class StepController extends Controller
             'max.file' => trans('validation.max.file'),
         ];
 
-        $data = ['step3Page' => $step3Page, 'step4Page' => $step4Page, 'validationMessages' => $validationMessages];
+        $vehicleTypeOptions = $this->getRideFeatureOptionGroups(
+            $selectedLanguage?->id,
+            $this->defaultLang?->id
+        )->get('vehicle_type', collect())->values();
+
+        $data = [
+            'step3Page' => $step3Page,
+            'step4Page' => $step4Page,
+            'vehicleTypeOptions' => $vehicleTypeOptions,
+            'validationMessages' => $validationMessages
+        ];
         return $this->successResponse($data, 'Step3 page get successfully');
     }
 

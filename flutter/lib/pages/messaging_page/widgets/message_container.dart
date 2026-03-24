@@ -142,14 +142,23 @@ Widget messageContainer(
   String tripDate = "";
   String tripTime = "";
 
-  if (date != "") {
-    DateTime parsedDate = DateTime.parse(date);
-    DateFormat outputFormat = DateFormat('MMMM d, yyyy');
-    tripDate = outputFormat.format(parsedDate);
+  final dateValue = date?.toString() ?? "";
+  final rideTimeValue = rideTime?.toString() ?? "";
 
-    DateTime parsedTime = DateFormat("HH:mm:ss").parse(rideTime);
-    DateFormat outputTimeFormat = DateFormat("h:mm a");
-    tripTime = outputTimeFormat.format(parsedTime);
+  if (dateValue.isNotEmpty) {
+    final parsedDate = DateTime.tryParse(dateValue);
+    if (parsedDate != null) {
+      DateFormat outputFormat = DateFormat('MMMM d, yyyy');
+      tripDate = outputFormat.format(parsedDate);
+    }
+  }
+
+  if (rideTimeValue.isNotEmpty) {
+    final parsedTime = DateFormat("HH:mm:ss").tryParse(rideTimeValue);
+    if (parsedTime != null) {
+      DateFormat outputTimeFormat = DateFormat("h:mm a");
+      tripTime = outputTimeFormat.format(parsedTime);
+    }
   }
 
   // Check if this is a ride details message

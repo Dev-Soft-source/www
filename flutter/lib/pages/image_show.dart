@@ -15,11 +15,10 @@ class ImageShow extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: primaryColor,
         title: secondAppBarWidget(title: serviceController.imagePreviewLabel.value, context: context),
-        leading: const BackButton(
-          color: Colors.white,
-        ),
+        leading: safeBackButton(context),
       ),
       body: Center(child: networkCacheImageWidget(serviceController.showImage.value, BoxFit.contain, 0.0, 0.0)),
     );
   }
 }
+

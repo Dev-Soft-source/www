@@ -19,9 +19,16 @@ import '../widgets/tool_tip.dart';
 class AddVehiclePage extends StatelessWidget {
   const AddVehiclePage({super.key});
 
+  MyVehicleController get controller {
+    if (Get.isRegistered<MyVehicleController>()) {
+      return Get.find<MyVehicleController>();
+    }
+
+    return Get.put(MyVehicleController());
+  }
+
   @override
   Widget build(BuildContext context) {
-    var controller = Get.find<MyVehicleController>();
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -30,8 +37,17 @@ class AddVehiclePage extends StatelessWidget {
                   ? "${controller.labelTextDetail['add_main_heading'] ?? "Add vehicle"}"
                   : "${controller.labelTextDetail['edit_main_heading'] ?? "Edit vehicle"}",
               context: context),
-          leading: const BackButton(
-            color: Colors.white,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              if (Get.key.currentState?.canPop() ?? false) {
+                Get.back();
+              } else if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
+              } else {
+                Get.offNamed('/my_vehicle');
+              }
+            },
           ),
         ),
         body: Obx(() {
@@ -175,11 +191,11 @@ class AddVehiclePage extends StatelessWidget {
                             onChanged: (value) {
                               if (controller.errors.firstWhereOrNull(
                                       (element) =>
-                                          element['title'] == "liscense_no") !=
+                                          element['title'] == "license_no") !=
                                   null) {
                                 controller.errors.remove(controller.errors
                                     .firstWhereOrNull((element) =>
-                                        element['title'] == "liscense_no"));
+                                        element['title'] == "license_no"));
                               }
                             },
                             fieldType: "text",
@@ -188,17 +204,17 @@ class AddVehiclePage extends StatelessWidget {
                             fontSize: 18.0,
                             isError: controller.errors.firstWhereOrNull(
                                     (element) =>
-                                        element['title'] == "liscense_no") !=
+                                        element['title'] == "license_no") !=
                                 null,
                             focusNode: controller.focusNodes[3.toString()],
                           ),
                           if (controller.errors.firstWhereOrNull((element) =>
-                                  element['title'] == "liscense_no") !=
+                                  element['title'] == "license_no") !=
                               null) ...[
                             toolTip(
                                 tip: controller.errors.firstWhereOrNull(
                                     (element) =>
-                                        element['title'] == "liscense_no"))
+                                        element['title'] == "license_no"))
                           ],
                           10.heightBox,
                           Row(
@@ -308,71 +324,73 @@ class AddVehiclePage extends StatelessWidget {
                             ],
                           ),
                           5.heightBox,
-                          DropdownButtonFormField2(
-                            isExpanded: true,
-                            decoration: InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(5.0),
-                                borderSide: BorderSide(
-                                  color: controller.errors.firstWhereOrNull(
-                                              (element) =>
-                                                  element['title'] == "type") !=
-                                          null
-                                      ? primaryColor
-                                      : Colors.grey.shade400,
-                                  style: BorderStyle.solid,
-                                  width: 1,
+                          (() {
+                            final vehicleOptions = <Map<String, String>>[];
+                            final seenVehicleTypes = <String>{};
+
+                            for (var i = 0;
+                                i < controller.vehicleTypeList.length &&
+                                    i < controller.vehicleTypeLabelList.length;
+                                i++) {
+                              final value =
+                                  controller.vehicleTypeList[i].toString();
+                              if (value.isEmpty ||
+                                  seenVehicleTypes.contains(value)) {
+                                continue;
+                              }
+
+                              seenVehicleTypes.add(value);
+                              vehicleOptions.add({
+                                'value': value,
+                                'label': controller.vehicleTypeLabelList[i]
+                                    .toString(),
+                              });
+                            }
+
+                            final selectedVehicleType = seenVehicleTypes.contains(
+                                    controller.vehicleType.value.toString())
+                                ? controller.vehicleType.value.toString()
+                                : null;
+
+                            return DropdownButtonFormField2(
+                              isExpanded: true,
+                              decoration: InputDecoration(
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5.0),
+                                  borderSide: BorderSide(
+                                    color: controller.errors.firstWhereOrNull(
+                                                (element) =>
+                                                    element['title'] ==
+                                                    "type") !=
+                                            null
+                                        ? primaryColor
+                                        : Colors.grey.shade400,
+                                    style: BorderStyle.solid,
+                                    width: 1,
+                                  ),
                                 ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(5.0),
+                                  borderSide:
+                                      const BorderSide(color: primaryColor),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 0.0, horizontal: 8.0),
+                                fillColor: inputColor,
                               ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(5.0),
-                                borderSide:
-                                    const BorderSide(color: primaryColor),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                  vertical: 0.0, horizontal: 8.0),
-                              fillColor: inputColor,
-                            ),
-                            value: controller.vehicleType.value,
-                            items: [
-                              DropdownMenuItem(
-                                value: "",
-                                child: controller.vehicleType.value == ""
-                                    ? Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          txt18Size(
-                                              title:
-                                                  "${controller.labelTextDetail['vehicle_type_placeholder'] ?? "Select vehicle type"}",
-                                              context: context,
-                                              fontFamily: bold),
-                                          Icon(Icons.check,
-                                              color: btnPrimaryColor, size: 20)
-                                        ],
-                                      )
-                                    : txt18Size(
-                                        title:
-                                            "${controller.labelTextDetail['vehicle_type_placeholder'] ?? "Select vehicle type"}",
-                                        context: context,
-                                        fontFamily: bold),
-                              ),
-                              for (var i = 0;
-                                  i < controller.vehicleTypeList.length;
-                                  i++) ...[
+                              value: selectedVehicleType,
+                              items: [
                                 DropdownMenuItem(
-                                  value:
-                                      controller.vehicleTypeList[i].toString(),
-                                  child: controller.vehicleType.value ==
-                                          controller.vehicleTypeList[i]
-                                              .toString()
+                                  value: "",
+                                  child: selectedVehicleType == null ||
+                                          selectedVehicleType.isEmpty
                                       ? Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             txt18Size(
-                                                title: controller
-                                                    .vehicleTypeLabelList[i],
+                                                title:
+                                                    "${controller.labelTextDetail['vehicle_type_placeholder'] ?? "Select vehicle type"}",
                                                 context: context,
                                                 fontFamily: bold),
                                             Icon(Icons.check,
@@ -381,26 +399,50 @@ class AddVehiclePage extends StatelessWidget {
                                           ],
                                         )
                                       : txt18Size(
-                                          title: controller
-                                              .vehicleTypeLabelList[i],
+                                          title:
+                                              "${controller.labelTextDetail['vehicle_type_placeholder'] ?? "Select vehicle type"}",
                                           context: context,
                                           fontFamily: bold),
                                 ),
+                                for (final option in vehicleOptions) ...[
+                                  DropdownMenuItem(
+                                    value: option['value'],
+                                    child: selectedVehicleType ==
+                                            option['value']
+                                        ? Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              txt18Size(
+                                                  title:
+                                                      option['label'] ?? "",
+                                                  context: context,
+                                                  fontFamily: bold),
+                                              Icon(Icons.check,
+                                                  color: btnPrimaryColor,
+                                                  size: 20)
+                                            ],
+                                          )
+                                        : txt18Size(
+                                            title: option['label'] ?? "",
+                                            context: context,
+                                            fontFamily: bold),
+                                  ),
+                                ],
                               ],
-                            ],
-                            onChanged: (data) {
-                              controller.vehicleType.value = data!;
-                              if (controller.errors.firstWhereOrNull(
-                                      (element) =>
-                                          element['title'] == "type") !=
-                                  null) {
-                                controller.errors.remove(controller.errors
-                                    .firstWhereOrNull((element) =>
-                                        element['title'] == "type"));
-                              }
-                            },
-                            alignment: AlignmentDirectional.topCenter,
-                            dropdownStyleData: DropdownStyleData(
+                              onChanged: (data) {
+                                controller.vehicleType.value = data ?? "";
+                                if (controller.errors.firstWhereOrNull(
+                                        (element) =>
+                                            element['title'] == "type") !=
+                                    null) {
+                                  controller.errors.remove(controller.errors
+                                      .firstWhereOrNull((element) =>
+                                          element['title'] == "type"));
+                                }
+                              },
+                              alignment: AlignmentDirectional.topCenter,
+                              dropdownStyleData: DropdownStyleData(
                               maxHeight: context.screenHeight * 0.45,
                               width: context.screenWidth - 30,
                               // padding: EdgeInsets.only(bottom: 100),
@@ -412,7 +454,8 @@ class AddVehiclePage extends StatelessWidget {
                                     bottomRight: Radius.circular(10.0)),
                               ),
                             ),
-                          ),
+                            );
+                          })(),
                           if (controller.errors.firstWhereOrNull(
                                   (element) => element['title'] == "type") !=
                               null) ...[
@@ -825,9 +868,15 @@ class AddVehiclePage extends StatelessWidget {
                                   InkWell(
                                     onTap: () {
                                       controller.serviceController.showImage
-                                              .value =
-                                          controller
-                                              .oldCarImagePathOriginal.value;
+                                              .value = controller
+                                                  .oldCarImagePathOriginal
+                                                  .value
+                                                  .isNotEmpty
+                                              ? controller
+                                                  .oldCarImagePathOriginal
+                                                  .value
+                                              : controller
+                                                  .oldCarImagePath.value;
                                       Get.toNamed("/show_image");
                                     },
                                     child: networkCacheImageWidget(

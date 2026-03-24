@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_paypal_pay/flutter_paypal_pay.dart';
 import 'package:get/get.dart';
@@ -223,6 +224,20 @@ class MyWalletController extends GetxController
   @override
   void onClose() {
     super.onClose();
+    tabController.dispose();
+    passengerTabController.dispose();
+    driverTabController.dispose();
+    pageController.dispose();
+    passengerPageController.dispose();
+    driverPageController.dispose();
+    passengerRideScrollController.dispose();
+    passengerBalanceScrollController.dispose();
+    passengerRewardScrollController.dispose();
+    driverPaidOutScrollController.dispose();
+    driverAvailableScrollController.dispose();
+    driverPendingScrollController.dispose();
+    driverRewardScrollController.dispose();
+    myBalanceScrollController.dispose();
     cardNameController.dispose();
     cardNumberController.dispose();
     cvvCodeController.dispose();
@@ -759,16 +774,34 @@ class MyWalletController extends GetxController
     makePrimaryCard.value = false;
   }
 
+  void _safeJumpToPage(PageController controller, int page) {
+    if (isClosed) {
+      return;
+    }
+
+    if (controller.hasClients) {
+      controller.jumpToPage(page);
+      return;
+    }
+
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (isClosed || !controller.hasClients) {
+        return;
+      }
+      controller.jumpToPage(page);
+    });
+  }
+
   updatePageIndexValue(index) async {
     mainPageIndex.value = index;
     if (index == 0) {
       // Reset passenger tab to first selection (index 0)
       passengerTabController.index = 0;
-      passengerPageController.jumpToPage(0);
+      _safeJumpToPage(passengerPageController, 0);
     } else if (index == 1) {
       // Reset driver tab to first selection (index 0)
       driverTabController.index = 0;
-      driverPageController.jumpToPage(0);
+      _safeJumpToPage(driverPageController, 0);
       if (secondTabValue == -1) {
         await getPaidOutData();
         secondTabValue = 1;

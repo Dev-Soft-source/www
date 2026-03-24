@@ -21,7 +21,7 @@ class AddReviewPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: const BackButton(color: Colors.white),
+        leading: safeBackButton(context),
         title: Obx(() => secondAppBarWidget(
             context: context,
             title: controller.reviewType.toString() == "driver"
@@ -302,3 +302,4 @@ class AddReviewPage extends StatelessWidget {
     );
   }
 }
+

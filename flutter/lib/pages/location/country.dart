@@ -23,7 +23,7 @@ class CountryPage extends GetView<LocationController> {
               title:
                   "${controller.labelTextDetail['select_country_label'] ?? "Select country"}",
               context: context)),
-          leading: const BackButton(color: Colors.white),
+          leading: safeBackButton(context),
         ),
         body: Obx(() {
           if (controller.errorStateManager.hasError.value) {
@@ -141,3 +141,4 @@ class CountryPage extends GetView<LocationController> {
         }));
   }
 }
+

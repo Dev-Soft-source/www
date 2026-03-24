@@ -23,7 +23,7 @@ class StatePage extends GetView<LocationController> {
               title:
                   "${controller.labelTextDetail['select_state_label'] ?? "Select state"}",
               context: context)),
-          leading: const BackButton(color: Colors.white),
+          leading: safeBackButton(context),
         ),
         body: Obx(() {
           if (controller.errorStateManager.hasError.value) {
@@ -135,3 +135,4 @@ class StatePage extends GetView<LocationController> {
         }));
   }
 }
+

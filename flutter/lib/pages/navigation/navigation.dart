@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
@@ -7,6 +6,7 @@ import 'package:proximaride_app/pages/my_profile/my_profile.dart';
 import 'package:proximaride_app/pages/my_trips/MyTripController.dart';
 import 'package:proximaride_app/pages/my_trips/my_trip.dart';
 import 'package:proximaride_app/pages/navigation/NavigationController.dart';
+import 'package:proximaride_app/pages/widgets/app_network_image.dart';
 
 class NavigationPage extends GetView<NavigationController> {
   const NavigationPage({super.key});
@@ -61,9 +61,11 @@ class NavigationPage extends GetView<NavigationController> {
             backgroundColor: Colors.grey.shade100,
             selectedItemColor: primaryColor,
             selectedLabelStyle: const TextStyle(fontFamily: bold),
-            selectedFontSize: 20,
+            selectedFontSize: 12,
             unselectedLabelStyle: const TextStyle(fontFamily: bold),
-            unselectedFontSize: 20,
+            unselectedFontSize: 12,
+            iconSize: 40,
+            landscapeLayout: BottomNavigationBarLandscapeLayout.centered,
             items: [
               BottomNavigationBarItem(
                   icon: Image.asset(chatOutLineImage,
@@ -83,24 +85,28 @@ class NavigationPage extends GetView<NavigationController> {
                       ? CircleAvatar(
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(50.0),
-                            child: CachedNetworkImage(
+                            child: appNetworkImage(
                               imageUrl:
                                   "${controller.serviceController.loginUserDetail['profile_image']}",
                               width: double.infinity,
                               height: double.infinity,
                               fit: BoxFit.cover,
-                              errorWidget: (context, url, error) => controller
+                              errorChild: controller
                                           .serviceController
                                           .loginUserDetail['gender'] ==
                                       'female'
-                                  ? Image.asset(defaultFemaleImage,
+                                  ? Image.asset(
+                                      defaultFemaleImage,
                                       width: double.infinity,
                                       height: double.infinity,
-                                      fit: BoxFit.cover)
-                                  : Image.asset(defaultMaleImage,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.asset(
+                                      defaultMaleImage,
                                       width: double.infinity,
                                       height: double.infinity,
-                                      fit: BoxFit.cover),
+                                      fit: BoxFit.cover,
+                                    ),
                             ),
                           ),
                         )
@@ -114,24 +120,29 @@ class NavigationPage extends GetView<NavigationController> {
                       ? CircleAvatar(
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(50.0),
-                            child: CachedNetworkImage(
-                                imageUrl:
-                                    "${controller.serviceController.loginUserDetail['profile_image']}",
-                                width: double.infinity,
-                                height: double.infinity,
-                                fit: BoxFit.cover,
-                                errorWidget: (context, url, error) => controller
-                                            .serviceController
-                                            .loginUserDetail['gender'] ==
-                                        'female'
-                                    ? Image.asset(defaultFemaleImage,
-                                        width: double.infinity,
-                                        height: double.infinity,
-                                        fit: BoxFit.cover)
-                                    : Image.asset(defaultMaleImage,
-                                        width: double.infinity,
-                                        height: double.infinity,
-                                        fit: BoxFit.cover)),
+                            child: appNetworkImage(
+                              imageUrl:
+                                  "${controller.serviceController.loginUserDetail['profile_image']}",
+                              width: double.infinity,
+                              height: double.infinity,
+                              fit: BoxFit.cover,
+                              errorChild: controller
+                                          .serviceController
+                                          .loginUserDetail['gender'] ==
+                                      'female'
+                                  ? Image.asset(
+                                      defaultFemaleImage,
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.asset(
+                                      defaultMaleImage,
+                                      width: double.infinity,
+                                      height: double.infinity,
+                                      fit: BoxFit.cover,
+                                    ),
+                            ),
                           ),
                         )
                       : Image.asset(profileFillImage,

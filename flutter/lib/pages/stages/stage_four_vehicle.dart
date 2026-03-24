@@ -250,11 +250,11 @@ class StageFourVehicle extends GetView<StageThreeController> {
                                 if (controller.errors.firstWhereOrNull(
                                         (element) =>
                                             element['title'] ==
-                                            "liscense_no") !=
+                                            "license_no") !=
                                     null) {
                                   controller.errors.remove(controller.errors
                                       .firstWhereOrNull((element) =>
-                                          element['title'] == "liscense_no"));
+                                          element['title'] == "license_no"));
                                 }
                               },
                               fieldType: "text",
@@ -263,16 +263,16 @@ class StageFourVehicle extends GetView<StageThreeController> {
                               fontSize: 18.0,
                               isError: controller.errors.firstWhereOrNull(
                                       (element) =>
-                                          element['title'] == "liscense_no") !=
+                                          element['title'] == "license_no") !=
                                   null,
                             ),
                             if (controller.errors.firstWhereOrNull((element) =>
-                                    element['title'] == "liscense_no") !=
+                                    element['title'] == "license_no") !=
                                 null) ...[
                               toolTip(
                                   tip: controller.errors.firstWhereOrNull(
                                       (element) =>
-                                          element['title'] == "liscense_no"))
+                                          element['title'] == "license_no"))
                             ],
                             10.heightBox,
                             Row(

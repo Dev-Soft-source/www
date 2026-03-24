@@ -728,8 +728,13 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
       isOverlayLoading(false);
       pageType = "trip";
       rideId = getRideDetail['ride_id'].toString();
+      final query = Uri(queryParameters: {
+        'from': (getRideDetail['departure'] ?? '').toString(),
+        'to': (getRideDetail['destination'] ?? '').toString(),
+        'price': (getRideDetail['price'] ?? '').toString(),
+      }).query;
       Get.toNamed(
-          '/trip_detail/${getRideDetail['ride_id']}/trip/upcoming/${getRideDetail['ride_detail_id']}');
+          '/trip_detail/${getRideDetail['ride_id']}/trip/upcoming/${getRideDetail['ride_detail_id']}?$query');
     }
   }
 

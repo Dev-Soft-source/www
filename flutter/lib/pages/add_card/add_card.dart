@@ -27,7 +27,7 @@ class AddCard extends GetView<AddCardController> {
             title:
                 "${controller.labelTextDetail['main_heading'] ?? "Billing address"}",
             context: context)),
-        leading: const BackButton(color: Colors.white),
+        leading: safeBackButton(context),
       ),
       body: Obx(() {
         if (controller.isLoading.value == true) {
@@ -614,3 +614,4 @@ class AddCard extends GetView<AddCardController> {
     );
   }
 }
+

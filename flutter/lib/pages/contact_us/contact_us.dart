@@ -25,7 +25,7 @@ class ContactUsPage extends GetView<ContactUsController> {
               title:
                   "${controller.labelTextDetail['main_heading'] ?? "Contact ProximaRide"}",
               context: context)),
-          leading: const BackButton(color: Colors.white),
+          leading: safeBackButton(context),
         ),
         body: SafeArea(
           child: Obx(() {
@@ -226,3 +226,4 @@ class ContactUsPage extends GetView<ContactUsController> {
         ));
   }
 }
+

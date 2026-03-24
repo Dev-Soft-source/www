@@ -22,7 +22,7 @@ class PaymentOptions extends GetView<PaymentOptionController> {
             title:
                 "${controller.labelTextDetail['main_heading'] ?? "Payment options"}",
             context: context)),
-        leading: const BackButton(color: Colors.white),
+        leading: safeBackButton(context),
       ),
       body: SafeArea(
         child: Obx(() {
@@ -142,3 +142,4 @@ class PaymentOptions extends GetView<PaymentOptionController> {
     );
   }
 }
+

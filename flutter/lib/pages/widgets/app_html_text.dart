@@ -29,11 +29,12 @@ class AppHtmlText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String normalizedData = _decodeHtmlEntities(data);
     final Color resolvedTextColor =
         textColor ?? Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black;
 
     return Html(
-      data: data,
+      data: normalizedData,
       style: {
         "html": Style(
           margin: Margins.zero,
@@ -107,5 +108,19 @@ class AppHtmlText extends StatelessWidget {
             }
           : null,
     );
+  }
+
+  String _decodeHtmlEntities(String value) {
+    return value
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
+        .replaceAll('&quot;', '"')
+        .replaceAll('&#39;', "'")
+        .replaceAll('&apos;', "'")
+        .replaceAll('&amp;', '&')
+        .replaceAllMapped(RegExp(r'&#(\d+);'), (match) {
+      final int? codePoint = int.tryParse(match.group(1) ?? '');
+      return codePoint == null ? match.group(0)! : String.fromCharCode(codePoint);
+    });
   }
 }

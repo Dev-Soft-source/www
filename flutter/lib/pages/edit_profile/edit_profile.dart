@@ -31,9 +31,7 @@ class EditProfilePage extends GetView<EditProfileController> {
               title:
                   "${controller.labelTextDetail['main_heading'] ?? "Edit My Profile"}",
               context: context)),
-          leading: const BackButton(
-            color: Colors.white,
-          ),
+          leading: safeBackButton(context),
         ),
         body: SafeArea(
           child: Obx(() {
@@ -649,3 +647,4 @@ class EditProfilePage extends GetView<EditProfileController> {
         ));
   }
 }
+

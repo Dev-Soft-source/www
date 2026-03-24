@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/consts/const_api.dart';
 import 'package:proximaride_app/pages/widgets/second_appbar_widget.dart';
+import 'package:proximaride_app/pages/widgets/web_page_fallback_widget.dart';
 import 'package:proximaride_app/services/service.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -13,18 +15,21 @@ class CancellationPolicy extends StatefulWidget {
 }
 
 class _CancellationPolicyState extends State<CancellationPolicy> {
-  late final WebViewController controller;
+  WebViewController? controller;
   final serviceController = Get.find<Service>();
   @override
   void initState() {
     super.initState();
+    if (kIsWeb) {
+      return;
+    }
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (int progress) {
-            controller.runJavaScriptReturningResult(
+            controller?.runJavaScriptReturningResult(
                 'document.querySelector(".hideheader").style.setProperty("display", "none", "important");'
                 'document.querySelector(".hideheader1").style.setProperty("display", "none", "important");'
                 'document.querySelector(".hidefooter").style.setProperty("display", "none", "important");'
@@ -58,20 +63,28 @@ class _CancellationPolicyState extends State<CancellationPolicy> {
 
   @override
   Widget build(BuildContext context) {
+    final String pageUrl =
+        '$url/${serviceController.lang.value}/cancellation-policy';
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
         title: secondAppBarWidget(
             title: serviceController.cancellationPolicyLabel.value,
             context: context),
-        leading: const BackButton(color: Colors.white),
+        leading: safeBackButton(context),
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.only(left: 15.0, right: 15.0),
-          child: WebViewWidget(controller: controller),
+          child: kIsWeb
+              ? WebPageFallbackWidget(
+                  pageUrl: pageUrl,
+                  title: serviceController.cancellationPolicyLabel.value,
+                )
+              : WebViewWidget(controller: controller!),
         ),
       ),
     );
   }
 }
+

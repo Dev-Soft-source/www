@@ -39,7 +39,7 @@ class TripDetailPage extends GetView<TripDetailController> {
                       ? "${controller.labelTextDetail['ride_main_heading'] ?? 'Trip details'}"
                       : "${controller.labelTextDetail['main_heading'] ?? "Ride detail"}",
               context: context)),
-          leading: const BackButton(color: Colors.white),
+          leading: safeBackButton(context),
         ),
         body: Obx(() {
           if (controller.isLoading.value == true) {
@@ -49,6 +49,22 @@ class TripDetailPage extends GetView<TripDetailController> {
               DateTime parsedDate = DateTime.parse(controller.ride['date']);
               DateFormat outputFormat = DateFormat('MMMM d, yyyy');
               String tripDate = outputFormat.format(parsedDate);
+              final rideDriver = controller.ride['driver'] is Map
+                  ? Map<String, dynamic>.from(controller.ride['driver'])
+                  : <String, dynamic>{};
+              final rideDetails = controller.ride['ride_detail'] is List
+                  ? List<dynamic>.from(controller.ride['ride_detail'])
+                  : <dynamic>[];
+              final matchingRideDetail = rideDetails.firstWhereOrNull(
+                (detail) =>
+                    detail is Map &&
+                    detail['id']?.toString() == controller.tripDetailId,
+              );
+              final selectedRideDetail = matchingRideDetail is Map
+                  ? Map<String, dynamic>.from(matchingRideDetail)
+                  : rideDetails.isNotEmpty && rideDetails.first is Map
+                      ? Map<String, dynamic>.from(rideDetails.first)
+                      : <String, dynamic>{};
 
               String tripTime = "";
               if (controller.ride['time'] != null) {
@@ -119,20 +135,28 @@ class TripDetailPage extends GetView<TripDetailController> {
                               10.heightBox,
                             ],
                             (() {
-                              final rideDetail = controller.ride['ride_detail'];
-                              final detail = rideDetail is List &&
-                                      rideDetail.isNotEmpty &&
-                                      rideDetail[0] != null
-                                  ? rideDetail[0]
-                                  : <String, dynamic>{};
-
                               return fromToWidget(
                                   context: context,
-                                  from: detail['departure'] ?? '',
-                                  to: detail['destination'] ?? '',
+                                  from: (selectedRideDetail['departure'] ?? '')
+                                          .toString()
+                                          .isNotEmpty
+                                      ? selectedRideDetail['departure'].toString()
+                                      : controller.from,
+                                  to: (selectedRideDetail['destination'] ?? '')
+                                          .toString()
+                                          .isNotEmpty
+                                      ? selectedRideDetail['destination'].toString()
+                                      : controller.to,
                                   date: tripDate,
                                   time: tripTime,
-                                  perSeat: (detail['price'] ?? '0').toString(),
+                                  perSeat:
+                                      (selectedRideDetail['price'] ?? '')
+                                              .toString()
+                                              .isNotEmpty
+                                          ? selectedRideDetail['price'].toString()
+                                          : (controller.price.isNotEmpty
+                                              ? controller.price
+                                              : '0'),
                                   leftSeat:
                                       controller.ride['seats_left'].toString(),
                                   fromLabel:
@@ -238,12 +262,12 @@ class TripDetailPage extends GetView<TripDetailController> {
                               driverInfoWidget(
                                   context: context,
                                   driverName:
-                                      "${controller.ride['driver'] != null ? controller.ride['driver']['first_name'] : ""} ${controller.ride['driver'] != null ? controller.ride['driver']['last_name'] : ""}",
+                                      "${rideDriver['first_name'] ?? ""} ${rideDriver['last_name'] ?? ""}",
                                   driverRating:
-                                      "${(controller.ride['driver'] != null && controller.ride['driver']['average_rating'] != null) ? controller.ride['driver']['average_rating'].toStringAsFixed(1) : ""}",
+                                      "${rideDriver['average_rating'] != null ? rideDriver['average_rating'].toStringAsFixed(1) : ""}",
                                   rideId: "${controller.ride['id']}",
                                   driverImage:
-                                      "${(controller.ride['driver'] != null && controller.ride['driver']['profile_image'] != null) ? controller.ride['driver']['profile_image'] : ""}",
+                                      "${rideDriver['profile_image'] ?? ""}",
                                   screenWidth: context.screenWidth,
                                   pageType:
                                       controller.type == "trip" ? '1' : '0',
@@ -264,7 +288,7 @@ class TripDetailPage extends GetView<TripDetailController> {
                                   vehicleDetail:
                                       "${controller.ride['vehicle'] != null ? controller.ride['vehicle']['year'] : ""} ${controller.ride['vehicle'] != null ? controller.ride['vehicle']['make'] : ""} ${controller.ride['vehicle'] != null ? controller.ride['vehicle']['model'] : ""}",
                                   licenseNumber:
-                                      "${controller.ride['vehicle'] != null ? controller.ride['vehicle']['liscense_no'] : ""}",
+                                      "${controller.ride['vehicle'] != null ? controller.ride['vehicle']['license_no'] : ""}",
                                   carType:
                                       "${controller.ride['vehicle'] != null ? controller.ride['vehicle']['car_type'] : ""}",
                                   rideId: "${controller.ride['id']}",
@@ -339,8 +363,7 @@ class TripDetailPage extends GetView<TripDetailController> {
                                   context: context,
                                   screenWidth: context.screenWidth,
                                   rideId: "${controller.ride['id']}",
-                                  driverId:
-                                      "${controller.ride['driver']['id']}",
+                                  driverId: "${rideDriver['id'] ?? ""}",
                                   heading:
                                       "${controller.labelTextDetail['driver_chat_heading'] ?? "Chat with the driver"}"),
                               10.heightBox,
@@ -443,14 +466,13 @@ class TripDetailPage extends GetView<TripDetailController> {
                                     await controller.checkRide('add');
                                   }
                                 })
-                            : controller.status.toString() == "upcoming"
+                                : controller.status.toString() == "upcoming"
                                 ? tripDetailButtonWidget(
                                     context: context,
                                     tripStatus: "${controller.ride['status']}",
                                     rideId: "${controller.ride['id']}",
                                     status: controller.status.toString(),
-                                    driverId:
-                                        "${controller.ride['driver']['id']}",
+                                    driverId: "${rideDriver['id'] ?? ""}",
                                     bookedSeat:
                                         "${controller.ride['booked_seats']}",
                                     cancelBookingBtn:
@@ -465,9 +487,8 @@ class TripDetailPage extends GetView<TripDetailController> {
                                             : false,
                                     noShowDriverLabel:
                                         "${controller.labelTextDetail['no_show_driver_label'] ?? "No show driver"}",
-                                    rideDetailId: controller.ride['ride_detail']
-                                            [0]['id']
-                                        .toString(),
+                                    rideDetailId:
+                                        "${selectedRideDetail['id'] ?? ""}",
                                     onPressed: () async {
                                       await controller.noShowDriverData();
                                     },
@@ -492,3 +513,4 @@ class TripDetailPage extends GetView<TripDetailController> {
         }));
   }
 }
+

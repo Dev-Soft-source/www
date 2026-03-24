@@ -20,7 +20,7 @@ class PhoneNumberVerificationPage extends GetView<MyPhoneNumberController> {
               title:
                   "${controller.labelTextDetail['verify_phone_number_heading'] ?? "Verify my phone number"}",
               context: context),
-          leading: const BackButton(color: Colors.white),
+          leading: safeBackButton(context),
         ),
         body: Stack(children: [
           Container(
@@ -164,3 +164,4 @@ class PhoneNumberVerificationPage extends GetView<MyPhoneNumberController> {
         ])));
   }
 }
+

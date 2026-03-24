@@ -438,10 +438,7 @@ class BookSeatPage extends GetView<BookSeatController> {
                         ],
                         10.heightBox,
                         if ((controller.ride['payment_method_slug'] == "cash" &&
-                                (double.parse(controller.ride['ride_detail'][0]
-                                            ['price']
-                                        .toString()) <=
-                                    15)) ||
+                                controller.rideUnitPrice() <= 15) ||
                             controller.bookedByWallet.value == true) ...[
                           Align(
                             alignment: Alignment.bottomCenter,

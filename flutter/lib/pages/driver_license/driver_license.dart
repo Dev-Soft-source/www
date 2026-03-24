@@ -27,7 +27,7 @@ class DriverLicensePage extends GetView<DriverLicenseController> {
             title:
                 "${controller.labelTextDetail['main_heading'] ?? "Driver's license"}",
             context: context)),
-        leading: const BackButton(color: Colors.white),
+        leading: safeBackButton(context),
       ),
       body: SafeArea(
         child: Obx(() {
@@ -231,3 +231,4 @@ class DriverLicensePage extends GetView<DriverLicenseController> {
     );
   }
 }
+

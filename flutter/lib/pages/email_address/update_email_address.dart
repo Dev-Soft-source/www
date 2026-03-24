@@ -23,7 +23,7 @@ class UpdateEmailAddressPage extends StatelessWidget {
               title:
                   "${controller.labelTextDetail['main_heading'] ?? "My e-mail address"}",
               context: context)),
-          leading: const BackButton(color: Colors.white),
+          leading: safeBackButton(context),
         ),
         body: SafeArea(
           child: Obx(() {
@@ -177,3 +177,4 @@ class UpdateEmailAddressPage extends StatelessWidget {
         ));
   }
 }
+

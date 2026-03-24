@@ -22,7 +22,7 @@ class ReviewDetail extends GetView<ReviewDetailController> {
       length: 2,
       child: Scaffold(
           appBar: AppBar(
-            leading: const BackButton(color: Colors.white),
+            leading: safeBackButton(context),
             title: Obx(() => secondAppBarWidget(
                 context: context,
                 title:

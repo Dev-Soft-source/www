@@ -22,7 +22,7 @@ class NotificationAddReviewPage
     Get.put(NotificationAddReviewController());
     return Scaffold(
       appBar: AppBar(
-        leading: const BackButton(color: Colors.white),
+        leading: safeBackButton(context),
         title: secondAppBarWidget(
             context: context,
             title: controller.reviewType.toString() == "driver"
@@ -313,3 +313,4 @@ class NotificationAddReviewPage
     );
   }
 }
+

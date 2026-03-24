@@ -24,7 +24,7 @@ class RideFairDetail extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: const BackButton(color: Colors.white),
+        leading: safeBackButton(context),
         title: Obx(() => secondAppBarWidget(context: context, title: "${controller.labelTextDetail['ride_fare_main_heading'] ?? "Ride fair details"}")),
         backgroundColor: primaryColor,
       ),
@@ -63,3 +63,4 @@ class RideFairDetail extends StatelessWidget {
     );
   }
 }
+

@@ -298,8 +298,21 @@ class MyTripsPage extends GetView<MyTripController> {
                                                                 : Colors.white,
                                                         onTapTripCard:
                                                             () async {
+                                                          final query = Uri(
+                                                                  queryParameters: {
+                                                                'from': (controller.completedTripList[index]['departure'] ??
+                                                                        '')
+                                                                    .toString(),
+                                                                'to': (controller.completedTripList[index]['destination'] ??
+                                                                        '')
+                                                                    .toString(),
+                                                                'price': (controller.completedTripList[index]['price'] ??
+                                                                        '')
+                                                                    .toString(),
+                                                              })
+                                                              .query;
                                                           Get.toNamed(
-                                                              '/trip_detail/${controller.completedTripList[index]['ride']['id']}/trip/completed/${controller.completedTripList[index]['ride_detail_id']}');
+                                                              '/trip_detail/${controller.completedTripList[index]['ride']['id']}/trip/completed/${controller.completedTripList[index]['ride_detail_id']}?$query');
                                                         },
                                                         leaveReviewDays:
                                                             int.parse(controller
@@ -417,8 +430,21 @@ class MyTripsPage extends GetView<MyTripController> {
                                                               ? Colors.grey.shade100
                                                               : Colors.white,
                                                           onTapTripCard: () async {
+                                                            final query = Uri(
+                                                                    queryParameters: {
+                                                                  'from': (controller.cancelledTripList[index]['departure'] ??
+                                                                          '')
+                                                                      .toString(),
+                                                                  'to': (controller.cancelledTripList[index]['destination'] ??
+                                                                          '')
+                                                                      .toString(),
+                                                                  'price': (controller.cancelledTripList[index]['price'] ??
+                                                                          '')
+                                                                      .toString(),
+                                                                })
+                                                                .query;
                                                             Get.toNamed(
-                                                                '/trip_detail/${controller.cancelledTripList[index]['ride']['id']}/trip/cancelled/${controller.cancelledTripList[index]['ride_detail_id']}');
+                                                                '/trip_detail/${controller.cancelledTripList[index]['ride']['id']}/trip/cancelled/${controller.cancelledTripList[index]['ride_detail_id']}?$query');
                                                           });
                                                     },
                                                     separatorBuilder:

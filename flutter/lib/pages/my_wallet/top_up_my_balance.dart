@@ -22,7 +22,7 @@ class TopUpMyBalance extends StatelessWidget {
     var controller = Get.find<MyWalletController>();
     return Scaffold(
         appBar: AppBar(
-          leading: const BackButton(color: Colors.white),
+          leading: safeBackButton(context),
           title: Obx(() => secondAppBarWidget(
               context: context,
               title:
@@ -196,3 +196,4 @@ class TopUpMyBalance extends StatelessWidget {
         ));
   }
 }
+

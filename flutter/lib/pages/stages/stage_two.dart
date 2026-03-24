@@ -30,7 +30,7 @@ class StageTwo extends GetView<StageTowController> {
               langIcon: controller.serviceController.langIcon.value,
               screeWidth: context.screenWidth,
               page: "step2")),
-          // leading: const BackButton(color: Colors.white),
+          // leading: safeBackButton(context),
         ),
         body: Obx(() {
           if (controller.errorStateManager.hasError.value) {
@@ -211,3 +211,4 @@ class StageTwo extends GetView<StageTowController> {
         }));
   }
 }
+

@@ -31,9 +31,7 @@ class DeepTripDetailPage extends GetView<DeepTripDetailController> {
       appBar: AppBar(
         backgroundColor: primaryColor,
         title: Obx(() => secondAppBarWidget(title: "${controller.labelTextDetail['trip_main_heading'] ?? 'Trip details'}", context: context)),
-        leading: const BackButton(
-            color: Colors.white
-        ),
+        leading: safeBackButton(context),
       ),
 
       body: Obx(() {
@@ -129,7 +127,7 @@ class DeepTripDetailPage extends GetView<DeepTripDetailController> {
                           vehicleInfoWidget(
                               context: context,
                               vehicleDetail: "${controller.ride['vehicle'] != null ? controller.ride['vehicle']['year'] : ""} ${controller.ride['vehicle'] != null ? controller.ride['vehicle']['make'] : ""} ${controller.ride['vehicle'] != null ? controller.ride['vehicle']['model'] : ""}",
-                              licenseNumber: "${controller.ride['vehicle'] != null ? controller.ride['vehicle']['liscense_no'] : ""}",
+                              licenseNumber: "${controller.ride['vehicle'] != null ? controller.ride['vehicle']['license_no'] : ""}",
                               carType: "${controller.ride['vehicle'] != null ? controller.ride['vehicle']['car_type'] : ""}",
                               rideId: "${controller.ride['id']}",
                               vehicleImage: "${controller.ride['vehicle'] != null ? controller.ride['vehicle']['image'] : ""}",

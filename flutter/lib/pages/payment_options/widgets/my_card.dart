@@ -11,6 +11,11 @@ Widget myCard(
     Color cardBgColor = Colors.white,
     onSetPrimary,
     onDelete}) {
+  final String cardType = cardDetail['card_type']?.toString() ?? "";
+  final String cardNumber = cardDetail['card_number']?.toString() ?? "";
+  final String expMonth = cardDetail['exp_month']?.toString() ?? "";
+  final String expYear = cardDetail['exp_year']?.toString() ?? "";
+
   return Container(
     decoration: BoxDecoration(
       borderRadius: const BorderRadius.all(Radius.circular(5.0)),
@@ -56,7 +61,7 @@ Widget myCard(
               Expanded(
                 flex: 10,
                 child: txt20SizeCapitalize(
-                  title: cardDetail['card_type'],
+                  title: cardType,
                   textColor: textColor,
                   fontFamily: bold,
                   context: context,
@@ -81,7 +86,9 @@ Widget myCard(
               Expanded(
                 flex: 10,
                 child: txt20Size(
-                  title: "XXXX XXXX XXXX ${cardDetail['card_number']}",
+                  title: cardNumber.isEmpty
+                      ? "XXXX XXXX XXXX"
+                      : "XXXX XXXX XXXX $cardNumber",
                   textColor: textColor,
                   fontFamily: bold,
                   context: context,
@@ -106,9 +113,11 @@ Widget myCard(
               Expanded(
                 flex: 10,
                 child: txt20Size(
-                  title: cardDetail['exp_month'].toString().length == 1
-                      ? "0${cardDetail['exp_month']}-${cardDetail['exp_year']}"
-                      : "${cardDetail['exp_month']}-${cardDetail['exp_year']}",
+                  title: expMonth.isEmpty || expYear.isEmpty
+                      ? ""
+                      : expMonth.length == 1
+                          ? "0$expMonth-$expYear"
+                          : "$expMonth-$expYear",
                   textColor: textColor,
                   fontFamily: bold,
                   context: context,

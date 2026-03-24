@@ -21,7 +21,7 @@ class CancelBookingPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: const BackButton(color: Colors.white),
+        leading: safeBackButton(context),
         title: Obx(() => secondAppBarWidget(
             context: context,
             title: controller.pageType == "trip"
@@ -305,3 +305,4 @@ class CancelBookingPage extends StatelessWidget {
     );
   }
 }
+

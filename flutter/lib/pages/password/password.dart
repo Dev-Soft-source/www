@@ -24,7 +24,7 @@ class PasswordPage extends GetView<PasswordController> {
               title:
                   "${controller.labelTextDetail['main_heading'] ?? "Password"}",
               context: context)),
-          leading: const BackButton(color: Colors.white),
+          leading: safeBackButton(context),
         ),
         body: SafeArea(
           child: Obx(() {
@@ -610,3 +610,4 @@ String _getStrengthText(int completedRequirements) {
       return "Unknown";
   }
 }
+

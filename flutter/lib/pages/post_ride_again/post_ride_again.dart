@@ -26,9 +26,7 @@ class PostRideAgainPage extends GetView<PostRideAgainController> {
                 title:
                     "${controller.labelTextDetail['post_ride_again_main_heading'] ?? "Post ride again"}",
                 context: context)),
-            leading: const BackButton(
-              color: Colors.white,
-            ),
+            leading: safeBackButton(context),
           ),
           body: SafeArea(
             child: Obx(() {
@@ -296,3 +294,4 @@ class PostRideAgainPage extends GetView<PostRideAgainController> {
     );
   }
 }
+

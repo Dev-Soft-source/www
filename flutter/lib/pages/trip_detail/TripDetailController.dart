@@ -15,6 +15,7 @@ class TripDetailController extends GetxController {
   var type = "";
   var from = "";
   var to = "";
+  var price = "";
   var fromCityId = "";
   var toCityId = "";
   var cancelSetting = {};
@@ -38,6 +39,7 @@ class TripDetailController extends GetxController {
     status = Get.parameters['status'] ?? "";
     from = Get.parameters['from'] ?? "";
     to = Get.parameters['to'] ?? "";
+    price = Get.parameters['price'] ?? "";
     fromCityId = Get.parameters['from_city_id'] ?? "0";
     toCityId = Get.parameters['to_city_id'] ?? "0";
     amountTextEditingController = TextEditingController();

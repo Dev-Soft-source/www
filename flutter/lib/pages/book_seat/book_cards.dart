@@ -20,9 +20,7 @@ class BookCardsPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: primaryColor,
         title: secondAppBarWidget(title: "${controller.labelTextDetail['select_card_label'] ?? "Select your card"}", context: context),
-        leading: const BackButton(
-            color: Colors.white
-        ),
+        leading: safeBackButton(context),
       ),
 
       body: Obx(() {

@@ -19,7 +19,7 @@ class CoPassengerPage extends GetView<CoPassengerController> {
               title:
                   "${controller.labelTextDetail['co_passenger_main_heading'] ?? "Co-passengers"}",
               context: context),
-          leading: const BackButton(color: Colors.white),
+          leading: safeBackButton(context),
         ),
         body: Obx(() {
           if (controller.errorStateManager.isLoading.value) {
@@ -66,3 +66,4 @@ class CoPassengerPage extends GetView<CoPassengerController> {
         }));
   }
 }
+

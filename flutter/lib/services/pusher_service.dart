@@ -133,8 +133,16 @@ class PusherService {
   }
 
   Future<void> disconnect() async {
-    if (_pusher != null) {
+    if (_pusher == null || !_isInitialized) {
+      _isInitialized = false;
+      return;
+    }
+
+    try {
       await _pusher!.disconnect();
+    } catch (e) {
+      logger.warning('Pusher disconnect skipped/failed safely: $e');
+    } finally {
       _isInitialized = false;
     }
   }

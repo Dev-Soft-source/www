@@ -1,6 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
+import 'package:proximaride_app/pages/widgets/app_network_image.dart';
 
 Widget profileImageWidget(
     {required controller,
@@ -16,21 +16,26 @@ Widget profileImageWidget(
     ),
     child: ClipRRect(
       borderRadius: BorderRadius.circular(50.0),
-      child: CachedNetworkImage(
-          width: double.infinity,
-          height: double.infinity,
-          fit: BoxFit.cover,
-          imageUrl: imagePath,
-          errorWidget: (context, url, error) =>
-              controller.serviceController.loginUserDetail['gender'] == 'female'
-                  ? Image.asset(defaultFemaleImage,
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover)
-                  : Image.asset(defaultMaleImage,
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover)),
+      child: appNetworkImage(
+        imageUrl: imagePath,
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.cover,
+        errorChild:
+            controller.serviceController.loginUserDetail['gender'] == 'female'
+                ? Image.asset(
+                    defaultFemaleImage,
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
+                  )
+                : Image.asset(
+                    defaultMaleImage,
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+      ),
     ),
   );
 }

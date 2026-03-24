@@ -25,7 +25,7 @@ class ForgetPasswordPage extends GetView<ForgetPasswordController> {
               title:
                   "${controller.labelTextDetail['main_heading'] ?? "Forgot password?"}",
               context: context),
-          leading: const BackButton(color: Colors.white),
+          leading: safeBackButton(context),
         ),
         body: controller.errorStateManager.isLoading.value
             ? Center(child: progressCircularWidget(context))
@@ -155,3 +155,4 @@ class ForgetPasswordPage extends GetView<ForgetPasswordController> {
                       )));
   }
 }
+

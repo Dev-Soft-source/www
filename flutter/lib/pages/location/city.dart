@@ -28,7 +28,7 @@ class CityPage extends GetView<LocationController> {
                           ? "${controller.labelTextDetail['select_destination_label'] ?? "Select destination"}"
                           : "",
               context: context)),
-          leading: const BackButton(color: Colors.white),
+          leading: safeBackButton(context),
         ),
         body: Obx(() {
           if (controller.errorStateManager.hasError.value) {
@@ -236,3 +236,4 @@ class CityPage extends GetView<LocationController> {
         }));
   }
 }
+

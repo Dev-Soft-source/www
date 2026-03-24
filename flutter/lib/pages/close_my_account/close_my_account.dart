@@ -23,7 +23,7 @@ class CloseMyAccount extends GetView<CloseAccountController> {
               title:
                   "${controller.labelTextDetail['main_heading'] ?? 'Close my account'}",
               context: context)),
-          leading: const BackButton(color: Colors.white),
+          leading: safeBackButton(context),
         ),
         body: SafeArea(
           child: Obx(() {
@@ -831,3 +831,4 @@ class CloseMyAccount extends GetView<CloseAccountController> {
         ));
   }
 }
+

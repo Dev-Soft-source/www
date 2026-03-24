@@ -18,7 +18,7 @@ class BookAddCardPage extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: primaryColor,
           title: secondAppBarWidget(title: "Add new card", context: context),
-          leading: const BackButton(color: Colors.white),
+          leading: safeBackButton(context),
         ),
         body: Obx(() {
           if (controller.isLoading.value == true) {
@@ -59,3 +59,4 @@ class BookAddCardPage extends StatelessWidget {
         }));
   }
 }
+

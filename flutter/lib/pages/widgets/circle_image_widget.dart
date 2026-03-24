@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../consts/constFileLink.dart';
+import 'package:proximaride_app/pages/widgets/app_network_image.dart';
 
 Widget circleImageWidget(
     {double width = 0.0,
@@ -21,14 +22,28 @@ Widget circleImageWidget(
       tablet: width,
     ),
     decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(borderRadius),
-        color: bgColor.withOpacity(0.3),
-        image: imageType != "local"
-            ? DecorationImage(
-                image: NetworkImage(imagePath),
-              )
-            : DecorationImage(
-                image: AssetImage(imagePath),
-              )),
+      borderRadius: BorderRadius.circular(borderRadius),
+      color: bgColor.withOpacity(0.3),
+    ),
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(borderRadius),
+      child: imageType != "local"
+          ? appNetworkImage(
+              imageUrl: imagePath,
+              width: double.infinity,
+              height: double.infinity,
+              fit: BoxFit.cover,
+              errorChild: Icon(
+                Icons.image_outlined,
+                color: bgColor,
+              ),
+            )
+          : Image.asset(
+              imagePath,
+              width: double.infinity,
+              height: double.infinity,
+              fit: BoxFit.cover,
+            ),
+    ),
   );
 }

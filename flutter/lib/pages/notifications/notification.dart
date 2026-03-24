@@ -25,7 +25,7 @@ class NotificationPage extends GetView<NotificationController> {
               title:
                   "${controller.labelTextDetail['notification_page_main_heading'] ?? 'Notifications'}",
               context: context)),
-          leading: const BackButton(color: Colors.white),
+          leading: safeBackButton(context),
         ),
         body: SafeArea(
           child: Obx(() {
@@ -1072,3 +1072,4 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 }
+

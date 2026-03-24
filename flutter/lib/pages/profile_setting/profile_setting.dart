@@ -19,8 +19,17 @@ class ProfileSettingPage extends GetView<ProfileSettingController> {
               title:
                   "${controller.labelTextDetail['main_heading'] ?? "Profile settings"}",
               context: context)),
-          leading: const BackButton(
-            color: Colors.white,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              if (Get.key.currentState?.canPop() ?? false) {
+                Get.back();
+              } else if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
+              } else {
+                Get.offNamed('/navigation');
+              }
+            },
           ),
         ),
         body: SafeArea(

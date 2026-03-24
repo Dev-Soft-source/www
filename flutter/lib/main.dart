@@ -42,6 +42,7 @@ import 'package:proximaride_app/pages/my_reviews/my_reviews.dart';
 import 'package:proximaride_app/pages/my_trips/cancel_booking.dart';
 import 'package:proximaride_app/pages/my_trips/remove_passenger.dart';
 import 'package:proximaride_app/pages/my_trips/review_passenger.dart';
+import 'package:proximaride_app/pages/my_vehicle/MyVehicleController.dart';
 import 'package:proximaride_app/pages/my_vehicle/add_vehicle.dart';
 import 'package:proximaride_app/pages/my_vehicle/my_vehicle.dart';
 import 'package:proximaride_app/pages/my_wallet/balance_book_cards.dart';
@@ -524,8 +525,24 @@ class MyAppState extends State<MyApp> {
           page: () => const ProfileSettingPage(),
         ),
         GetPage(name: '/profile_photo', page: () => const ProfilePhotoPage()),
-        GetPage(name: '/my_vehicle', page: () => const MyVehiclePage()),
-        GetPage(name: '/add_vehicle', page: () => const AddVehiclePage()),
+        GetPage(
+          name: '/my_vehicle',
+          page: () => const MyVehiclePage(),
+          binding: BindingsBuilder(() {
+            if (!Get.isRegistered<MyVehicleController>()) {
+              Get.lazyPut<MyVehicleController>(() => MyVehicleController());
+            }
+          }),
+        ),
+        GetPage(
+          name: '/add_vehicle',
+          page: () => const AddVehiclePage(),
+          binding: BindingsBuilder(() {
+            if (!Get.isRegistered<MyVehicleController>()) {
+              Get.lazyPut<MyVehicleController>(() => MyVehicleController());
+            }
+          }),
+        ),
         GetPage(name: '/password', page: () => const PasswordPage()),
         GetPage(
           name: '/my_phone_number',

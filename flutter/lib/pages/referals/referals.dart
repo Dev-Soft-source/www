@@ -23,9 +23,7 @@ class Referral extends GetView<ReferralController> {
             title:
                 "${controller.labelTextDetail['main_heading'] ?? "Earn Rewards for Referring Quality Members!"}",
             context: context)),
-        leading: const BackButton(
-          color: Colors.white,
-        ),
+        leading: safeBackButton(context),
       ),
       body: SafeArea(
         child: Obx(() {
@@ -183,3 +181,4 @@ class Referral extends GetView<ReferralController> {
     );
   }
 }
+

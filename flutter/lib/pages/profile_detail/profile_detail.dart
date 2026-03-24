@@ -30,7 +30,7 @@ class ProfileDetailPage extends GetView<ProfileDetailController> {
                         ? "${controller.userProfile['first_name'] ?? "User"}'s ${controller.labelTextDetail['profile_label'] ?? "profile"}"
                         : "${controller.userProfile['first_name'] ?? "User"}'s ${controller.labelTextDetail['profile_label'] ?? "profile"}",
                 context: context),
-            leading: const BackButton(color: Colors.white),
+            leading: safeBackButton(context),
           ),
           body: SafeArea(
             child: Obx(() {
@@ -322,3 +322,4 @@ class ProfileDetailPage extends GetView<ProfileDetailController> {
     );
   }
 }
+
