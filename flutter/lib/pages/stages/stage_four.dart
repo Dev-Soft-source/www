@@ -88,7 +88,7 @@ class StageFour extends GetView<StageFourController> {
                           context: context,
                           onTap: () async {
                             controller.errors.removeWhere(
-                                (element) => element['title'] == "driver_license");
+                                (element) => element['title'] == "driver_liscense");
                             controller.imageType.value = 2;
                             await imageUploadBottomSheet(controller, context);
                           },
@@ -103,11 +103,11 @@ class StageFour extends GetView<StageFourController> {
                           screenWidth: context.screenWidth,
                           isError: controller.errors.firstWhereOrNull(
                                   (element) =>
-                                      element['title'] == "driver_license") !=
+                                      element['title'] == "driver_liscense") !=
                               null,
                         ),
                         if (controller.errors.firstWhereOrNull((element) =>
-                                element['title'] == "driver_license") !=
+                                element['title'] == "driver_liscense") !=
                             null) ...[
                           toolTip(
                               tip: "Driver's License is required",

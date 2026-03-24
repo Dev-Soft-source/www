@@ -225,7 +225,7 @@ class StageFourController extends GetxController {
     driverLicenseNameOriginal.value = serviceController.originalImageName.value;
     serviceController.originalImageName.value = "";
 
-    errors.removeWhere((element) => element['title'] == "driver_license");
+    errors.removeWhere((element) => element['title'] == "driver_liscense");
     validateLicenseFields(showError: false);
     Get.back();
   }
@@ -238,15 +238,15 @@ class StageFourController extends GetxController {
       return hasLicense;
     }
 
-    errors.removeWhere((element) => element['title'] == "driver_license");
+    errors.removeWhere((element) => element['title'] == "driver_liscense");
     if (!hasLicense) {
       var message = validationMessageDetail['required'];
       message = (message ?? ":Attribute is required").replaceAll(
         ":Attribute",
-        labelTextDetail['driver_license_error'] ?? "Driver's License",
+        labelTextDetail['driver_liscense_error'] ?? "Driver's License",
       );
       errors.add({
-        'title': "driver_license",
+        'title': "driver_liscense",
         'eList': [message]
       });
     }
@@ -270,13 +270,13 @@ class StageFourController extends GetxController {
         message = (message ?? "Can not upload image size greater than :max MB")
             .replaceAll(
                 ":attribute",
-                labelTextDetail['driver_license_error'] ??
+                labelTextDetail['driver_liscense_error'] ??
                     "driver license")
             .replaceAll(":Attribute",
-                labelTextDetail['driver_license_error'] ?? "driver license")
+                labelTextDetail['driver_liscense_error'] ?? "driver license")
             .replaceAll(":max", "10");
         errors.add({
-          'title': "driver_license",
+          'title': "driver_liscense",
           'eList': [message]
         });
         return;
@@ -307,10 +307,10 @@ class StageFourController extends GetxController {
       } else if (resp['errors'] != null) {
         final licenseErrors = resp['errors']['driver_liscense'] ??
             resp['errors']['driver_license_original_upload'] ??
-            resp['errors']['driver_license'];
+            resp['errors']['driver_liscense'];
         if (licenseErrors != null) {
           errors.add({
-            'title': "driver_license",
+            'title': "driver_liscense",
             'eList': List<String>.from(licenseErrors)
           });
         }
