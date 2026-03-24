@@ -636,34 +636,27 @@ class _StageOneState extends State<StageOne> {
                             //         (element) => element['title'] == "mini"))
                             toolTip(tip: "Mini Bio is required", type: 'string')
                           ],
-                          100.heightBox,
+                          24.heightBox,
+                          Container(
+                            color: Colors.grey.shade100,
+                            width: context.screenWidth,
+                            child: elevatedButtonWidget(
+                                enabled: controller.isStageOneValid.value,
+                                textWidget: txt22Size(
+                                    title:
+                                        "${controller.labelTextDetail['button_label'] ?? "Next"}",
+                                    fontFamily: regular,
+                                    textColor: Colors.white,
+                                    context: context),
+                                onPressed: () async {
+                                  controller.setStageOne();
+                                },
+                                context: context,
+                                btnRadius: 5.0),
+                          ),
+                          24.heightBox,
                         ],
                       ),
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      color: Colors.grey.shade100,
-                      padding: EdgeInsets.all(getValueForScreenType<double>(
-                        context: context,
-                        mobile: 15.0,
-                        tablet: 15.0,
-                      )),
-                      width: context.screenWidth,
-                      child: elevatedButtonWidget(
-                          enabled: controller.isStageOneValid.value,
-                          textWidget: txt22Size(
-                              title:
-                                  "${controller.labelTextDetail['button_label'] ?? "Next"}",
-                              fontFamily: regular,
-                              textColor: Colors.white,
-                              context: context),
-                          onPressed: () async {
-                            controller.setStageOne();
-                          },
-                          context: context,
-                          btnRadius: 5.0),
                     ),
                   ),
                   if (controller.isOverlayLoading.value == true) ...[
