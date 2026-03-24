@@ -41,15 +41,21 @@ Widget textAreaWidget(
       hintStyle: appPlaceholderTextStyle(
         context: null,
       ).copyWith(
-        fontSize: fontSize != null ? fontSize - 2 : null,
+        fontSize: fontSize ?? 18.0,
         fontFamily: fontFamily,
       ),
       hintMaxLines: hintMaxLines,
       filled: true,
       fillColor: inputColor,
+      contentPadding:
+          const EdgeInsets.symmetric(vertical: 14.0, horizontal: 12.0),
     ),
-    style:
-        TextStyle(fontSize: fontSize, fontFamily: fontFamily, color: textColor),
+    style: TextStyle(
+      fontSize: fontSize ?? 18.0,
+      fontFamily: fontFamily,
+      color: textColor,
+      height: 1.2,
+    ),
     focusNode: focusNode,
   );
 }

@@ -27,6 +27,7 @@ Widget fieldsWidget(
     controller: textController,
     readOnly: readonly,
     autofocus: autoFocus,
+    textAlignVertical: TextAlignVertical.center,
     onEditingComplete: () {},
     maxLength: maxLength,
     maxLines: maxLines,
@@ -64,9 +65,13 @@ Widget fieldsWidget(
         ),
         fillColor: inputColor,
         contentPadding:
-            const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0)),
-    style:
-        TextStyle(fontSize: fontSize, fontFamily: fontFamily, color: textColor),
+            const EdgeInsets.symmetric(vertical: 14.0, horizontal: 12.0)),
+    style: TextStyle(
+      fontSize: fontSize ?? 18.0,
+      fontFamily: fontFamily,
+      color: textColor,
+      height: 1.2,
+    ),
     onChanged: onChanged,
     focusNode: focusNode,
     onFieldSubmitted: onFieldSubmitted,

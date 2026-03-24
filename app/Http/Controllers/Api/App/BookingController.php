@@ -2096,26 +2096,9 @@ class BookingController extends Controller
 
         $taxAmt = isset($request->tax_amount) ? $request->tax_amount : 0;
 
-        $findRidePage = null;
-        $messages = null;
         $selectedLanguage = app()->getLocale();
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-
-            if ($selectedLanguage) {
-                // Retrieve the HomePageSettingDetail associated with the selected language
-                $findRidePage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('seat_unavailable_message', 'verified_number_message','general_error_message','card_expiry_message','block_booking_message', 'booking_request_success_message')->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $findRidePage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('seat_unavailable_message', 'verified_number_message','general_error_message','card_expiry_message','block_booking_message', 'booking_request_success_message')->first();
-            }
-        }
-
+       
+        $messages = $this->successMessage;
 
         if ($user->block_booking == '1') {
             return $this->apiErrorResponse(strip_tags($message->block_booking_message ?? null), 200);

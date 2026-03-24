@@ -564,7 +564,7 @@ class BookingController extends Controller
             $request->input('from_stop_id'),
             $request->input('to_stop_id')
         );
-        $type = FeaturesSetting::whereId($ride->payment_method)->first();
+
         $user = User::where('id', auth()->user()->id)->first();
         
         $phoneNumber = PhoneNumber::where('user_id', $user->id)->first();
@@ -777,7 +777,7 @@ class BookingController extends Controller
 
                 if ($request->online_payment > '0') {
 
-                    if ($ride->payment_method === $findRidePage->payment_methods_option4) {
+                    if ($ride->isSecureCashPayment()) {
                         $phoneNumber = PhoneNumber::where('user_id', $user->id)->where('verified', '1')->where('default', '1')->first();
 
                         if (!$phoneNumber) {
@@ -1156,8 +1156,9 @@ class BookingController extends Controller
                         $query->where('sender', $booking->user_id)
                             ->where('receiver', $ride->added_by);
                     })->where('ride_id', $id)->first();
+
                     if (empty($rideFirstMessage)) {
-                        $message1 = Message::create([
+                        Message::create([
                             'ride_id' => $id,
                             'receiver' => $ride->added_by,
                             'sender' => $booking->user_id,
@@ -1165,14 +1166,15 @@ class BookingController extends Controller
                             'redirect' => '1',
                             'ride_detail_id' => $booking->ride_detail_id != "" ? $booking->ride_detail_id : NULL
                         ]);
+                    }else{
+                        Message::create([
+                            'ride_id' => $id,
+                            'receiver' => $ride->added_by,
+                            'sender' => $booking->user_id,
+                            'message' => $request->driver_message,
+                            'ride_detail_id' => $booking->ride_detail_id != "" ? $booking->ride_detail_id : NULL
+                        ]);
                     }
-                    $message = Message::create([
-                        'ride_id' => $id,
-                        'receiver' => $ride->added_by,
-                        'sender' => $booking->user_id,
-                        'message' => $request->driver_message,
-                        'ride_detail_id' => $booking->ride_detail_id != "" ? $booking->ride_detail_id : NULL
-                    ]);
 
                     $driver = $ride->driver ?? User::find($ride->added_by);
                     if ($driver) {
@@ -1189,22 +1191,6 @@ class BookingController extends Controller
                         $data = ['first_name' => $user->first_name];
                         Mail::to($user->email)->queue(new BookingRequestConfirmationMail($data));
 
-                        if ($driver) {
-                            $driverPhoneNumber = PhoneNumber::where('user_id', $driver->id)
-                                // ->where('verified', '1')
-                                ->where('default', '1')
-                                ->first();
-
-                            $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $driver->phone;
-                        }
-
-                        // Get the verified phone number for the passenger (user)
-                        $passengerPhoneNumber = PhoneNumber::where('user_id', $user->id)
-                            // ->where('verified', '1')
-                            ->where('default', '1')
-                            ->first();
-
-                        $passengerPhoneToUse = $passengerPhoneNumber ? $passengerPhoneNumber->phone : $user->phone;
                         $topUpBalance = TopUpBalance::create([
                             'booking_id' => $booking->id,
                             'user_id' => $user->id,
@@ -1289,7 +1275,6 @@ class BookingController extends Controller
                             );
                         } catch (\Exception  $e) {
                             $this->logTwilioSmsFailure($to, $message, $e);
-
                             // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
                         }
                     }
@@ -1307,9 +1292,7 @@ class BookingController extends Controller
         $secured_cash_code = null;
         $paymentAmounts = $this->normalizeBookingPaymentAmounts($request, $ride);
 
-        // Ensure type is a valid string (use ride->booking_type as fallback, limit length to prevent truncation errors)
         $bookingType = (string) ($request->type ?? $ride->booking_type ?? 'standard');
-        $bookingType = substr($bookingType, 0, 50); // Limit to 50 characters to prevent truncation errors
 
         // Payment successful, handle booking logic here
         if ($hasExistingBooking) {
@@ -1469,8 +1452,9 @@ class BookingController extends Controller
             $query->where('sender', $booking->user_id)
                 ->where('receiver', $ride->added_by);
         })->where('ride_id', $ride->id)->first();
+
         if (empty($rideFirstMessage)) {
-            $message1 = Message::create([
+            $message = Message::create([
                 'ride_id' => $ride->id,
                 'receiver' => $ride->added_by,
                 'sender' => $booking->user_id,
@@ -1478,14 +1462,15 @@ class BookingController extends Controller
                 'redirect' => '1',
                 'ride_detail_id' => $booking->ride_detail_id != "" ? $booking->ride_detail_id : NULL
             ]);
+        } else {
+            $message = Message::create([
+                'ride_id' => $ride->id,
+                'receiver' => $ride->added_by,
+                'sender' => $booking->user_id,
+                'message' => $request->driver_message,
+                'ride_detail_id' => $booking->ride_detail_id != "" ? $booking->ride_detail_id : NULL
+            ]);
         }
-        $message = Message::create([
-            'ride_id' => $ride->id,
-            'receiver' => $ride->added_by,
-            'sender' => $booking->user_id,
-            'message' => $request->driver_message,
-            'ride_detail_id' => $booking->ride_detail_id != "" ? $booking->ride_detail_id : NULL
-        ]);
         // Assuming $user and $fcmToken are defined
         $fcmService = new FCMService();
         $fcm_tokens = FCMToken::where('user_id', $ride->driver->id)->get();
@@ -1506,27 +1491,16 @@ class BookingController extends Controller
 
 
         if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
-            $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $booking->seats, 'booking_price' => $price, 'total_price' => $request->seats_amount, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time];
             // Send booking request email
+            $data = ['first_name' => $ride->driver->first_name, 'id' => $booking->id, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $ride->driver->email, 'secured_cash_code' => $secured_cash_code, 'passenger_first_name' => $user->first_name, 'passenger_last_name' => $user->last_name, 'gender' => $user->gender, 'passenger_email' => $user->email, 'phone' => $user->phone, 'seats' => $booking->seats, 'booking_price' => $price, 'total_price' => $request->seats_amount, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time];
             Mail::to($ride->driver->email)->queue(new BookingRequestMail($data));
         }
-
-
 
         if (isset($user->email_notification) && $user->email_notification == 1) {
 
             $data = ['first_name' => $user->first_name];
             Mail::to($user->email)->queue(new BookingRequestConfirmationMail($data));
 
-
-            $driverPhoneNumber = PhoneNumber::where('user_id', $ride->driver->id)
-                ->where('default', '1')
-                ->first();
-
-            $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $ride->driver->phone;
-
-
-            // $data = ['first_name' => $user->first_name, 'seats' => $booking->seats, 'seats_amount' => $request->seats_amount, 'booking_credit' => $booking->booking_credit, 'online_payment' => $request->online_payment, 'cash_payment' => $request->cash_payment, 'total' => $request->total];
             $data = [
                 'first_name' => $user->first_name,
                 'full_name' => $user->first_name . ' ' . $user->last_name,

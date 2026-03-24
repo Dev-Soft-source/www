@@ -10,5 +10,5 @@ const placeholderFontFamily = regular;
 const descriptiveFontFamily = regular;
 
 const buttonFontSize = 20.0;
-const placeholderFontSize = 16.0;
+const placeholderFontSize = 18.0;
 const descriptiveFontSize = 18.0;

@@ -33,8 +33,6 @@ class PusherService {
     await _pusher!.init(
       apiKey: _appKey,
       cluster: _cluster,
-      authEndpoint: _authEndpoint,
-      authParams: {'headers': headers},
       onConnectionStateChange: (currentState, previousState) {
         logger.info('Pusher Connection: $currentState');
       },
@@ -49,7 +47,7 @@ class PusherService {
         // ignore: prefer_typing_uninitialized_variables
         var json;
         try {
-          var authUrl = '$url/api/broadcasting/auth';
+          var authUrl = _authEndpoint;
           logger.info('Auth URL: $authUrl');
           logger.info(
               'Request Body: socket_id=$socketId&channel_name=$channelName');
