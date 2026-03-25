@@ -75,6 +75,7 @@ Widget rideCardWidget(
               price: "${tripDetail['ride_detail'][0]['price']}",
               pickup: "${tripDetail['pickup']}",
               dropOff: "${tripDetail['dropoff']}",
+              labelTextDetail: controller.labelTextDetail,
               fromLabel: "${controller.labelTextDetail['card_section_from_label'] ?? 'From'}",
               toLabel: "${controller.labelTextDetail['card_section_to_label'] ?? 'to'}",
               seatLeftLabel: "${controller.labelTextDetail['card_section_seats_left'] ?? 'seats left'}",

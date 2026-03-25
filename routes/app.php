@@ -195,9 +195,11 @@ Route::group(['prefix' => 'app/v1', 'middleware' => ['auth:sanctum']], function 
     Route::post('review-driver/store', [ReviewController::class, 'StoreReviewDriver'])->name('app.auth.review_driver.store');
     Route::get('review-passenger', [ReviewController::class, 'ReviewPassenger'])->name('app.auth.review_passenger');
     Route::post('review-passenger/store', [ReviewController::class, 'StoreReviewPassenger'])->name('app.auth.review_passenger.store');
+    
     Route::get('upcoming-trips', [MyTripController::class, 'CurrentTrips'])->name('app.auth.my_trips');
     Route::get('completed-trips', [MyTripController::class, 'PastTrips'])->name('app.auth.past_trips');
     Route::get('cancelled-trips', [MyTripController::class, 'CancelledTrips'])->name('app.auth.cancelled_trips');
+    
     Route::put('cancel-booking', [MyTripController::class, 'cancelBooking'])->name('app.auth.cancel_booking');
     Route::get('upcoming-rides', [MyRideController::class, 'CurrentRides'])->name('app.auth.my_rides');
     Route::get('completed-rides', [MyRideController::class, 'PastRides'])->name('app.auth.past_rides');

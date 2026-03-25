@@ -343,6 +343,9 @@ class MyTripController extends Controller
         extract($this->prepareRideFeatureContext($request->lang_id));
 
         foreach ($bookings as $booking) {
+
+            $booking->price = number_format($booking->price / 100, 2, '.', '');
+
             // Calculate seats left
             $bookedSeats = $booking->ride->bookings()
                 ->where('status', '<>', 3)
@@ -455,6 +458,8 @@ class MyTripController extends Controller
         extract($this->prepareRideFeatureContext($request->lang_id));
 
         foreach ($bookings as $booking) {
+            
+            $booking->price = number_format($booking->price / 100, 2, '.', '');
             // Calculate seats left
             $bookedSeats = $booking->ride->bookings()
                 ->where('status', '<>', 3)
