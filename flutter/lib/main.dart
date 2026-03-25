@@ -108,22 +108,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   logger.intialize();
-
-  await _initializeStripe(
-    publishableKey:
-        'pk_test_51PQ40hHySwupjfTMAKFhcggJHnPhCgsnASCOyIFfNixqiReRCXa4v1w3Zds3OuOzADlGg2Uk0xbLbLU9CvSyrBSH000NbZbLzR',
-  );
-
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  await instalData();
-
-  // WidgetsBinding.instance.addObserver(
-  //     LifecycleEventHandler(resumeCallBack: () async => setState(() {
-  //     }))
-  // );
-  Get.put(DeepLinkController());
+  await bootstrapCoreAppState();
   runApp(const MyApp());
 }
 
@@ -149,23 +134,26 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   }
 }
 
-instalData() async {
+Future<void> bootstrapCoreAppState() async {
   await dotenv.load(fileName: "assets/.env");
   await initializeApiConfig();
   logger.info("API environment: $apiEnvironment");
   logger.info("Resolved app URL: $url");
   logger.info("Resolved API URL: $baseUrl");
   await initService();
+}
 
-  NotificationService().initNotification();
+Future<void> bootstrapDeferredServices() async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  await NotificationService().initNotification();
 
   FirebaseMessaging.instance.onTokenRefresh.listen((fcmToken) {
     if (kDebugMode) {
       logger.info(fcmToken);
     }
   }).onError((err) {});
-
-  FirebaseMessaging.onMessage;
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     logger.info("[FG] Notification received:");
@@ -199,12 +187,9 @@ instalData() async {
     publishableKey: dotenv.env['STRIPE_KEY'],
   );
 
-  //await TiktokLoginFlutter.initializeTiktokLogin("sbawj9a1vuvtt3arxd");
-
-  // SystemChrome.setPreferredOrientations([
-  //   DeviceOrientation.portraitUp,
-  //   DeviceOrientation.portraitDown
-  // ]);
+  if (!Get.isRegistered<DeepLinkController>()) {
+    Get.put(DeepLinkController());
+  }
 }
 
 Future<void> initService() async {
@@ -222,6 +207,7 @@ class MyApp extends StatefulWidget {
 class MyAppState extends State<MyApp> {
   final serviceController = Get.find<Service>();
   LifecycleEventHandler? lifecycleEventHandler;
+  bool _deferredServicesBootstrapped = false;
   List<String> registeredRoutes = [
     '/',
     '/show-ride',
@@ -298,7 +284,7 @@ class MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    handleInitialNotification();
+    _bootstrapDeferredServices();
 
     logger.info("initState called");
     logger.info(
@@ -334,6 +320,26 @@ class MyAppState extends State<MyApp> {
     // );
   }
 
+  void _bootstrapDeferredServices() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_deferredServicesBootstrapped) {
+        return;
+      }
+      _deferredServicesBootstrapped = true;
+      unawaited(_runDeferredBootstrap());
+    });
+  }
+
+  Future<void> _runDeferredBootstrap() async {
+    try {
+      await bootstrapDeferredServices();
+      await handleInitialNotification();
+    } catch (error, stackTrace) {
+      logger.error('Deferred bootstrap failed: $error');
+      logger.error('Deferred bootstrap stack trace: $stackTrace');
+    }
+  }
+
   @override
   void dispose() {
     if (lifecycleEventHandler != null) {
@@ -342,7 +348,7 @@ class MyAppState extends State<MyApp> {
     super.dispose();
   }
 
-  void handleInitialNotification() async {
+  Future<void> handleInitialNotification() async {
     RemoteMessage? initialMessage =
         await FirebaseMessaging.instance.getInitialMessage();
     logger.info("[TERM] Notification received (getInitialMessage):");

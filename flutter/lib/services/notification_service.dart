@@ -75,10 +75,6 @@ class NotificationService {
 
   final serviceController = Get.find<Service>();
 
-  NotificationService() {
-    initNotification();
-  }
-
   Future<void> initNotification() async {
     developer.log('Initializing notification service',
         name: 'NotificationService');
