@@ -318,7 +318,7 @@
                                     </div>
                                 </div>
 
-                                <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
                                     <div id="credit-card-div"
                                         class="hidden mt-4 p-4 bg-white border border-b-4 border-gray-400 rounded">
                                         <div>
