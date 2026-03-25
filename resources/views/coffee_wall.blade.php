@@ -1,5 +1,14 @@
 @extends('layouts.template')
 
+@section('style')
+<style>
+    label p {
+        font-size: 18px;
+        font-family: FuturaMdCnBT, cursive;
+    }
+</style>
+@endsection
+
 @section('content')
     <div class="container mx-auto my-10 md:my-14 px-4">
         <div class="pb-2">
