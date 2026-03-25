@@ -24,17 +24,16 @@ Widget rideCardWidget(
     tripDate = outputFormat.format(parsedDate);
   }
 
-
   String tripTime = "";
-  if(tripDetail['time'] != null) {
+  if (tripDetail['time'] != null) {
     DateTime parsedTime = DateFormat("HH:mm:ss").parse(tripDetail['time']);
-    if(parsedTime.hour == 12 && parsedTime.minute == 0){
+    if (parsedTime.hour == 12 && parsedTime.minute == 0) {
       DateFormat outputTimeFormat = DateFormat("h:mm");
       tripTime = "${outputTimeFormat.format(parsedTime)} noon";
-    }else if(parsedTime.hour == 0 && parsedTime.minute == 0){
+    } else if (parsedTime.hour == 0 && parsedTime.minute == 0) {
       DateFormat outputTimeFormat = DateFormat("h:mm");
       tripTime = "${outputTimeFormat.format(parsedTime)} midnight";
-    }else{
+    } else {
       DateFormat outputTimeFormat = DateFormat("h:mm a");
       tripTime = outputTimeFormat.format(parsedTime);
     }
@@ -43,6 +42,7 @@ Widget rideCardWidget(
   var requestCount = tripDetail['booking_requests'] != null
       ? tripDetail['booking_requests'].length
       : 0;
+  final bookedSeats = int.tryParse("${tripDetail['booked_seats'] ?? 0}") ?? 0;
 
   return InkWell(
     onTap: onTapRideCard,
@@ -54,34 +54,50 @@ Widget rideCardWidget(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           tripCardDateTimeWidget(
-            date: tripDate,
-            time: tripTime,
-            context: context,
-            tripStatus: tripStatus,
-            request: requestCount.toString(),
-            isLive: tripStatus == "upcoming" ? (tripDetail['vehicle_id'] == null) ? false : true : true,
-            atLabel: "${controller.labelTextDetail['card_section_at_label'] ?? 'at'}",
-            seatLeftLabel: "${controller.labelTextDetail['card_section_seats_left'] ?? 'seats left'}",
-            perSeatLabel: "${controller.labelTextDetail['card_section_per_seat'] ?? 'per seat'}",
-            notLiveLabel: "${controller.labelTextDetail['card_section_not_live'] ?? 'Not live'}",
-            bookingRequestLabel: "${controller.labelTextDetail['card_section_booking_request'] ?? 'booking request'}",
-            completedStatusLabel: "${controller.labelTextDetail['card_section_completed'] ?? 'Completed'}",
-            totalSeat: "${tripDetail['seats']}",
-            cancelStatusLabel: "${controller.labelTextDetail['card_section_cancelled'] ?? 'Cancelled'}"
-          ),
+              date: tripDate,
+              time: tripTime,
+              context: context,
+              tripStatus: tripStatus,
+              request: requestCount.toString(),
+              isLive: tripStatus == "upcoming"
+                  ? (tripDetail['vehicle_id'] == null)
+                      ? false
+                      : true
+                  : true,
+              atLabel:
+                  "${controller.labelTextDetail['card_section_at_label'] ?? 'at'}",
+              seatLeftLabel:
+                  "${controller.labelTextDetail['card_section_seats_left'] ?? 'seats left'}",
+              perSeatLabel:
+                  "${controller.labelTextDetail['card_section_per_seat'] ?? 'per seat'}",
+              notLiveLabel:
+                  "${controller.labelTextDetail['card_section_not_live'] ?? 'Not live'}",
+              bookingRequestLabel:
+                  "${controller.labelTextDetail['card_section_booking_request'] ?? 'booking request'}",
+              completedStatusLabel:
+                  "${controller.labelTextDetail['card_section_completed'] ?? 'Completed'}",
+              totalSeat: "${tripDetail['seats']}",
+              cancelStatusLabel:
+                  "${controller.labelTextDetail['card_section_cancelled'] ?? 'Cancelled'}"),
           tripCardFromToWidget(
-              from: "${tripDetail['ride_detail'][0]['departure']}",
-              to: "${tripDetail['ride_detail'][0]['destination']}",
-              price: "${tripDetail['ride_detail'][0]['price']}",
+              from: "${tripDetail['ride_detail']['departure']}",
+              to: "${tripDetail['ride_detail']['destination']}",
+              price: "${tripDetail['price']}",
               pickup: "${tripDetail['pickup']}",
               dropOff: "${tripDetail['dropoff']}",
               labelTextDetail: controller.labelTextDetail,
-              fromLabel: "${controller.labelTextDetail['card_section_from_label'] ?? 'From'}",
-              toLabel: "${controller.labelTextDetail['card_section_to_label'] ?? 'to'}",
-              seatLeftLabel: "${controller.labelTextDetail['card_section_seats_left'] ?? 'seats left'}",
-              perSeatLabel: "${controller.labelTextDetail['card_section_per_seat'] ?? 'per seat'}",
-              reviewedLabel: "${controller.labelTextDetail['trips_card_section_reviewed'] ?? 'Reviewed'}",
-              reviewDriverLabel: "${controller.labelTextDetail['trips_card_section_review_driver'] ?? 'Review your driver'}",
+              fromLabel:
+                  "${controller.labelTextDetail['card_section_from_label'] ?? 'From'}",
+              toLabel:
+                  "${controller.labelTextDetail['card_section_to_label'] ?? 'to'}",
+              seatLeftLabel:
+                  "${controller.labelTextDetail['card_section_seats_left'] ?? 'seats left'}",
+              perSeatLabel:
+                  "${controller.labelTextDetail['card_section_per_seat'] ?? 'per seat'}",
+              reviewedLabel:
+                  "${controller.labelTextDetail['trips_card_section_reviewed'] ?? 'Reviewed'}",
+              reviewDriverLabel:
+                  "${controller.labelTextDetail['trips_card_section_review_driver'] ?? 'Review your driver'}",
               context: context),
           const Divider(),
           Column(
@@ -93,24 +109,26 @@ Widget rideCardWidget(
                   value:
                       "${tripDetail['booked_seats']} ${controller.labelTextDetail['card_section_seats'] ?? "seats"}",
                   context: context),
-              const Divider(),
-              ridePriceInfoWidget(
-                  title:
-                      "${controller.labelTextDetail['card_section_seats_fee'] ?? "Fare"}",
-                  value: "\$${tripDetail['ride_detail'][0]['price']}",
-                  context: context),
-              const Divider(),
-              ridePriceInfoWidget(
-                  title:
-                      "${controller.labelTextDetail['card_section_booking_fee'] ?? "Booking fee"}",
-                  value: "\$${tripDetail['booking_fee']}",
-                  context: context),
-              const Divider(),
-              ridePriceInfoWidget(
-                  title:
-                      "${controller.labelTextDetail['card_section_amount'] ?? "Total amount"}",
-                  value: "\$${tripDetail['total_amount']}",
-                  context: context),
+              if (bookedSeats > 0) ...[
+                const Divider(),
+                ridePriceInfoWidget(
+                    title:
+                        "${controller.labelTextDetail['card_section_seats_fee'] ?? "Fare"}",
+                    value: "\$${tripDetail['fare']}",
+                    context: context),
+                const Divider(),
+                ridePriceInfoWidget(
+                    title:
+                        "${controller.labelTextDetail['card_section_booking_fee'] ?? "Booking fee"}",
+                    value: "\$${tripDetail['booking_fee']}",
+                    context: context),
+                const Divider(),
+                ridePriceInfoWidget(
+                    title:
+                        "${controller.labelTextDetail['card_section_amount'] ?? "Total amount"}",
+                    value: "\$${tripDetail['total_amount']}",
+                    context: context),
+              ],
             ],
           ),
           const Divider(),
@@ -145,22 +163,11 @@ Widget rideCardWidget(
                   circleImageWidget(
                       width: 30.0,
                       height: 30.0,
-                      imagePath: "${tripDetail['vehicle'] != null ? tripDetail['vehicle']['image'] : tripDetail['car_image']}",
+                      imagePath:
+                          "${tripDetail['vehicle'] != null ? tripDetail['vehicle']['image'] : tripDetail['car_image']}",
                       imageType: "network",
                       context: context),
-                  if (tripDetail['features'].isNotEmpty) ...[
-                    for (var i = 0; i < tripDetail['features'].length; i++) ...[
-                      2.widthBox,
-                      circleIconWidget(
-                          width: 30.0,
-                          height: 30.0,
-                          imagePath: tripDetail['features'][i]['image'],
-                          context: context),
-                      2.widthBox,
-                    ]
-                  ] else ...[
-                    2.widthBox,
-                  ],
+
                   if (tripDetail['payment_method_image'] != null) ...[
                     circleIconWidget(
                         width: 30.0,
@@ -199,6 +206,20 @@ Widget rideCardWidget(
                         height: 30.0,
                         imagePath: tripDetail['luggage_image'],
                         context: context),
+                    2.widthBox,
+                  ],
+                  // features
+                  if (tripDetail['features'].isNotEmpty) ...[
+                    for (var i = 0; i < tripDetail['features'].length; i++) ...[
+                      2.widthBox,
+                      circleIconWidget(
+                          width: 30.0,
+                          height: 30.0,
+                          imagePath: tripDetail['features'][i]['image'],
+                          context: context),
+                      2.widthBox,
+                    ]
+                  ] else ...[
                     2.widthBox,
                   ],
                 ],
@@ -262,15 +283,17 @@ Widget rideCardWidget(
                                 i < tripDetail['bookings'].length;
                                 i++) ...[
                               circleImageWidget(
-                                  width: 34.0,
-                                  height: 34.0,
-                                  imagePath:
-                                      tripDetail['bookings'][i] != null &&
-                                              tripDetail['bookings'][i]
-                                                      ['passenger'] !=
-                                                  null
-                                          ? tripDetail['bookings'][i]['passenger']['profile_image'] ?? ""
-                                          : "",
+                                  width: 30.0,
+                                  height: 30.0,
+                                  imagePath: tripDetail['bookings'][i] !=
+                                              null &&
+                                          tripDetail['bookings'][i]
+                                                  ['passenger'] !=
+                                              null
+                                      ? tripDetail['bookings'][i]['passenger']
+                                              ['profile_image'] ??
+                                          ""
+                                      : "",
                                   imageType: "network",
                                   context: context),
                               5.widthBox,

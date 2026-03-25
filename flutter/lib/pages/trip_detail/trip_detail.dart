@@ -22,9 +22,12 @@ import 'package:proximaride_app/pages/widgets/overlay_widget.dart';
 import 'package:proximaride_app/pages/widgets/progress_circular_widget.dart';
 import 'package:proximaride_app/pages/widgets/second_appbar_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
+import 'package:proximaride_app/services/logger_service.dart';
 
 class TripDetailPage extends GetView<TripDetailController> {
   const TripDetailPage({super.key});
+
+  static const double _bottomActionBarHeight = 88.0;
 
   @override
   Widget build(BuildContext context) {
@@ -52,19 +55,10 @@ class TripDetailPage extends GetView<TripDetailController> {
               final rideDriver = controller.ride['driver'] is Map
                   ? Map<String, dynamic>.from(controller.ride['driver'])
                   : <String, dynamic>{};
-              final rideDetails = controller.ride['ride_detail'] is List
-                  ? List<dynamic>.from(controller.ride['ride_detail'])
-                  : <dynamic>[];
-              final matchingRideDetail = rideDetails.firstWhereOrNull(
-                (detail) =>
-                    detail is Map &&
-                    detail['id']?.toString() == controller.tripDetailId,
-              );
-              final selectedRideDetail = matchingRideDetail is Map
-                  ? Map<String, dynamic>.from(matchingRideDetail)
-                  : rideDetails.isNotEmpty && rideDetails.first is Map
-                      ? Map<String, dynamic>.from(rideDetails.first)
-                      : <String, dynamic>{};
+              final selectedRideDetail = controller.ride['detail'] is Map
+                  ? Map<String, dynamic>.from(controller.ride['detail'])
+                  : <String, dynamic>{};
+
 
               String tripTime = "";
               if (controller.ride['time'] != null) {
@@ -101,6 +95,8 @@ class TripDetailPage extends GetView<TripDetailController> {
               DateTime cancelDateTime =
                   dateTime.add(Duration(hours: cancelHours));
               DateTime currentDateTime = DateTime.now();
+
+              logger.info('controller.ride ${controller.ride['vehicle']}');
 
               return Stack(
                 children: [
@@ -290,7 +286,7 @@ class TripDetailPage extends GetView<TripDetailController> {
                                   licenseNumber:
                                       "${controller.ride['vehicle'] != null ? controller.ride['vehicle']['license_no'] : ""}",
                                   carType:
-                                      "${controller.ride['vehicle'] != null ? controller.ride['vehicle']['car_type'] : ""}",
+                                      "${controller.ride['vehicle'] != null ? controller.ride['vehicle']['power_type'] : ""}",
                                   rideId: "${controller.ride['id']}",
                                   vehicleImage:
                                       "${controller.ride['vehicle'] != null ? controller.ride['vehicle']['image'] : ""}",
@@ -430,70 +426,79 @@ class TripDetailPage extends GetView<TripDetailController> {
                                 160.heightBox,
                               ]
                             ],
+                            if (controller.type != "ride") ...[
+                              SizedBox(
+                                height: _bottomActionBarHeight +
+                                    MediaQuery.of(context).padding.bottom,
+                              ),
+                            ],
                           ],
                         ),
                       )),
                   if (controller.type != "ride") ...[
                     Positioned(
                       bottom: 0,
-                      child: Container(
-                        padding: const EdgeInsets.only(
-                            left: 15.0, right: 15.0, top: 10, bottom: 10),
-                        color: Colors.grey.shade100,
-                        width: context.screenWidth,
-                        child: controller.type == "findRide"
-                            ? elevatedButtonWidget(
-                                textWidget: controller.ride[
-                                            'booking_method_id'] ==
-                                        "31"
-                                    ? txt22Size(
-                                        title:
-                                            "${controller.labelTextDetail['instant_btn_label'] ?? "Instant booking"}",
-                                        context: context,
-                                        textColor: Colors.white)
-                                    : txt22Size(
-                                        title:
-                                            "${controller.labelTextDetail['book_seat_btn_label'] ?? "Book your seats"}",
-                                        context: context,
-                                        textColor: Colors.white),
-                                context: context,
-                                onPressed: () async {
-                                  if (controller.ride['seats_left'] == 0) {
-                                    // controller.serviceController.showDialogue('No seats available');
-                                    controller.serviceController.showDialogue(
-                                        "${controller.labelTextDetail['no_seat_available_label'] ?? 'No seats available'}");
-                                  } else {
-                                    await controller.checkRide('add');
-                                  }
-                                })
-                                : controller.status.toString() == "upcoming"
-                                ? tripDetailButtonWidget(
-                                    context: context,
-                                    tripStatus: "${controller.ride['status']}",
-                                    rideId: "${controller.ride['id']}",
-                                    status: controller.status.toString(),
-                                    driverId: "${rideDriver['id'] ?? ""}",
-                                    bookedSeat:
-                                        "${controller.ride['booked_seats']}",
-                                    cancelBookingBtn:
-                                        "${controller.labelTextDetail['cancel_booking_btn_label'] ?? "Cancel booking"}",
-                                    chatWithDriverBtn:
-                                        "${controller.labelTextDetail['driver_chat_button_label'] ?? "Chat with driver"}",
-                                    updateBookingBtn:
-                                        "${controller.labelTextDetail['edit_button_actions_label'] ?? "Update booking"}",
-                                    showBtn:
-                                        cancelDateTime.isAfter(currentDateTime)
-                                            ? true
-                                            : false,
-                                    noShowDriverLabel:
-                                        "${controller.labelTextDetail['no_show_driver_label'] ?? "No show driver"}",
-                                    rideDetailId:
-                                        "${selectedRideDetail['id'] ?? ""}",
-                                    onPressed: () async {
-                                      await controller.noShowDriverData();
-                                    },
-                                  )
-                                : const SizedBox(),
+                      child: SafeArea(
+                        top: false,
+                        child: Container(
+                          padding: const EdgeInsets.only(
+                              left: 15.0, right: 15.0, top: 10, bottom: 10),
+                          color: Colors.grey.shade100,
+                          width: context.screenWidth,
+                          child: controller.type == "findRide"
+                              ? elevatedButtonWidget(
+                                  textWidget: controller.ride[
+                                              'booking_method_id'] ==
+                                          "31"
+                                      ? txt22Size(
+                                          title:
+                                              "${controller.labelTextDetail['instant_btn_label'] ?? "Instant booking"}",
+                                          context: context,
+                                          textColor: Colors.white)
+                                      : txt22Size(
+                                          title:
+                                              "${controller.labelTextDetail['book_seat_btn_label'] ?? "Book your seats"}",
+                                          context: context,
+                                          textColor: Colors.white),
+                                  context: context,
+                                  onPressed: () async {
+                                    if (controller.ride['seats_left'] == 0) {
+                                      controller.serviceController.showDialogue(
+                                          "${controller.labelTextDetail['no_seat_available_label'] ?? 'No seats available'}");
+                                    } else {
+                                      await controller.checkRide('add');
+                                    }
+                                  })
+                              : controller.status.toString() == "upcoming"
+                                  ? tripDetailButtonWidget(
+                                      context: context,
+                                      tripStatus:
+                                          "${controller.ride['status']}",
+                                      rideId: "${controller.ride['id']}",
+                                      status: controller.status.toString(),
+                                      driverId: "${rideDriver['id'] ?? ""}",
+                                      bookedSeat:
+                                          "${controller.ride['booked_seats']}",
+                                      cancelBookingBtn:
+                                          "${controller.labelTextDetail['cancel_booking_btn_label'] ?? "Cancel booking"}",
+                                      chatWithDriverBtn:
+                                          "${controller.labelTextDetail['driver_chat_button_label'] ?? "Chat with driver"}",
+                                      updateBookingBtn:
+                                          "${controller.labelTextDetail['edit_button_actions_label'] ?? "Update booking"}",
+                                      showBtn:
+                                          cancelDateTime.isAfter(currentDateTime)
+                                              ? true
+                                              : false,
+                                      noShowDriverLabel:
+                                          "${controller.labelTextDetail['no_show_driver_label'] ?? "No show driver"}",
+                                      rideDetailId:
+                                          "${selectedRideDetail['id'] ?? ""}",
+                                      onPressed: () async {
+                                        await controller.noShowDriverData();
+                                      },
+                                    )
+                                  : const SizedBox(),
+                        ),
                       ),
                     ),
                   ],

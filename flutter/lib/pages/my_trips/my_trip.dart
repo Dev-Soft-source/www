@@ -12,6 +12,32 @@ import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
 class MyTripsPage extends GetView<MyTripController> {
   const MyTripsPage({super.key});
+
+  Widget _emptyState(BuildContext context, String imagePath, String title) {
+    return Center(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final imageHeight = (constraints.maxHeight * 0.72).clamp(120.0, 320.0);
+
+          return SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(imagePath, height: imageHeight),
+                  txt16Size(title: title, context: context),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Get.put(MyTripController());
@@ -238,18 +264,11 @@ class MyTripsPage extends GetView<MyTripController> {
                                               ],
                                             ),
                                           )
-                                        : Center(
-                                            child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Image.asset(noUpcomingTrips),
-                                              txt16Size(
-                                                  title:
-                                                      "${controller.labelTextTripDetail['no_upcoming_trips_label'] ?? "You have no upcoming trips"}",
-                                                  context: context),
-                                            ],
-                                          )),
+                                        : _emptyState(
+                                            context,
+                                            noUpcomingTrips,
+                                            "${controller.labelTextTripDetail['no_upcoming_trips_label'] ?? "You have no upcoming trips"}",
+                                          ),
                                     controller.completedTripList.isNotEmpty
                                         ? SingleChildScrollView(
                                             controller: controller
@@ -374,18 +393,11 @@ class MyTripsPage extends GetView<MyTripController> {
                                               ],
                                             ),
                                           )
-                                        : Center(
-                                            child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Image.asset(noCompletedTrips),
-                                              txt16Size(
-                                                  title:
-                                                      "${controller.labelTextTripDetail['no_completed_trips_label'] ?? "You have no completed trips"}",
-                                                  context: context),
-                                            ],
-                                          )),
+                                        : _emptyState(
+                                            context,
+                                            noCompletedTrips,
+                                            "${controller.labelTextTripDetail['no_completed_trips_label'] ?? "You have no completed trips"}",
+                                          ),
                                     controller.cancelledTripList.isNotEmpty
                                         ? SingleChildScrollView(
                                             controller: controller
@@ -501,18 +513,11 @@ class MyTripsPage extends GetView<MyTripController> {
                                               ],
                                             ),
                                           )
-                                        : Center(
-                                            child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Image.asset(noCancelledTrips),
-                                              txt16Size(
-                                                  title:
-                                                      "${controller.labelTextTripDetail['no_cancelled_trips_label'] ?? "You have no cancelled trips"}",
-                                                  context: context),
-                                            ],
-                                          )),
+                                        : _emptyState(
+                                            context,
+                                            noCancelledTrips,
+                                            "${controller.labelTextTripDetail['no_cancelled_trips_label'] ?? "You have no cancelled trips"}",
+                                          ),
                                   ],
                                   onPageChanged: (index) async {
                                     controller.tripTabController.index = index;
@@ -653,18 +658,11 @@ class MyTripsPage extends GetView<MyTripController> {
                                               ],
                                             ),
                                           )
-                                        : Center(
-                                            child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Image.asset(noUpcomingRides),
-                                              txt16Size(
-                                                  title:
-                                                      "${controller.labelTextTripDetail['no_upcoming_rides_label'] ?? "You have no upcoming rides"}",
-                                                  context: context),
-                                            ],
-                                          )),
+                                        : _emptyState(
+                                            context,
+                                            noUpcomingRides,
+                                            "${controller.labelTextTripDetail['no_upcoming_rides_label'] ?? "You have no upcoming rides"}",
+                                          ),
                                     controller.completedRideList.isNotEmpty
                                         ? SingleChildScrollView(
                                             controller: controller
@@ -764,18 +762,11 @@ class MyTripsPage extends GetView<MyTripController> {
                                               ],
                                             ),
                                           )
-                                        : Center(
-                                            child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Image.asset(noCompletedRides),
-                                              txt16Size(
-                                                  title:
-                                                      "${controller.labelTextTripDetail['no_completed_rides_label'] ?? "You have no completed rides"}",
-                                                  context: context),
-                                            ],
-                                          )),
+                                        : _emptyState(
+                                            context,
+                                            noCompletedRides,
+                                            "${controller.labelTextTripDetail['no_completed_rides_label'] ?? "You have no completed rides"}",
+                                          ),
                                     controller.cancelledRideList.isNotEmpty
                                         ? SingleChildScrollView(
                                             controller: controller
@@ -867,18 +858,11 @@ class MyTripsPage extends GetView<MyTripController> {
                                               ],
                                             ),
                                           )
-                                        : Center(
-                                            child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Image.asset(noCancelledRides),
-                                              txt16Size(
-                                                  title:
-                                                      "${controller.labelTextTripDetail['no_cancelled_rides_label'] ?? "You have no cancelled rides"}",
-                                                  context: context),
-                                            ],
-                                          )),
+                                        : _emptyState(
+                                            context,
+                                            noCancelledRides,
+                                            "${controller.labelTextTripDetail['no_cancelled_rides_label'] ?? "You have no cancelled rides"}",
+                                          ),
                                   ],
                                   onPageChanged: (index) async {
                                     controller.rideTabController.index = index;

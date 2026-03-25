@@ -256,6 +256,16 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
     }
   }
 
+  Map<String, dynamic>? _asMap(dynamic value) {
+    if (value is Map<String, dynamic>) {
+      return value;
+    }
+    if (value is Map) {
+      return Map<String, dynamic>.from(value);
+    }
+    return null;
+  }
+
   @override
   void onClose() {
     // TODO: implement onClose
@@ -501,33 +511,36 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
             pageLimit,
             serviceController.langId.value)
         .then((resp) async {
-      if (resp['status'] != null && resp['status'] == "Success") {
-        if (resp['data'] != null &&
-            resp['data']['rides'] != null &&
-            resp['data']['rides']['data'] != null) {
-          if (rideType.value == "upcoming") {
-            upComingRideList.addAll(resp['data']['rides']['data']);
-            upComingRideTotal.value = resp['data']['rides']['total'] ?? 0;
+      final responseMap = _asMap(resp);
+      final responseData = _asMap(responseMap?['data']);
+      final rides = _asMap(responseData?['rides']);
+      final ridesData = rides?['data'];
 
-            if (resp['data'] != null &&
-                resp['data']['tripsPage'] != null &&
+      if (responseMap?['status'] != null && responseMap?['status'] == "Success") {
+        if (ridesData is List) {
+          if (rideType.value == "upcoming") {
+            upComingRideList.addAll(ridesData);
+            upComingRideTotal.value = rides?['total'] ?? 0;
+
+            if (responseData?['tripsPage'] != null &&
                 labelTextTripDetail.isEmpty) {
-              labelTextTripDetail.addAll(resp['data']['tripsPage']);
+              labelTextTripDetail.addAll(responseData!['tripsPage']);
             }
 
-            if (resp['data'] != null &&
-                resp['data']['rideDetailPage'] != null &&
+            if (responseData?['rideDetailPage'] != null &&
                 labelTextDetail.isEmpty) {
-              labelTextDetail.addAll(resp['data']['rideDetailPage']);
+              labelTextDetail.addAll(responseData!['rideDetailPage']);
             }
           } else if (rideType.value == "completed") {
-            completedRideList.addAll(resp['data']['rides']['data']);
-
-            completedRideTotal.value = resp['data']['rides']['total'] ?? 0;
+            completedRideList.addAll(ridesData);
+            completedRideTotal.value = rides?['total'] ?? 0;
           } else {
-            cancelledRideList.addAll(resp['data']['rides']['data']);
-            cancelledRideTotal.value = resp['data']['rides']['total'] ?? 0;
+            cancelledRideList.addAll(ridesData);
+            cancelledRideTotal.value = rides?['total'] ?? 0;
           }
+        } else {
+          logger.warning(
+              "Get all rides returned no list for type ${rideType.value}: ${responseMap?['data']}");
         }
       }
       isOverlayLoading(false);
@@ -590,10 +603,12 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
               pageLimit,
               serviceController.langId.value)
           .then((resp) async {
-        if (resp['data'] != null &&
-            resp['data']['rides'] != null &&
-            resp['data']['rides']['data'] != null &&
-            resp['data']['rides']['data'].isNotEmpty) {
+        final responseMap = _asMap(resp);
+        final responseData = _asMap(responseMap?['data']);
+        final rides = _asMap(responseData?['rides']);
+        final ridesData = rides?['data'];
+
+        if (ridesData is List && ridesData.isNotEmpty) {
         } else {
           rideType.value == "upcoming"
               ? upComingRideLoadMore(false)
@@ -606,15 +621,13 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
                   ? completedRideNoMoreData(true)
                   : cancelledRideNoMoreData(true);
         }
-        if (resp['data'] != null &&
-            resp['data']['rides'] != null &&
-            resp['data']['rides']['data'] != null) {
+        if (ridesData is List) {
           if (rideType.value == "upcoming") {
-            upComingRideList.addAll(resp['data']['rides']['data']);
+            upComingRideList.addAll(ridesData);
           } else if (rideType.value == "completed") {
-            completedRideList.addAll(resp['data']['rides']['data']);
+            completedRideList.addAll(ridesData);
           } else {
-            cancelledRideList.addAll(resp['data']['rides']['data']);
+            cancelledRideList.addAll(ridesData);
           }
         }
         rideType.value == "upcoming"

@@ -852,31 +852,7 @@ class RideController extends Controller
             $displayPrice = $ride->price_minor
                 ?? (int) round(((float) ($primaryDetail->price ?? 0)) / 100);
 
-            $ride->price_minor = $displayPrice;
-            if ($ride->relationLoaded('rideDetail')) {
-                $ride->setRelation('rideDetail', collect($ride->rideDetail)->map(function ($detail) use ($displayPrice) {
-                    if ($detail instanceof RideDetail) {
-                        $detail->price = $displayPrice;
-
-                        return $detail;
-                    }
-
-                    if (is_object($detail)) {
-                        $detail->price = $displayPrice;
-
-                        return $detail;
-                    }
-
-                    if (is_array($detail)) {
-                        $detail['price'] = $displayPrice;
-
-                        return $detail;
-                    }
-
-                    return ['price' => $displayPrice];
-
-                }));
-            }
+            $ride->detail->price = $displayPrice;
 
             // Calculate seats left
             $bookedSeats = $ride->bookings()
@@ -1077,8 +1053,6 @@ class RideController extends Controller
                 $tripsPage = TripsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
             }
         }
-
-Log::info('ride detail', $ride->toArray());
 
         $data = ['ride' => $ride, 'cancelRideSetting' => $cancelRideSetting, 'reviewSetting' => $reviewSetting, 'siteSetting' => $siteSetting, 'rideDetailPage' => $rideDetailPage, 'tripsPage' => $tripsPage];
         return $this->successResponse($data, 'Success');

@@ -8,6 +8,16 @@ import 'package:proximaride_app/services/logger_service.dart';
 class MyTripProvider extends GetConnect {
   final getConnect = GetConnect(timeout: const Duration(seconds: 180));
 
+  Map<String, dynamic>? _asMap(dynamic value) {
+    if (value is Map<String, dynamic>) {
+      return value;
+    }
+    if (value is Map) {
+      return Map<String, dynamic>.from(value);
+    }
+    return null;
+  }
+
   Future getAllTrips(page, token, type, pageLimit, langId) async {
     try {
       var url = baseUrl;
@@ -86,8 +96,10 @@ class MyTripProvider extends GetConnect {
 
       logger.info("Get All Rides URL: $url");
       logger.info("Get All Rides Response: ${response.body}");
-      logger.info(
-          "Get All Rides Total: ${response.body['data']['rides']['total']}");
+      final responseBody = _asMap(response.body);
+      final responseData = _asMap(responseBody?['data']);
+      final rides = _asMap(responseData?['rides']);
+      logger.info("Get All Rides Total: ${rides?['total'] ?? 0}");
 
       if (response.status.hasError) {
         if (response.status.connectionError) {

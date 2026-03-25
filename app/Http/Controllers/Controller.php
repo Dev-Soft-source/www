@@ -374,7 +374,6 @@ class Controller extends BaseController
         return $groups;
     }
 
-
     // will be removed in future
     protected function getSearchOptionGroups(?int $selectedLangId = null, ?int $defaultLangId = null)
     {
