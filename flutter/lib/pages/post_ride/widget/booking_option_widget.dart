@@ -35,11 +35,12 @@ Widget bookingOptionWidget(
                       onTap: bookingCheck == true
                           ? null
                           : () {
+                              final optionValue =
+                                  controller.bookingOptionList[i].toString();
                               if (controller.errors.any((error) => error['title'] == "booking_method")) {
                                 controller.errors.removeWhere((error) => error['title'] == "booking_method");
                               }
-                              controller.bookingOption.value =
-                                  controller.bookingOptionList[i];
+                              controller.bookingOption.value = optionValue;
                             },
                       child: Container(
                         padding: EdgeInsets.all(getValueForScreenType<double>(
@@ -53,6 +54,7 @@ Widget bookingOptionWidget(
                                 width: 1,
                                 color: controller.bookingOption.value ==
                                         controller.bookingOptionList[i]
+                                            .toString()
                                     ? primaryColor
                                     : controller.errors
                                             .where((error) =>
@@ -61,7 +63,7 @@ Widget bookingOptionWidget(
                                         ? Colors.red
                                         : Colors.grey.shade200),
                             color: controller.bookingOption.value ==
-                                    controller.bookingOptionList[i]
+                                    controller.bookingOptionList[i].toString()
                                 ? primaryColor.withOpacity(0.1)
                                 : Colors.white),
                         child: Row(
@@ -88,6 +90,7 @@ Widget bookingOptionWidget(
                                 fontFamily: regular,
                                 textColor: controller.bookingOption.value ==
                                         controller.bookingOptionList[i]
+                                            .toString()
                                     ? primaryColor
                                     : textColor),
                             const SizedBox(width: 10),

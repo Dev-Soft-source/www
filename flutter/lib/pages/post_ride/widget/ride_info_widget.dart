@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-// import 'package:proximaride_app/pages/post_ride/widget/add_more_spot_ride_widget.dart';
-// import 'package:proximaride_app/pages/widgets/button_Widget.dart';
+import 'package:proximaride_app/pages/post_ride/widget/add_more_spot_ride_widget.dart';
+import 'package:proximaride_app/pages/widgets/button_Widget.dart';
 import 'package:proximaride_app/pages/widgets/prefix_icon_widget.dart';
 import 'package:proximaride_app/pages/widgets/check_box_widget.dart';
 import 'package:proximaride_app/pages/widgets/date_field_widget.dart';
@@ -67,7 +67,6 @@ Widget rideInfoWidget(
                       context: context, imagePath: fromLocationImage),
                   placeHolder:
                       "${controller.labelTextDetail['from_placeholder'] ?? "Origin"}",
-                  hintTextColor: textColor,
                   onChanged: (value) {
                     if (controller.errors
                         .any((error) => error['title'] == "from")) {
@@ -135,30 +134,30 @@ Widget rideInfoWidget(
                       tip: controller.errors
                           .firstWhere((error) => error['title'] == "to"))
                 ],
-                // 10.heightBox,
-                // Obx(
-                //   () => addMoreSpotRideWidget(
-                //     context: context,
-                //     controller: controller,
-                //     screenWidth: screenWidth,
-                //     bookingCheck: controller.bookings.value,
-                //     error: controller.errors.toList(),
-                //   ),
-                // ),
-                // 5.heightBox,
-                // Align(
-                //   alignment: Alignment.centerRight,
-                //   child: elevatedButtonWidget(
-                //       textWidget: txt18Size(
-                //           title:
-                //               '${controller.labelTextDetail['add_spot_button_label'] ?? "Add Spot"}',
-                //           context: context,
-                //           textColor: Colors.white),
-                //       context: context,
-                //       onPressed: () async {
-                //         await controller.addNewSpot();
-                //       }),
-                // ),
+                10.heightBox,
+                Obx(
+                  () => addMoreSpotRideWidget(
+                    context: context,
+                    controller: controller,
+                    screenWidth: screenWidth,
+                    bookingCheck: controller.bookings.value,
+                    error: controller.errors.toList(),
+                  ),
+                ),
+                5.heightBox,
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: elevatedButtonWidget(
+                      textWidget: txt18Size(
+                          title:
+                              '${controller.labelTextDetail['add_spot_button_label'] ?? "Add Spot"}',
+                          context: context,
+                          textColor: Colors.white),
+                      context: context,
+                      onPressed: () async {
+                        await controller.addNewSpot();
+                      }),
+                ),
                 10.heightBox,
                 Row(
                   children: [

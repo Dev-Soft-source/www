@@ -640,6 +640,10 @@ class PostRideProvider extends GetConnect {
       fromSpots,
       toSpots,
       priceSpots,
+      pickupSpots,
+      dropoffSpots,
+      dateSpots,
+      timeSpots,
       rideDetailIdsArray) async {
     try {
       final data = FormData({});
@@ -676,6 +680,10 @@ class PostRideProvider extends GetConnect {
         data.fields.add(MapEntry("from_spot", jsonEncode(fromSpots)));
         data.fields.add(MapEntry("to_spot", jsonEncode(toSpots)));
         data.fields.add(MapEntry("price_spot", jsonEncode(priceSpots)));
+        data.fields.add(MapEntry("pickup_spot", jsonEncode(pickupSpots)));
+        data.fields.add(MapEntry("dropoff_spot", jsonEncode(dropoffSpots)));
+        data.fields.add(MapEntry("date_spot", jsonEncode(dateSpots)));
+        data.fields.add(MapEntry("time_spot", jsonEncode(timeSpots)));
         data.fields
             .add(MapEntry("ride_detail_ids", rideDetailIdsArray.toString()));
       }

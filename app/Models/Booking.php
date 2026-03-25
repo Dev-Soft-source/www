@@ -148,6 +148,11 @@ class Booking extends Model
         return $query->where('status', self::STATUS_REQUESTED);
     }
 
+    public function scopeCancelled($query)
+    {
+        return $query->where('status', self::STATUS_CANCELLED);
+    }
+
     public function scopeWithActivePassenger($query)
     {
         return $query->whereHas('passenger', function ($passengerQuery) {

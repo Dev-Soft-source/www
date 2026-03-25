@@ -104,7 +104,7 @@ Widget pricePaymentOptionWidget(
                           ),
                           child: checkBoxWidget(
                             value: controller.paymentOption.value ==
-                                    controller.paymentOptionList[i]
+                                    controller.paymentOptionList[i].toString()
                                 ? true
                                 : false,
                             activeColor: primaryColor,
@@ -114,6 +114,7 @@ Widget pricePaymentOptionWidget(
                                     controller.paymentOption.value =
                                         value == true
                                             ? controller.paymentOptionList[i]
+                                                .toString()
                                             : "";
                                     if (controller.errors.any((error) =>
                                         error['title'] == "payment_method")) {
@@ -134,8 +135,10 @@ Widget pricePaymentOptionWidget(
                                   controller.paymentOption.value =
                                       controller.paymentOption.value ==
                                               controller.paymentOptionList[i]
+                                                  .toString()
                                           ? ""
-                                          : controller.paymentOptionList[i];
+                                          : controller.paymentOptionList[i]
+                                              .toString();
                                   if (controller.errors.any((error) =>
                                       error['title'] == "payment_method")) {
                                     controller.errors.removeWhere((error) =>

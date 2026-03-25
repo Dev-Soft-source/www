@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:proximaride_app/pages/widgets/button_Widget.dart';
+import 'package:proximaride_app/pages/widgets/date_field_widget.dart';
 import 'package:proximaride_app/pages/widgets/prefix_icon_widget.dart';
 import 'package:proximaride_app/pages/widgets/fields_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
@@ -19,7 +21,7 @@ Widget addMoreSpotRideWidget(
         children: [
           postRideWidget(
               title:
-                  "${controller.labelTextDetail['add_more_from_to'] ?? "Add More Spots"}",
+                  "${controller.labelTextDetail['stop_along_the_way_label'] ?? "Add More Spots(Optinal)"}",
               screenWidth: screenWidth,
               context: context),
           Container(
@@ -41,7 +43,7 @@ Widget addMoreSpotRideWidget(
                         children: [
                           txt20Size(
                               title:
-                                  "${controller.labelTextDetail['from_label'] ?? "From"}",
+                                  "Stop",
                               fontFamily: regular,
                               context: context),
                           index == 0
@@ -71,8 +73,7 @@ Widget addMoreSpotRideWidget(
                         fontSize: 18.0,
                         prefixIcon: preFixIconWidget(
                             context: context, imagePath: fromLocationImage),
-                        placeHolder:
-                            "${controller.labelTextDetail['from_placeholder'] ?? "Origin"}",
+                        placeHolder: "Stop",
                         hintTextColor: textColor,
                         onChanged: (value) {},
                       ),
@@ -80,7 +81,7 @@ Widget addMoreSpotRideWidget(
                         if (controller.fromSpotControllers[index].text == "" &&
                             controller.showErrorSpot.value == true) {
                           return toolTip(
-                              tip: "Please add first origin", type: "normal1");
+                              tip: "Please add stop", type: "normal1");
                         } else {
                           return SizedBox();
                         }
@@ -88,30 +89,24 @@ Widget addMoreSpotRideWidget(
                       10.heightBox,
                       txt20Size(
                           title:
-                              "${controller.labelTextDetail['to_label'] ?? "To"}",
-                          fontFamily: regular,
+                              "Pickup/off location",
                           context: context),
                       3.heightBox,
                       fieldsWidget(
-                        textController: controller.toSpotControllers[index],
-                        onTap: () {
-                          Get.toNamed("/city/destination/0/$index/yes");
-                        },
+                        textController: controller.pickupSpotControllers[index],
                         fieldType: "text",
-                        readonly: true,
+                        readonly: false,
                         fontFamily: regular,
                         fontSize: 18.0,
-                        prefixIcon: preFixIconWidget(
-                            context: context, imagePath: toLocationImage),
                         placeHolder:
-                            "${controller.labelTextDetail['to_placeholder'] ?? "Destination"}",
+                            "${controller.labelTextDetail['pickup_off_placeholder'] ?? "Describe the pickup/off point"}",
                         onChanged: (value) {},
                       ),
                       Obx(() {
-                        if (controller.toSpotControllers[index].text == "" &&
+                        if (controller.pickupSpotControllers[index].text == "" &&
                             controller.showErrorSpot.value == true) {
                           return toolTip(
-                              tip: "Please add first destination",
+                              tip: "Please add pickup/off location",
                               type: "normal1");
                         } else {
                           return SizedBox();
@@ -120,23 +115,103 @@ Widget addMoreSpotRideWidget(
                       10.heightBox,
                       txt20Size(
                           title:
-                              "${controller.labelTextDetail['price_per_seat_label'] ?? "Price"}",
+                              "${controller.labelTextDetail['date_time_label'] ?? "Date & time"}",
                           context: context),
                       3.heightBox,
-                      fieldsWidget(
-                        textController: controller.priceSpotControllers[index],
-                        fieldType: "number",
-                        readonly: false,
-                        fontFamily: regular,
-                        fontSize: 18.0,
-                        placeHolder: "\$",
-                        onChanged: (value) {},
+                      Row(
+                        children: [
+                          Expanded(
+                            child: dateFieldWidget(
+                              textController: controller.dateSpotControllers[index],
+                              fontFamily: regular,
+                              fontSize: 16.0,
+                              onTap: bookingCheck == true
+                                  ? null
+                                  : () async {
+                                      DateTime? pickedDate = await controller
+                                          .serviceController
+                                          .datePicker(context, allowPast: false);
+                                      if (pickedDate == null) return;
+
+                                      controller.dateSpotControllers[index].text =
+                                          DateFormat("MMMM dd, yyyy")
+                                              .format(pickedDate);
+                                    },
+                              prefixIcon: preFixIconWidget(
+                                  context: context, imagePath: calenderImage),
+                              isError: false,
+                            ),
+                          ),
+                          5.widthBox,
+                          txt20Size(
+                              title:
+                                  "${controller.labelTextDetail['at_label'] ?? "at"}",
+                              context: context,
+                              fontFamily: regular),
+                          5.widthBox,
+                          Expanded(
+                            child: dateFieldWidget(
+                              textController: controller.timeSpotControllers[index],
+                              fontFamily: regular,
+                              fontSize: 16.0,
+                              onTap: bookingCheck == true
+                                  ? null
+                                  : () async {
+                                      if (controller
+                                          .dateSpotControllers[index].text
+                                          .isEmpty) {
+                                        controller.serviceController.showDialogue(
+                                            "${controller.popupTextDetail['past_date_message'] ?? 'Please select date first'}");
+                                        return;
+                                      }
+
+                                      TimeOfDay? pickedTime = await controller
+                                          .serviceController
+                                          .timePicker(context);
+                                      if (pickedTime == null) return;
+
+                                      final now = DateTime.now();
+                                      final selectedDate = DateFormat("MMMM dd, yyyy")
+                                          .parse(controller.dateSpotControllers[index].text);
+                                      final currentDateOnly =
+                                          DateTime(now.year, now.month, now.day);
+
+                                      if (selectedDate.isAtSameMomentAs(currentDateOnly) &&
+                                          (pickedTime.hour < now.hour ||
+                                              (pickedTime.hour == now.hour &&
+                                                  pickedTime.minute < now.minute))) {
+                                        controller.serviceController.showDialogue(
+                                            "${controller.popupTextDetail['past_time_message'] ?? 'Can not pick a time in the past'}");
+                                        controller.timeSpotControllers[index].text =
+                                            "";
+                                        return;
+                                      }
+
+                                      final selectedDateTime = DateTime(
+                                        now.year,
+                                        now.month,
+                                        now.day,
+                                        pickedTime.hour,
+                                        pickedTime.minute,
+                                      );
+
+                                      controller.timeSpotControllers[index].text =
+                                          DateFormat('HH:mm')
+                                              .format(selectedDateTime);
+                                    },
+                              prefixIcon: preFixIconWidget(
+                                  context: context, imagePath: clockImage),
+                              isError: false,
+                            ),
+                          ),
+                        ],
                       ),
                       Obx(() {
-                        if (controller.priceSpotControllers[index].text == "" &&
+                        if ((controller.dateSpotControllers[index].text == "" ||
+                                controller.timeSpotControllers[index].text == "") &&
                             controller.showErrorSpot.value == true) {
                           return toolTip(
-                              tip: "Please add first price", type: "normal1");
+                              tip: "Please add date and time", type: "normal1");
                         } else {
                           return SizedBox();
                         }
