@@ -383,8 +383,8 @@
                     <h3 class="text-2xl bg-primary text-white py-2 px-4">
                         {{ $postRidePage->ride_info_heading ?? 'Ride Info' }}
                     </h3>
-                    <div class="bg-white p-4 space-y-3">
-                        <div class="flex flex-col md:flex-row justify-between items-start">
+                    <div class="bg-white p-4 space-y-5">
+                        <div class="flex flex-col md:flex-row justify-between items-start mt-4">
                             <div class="w-full md:w-[45%] ">
                                 <label class="block text-sm mb-4 required">{{ $postRidePage->from_label }}</label>
                                 @livewire(
@@ -424,7 +424,7 @@
                             </div>
                         </div>
 
-                        <div class="flex flex-col md:flex-row justify-between mt-4">
+                        <div class="flex flex-col md:flex-row justify-between mt-6">
                             <div class="w-full md:w-[45%]">
                                 <label class="block text-sm mb-4 required">{{ $postRidePage->pick_up_label }}</label>
                                 <textarea name="pickup" rows="4" class="w-full rounded border-gray-300" autocomplete="off"
@@ -443,11 +443,11 @@
                             </div>
                         </div>
 
-                        <div>
+                        <div class="mt-6">
                             <label for="date_time" class="block text-gray-900 required">
                                 {{ $postRidePage->date_time_label ?? 'Date and Time' }}
                             </label>
-                            <div class="flex flex-col sm:flex-col md:flex-row lg:flow-row items-start mb-4 justify-between">
+                            <div class="flex flex-col sm:flex-col md:flex-row lg:flow-row items-start justify-between">
                                 <div class="w-full md:w-[45%] mb-4">
                                     <div class="relative mt-2">
                                         <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
@@ -494,7 +494,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="bg-white rounded-lg shadow-3xl mt-6">
+                        <div class="bg-white rounded-lg shadow-3xl mt-4">
                             <button type="button" id="px-stops-toggle"
                                 class="bg-primary rounded-lg text-white w-full flex items-center justify-between text-left px-4 py-2 disabled:opacity-60 disabled:cursor-not-allowed"
                                 {{ empty($oldOriginCityId) || empty($oldDestinationCityId) ? 'disabled' : '' }}
