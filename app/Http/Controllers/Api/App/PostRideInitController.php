@@ -109,58 +109,23 @@ class PostRideInitController extends Controller
      */
     private function getLabelsData($langId, $selectedLanguage)
     {
-        $postRidePage = PostRidePageSettingDetail::where('language_id', $langId)->first();
-
-        if (!$postRidePage && $selectedLanguage) {
-            $postRidePage = PostRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-        }
-
-        if ($postRidePage) {
-            // Add error labels
-            $postRideError = PostRidePageError::where('post_ride_page_setting_detail_id', $postRidePage->id)->first();
-            if ($postRideError) {
-                $postRidePage->from_error = $postRideError->from_error ?? null;
-                $postRidePage->to_error = $postRideError->to_error ?? null;
-                $postRidePage->pick_up_error = $postRideError->pick_up_error ?? null;
-                $postRidePage->drop_off_error = $postRideError->drop_off_error ?? null;
-                $postRidePage->date_error = $postRideError->date_error ?? null;
-                $postRidePage->time_error = $postRideError->time_error ?? null;
-                $postRidePage->recurring_type_error = $postRideError->recurring_type_error ?? null;
-                $postRidePage->recurring_trips_error = $postRideError->recurring_trips_error ?? null;
-                $postRidePage->meeting_drop_off_description_error = $postRideError->meeting_drop_off_description_error ?? null;
-                $postRidePage->seats_error = $postRideError->seats_error ?? null;
-                $postRidePage->seats_middle_error = $postRideError->seats_middle_error ?? null;
-                $postRidePage->seats_back_error = $postRideError->seats_back_error ?? null;
-                $postRidePage->vehicle_id_error = $postRideError->vehicle_id_error ?? null;
-                $postRidePage->make_error = $postRideError->make_error ?? null;
-                $postRidePage->model_error = $postRideError->model_error ?? null;
-                $postRidePage->vehicle_type_error = $postRideError->vehicle_type_error ?? null;
-                $postRidePage->color_error = $postRideError->color_error ?? null;
-                $postRidePage->license_error = $postRideError->license_error ?? null;
-                $postRidePage->year_error = $postRideError->year_error ?? null;
-                $postRidePage->fuel_error = $postRideError->fuel_error ?? null;
-                $postRidePage->photo_error = $postRideError->photo_error ?? null;
-                $postRidePage->booking_method_error = $postRideError->booking_method_error ?? null;
-                $postRidePage->anything_to_add_error = $postRideError->anything_to_add_error ?? null;
-                $postRidePage->smoking_error = $postRideError->smoking_error ?? null;
-                $postRidePage->animal_error = $postRideError->animal_error ?? null;
-                $postRidePage->luggage_error = $postRideError->luggage_error ?? null;
-                $postRidePage->price_error = $postRideError->price_error ?? null;
-                $postRidePage->payment_method_error = $postRideError->payment_method_error ?? null;
-                $postRidePage->booking_type_error = $postRideError->booking_type_error ?? null;
-                $postRidePage->agree_terms_error = $postRideError->agree_terms_error ?? null;
-            }
-        }
-
-        $messages = SuccessMessagesSettingDetail::where('language_id', $langId)->select('past_time_message', 'past_date_message')->first();
-
-        // Set locale for translations
-        if ($selectedLanguage) {
-            App::setLocale($selectedLanguage->abbreviation ?? 'en');
-        }
+        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        
+        $messages = $this->successMessage;
 
         // Validation messages using Laravel's trans() function
         $validationMessages = [
+            'required' => __('validation.required'),
+            'origin' => __('validation.custom.origin.message'),
+            'destination' => __('validation.custom.destination.message'),
+            'pickup' => __('validation.custom.pickup.required'),
+            'dropoff' => __('validation.custom.dropoff.required'),
+            'details' => __('validation.custom.details.required'),
+            'date' => __('validation.custom.date.required'),
+            'time' => __('validation.custom.time.required'),
+
+
+
             'required' => trans('validation.required'),
             'date' => trans('validation.date'),
             'date_format' => trans('validation.date_format'),
@@ -173,13 +138,9 @@ class PostRideInitController extends Controller
             'min' => trans('validation.min.numeric'),
         ];
 
-        $postRidePageData = $postRidePage ? $postRidePage->toArray() : null;
-        if ($postRidePageData !== null) {
-            $postRidePageData['indicates_required_field_text'] = $postRidePage->indicates_required_field_text;
-        }
 
         return [
-            'postRidePage' => $postRidePageData,
+            'postRidePage' => $postRidePage,
             'messages' => $messages,
             'validationMessages' => $validationMessages,
         ];
@@ -486,14 +447,16 @@ class PostRideInitController extends Controller
      */
     private function getRideData($rideId, $userId, $rideType)
     {
-        $ride = Ride::with('detail')->where('id', $rideId)->first();
+        $ride = Ride::with(['detail', 'bookings'])->where('id', $rideId)->first();
 
         if (!$ride) {
             return null;
         }
 
+        $ride->intermediate_stops = $this->extractIntermediateStopsForForm($ride);
+
         $rideDetail = $ride->detail;
-\Log::info('ride',  $rideDetail->toArray());
+
         return [
             'ride' => $ride,
             'rideDetail' => $rideDetail,

@@ -127,15 +127,15 @@ Widget addMoreSpotRideWidget({
           Padding(
             padding: EdgeInsets.all(getValueForScreenType<double>(
               context: context,
-              mobile: 10.0,
-              tablet: 10.0,
+              mobile: 5.0,
+              tablet: 5.0,
             )),
-            child: txt16Size(
-              title: controller.labelTextDetail['no_stops_added_label'] ??
-                  "No extra stops added yet",
-              context: context,
-              textColor: Colors.grey.shade700,
-            ),
+            // child: txt16Size(
+            //   title: controller.labelTextDetail['no_stops_added_label'] ??
+            //       "No extra stops added yet",
+            //   context: context,
+            //   textColor: Colors.grey.shade700,
+            // ),
           ),
         Obx(
           () {
@@ -166,7 +166,7 @@ Widget addMoreSpotRideWidget({
                         bookingCheck == false && controller.canAddMoreStops,
                     textWidget: txt18Size(
                         title:
-                            '${controller.labelTextDetail['add_spot_button_label'] ?? "Add More Stops"}',
+                            '${controller.labelTextDetail['add_stop_btn_label'] ?? "Add More Stops"}',
                         context: context,
                         textColor: Colors.white),
                     context: context,

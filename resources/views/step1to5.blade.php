@@ -4,6 +4,7 @@
     {{-- <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/ui-lightness/jquery-ui.css"> --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
+
         /* error tooltip css */
 .tooltip-dob-error {
     position: relative;
@@ -12,7 +13,7 @@
     background: #c75b5b;
     color: #fff;
     border-radius: 8px;
-
+    font-family: 'Carlito', Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
     font-size: 16px;
     font-weight: 400;
     line-height: 1.4;
@@ -82,13 +83,16 @@
                         </div>
 
                         <div class="md:col-span-2">
+                            <div class="form-group">
+
+                            
                             <label >
                                 @isset($step1Page->gender_label)
                                     {{ $step1Page->gender_label }}
                                 @endisset
                                 <span class="text-red-500">*</span>
                             </label>
-                            <div class="flex flex-wrap gap-2 justify-normal md:gap-x-8 items-center mt-2 p-1.5">
+                            <div class="flex flex-wrap gap-2 justify-normal md:gap-x-8 items-center">
                                 <div>
                                     <input id="bordered-radio-1" type="radio" value="male" name="gender"
                                         class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none"
@@ -128,6 +132,7 @@
                                     </div>
                                 </div>
                             @enderror
+                            </div>
                         </div>
 
                         <div class="relative">

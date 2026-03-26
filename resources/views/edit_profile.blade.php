@@ -11,7 +11,7 @@
     background: #c75b5b;
     color: #fff;
     border-radius: 8px;
-
+    font-family: 'Carlito', Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
     font-size: 16px;
     font-weight: 400;
     line-height: 1.4;
@@ -131,7 +131,7 @@
 
                 <div class="md:col-span-2">
                     <label for="">{{ $editProfilePage->gender_label ?? 'Gender' }} <span class="text-red-500">*</span></label>
-                    <div class="flex gap-4 md:justify-normal justify-between md:gap-x-8 items-center mt-2 p-1.5">
+                    <div class="flex gap-4 md:justify-normal justify-between md:gap-x-8 items-center">
                         <div>
                             <input id="bordered-radio-1" type="radio" value="male" name="gender" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none" {{ old('gender', $user->gender) === 'male' ? 'checked' : '' }}>
                             <label for="bordered-radio-1">{{ $editProfilePage->male_label ?? 'Male' }}</label>
@@ -201,7 +201,7 @@
 
                 <div class="col-span-2">
                     <label for="">{{ $editProfilePage->notification_label ?? 'Notifications' }}</label>
-                    <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row items-center gap-6 mt-2">
+                    <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row items-center gap-6">
                         @php
                             $emailNotifChecked = old('email_notification') !== null ? (old('email_notification') === 'on' || old('email_notification') == 1) : ($user->email_notification == 1);
                             $smsNotifChecked = old('sms_notification') !== null ? (old('sms_notification') === 'on' || old('sms_notification') == 1) : ($user->sms_notification == 1);
@@ -268,7 +268,7 @@
                   
                
 
-                <div class="md:col-span-2">
+                <div class="md:col-span-2 mt-8">
                     <label for="">{{ $editProfilePage->mini_bio_label ?? 'Mini bio' }} <span class="text-red-500">*</span></label>
                     <textarea id="message" rows="5" name="bio" class=" block mt-1 text-base lg:text-lg border p-1.5 w-full rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('bio') ? 'border-red-500' : '' }}">{{ old('bio', $user->about) }}</textarea>
                     @error('bio')
@@ -278,7 +278,7 @@
 
                 
 
-                <div class="md:col-span-2 flex justify-center">
+                <div class="md:col-span-2 flex justify-center mt-4">
                     <button type="submit" class="button-exp-fill w-32">{{ $editProfilePage->save_button_text ?? 'Save' }}</button>
                 </div>
             </div>

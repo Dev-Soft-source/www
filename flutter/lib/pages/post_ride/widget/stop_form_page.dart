@@ -261,7 +261,9 @@ class _StopFormPageState extends State<StopFormPage> {
                 width: context.screenWidth,
                 child: elevatedButtonWidget(
                   textWidget: txt22Size(
-                    title: widget.labelTextDetail['add_spot_button_label'] ?? "Add",
+                    title: widget.isEditing
+                        ? (widget.labelTextDetail['update_button_label'] ?? "Update")
+                        : (widget.labelTextDetail['add_stop_btn_label'] ?? "Add"),
                     context: context,
                     textColor: Colors.white,
                   ),

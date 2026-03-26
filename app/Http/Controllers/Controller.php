@@ -43,12 +43,12 @@ class Controller extends BaseController
         // Initialize language-dependent data per request so POST/PUT routes
         // without a {lang} segment still inherit the active locale correctly.
         $this->middleware(function ($request, $next) {
-            $lang = $request->route('lang');
+            $lang = $request->route('lang') ?? $request->route('lang_id');
 
             if ($lang) {
                 session(['selectedLanguage' => $lang]);
             } else {
-                $lang = $request->query('lang');
+                $lang = $request->query('lang') ?? $request->query('lang_id');
 
                 if (!$lang) {
                     $lang = session('selectedLanguage');
@@ -64,8 +64,8 @@ class Controller extends BaseController
 
                 session(['selectedLanguage' => $lang]);
             }
-
-            $this->selectedLanguage = Language::resolveLanguage(session('selectedLanguage'));
+// \Log::info('dddd', [$lang, $request->query('lang'), app()->getLocale(), session('selectedLanguage')]);
+            $this->selectedLanguage = Language::resolveLanguage(app()->getLocale());
 
             if (!$this->selectedLanguage) {
                 $this->selectedLanguage = $this->defaultLang;
@@ -512,6 +512,12 @@ class Controller extends BaseController
                 'city_id' => $stop->city_id,
                 'departure_at' => !empty($stop->departure_at)
                     ? Carbon::parse($stop->departure_at)->format('Y-m-d H:i')
+                    : null,
+                'depature_date' => !empty($stop->departure_at)
+                    ? Carbon::parse($stop->departure_at)->format('Y-m-d')
+                    : null,
+                'depature_time' => !empty($stop->departure_at)
+                    ? Carbon::parse($stop->departure_at)->format('H:i')
                     : null,
                 'price_delta_minor' => $stop->price_delta_minor,
                 'is_pickup' => $stop->is_pickup,

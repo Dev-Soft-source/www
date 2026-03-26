@@ -20,6 +20,7 @@ import 'package:proximaride_app/pages/widgets/overlay_widget.dart';
 import 'package:proximaride_app/pages/widgets/progress_circular_widget.dart';
 import 'package:proximaride_app/pages/widgets/second_appbar_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
+import 'package:proximaride_app/services/logger_service.dart';
 import '../widgets/tool_tip.dart';
 
 class PostRidePage extends StatefulWidget {
@@ -86,6 +87,7 @@ class _PostRideScaffold extends GetView<PostRideController> {
             if (controller.isLoading.value == true) {
               return Center(child: progressCircularWidget(context));
             } else {
+              logger.info('bookings.value ${controller.bookings.value}');
               return Stack(
                 children: [
                   Container(

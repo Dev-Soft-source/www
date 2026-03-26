@@ -1,8 +1,14 @@
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
-Widget postRideAgainCardWidget({context, screenWidth, String fromText = "", String toText = "", onTap, Color cardBgColor = Colors.white, String fromLabel = "From", String toLabel = "To"}){
+Widget postRideAgainCardWidget({context, screenWidth, String fromText = "", String toText = "", String depatureAt = "", onTap, Color cardBgColor = Colors.white, String fromLabel = "From", String toLabel = "To"}){
+  
+  DateTime parsedDate = DateTime.parse(depatureAt);
+  DateFormat outputFormat = DateFormat('MMMM d, yyyy');
+  depatureAt = outputFormat.format(parsedDate);
+  
   return InkWell(
     onTap: onTap,
     child: Card(
@@ -14,10 +20,12 @@ Widget postRideAgainCardWidget({context, screenWidth, String fromText = "", Stri
         child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(height: 10),
                 Container(
                   width: 10,
                   height: 10,
@@ -27,7 +35,7 @@ Widget postRideAgainCardWidget({context, screenWidth, String fromText = "", Stri
                   ),
                 ),
                 const SizedBox(
-                  height: 20,
+                  height: 25,
                   width: 20,
                   child: Padding(
                     padding: EdgeInsets.only(left: 4.4),
@@ -62,7 +70,8 @@ Widget postRideAgainCardWidget({context, screenWidth, String fromText = "", Stri
                 txt20Size(title: "$fromLabel:", context: context),
                 5.heightBox,
                 txt20Size(title: "$toLabel:", context: context),
-
+                5.heightBox,
+                txt20Size(title: "", context: context),
               ],
             ),
             10.widthBox,
@@ -73,7 +82,9 @@ Widget postRideAgainCardWidget({context, screenWidth, String fromText = "", Stri
                 children: [
                   txt20Size(title: fromText, context: context, fontFamily: bold),
                   10.heightBox,
-                  txt20Size(title: toText, context: context, fontFamily: bold)
+                  txt20Size(title: toText, context: context, fontFamily: bold),
+                  10.heightBox,
+                  txt16Size(title: depatureAt, context: context)
                 ],
               ),
             )

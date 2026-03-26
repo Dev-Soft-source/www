@@ -261,6 +261,75 @@ class PostRideController extends GetxController {
     return DateFormat("HH:mm").format(parsedTime);
   }
 
+  String formatRideDateValue(dynamic value) {
+    if (value == null || value.toString().isEmpty) {
+      return "";
+    }
+
+    final parsedDate = DateTime.tryParse(value.toString());
+    if (parsedDate == null) {
+      return value.toString();
+    }
+
+    return DateFormat('MMMM d, yyyy').format(parsedDate);
+  }
+
+  String formatRideTimeValue(dynamic value) {
+    if (value == null || value.toString().isEmpty) {
+      return "";
+    }
+
+    final timeText = value.toString();
+    final parsedTime = DateFormat("HH:mm:ss").tryParse(timeText) ??
+        DateFormat("HH:mm").tryParse(timeText);
+
+    if (parsedTime == null) {
+      return timeText;
+    }
+
+    return DateFormat("HH:mm").format(parsedTime);
+  }
+
+  List<dynamic> extractAdditionalRideDetails(dynamic ride) {
+    if (ride is! Map) {
+      return <dynamic>[];
+    }
+
+    final dynamic moreRideDetail =
+        ride['more_ride_detail'] ?? ride['moreRideDetail'];
+    if (moreRideDetail is List) {
+      return List<dynamic>.from(moreRideDetail);
+    }
+
+    final dynamic intermediateStops = ride['intermediate_stops'];
+    if (intermediateStops is List) {
+      return intermediateStops.map((stop) {
+        if (stop is! Map) {
+          return stop;
+        }
+
+        return <String, dynamic>{
+          'id': stop['id'] ?? 0,
+          'departure': stop['label'],
+          'destination': stop['label'],
+          'pickup': stop['pickup_dropoff_location'] ??
+              stop['pickup_location'] ??
+              stop['dropoff_location'] ??
+              "",
+          'dropoff': stop['pickup_dropoff_location'] ??
+              stop['dropoff_location'] ??
+              stop['pickup_location'] ??
+              "",
+          'date': stop['depature_date'],
+          'time': stop['depature_time'],
+          'price': stop['price'] ?? stop['price_delta_minor'] ?? "",
+        };
+      }).toList();
+    }
+
+    return <dynamic>[];
+  }
+
   void _refreshStopFormPrerequisites() {
     stopFormPrerequisiteVersion.value++;
   }
@@ -448,20 +517,15 @@ class PostRideController extends GetxController {
     if (isRequired && fieldValue.isEmpty) {
       var message = validationMessageDetail['required'];
       if (fieldName == "from") {
-        message = message.replaceAll(
-            ":Attribute", labelTextDetail['from_error'] ?? "From");
+        message = labelTextDetail['origin'];
       } else if (fieldName == "to") {
-        message = message.replaceAll(
-            ":Attribute", labelTextDetail['to_error'] ?? "To");
+        message = labelTextDetail['destination'];
       } else if (fieldName == "pickup") {
-        message = message.replaceAll(
-            ":Attribute", labelTextDetail['pick_up_error'] ?? "Pickup");
+        message = labelTextDetail['pickup'];
       } else if (fieldName == "dropoff") {
-        message = message.replaceAll(
-            ":Attribute", labelTextDetail['drop_off_error'] ?? "Dropoff");
+        message = labelTextDetail['dropoff'];
       } else if (fieldName == "details") {
-        message = message.replaceAll(":Attribute",
-            labelTextDetail['meeting_drop_off_description_error'] ?? "Details");
+        message = labelTextDetail['details'];
       } else if (fieldName == "make") {
         message = message.replaceAll(
             ":Attribute", labelTextDetail['make_error'] ?? "Make");
@@ -478,8 +542,7 @@ class PostRideController extends GetxController {
         message = message.replaceAll(
             ":Attribute", labelTextDetail['year_error'] ?? "Year");
       } else if (fieldName == "price") {
-        message = message.replaceAll(
-            ":Attribute", labelTextDetail['price_error'] ?? "Price");
+        message = labelTextDetail['price'];
       }
       errorList.add(message);
       errors.add({
@@ -1235,10 +1298,13 @@ class PostRideController extends GetxController {
                   ride['detail']['destination'];
               pickUpLocationTextEditingController.text = ride['pickup'] ?? "";
               dropOffLocationTextEditingController.text = ride['dropoff'] ?? "";
-              timeTextEditingController.text = "";
+              dateTextEditingController.text = formatRideDateValue(ride['date']);
+              timeTextEditingController.text = formatRideTimeValue(ride['time']);
             }
 
-            dateTextEditingController.text = "";
+            if (rideTypeParam == "new") {
+              dateTextEditingController.text = "";
+            }
             recurring.value = ride['recurring'] == "1" ? true : false;
             recurringType.value = "";
             recurringTripsTextEditingController.text = "";
@@ -1257,36 +1323,40 @@ class PostRideController extends GetxController {
             bookingType.value = ride['booking_type'].toString();
 
             // Handle multiple spots
-            if (ride['more_ride_detail'] != null &&
-                ride['more_ride_detail'].length > 0) {
-              var moreRideDetail = List<dynamic>.empty(growable: true);
-              moreRideDetail.addAll(ride['more_ride_detail']);
+            final moreRideDetail = extractAdditionalRideDetails(ride);
+            if (moreRideDetail.isNotEmpty) {
               logger.info(moreRideDetail.toString());
-              if (moreRideDetail.isNotEmpty) {
-                for (var index = 0; index < moreRideDetail.length; index++) {
-                  if (moreRideDetail[index]['destination'] != null) {
-                    _appendEmptySpot();
-                    final stopValue = rideTypeParam == "new"
-                        ? (moreRideDetail[index]['destination']?.toString() ?? "")
-                        : (moreRideDetail[index]['departure']?.toString() ??
-                            moreRideDetail[index]['destination']?.toString() ??
-                            "");
-                    final pickupOffValue =
-                        moreRideDetail[index]['pickup']?.toString() ??
-                            moreRideDetail[index]['dropoff']?.toString() ??
-                            "";
-                    _setSpotValues(
-                      index,
-                      stop: stopValue,
-                      pickupOff: pickupOffValue,
-                      date: formatSpotDateValue(moreRideDetail[index]['date']),
-                      time: formatSpotTimeValue(moreRideDetail[index]['time']),
-                    );
-                    priceSpotControllers[index].text =
-                        moreRideDetail[index]['price'].toString();
-                    rideDetailIds[index] = "${moreRideDetail[index]['id']}";
-                  }
+              for (var index = 0; index < moreRideDetail.length; index++) {
+                final stopDetail = moreRideDetail[index];
+                if (stopDetail is! Map) {
+                  continue;
                 }
+
+                if (stopDetail['departure'] == null &&
+                    stopDetail['destination'] == null) {
+                  continue;
+                }
+
+                _appendEmptySpot();
+                final stopValue = rideTypeParam == "new"
+                    ? (stopDetail['destination']?.toString() ?? "")
+                    : (stopDetail['departure']?.toString() ??
+                        stopDetail['destination']?.toString() ??
+                        "");
+                final pickupOffValue =
+                    stopDetail['pickup']?.toString() ??
+                        stopDetail['dropoff']?.toString() ??
+                        "";
+                _setSpotValues(
+                  index,
+                  stop: stopValue,
+                  pickupOff: pickupOffValue,
+                  date: formatSpotDateValue(stopDetail['date']),
+                  time: formatSpotTimeValue(stopDetail['time']),
+                );
+                priceSpotControllers[index].text =
+                    stopDetail['price']?.toString() ?? "";
+                rideDetailIds[index] = "${stopDetail['id'] ?? 0}";
               }
             }
 

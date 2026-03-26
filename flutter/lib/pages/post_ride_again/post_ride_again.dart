@@ -98,13 +98,14 @@ class PostRideAgainPage extends GetView<PostRideAgainController> {
                                                       "${controller.labelTextDetail['from_label'] ?? "From"}",
                                                   toLabel:
                                                       "${controller.labelTextDetail['to_label'] ?? "To"}",
+                                                  depatureAt: controller
+                                                      .upcomingPostRideList[index]['ride_detail']['date']
+                                                      .toString(),
                                                   fromText: controller
-                                                      .upcomingPostRideList[
-                                                          index]['ride_detail']['departure']
+                                                      .upcomingPostRideList[index]['ride_detail']['departure']
                                                       .toString(),
                                                   toText: controller
-                                                      .upcomingPostRideList[
-                                                          index]['ride_detail']['destination']
+                                                      .upcomingPostRideList[index]['ride_detail']['destination']
                                                       .toString(),
                                                   onTap: () {
                                                     Get.offNamed(
@@ -164,6 +165,7 @@ class PostRideAgainPage extends GetView<PostRideAgainController> {
                                                       "${controller.labelTextDetail['from_label'] ?? "From"}",
                                                   toLabel:
                                                       "${controller.labelTextDetail['to_label'] ?? "To"}",
+                                                  depatureAt: "",
                                                   fromText:
                                                       "${controller.completedPostRideList[index]['ride_detail']['departure']}",
                                                   toText: controller
@@ -228,12 +230,11 @@ class PostRideAgainPage extends GetView<PostRideAgainController> {
                                                       "${controller.labelTextDetail['from_label'] ?? "From"}",
                                                   toLabel:
                                                       "${controller.labelTextDetail['to_label'] ?? "To"}",
+                                                  depatureAt: "",
                                                   fromText: controller
-                                                              .cancelledPostRideList[
-                                                          index]['ride_detail']['departure'],
+                                                              .cancelledPostRideList[index]['ride_detail']['departure'],
                                                   toText: controller
-                                                              .cancelledPostRideList[
-                                                          index]['ride_detail']['destination'],
+                                                              .cancelledPostRideList[index]['ride_detail']['destination'],
                                                   onTap: () {
                                                     Get.offNamed(
                                                         "/post_ride/${controller.cancelledPostRideList[index]['id']}/new");

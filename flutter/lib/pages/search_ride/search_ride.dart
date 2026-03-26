@@ -321,6 +321,7 @@ class SearchRidePage extends GetView<SearchRideController> {
                                       ['from'],
                                   toText: controller.recentSearchList[index]
                                       ['to'],
+                                  depatureAt: "",
                                   onTap: () async {
                                     controller.applyRecentSearch(
                                         controller.recentSearchList[index]);

@@ -17,6 +17,7 @@ Widget vehicleWidget(
     bool bookingCheck = false,
     error,
     screenHeight}) {
+  String checkedVehicle = 'skip';
   return Container(
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8.0),
@@ -60,7 +61,7 @@ Widget vehicleWidget(
                             ),
                             child: checkBoxWidget(
                                 value: controller.skipNow.value,
-                                onChanged: bookingCheck == true
+                                onChanged: bookingCheck == true || controller.skipNow.value
                                     ? null
                                     : (value) {
                                         controller.skipNow.value = value!;
@@ -84,7 +85,7 @@ Widget vehicleWidget(
                           ),
                           5.widthBox,
                           InkWell(
-                            onTap: bookingCheck == true
+                            onTap: bookingCheck == true || controller.skipNow.value
                                 ? null
                                 : () {
                                     controller.skipNow.value =
@@ -135,7 +136,7 @@ Widget vehicleWidget(
                               ),
                               child: checkBoxWidget(
                                   value: controller.addNewVehicle.value,
-                                  onChanged: bookingCheck == true
+                                  onChanged: bookingCheck == true || controller.addNewVehicle.value
                                       ? null
                                       : (value) {
                                           controller.addNewVehicle.value =
@@ -146,7 +147,7 @@ Widget vehicleWidget(
                             ),
                             5.widthBox,
                             InkWell(
-                              onTap: bookingCheck == true
+                              onTap: bookingCheck == true || controller.addNewVehicle.value
                                   ? null
                                   : () {
                                       controller.addNewVehicle.value =
@@ -183,7 +184,7 @@ Widget vehicleWidget(
                               ),
                               child: checkBoxWidget(
                                   value: controller.alreadyAdded.value,
-                                  onChanged: bookingCheck == true
+                                  onChanged: bookingCheck == true || controller.alreadyAdded.value
                                       ? null
                                       : (value) {
                                           controller.alreadyAdded.value =
@@ -208,7 +209,7 @@ Widget vehicleWidget(
                             ),
                             5.widthBox,
                             InkWell(
-                              onTap: bookingCheck == true
+                              onTap: bookingCheck == true || controller.alreadyAdded.value
                                   ? null
                                   : () {
                                       controller.alreadyAdded.value =
