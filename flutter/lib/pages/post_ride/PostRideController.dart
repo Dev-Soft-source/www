@@ -78,6 +78,8 @@ class PostRideController extends GetxController {
   var overallRating = 0.0.obs;
   var rideId = 0.obs;
   var rideType = "".obs;
+  var fromCityId = 0.obs;
+  var toCityId = 0.obs;
   var pinkRideReadOnly = false.obs;
   var extraCareRideReadOnly = false.obs;
   var labelTextDetail = {}.obs;
@@ -111,6 +113,7 @@ class PostRideController extends GetxController {
   List<TextEditingController> dropoffSpotControllers = [];
   List<TextEditingController> dateSpotControllers = [];
   List<TextEditingController> timeSpotControllers = [];
+  List<int> stopCityIds = [];
   var rideDetailIds = [];
 
   var spotsCount = 0.obs;
@@ -312,6 +315,7 @@ class PostRideController extends GetxController {
           'id': stop['id'] ?? 0,
           'departure': stop['label'],
           'destination': stop['label'],
+          'city_id': stop['city_id'] ?? 0,
           'pickup': stop['pickup_dropoff_location'] ??
               stop['pickup_location'] ??
               stop['dropoff_location'] ??
@@ -443,6 +447,7 @@ class PostRideController extends GetxController {
     dropoffSpotControllers.add(TextEditingController());
     dateSpotControllers.add(TextEditingController());
     timeSpotControllers.add(TextEditingController());
+    stopCityIds.add(0);
     rideDetailIds.add("0");
     spotsCount.value = fromSpotControllers.length;
   }
@@ -453,6 +458,7 @@ class PostRideController extends GetxController {
     required String pickupOff,
     required String date,
     required String time,
+    int cityId = 0,
   }) {
     fromSpotControllers[index].text = stop;
     toSpotControllers[index].text = stop;
@@ -461,6 +467,7 @@ class PostRideController extends GetxController {
     dropoffSpotControllers[index].text = pickupOff;
     dateSpotControllers[index].text = date;
     timeSpotControllers[index].text = time;
+    stopCityIds[index] = cityId;
   }
 
   Future<void> openStopForm(BuildContext context, {int? index}) async {
@@ -503,9 +510,38 @@ class PostRideController extends GetxController {
       pickupOff: (result['pickup_off'] ?? '').toString(),
       date: (result['date'] ?? '').toString(),
       time: (result['time'] ?? '').toString(),
+      cityId: int.tryParse((result['city_id'] ?? 0).toString()) ?? 0,
     );
     spotsCount.refresh();
     showErrorSpot.value = false;
+    update();
+  }
+
+  void setOriginLocation({required String label, required int cityId}) {
+    fromTextEditingController.text = label;
+    fromCityId.value = cityId;
+    errors.removeWhere((error) => error['title'] == "from");
+  }
+
+  void setDestinationLocation({required String label, required int cityId}) {
+    toTextEditingController.text = label;
+    toCityId.value = cityId;
+    errors.removeWhere((error) => error['title'] == "to");
+  }
+
+  void setStopLocation({
+    required int index,
+    required String label,
+    required int cityId,
+  }) {
+    if (index < 0 || index >= fromSpotControllers.length) {
+      return;
+    }
+
+    fromSpotControllers[index].text = label;
+    toSpotControllers[index].text = label;
+    stopCityIds[index] = cityId;
+    spotsCount.refresh();
     update();
   }
 
@@ -1277,6 +1313,7 @@ class PostRideController extends GetxController {
           // 11. Parse ride data (if editing/duplicating)
           if (data['rideData'] != null && data['rideData']['ride'] != null) {
             var ride = data['rideData']['ride'];
+            var rideDetail = data['rideData']['rideDetail'];
 
             if (rideTypeParam == "new") {
               // Duplicate ride - swap from/to
@@ -1284,6 +1321,10 @@ class PostRideController extends GetxController {
                   ride['detail']['destination'];
               toTextEditingController.text =
                   ride['detail']['departure'];
+              fromCityId.value =
+                  int.tryParse(ride['detail']['destination_city_id'].toString()) ?? 0;
+              toCityId.value =
+                  int.tryParse(ride['detail']['origin_city_id'].toString()) ?? 0;
               pickUpLocationTextEditingController.text = ride['dropoff'] ?? "";
               dropOffLocationTextEditingController.text = ride['pickup'] ?? "";
               var timeFormat = DateFormat("HH:mm:ss");
@@ -1296,6 +1337,10 @@ class PostRideController extends GetxController {
                   ride['detail']['departure'];
               toTextEditingController.text =
                   ride['detail']['destination'];
+              fromCityId.value =
+                  int.tryParse(ride['detail']['origin_city_id'].toString()) ?? 0;
+              toCityId.value =
+                  int.tryParse(ride['detail']['destination_city_id'].toString()) ?? 0;
               pickUpLocationTextEditingController.text = ride['pickup'] ?? "";
               dropOffLocationTextEditingController.text = ride['dropoff'] ?? "";
               dateTextEditingController.text = formatRideDateValue(ride['date']);
@@ -1353,6 +1398,7 @@ class PostRideController extends GetxController {
                   pickupOff: pickupOffValue,
                   date: formatSpotDateValue(stopDetail['date']),
                   time: formatSpotTimeValue(stopDetail['time']),
+                  cityId: int.tryParse(stopDetail['city_id'].toString()) ?? 0,
                 );
                 priceSpotControllers[index].text =
                     stopDetail['price']?.toString() ?? "";
@@ -1394,7 +1440,12 @@ class PostRideController extends GetxController {
             pet.value = ride['animal_friendly'].toString();
 
             if (ride['features'] != null && ride['features'].isNotEmpty) {
-              featureList.value = ride['features'].split(',');
+              featureList.value = ride['features']
+                  .toString()
+                  .split(',')
+                  .map((feature) => feature.toString().trim())
+                  .where((feature) => feature.isNotEmpty)
+                  .toList();
             }
 
             bookingOption.value = ride['booking_method'].toString();
@@ -1402,7 +1453,13 @@ class PostRideController extends GetxController {
             paymentOption.value = ride['payment_method'].toString();
             acceptMoreLuggage.value = ride['accept_more_luggage'].toString();
             openCustomized.value = ride['open_customized'].toString();
-            pricePerSeatTextEditingController.text = ride['price'].toString();
+            final detailPrice =
+                rideDetail != null ? rideDetail['price'] : ride['detail']?['price'];
+            final ridePrice = ride['price'];
+            pricePerSeatTextEditingController.text =
+                (detailPrice != null && detailPrice.toString().isNotEmpty)
+                    ? detailPrice.toString()
+                    : (ridePrice != null ? ridePrice.toString() : "");
             anythingTextEditingController.text = ride['notes'] ?? "";
 
             if (recurring.value) {
@@ -1708,6 +1765,7 @@ class PostRideController extends GetxController {
       var dropoffSpots = [];
       var dateSpots = [];
       var timeSpots = [];
+      var stopCityIdsArray = [];
       var rideDetailIdsArray = [];
       if (fromSpotControllers.isNotEmpty) {
         for (var fromIndex = 0;
@@ -1750,6 +1808,12 @@ class PostRideController extends GetxController {
 
         for (var timeIndex = 0; timeIndex < fromSpotControllers.length; timeIndex++) {
           timeSpots.add(timeSpotControllers[timeIndex].text);
+        }
+
+        for (var stopCityIndex = 0;
+            stopCityIndex < stopCityIds.length;
+            stopCityIndex++) {
+          stopCityIdsArray.add(stopCityIds[stopCityIndex]);
         }
 
         for (var rideIndex = 0; rideIndex < rideDetailIds.length; rideIndex++) {
@@ -1802,8 +1866,11 @@ class PostRideController extends GetxController {
               rideType.value,
               rideId.value,
               bookingType.value,
+              fromCityId.value,
+              toCityId.value,
               fromSpots,
               toSpots,
+              stopCityIdsArray,
               priceSpots,
               pickupSpots,
               dropoffSpots,
@@ -2237,6 +2304,13 @@ class PostRideController extends GetxController {
                 resp['data']['ride']['detail']['departure'];
             toTextEditingController.text =
                 resp['data']['ride']['detail']['destination'];
+            fromCityId.value = int.tryParse(
+                    resp['data']['ride']['detail']['origin_city_id'].toString()) ??
+                0;
+            toCityId.value = int.tryParse(resp['data']['ride']['detail']
+                        ['destination_city_id']
+                    .toString()) ??
+                0;
             pickUpLocationTextEditingController.text =
                 resp['data']['ride']['pickup'] ?? "";
             dropOffLocationTextEditingController.text =
@@ -2277,6 +2351,9 @@ class PostRideController extends GetxController {
                     pickupOff: pickupOffValue,
                     date: formatSpotDateValue(moreRideDetail[index]['date']),
                     time: formatSpotTimeValue(moreRideDetail[index]['time']),
+                    cityId: int.tryParse(
+                            moreRideDetail[index]['city_id'].toString()) ??
+                        0,
                   );
                   priceSpotControllers[index].text =
                       moreRideDetail[index]['price'].toString();
@@ -2335,7 +2412,8 @@ class PostRideController extends GetxController {
             var featureData = List<dynamic>.empty(growable: true);
             featureData.addAll(resp['data']['ride']['features']);
             for (var element in featureData) {
-              featureList.add(element['title']);
+              featureList.add(
+                  (element['id'] ?? element['title']).toString());
             }
             bookingOption.value =
                 resp['data']['ride']['booking_method'].toString();
@@ -2643,6 +2721,7 @@ class PostRideController extends GetxController {
     dropoffSpotControllers.removeAt(index);
     dateSpotControllers.removeAt(index);
     timeSpotControllers.removeAt(index);
+    stopCityIds.removeAt(index);
     rideDetailIds.removeAt(index);
     spotsCount.value = fromSpotControllers.length;
     spotsCount.refresh();

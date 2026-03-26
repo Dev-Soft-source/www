@@ -118,12 +118,17 @@ class CityPage extends GetView<LocationController> {
                                         } else if (controller.isCity.value ==
                                             "origin") {
                                           if (controller.spot.value == "yes") {
-                                            controller
-                                                    .tempController
-                                                    .fromSpotControllers[
-                                                        controller.spotIndex.value]
-                                                    .text =
-                                                label;
+                                            controller.tempController
+                                                .setStopLocation(
+                                              index:
+                                                  controller.spotIndex.value,
+                                              label: label,
+                                              cityId: int.tryParse(controller
+                                                          .searchCities[index]
+                                                              ['id']
+                                                          .toString()) ??
+                                                  0,
+                                            );
                                           } else {
                                             if (controller
                                                 .isSearchControllerRegistered) {
@@ -138,11 +143,16 @@ class CityPage extends GetView<LocationController> {
                                                                   .toString()) ??
                                                           0);
                                             } else {
-                                              controller
-                                                      .tempController
-                                                      .fromTextEditingController
-                                                      .text =
-                                                  label;
+                                              controller.tempController
+                                                  .setOriginLocation(
+                                                      label: label,
+                                                      cityId: int.tryParse(
+                                                              controller
+                                                                  .searchCities[
+                                                                      index]
+                                                                      ['id']
+                                                                  .toString()) ??
+                                                          0);
                                             }
                                           }
                                         } else if (controller.isCity.value ==
@@ -168,11 +178,16 @@ class CityPage extends GetView<LocationController> {
                                                                   .toString()) ??
                                                           0);
                                             } else {
-                                              controller
-                                                      .tempController
-                                                      .toTextEditingController
-                                                      .text =
-                                                  label;
+                                              controller.tempController
+                                                  .setDestinationLocation(
+                                                      label: label,
+                                                      cityId: int.tryParse(
+                                                              controller
+                                                                  .searchCities[
+                                                                      index]
+                                                                      ['id']
+                                                                  .toString()) ??
+                                                          0);
                                             }
                                           }
                                         }

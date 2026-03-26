@@ -41,8 +41,8 @@ Widget ridePreferenceWidget(
                           checkBoxSelectionWidget(
                             context: context,
                             title: "${controller.rideFeatureLabelList[i]}",
-                            value: controller.featureList
-                                    .contains(controller.rideFeatureList[i])
+                            value: controller.featureList.contains(
+                                    controller.rideFeatureList[i].toString())
                                 ? true
                                 : false,
                             textColor: i == 0
@@ -80,14 +80,16 @@ Widget ridePreferenceWidget(
                                                       .rideFeatureList[i]
                                                       .toString())) {
                                               } else {
-                                                controller.featureList.add(
-                                                    controller
-                                                        .rideFeatureList[i]);
+                                                controller.featureList
+                                                    .add(controller
+                                                        .rideFeatureList[i]
+                                                        .toString());
                                               }
                                             } else {
-                                              controller.featureList.remove(
-                                                  controller
-                                                      .rideFeatureList[i]);
+                                              controller.featureList
+                                                  .remove(controller
+                                                      .rideFeatureList[i]
+                                                      .toString());
                                             }
                                           },
                             onTap: bookingCheck == true
@@ -109,16 +111,19 @@ Widget ridePreferenceWidget(
                                                       error['title'] ==
                                                       "features");
                                             }
-                                            if (controller.featureList.contains(
-                                                controller.rideFeatureList[i]
+                                            if (controller.featureList
+                                                .contains(controller
+                                                    .rideFeatureList[i]
                                                     .toString())) {
-                                              controller.featureList.remove(
-                                                  controller
-                                                      .rideFeatureList[i]);
+                                              controller.featureList
+                                                  .remove(controller
+                                                      .rideFeatureList[i]
+                                                      .toString());
                                             } else {
-                                              controller.featureList.add(
-                                                  controller
-                                                      .rideFeatureList[i]);
+                                              controller.featureList
+                                                  .add(controller
+                                                      .rideFeatureList[i]
+                                                      .toString());
                                             }
                                           },
                             isError: controller.errors

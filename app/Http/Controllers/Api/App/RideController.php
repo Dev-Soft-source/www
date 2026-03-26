@@ -17,6 +17,8 @@ use App\Models\RecentSearch;
 use App\Models\ReviewSetting;
 use App\Models\Ride;
 use App\Models\RideDetail;
+use App\Models\RideStop;
+use App\Models\RideStopSegment;
 use App\Models\City;
 use App\Models\FeaturesSetting;
 use App\Models\FeaturesSettingDetail;
@@ -1301,7 +1303,7 @@ class RideController extends Controller
             $newStart = Carbon::parse("$request->date $request->time");
             $newEnd = Carbon::parse("$destinationReachedDate $destinationReachedTime");
 
-            $rides = DB::table('rides')
+            $rides = Ride::query()
                 ->notCancelled()
                 ->where('added_by', $user_id)
                 ->whereRaw("CONCAT(date, ' ', time) < ?", [$newEnd])
@@ -1576,6 +1578,8 @@ class RideController extends Controller
         $rideDetail->ride_id = $initialRide->id;
         $rideDetail->departure = $from;
         $rideDetail->destination = $to;
+        $rideDetail->origin_city_id = (int) $request->input('from_city_id', 0) ?: null;
+        $rideDetail->destination_city_id = (int) $request->input('to_city_id', 0) ?: null;
         $rideDetail->default_ride = 1;
         $rideDetail->total_distance = $distance;
         $rideDetail->total_duration = $duration;
@@ -1706,6 +1710,8 @@ class RideController extends Controller
                 $rideDetail->save();
             }
         }
+
+        $this->syncAppRideStopsAndSegments($initialRide, $request);
 
 
 
@@ -2157,48 +2163,17 @@ class RideController extends Controller
 
     public function UpdateRide(Request $request)
     {
-        $ride = Ride::where('id', $request->ride_id)->first();
         $user = Auth::guard('sanctum')->user();
-        $adminSetting = SiteSetting::first();
         $user_id = $user->id;
-        $rides = Ride::where('added_by', $user_id)->whereNotIn('id', [$request->ride_id])->get();
-
-        // Check if ride has any bookings - if so, price cannot be changed
-        $hasBookings = Booking::where('ride_id', $request->ride_id)
-            ->where('status', '<>', 3)
-            ->where('status', '<>', 4)
-            ->withActivePassenger()
-            ->exists();
-
-        // If bookings exist, check if price is being changed
-        if ($hasBookings && $ride->defaultRideDetail && isset($ride->defaultRideDetail[0])) {
-            $currentPrice = $ride->defaultRideDetail[0]->price;
-            $newPrice = $request->price;
-
-            if ($currentPrice != $newPrice) {
-                return $this->apiErrorResponse('You cannot change the price once passengers have booked this ride.', 200);
-            }
-        }
-
-        $selectedLanguage = $this->resolveApiLanguage();
-        $message = $this->getApiSuccessMessageFields([
-            'ride_schedule_message',
-            'acc_suspend_message',
-            'overlap_ride_message',
-            'post_ride_update_message',
-            'block_post_ride_message',
-            'profile_photo_required_message',
-        ], $selectedLanguage);
+        $message = $this->successMessage;
 
         // Check if user has suspanded
         if ($user->isSuspended()) {
             return $this->apiErrorResponse(strip_tags($message->acc_suspend_message ?? null), 200);
         }
-
         if ($user->isBlockedPostRide()) {
             return $this->apiErrorResponse(strip_tags($message->block_post_ride_message ?? null), 200);
         }
-
         if (!isset($user->profile_image) && $user->profile_image == '') {
             return $this->apiErrorResponse(strip_tags($message->profile_photo_required_message ?? null), 200);
         }
@@ -2207,11 +2182,11 @@ class RideController extends Controller
         if (isset($request->date) && isset($request->time)) {
             $tripDate = date('Y-m-d', strtotime($request->date));
             $tripTime = date('H:i:s', strtotime($request->time));
-            $rides = Ride::where('added_by', $user_id)->where('id', '!=', $request->ride_id)
+            $ride = Ride::where('added_by', $user_id)->where('id', '!=', $request->ride_id)
                 ->whereDate('date', '=', $tripDate)
                 ->whereTime('time', '=', $tripTime)
                 ->first();
-            if (isset($rides) && !empty($rides)) {
+            if (isset($ride) && !empty($ride)) {
                 $data = ['ride' => $request->all(), 'uploaded_image' => $filename ?? null];
                 return $this->apiErrorResponse(strip_tags($message->ride_schedule_message), 200, $data);
             }
@@ -2225,13 +2200,8 @@ class RideController extends Controller
             $fromArray = explode(',', $request->from);
             $toArray = explode(',', $request->to);
 
-            Log::info('Calculating distance for ride update (API)', [
-                'ride_id' => $request->ride_id,
-                'from' => $from,
-                'to' => $to,
-                'user_id' => $user_id
-            ]);
-
+            // TODO : cross all of from - stops - to
+            
             $googleApiData = $this->getDataFromGoogleApi($from, $to);
             if (isset($googleApiData) && !empty($googleApiData)) {
                 $duration = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['duration']) ? $googleApiData['rows'][0]['elements'][0]['duration']['value'] : 0;
@@ -2242,15 +2212,6 @@ class RideController extends Controller
             if ($distance != 0) {
                 $distance = round(($distance / 1000), 2);
             }
-
-            Log::info('Distance calculation completed for ride update (API)', [
-                'ride_id' => $request->ride_id,
-                'from' => $from,
-                'to' => $to,
-                'distance_km' => $distance,
-                'duration_seconds' => $duration,
-                'distance_meters' => $distance * 1000
-            ]);
 
             if (isset($adminSetting)) {
 
@@ -2305,18 +2266,53 @@ class RideController extends Controller
 
 
 
-            $rides = DB::table('rides')
+            $ride = Ride::query()
                 ->notCancelled()
                 ->where('added_by', $user_id)
                 ->whereRaw("CONCAT(date, ' ', time) < ?", [$newEnd])
                 ->whereRaw("CONCAT(destination_reached_date, ' ', destination_reached_time) > ?", [$newStart])
                 ->first();
 
-            if (isset($rides) && !empty($rides)) {
+            if (isset($ride) && !empty($ride)) {
                 $data = ['ride' => $request->all(), 'uploaded_image' => $filename ?? null];
                 return $this->apiErrorResponse(strip_tags($message->overlap_ride_message ?? "this ride overlaps with an existing ride you already have"), 200, $data);
             }
         }
+        
+        $ride = Ride::where('id', $request->ride_id)->first();
+        
+        // Check if ride has any bookings - if so, price cannot be changed
+        $hasBookings = Booking::where('ride_id', $request->ride_id)
+        ->NotRejected()
+        ->withActivePassenger()
+        ->exists();
+        
+        // If bookings exist, check if price is being changed
+        if ($hasBookings && $ride->detail) {
+            $currentPrice = $ride->detail->price;
+            $newPrice = $request->price * 100;
+            
+            if ($currentPrice != $newPrice) {
+                return $this->apiErrorResponse('You cannot change the price once passengers have booked this ride.', 200);
+            }
+        }
+                
+        $adminSetting = SiteSetting::first();
+        
+
+
+        // ???
+        $selectedLanguage = $this->resolveApiLanguage();
+        $message = $this->getApiSuccessMessageFields([
+            'ride_schedule_message',
+            'acc_suspend_message',
+            'overlap_ride_message',
+            'post_ride_update_message',
+            'block_post_ride_message',
+            'profile_photo_required_message',
+        ], $selectedLanguage);
+
+        
 
         $skip_vehicle = $request->filled('skip_vehicle') ? $request->skip_vehicle : 0;
         $add_vehicle = $request->filled('add_vehicle') ? $request->add_vehicle : '0';
@@ -2324,6 +2320,7 @@ class RideController extends Controller
 
         $recurring = $request->filled('recurring') ? '1' : '0';
 
+        // TODO : custom validation
         $customMessages = [
             'image.max' => 'Can not upload image size greater than 10MB',
         ];
@@ -2562,15 +2559,13 @@ class RideController extends Controller
         $from = $request->from;
         $to = $request->to;
 
-        if (isset($request->default_ride_detail_id)) {
-            $rideDetail = RideDetail::where('id', $request->default_ride_detail_id)->first();
-        } else {
-            $rideDetail = new RideDetail();
-        }
+        $rideDetail = RideDetail::where('ride_id', $ride->id)->first();
 
         $rideDetail->ride_id = $ride->id;
         $rideDetail->departure = $from;
         $rideDetail->destination = $to;
+        $rideDetail->origin_city_id = (int) $request->input('from_city_id', 0) ?: null;
+        $rideDetail->destination_city_id = (int) $request->input('to_city_id', 0) ?: null;
         $rideDetail->default_ride = 1;
         $rideDetail->total_distance = $distance;
         $rideDetail->total_duration = $duration;
@@ -2578,14 +2573,6 @@ class RideController extends Controller
         $rideDetail->time = $request->time;
         $rideDetail->date = Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d');
 
-        Log::info('Saving ride detail with distance (API)', [
-            'ride_id' => $ride->id,
-            'ride_detail_id' => $rideDetail->id ?? 'new',
-            'departure' => $from,
-            'destination' => $to,
-            'total_distance_km' => $distance,
-            'total_duration_seconds' => $duration
-        ]);
 
         if (isset($adminSetting)) {
 
@@ -2710,6 +2697,8 @@ class RideController extends Controller
                 $rideDetail->save();
             }
         }
+
+        $this->syncAppRideStopsAndSegments($ride, $request);
 
 
         // Check if the ride is recurring
@@ -3162,5 +3151,181 @@ class RideController extends Controller
         }
 
         return $data;
+    }
+
+    protected function syncAppRideStopsAndSegments(Ride $ride, Request $request): void
+    {
+        RideStopSegment::where('ride_id', $ride->id)->delete();
+        RideStop::where('ride_id', $ride->id)->delete();
+
+        $originLabel = trim((string) $request->input('from', ''));
+        $destinationLabel = trim((string) $request->input('to', ''));
+        if ($originLabel === '' || $destinationLabel === '') {
+            return;
+        }
+
+        $fromSpots = $this->decodeAppJsonArray($request->input('from_spot'));
+        $stopCityIds = $this->decodeAppJsonArray($request->input('stop_city_ids'));
+        $pickupSpots = $this->decodeAppJsonArray($request->input('pickup_spot'));
+        $dropoffSpots = $this->decodeAppJsonArray($request->input('dropoff_spot'));
+        $dateSpots = $this->decodeAppJsonArray($request->input('date_spot'));
+        $timeSpots = $this->decodeAppJsonArray($request->input('time_spot'));
+        $priceSpots = $this->decodeAppJsonArray($request->input('price_spot'));
+
+        $originDepartureAt = $this->parseAppRideDateTime(
+            (string) $request->input('date', ''),
+            (string) $request->input('time', '')
+        );
+
+        $destinationEtaAt = null;
+        if (!empty($ride->destination_reached_date) && !empty($ride->destination_reached_time)) {
+            $destinationEtaAt = Carbon::parse($ride->destination_reached_date . ' ' . $ride->destination_reached_time);
+        }
+
+        $stopRecords = [[
+            'stop_order' => 1,
+            'city_id' => (int) $request->input('from_city_id', 0) ?: $this->resolveAppCityId($originLabel),
+            'label' => $originLabel,
+            'departure_at' => $originDepartureAt,
+            'pickup_dropoff_location' => $request->input('pickup'),
+            'eta_at' => null,
+            'price_delta_minor' => 0,
+            'seats_available' => $ride->seats,
+            'is_pickup' => true,
+            'is_dropoff' => false,
+        ]];
+
+        $previousLabel = $originLabel;
+        $segmentPrices = [];
+
+        foreach ($fromSpots as $index => $stopLabelRaw) {
+            $stopLabel = trim((string) $stopLabelRaw);
+            if ($stopLabel === '') {
+                continue;
+            }
+
+            $pickupDropoffLocation = trim((string) ($pickupSpots[$index] ?? $dropoffSpots[$index] ?? ''));
+            $stopDepartureAt = $this->parseAppRideDateTime(
+                (string) ($dateSpots[$index] ?? ''),
+                (string) ($timeSpots[$index] ?? '')
+            );
+            $priceDeltaMinor = (int) ($priceSpots[$index] ?? 0);
+
+            $stopRecords[] = [
+                'stop_order' => count($stopRecords) + 1,
+                'city_id' => (int) ($stopCityIds[$index] ?? 0) ?: $this->resolveAppCityId($stopLabel),
+                'label' => $stopLabel,
+                'departure_at' => $stopDepartureAt,
+                'pickup_dropoff_location' => $pickupDropoffLocation !== '' ? $pickupDropoffLocation : null,
+                'eta_at' => null,
+                'price_delta_minor' => $priceDeltaMinor,
+                'seats_available' => $ride->seats,
+                'is_pickup' => true,
+                'is_dropoff' => true,
+            ];
+
+            $segmentPrices[] = $priceDeltaMinor;
+            $previousLabel = $stopLabel;
+        }
+
+        $finalLegPrice = !empty($priceSpots)
+            ? (int) ($priceSpots[count($priceSpots) - 1] ?? 0)
+            : 0;
+
+        $stopRecords[] = [
+            'stop_order' => count($stopRecords) + 1,
+            'city_id' => (int) $request->input('to_city_id', 0) ?: $this->resolveAppCityId($destinationLabel),
+            'label' => $destinationLabel,
+            'departure_at' => null,
+            'pickup_dropoff_location' => $request->input('dropoff'),
+            'eta_at' => $destinationEtaAt,
+            'price_delta_minor' => $finalLegPrice,
+            'seats_available' => $ride->seats,
+            'is_pickup' => false,
+            'is_dropoff' => true,
+        ];
+
+        $segmentPrices[] = $finalLegPrice;
+
+        $savedStopIds = [];
+        foreach ($stopRecords as $record) {
+            $savedStop = RideStop::create([
+                'ride_id' => $ride->id,
+                'stop_order' => $record['stop_order'],
+                'city_id' => $record['city_id'],
+                'label' => $record['label'],
+                'departure_at' => $record['departure_at'],
+                'pickup_dropoff_location' => $record['pickup_dropoff_location'],
+                'eta_at' => $record['eta_at'],
+                'price_delta_minor' => $record['price_delta_minor'],
+                'seats_available' => $record['seats_available'],
+                'is_pickup' => $record['is_pickup'],
+                'is_dropoff' => $record['is_dropoff'],
+            ]);
+
+            $savedStopIds[] = $savedStop->id;
+        }
+
+        for ($index = 0; $index < count($savedStopIds) - 1; $index++) {
+            $fromStopId = $savedStopIds[$index] ?? null;
+            $toStopId = $savedStopIds[$index + 1] ?? null;
+            if (!$fromStopId || !$toStopId || $fromStopId === $toStopId) {
+                continue;
+            }
+
+            RideStopSegment::create([
+                'ride_id' => $ride->id,
+                'from_stop_id' => $fromStopId,
+                'to_stop_id' => $toStopId,
+                'price_minor' => (int) ($segmentPrices[$index] ?? 0),
+            ]);
+        }
+    }
+
+    protected function decodeAppJsonArray($value): array
+    {
+        if (is_array($value)) {
+            return $value;
+        }
+
+        if (!is_string($value) || trim($value) === '') {
+            return [];
+        }
+
+        $decoded = json_decode($value, true);
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    protected function parseAppRideDateTime(string $date, string $time): ?Carbon
+    {
+        $date = trim($date);
+        $time = trim($time);
+        if ($date === '' || $time === '') {
+            return null;
+        }
+
+        foreach (['F d, Y H:i', 'F j, Y H:i', 'Y-m-d H:i', 'Y-m-d H:i:s'] as $format) {
+            try {
+                return Carbon::createFromFormat($format, $date . ' ' . $time);
+            } catch (\Throwable $e) {
+            }
+        }
+
+        try {
+            return Carbon::parse($date . ' ' . $time);
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    protected function resolveAppCityId(string $label): ?int
+    {
+        $cityName = trim(explode(',', $label)[0] ?? $label);
+        if ($cityName === '') {
+            return null;
+        }
+
+        $city = City::where('name', $cityName)->first();
+        return $city ? (int) $city->id : null;
     }
 }

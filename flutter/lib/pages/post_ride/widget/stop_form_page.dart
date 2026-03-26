@@ -91,6 +91,7 @@ class _StopFormPageState extends State<StopFormPage> {
       'pickup_off': pickupOffController.text.trim(),
       'date': dateController.text.trim(),
       'time': timeController.text.trim(),
+      'city_id': postRideController.stopCityIds[widget.stopIndex],
     });
   }
 

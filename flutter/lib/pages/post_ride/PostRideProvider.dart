@@ -637,8 +637,11 @@ class PostRideProvider extends GetConnect {
       rideType,
       rideId,
       bookingType,
+      fromCityId,
+      toCityId,
       fromSpots,
       toSpots,
+      stopCityIds,
       priceSpots,
       pickupSpots,
       dropoffSpots,
@@ -653,6 +656,8 @@ class PostRideProvider extends GetConnect {
       data.fields.add(MapEntry('booking_type', bookingType.toString()));
       data.fields.add(MapEntry("from", fromTextEditingController));
       data.fields.add(MapEntry("to", toTextEditingController));
+      data.fields.add(MapEntry("from_city_id", fromCityId.toString()));
+      data.fields.add(MapEntry("to_city_id", toCityId.toString()));
       data.fields.add(MapEntry("pickup", pickUpLocationTextEditingController));
       data.fields
           .add(MapEntry("dropoff", dropOffLocationTextEditingController));
@@ -679,6 +684,7 @@ class PostRideProvider extends GetConnect {
       if (fromSpots.length > 0) {
         data.fields.add(MapEntry("from_spot", jsonEncode(fromSpots)));
         data.fields.add(MapEntry("to_spot", jsonEncode(toSpots)));
+        data.fields.add(MapEntry("stop_city_ids", jsonEncode(stopCityIds)));
         data.fields.add(MapEntry("price_spot", jsonEncode(priceSpots)));
         data.fields.add(MapEntry("pickup_spot", jsonEncode(pickupSpots)));
         data.fields.add(MapEntry("dropoff_spot", jsonEncode(dropoffSpots)));
