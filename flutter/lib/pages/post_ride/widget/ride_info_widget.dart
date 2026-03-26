@@ -135,43 +135,32 @@ Widget rideInfoWidget(
                           .firstWhere((error) => error['title'] == "to"))
                 ],
                 10.heightBox,
-                Obx(
-                  () => addMoreSpotRideWidget(
-                    context: context,
-                    controller: controller,
-                    screenWidth: screenWidth,
-                    bookingCheck: controller.bookings.value,
-                    error: controller.errors.toList(),
-                  ),
-                ),
-                5.heightBox,
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: elevatedButtonWidget(
-                      textWidget: txt18Size(
-                          title:
-                              '${controller.labelTextDetail['add_spot_button_label'] ?? "Add Spot"}',
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable:
+                      controller.pickUpLocationTextEditingController,
+                  builder: (context, value, _) {
+                    return Row(
+                      children: [
+                        txt20Size(
+                            title:
+                                "${controller.labelTextDetail['pick_up_label'] ?? "Pick-up location"}",
+                            fontFamily: regular,
+                            context: context),
+                        txt20Size(
+                            title: "*",
+                            fontFamily: regular,
+                            context: context,
+                            textColor: Colors.red),
+                        const Spacer(),
+                        txt14Size(
+                          title: "${value.text.length}/300",
                           context: context,
-                          textColor: Colors.white),
-                      context: context,
-                      onPressed: () async {
-                        await controller.addNewSpot();
-                      }),
-                ),
-                10.heightBox,
-                Row(
-                  children: [
-                    txt20Size(
-                        title:
-                            "${controller.labelTextDetail['pick_up_label'] ?? "Pick-up location"}",
-                        fontFamily: regular,
-                        context: context),
-                    txt20Size(
-                        title: "*",
-                        fontFamily: regular,
-                        context: context,
-                        textColor: Colors.red),
-                  ],
+                          fontFamily: regular,
+                          textColor: Colors.grey.shade700,
+                        ),
+                      ],
+                    );
+                  },
                 ),
                 3.heightBox,
                 textAreaWidget(
@@ -185,6 +174,7 @@ Widget rideInfoWidget(
                   maxLines: 2,
                   hintMaxLines: 10,
                   maxLength: 300,
+                  showCounter: false,
                   onChanged: (value) {
                     if (controller.errors
                         .any((error) => error['title'] == "pickup")) {
@@ -204,19 +194,32 @@ Widget rideInfoWidget(
                           .firstWhere((error) => error['title'] == "pickup"))
                 ],
                 10.heightBox,
-                Row(
-                  children: [
-                    txt20Size(
-                        title:
-                            "${controller.labelTextDetail['drop_off_label'] ?? "Drop-off location"}",
-                        fontFamily: regular,
-                        context: context),
-                    txt20Size(
-                        title: "*",
-                        fontFamily: regular,
-                        context: context,
-                        textColor: Colors.red),
-                  ],
+                ValueListenableBuilder<TextEditingValue>(
+                  valueListenable:
+                      controller.dropOffLocationTextEditingController,
+                  builder: (context, value, _) {
+                    return Row(
+                      children: [
+                        txt20Size(
+                            title:
+                                "${controller.labelTextDetail['drop_off_label'] ?? "Drop-off location"}",
+                            fontFamily: regular,
+                            context: context),
+                        txt20Size(
+                            title: "*",
+                            fontFamily: regular,
+                            context: context,
+                            textColor: Colors.red),
+                        const Spacer(),
+                        txt14Size(
+                          title: "${value.text.length}/300",
+                          context: context,
+                          fontFamily: regular,
+                          textColor: Colors.grey.shade700,
+                        ),
+                      ],
+                    );
+                  },
                 ),
                 3.heightBox,
                 textAreaWidget(
@@ -230,6 +233,7 @@ Widget rideInfoWidget(
                   maxLines: 2,
                   hintMaxLines: 10,
                   maxLength: 300,
+                  showCounter: false,
                   onChanged: (value) {
                     if (controller.errors
                         .any((error) => error['title'] == "dropoff")) {
@@ -388,6 +392,16 @@ Widget rideInfoWidget(
                     ],
                   )
                 ],
+                10.heightBox,
+                Obx(
+                  () => addMoreSpotRideWidget(
+                    context: context,
+                    controller: controller,
+                    screenWidth: screenWidth,
+                    bookingCheck: controller.bookings.value,
+                    error: controller.errors.toList(),
+                  ),
+                ),
                 10.heightBox,
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,

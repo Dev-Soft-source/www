@@ -82,7 +82,7 @@ class DeepTripDetailPage extends GetView<DeepTripDetailController> {
                            ),
                            10.heightBox,
                          ],
-                          fromToWidget(context: context, from: controller.ride['ride_detail'][0]['departure'], to: controller.ride['ride_detail'][0]['destination'], date: tripDate, time: tripTime, perSeat: controller.ride['ride_detail'][0]['price'], leftSeat: controller.ride['seats_left'].toString(),
+                          fromToWidget(context: context, from: controller.ride['ride_detail']['departure'], to: controller.ride['ride_detail']['destination'], date: tripDate, time: tripTime, perSeat: controller.ride['ride_detail']['price'], leftSeat: controller.ride['seats_left'].toString(),
                               fromLabel: "${controller.labelTextDetail['from_label'] ?? "From"}",
                               toLabel: "${controller.labelTextDetail['to_label'] ?? "To"}",
                               atLabel: "${controller.labelTextDetail['at_label'] ?? "at"}",

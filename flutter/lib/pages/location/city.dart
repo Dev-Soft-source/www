@@ -88,6 +88,25 @@ class CityPage extends GetView<LocationController> {
                                   return dropDownItemWidget(
                                       context: context,
                                       onTap: () async {
+                                        final label =
+                                            "${controller.searchCities[index]['name']}, ${controller.searchCities[index]['state']['abrv']}, ${controller.searchCities[index]['state']['country']['name']}";
+
+                                        if (controller.isPostRideControllerRegistered &&
+                                            controller.spot.value == "yes" &&
+                                            controller.isCity.value == "origin" &&
+                                            controller.tempController
+                                                .isDuplicateStopCity(
+                                                    controller.spotIndex.value,
+                                                    label)) {
+                                          controller.tempController
+                                              .serviceController
+                                              .showDialogue(
+                                            "You can't select the same city as From, To, or another stop",
+                                            type: "error",
+                                          );
+                                          return;
+                                        }
+
                                         if (controller.isCity.value == "city") {
                                           controller
                                                   .tempController.cityId.value =
@@ -104,10 +123,8 @@ class CityPage extends GetView<LocationController> {
                                                     .fromSpotControllers[
                                                         controller.spotIndex.value]
                                                     .text =
-                                                "${controller.searchCities[index]['name']}, ${controller.searchCities[index]['state']['abrv']}, ${controller.searchCities[index]['state']['country']['name']}";
+                                                label;
                                           } else {
-                                            final label =
-                                                "${controller.searchCities[index]['name']}, ${controller.searchCities[index]['state']['abrv']}, ${controller.searchCities[index]['state']['country']['name']}";
                                             if (controller
                                                 .isSearchControllerRegistered) {
                                               controller.tempController
@@ -136,10 +153,8 @@ class CityPage extends GetView<LocationController> {
                                                     .toSpotControllers[controller
                                                         .spotIndex.value]
                                                     .text =
-                                                "${controller.searchCities[index]['name']}, ${controller.searchCities[index]['state']['abrv']}, ${controller.searchCities[index]['state']['country']['name']}";
+                                                label;
                                           } else {
-                                            final label =
-                                                "${controller.searchCities[index]['name']}, ${controller.searchCities[index]['state']['abrv']}, ${controller.searchCities[index]['state']['country']['name']}";
                                             if (controller
                                                 .isSearchControllerRegistered) {
                                               controller.tempController

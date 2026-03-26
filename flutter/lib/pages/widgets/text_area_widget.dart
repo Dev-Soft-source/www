@@ -15,7 +15,8 @@ Widget textAreaWidget(
     focusNode,
     characterLimit = 500,
     int? hintMaxLines,
-    int? maxLength}) {
+    int? maxLength,
+    bool showCounter = true}) {
   return TextFormField(
     controller: textController,
     maxLines: maxLines,
@@ -49,6 +50,7 @@ Widget textAreaWidget(
       fillColor: inputColor,
       contentPadding:
           const EdgeInsets.symmetric(vertical: 14.0, horizontal: 12.0),
+      counterText: showCounter ? null : "",
     ),
     style: TextStyle(
       fontSize: fontSize ?? 18.0,

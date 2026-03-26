@@ -41,13 +41,13 @@ Widget driverPendingWidget({context, required data, controller, bool changeColor
         dataRowWidget(
             context: context,
             title: "${controller.labelTextDetail['driver_available_from_label'] ?? 'From'}",
-            data: '${data['ride']['default_ride_detail'][0]['departure']}',
+            data: '${data['ride']['default_ride_detail']['departure']}',
         ),
         const Divider(),
         dataRowWidget(
             context: context,
             title: "${controller.labelTextDetail['driver_available_to_label'] ?? 'To'}",
-            data: '${data['ride']['default_ride_detail'][0]['destination']}',
+            data: '${data['ride']['default_ride_detail']['destination']}',
         ),
         const Divider(),
         dataRowWidget(

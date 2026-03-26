@@ -374,10 +374,10 @@ class TripDetailController extends GetxController {
           } else {
             if (type == "add") {
               Get.toNamed(
-                  "/book_seat/${ride['id']}/0/${ride['ride_detail'][0]['id'].toString()}");
+                  "/book_seat/${ride['id']}/0/${ride['ride_detail']['id'].toString()}");
             } else {
               Get.toNamed(
-                  "/book_seat/${ride['id']}/${ride['booked_seats']}/${ride['ride_detail'][0]['id'].toString()}");
+                  "/book_seat/${ride['id']}/${ride['booked_seats']}/${ride['ride_detail']['id'].toString()}");
             }
           }
           isOverlayLoading(false);
@@ -416,10 +416,10 @@ class TripDetailController extends GetxController {
     } else {
       if (type == "add") {
         Get.toNamed(
-            "/book_seat/${ride['id']}/0/${ride['ride_detail'][0]['id'].toString()}");
+            "/book_seat/${ride['id']}/0/${ride['ride_detail']['id'].toString()}");
       } else {
         Get.toNamed(
-            "/book_seat/${ride['id']}/${ride['booked_seats']}/${ride['ride_detail'][0]['id'].toString()}");
+            "/book_seat/${ride['id']}/${ride['booked_seats']}/${ride['ride_detail']['id'].toString()}");
       }
     }
   }

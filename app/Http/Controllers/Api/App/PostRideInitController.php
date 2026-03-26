@@ -486,14 +486,14 @@ class PostRideInitController extends Controller
      */
     private function getRideData($rideId, $userId, $rideType)
     {
-        $ride = Ride::where('id', $rideId)->first();
+        $ride = Ride::with('detail')->where('id', $rideId)->first();
 
         if (!$ride) {
             return null;
         }
 
-        $rideDetail = RideDetail::where('ride_id', $rideId)->orderBy('id', 'asc')->get();
-
+        $rideDetail = $ride->detail;
+\Log::info('ride',  $rideDetail->toArray());
         return [
             'ride' => $ride,
             'rideDetail' => $rideDetail,

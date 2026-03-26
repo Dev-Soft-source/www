@@ -22,12 +22,55 @@ import 'package:proximaride_app/pages/widgets/second_appbar_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import '../widgets/tool_tip.dart';
 
-class PostRidePage extends GetView<PostRideController> {
+class PostRidePage extends StatefulWidget {
   const PostRidePage({super.key});
 
   @override
+  State<PostRidePage> createState() => _PostRidePageState();
+}
+
+class _PostRidePageState extends State<PostRidePage> {
+  bool _controllerReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Get.put(PostRideController());
+      if (mounted) {
+        setState(() => _controllerReady = true);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    var controller = Get.put(PostRideController());
+    if (!_controllerReady) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: primaryColor,
+          title: secondAppBarWidget(
+            title: 'Post a ride',
+            context: context,
+          ),
+          leading: safeBackButton(context),
+        ),
+        body: SafeArea(
+          child: Center(child: progressCircularWidget(context)),
+        ),
+      );
+    }
+    return const _PostRideScaffold();
+  }
+}
+
+class _PostRideScaffold extends GetView<PostRideController> {
+  const _PostRideScaffold();
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -111,6 +154,13 @@ class PostRidePage extends GetView<PostRideController> {
                                 bookingCheck: controller.bookings.value,
                                 error: controller.errors.toList()),
                             10.heightBox,
+                            pricePaymentOptionWidget(
+                                context: context,
+                                controller: controller,
+                                screenWidth: context.screenWidth,
+                                bookingCheck: controller.bookings.value,
+                                error: controller.errors.toList()),
+                            10.heightBox,
                             Obx(
                               () => vehicleWidget(
                                   context: context,
@@ -155,13 +205,7 @@ class PostRidePage extends GetView<PostRideController> {
                                 screenWidth: context.screenWidth,
                                 bookingCheck: controller.bookings.value,
                                 error: controller.errors.toList()),
-                            10.heightBox,
-                            pricePaymentOptionWidget(
-                                context: context,
-                                controller: controller,
-                                screenWidth: context.screenWidth,
-                                bookingCheck: controller.bookings.value,
-                                error: controller.errors.toList()),
+                            
                             10.heightBox,
                             cancellationPolicyWidget(
                               context: context,

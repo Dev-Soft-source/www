@@ -174,11 +174,9 @@ class BookSeatController extends GetxController {
     }
 
     if (ride['ride_detail'] != null &&
-        ride['ride_detail'] is List &&
         ride['ride_detail'].isNotEmpty &&
-        ride['ride_detail'][0] != null &&
-        ride['ride_detail'][0]['price'] != null) {
-      return double.tryParse(ride['ride_detail'][0]['price'].toString()) ??
+        ride['ride_detail']['price'] != null) {
+      return double.tryParse(ride['ride_detail']['price'].toString()) ??
           0.0;
     }
 

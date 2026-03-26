@@ -138,10 +138,8 @@ class SearchRideResultPage extends StatelessWidget {
                                     final rideDetail = controller.rides[index]['ride_detail'];
                                     final tripDetailId =
                                         rideDetail != null &&
-                                                rideDetail is List &&
-                                                rideDetail.isNotEmpty &&
-                                                rideDetail[0] != null
-                                            ? (rideDetail[0]['id'] ?? 0)
+                                                rideDetail.isNotEmpty
+                                            ? (rideDetail['id'] ?? 0)
                                             : 0;
                                     await controller.checkBooking(
                                         controller.rides[index]['id'],
@@ -170,7 +168,7 @@ class SearchRideResultPage extends StatelessWidget {
                                           date: tripDate,
                                           time: tripTime,
                                           context: context,
-                                          price: "${controller.rides[index]['ride_detail'][0]['price']}",
+                                          price: "${controller.rides[index]['ride_detail']['price']}",
                                           tripStatus: "search",
                                           atLabel: "${controller.labelTextDetail['card_section_at_label'] ?? 'at'}",
                                           seatLeftLabel: "${controller.labelTextDetail['card_section_seats_left'] ?? 'seats left'}",
@@ -184,11 +182,11 @@ class SearchRideResultPage extends StatelessWidget {
                                       ),
                                       tripCardFromToWidget(
                                           from:
-                                              "${controller.rides[index]['ride_detail'][0]['departure']}",
+                                              "${controller.rides[index]['ride_detail']['departure']}",
                                           to:
-                                              "${controller.rides[index]['ride_detail'][0]['destination']}",
+                                              "${controller.rides[index]['ride_detail']['destination']}",
                                           price:
-                                              "${controller.rides[index]['ride_detail'][0]['price']}",
+                                              "${controller.rides[index]['ride_detail']['price']}",
                                           context: context,
                                           tripStatus: 'search',
                                           seatsLeft: "${controller.rides[index]['seats_left']}",
