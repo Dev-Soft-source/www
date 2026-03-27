@@ -51,7 +51,7 @@ class RideCompleteCron extends Command
      */
     public function handle()
     {
-        $getAllRides = Ride::where('status','0')->where(function ($query) {
+        $getAllRides = Ride::where('status', '0')->where(function ($query) {
             $query->where(function ($query) {
                 $query->whereDate('completed_date', '<', now()->toDateString())
                     ->orWhere(function ($query) {
@@ -68,9 +68,9 @@ class RideCompleteCron extends Command
             $getRide->status = '3';
             $getRide->save();
             $getBookings = Booking::with('passenger')->where('ride_id', $getRide->id)->where('status', '!=', '4')
-            ->where('status', '!=', '3')->get();
+                ->where('status', '!=', '3')->get();
 
-            $getSetting = SiteSetting::first();
+            $getSetting = SiteSetting::getCached();
             foreach ($getBookings as $key => $booking) {
                 //Get Booked and Cancelled Ride Cost
                 $getRideCost = Transaction::where('booking_id', $booking->id)->where('type', '1')->sum('price');
@@ -83,9 +83,9 @@ class RideCompleteCron extends Command
                 $payoutAmt = 0;
 
 
-                if(isset($getSetting->booking_fee_give_to_driver) && $getSetting->booking_fee_give_to_driver == 1){
+                if (isset($getSetting->booking_fee_give_to_driver) && $getSetting->booking_fee_give_to_driver == 1) {
                     $payoutAmt = ($getRideCost) - ($getRideCancelCost + $getRideCancelBookingFee);
-                }else{
+                } else {
                     $payoutAmt = ($getRideCost - $getRideCancelCost) - ($getRideBookingFee - $getRideCancelBookingFee);
                 }
 
@@ -95,40 +95,38 @@ class RideCompleteCron extends Command
                 $taxAmt = 0;
 
 
-                if(isset($getSetting) && !empty($getSetting)){
-                    if(isset($getSetting->deduct_tax) && $getSetting->deduct_tax == "deduct_from_driver"){
+                if (isset($getSetting) && !empty($getSetting)) {
+                    if (isset($getSetting->deduct_tax) && $getSetting->deduct_tax == "deduct_from_driver") {
                         $deduct_tax = $getSetting->deduct_tax;
                         $tax_type = $getSetting->tax_type;
-                        if(isset($getSetting->tax_type) && $getSetting->tax_type == "state_wise_tax"){
+                        if (isset($getSetting->tax_type) && $getSetting->tax_type == "state_wise_tax") {
                             $locationBeforeComma = explode(',', $booking->departure);
-                            $getFromState = City::with('state:id,tax')->where('status', '1')->whereRaw('LOWER(`name`) LIKE ? ',['%'.$locationBeforeComma[0].'%'])->first();
-                            if(isset($getFromState) && !empty($getFromState)){
+                            $getFromState = City::with('state:id,tax')->where('status', '1')->whereRaw('LOWER(`name`) LIKE ? ', ['%' . $locationBeforeComma[0] . '%'])->first();
+                            if (isset($getFromState) && !empty($getFromState)) {
                                 $tax = $getFromState->state->tax;
                             }
-                        }else{
+                        } else {
                             $tax = $getSetting->tax;
                         }
 
                         $taxAmt = round((($payoutAmt * $tax) / 100), 2);
                         $payoutAmt = $payoutAmt - $taxAmt;
-
                     }
                 }
 
 
-                
 
-                if($payoutAmt > 0){
+
+                if ($payoutAmt > 0) {
                     //Add Payout Data
 
                     $getPayout = Payout::where('ride_id', $getRide->id)->where('booking_id', $booking->id)->first();
-                    if(isset($getPayout) && !is_null($getPayout)){
-
-                    }else{
+                    if (isset($getPayout) && !is_null($getPayout)) {
+                    } else {
                         $getPayout = new Payout();
                     }
 
-                    if(isset($getPayout->amount)){
+                    if (isset($getPayout->amount)) {
                         $payoutAmt = $getPayout->amount + $payoutAmt;
                     }
 
@@ -149,21 +147,21 @@ class RideCompleteCron extends Command
                 }
 
 
-                
-                if(isset($getSetting->booking_fee_give_to_student) && $getSetting->booking_fee_give_to_student == 1){
-                    if($booking->passenger->student == 1 && Carbon::parse($booking->passenger->student_card_exp_date) > now()){
 
-                        
+                if (isset($getSetting->booking_fee_give_to_student) && $getSetting->booking_fee_give_to_student == 1) {
+                    if ($booking->passenger->student == 1 && Carbon::parse($booking->passenger->student_card_exp_date) > now()) {
+
+
 
                         $bookingFee = round(($booking->booking_credit / $booking->seats), 2);
 
                         $getTransactionDetails = Transaction::where('booking_id', $booking->id)->where('type', '1')->where('coffee_from_wall', '0')->get();
                         foreach ($getTransactionDetails as $key => $getTransactionDetail) {
-                            if(isset($getTransactionDetail->booking_fee) && $getTransactionDetail->booking_fee != 0){
+                            if (isset($getTransactionDetail->booking_fee) && $getTransactionDetail->booking_fee != 0) {
 
                                 $refundId = "";
 
-                                if($getTransactionDetail->pay_by_account == 0){
+                                if ($getTransactionDetail->pay_by_account == 0) {
                                     if ($getTransactionDetail->paypal_id) {
                                         try {
                                             $uniqueId = strtotime(date('Y-m-d H:i:s'));
@@ -179,13 +177,10 @@ class RideCompleteCron extends Command
                                             );
 
                                             $refundId = isset($response['id']) ? $response['id'] : "";
-
                                         } catch (\PayPal\Exception\PayPalConnectionException $e) {
                                             $errorData = json_decode($e->getData(), true);
                                             Log::error("PayPal error: " . $errorData['message']);
                                         }
-
-
                                     } elseif ($getTransactionDetail->stripe_id) {
                                         // Set your Stripe API key
                                         Stripe::setApiKey(env('STRIPE_SECRET'));
@@ -198,12 +193,10 @@ class RideCompleteCron extends Command
                                             ]);
 
                                             $refundId = $refund->id;
-
                                         } catch (\Stripe\Exception\ApiErrorException $e) {
-
                                         }
                                     }
-                                }else{
+                                } else {
                                     $topUpBalance = TopUpBalance::create([
                                         'booking_id' => $getTransactionDetail->booking_id,
                                         'user_id' => $booking->user_id,
@@ -225,7 +218,7 @@ class RideCompleteCron extends Command
                         }
 
                         $transactions = Transaction::where('booking_id', $booking->id)->where('type', '1')->where('coffee_from_wall', '1')->first();
-                        if(isset($transactions) && !empty($transactions)){
+                        if (isset($transactions) && !empty($transactions)) {
                             foreach ($transactions as $key => $transaction) {
                                 $coffeeWallet = CoffeeWallet::create([
                                     'booking_id' => $booking->id,
@@ -244,9 +237,9 @@ class RideCompleteCron extends Command
                 ]);
                 if (isset($booking->passenger->email_notification) && $booking->passenger->email_notification == 1) {
 
-                // Send review  mail to passengers
-                $data = ['first_name' => $booking->passenger->first_name, 'uuid' => $uniqueUserId, 'abbreviation' => $defaultLang->abbreviation];
-                Mail::to($booking->passenger->email)->queue(new InvitingPassengerToReviewMail($data));
+                    // Send review  mail to passengers
+                    $data = ['first_name' => $booking->passenger->first_name, 'uuid' => $uniqueUserId, 'abbreviation' => $defaultLang->abbreviation];
+                    Mail::to($booking->passenger->email)->queue(new InvitingPassengerToReviewMail($data));
                 }
                 $notification = Notification::create([
                     'type' => 2,
@@ -324,9 +317,9 @@ class RideCompleteCron extends Command
             }
             if (isset($getRide->driver->email_notification) && $getRide->driver->email_notification == 1) {
 
-            // Send review  mail to driver
-            $data = ['first_name' => $getRide->driver->first_name, 'getBookings' => $getBookings, 'abbreviation' => $defaultLang->abbreviation];
-            Mail::to($getRide->driver->email)->queue(new InvitingDriverToReviewMail($data));
+                // Send review  mail to driver
+                $data = ['first_name' => $getRide->driver->first_name, 'getBookings' => $getBookings, 'abbreviation' => $defaultLang->abbreviation];
+                Mail::to($getRide->driver->email)->queue(new InvitingDriverToReviewMail($data));
             }
             $getNotifications = Notification::where('is_delete', '0')->where('ride_id', $getRide->id)->get();
             foreach ($getNotifications as $key => $getNotification) {

@@ -7,7 +7,9 @@ use App\Models\City;
 use App\Models\Country;
 use App\Models\State;
 use App\Models\SiteSetting;
+use App\Support\LocationCache;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use App\Traits\StatusResponser;
 
 class CountryStateCityController extends Controller
@@ -16,8 +18,10 @@ class CountryStateCityController extends Controller
 
     public function getCountries()
     {
-        // $countries = Country::orderBy('name', 'asc')->where('status', '1')->get();
-        $countries = Country::orderBy('name', 'asc')->get();
+        $countries = Cache::rememberForever(
+            LocationCache::key('api:locations:countries:all'),
+            fn () => Country::orderBy('name', 'asc')->get()
+        );
 
 
         $data = ['countries' => $countries];
@@ -26,8 +30,12 @@ class CountryStateCityController extends Controller
 
     public function getStates(Request $request)
     {
-        // $states = State::where('country_id', $request->country_id)->where('status', '1')->orderBy('name', 'asc')->get();
-        $states = State::where('country_id', $request->country_id)->orderBy('name', 'asc')->get();
+        $countryId = (int) $request->country_id;
+        $cacheKey = LocationCache::key('api:locations:states:country:' . $countryId);
+        $states = Cache::rememberForever(
+            $cacheKey,
+            fn () => State::where('country_id', $countryId)->orderBy('name', 'asc')->get()
+        );
 
         $data = ['states' => $states];
         return $this->successResponse($data, 'Get data successfully');
@@ -35,16 +43,27 @@ class CountryStateCityController extends Controller
 
     public function getCities(Request $request)
     {
-        // $cities = City::with(['state:id,abrv,country_id', 'state.country:id,name'])->where('status', '1');
-        $cities = City::with(['state:id,abrv,country_id', 'state.country:id,name']);
-        if (isset($request->state_id) && $request->state_id != 0) {
-            $cities = $cities->where('state_id', $request->state_id);
-        }
+        $stateId = (int) ($request->state_id ?? 0);
+        $search = trim((string) ($request->search ?? ''));
+        $normalizedSearch = mb_strtolower($search);
+        $cacheKey = LocationCache::key('api:locations:cities:state:' . $stateId . ':search:' . md5($normalizedSearch));
 
-        if (isset($request->search) && $request->search != "") {
-            $cities = $cities->where('name', 'like', $request->search . '%');
-        }
-        $cities = $cities->orderBy('name', 'asc')->select('id', 'name', 'state_id')->get();
+        $cities = Cache::rememberForever(
+            $cacheKey,
+            function () use ($stateId, $search) {
+                $citiesQuery = City::with(['state:id,abrv,country_id', 'state.country:id,name']);
+
+                if ($stateId !== 0) {
+                    $citiesQuery = $citiesQuery->where('state_id', $stateId);
+                }
+
+                if ($search !== '') {
+                    $citiesQuery = $citiesQuery->where('name', 'like', $search . '%');
+                }
+
+                return $citiesQuery->orderBy('name', 'asc')->select('id', 'name', 'state_id')->get();
+            }
+        );
 
         $data = ['cities' => $cities];
         return $this->successResponse($data, 'Get data successfully');
@@ -63,7 +82,7 @@ class CountryStateCityController extends Controller
             $distance = round(($distance / 1000), 2);
         }
 
-        $siteSetting = SiteSetting::first();
+        $siteSetting = SiteSetting::getCached();
 
         $pricePerKm = $siteSetting->price_per_km;
 

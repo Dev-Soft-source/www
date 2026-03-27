@@ -172,9 +172,10 @@ class BookingController extends Controller
     protected function loadRideForBooking(int $rideId, ?int $rideDetailId = null, $fromStopId = null, $toStopId = null): Ride
     {
         $ride = Ride::with([
-            'rideStops' => fn ($query) => $query->orderBy('stop_order'),
+            'rideStops' => fn($query) => $query->orderBy('stop_order'),
             'rideStopSegments',
-            'detail'])->findOrFail($rideId);
+            'detail'
+        ])->findOrFail($rideId);
 
         $ride = $this->makeDetailOfRide($ride, $fromStopId, $toStopId);
 
@@ -188,7 +189,7 @@ class BookingController extends Controller
     protected function resolveBookingRouteData(Ride $ride, $fromStopId = null, $toStopId = null): array
     {
         $ride->loadMissing([
-            'rideStops' => fn ($query) => $query->orderBy('stop_order'),
+            'rideStops' => fn($query) => $query->orderBy('stop_order'),
             'rideStopSegments',
             'detail'
         ]);
@@ -259,7 +260,7 @@ class BookingController extends Controller
         $bookingPage = BookingPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $paymentSettingDetail = BillingAddressSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        
+
         $cards = Card::where('user_id', $user_id)->orderBy('id', 'desc')->get();
 
         Stripe::setApiKey(env('STRIPE_SECRET'));
@@ -269,17 +270,17 @@ class BookingController extends Controller
                 $card->paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
             }
         }
-        
+
         $topBalance = TopUpBalance::where('user_id', $user->id)
             ->selectRaw('SUM(dr_amount) - SUM(cr_amount) as balance')
             ->value('balance');
         $coffeeBalance = CoffeeWallet::selectRaw('SUM(dr_amount) - SUM(cr_amount) as balance')
             ->value('balance');
-            
-        $setting = SiteSetting::first();
+
+        $setting = SiteSetting::getCached();
         $settingTaxPercentage = 0;
         if (isset($setting->deduct_tax) && $setting->deduct_tax == "deduct_from_passenger") {
-            if($setting->tax_type == "state_wise_tax"){
+            if ($setting->tax_type == "state_wise_tax") {
                 $getFromState = City::with('state:id,tax')->where('status', '1')->where('id',  $ride->city_id)->first();
                 if (isset($getFromState) && !empty($getFromState)) {
                     $settingTaxPercentage = $getFromState->state->tax;
@@ -289,28 +290,27 @@ class BookingController extends Controller
             }
         }
 
-        return view('booking', 
+        return view(
+            'booking',
             [
                 'user' => $user,
-                'bookingPage' => $bookingPage, 
+                'bookingPage' => $bookingPage,
                 'rideDetailPage' => $rideDetailPage,
-                'ride' => $ride, 
-                'cards' => $cards, 
+                'ride' => $ride,
+                'cards' => $cards,
                 'paymentSettingDetail' => $paymentSettingDetail,
                 'topUpBalance' => $topBalance,
-                'setting' => $setting, 
-                'settingTaxPercentage' => $settingTaxPercentage, 
-                'coffeeBalance' => $coffeeBalance, 
-            ]);
+                'setting' => $setting,
+                'settingTaxPercentage' => $settingTaxPercentage,
+                'coffeeBalance' => $coffeeBalance,
+            ]
+        );
     }
 
     /**
      * it is not needed
      */
-    public function edit($lang = null, $id)
-    {
-        
-    }
+    public function edit($lang = null, $id) {}
 
 
     public function seatOnHold(Request $request)
@@ -504,9 +504,9 @@ class BookingController extends Controller
         $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $limitExceed = BookingPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        
+
         $user_id = $user->id;
-        $setting = SiteSetting::first();
+        $setting = SiteSetting::getCached();
         $monthsAgo = Carbon::now()->subMonths($setting->booking_cancel_duration);
 
         $cancellationCount = Booking::where('user_id', $user_id)
@@ -543,11 +543,17 @@ class BookingController extends Controller
 
 
 
-        
-        return view('cancel_booking', ['notificationPage' => $notificationPage, 
-        'successMessage' => $successMessage, 'booking' => $booking, 'ride' => $ride, 
-        'postRidePage' => $postRidePage, 'setting' => $setting, 'tripsPage' => $tripsPage, 
-        'sureMessage' => $sureMessage]);
+
+        return view('cancel_booking', [
+            'notificationPage' => $notificationPage,
+            'successMessage' => $successMessage,
+            'booking' => $booking,
+            'ride' => $ride,
+            'postRidePage' => $postRidePage,
+            'setting' => $setting,
+            'tripsPage' => $tripsPage,
+            'sureMessage' => $sureMessage
+        ]);
     }
 
     /**
@@ -557,7 +563,7 @@ class BookingController extends Controller
     {
         $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $messages = $this->successMessage;
-        
+
         $ride = $this->loadRideForBooking(
             $id,
             $request->input('ride_detail_id'),
@@ -566,7 +572,7 @@ class BookingController extends Controller
         );
 
         $user = User::where('id', auth()->user()->id)->first();
-        
+
         $phoneNumber = PhoneNumber::where('user_id', $user->id)->first();
         if (is_null($phoneNumber) && $ride->isSecureCashPayment()) {
             // Store return URL to redirect back after add phone
@@ -612,12 +618,12 @@ class BookingController extends Controller
 
         $taxAmt = isset($request->tax_amount) ? $request->tax_amount : 0;
 
-        
+
 
         // Passenger gatekeeping logic for Pink Ride and Extra Care Ride
         $featuresArray = explode('=', $ride->features);
-        $pinkRideSetting = PinkRideSetting::first();
-        $folkRideSetting = FolkRideSetting::first();
+        $pinkRideSetting = PinkRideSetting::getCached();
+        $folkRideSetting = FolkRideSetting::getCached();
 
         // Check if ride has Pink Ride feature (feature ID 1)
         if ($ride->isPinkRide()) {
@@ -868,7 +874,7 @@ class BookingController extends Controller
                             'amount'        => round(($amount * 100), 0),
                             'currency'      => 'CAD',
                             'customer'      => $user->stripe_customer_id,
-                            'payment_method'=> $stripePaymentMethodId,
+                            'payment_method' => $stripePaymentMethodId,
                             'off_session'   => true,
                             'confirm'       => true,
                         ]);
@@ -1033,7 +1039,7 @@ class BookingController extends Controller
                     // Ensure type is a valid string (use ride->booking_type as fallback, limit length to prevent truncation errors)
                     $bookingType = (string) ($request->type ?? $ride->booking_type ?? 'standard');
                     $bookingType = substr($bookingType, 0, 50); // Limit to 50 characters to prevent truncation errors
-                    
+
                     if ($hasExistingBooking) {
                         // Update existing booking by ADDING new values to old values.
                         $newSeats          = (int) ($booking->seats ?? 0) + (int) ($request->seats ?? 0);
@@ -1166,7 +1172,7 @@ class BookingController extends Controller
                             'redirect' => '1',
                             'ride_detail_id' => $booking->ride_detail_id != "" ? $booking->ride_detail_id : NULL
                         ]);
-                    }else{
+                    } else {
                         Message::create([
                             'ride_id' => $id,
                             'receiver' => $ride->added_by,
@@ -1601,7 +1607,7 @@ class BookingController extends Controller
 
         $user = auth()->user();
         $phoneNumber = $user->primaryPhone();
-        
+
         if ($type->slug === 'secured') {
             $returnUrl = url()->current() . (request()->getQueryString() ? '?' . request()->getQueryString() : '');
             session(['return_url_after_action' => $returnUrl]);
@@ -1630,8 +1636,8 @@ class BookingController extends Controller
 
         // Passenger gatekeeping logic for Pink Ride and Extra Care Ride (instant booking)
         $featuresArray = explode('=', $ride->features);
-        $pinkRideSetting = PinkRideSetting::first();
-        $folkRideSetting = FolkRideSetting::first();
+        $pinkRideSetting = PinkRideSetting::getCached();
+        $folkRideSetting = FolkRideSetting::getCached();
 
         // Check if ride has Pink Ride feature (feature ID 1)
         if (in_array('1', $featuresArray)) {
@@ -1716,7 +1722,7 @@ class BookingController extends Controller
         Log::info($hasExistingBooking);
         if ($seatsBooked > $ride->seats) {
             return redirect()->route('search_ride', ['lang' => $this->selectedLanguage->abbreviation, 'from' => $ride->detail->departure, 'to' => $ride->detail->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y')])
-            ->with(['failure' => $errorMsg->seat_unavailable_message]);
+                ->with(['failure' => $errorMsg->seat_unavailable_message]);
         }
 
         $taxAmt = isset($request->tax_amount) ? $request->tax_amount : 0;
@@ -4674,7 +4680,7 @@ class BookingController extends Controller
             ->with('message', 'Transaction failed.');
     }
 
-    
+
     public function AcceptBookingRequest($lang = null, $id, $email)
     {
         if (!auth()->user()) {
@@ -5513,7 +5519,7 @@ class BookingController extends Controller
             ->with('decline_success_message', 'You have declined the booking request. The seats are now available for other passengers to book.');
     }
 
-    
+
 
     public function successTransaction($id, $type, $seats, $seats_amount, $booking_credit, $fare, $online_payment, $cash_payment, $total, $seats_id, $coffee_wall, $transactionTaxSum, $ride, $tax_amount, $tax_percentage, $tax_type, $deduct_tax, Request $request)
     {
@@ -5941,7 +5947,7 @@ class BookingController extends Controller
 
         $message = null;
         $taxAmt = isset($request->tax_amount) ? $request->tax_amount : 0;
-        
+
         $message = $this->successMessage;
         $type = FeaturesSetting::whereId($ride->payment_method)->first();
         $phoneNumber = PhoneNumber::where('user_id', $user->id)->first();
@@ -6557,7 +6563,7 @@ class BookingController extends Controller
     public function updateCancelBooking($id, Request $request)
     {
         $user_id = auth()->user()->id;
-        $setting = SiteSetting::first();
+        $setting = SiteSetting::getCached();
         $payoutAmt = 0;
         $monthsAgo = Carbon::now()->subMonths($setting->booking_cancel_duration)->setTimezone('UTC');;
 
@@ -6570,7 +6576,7 @@ class BookingController extends Controller
 
         $booking = Booking::where('id', $id)->first();
         $ride = Ride::where('id', $booking->ride_id)->first();
-        $getSetting = SiteSetting::first();
+        $getSetting = SiteSetting::getCached();
 
         $selectedLanguage = session('selectedLanguage');
         if ($selectedLanguage) {

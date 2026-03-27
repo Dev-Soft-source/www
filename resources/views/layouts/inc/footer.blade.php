@@ -51,7 +51,7 @@
       </div>
       <hr>
       @php
-        $settingPage = App\Models\SiteSetting::first();
+        $settingPage = App\Models\SiteSetting::getCached();
       @endphp
       {{-- social link list --}}
       <div class="flex items-center gap-4 justify-center mb-3 mt-4">

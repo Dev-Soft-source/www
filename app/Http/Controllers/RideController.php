@@ -284,8 +284,8 @@ class RideController extends Controller
 
         $user_id = auth()->user()->id;
         $user = User::whereId($user_id)->first();
-        $pinkRideSetting = PinkRideSetting::first();
-        $setting = FolkRideSetting::first();
+        $pinkRideSetting = PinkRideSetting::getCached();
+        $setting = FolkRideSetting::getCached();
         $vehicles = Vehicle::where('user_id', $user_id)->get();
         $rides = Ride::where('added_by', $user_id)->get();
 
@@ -1082,7 +1082,7 @@ class RideController extends Controller
             return $duplicateRideResponse;
         }
 
-        $adminSetting = SiteSetting::first();
+        $adminSetting = SiteSetting::getCached();
 
         // 
         $distance = (int) $request->input('distance_meters', 0);
@@ -1679,7 +1679,6 @@ class RideController extends Controller
                         }
                     }
                 });
-
             } else {
                 $frequency = $request->input('recurring_type');
                 $numRecurringTrips = (int) $request->input('recurring_trips');

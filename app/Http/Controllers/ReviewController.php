@@ -29,7 +29,8 @@ use Illuminate\Support\Facades\Log;
 
 class ReviewController extends Controller
 {
-    public function reviewIndex($lang, $id){
+    public function reviewIndex($lang, $id)
+    {
         $rating = Rating::whereId($id)->with(['from' => function ($query) {
             $query->withTrashed(); // Include soft-deleted users
         }])->first();
@@ -53,26 +54,26 @@ class ReviewController extends Controller
             $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
                 // Ratings where type is 1 and ride_id belongs to the user
                 $query->where('type', '1')
-                      ->whereHas('ride', function ($query) use ($user_id) {
-                          $query->where('added_by', $user_id);
-                      });
+                    ->whereHas('ride', function ($query) use ($user_id) {
+                        $query->where('added_by', $user_id);
+                    });
             })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($user_id) {
-                          $query->where('user_id', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is null and receiver_id belongs to the user
-                $query->where('type', null)
-                      ->whereHas('receiver', function ($query) use ($user_id) {
-                          $query->where('id', $user_id);
-                      });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is 2 and booking_id belongs to the user
+                    $query->where('type', '2')
+                        ->whereHas('booking', function ($query) use ($user_id) {
+                            $query->where('user_id', $user_id);
+                        });
+                })
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is null and receiver_id belongs to the user
+                    $query->where('type', null)
+                        ->whereHas('receiver', function ($query) use ($user_id) {
+                            $query->where('id', $user_id);
+                        });
+                })
+                ->orderBy('id', 'desc')
+                ->get();
         }
         if (!$rating) {
             abort(404, 'Review not found');
@@ -80,7 +81,8 @@ class ReviewController extends Controller
         return view('review', ['rating' => $rating]);
     }
 
-    public function passengerReviewIndex($lang, $id){
+    public function passengerReviewIndex($lang, $id)
+    {
         $rating = Rating::whereId($id)->with(['from' => function ($query) {
             $query->withTrashed(); // Include soft-deleted users
         }])->first();
@@ -106,14 +108,16 @@ class ReviewController extends Controller
         ]);
     }
 
-    public function reviewLeftIndex($lang, $id){
+    public function reviewLeftIndex($lang, $id)
+    {
         $rating = Rating::whereId($id)->first();
 
-        return view('review_left',['rating' => $rating]);
+        return view('review_left', ['rating' => $rating]);
     }
 
-    public function passengerLeftReviewIndex($lang, $id){
-        
+    public function passengerLeftReviewIndex($lang, $id)
+    {
+
         $rating = Rating::whereId($id)->first();
 
         $languages = Language::all();
@@ -136,7 +140,8 @@ class ReviewController extends Controller
         ]);
     }
 
-    public function ReviewPassenger($lang, $id){
+    public function ReviewPassenger($lang, $id)
+    {
         $booking = Booking::where('id', $id)->first();
         if ($booking) {
             $languages = Language::all();
@@ -151,33 +156,33 @@ class ReviewController extends Controller
             } else {
                 $selectedLanguage = Language::where('is_default', 1)->first();
             }
-    
+
             $notifications = null;
             if (auth()->user()) {
                 $user_id = auth()->user()->id;
                 $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
                     // Ratings where type is 1 and ride_id belongs to the user
                     $query->where('type', '1')
-                          ->whereHas('ride', function ($query) use ($user_id) {
-                              $query->where('added_by', $user_id);
-                          });
+                        ->whereHas('ride', function ($query) use ($user_id) {
+                            $query->where('added_by', $user_id);
+                        });
                 })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is 2 and booking_id belongs to the user
-                    $query->where('type', '2')
-                          ->whereHas('booking', function ($query) use ($user_id) {
-                              $query->where('user_id', $user_id);
-                          });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is null and receiver_id belongs to the user
-                    $query->where('type', null)
-                          ->whereHas('receiver', function ($query) use ($user_id) {
-                              $query->where('id', $user_id);
-                          });
-                })
-                ->orderBy('id', 'desc')
-                ->get();
+                    ->orWhere(function ($query) use ($user_id) {
+                        // Ratings where type is 2 and booking_id belongs to the user
+                        $query->where('type', '2')
+                            ->whereHas('booking', function ($query) use ($user_id) {
+                                $query->where('user_id', $user_id);
+                            });
+                    })
+                    ->orWhere(function ($query) use ($user_id) {
+                        // Ratings where type is null and receiver_id belongs to the user
+                        $query->where('type', null)
+                            ->whereHas('receiver', function ($query) use ($user_id) {
+                                $query->where('id', $user_id);
+                            });
+                    })
+                    ->orderBy('id', 'desc')
+                    ->get();
             }
 
             $reviewPage = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
@@ -188,24 +193,28 @@ class ReviewController extends Controller
             }
 
 
-            return view('review_passenger',['booking' => $booking, 
-            'reviewPage' => $reviewPage, 
-            'notifications' => $notifications, 
-            'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
+            return view('review_passenger', [
+                'booking' => $booking,
+                'reviewPage' => $reviewPage,
+                'notifications' => $notifications,
+                'languages' => $languages,
+                'selectedLanguage' => $selectedLanguage
+            ]);
         }
         $errorPage = \App\View\Composers\ErrorPageComposer::getErrorPage();
         return view('errors/404', ['errorPage' => $errorPage]);
     }
 
-    public function StoreReviewPassenger($id, Request $request){
+    public function StoreReviewPassenger($id, Request $request)
+    {
         $selectedLanguage = session('selectedLanguage');
         if ($selectedLanguage) {
             // Find the language by abbreviation
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('reviewed_passenger_message', 'general_error_message','block_review_rating_message')->first();
+            $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('reviewed_passenger_message', 'general_error_message', 'block_review_rating_message')->first();
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
-            $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('reviewed_passenger_message', 'general_error_message','block_review_rating_message')->first();
+            $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('reviewed_passenger_message', 'general_error_message', 'block_review_rating_message')->first();
         }
 
         $user = auth()->user();
@@ -231,22 +240,21 @@ class ReviewController extends Controller
             'review.max_words' => 'The review may not be greater than 500 words',
             'conscious.required_without_all' => 'At least one of the ratings must be filled',
         ]);
-        
+
         // Initialize variables to store sum and count of non-null values
         $sum = 0;
         $count = 0;
-        
+
         // Iterate over the columns and calculate sum and count of non-null values
         $columns = ['timeliness', 'safety', 'conscious', 'comfort', 'communication', 'attitude', 'respect', 'hygiene'];
         foreach ($columns as $column) {
             if ($request->$column == null || $request->$column == '0' || $request->$column == 0) {
-            
-            }else{
+            } else {
                 $sum += $request->$column;
                 $count += 1;
             }
         }
-        
+
         // Calculate average rating
         $averageRating = $count > 0 ? $sum / $count : null;
 
@@ -277,7 +285,7 @@ class ReviewController extends Controller
                 'reply_deadline' => $deadline,
             ]);
         }
-        
+
         // Set the review live limit based on the setting
         if ($setting->leave_review_days != '') {
             $rideDateTime = Carbon::parse($booking->ride->date . ' ' . $booking->ride->time);
@@ -293,7 +301,7 @@ class ReviewController extends Controller
             ]);
         }
 
-        $existing = Rating::where('type','1')->where('ride_id',$booking->ride_id)->where('posted_by',$booking->user_id)->first();
+        $existing = Rating::where('type', '1')->where('ride_id', $booking->ride_id)->where('posted_by', $booking->user_id)->first();
 
         if ($existing) {
             $existing->update([
@@ -307,114 +315,115 @@ class ReviewController extends Controller
         }
 
         if ($booking->ride->driver->email_notification == 1) {
-        $data = ['first_name' => $booking->ride->driver->first_name];
-        Mail::to($booking->ride->driver->email)->queue(new ReviewLeftMail($data));
+            $data = ['first_name' => $booking->ride->driver->first_name];
+            Mail::to($booking->ride->driver->email)->queue(new ReviewLeftMail($data));
         }
 
         if ($booking->passenger->email_notification == 1) {
-        $data = ['first_name' => $booking->passenger->first_name];
-        Mail::to($booking->passenger->email)->queue(new PassengerReceivedReviewMail($data));
+            $data = ['first_name' => $booking->passenger->first_name];
+            Mail::to($booking->passenger->email)->queue(new PassengerReceivedReviewMail($data));
         }
-        
-        if(isset($booking) && !empty($booking)){
+
+        if (isset($booking) && !empty($booking)) {
             $checkUserReferral = ReferralDetail::where('user_id', $booking->user_id)->where('status', 'pending')->first();
-            if(isset($checkUserReferral) && !empty($checkUserReferral)){
+            if (isset($checkUserReferral) && !empty($checkUserReferral)) {
                 $getUserDetail = User::where('id', $checkUserReferral->user_id)->first();
                 $averageRating = $rating->average_rating;
-                    if($averageRating >= 4){
-                        if(isset($getUserDetail) && isset($getUserDetail->student) && $getUserDetail->student == 1){
-                            $getRegistrationPoint = RegistrationRewardSetting::value('student_reward_point');
-                            $rewardPoint = new RewardPoint();
-                            $rewardPoint->type = "student";
-                            $rewardPoint->user_id = $checkUserReferral->user_id;
-                            $rewardPoint->point = $getRegistrationPoint ?? 0; 
-                            $rewardPoint->status = "pending";
-                            $rewardPoint->save();
-                        }else{
-                            $getRegistrationPoint = RegistrationRewardSetting::value('passenger_credit_booking');
-                            $topUpBalance = new TopUpBalance();
-                            $topUpBalance->user_id = $checkUserReferral->user_id;
-                            $topUpBalance->dr_amount = $getRegistrationPoint ?? 0;
-                            $topUpBalance->added_date = date('Y-m-d');
-                            $topUpBalance->save();
-                        }
+                if ($averageRating >= 4) {
+                    if (isset($getUserDetail) && isset($getUserDetail->student) && $getUserDetail->student == 1) {
+                        $getRegistrationPoint = RegistrationRewardSetting::value('student_reward_point');
+                        $rewardPoint = new RewardPoint();
+                        $rewardPoint->type = "student";
+                        $rewardPoint->user_id = $checkUserReferral->user_id;
+                        $rewardPoint->point = $getRegistrationPoint ?? 0;
+                        $rewardPoint->status = "pending";
+                        $rewardPoint->save();
+                    } else {
+                        $getRegistrationPoint = RegistrationRewardSetting::value('passenger_credit_booking');
+                        $topUpBalance = new TopUpBalance();
+                        $topUpBalance->user_id = $checkUserReferral->user_id;
+                        $topUpBalance->dr_amount = $getRegistrationPoint ?? 0;
+                        $topUpBalance->added_date = date('Y-m-d');
+                        $topUpBalance->save();
                     }
+                }
 
-                    // Referrer reward only when referred user has good reputation (rating >= 4)
-                    if ($averageRating >= 4) {
-                        $getReferralSetting = ReferralSystemSetting::first();
-                        $getReferralUser = User::where('id', $checkUserReferral->referral_user_id)->first();
-                        if(isset($getReferralUser) && !empty($getReferralUser)){
-                            if($getReferralUser->driver == 1){
-                                if(isset($getUserDetail) && isset($getUserDetail->student) && $getUserDetail->student == 1){
-                                    $rewardPoint = new RewardPoint;
-                                    $rewardPoint->type = "driver";
-                                    $rewardPoint->user_id = $getReferralUser->id;
-                                    $rewardPoint->point = $getReferralSetting->d_2_s_reward_point ?? 0; 
-                                    $rewardPoint->status = "pending";
-                                    $rewardPoint->save();
-                                }else{
-                                    $rewardPoint = new RewardPoint;
-                                    $rewardPoint->type = "driver";
-                                    $rewardPoint->user_id = $getReferralUser->id;
-                                    $rewardPoint->point = $getReferralSetting->d_2_p_reward_point ?? 0; 
-                                    $rewardPoint->status = "pending";
-                                    $rewardPoint->save();
-                                }                                
-                            }else if($getReferralUser->student == 1){
+                // Referrer reward only when referred user has good reputation (rating >= 4)
+                if ($averageRating >= 4) {
+                    $getReferralSetting = ReferralSystemSetting::first();
+                    $getReferralUser = User::where('id', $checkUserReferral->referral_user_id)->first();
+                    if (isset($getReferralUser) && !empty($getReferralUser)) {
+                        if ($getReferralUser->driver == 1) {
+                            if (isset($getUserDetail) && isset($getUserDetail->student) && $getUserDetail->student == 1) {
+                                $rewardPoint = new RewardPoint;
+                                $rewardPoint->type = "driver";
+                                $rewardPoint->user_id = $getReferralUser->id;
+                                $rewardPoint->point = $getReferralSetting->d_2_s_reward_point ?? 0;
+                                $rewardPoint->status = "pending";
+                                $rewardPoint->save();
+                            } else {
+                                $rewardPoint = new RewardPoint;
+                                $rewardPoint->type = "driver";
+                                $rewardPoint->user_id = $getReferralUser->id;
+                                $rewardPoint->point = $getReferralSetting->d_2_p_reward_point ?? 0;
+                                $rewardPoint->status = "pending";
+                                $rewardPoint->save();
+                            }
+                        } else if ($getReferralUser->student == 1) {
 
-                                if(isset($getUserDetail) && isset($getUserDetail->student) && $getUserDetail->student == 1){
-                                    $rewardPoint = new RewardPoint;
-                                    $rewardPoint->type = "student";
-                                    $rewardPoint->user_id = $getReferralUser->id;
-                                    $rewardPoint->point = $getReferralSetting->s_2_s_reward_point ?? 0; 
-                                    $rewardPoint->status = "pending";
-                                    $rewardPoint->save();
-                                }else{
-                                    $rewardPoint = new RewardPoint;
-                                    $rewardPoint->type = "student";
-                                    $rewardPoint->user_id = $getReferralUser->id;
-                                    $rewardPoint->point = $getReferralSetting->s_2_p_reward_point ?? 0; 
-                                    $rewardPoint->status = "pending";
-                                    $rewardPoint->save();
-                                }
-                            }else{
-                                if(isset($getUserDetail) && isset($getUserDetail->student) && $getUserDetail->student == 1){
+                            if (isset($getUserDetail) && isset($getUserDetail->student) && $getUserDetail->student == 1) {
+                                $rewardPoint = new RewardPoint;
+                                $rewardPoint->type = "student";
+                                $rewardPoint->user_id = $getReferralUser->id;
+                                $rewardPoint->point = $getReferralSetting->s_2_s_reward_point ?? 0;
+                                $rewardPoint->status = "pending";
+                                $rewardPoint->save();
+                            } else {
+                                $rewardPoint = new RewardPoint;
+                                $rewardPoint->type = "student";
+                                $rewardPoint->user_id = $getReferralUser->id;
+                                $rewardPoint->point = $getReferralSetting->s_2_p_reward_point ?? 0;
+                                $rewardPoint->status = "pending";
+                                $rewardPoint->save();
+                            }
+                        } else {
+                            if (isset($getUserDetail) && isset($getUserDetail->student) && $getUserDetail->student == 1) {
 
-                                    $topUpBalance = new TopUpBalance;
-                                    $topUpBalance->user_id = $getReferralUser->id;
-                                    $topUpBalance->dr_amount = $getReferralSetting->p_2_s_booking_credit ?? 0;
-                                    $topUpBalance->added_date = date('Y-m-d');
-                                    $topUpBalance->save();
-                                }else{
-                                    $topUpBalance = new TopUpBalance;
-                                    $topUpBalance->user_id = $getReferralUser->id;
-                                    $topUpBalance->dr_amount = $getReferralSetting->p_2_p_booking_credit ?? 0;
-                                    $topUpBalance->added_date = date('Y-m-d');
-                                    $topUpBalance->save();
-                                }
+                                $topUpBalance = new TopUpBalance;
+                                $topUpBalance->user_id = $getReferralUser->id;
+                                $topUpBalance->dr_amount = $getReferralSetting->p_2_s_booking_credit ?? 0;
+                                $topUpBalance->added_date = date('Y-m-d');
+                                $topUpBalance->save();
+                            } else {
+                                $topUpBalance = new TopUpBalance;
+                                $topUpBalance->user_id = $getReferralUser->id;
+                                $topUpBalance->dr_amount = $getReferralSetting->p_2_p_booking_credit ?? 0;
+                                $topUpBalance->added_date = date('Y-m-d');
+                                $topUpBalance->save();
                             }
                         }
                     }
+                }
 
-                    $checkUserReferral->status = "completed";
-                    $checkUserReferral->save();
+                $checkUserReferral->status = "completed";
+                $checkUserReferral->save();
             }
         }
-        
+
         if (auth()->user()) {
             return redirect()->route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id]);
         }
         return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation])->with(['success' => 'Reviewed successfully']);
     }
 
-    public function ReviewDriver($lang, $id){
+    public function ReviewDriver($lang, $id)
+    {
 
         $booking = Booking::where('id', $id)->first();
         Log::info($booking);
         if ($booking) {
             $ride = Ride::whereId($booking->ride_id)->first();
-    
+
             $languages = Language::all();
             // Store the selected language in the session
             if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
@@ -427,33 +436,33 @@ class ReviewController extends Controller
             } else {
                 $selectedLanguage = Language::where('is_default', 1)->first();
             }
-    
+
             $notifications = null;
             if (auth()->user()) {
                 $user_id = auth()->user()->id;
                 $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
                     // Ratings where type is 1 and ride_id belongs to the user
                     $query->where('type', '1')
-                          ->whereHas('ride', function ($query) use ($user_id) {
-                              $query->where('added_by', $user_id);
-                          });
+                        ->whereHas('ride', function ($query) use ($user_id) {
+                            $query->where('added_by', $user_id);
+                        });
                 })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is 2 and booking_id belongs to the user
-                    $query->where('type', '2')
-                          ->whereHas('booking', function ($query) use ($user_id) {
-                              $query->where('user_id', $user_id);
-                          });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is null and receiver_id belongs to the user
-                    $query->where('type', null)
-                          ->whereHas('receiver', function ($query) use ($user_id) {
-                              $query->where('id', $user_id);
-                          });
-                })
-                ->orderBy('id', 'desc')
-                ->get();
+                    ->orWhere(function ($query) use ($user_id) {
+                        // Ratings where type is 2 and booking_id belongs to the user
+                        $query->where('type', '2')
+                            ->whereHas('booking', function ($query) use ($user_id) {
+                                $query->where('user_id', $user_id);
+                            });
+                    })
+                    ->orWhere(function ($query) use ($user_id) {
+                        // Ratings where type is null and receiver_id belongs to the user
+                        $query->where('type', null)
+                            ->whereHas('receiver', function ($query) use ($user_id) {
+                                $query->where('id', $user_id);
+                            });
+                    })
+                    ->orderBy('id', 'desc')
+                    ->get();
             }
 
             $reviewPage = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
@@ -463,26 +472,31 @@ class ReviewController extends Controller
                 return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $reviewPage->already_reviewed_label ?? 'Already reviewed']);
             }
 
-            return view('review_driver',['booking' => $booking, 
-            'ride' => $ride, 
-            'reviewPage' => $reviewPage, 
-            'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
+            return view('review_driver', [
+                'booking' => $booking,
+                'ride' => $ride,
+                'reviewPage' => $reviewPage,
+                'notifications' => $notifications,
+                'languages' => $languages,
+                'selectedLanguage' => $selectedLanguage
+            ]);
         }
         $errorPage = \App\View\Composers\ErrorPageComposer::getErrorPage();
         return view('errors/404', ['errorPage' => $errorPage]);
     }
 
-    public function StoreReviewDriver($id, Request $request){
+    public function StoreReviewDriver($id, Request $request)
+    {
         $booking = Booking::whereId($id)->first();
         $user_id = $booking->user_id;
         $ride = Ride::whereId($booking->ride_id)->first();
         $setting = ReviewSetting::first();
-        
+
         $customMessages = [
             'required_without_all' => 'At least one of the ratings must be filled',
             'max_words' => 'The :attribute may not be greater than 500 words',
         ];
-        
+
         $request->validate([
             'review' => 'required|string|max_words:500',
             'conscious' => ['required_without_all:vehicle_condition,comfort,communication,attitude,hygiene,respect,safety,timeliness'],
@@ -492,17 +506,16 @@ class ReviewController extends Controller
             'review.max_words' => 'The review may not be greater than 500 words',
             'conscious.required_without_all' => 'At least one of the ratings must be filled',
         ]);
-        
+
         // Initialize variables to store sum and count of non-null values
         $sum = 0;
         $count = 0;
-        
+
         // Iterate over the columns and calculate sum and count of non-null values
         $columns = ['vehicle_condition', 'timeliness', 'safety', 'conscious', 'comfort', 'communication', 'attitude', 'respect', 'hygiene'];
         foreach ($columns as $column) {
             if ($request->$column == null || $request->$column == '0' || $request->$column == 0) {
-                
-            }else{
+            } else {
                 $sum += $request->$column;
                 $count += 1;
             }
@@ -554,9 +567,9 @@ class ReviewController extends Controller
             ]);
         }
 
-        $existing = Rating::where('type','2')->where('ride_id',$ride->id)->whereHas('booking', function ($query) use ($user_id) {
+        $existing = Rating::where('type', '2')->where('ride_id', $ride->id)->whereHas('booking', function ($query) use ($user_id) {
             $query->where('user_id', $user_id);
-        })->where('posted_by',$ride->added_by)->first();
+        })->where('posted_by', $ride->added_by)->first();
 
         if ($existing) {
             $existing->update([
@@ -582,35 +595,35 @@ class ReviewController extends Controller
 
         $data = ['first_name' => $ride->driver->first_name];
         if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
-        Mail::to($ride->driver->email)->queue(new DriverReceivedReviewMail($data));
+            Mail::to($ride->driver->email)->queue(new DriverReceivedReviewMail($data));
         }
 
         // If driver's average rating drops below Extra Care threshold, revoke Extra Care eligibility
         $driverId = $ride->added_by;
         $driverRatings = Rating::where('type', 1)->where('status', 1)
-            ->whereHas('ride', fn ($q) => $q->where('added_by', $driverId))->get();
+            ->whereHas('ride', fn($q) => $q->where('added_by', $driverId))->get();
         if (!$driverRatings->isEmpty()) {
             $avgRating = (float) $driverRatings->avg('average_rating');
-            $folkSetting = FolkRideSetting::first();
+            $folkSetting = FolkRideSetting::getCached();
             if ($folkSetting && $folkSetting->average_rating !== null && $avgRating < (float) $folkSetting->average_rating) {
                 User::where('id', $driverId)->whereIn('folks_ride', ['1', ''])->update(['folks_ride' => '0']);
             }
         }
 
-        if(isset($ride) && !empty($ride)){
+        if (isset($ride) && !empty($ride)) {
             $checkUserReferral = ReferralDetail::where('user_id', $ride->added_by)->where('status', 'pending')->first();
-            if(isset($checkUserReferral) && !empty($checkUserReferral)){
+            if (isset($checkUserReferral) && !empty($checkUserReferral)) {
                 $getBookingCount = Booking::where('ride_id', $ride->id)->where('status', '!=', '4')->where('status', '!=', '3')->count();
                 $getRatingCount = Rating::where('ride_id', $ride->id)->where('type', '1')->count();
-                if($getBookingCount == $getRatingCount){
+                if ($getBookingCount == $getRatingCount) {
                     $getRatingSum = Rating::where('ride_id', $ride->id)->where('type', '1')->sum('average_rating');
                     $averageRating = $getRatingSum / $getRatingCount;
-                    if($averageRating >= 4){
+                    if ($averageRating >= 4) {
                         $getRegistrationPoint = RegistrationRewardSetting::value('driver_reward_point');
                         $rewardPoint = new RewardPoint;
                         $rewardPoint->type = "driver";
                         $rewardPoint->user_id = $ride->added_by;
-                        $rewardPoint->point = $getRegistrationPoint ?? 0; 
+                        $rewardPoint->point = $getRegistrationPoint ?? 0;
                         $rewardPoint->status = "pending";
                         $rewardPoint->save();
                     }
@@ -618,22 +631,22 @@ class ReviewController extends Controller
                     $getReferralSetting = ReferralSystemSetting::first();
 
                     $getReferralUser = User::where('id', $checkUserReferral->referral_user_id)->first();
-                    if(isset($getReferralUser) && !empty($getReferralUser)){
-                        if($getReferralUser->driver == 1){
+                    if (isset($getReferralUser) && !empty($getReferralUser)) {
+                        if ($getReferralUser->driver == 1) {
                             $rewardPoint = new RewardPoint;
                             $rewardPoint->type = "driver";
                             $rewardPoint->user_id = $getReferralUser->id;
-                            $rewardPoint->point = $getReferralSetting->d_2_d_rewad_point ?? 0; 
+                            $rewardPoint->point = $getReferralSetting->d_2_d_rewad_point ?? 0;
                             $rewardPoint->status = "pending";
                             $rewardPoint->save();
-                        }else if($getReferralUser->student == 1){
+                        } else if ($getReferralUser->student == 1) {
                             $rewardPoint = new RewardPoint;
                             $rewardPoint->type = "student";
                             $rewardPoint->user_id = $getReferralUser->id;
-                            $rewardPoint->point = $getReferralSetting->s_2_d_reward_point ?? 0; 
+                            $rewardPoint->point = $getReferralSetting->s_2_d_reward_point ?? 0;
                             $rewardPoint->status = "pending";
                             $rewardPoint->save();
-                        }else{
+                        } else {
                             $topUpBalance = new TopUpBalance;
                             $topUpBalance->user_id = $getReferralUser->id;
                             $topUpBalance->dr_amount = $getReferralSetting->p_2_d_booking_credit ?? 0;
@@ -641,27 +654,29 @@ class ReviewController extends Controller
                             $topUpBalance->save();
                         }
                     }
-                    
+
                     $checkUserReferral->status = "completed";
                     $checkUserReferral->save();
                 }
             }
         }
-        
+
         if (auth()->user()) {
             return redirect()->route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $ride->id]);
         }
         return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation])->with(['success' => 'Reviewed successfully']);
     }
 
-    public function ReviewReply($lang, $id){
+    public function ReviewReply($lang, $id)
+    {
         $rating = Rating::whereId($id)->first();
         $reviewSettingPage = ReviewSettingDetail::where('language_id', $this->selectedLanguage->id)->first();
-        
+
         return view('review_reply', ['rating' => $rating, 'reviewSettingPage' => $reviewSettingPage]);
     }
 
-    public function ReviewReplyStore($id, Request $request){
+    public function ReviewReplyStore($id, Request $request)
+    {
         $message = null;
         $reviewSettingPage = null;
         $selectedLanguage = session('selectedLanguage');
@@ -670,7 +685,6 @@ class ReviewController extends Controller
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
             if ($selectedLanguage) {
                 $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('replied_message', 'block_review_rating_message')->first();
-
             }
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
@@ -693,7 +707,7 @@ class ReviewController extends Controller
 
         // Validation custom messages (avoid undefined variable usage).
         $customMessages = [];
-        
+
         $request->validate([
             'reply' => 'required',
         ], $customMessages, [

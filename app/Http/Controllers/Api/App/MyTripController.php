@@ -174,7 +174,7 @@ class MyTripController extends Controller
         $user_id = $user->id;
 
         $query = Booking::where('user_id', $user_id)->select('id', 'ride_id', 'seats', 'status', 'booking_credit', 'fare', 'tax_amount', 'ride_detail_id', 'departure', 'destination', 'price', 'booked_on', 'type');
-        
+
         switch ($kind) {
             case 'upcoming':
                 // include past rides even if they are not marked as completed, as long as their departure time has passed
@@ -347,7 +347,7 @@ class MyTripController extends Controller
 
         $setting = ReviewSetting::first();
 
-        $data = ['bookings' => $bookings,'setting' => $setting, 'tripsPage' => $tripsPage, 'rideDetailPage' => $rideDetailPage];
+        $data = ['bookings' => $bookings, 'setting' => $setting, 'tripsPage' => $tripsPage, 'rideDetailPage' => $rideDetailPage];
         return $this->successResponse($data, 'Get my ' . $kind . ' trips');
     }
 
@@ -366,7 +366,7 @@ class MyTripController extends Controller
         $user = Auth::guard('sanctum')->user();
         $booking = Booking::where('id', $request->booking_id)->first();
 
-        $getSetting = SiteSetting::first();
+        $getSetting = SiteSetting::getCached();
 
         $taxAmt = 0;
 
@@ -971,7 +971,7 @@ class MyTripController extends Controller
                                 $payoutAmt = $refundTotalAmount;
                             }
 
-                            $getSetting = SiteSetting::first();
+                            $getSetting = SiteSetting::getCached();
                             if (isset($getSetting) && !empty($getSetting)) {
                                 if (isset($getSetting->deduct_tax) && $getSetting->deduct_tax == "deduct_from_driver") {
                                     $deduct_tax = $getSetting->deduct_tax;

@@ -28,7 +28,7 @@ class PinkRideSettingController extends Controller
         $driver_license = $request->filled('driver_license') ? $request->driver_license : 0;
         $profile_complete = $request->filled('profile_complete') ? $request->profile_complete : 0;
 
-        $pinkRideSetting = PinkRideSetting::first();
+        $pinkRideSetting = PinkRideSetting::getCached();
         if (!$pinkRideSetting) {
             $setting = PinkRideSetting::create([
                 'id' => '1',

@@ -62,10 +62,10 @@ class MyRideController extends Controller
             // personal information
             return redirect()->route('step1to5', ['lang' => $lang]);
         }
-        
+
         // Check if user has posted any rides (as a driver)
         $hasPostedRides = Ride::where('added_by', $user_id)->exists();
-        
+
         // If user hasn't posted rides, redirect to "As a Passenger" (my_trips)
         if (!$hasPostedRides) {
             return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation]);
@@ -76,7 +76,7 @@ class MyRideController extends Controller
         $tab = request()->query('tab', 'upcoming');
 
         // Build query based on tab
-        $query = Ride::where('added_by', $user_id)->with(['detail','rideStops','rideStopSegments']);
+        $query = Ride::where('added_by', $user_id)->with(['detail', 'rideStops', 'rideStopSegments']);
 
         switch ($tab) {
             case 'upcoming':
@@ -115,37 +115,37 @@ class MyRideController extends Controller
             ->orderBy('time', 'asc')
             ->paginate(6);
 
-        foreach($rides as $ride){
+        foreach ($rides as $ride) {
             $ride = $this->makeDetailOfRide($ride);
         }
-        
-        $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
-        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
-        $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
-        $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
-        $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
-        
+
+        $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+
         $firm_cancellation_discount = SiteSetting::value('frim_discount');
-       
+
         View::share([
             'rideDetailPage' => $rideDetailPage,
             'firm_cancellation_discount' => $firm_cancellation_discount,
         ]);
 
         return view('my_rides', [
-            'rides' => $rides, 
+            'rides' => $rides,
             'activeTab' => $tab,
-            'reviewSetting' => $reviewSetting, 
-            'ProfilePage' => $ProfilePage, 
-            'ProfileSetting' => $ProfileSetting, 
-            'rideDetailPage' => $rideDetailPage, 
+            'reviewSetting' => $reviewSetting,
+            'ProfilePage' => $ProfilePage,
+            'ProfileSetting' => $ProfileSetting,
+            'rideDetailPage' => $rideDetailPage,
             'tripsPage' => $tripsPage
-            ]);
+        ]);
     }
 
     protected function MyRideDetail(Request $request, $lang = null)
     {
-        $siteSetting = SiteSetting::first();
+        $siteSetting = SiteSetting::getCached();
 
         $from = (string) ($request->departure ?? '');
         $to = (string) ($request->destination ?? '');
@@ -178,7 +178,7 @@ class MyRideController extends Controller
         $postRidePage = $this->getPostRidePageWithSettingDetail();
 
 
-        $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);  
+        $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback(
             $this->selectedLanguage->id,
             $this->defaultLang->id
@@ -189,7 +189,7 @@ class MyRideController extends Controller
         );
         $messages = $this->successMessage;
 
-        
+
 
         $ride = $this->makeDetailOfRide($ride);
 
@@ -274,7 +274,7 @@ class MyRideController extends Controller
     {
         $booking = Booking::where('id', $request->booking_id)->first();
 
-        $siteSetting = SiteSetting::first();
+        $siteSetting = SiteSetting::getCached();
 
         $message = null;
         $selectedLanguage = session('selectedLanguage');
@@ -356,7 +356,7 @@ class MyRideController extends Controller
                         ]);
                     }
                 }
-                
+
                 $driverPhoneNumber = PhoneNumber::where('user_id', $booking->ride->driver->id)
                     ->where('default', '1')
                     ->first();
@@ -378,79 +378,79 @@ class MyRideController extends Controller
                     'driver_phone' => $driverPhoneToUse,
                     'passenger_email' => $booking->ride->driver->email,
                 ];
-                
+
                 if (isset($booking->passenger->email_notification) && $booking->passenger->email_notification == 1) {
-                Mail::to($booking->passenger->email)->send(new SecuredCashPassengerMail($passengerData));
+                    Mail::to($booking->passenger->email)->send(new SecuredCashPassengerMail($passengerData));
                 }
 
                 // sms passneger 
                 $passengerPhoneNumber = PhoneNumber::where('user_id', $booking->passenger->id)
+                    ->where('verified', '1')
+                    ->where('default', '1')
+                    ->first();
+
+                if (!$passengerPhoneNumber) {
+                    $passengerPhoneNumber = PhoneNumber::where('user_id', $booking->passenger->id)
                         ->where('verified', '1')
-                        ->where('default', '1')
                         ->first();
+                }
 
-                    if (!$passengerPhoneNumber) {
-                        $passengerPhoneNumber = PhoneNumber::where('user_id', $booking->passenger->id)
-                            ->where('verified', '1')
-                            ->first();
+                if ($passengerPhoneNumber && env('APP_ENV') != 'local' && isset($booking->passenger->sms_notification) && $booking->passenger->sms_notification == 1) {
+                    $sid = env('TWILIO_ACCOUNT_SID');
+                    $token = env('TWILIO_AUTH_TOKEN');
+                    $from = env('TWILIO_PHONE_NUMBER');
+
+                    $twilio = new Client($sid, $token);
+                    $to = $passengerPhoneNumber->phone;
+
+
+                    $title = "";
+                    $currentHour = date('H');
+                    if ($currentHour >= 0 && $currentHour < 12) {
+                        $title = "Good morning " . $booking->passenger->first_name . ",";
+                    } elseif ($currentHour >= 12 && $currentHour < 17) {
+                        $title = "Good afternoon " . $booking->passenger->first_name . ",";
+                    } else {
+                        $title = "Good evening " . $booking->passenger->first_name . ",";
                     }
 
-                    if ($passengerPhoneNumber && env('APP_ENV') != 'local' && isset($booking->passenger->sms_notification) && $booking->passenger->sms_notification == 1) {
-                        $sid = env('TWILIO_ACCOUNT_SID');
-                        $token = env('TWILIO_AUTH_TOKEN');
-                        $from = env('TWILIO_PHONE_NUMBER');
+                    // Format phone number (123)456-7890
+                    $driverPhone = preg_replace("/^(\d{3})(\d{3})(\d{4})$/", "($1)$2-$3", $driverPhoneToUse);
 
-                        $twilio = new Client($sid, $token);
-                        $to = $passengerPhoneNumber->phone;
+                    // Format date and time
+                    $departureTime = date('H:i:s', strtotime($booking->ride->time));
+                    $departureDate = date('d F, Y', strtotime($booking->ride->date));
 
-                        
-                        $title = "";
-                        $currentHour = date('H');
-                        if ($currentHour >= 0 && $currentHour < 12) {
-                            $title = "Good morning " . $booking->passenger->first_name . ",";
-                        } elseif ($currentHour >= 12 && $currentHour < 17) {
-                            $title = "Good afternoon " . $booking->passenger->first_name . ",";
-                        } else {
-                            $title = "Good evening " . $booking->passenger->first_name . ",";
-                        }
+                    // Convert seat number to words if needed
+                    $seatText = $booking->seats == 1 ? 'seat' : 'seats';
 
-                        // Format phone number (123)456-7890
-                        $driverPhone = preg_replace("/^(\d{3})(\d{3})(\d{4})$/", "($1)$2-$3", $driverPhoneToUse);
-                        
-                        // Format date and time
-                        $departureTime = date('H:i:s', strtotime($booking->ride->time));
-                        $departureDate = date('d F, Y', strtotime($booking->ride->date));
-                        
-                        // Convert seat number to words if needed
-                        $seatText = $booking->seats == 1 ? 'seat' : 'seats';
+                    $seats = $booking->seats;
+                    $pricePerSeat = $booking->price;
+                    $bookingCredit = $booking->booking_credit;
 
-                        $seats = $booking->seats;
-                        $pricePerSeat = $booking->price;
-                        $bookingCredit = $booking->booking_credit;
+                    // Calculate total amount due
+                    $totalAmount = ($seats * $pricePerSeat) + $bookingCredit;
+                    $formattedAmountForPassengerToPay = number_format($totalAmount, 2);
 
-                        // Calculate total amount due
-                        $totalAmount = ($seats * $pricePerSeat) + $bookingCredit;
-                        $formattedAmountForPassengerToPay = number_format($totalAmount, 2);
+                    $message = $title . "\n" . "From ProximaRide: Secured-cash payment code was successful. Your booking price has been refunded to you. Now, please pay your driver in cash. Pay the booking price only, not the booking fee.\n" .
+                        "Ride from " . $booking->departure . " to " . $booking->destination .
+                        " on " . $departureDate . " at " . $departureTime . "\n" .
+                        "Driver name is (" . $booking->ride->driver->first_name . "). Phone " . $driverPhone . "\n" .
+                        "You booked: " . $booking->seats . " " . $seatText . "\n" .
+                        "Amount to pay to the driver: $" . $formattedAmountForPassengerToPay;
 
-                        $message = $title . "\n" . "From ProximaRide: Secured-cash payment code was successful. Your booking price has been refunded to you. Now, please pay your driver in cash. Pay the booking price only, not the booking fee.\n" .
-                                "Ride from " . $booking->departure . " to " . $booking->destination . 
-                                " on " . $departureDate . " at " . $departureTime . "\n" .
-                                "Driver name is (" . $booking->ride->driver->first_name . "). Phone " . $driverPhone . "\n" .
-                                "You booked: " . $booking->seats . " " . $seatText . "\n" .
-                                "Amount to pay to the driver: $" . $formattedAmountForPassengerToPay;
-
-                        try {
-                            $res = $twilio->messages->create(
-                                $to,
-                                [
-                                    'from' => $from,
-                                    'body' => $message,
-                                ]
-                            );
-                        } catch (\Exception $e) {
-                            Log::error("Cannot send secured cash success SMS to $to. Error: " . $e->getMessage());
-                        }
+                    try {
+                        $res = $twilio->messages->create(
+                            $to,
+                            [
+                                'from' => $from,
+                                'body' => $message,
+                            ]
+                        );
+                    } catch (\Exception $e) {
+                        Log::error("Cannot send secured cash success SMS to $to. Error: " . $e->getMessage());
                     }
+                }
 
 
                 // Send email to driver
@@ -467,7 +467,7 @@ class MyRideController extends Controller
                     'passenger_email' => $booking->passenger->email,
                 ];
                 if (isset($booking->ride->driver->email_notification) && $booking->ride->driver->email_notification == 1) {
-                Mail::to($booking->ride->driver->email)->send(new SecuredCashDriverMail($driverData));
+                    Mail::to($booking->ride->driver->email)->send(new SecuredCashDriverMail($driverData));
                 }
 
                 // driver sms
@@ -502,11 +502,11 @@ class MyRideController extends Controller
 
                     // Format phone number (123)456-7890
                     $passengerPhone = preg_replace("/^(\d{3})(\d{3})(\d{4})$/", "($1)$2-$3", $passengerPhoneToUse);
-                    
+
                     // Format date and time
                     $departureTime = date('H:i:s', strtotime($booking->ride->time));
                     $departureDate = date('d F, Y', strtotime($booking->ride->date));
-                    
+
                     // Convert seat number to words if needed
                     $seatText = $booking->seats == 1 ? 'seat' : 'seats';
 
@@ -519,11 +519,11 @@ class MyRideController extends Controller
                     $formattedAmount = number_format($totalAmount, 2);
 
                     $message = $title . "\n" . "From ProximaRide: Secured-cash payment code was successful. Now, take your payment from the passenger in cash.\n" .
-                            "Passenger name is (" . $booking->passenger->first_name . "). Phone " . $passengerPhone . "\n" .
-                            "Ride from " . $booking->departure . " to " . $booking->destination . 
-                            " on " . $departureDate . " at " . $departureTime . "\n" .
-                            "Seats booked: " . $booking->seats . "\n" .
-                            "Amount due to you: $" . $formattedAmount;
+                        "Passenger name is (" . $booking->passenger->first_name . "). Phone " . $passengerPhone . "\n" .
+                        "Ride from " . $booking->departure . " to " . $booking->destination .
+                        " on " . $departureDate . " at " . $departureTime . "\n" .
+                        "Seats booked: " . $booking->seats . "\n" .
+                        "Amount due to you: $" . $formattedAmount;
 
                     try {
                         $res = $twilio->messages->create(
@@ -545,7 +545,7 @@ class MyRideController extends Controller
                     'status' => 'upcoming',
                     'notification_type' => 'upcoming',
                 ]);
-        
+
                 $body = $notification->message;
                 $fcmService = new FCMService();
 
@@ -553,9 +553,9 @@ class MyRideController extends Controller
                 if ($fcmToken) {
                     $fcmService->sendNotification($fcmToken, $body);
                 }
-        
+
                 $fcm_tokens = FCMToken::where('user_id', $booking->ride->added_by)->get();
-        
+
                 foreach ($fcm_tokens as $fcm_token) {
                     try {
                         $fcmService->sendNotification($fcm_token->token, $body);
@@ -563,7 +563,7 @@ class MyRideController extends Controller
                         Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
                     }
                 }
-                
+
                 $notification = Notification::create([
                     'type' => 2,
                     'ride_id' => $booking->ride_id,
@@ -573,7 +573,7 @@ class MyRideController extends Controller
                     'status' => 'upcoming',
                     'notification_type' => 'upcoming',
                 ]);
-        
+
                 $body = $notification->message;
                 $fcmService = new FCMService();
 
@@ -581,9 +581,9 @@ class MyRideController extends Controller
                 if ($fcmToken) {
                     $fcmService->sendNotification($fcmToken, $body);
                 }
-        
+
                 $fcm_tokens = FCMToken::where('user_id', $booking->user_id)->get();
-        
+
                 foreach ($fcm_tokens as $fcm_token) {
                     try {
                         $fcmService->sendNotification($fcm_token->token, $body);
@@ -591,18 +591,18 @@ class MyRideController extends Controller
                         Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
                     }
                 }
-                
+
                 return redirect()->route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id])->with(['success' => $this->successMessage->secured_cash_success_message ?? "Code submitted and the booking price has been released back to the passenger. Now, get your payment in cash from them"]);
             } else {
 
-                if($booking->secured_cash_attempt_count < $siteSetting->secured_cash_attempt){
+                if ($booking->secured_cash_attempt_count < $siteSetting->secured_cash_attempt) {
                     $count = isset($booking->secured_cash_attempt_count) ? $booking->secured_cash_attempt_count : 0;
                     $count = $count + 1;
                     $booking->secured_cash_attempt_count = $count;
                     $booking->save();
                     $messageData = $this->successMessage->incorrect_code_message;
-                }else{
-                   $messageData = $this->successMessage->too_many_secured_cash_attempt_message;
+                } else {
+                    $messageData = $this->successMessage->too_many_secured_cash_attempt_message;
                 }
             }
             return redirect()->route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id])->with(['message' => $messageData, 'secured_cash_attempt_count' => $booking->secured_cash_attempt_count]);
@@ -714,15 +714,20 @@ class MyRideController extends Controller
 
         $ratings = Rating::all();
 
-        return view('my_passengers', ['ride' => $ride, 'setting' => $setting, 'cancelSetting' => $cancelSetting,
-         'ratings' => $ratings, 
-         'myPassengerPage' => $myPassengerPage, 'messages' => $messages]);
+        return view('my_passengers', [
+            'ride' => $ride,
+            'setting' => $setting,
+            'cancelSetting' => $cancelSetting,
+            'ratings' => $ratings,
+            'myPassengerPage' => $myPassengerPage,
+            'messages' => $messages
+        ]);
     }
 
     public function cancel($lang = null, $id)
     {
         $ride = Ride::where('id', $id)->first();
-        $setting = SiteSetting::first();
+        $setting = SiteSetting::getCached();
         $languages = Language::all();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
@@ -774,7 +779,7 @@ class MyRideController extends Controller
     {
         $ride = Ride::where('id', $id)->first();
         $user_id = auth()->user()->id;
-        $setting = SiteSetting::first();
+        $setting = SiteSetting::getCached();
         $monthsAgo = Carbon::now()->subMonths($setting->booking_cancel_duration)->setTimezone('UTC');;
 
         $cancellationCount = CancellationHistory::where('user_id', $user_id)
@@ -782,64 +787,64 @@ class MyRideController extends Controller
             ->where('type', 'driver')
 
             ->count();
-            $messages = null;
-            $selectedLanguageAbbreviation = session('selectedLanguage');
-    
-            if ($selectedLanguageAbbreviation) {
-                // Find the language by abbreviation
-                $selectedLanguage = Language::where('abbreviation', $selectedLanguageAbbreviation)->first();
-                if ($selectedLanguage) {
-                    $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('ride_cancel_message')->first();
-                    $limitExceed = BookingPageSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_cancellation_limit_exceed')->first();
-                }
-            } else {
-                // Use the default language
-                $selectedLanguage = Language::where('is_default', 1)->first();
-                if ($selectedLanguage) {
-                    $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('ride_cancel_message')->first();
-                    $limitExceed = BookingPageSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_cancellation_limit_exceed')->first();
-                }
-                $selectedLanguageAbbreviation = $selectedLanguage->abbreviation;
-            }
-            // dd($limitExceed);
-            if ($cancellationCount >= $setting->booking_cancel_limit) {
-            return redirect()->back()->with(['failure' => $limitExceed->booking_cancellation_limit_exceed ?? "Booking cancellation limit exceeded"]);
-                
-                // return response()->json(['error' => true, 'message' => $limitExceed->booking_cancellation_limit_exceed ?? "Booking cancellation limit exceeded"]);
-            }
+        $messages = null;
+        $selectedLanguageAbbreviation = session('selectedLanguage');
 
-            // Check if there are any active bookings
-            $bookedSeats = $ride->bookings()
+        if ($selectedLanguageAbbreviation) {
+            // Find the language by abbreviation
+            $selectedLanguage = Language::where('abbreviation', $selectedLanguageAbbreviation)->first();
+            if ($selectedLanguage) {
+                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('ride_cancel_message')->first();
+                $limitExceed = BookingPageSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_cancellation_limit_exceed')->first();
+            }
+        } else {
+            // Use the default language
+            $selectedLanguage = Language::where('is_default', 1)->first();
+            if ($selectedLanguage) {
+                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('ride_cancel_message')->first();
+                $limitExceed = BookingPageSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_cancellation_limit_exceed')->first();
+            }
+            $selectedLanguageAbbreviation = $selectedLanguage->abbreviation;
+        }
+        // dd($limitExceed);
+        if ($cancellationCount >= $setting->booking_cancel_limit) {
+            return redirect()->back()->with(['failure' => $limitExceed->booking_cancellation_limit_exceed ?? "Booking cancellation limit exceeded"]);
+
+            // return response()->json(['error' => true, 'message' => $limitExceed->booking_cancellation_limit_exceed ?? "Booking cancellation limit exceeded"]);
+        }
+
+        // Check if there are any active bookings
+        $bookedSeats = $ride->bookings()
             ->where('status', '!=', '0') // Exclude pending bookings
             ->where('status', '!=', '3') // Exclude canceled bookings
             ->where('status', '!=', '4') // Exclude completed bookings
             ->sum('seats');
-            if ($bookedSeats == 0) {
-                $ride->update(['status' => '2']);
-                
-                // Add cancellation history
-                CancellationHistory::create([
-                    'ride_id' => $ride->id,
-                    'user_id' => $ride->added_by,
-                    'type' => 'driver',
-                ]);
+        if ($bookedSeats == 0) {
+            $ride->update(['status' => '2']);
 
-                // Revoke Extra Care eligibility when driver cancels ride
-                User::where('id', $ride->added_by)->whereIn('folks_ride', ['1', ''])->update(['folks_ride' => '0']);
-                
-                $selectedLanguageAbbreviation = session('selectedLanguage');
-                
-                if (!$selectedLanguageAbbreviation) {
-                    $defaultLanguage = Language::where('is_default', 1)->first();
-                    $selectedLanguageAbbreviation = $defaultLanguage->abbreviation;
-                }
-                return response()->json(['success' => true, 'message' => 'Ride canceled successfully.']);
+            // Add cancellation history
+            CancellationHistory::create([
+                'ride_id' => $ride->id,
+                'user_id' => $ride->added_by,
+                'type' => 'driver',
+            ]);
+
+            // Revoke Extra Care eligibility when driver cancels ride
+            User::where('id', $ride->added_by)->whereIn('folks_ride', ['1', ''])->update(['folks_ride' => '0']);
+
+            $selectedLanguageAbbreviation = session('selectedLanguage');
+
+            if (!$selectedLanguageAbbreviation) {
+                $defaultLanguage = Language::where('is_default', 1)->first();
+                $selectedLanguageAbbreviation = $defaultLanguage->abbreviation;
             }
-      
+            return response()->json(['success' => true, 'message' => 'Ride canceled successfully.']);
+        }
+
         $request->validate([
             'message' => 'required',
             'reason' => 'required'
-        ],[
+        ], [
             'message.required' => 'The message is required',
             'reason.required' => 'The reason is required',
         ]);
@@ -996,10 +1001,10 @@ class MyRideController extends Controller
             }
 
             if (isset($booking->passenger->email_notification) && $booking->passenger->email_notification == 1) {
-            $data = ['driver_name' => $ride->driver->first_name, 'passenger_name' => $booking->passenger->first_name, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time, 'seats' => $booking->seats, 'total_price' => $booking->fare, 'cancellation_reason' => $request->message];
+                $data = ['driver_name' => $ride->driver->first_name, 'passenger_name' => $booking->passenger->first_name, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time, 'seats' => $booking->seats, 'total_price' => $booking->fare, 'cancellation_reason' => $request->message];
 
-            Mail::to($booking->passenger->email)->queue(new DriverCancelRideMail($data));
-            Mail::to($booking->passenger->email)->queue(new DriverCancelRideWithReasonMail($data));
+                Mail::to($booking->passenger->email)->queue(new DriverCancelRideMail($data));
+                Mail::to($booking->passenger->email)->queue(new DriverCancelRideWithReasonMail($data));
             }
 
             $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)
@@ -1011,7 +1016,7 @@ class MyRideController extends Controller
                 $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)->where('verified', '1')->first();
             }
 
-            if ($phoneNumber && env('APP_ENV') != 'local' && isset($booking->passenger->sms_notification) && $booking->passenger->sms_notification == 1)  {
+            if ($phoneNumber && env('APP_ENV') != 'local' && isset($booking->passenger->sms_notification) && $booking->passenger->sms_notification == 1) {
                 $sid = env('TWILIO_ACCOUNT_SID');
                 $token = env('TWILIO_AUTH_TOKEN');
                 $from = env('TWILIO_PHONE_NUMBER');
@@ -1035,11 +1040,11 @@ class MyRideController extends Controller
 
                 // $message = "" . $title . "\nDriver cancelled this ride\nTrip detail\nOrigin: " . $booking->departure . "\nDestination: " . $booking->destination . "\nDeparture date: " . $depatureDate . "\nDriver name: " . $ride->driver->first_name . "\nDriver phone number: " . $ride->driver->phone . "";
                 $message = $title . "\n" .
-                "From ProximaRide: we are sorry to inform you that your ride from " . $booking->departure .
-                " to " . $booking->destination .
-                " on " . $departureDate .
-                " at " . $departureTime . " has been cancelled by the driver.\n" .
-                "All amounts that you have made for this booking will be refunded to you immediately.";
+                    "From ProximaRide: we are sorry to inform you that your ride from " . $booking->departure .
+                    " to " . $booking->destination .
+                    " on " . $departureDate .
+                    " at " . $departureTime . " has been cancelled by the driver.\n" .
+                    "All amounts that you have made for this booking will be refunded to you immediately.";
 
                 try {
                     $twilio->messages->create(
@@ -1062,7 +1067,7 @@ class MyRideController extends Controller
         return redirect()->route('home', ['lang' => $selectedLanguageAbbreviation])
             ->with(['success' => $messages->ride_cancel_message]);
     }
- 
+
     public function cancelRide($id, Request $request)
     {
         \Log::info("Attempting to cancel ride with ID: {$id}");
@@ -1164,18 +1169,18 @@ class MyRideController extends Controller
 
                 // Send email notification to passengers
                 if (isset($booking->passenger->email_notification) && $booking->passenger->email_notification == 1) {
-                $data = [
-                    'driver_name' => $ride->driver->first_name,
-                    'passenger_name' => $booking->passenger->first_name,
-                    'from' => $booking->departure,
-                    'to' => $booking->destination,
-                    'date' => $departureDate,
-                    'time' => $departureTime,
-                    'seats' => $booking->seats,
-                    'total_price' => $booking->fare,
-                ];
-                Mail::to($booking->passenger->email)->queue(new DriverCancelRideMail($data));
-            }
+                    $data = [
+                        'driver_name' => $ride->driver->first_name,
+                        'passenger_name' => $booking->passenger->first_name,
+                        'from' => $booking->departure,
+                        'to' => $booking->destination,
+                        'date' => $departureDate,
+                        'time' => $departureTime,
+                        'seats' => $booking->seats,
+                        'total_price' => $booking->fare,
+                    ];
+                    Mail::to($booking->passenger->email)->queue(new DriverCancelRideMail($data));
+                }
 
                 // Send SMS notification to passengers (if enabled)
                 $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)
@@ -1202,7 +1207,7 @@ class MyRideController extends Controller
                     }
 
                     // $departureDateTime = date('d F, Y H:i:s', strtotime($ride->date . ' ' . $ride->time));
-                    $departureDate = date('F d, Y', strtotime($ride->date)); 
+                    $departureDate = date('F d, Y', strtotime($ride->date));
                     $departureTime = date('H:i', strtotime($ride->time));
 
                     // $smsMessage = "{$title}\nWe regret to inform you that your ride from {$booking->departure} to {$booking->destination} on {$departureDateTime} has been cancelled by the driver.\n\nAll payments will be refunded immediately.\n\nWe apologize for the inconvenience and encourage you to search for alternative rides.\n\nProximaRide Team";
@@ -1232,16 +1237,22 @@ class MyRideController extends Controller
     {
         $booking = Booking::where('id', $id)->first();
         $ride = Ride::where('id', $booking->ride_id)->first();
-        $setting = SiteSetting::first();
-       
-        
+        $setting = SiteSetting::getCached();
+
+
         $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $messages = $this->successMessage;
 
-        return view('cancel_passenger', ['booking' => $booking, 'messages' => $messages, 'ride' => $ride, 
-        
-        'postRidePage' => $postRidePage, 'setting' => $setting, 'tripsPage' => $tripsPage]);
+        return view('cancel_passenger', [
+            'booking' => $booking,
+            'messages' => $messages,
+            'ride' => $ride,
+
+            'postRidePage' => $postRidePage,
+            'setting' => $setting,
+            'tripsPage' => $tripsPage
+        ]);
     }
 
     public function updateRemovePassenger($id, Request $request)
@@ -1250,14 +1261,14 @@ class MyRideController extends Controller
         $booking = Booking::where('id', $id)->first();
         $ride = Ride::where('id', $booking->ride_id)->first();
         $user_id = auth()->user()->id;
-        $setting = SiteSetting::first();
+        $setting = SiteSetting::getCached();
         $monthsAgo = Carbon::now()->subMonths($setting->booking_cancel_duration)->setTimezone('UTC');;
-        
+
         $cancellationCount = CancellationHistory::where('user_id', $user_id)
-        ->where('created_at', '>=', $monthsAgo)
-        ->where('type', 'driver')
-        
-        ->count();
+            ->where('created_at', '>=', $monthsAgo)
+            ->where('type', 'driver')
+
+            ->count();
         $messages = null;
 
         $niceNames = [];
@@ -1290,9 +1301,9 @@ class MyRideController extends Controller
         }
         if ($cancellationCount >= $setting->booking_cancel_limit) {
             return redirect()->back()->with(['failure' => $limitExceed->booking_cancellation_limit_exceed ?? "Booking cancellation limit exceeded"]);
-                
-                // return response()->json(['error' => true, 'message' => $limitExceed->booking_cancellation_limit_exceed ?? "Booking cancellation limit exceeded"]);
-            }
+
+            // return response()->json(['error' => true, 'message' => $limitExceed->booking_cancellation_limit_exceed ?? "Booking cancellation limit exceeded"]);
+        }
         $removed_permanently = $request->filled('removed_permanently') ? $request->removed_permanently : 0;
 
         $remove_type = $request->filled('remove_type') ? $request->remove_type : null;
@@ -1316,7 +1327,7 @@ class MyRideController extends Controller
             $currentDate = date('Y-m-d H:i:s');
             $getDate = date('Y-m-d H:i:s', strtotime($currentDate . "+ " . $blockDay . " days"));
             $blockDateTime = $getDate;
-        }else if($removed_permanently == "1" && isset($remove_type) && $remove_type == "permanently"){
+        } else if ($removed_permanently == "1" && isset($remove_type) && $remove_type == "permanently") {
             $blockDay = 1000;
             $currentDate = date('Y-m-d H:i:s');
             $getDate = date('Y-m-d H:i:s', strtotime($currentDate . "+ " . $blockDay . " days"));
@@ -1463,12 +1474,12 @@ class MyRideController extends Controller
         }
         $admin = Admin::first();
         $data = [
-            'admin_username' => $admin->username, 
-            'driver_name' => $booking->ride->driver->first_name, 
-            'passenger_name' => $booking->passenger->first_name, 
-            'departure' => $booking->departure, 
-            'destination' => $booking->destination, 
-            'date' => $ride->date, 
+            'admin_username' => $admin->username,
+            'driver_name' => $booking->ride->driver->first_name,
+            'passenger_name' => $booking->passenger->first_name,
+            'departure' => $booking->departure,
+            'destination' => $booking->destination,
+            'date' => $ride->date,
             'message' => $request->admin_message
         ];
         // Send email to admin
@@ -1540,12 +1551,12 @@ class MyRideController extends Controller
 
             // $message = "" . $title . "\nDriver remove your seat from this ride\nTrip detail\nOrigin: " . $booking->departure . "\nDestination: " . $booking->destination . "\nDeparture date: " . $depatureDate . "\nDriver name: " . $ride->driver->first_name . "\nDriver phone number: " . $ride->driver->phone . "";
             $message = $title . "\n" . "From ProximaRide: We are sorry to inform you that your driver has cancelled your booking\n" .
-            "Ride from " . $booking->departure . 
-            " to " . $booking->destination . 
-            " on " . $departureDate . 
-            " at " . $departureTime . 
-            "\nNumber of seats: " . $seatWords . 
-            "\nAll payments that you have made to book on this ride will be refunded to you immediately";
+                "Ride from " . $booking->departure .
+                " to " . $booking->destination .
+                " on " . $departureDate .
+                " at " . $departureTime .
+                "\nNumber of seats: " . $seatWords .
+                "\nAll payments that you have made to book on this ride will be refunded to you immediately";
 
             try {
                 $res = $twilio->messages->create(

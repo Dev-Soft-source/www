@@ -7,7 +7,9 @@ use App\Models\State;
 use App\Models\Country;
 use App\Models\SiteSetting;
 use App\Services\CountryStateCityApiService;
+use App\Support\LocationCache;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class CountryStateCityController extends Controller
 {
@@ -19,115 +21,121 @@ class CountryStateCityController extends Controller
     }
     public function getState(Request $request)
     {
-        $data['states'] = State::where("country_id",$request->country_id)->where('status', '1')
-                    ->orderBy("name", "asc")->get(["name","id"]);
+        $countryId = (int) $request->country_id;
+        $cacheKey = LocationCache::key('web:locations:states:country:' . $countryId);
+
+        $data['states'] = Cache::rememberForever(
+            $cacheKey,
+            fn () => State::where('country_id', $countryId)
+                ->where('status', '1')
+                ->orderBy('name', 'asc')
+                ->get(['name', 'id'])
+        );
+
         return response()->json($data);
     }
 
     public function getCity(Request $request)
     {
-        $cities = City::with(['state:id,abrv,country_id', 'state.country:id,name'])->where('status', '1');
+        $stateId = (int) ($request->state_id ?? 0);
+        $search = trim((string) ($request->search ?? ''));
+        $cacheKey = LocationCache::key('web:locations:cities:state:' . $stateId . ':search:' . md5(mb_strtolower($search)));
 
-        if(isset($request->state_id) && $request->state_id != 0){
-            $cities = $cities->where('state_id', $request->state_id);
-        }
+        $cityList = Cache::rememberForever(
+            $cacheKey,
+            function () use ($stateId, $search) {
+                $cities = City::with(['state:id,abrv,country_id', 'state.country:id,name'])->where('status', '1');
 
-        if(isset($request->search) && $request->search != ""){
-            $cities = $cities->where('name', 'like', $request->search.'%');
-        }
-
-        // Group by city name, state_id to remove database-level duplicates before processing
-        $cities = $cities->orderBy('name', 'asc')
-            ->get()
-            ->unique(function ($city) {
-                // Use name and state_id as unique key at database level
-                return strtolower(trim($city->name)) . '|' . ($city->state_id ?? 'null');
-            });
-
-        // Deduplicate cities to ensure only one entry per unique city name + state + country combination
-        // This prevents showing "Ottawa, ON, Canada" and multiple "Ottawa, null, United States" entries
-        // Special handling: If state abbreviation is null, group by base_name + country_id only
-        // Otherwise, group by base_name + state_id + country_id
-        $uniqueCities = $cities->map(function ($city) {
-            // Extract the base city name by removing any state/country suffixes
-            // Pattern: "City Name, State, Country" or "City Name, State" -> "City Name"
-            $baseName = trim(preg_replace('/\s*,\s*[^,]+(?:,\s*[^,]+)?$/', '', $city->name));
-            $countryId = $city->state && $city->state->country ? $city->state->country->id : null;
-            $stateAbrv = $city->state ? $city->state->abrv : null;
-            return [
-                'city' => $city,
-                'base_name' => strtolower(trim($baseName)),
-                'state_id' => $city->state_id,
-                'state_abrv' => $stateAbrv,
-                'country_id' => $countryId
-            ];
-        })->unique(function ($item) {
-            // If state abbreviation is null, group only by base_name + country_id
-            // This ensures multiple "Ottawa, null, United States" entries show as one
-            // If state abbreviation exists, group by base_name + state_id + country_id
-            if (empty($item['state_abrv'])) {
-                return $item['base_name'] . '|' . ($item['country_id'] ?? 'null');
-            } else {
-                return $item['base_name'] . '|' . ($item['state_id'] ?? 'null') . '|' . ($item['country_id'] ?? 'null');
-            }
-        })->map(function ($item) {
-            // Return only the city object, but ensure the name is clean (base name only)
-            $city = $item['city'];
-            // Update the city name to be just the base name (without state/country suffixes)
-            $baseName = trim(preg_replace('/\s*,\s*[^,]+(?:,\s*[^,]+)?$/', '', $city->name));
-            $city->name = $baseName;
-            return $city;
-        });
-
-        $cityList = $uniqueCities->values();
-
-        // Merge with API (GeoNames or CountriesNow) when state_id given so NY, TX, etc. have full city lists
-        if (isset($request->state_id) && (int) $request->state_id > 0) {
-            $state = State::with('country')->find((int) $request->state_id);
-            if ($state && $state->country) {
-                $countryIso = $state->country->iso_code ?? null;
-                $stateCode = $state->abrv ?? null;
-                $apiCities = $this->apiService->getCitiesByState(
-                    $state->country->name,
-                    $state->name,
-                    $countryIso,
-                    $stateCode
-                );
-                $existingNames = $cityList->map(function ($c) {
-                    return strtolower(trim(preg_replace('/\s*,\s*[^,]+(?:,\s*[^,]+)?$/', '', $c->name)));
-                })->flip();
-                foreach ($apiCities as $row) {
-                    $name = is_array($row) ? ($row['name'] ?? '') : (string) $row;
-                    if ($name === '') {
-                        continue;
-                    }
-                    $key = strtolower(trim($name));
-                    if ($existingNames->has($key)) {
-                        continue;
-                    }
-                    $existingNames->put($key, true);
-                    $slug = preg_replace('/[^a-z0-9]+/i', '_', $name);
-                    $slug = trim($slug, '_') ?: 'city';
-                    $cityList->push((object) [
-                        'id' => 'api_' . $slug,
-                        'name' => $name,
-                        'state_id' => $state->id,
-                        'state' => (object) [
-                            'id' => $state->id,
-                            'abrv' => $state->abrv ?? null,
-                            'country_id' => $state->country_id,
-                            'country' => (object) [
-                                'id' => $state->country->id,
-                                'name' => $state->country->name,
-                            ],
-                        ],
-                    ]);
+                if ($stateId !== 0) {
+                    $cities = $cities->where('state_id', $stateId);
                 }
-                $cityList = $cityList->sortBy(function ($c) {
-                    return strtolower(is_object($c) ? $c->name : ($c['name'] ?? ''));
-                })->values();
+
+                if ($search !== '') {
+                    $cities = $cities->where('name', 'like', $search . '%');
+                }
+
+                $cities = $cities->orderBy('name', 'asc')
+                    ->get()
+                    ->unique(function ($city) {
+                        return strtolower(trim($city->name)) . '|' . ($city->state_id ?? 'null');
+                    });
+
+                $uniqueCities = $cities->map(function ($city) {
+                    $baseName = trim(preg_replace('/\s*,\s*[^,]+(?:,\s*[^,]+)?$/', '', $city->name));
+                    $countryId = $city->state && $city->state->country ? $city->state->country->id : null;
+                    $stateAbrv = $city->state ? $city->state->abrv : null;
+                    return [
+                        'city' => $city,
+                        'base_name' => strtolower(trim($baseName)),
+                        'state_id' => $city->state_id,
+                        'state_abrv' => $stateAbrv,
+                        'country_id' => $countryId
+                    ];
+                })->unique(function ($item) {
+                    if (empty($item['state_abrv'])) {
+                        return $item['base_name'] . '|' . ($item['country_id'] ?? 'null');
+                    }
+
+                    return $item['base_name'] . '|' . ($item['state_id'] ?? 'null') . '|' . ($item['country_id'] ?? 'null');
+                })->map(function ($item) {
+                    $city = $item['city'];
+                    $baseName = trim(preg_replace('/\s*,\s*[^,]+(?:,\s*[^,]+)?$/', '', $city->name));
+                    $city->name = $baseName;
+                    return $city;
+                });
+
+                $cityList = $uniqueCities->values();
+
+                if ($stateId > 0) {
+                    $state = State::with('country')->find($stateId);
+                    if ($state && $state->country) {
+                        $countryIso = $state->country->iso_code ?? null;
+                        $stateCode = $state->abrv ?? null;
+                        $apiCities = $this->apiService->getCitiesByState(
+                            $state->country->name,
+                            $state->name,
+                            $countryIso,
+                            $stateCode
+                        );
+                        $existingNames = $cityList->map(function ($c) {
+                            return strtolower(trim(preg_replace('/\s*,\s*[^,]+(?:,\s*[^,]+)?$/', '', $c->name)));
+                        })->flip();
+                        foreach ($apiCities as $row) {
+                            $name = is_array($row) ? ($row['name'] ?? '') : (string) $row;
+                            if ($name === '') {
+                                continue;
+                            }
+                            $key = strtolower(trim($name));
+                            if ($existingNames->has($key)) {
+                                continue;
+                            }
+                            $existingNames->put($key, true);
+                            $slug = preg_replace('/[^a-z0-9]+/i', '_', $name);
+                            $slug = trim($slug, '_') ?: 'city';
+                            $cityList->push((object) [
+                                'id' => 'api_' . $slug,
+                                'name' => $name,
+                                'state_id' => $state->id,
+                                'state' => (object) [
+                                    'id' => $state->id,
+                                    'abrv' => $state->abrv ?? null,
+                                    'country_id' => $state->country_id,
+                                    'country' => (object) [
+                                        'id' => $state->country->id,
+                                        'name' => $state->country->name,
+                                    ],
+                                ],
+                            ]);
+                        }
+                        $cityList = $cityList->sortBy(function ($c) {
+                            return strtolower(is_object($c) ? $c->name : ($c['name'] ?? ''));
+                        })->values();
+                    }
+                }
+
+                return $cityList;
             }
-        }
+        );
 
         $data['cities'] = $cityList;
         return response()->json($data);
@@ -146,7 +154,7 @@ class CountryStateCityController extends Controller
             $distance = round(($distance / 1000), 2);
         }
 
-        $siteSetting = SiteSetting::first();
+        $siteSetting = SiteSetting::getCached();
 
         $pricePerKm = $siteSetting->price_per_km;
 
@@ -196,7 +204,10 @@ class CountryStateCityController extends Controller
             return response()->json(['error' => 'Country name is required'], 400);
         }
 
-        $states = $this->apiService->getStatesByCountry($countryName);
+        $states = Cache::rememberForever(
+            LocationCache::key('web:api:states:country:' . md5(mb_strtolower(trim((string) $countryName)))),
+            fn () => $this->apiService->getStatesByCountry($countryName)
+        );
 
         return response()->json([
             'success' => true,
@@ -212,35 +223,42 @@ class CountryStateCityController extends Controller
     {
         $countryName = $request->country_name;
         $stateName = $request->state_name;
-        $search = $request->search ?? '';
+        $search = trim((string) ($request->search ?? ''));
 
         if (!$countryName || !$stateName) {
             return response()->json(['error' => 'Country and state names are required'], 400);
         }
 
-        $cities = $this->apiService->getCitiesByState($countryName, $stateName);
+        $formattedCities = Cache::rememberForever(
+            LocationCache::key(
+                'web:api:cities:country:' . md5(mb_strtolower(trim((string) $countryName)))
+                    . ':state:' . md5(mb_strtolower(trim((string) $stateName)))
+                    . ':search:' . md5(mb_strtolower($search))
+                    . ':state_id:' . (int) ($request->state_id ?? 0)
+            ),
+            function () use ($countryName, $stateName, $search, $request) {
+                $cities = $this->apiService->getCitiesByState($countryName, $stateName);
 
-        // Filter by search term if provided
-        if ($search) {
-            $cities = collect($cities)->filter(function ($city) use ($search) {
-                return stripos($city['name'], $search) === 0;
-            })->values()->toArray();
-        }
+                if ($search !== '') {
+                    $cities = collect($cities)->filter(function ($city) use ($search) {
+                        return stripos($city['name'], $search) === 0;
+                    })->values()->toArray();
+                }
 
-        // Format cities similar to database response
-        $formattedCities = collect($cities)->map(function ($city) use ($stateName, $countryName, $request) {
-            // Get state code if we have it in database
-            $stateCode = null;
-            if ($request->state_id) {
-                $state = State::find($request->state_id);
-                $stateCode = $state ? $state->abrv : null;
+                return collect($cities)->map(function ($city) use ($countryName, $request) {
+                    $stateCode = null;
+                    if ($request->state_id) {
+                        $state = State::find($request->state_id);
+                        $stateCode = $state ? $state->abrv : null;
+                    }
+
+                    return [
+                        'name' => $city['name'],
+                        'display_name' => $city['name'] . ($stateCode ? ', ' . $stateCode . ', ' . $countryName : ', ' . $countryName)
+                    ];
+                })->toArray();
             }
-
-            return [
-                'name' => $city['name'],
-                'display_name' => $city['name'] . ($stateCode ? ', ' . $stateCode . ', ' . $countryName : ', ' . $countryName)
-            ];
-        })->toArray();
+        );
 
         return response()->json([
             'success' => true,
@@ -253,64 +271,71 @@ class CountryStateCityController extends Controller
      */
     public function getCityHybrid(Request $request)
     {
-        // First try database
-        $cities = City::with(['state:id,abrv,country_id', 'state.country:id,name'])->where('status', '1');
+        $stateId = (int) ($request->state_id ?? 0);
+        $search = trim((string) ($request->search ?? ''));
+        $cacheKey = LocationCache::key('web:hybrid:cities:state:' . $stateId . ':search:' . md5(mb_strtolower($search)));
 
-        if(isset($request->state_id) && $request->state_id != 0){
-            $cities = $cities->where('state_id', $request->state_id);
-        }
+        $result = Cache::rememberForever(
+            $cacheKey,
+            function () use ($stateId, $search) {
+                $cities = City::with(['state:id,abrv,country_id', 'state.country:id,name'])->where('status', '1');
 
-        if(isset($request->search) && $request->search != ""){
-            $cities = $cities->where('name', 'like', $request->search.'%');
-        }
-
-        $cities = $cities->orderBy('name', 'asc')->get();
-
-        // If no cities found in database and we have state info, try API
-        if ($cities->isEmpty() && isset($request->state_id)) {
-            $state = State::with('country')->find($request->state_id);
-
-            if ($state && $state->country) {
-                $apiCities = $this->apiService->getCitiesByState(
-                    $state->country->name,
-                    $state->name
-                );
-
-                // Filter by search if provided
-                if (isset($request->search) && $request->search != "") {
-                    $apiCities = collect($apiCities)->filter(function ($city) use ($request) {
-                        return stripos($city['name'], $request->search) === 0;
-                    })->values()->toArray();
+                if ($stateId !== 0) {
+                    $cities = $cities->where('state_id', $stateId);
                 }
 
-                // Format API cities to match database structure
-                $formattedCities = collect($apiCities)->map(function ($city) use ($state) {
-                    return (object)[
-                        'id' => 'api_' . md5($city['name'] . $state->id), // Temporary ID for API cities
-                        'name' => $city['name'],
-                        'state_id' => $state->id,
-                        'state' => (object)[
-                            'id' => $state->id,
-                            'abrv' => $state->abrv,
-                            'country_id' => $state->country_id,
-                            'country' => (object)[
-                                'id' => $state->country->id,
-                                'name' => $state->country->name
-                            ]
-                        ]
-                    ];
-                });
+                if ($search !== '') {
+                    $cities = $cities->where('name', 'like', $search . '%');
+                }
 
-                return response()->json([
-                    'cities' => $formattedCities,
-                    'source' => 'api'
-                ]);
+                $cities = $cities->orderBy('name', 'asc')->get();
+
+                if ($cities->isEmpty() && $stateId > 0) {
+                    $state = State::with('country')->find($stateId);
+
+                    if ($state && $state->country) {
+                        $apiCities = $this->apiService->getCitiesByState(
+                            $state->country->name,
+                            $state->name
+                        );
+
+                        if ($search !== '') {
+                            $apiCities = collect($apiCities)->filter(function ($city) use ($search) {
+                                return stripos($city['name'], $search) === 0;
+                            })->values()->toArray();
+                        }
+
+                        $formattedCities = collect($apiCities)->map(function ($city) use ($state) {
+                            return (object)[
+                                'id' => 'api_' . md5($city['name'] . $state->id),
+                                'name' => $city['name'],
+                                'state_id' => $state->id,
+                                'state' => (object)[
+                                    'id' => $state->id,
+                                    'abrv' => $state->abrv,
+                                    'country_id' => $state->country_id,
+                                    'country' => (object)[
+                                        'id' => $state->country->id,
+                                        'name' => $state->country->name
+                                    ]
+                                ]
+                            ];
+                        });
+
+                        return [
+                            'cities' => $formattedCities,
+                            'source' => 'api'
+                        ];
+                    }
+                }
+
+                return [
+                    'cities' => $cities,
+                    'source' => 'database'
+                ];
             }
-        }
+        );
 
-        return response()->json([
-            'cities' => $cities,
-            'source' => 'database'
-        ]);
+        return response()->json($result);
     }
 }

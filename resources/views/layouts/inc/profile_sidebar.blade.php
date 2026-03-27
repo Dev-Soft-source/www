@@ -1,5 +1,5 @@
 {{-- @php
-        $sitePage = App\Models\SiteSetting::first();
+        $sitePage = App\Models\SiteSetting::getCached();
 @endphp --}}
 
 <div class="profile-sidebar-container flex flex-col col-span-12 lg:col-span-3 relative">

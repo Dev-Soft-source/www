@@ -34,7 +34,7 @@ class FolkRideSettingController extends Controller
         $driver_license = $request->filled('driver_license') ? $request->driver_license : 0;
         $profile_complete = $request->filled('profile_complete') ? $request->profile_complete : 0;
 
-        $folkRideSetting = FolkRideSetting::first();
+        $folkRideSetting = FolkRideSetting::getCached();
         if (!$folkRideSetting) {
             $setting = FolkRideSetting::create([
                 'id' => '1',

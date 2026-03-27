@@ -24,8 +24,9 @@ class InfoIconController extends Controller
 {
     use StatusResponser;
 
-    public function pinkRideInfo(){
-        $pinkRideSetting = PinkRideSetting::first();
+    public function pinkRideInfo()
+    {
+        $pinkRideSetting = PinkRideSetting::getCached();
 
         $loggedInUser = Auth::guard('sanctum')->user();
         $user = User::whereId($loggedInUser->id)->select('id', 'gender', 'email_verified', 'driver', 'dob', 'profile_complete', 'pink_ride', 'folks_ride')->first();
@@ -34,10 +35,11 @@ class InfoIconController extends Controller
         return $this->successResponse($data, 'Get pink ride settings successfully');
     }
 
-    public function extraCareRideInfo(){
-        $folkRideSetting = FolkRideSetting::first();
+    public function extraCareRideInfo()
+    {
+        $folkRideSetting = FolkRideSetting::getCached();
 
-        
+
         $loggedInUser = Auth::guard('sanctum')->user();
         $user = User::whereId($loggedInUser->id)->select('id', 'gender', 'email_verified', 'driver', 'dob', 'profile_complete', 'pink_ride', 'folks_ride')->first();
 
@@ -45,10 +47,11 @@ class InfoIconController extends Controller
         return $this->successResponse($data, 'Get extra care ride settings successfully');
     }
 
-    public function postRideSetting(Request $request){
-        $pinkRideSetting = PinkRideSetting::first();
-        $folkRideSetting = FolkRideSetting::first();
-        $siteSetting = SiteSetting::first();
+    public function postRideSetting(Request $request)
+    {
+        $pinkRideSetting = PinkRideSetting::getCached();
+        $folkRideSetting = FolkRideSetting::getCached();
+        $siteSetting = SiteSetting::getCached();
 
         $loggedInUser = Auth::guard('sanctum')->user();
         $user = User::whereId($loggedInUser->id)->select('id', 'gender', 'email_verified', 'driver', 'dob', 'profile_complete', 'pink_ride', 'folks_ride')->first();
@@ -120,7 +123,8 @@ class InfoIconController extends Controller
         return $this->successResponse($data, 'Get post ride settings successfully');
     }
 
-    public function selectLocationSetting(){
+    public function selectLocationSetting()
+    {
         $selectLocationSetting = null;
         $selectedLanguage = app()->getLocale();
         if ($selectedLanguage) {

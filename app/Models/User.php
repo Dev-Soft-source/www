@@ -247,7 +247,7 @@ class User extends Authenticatable
             return true;
         }
 
-        $folkRideSetting = $folkRideSetting ?: FolkRideSetting::first();
+        $folkRideSetting = $folkRideSetting ?: FolkRideSetting::getCached();
 
         if (!$folkRideSetting) {
             return true;
@@ -311,7 +311,7 @@ class User extends Authenticatable
             return null;
         }
 
-        $folkRideSetting = $folkRideSetting ?: FolkRideSetting::first();
+        $folkRideSetting = $folkRideSetting ?: FolkRideSetting::getCached();
 
         if (!$folkRideSetting) {
             return null;
@@ -369,7 +369,7 @@ class User extends Authenticatable
             return 'Extra Care Rides require at least ' . $rideLimit . ' completed rides.';
         }
 
-        if ($this->home_address == ''){
+        if ($this->home_address == '') {
             return 'You have to address.';
         }
 
@@ -378,7 +378,7 @@ class User extends Authenticatable
 
     public function pinkRideEligibilityError(?PinkRideSetting $pinkRideSetting = null): ?string
     {
-        $pinkRideSetting = $pinkRideSetting ?: PinkRideSetting::first();
+        $pinkRideSetting = $pinkRideSetting ?: PinkRideSetting::getCached();
 
         if (!$pinkRideSetting) {
             return null;
@@ -400,11 +400,11 @@ class User extends Authenticatable
             return 'A government-issued photo ID (driver\'s license) is required to post Pink Rides. Please upload your driver\'s license in your profile.';
         }
 
-        if ($this->home_address == ''){
+        if ($this->home_address == '') {
             return 'You have to address.';
         }
 
-        
+
 
         return null;
     }
@@ -421,7 +421,7 @@ class User extends Authenticatable
             return $postRidePage->pink_ride_tooltip_admin_enable_text ?? '';
         }
 
-        $pinkRideSetting = $pinkRideSetting ?: PinkRideSetting::first();
+        $pinkRideSetting = $pinkRideSetting ?: PinkRideSetting::getCached();
 
         if (!$pinkRideSetting) {
             return '';
@@ -469,7 +469,7 @@ class User extends Authenticatable
             return $postRidePage->extra_care_tooltip_admin_enable_text ?? '';
         }
 
-        $folkRideSetting = $folkRideSetting ?: FolkRideSetting::first();
+        $folkRideSetting = $folkRideSetting ?: FolkRideSetting::getCached();
 
         if (!$folkRideSetting) {
             return '';
@@ -628,8 +628,8 @@ class User extends Authenticatable
     public function getCompletedPassengerBookingsCount(): int
     {
         return Booking::whereHas('ride', function ($query) {
-                $query->where('added_by', $this->id);
-            })
+            $query->where('added_by', $this->id);
+        })
             ->where('status', Booking::STATUS_COMPLETED)
             ->count();
     }
@@ -722,7 +722,7 @@ class User extends Authenticatable
     {
         return (int) ($this->charge_booking ?? 0) === self::CHARGE_BOOKING_WAIVED;
     }
-    
+
     public function hasBookingChargeFlag(): bool
     {
         return (int) ($this->charge_booking ?? 0) === self::CHARGE_BOOKING_CHARGED;

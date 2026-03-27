@@ -144,9 +144,9 @@ class PostRideInitController extends Controller
      */
     private function getPostRideSettingsData($loggedInUser, $langId)
     {
-        $pinkRideSetting = PinkRideSetting::first();
-        $folkRideSetting = FolkRideSetting::first();
-        $siteSetting = SiteSetting::first();
+        $pinkRideSetting = PinkRideSetting::getCached();
+        $folkRideSetting = FolkRideSetting::getCached();
+        $siteSetting = SiteSetting::getCached();
 
         $user = User::whereId($loggedInUser->id)->first();
 
@@ -306,7 +306,7 @@ class PostRideInitController extends Controller
      */
     private function getPinkRideData($loggedInUser)
     {
-        $pinkRideSetting = PinkRideSetting::first();
+        $pinkRideSetting = PinkRideSetting::getCached();
         $user = User::whereId($loggedInUser->id)->select('id', 'gender', 'email_verified', 'driver', 'dob', 'profile_complete', 'pink_ride', 'folks_ride')->first();
 
         return [
@@ -320,7 +320,7 @@ class PostRideInitController extends Controller
      */
     private function getExtraCareRideData($loggedInUser)
     {
-        $folkRideSetting = FolkRideSetting::first();
+        $folkRideSetting = FolkRideSetting::getCached();
         $user = User::whereId($loggedInUser->id)->select('id', 'gender', 'email_verified', 'driver', 'dob', 'profile_complete', 'pink_ride', 'folks_ride')->first();
 
         return [

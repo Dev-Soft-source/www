@@ -3,10 +3,14 @@
 namespace App\Http\Livewire\Px;
 
 use App\Models\City;
+use App\Support\LocationCache;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 
 class CityAutocomplete extends Component
 {
+    private const SUGGESTIONS_CACHE_TTL_SECONDS = 300;
+
     public string $field;
     public ?string $class = '';
     public string $placeholder;
@@ -151,19 +155,28 @@ class CityAutocomplete extends Component
             return;
         }
 
-        $this->suggestions = City::query()
-            ->with(['state:id,abrv,country_id', 'state.country:id,name'])
-            ->where('status', '1')
-            ->where('name', 'like', $search . '%')
-            ->orderBy('name')
-            ->limit(12)
-            ->get()
-            ->map(fn (City $city) => [
-                'id' => (int) $city->id,
-                'name' => $city->name,
-                'label' => $this->formatCityLabel($city),
-            ])
-            ->all();
+        $normalizedSearch = mb_strtolower(trim($search));
+        $cacheKey = LocationCache::key('city-autocomplete:suggestions:' . md5($normalizedSearch));
+
+        $this->suggestions = Cache::remember(
+            $cacheKey,
+            now()->addSeconds(self::SUGGESTIONS_CACHE_TTL_SECONDS),
+            function () use ($search) {
+                return City::query()
+                    ->with(['state:id,abrv,country_id', 'state.country:id,name'])
+                    ->where('status', '1')
+                    ->where('name', 'like', $search . '%')
+                    ->orderBy('name')
+                    ->limit(12)
+                    ->get()
+                    ->map(fn (City $city) => [
+                        'id' => (int) $city->id,
+                        'name' => $city->name,
+                        'label' => $this->formatCityLabel($city),
+                    ])
+                    ->all();
+            }
+        );
 
         $this->highlightedIndex = empty($this->suggestions) ? -1 : 0;
     }

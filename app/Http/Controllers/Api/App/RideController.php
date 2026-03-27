@@ -294,26 +294,28 @@ class RideController extends WebRideController
 
     protected function shouldRunAppSearch(array $filters): bool
     {
-        foreach ([
-            'origin_city_id',
-            'destination_city_id',
-            'origin_label',
-            'destination_label',
-            'keyword',
-            'departure_date',
-            'driver_age',
-            'driver_rating',
-            'driver_phone',
-            'driver_name',
-            'payment_method',
-            'vehicle_type',
-            'luggage_size',
-            'smoking_allowed',
-            'pets_allowed',
-            'women_only',
-            'extra_care',
-            'ride_option_ids',
-        ] as $key) {
+        foreach (
+            [
+                'origin_city_id',
+                'destination_city_id',
+                'origin_label',
+                'destination_label',
+                'keyword',
+                'departure_date',
+                'driver_age',
+                'driver_rating',
+                'driver_phone',
+                'driver_name',
+                'payment_method',
+                'vehicle_type',
+                'luggage_size',
+                'smoking_allowed',
+                'pets_allowed',
+                'women_only',
+                'extra_care',
+                'ride_option_ids',
+            ] as $key
+        ) {
             $value = $filters[$key] ?? null;
             if ($value !== null && $value !== '' && $value !== []) {
                 return true;
@@ -1033,7 +1035,7 @@ class RideController extends WebRideController
 
         $cancelRideSetting = CancelRideSetting::first();
         $reviewSetting = ReviewSetting::select('id', 'leave_review_days')->first();
-        $siteSetting = SiteSetting::first();
+        $siteSetting = SiteSetting::getCached();
 
         $rideDetailPage = null;
         if ($request->lang_id && $request->lang_id != 0) {
@@ -1263,7 +1265,7 @@ class RideController extends WebRideController
         $originCityId = $request->input('origin.city_id');
         $destination = $request->input('destination.label');
         $destinationCityId = $request->input('destination.city_id');
-        $adminSetting = SiteSetting::first();
+        $adminSetting = SiteSetting::getCached();
         $seatCount = (int) $request->input('seats_total', $request->input('seats', 0));
 
         if ($ride_id) {

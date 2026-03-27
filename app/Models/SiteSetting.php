@@ -4,11 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class SiteSetting extends Model
 {
     use HasFactory;
     public $timestamps = false;
+    private const CACHE_KEY = 'settings:site:first';
 
     protected $fillable = [
         'site_name',
@@ -53,4 +55,15 @@ class SiteSetting extends Model
         'menu_icon_log_out',
         'meanu_icon_close_your_account'
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => Cache::forget(self::CACHE_KEY));
+        static::deleted(fn () => Cache::forget(self::CACHE_KEY));
+    }
+
+    public static function getCached(): ?self
+    {
+        return Cache::rememberForever(self::CACHE_KEY, fn () => static::query()->first());
+    }
 }
