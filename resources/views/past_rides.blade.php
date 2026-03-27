@@ -238,7 +238,6 @@
                                                                     class="border-t border-gray-300 no-scrollbar overflow-x-auto flex items-center space-x-2 p-4">
                                                                     @include('partials.ride_preference_icons', [
                                                                         'ride' => $ride,
-                                                                        'searchOptionGroups' => $searchOptionGroups,
                                                                     ])
                                                                     @include('partials.ride_feature_icons', [
                                                                         'rideFeatures' => $ride->features,

@@ -127,7 +127,6 @@ class RideSearchController extends Controller
     {
         $selectedLangId = optional($this->selectedLanguage)->id;
         $defaultLangId = optional($this->defaultLang)->id;
-        $searchOptionGroups = $this->getSearchOptionGroups($selectedLangId, $defaultLangId);
         $searchFilters = $this->getPxSearchFilters($request);
         $hasActiveFilters = collect($searchFilters)->contains(function ($value) {
             return $value !== null && $value !== '' && $value !== false;

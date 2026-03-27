@@ -28,7 +28,7 @@ class CancelRideSettingController extends Controller
         ];
         $this->validate($request, $rules);
 
-        $cancelRideSetting = CancelRideSetting::first();
+        $cancelRideSetting = CancelRideSetting::getCached();
         if (!$cancelRideSetting) {
             $setting = CancelRideSetting::create([
                 'id' => '1',

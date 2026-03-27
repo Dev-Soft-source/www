@@ -1033,7 +1033,7 @@ class RideController extends WebRideController
             }
         }
 
-        $cancelRideSetting = CancelRideSetting::first();
+        $cancelRideSetting = CancelRideSetting::getCached();
         $reviewSetting = ReviewSetting::select('id', 'leave_review_days')->first();
         $siteSetting = SiteSetting::getCached();
 

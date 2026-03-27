@@ -398,11 +398,7 @@
                 <div class="col-span-2">
                     <x-px.ride-detail-info
                         :ride="$ride"
-                        :findRidePage="$findRidePage"
-                        :postRidePage="$postRidePage"
                         :rideDetailPage="$rideDetailPage"
-                        :selectedLanguage="$selectedLanguage ?? null"
-                        :searchOptionGroups="$searchOptionGroups"
                     />
                 </div>
                 <div class="col-span-1">

@@ -75,8 +75,8 @@ class RideController extends Controller
             return redirect(route('home', ['lang' => $lang]));
         }
 
-        $setting = ReviewSetting::first();
-        $cancelSetting = CancelRideSetting::first();
+        $setting = ReviewSetting::getCached();
+        $cancelSetting = CancelRideSetting::getCached();
         $ratings = Rating::all();
 
         $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback(
@@ -90,18 +90,6 @@ class RideController extends Controller
         );
 
         $postRidePage = $this->getPostRidePageWithSettingDetail();
-
-        $searchOptionGroups = $this->getSearchOptionGroups(
-            $this->selectedLanguage->id,
-            $this->defaultLang->id
-        );
-
-        // $ride->mapMultipleOptionColumnsToDetails(
-        //     ['luggage', 'payment_method', 'booking_type', 'animal_friendly', 'booking_method'],
-        //     $this->selectedLanguage->id,
-        //     $this->defaultLang->id,
-        //     false
-        // );
 
         $ride = $this->makeDetailOfRide($ride, $from_stop_id, $to_stop_id);
 
@@ -122,7 +110,6 @@ class RideController extends Controller
             'ride_cancelled' => $ride_cancelled,
             'rideDetailPage' => $rideDetailPage,
             'ride' => $ride,
-            'searchOptionGroups' => $searchOptionGroups,
             'setting' => $setting,
             'cancelSetting' => $cancelSetting,
             'postRidePage' => $postRidePage,
@@ -185,7 +172,7 @@ class RideController extends Controller
     public function MyCoPassengers(Request $request, $lang = null)
     {
         $ride = Ride::where('id', $request->id)->first();
-        $setting = ReviewSetting::first();
+        $setting = ReviewSetting::getCached();
 
 
         $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);

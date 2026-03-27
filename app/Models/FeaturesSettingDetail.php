@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Traits\HasLanguageFallback;
+use App\Models\FeaturesSetting;
 
 class FeaturesSettingDetail extends Model
 {
@@ -13,6 +14,12 @@ class FeaturesSettingDetail extends Model
 
     public $table = "features_setting_detail";
     protected $guarded = [];
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => FeaturesSetting::bustOptionGroupsCache());
+        static::deleted(fn () => FeaturesSetting::bustOptionGroupsCache());
+    }
 
     /**
      * Appended attributes: default_name and default_icon from the row where language_id = 1

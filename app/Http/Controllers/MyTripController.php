@@ -22,7 +22,8 @@ use Illuminate\Support\Facades\View;
 
 class MyTripController extends Controller
 {
-    public function MyTrips($lang = null){
+    public function MyTrips($lang = null)
+    {
 
         $user_id = auth()->user()->id;
 
@@ -82,21 +83,21 @@ class MyTripController extends Controller
         }
 
         $bookings = $bookingsQuery->paginate(6);
-        
-        foreach($bookings as $booking){
+
+        foreach ($bookings as $booking) {
             $from_stop_id = $booking->from_stop_id;
             $to_stop_id = $booking->to_stop_id;
             $booking->ride = $this->makeDetailOfRide($booking->ride, $from_stop_id, $to_stop_id);
         }
 
-        $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
-        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
-        $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
-        $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
-        $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id,$this->defaultLang->id);
+        $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $firm_cancellation_discount = SiteSetting::value('frim_discount');
-       
+
         View::share([
             'rideDetailPage' => $rideDetailPage,
             'firm_cancellation_discount' => $firm_cancellation_discount,
@@ -105,7 +106,7 @@ class MyTripController extends Controller
         $ratings = Rating::all();
 
 
-        return view('my_trips',[
+        return view('my_trips', [
             'reviewSetting' => $reviewSetting,
             'messages' => $this->successMessage,
             'ProfilePage' => $ProfilePage,
@@ -113,10 +114,12 @@ class MyTripController extends Controller
             'bookings' => $bookings,
             'activeTab' => $tab,
             'ratings' => $ratings,
-            'tripsPage' => $tripsPage]);
+            'tripsPage' => $tripsPage
+        ]);
     }
 
-    public function PastTrips($lang = null){
+    public function PastTrips($lang = null)
+    {
         $bookings = Booking::where('user_id', auth()->user()->id)
             ->where('bookings.status', '!=', '4')
             ->where('bookings.status', '!=', '3')
@@ -131,11 +134,11 @@ class MyTripController extends Controller
                 });
             })->select('bookings.*', 'rides.id', 'rides.date', 'rides.time', 'rides.completed_date', 'rides.completed_time')
             ->orderBy(Ride::select('date')
-            ->whereColumn('rides.id', 'bookings.ride_id')
-            ->limit(1), 'asc')
+                ->whereColumn('rides.id', 'bookings.ride_id')
+                ->limit(1), 'asc')
             ->orderBy(Ride::select('time')
-            ->whereColumn('rides.id', 'bookings.ride_id')
-            ->limit(1), 'asc')
+                ->whereColumn('rides.id', 'bookings.ride_id')
+                ->limit(1), 'asc')
             ->orderBy('ride_id', 'desc')
             ->paginate(6);
 
@@ -150,7 +153,7 @@ class MyTripController extends Controller
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
             if ($selectedLanguage) {
                 $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button','delete_button')->first();
+                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
                 $postRidePage = $this->getPostRidePageWithSettingDetail();
                 $tripsPage = TripsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $rideDetailPage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
@@ -162,7 +165,7 @@ class MyTripController extends Controller
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button','delete_button')->first();
+                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
                 $postRidePage = $this->getPostRidePageWithSettingDetail();
                 $tripsPage = TripsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $rideDetailPage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
@@ -172,7 +175,7 @@ class MyTripController extends Controller
             }
         }
         $ratings = Rating::all();
-        $setting = ReviewSetting::first();
+        $setting = ReviewSetting::getCached();
 
         $notifications = null;
         if (auth()->user()) {
@@ -182,29 +185,36 @@ class MyTripController extends Controller
                 $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
                     $query->where('added_by', $user_id);
                 })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                        $query->where('user_id', $user_id);
+                    ->orWhere(function ($query) use ($user_id) {
+                        $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
+                            $query->where('user_id', $user_id);
+                        });
+                    })
+                    ->orWhere(function ($query) use ($user_id) {
+                        $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
+                            $query->where('id', $user_id);
+                        });
                     });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                        $query->where('id', $user_id);
-                    });
-                });
             })
-            ->orderBy('id', 'desc')
-            ->get();
-
+                ->orderBy('id', 'desc')
+                ->get();
         }
 
-        return view('past_trips',['reviewSetting' => $reviewSetting,'ProfilePage' => $ProfilePage,
-        'ProfileSetting' => $ProfileSetting,'bookings' => $bookings,'rideDetailPage' => $rideDetailPage,
-        'tripsPage' => $tripsPage,'ratings' => $ratings,'setting' => $setting,
-        'postRidePage' => $postRidePage]);
+        return view('past_trips', [
+            'reviewSetting' => $reviewSetting,
+            'ProfilePage' => $ProfilePage,
+            'ProfileSetting' => $ProfileSetting,
+            'bookings' => $bookings,
+            'rideDetailPage' => $rideDetailPage,
+            'tripsPage' => $tripsPage,
+            'ratings' => $ratings,
+            'setting' => $setting,
+            'postRidePage' => $postRidePage
+        ]);
     }
 
-    public function CancelledTrips($lang = null){
+    public function CancelledTrips($lang = null)
+    {
         $bookings = Booking::join('rides', 'bookings.ride_id', '=', 'rides.id')
             ->where('bookings.user_id', auth()->user()->id)
             ->where('bookings.status', 4)
@@ -226,7 +236,7 @@ class MyTripController extends Controller
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
             if ($selectedLanguage) {
                 $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button','delete_button')->first();
+                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
                 $postRidePage = $this->getPostRidePageWithSettingDetail();
                 $rideDetailPage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $tripsPage = TripsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
@@ -238,7 +248,7 @@ class MyTripController extends Controller
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button','delete_button')->first();
+                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
                 $postRidePage = $this->getPostRidePageWithSettingDetail();
                 $rideDetailPage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
                 $tripsPage = TripsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
@@ -249,7 +259,7 @@ class MyTripController extends Controller
         }
 
         $ratings = Rating::all();
-        $setting = ReviewSetting::first();
+        $setting = ReviewSetting::getCached();
         $notifications = null;
         if (auth()->user()) {
             $user_id = auth()->user()->id;
@@ -258,25 +268,31 @@ class MyTripController extends Controller
                 $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
                     $query->where('added_by', $user_id);
                 })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                        $query->where('user_id', $user_id);
+                    ->orWhere(function ($query) use ($user_id) {
+                        $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
+                            $query->where('user_id', $user_id);
+                        });
+                    })
+                    ->orWhere(function ($query) use ($user_id) {
+                        $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
+                            $query->where('id', $user_id);
+                        });
                     });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                        $query->where('id', $user_id);
-                    });
-                });
             })
-            ->orderBy('id', 'desc')
-            ->get();
-
+                ->orderBy('id', 'desc')
+                ->get();
         }
 
-        return view('cancelled_trips',[
-            'reviewSetting' => $reviewSetting,'ProfilePage' => $ProfilePage,'ProfileSetting' => $ProfileSetting,
-            'bookings' => $bookings,'postRidePage' => $postRidePage,'rideDetailPage' => $rideDetailPage,
-            'tripsPage' => $tripsPage,'ratings' => $ratings,'setting' => $setting]);
+        return view('cancelled_trips', [
+            'reviewSetting' => $reviewSetting,
+            'ProfilePage' => $ProfilePage,
+            'ProfileSetting' => $ProfileSetting,
+            'bookings' => $bookings,
+            'postRidePage' => $postRidePage,
+            'rideDetailPage' => $rideDetailPage,
+            'tripsPage' => $tripsPage,
+            'ratings' => $ratings,
+            'setting' => $setting
+        ]);
     }
 }

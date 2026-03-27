@@ -224,7 +224,7 @@ class ReviewController extends Controller
         }
 
         $booking = Booking::whereId($id)->first();
-        $setting = ReviewSetting::first();
+        $setting = ReviewSetting::getCached();
 
         $customMessages = [
             'required_without_all' => 'At least one of the ratings must be filled',
@@ -350,7 +350,7 @@ class ReviewController extends Controller
 
                 // Referrer reward only when referred user has good reputation (rating >= 4)
                 if ($averageRating >= 4) {
-                    $getReferralSetting = ReferralSystemSetting::first();
+                    $getReferralSetting = ReferralSystemSetting::getCached();
                     $getReferralUser = User::where('id', $checkUserReferral->referral_user_id)->first();
                     if (isset($getReferralUser) && !empty($getReferralUser)) {
                         if ($getReferralUser->driver == 1) {
@@ -490,7 +490,7 @@ class ReviewController extends Controller
         $booking = Booking::whereId($id)->first();
         $user_id = $booking->user_id;
         $ride = Ride::whereId($booking->ride_id)->first();
-        $setting = ReviewSetting::first();
+        $setting = ReviewSetting::getCached();
 
         $customMessages = [
             'required_without_all' => 'At least one of the ratings must be filled',
@@ -628,7 +628,7 @@ class ReviewController extends Controller
                         $rewardPoint->save();
                     }
 
-                    $getReferralSetting = ReferralSystemSetting::first();
+                    $getReferralSetting = ReferralSystemSetting::getCached();
 
                     $getReferralUser = User::where('id', $checkUserReferral->referral_user_id)->first();
                     if (isset($getReferralUser) && !empty($getReferralUser)) {

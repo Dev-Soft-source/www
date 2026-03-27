@@ -101,7 +101,7 @@ if (!function_exists('getFooterSetting')) {
             $languageId = 1;
         }
 
-        $footerSetting = FooterSetting::first();
+        $footerSetting = FooterSetting::getCached();
         $footerSettingDetail = [];
 
         $menuIds = $footerSetting

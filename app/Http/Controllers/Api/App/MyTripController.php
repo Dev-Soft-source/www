@@ -345,7 +345,7 @@ class MyTripController extends Controller
             }
         }
 
-        $setting = ReviewSetting::first();
+        $setting = ReviewSetting::getCached();
 
         $data = ['bookings' => $bookings, 'setting' => $setting, 'tripsPage' => $tripsPage, 'rideDetailPage' => $rideDetailPage];
         return $this->successResponse($data, 'Get my ' . $kind . ' trips');

@@ -168,8 +168,8 @@ class MyRideController extends Controller
             return redirect(route('home', ['lang' => $lang]));
         }
 
-        $setting = ReviewSetting::first();
-        $cancelSetting = CancelRideSetting::first();
+        $setting = ReviewSetting::getCached();
+        $cancelSetting = CancelRideSetting::getCached();
         $languages = Language::all();
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
@@ -622,8 +622,8 @@ class MyRideController extends Controller
                     ->where('destination', 'like', '%' . $to . '%')
                     ->where('ride_id', $rideId);
             }])->first();
-        $setting = ReviewSetting::first();
-        $cancelSetting = CancelRideSetting::first();
+        $setting = ReviewSetting::getCached();
+        $cancelSetting = CancelRideSetting::getCached();
         $languages = Language::all();
         $myPassengerPage = null;
         $messages = null;

@@ -14,8 +14,7 @@ class ReferralSystemSettingController extends Controller
 
     public function show()
     {
-        $referralSystemSetting = ReferralSystemSetting::query();
-        $referralSystemSetting = $referralSystemSetting->first();
+        $referralSystemSetting = ReferralSystemSetting::getCached();
 
         return $this->successResponse($referralSystemSetting ? new ReferralSystemSettingResource($referralSystemSetting) : [], 'Data Get Successfully!');
     }
@@ -35,7 +34,7 @@ class ReferralSystemSettingController extends Controller
         ];
         $this->validate($request, $rules);
 
-        $referralSystemSetting = ReferralSystemSetting::first();
+        $referralSystemSetting = ReferralSystemSetting::getCached();
         if (!$referralSystemSetting) {
             $setting = ReferralSystemSetting::create([
                 'id' => '1',

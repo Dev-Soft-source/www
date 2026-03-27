@@ -28,7 +28,7 @@ class ReviewSettingController extends Controller
         ];
         $this->validate($request, $rules);
 
-        $reviewSetting = ReviewSetting::first();
+        $reviewSetting = ReviewSetting::getCached();
         if (!$reviewSetting) {
             $setting = ReviewSetting::create([
                 'id' => '1',
