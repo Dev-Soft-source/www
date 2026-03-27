@@ -204,8 +204,7 @@ return [
         ],
         'stops.*.label' => ['required_with' => '每个停靠站的停靠位置为必填项。'],
         'stops.*.departure_at' => ['required_with' => '每个停靠站的出发时间为必填项。'],
-        'stops.*.pickup_dropoff_location' => ['required_with' => '上下车地点为必填项。']
-        ,
+        'stops.*.pickup_dropoff_location' => ['required_with' => '上下车地点为必填项。'],
         'from' => [
             'required' => '出发地点为必填项。',
         ],
@@ -224,7 +223,7 @@ return [
         'details' => [
             'required' => '详情为必填项。',
         ],
-        'seats' => [
+        'seats_total' => [
             'required' => '请选择座位数量。',
         ],
         'smoke' => [

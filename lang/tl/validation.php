@@ -223,7 +223,7 @@ return [
         'details' => [
             'required' => 'Kinakailangan ang mga detalye.',
         ],
-        'seats' => [
+        'seats_total' => [
             'required' => 'Pakiusap piliin ang bilang ng mga upuan.',
         ],
         'smoke' => [

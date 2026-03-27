@@ -223,7 +223,7 @@ return [
         'details' => [
             'required' => 'Деталі є обов’язковими.',
         ],
-        'seats' => [
+        'seats_total' => [
             'required' => 'Будь ласка, оберіть кількість місць.',
         ],
         'smoke' => [

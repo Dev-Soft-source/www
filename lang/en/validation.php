@@ -229,7 +229,7 @@ return
 			'details' => [
 				'required' => 'The details are required.',
 			],
-			'seats' => [
+			'seats_total' => [
 				'required' => 'Please select the number of seats.',
 			],
 			'smoke' => [

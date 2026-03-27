@@ -247,7 +247,7 @@ return [
         'details' => [
             'required' => 'Los detalles son obligatorios.',
         ],
-        'seats' => [
+        'seats_total' => [
             'required' => 'Selecciona el número de asientos.',
         ],
         'smoke' => [

@@ -223,7 +223,7 @@ return [
         'details' => [
             'required' => 'التفاصيل مطلوبة.',
         ],
-        'seats' => [
+        'seats_total' => [
             'required' => 'يرجى اختيار عدد المقاعد.',
         ],
         'smoke' => [

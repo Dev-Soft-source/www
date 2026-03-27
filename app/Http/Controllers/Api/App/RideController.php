@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\App;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\RideController as WebRideController;
 use App\Mail\ExtraCareRideMail;
 use App\Mail\PinkExtraCareRideMail;
 use App\Mail\PinkRideMail;
@@ -45,7 +45,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
-class RideController extends Controller
+class RideController extends WebRideController
 {
     use StatusResponser;
 
@@ -2462,244 +2462,50 @@ class RideController extends Controller
             $recurring_trips = '';
         }
 
-        if (isset($request->booking_type) && $request->booking_type != "") {
-        } else {
-            $getStandardId = FeaturesSetting::where('slug', 'standard')->value('id');
-            if (isset($getStandardId) && !is_null($getStandardId)) {
-                $request->booking_type = $getStandardId;
+        $this->persistUpdatedRide(
+            $ride,
+            $request,
+            [
+                'formattedDate' => Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d'),
+                'formattedTime' => $request->time,
+                'recurring' => $recurring,
+                'recurring_type' => $recurring_type,
+                'recurring_trips' => $recurring_trips,
+                'vehicle_mode' => $skip_vehicle == '1'
+                    ? 'skip'
+                    : ($add_vehicle == '1'
+                        ? 'add_new'
+                        : (($added_vehicle == '1' || !empty($vehicle_id ?? null)) ? 'existing' : 'skip')),
+                'vehicle_id' => $vehicle_id ?? null,
+                'make' => $make,
+                'model' => $model,
+                'vehicle_type' => $vehicle_type,
+                'year' => $year,
+                'color' => $color,
+                'license_no' => $license_no,
+                'power_type' => $car_type,
+                'filename' => $filename == "" ? null : $filename,
+                'max_back_seats' => $max_back_seats,
+                'accept_more_luggage' => $accept_more_luggage,
+                'open_customized' => $open_customized,
+                'features' => $request->features,
+                'user_id' => $user_id,
+                'completedDate' => $completedDate ?? ($ride->completed_date ?? Carbon::now()->toDateString()),
+                'completedTime' => $completedTime ?? ($ride->completed_time ?? Carbon::now()->format('H:i:s')),
+                'destinationReachedDate' => $destinationReachedDate ?? ($ride->destination_reached_date ?? Carbon::now()->toDateString()),
+                'destinationReachedTime' => $destinationReachedTime ?? ($ride->destination_reached_time ?? Carbon::now()->format('H:i:s')),
+                'origin' => $request->from,
+                'originCityId' => (int) $request->input('from_city_id', 0) ?: null,
+                'destination' => $request->to,
+                'destinationCityId' => (int) $request->input('to_city_id', 0) ?: null,
+                'distanceKm' => $distance,
+                'duration' => $duration,
+                'newPrice' => $request->price,
+            ],
+            function (Ride $ride, Request $request, array $payload): void {
+                $this->syncAppRideStopsAndSegments($ride, $request);
             }
-        }
-
-        $ride->update([
-            'departure' => "",
-            'departure_lat' => '',
-            'departure_lng' => '',
-            'departure_place' => '',
-            'departure_route' => '',
-            'departure_zipcode' => '',
-            'departure_city' => '',
-            'departure_state' => '',
-            'departure_state_short' => '',
-            'departure_country' => '',
-
-            'destination' => "",
-            'destination_lat' => '',
-            'destination_lng' => '',
-            'destination_place' => '',
-            'destination_route' => '',
-            'destination_zipcode' => '',
-            'destination_city' => '',
-            'destination_state' => '',
-            'destination_state_short' => '',
-            'destination_country' => '',
-
-            'total_distance' => "",
-            'total_time' => "",
-            'date' => Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d'),
-            'time' => $request->time,
-
-            'recurring' => $recurring,
-            'recurring_type' => $recurring_type,
-            'recurring_trips' => $recurring_trips,
-            'details' => $request->details,
-            'seats' => $request->seats,
-
-            'skip_vehicle' => $skip_vehicle,
-            'add_vehicle' => $add_vehicle,
-            'added_vehicle' => $added_vehicle,
-            'vehicle_id' => $vehicle_id ?? null,
-            'make' => $make,
-            'model' => $model,
-            'vehicle_type' => Ride::normalizeRideVehicleTypeId($vehicle_type),
-            'year' => $year,
-            'color' => $color,
-            'license_no' => $license_no,
-            'car_type' => $car_type,
-            'car_image' => $filename == "" ? NULL : $filename,
-            'car_image_original' => $filenameOriginal == "" ? NULL : $filenameOriginal,
-            'smoke' => $request->smoke,
-            'animal_friendly' => $request->animal_friendly,
-            'features' => $request->features,
-            'booking_method' => $request->booking_method,
-            'booking_type' => $request->booking_type,
-            'max_back_seats' => $max_back_seats,
-            'luggage' => $request->luggage,
-            'accept_more_luggage' => $accept_more_luggage,
-            'open_customized' => $open_customized,
-            'price' => "",
-            'payment_method' => $request->payment_method,
-            'notes' => $request->notes,
-            'added_by' => $user_id,
-            'until_date' => null,
-            'until_limit' => '',
-
-            'pickup' => $request->pickup,
-            'dropoff' => $request->dropoff,
-
-            'middle_seats' => $request->middle_seats,
-            'back_seats' => $request->back_seats,
-        ]);
-
-
-        $getSeatDetails = SeatDetail::where('ride_id', $ride->id)->get();
-        foreach ($getSeatDetails as $key => $getSeatDetail) {
-            $getSeatDetail->delete();
-        }
-
-
-        for ($i = 1; $i <= $ride->seats; $i++) {
-            $seatDetail = new SeatDetail;
-            $seatDetail->ride_id = $ride->id;
-            $seatDetail->seat_number = $i;
-            $seatDetail->status = 'pending';
-            $seatDetail->save();
-        }
-
-        $from = $to = "";
-        $from = $request->from;
-        $to = $request->to;
-
-        $rideDetail = RideDetail::where('ride_id', $ride->id)->first();
-
-        $rideDetail->ride_id = $ride->id;
-        $rideDetail->departure = $from;
-        $rideDetail->destination = $to;
-        $rideDetail->origin_city_id = (int) $request->input('from_city_id', 0) ?: null;
-        $rideDetail->destination_city_id = (int) $request->input('to_city_id', 0) ?: null;
-        $rideDetail->default_ride = 1;
-        $rideDetail->total_distance = $distance;
-        $rideDetail->total_duration = $duration;
-        $rideDetail->price = $request->price;
-        $rideDetail->time = $request->time;
-        $rideDetail->date = Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d');
-
-
-        if (isset($adminSetting)) {
-
-            if (isset($ride->date) && isset($ride->time)) {
-                $rideDateTime = Carbon::parse("$ride->date $ride->time");
-                $apiTime = 0;
-                if ($duration != 0) {
-                    $apiTime = round(($duration / 3600), 2);
-                }
-
-                // $rideDateTime->addHours($adminSetting->destination_hours);
-                // $rideDateTime->addMinutes(($apiTime - floor($apiTime)) * 60);
-                $totalHours = $duration / 3600;
-                $fullHours = floor($totalHours);
-                $minutes = round(($totalHours - $fullHours) * 60);
-                $rideDateTime->addHours($adminSetting->destination_hours + $fullHours)
-                    ->addMinutes($minutes);
-
-                $destinationReachedDate = $rideDateTime->toDateString();
-                $destinationReachedTime = $rideDateTime->toTimeString();
-
-
-                $rideDateTime->addHours($adminSetting->ride_completed_hours);
-                $completedDate = $rideDateTime->toDateString();
-                $completedTime = $rideDateTime->toTimeString();
-
-                $ride->completed_date = $completedDate;
-                $ride->completed_time = $completedTime;
-                $ride->destination_reached_date = $destinationReachedDate;
-                $ride->destination_reached_time = $destinationReachedTime;
-                $ride->save();
-
-                $rideDetail->destination_time = $destinationReachedTime;
-                $rideDetail->destination_date = $destinationReachedDate;
-                $rideDetail->completed_time = $completedTime;
-                $rideDetail->completed_date = $completedDate;
-            }
-        }
-        $rideDetail->save();
-
-        $fromSpots = [];
-        if (isset($request->from_spot)) {
-            $fromSpots = json_decode($request->from_spot, true);
-        }
-
-        if (isset($fromSpots) && !empty($fromSpots)) {
-            foreach ($fromSpots as $key => $from_spot) {
-                $duration = 0;
-                $distance = 0;
-
-
-                $toSpots = json_decode($request->to_spot, true);
-
-                $priceSpots = json_decode($request->price_spot, true);
-
-                $fromArray = explode(',', $fromSpots[$key]);
-                $toArray = explode(',', $toSpots[$key]);
-
-                $googleApiData = $this->getDataFromGoogleApi($fromSpots[$key], $toSpots[$key]);
-                if (isset($googleApiData) && !empty($googleApiData)) {
-                    $duration = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['duration']) ? $googleApiData['rows'][0]['elements'][0]['duration']['value'] : 0;
-
-                    $distance = isset($googleApiData['rows']) && isset($googleApiData['rows'][0]) && isset($googleApiData['rows'][0]['elements']) && isset($googleApiData['rows'][0]['elements'][0]) && isset($googleApiData['rows'][0]['elements'][0]['distance']) ? $googleApiData['rows'][0]['elements'][0]['distance']['value'] : 0;
-                }
-
-                if ($distance != 0) {
-                    $distance = round(($distance / 1000), 2);
-                }
-
-                $fromRide = $toRide = "";
-                $fromRide = $fromSpots[$key];
-                $toRide = $toSpots[$key];
-
-
-                $ride_detail_ids = [];
-
-                if (isset($request->ride_detail_ids)) {
-                    $ride_detail_ids = json_decode($request->ride_detail_ids, true);
-                }
-
-                if (isset($ride_detail_ids) && isset($ride_detail_ids[$key]) && $ride_detail_ids[$key] != "0") {
-                    $rideDetail = RideDetail::where('id', $ride_detail_ids[$key])->first();
-                } else {
-                    $rideDetail = new RideDetail();
-                }
-                $rideDetail->ride_id = $ride->id;
-                $rideDetail->departure = $fromRide;
-                $rideDetail->destination = $toRide;
-                $rideDetail->default_ride = 0;
-                $rideDetail->total_distance = $distance;
-                $rideDetail->total_duration = $duration;
-                $rideDetail->price = $priceSpots[$key];
-                $rideDetail->time = $request->time;
-                $rideDetail->date = Carbon::createFromFormat('F d, Y', $request->date)->format('Y-m-d');
-
-                if (isset($adminSetting)) {
-
-                    if (isset($ride->date) && isset($ride->time)) {
-                        $rideDateTime = Carbon::parse("$ride->date $ride->time");
-                        $apiTime = 0;
-                        if ($duration != 0) {
-                            $apiTime = round(($duration / 3600), 2);
-                        }
-
-                        $rideDateTime->addHours($adminSetting->destination_hours);
-                        $rideDateTime->addMinutes(($apiTime - floor($apiTime)) * 60);
-
-                        $destinationReachedDate = $rideDateTime->toDateString();
-                        $destinationReachedTime = $rideDateTime->toTimeString();
-
-
-                        $rideDateTime->addHours($adminSetting->ride_completed_hours);
-                        $completedDate = $rideDateTime->toDateString();
-                        $completedTime = $rideDateTime->toTimeString();
-
-                        $rideDetail->destination_time = $destinationReachedTime;
-                        $rideDetail->destination_date = $destinationReachedDate;
-                        $rideDetail->completed_time = $completedTime;
-                        $rideDetail->completed_date = $completedDate;
-                    }
-                }
-                $rideDetail->save();
-            }
-        }
-
-        $this->syncAppRideStopsAndSegments($ride, $request);
-
+        );
 
         // Check if the ride is recurring
         if ($recurring == '1') {

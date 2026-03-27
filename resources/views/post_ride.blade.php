@@ -251,18 +251,51 @@
             $oldStopFrom = old('stop_from', []);
             $oldStopTo = old('stop_to', []);
             $oldStopPriceMinor = old('stop_price_minor', []);
-
             if (is_array($oldStopFrom) && is_array($oldStopTo) && is_array($oldStopPriceMinor)) {
+                $routePointLabels = collect([
+                    ['label' => $oldOriginLabel ?? ''],
+                    ...collect($oldStops ?? [])->map(function ($stop) {
+                        return ['label' => $stop['label'] ?? ''];
+                    })->all(),
+                    ['label' => $oldDestinationLabel ?? ''],
+                ])
+                    ->map(fn($point) => trim((string) ($point['label'] ?? '')))
+                    ->values()
+                    ->all();
+
                 $derivedSegmentPrices = [];
                 foreach ($oldStopFrom as $segmentIndex => $fromLabel) {
                     $toLabel = $oldStopTo[$segmentIndex] ?? null;
                     $priceMinor = $oldStopPriceMinor[$segmentIndex] ?? null;
-
+                    
                     if ($fromLabel === null || $toLabel === null || $priceMinor === null) {
                         continue;
                     }
 
+                    $normalizedFromLabel = trim((string) $fromLabel);
+                    $normalizedToLabel = trim((string) $toLabel);
+                    $resolvedFromIndex = null;
+                    $resolvedToIndex = null;
+
+                    foreach ($routePointLabels as $pointIndex => $pointLabel) {
+                        if ($resolvedFromIndex === null && strcasecmp($pointLabel, $normalizedFromLabel) === 0) {
+                            $resolvedFromIndex = $pointIndex;
+                            continue;
+                        }
+
+                        if (
+                            $resolvedFromIndex !== null &&
+                            $pointIndex > $resolvedFromIndex &&
+                            strcasecmp($pointLabel, $normalizedToLabel) === 0
+                        ) {
+                            $resolvedToIndex = $pointIndex;
+                            break;
+                        }
+                    }
+                        
                     $derivedSegmentPrices[] = [
+                        'from_index' => $resolvedFromIndex,
+                        'to_index' => $resolvedToIndex,
                         'from_label' => (string) $fromLabel,
                         'to_label' => (string) $toLabel,
                         'price_minor' => (int) $priceMinor,
@@ -580,7 +613,7 @@
                                 </div>
                                 <div class="w-full md:w-[10%] hidden md:block mt-12 text-center">
                                     <span class="text-center text-base lg:text-lg ">
-                                        or
+                                        
                                     </span>
                                 </div>
                                 <div class="w-full md:w-[45%] mb-4">
@@ -2453,7 +2486,6 @@
                 }
                 refreshExpectedSegmentPriceHints();
                 refreshSingleRouteExpectedPriceHint();
-                console.log('maybeShowPxLivePriceAlert3');
                 maybeShowPxLivePriceAlert();
             }
 
@@ -2656,12 +2688,10 @@
                             stopPriceInput.value = String(toMinorFromMajor(priceInput.value));
                             syncStopPriceDeltaInputsFromSegmentRows();
                             syncSegmentPriceTotal();
-                            console.log('maybeShowPxLivePriceAlert4');
                             maybeShowPxLivePriceAlert(false, priceInput);
                         });
 
                         priceInput.addEventListener('blur', function() {
-                            console.log('maybeShowPxLivePriceAlert5', priceInput);
                             maybeShowPxLivePriceAlert(true, priceInput);
                         });
 
@@ -2687,12 +2717,10 @@
                     if (priceMinorHiddenInput) {
                         priceMinorHiddenInput.value = String(toMinorFromMajor(priceMinorInput.value));
                     }
-                    console.log('maybeShowPxLivePriceAlert1');
                     
                     maybeShowPxLivePriceAlert();
                 });
                 priceMinorInput.addEventListener('blur', function() {
-                    console.log('maybeShowPxLivePriceAlert2');
                     maybeShowPxLivePriceAlert(true);
                 });
             }
@@ -2745,14 +2773,11 @@
                     // Check if bypass flag is already set (user already saw warning and chose to continue)
                     const bypassInput = postRideForm.querySelector('input[name="bypass_price_validation"]');
                     if (bypassInput && bypassInput.value === '1') {
-                        console.log('PX Price validation bypassed - user already confirmed');
                         // Continue with normal form submission
                     } else {
                         
                         
                         const submitValidation = getPxSubmitValidationResult();
-
-                        console.log('PX Form submission validation:', submitValidation);
 
                         if (submitValidation.type === 'error') {
                             event.preventDefault();
@@ -2769,7 +2794,6 @@
                             event.preventDefault();
                             event.stopPropagation();
                             event.stopImmediatePropagation();
-                            console.log('Showing PX soft warning modal');
                             showPxPriceWarningModal(function() {
                                 const bypassInput = document.createElement('input');
                                 bypassInput.type = 'hidden';
@@ -3072,7 +3096,6 @@
             const vehicleImagePreview = document.getElementById('vehicle-image');
             if (vehicleImageInput && vehicleImagePreview) {
                 vehicleImageInput.addEventListener('change', function(event) {
-                    console.log('sssss');
                     
                     const file = event.target.files && event.target.files[0];
                     if (!file) {

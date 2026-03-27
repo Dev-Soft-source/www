@@ -223,7 +223,7 @@ return [
         'details' => [
             'required' => 'تفصیلات ضروری ہیں۔',
         ],
-        'seats' => [
+        'seats_total' => [
             'required' => 'براہ کرم نشستوں کی تعداد منتخب کریں۔',
         ],
         'smoke' => [
