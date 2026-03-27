@@ -100,48 +100,46 @@ Widget pricePaymentOptionWidget(
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Flexible(
-                                    child: txt18Size(
-                                      title: controller.shortLocationLabel(
-                                          routeEntry['fromLabel'].toString()),
-                                      context: context,
-                                      fontFamily: routeEntry['isDirect'] == true
-                                          ? bold
-                                          : regular,
-                                    ),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final isCompact = constraints.maxWidth < 340;
+                            final routeLabel = Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  child: txt18Size(
+                                    title: controller.shortLocationLabel(
+                                        routeEntry['fromLabel'].toString()),
+                                    context: context,
+                                    fontFamily: routeEntry['isDirect'] == true
+                                        ? bold
+                                        : regular,
                                   ),
-                                  10.widthBox,
-                                  Icon(
-                                    Icons.arrow_right_alt,
-                                    color: routeEntry['isDirect'] == true
-                                        ? primaryColor
-                                        : Colors.grey.shade700,
-                                    size: 22,
+                                ),
+                                8.widthBox,
+                                Icon(
+                                  Icons.arrow_right_alt,
+                                  color: routeEntry['isDirect'] == true
+                                      ? primaryColor
+                                      : Colors.grey.shade700,
+                                  size: 22,
+                                ),
+                                8.widthBox,
+                                Expanded(
+                                  child: txt18Size(
+                                    title: controller.shortLocationLabel(
+                                        routeEntry['toLabel'].toString()),
+                                    context: context,
+                                    fontFamily: routeEntry['isDirect'] == true
+                                        ? bold
+                                        : regular,
                                   ),
-                                  10.widthBox,
-                                  Flexible(
-                                    child: txt18Size(
-                                      title: controller.shortLocationLabel(
-                                          routeEntry['toLabel'].toString()),
-                                      context: context,
-                                      fontFamily: routeEntry['isDirect'] == true
-                                          ? bold
-                                          : regular,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            10.widthBox,
-                            SizedBox(
-                              width: 120,
+                                ),
+                              ],
+                            );
+
+                            final priceField = SizedBox(
+                              width: isCompact ? double.infinity : 100,
                               child: fieldsWidget(
                                 textController: routeEntry['controller'],
                                 fieldType: "number",
@@ -156,8 +154,28 @@ Widget pricePaymentOptionWidget(
                                       routeEntry, value);
                                 },
                               ),
-                            ),
-                          ],
+                            );
+
+                            if (isCompact) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  routeLabel,
+                                  8.heightBox,
+                                  priceField,
+                                ],
+                              );
+                            }
+
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(child: routeLabel),
+                                10.widthBox,
+                                priceField,
+                              ],
+                            );
+                          },
                         ),
                         4.heightBox,
                         txt14Size(
@@ -218,11 +236,11 @@ Widget pricePaymentOptionWidget(
                             onChanged: bookingCheck == true
                                 ? null
                                 : (value) {
-                                    controller.paymentOption.value =
-                                        value == true
-                                            ? controller.paymentOptionList[i]
-                                                .toString()
-                                            : "";
+                                    if (value == true) {
+                                      controller.paymentOption.value =
+                                          controller.paymentOptionList[i]
+                                              .toString();
+                                    }
                                     if (controller.errors.any((error) =>
                                         error['title'] == "payment_method")) {
                                       controller.errors.removeWhere((error) =>
@@ -240,12 +258,8 @@ Widget pricePaymentOptionWidget(
                               ? null
                               : () {
                                   controller.paymentOption.value =
-                                      controller.paymentOption.value ==
-                                              controller.paymentOptionList[i]
-                                                  .toString()
-                                          ? ""
-                                          : controller.paymentOptionList[i]
-                                              .toString();
+                                      controller.paymentOptionList[i]
+                                          .toString();
                                   if (controller.errors.any((error) =>
                                       error['title'] == "payment_method")) {
                                     controller.errors.removeWhere((error) =>

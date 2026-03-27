@@ -47,16 +47,14 @@ Widget cancellationPolicyWidget({context, controller, screenWidth, error}) {
                           ? true
                           : false,
                       onChanged: (value) async {
-                        controller.bookingType.value = value == true
-                            ? controller.cancellationOptionList[i].toString()
-                            : "";
+                        if (value == true) {
+                          controller.bookingType.value =
+                              controller.cancellationOptionList[i].toString();
+                        }
                       },
                       onTap: () {
-                        controller.bookingType.value = controller
-                                    .bookingType.value ==
-                                controller.cancellationOptionList[i].toString()
-                            ? ""
-                            : controller.cancellationOptionList[i].toString();
+                        controller.bookingType.value =
+                            controller.cancellationOptionList[i].toString();
                       },
                       isError: controller.errors
                           .where((error) => error == "booking_type")

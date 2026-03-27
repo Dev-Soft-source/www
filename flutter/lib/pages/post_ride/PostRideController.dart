@@ -258,6 +258,58 @@ class PostRideController extends GetxController {
     return DateFormat('MMMM dd, yyyy').format(parsedDate);
   }
 
+  bool _isTruthyFlag(dynamic value) {
+    if (value == null) {
+      return false;
+    }
+
+    final normalized = value.toString().trim().toLowerCase();
+    return normalized == "1" ||
+        normalized == "true" ||
+        normalized == "yes";
+  }
+
+  bool _hasVehicleIdValue(dynamic value) {
+    if (value == null) {
+      return false;
+    }
+
+    final normalized = value.toString().trim().toLowerCase();
+    return normalized.isNotEmpty &&
+        normalized != "null" &&
+        normalized != "0";
+  }
+
+  void _syncVehicleSelectionFromRide(Map rideData) {
+    final skipVehicle = _isTruthyFlag(rideData['skip_vehicle']);
+    final addVehicle = _isTruthyFlag(rideData['add_vehicle']);
+    final addedVehicle = _isTruthyFlag(rideData['added_vehicle']);
+    final rideVehicleId = _hasVehicleIdValue(rideData['vehicle_id'])
+        ? rideData['vehicle_id'].toString()
+        : "";
+
+    skipNow.value = skipVehicle;
+    addNewVehicle.value = !skipVehicle && addVehicle;
+    vehicleId.value = rideVehicleId;
+    alreadyAdded.value = !skipVehicle &&
+        !addNewVehicle.value &&
+        (addedVehicle || rideVehicleId.isNotEmpty);
+
+    if (alreadyAdded.value && vehicleId.value.isEmpty && vehicleList.isNotEmpty) {
+      final selectedVehicle = vehicleList.firstWhereOrNull(
+            (element) => element['primary_vehicle'].toString() == '1',
+          ) ??
+          vehicleList.first;
+      vehicleId.value = selectedVehicle['id'].toString();
+    }
+
+    if (skipNow.value) {
+      addNewVehicle.value = false;
+      alreadyAdded.value = false;
+      vehicleId.value = "";
+    }
+  }
+
   String formatSpotTimeValue(dynamic value) {
     if (value == null || value.toString().isEmpty) {
       return "";
@@ -1676,7 +1728,6 @@ class PostRideController extends GetxController {
             seatAvailable.value = int.parse(ride['seats'].toString());
             seatMiddle.value = int.parse(ride['middle_seats'].toString());
             seatBack.value = int.parse(ride['back_seats'].toString());
-            skipNow.value = ride['skip_vehicle'] == "1" ? true : false;
             bookingType.value = ride['booking_type'].toString();
 
             // Handle multiple spots
@@ -1741,12 +1792,7 @@ class PostRideController extends GetxController {
               fuel.value = ride['car_type'].toString();
               carOldImagePath.value = ride['vehicle']['image'].toString();
             }
-
-            // Continue with other ride fields
-            if (ride['vehicle_id'] != null) {
-              vehicleId.value = ride['vehicle_id'].toString();
-              alreadyAdded.value = ride['added_vehicle'] == "1" ? true : false;
-            }
+            _syncVehicleSelectionFromRide(ride);
 
             smoking.value = ride['smoke'].toString();
             pet.value = ride['animal_friendly'].toString();
@@ -1873,8 +1919,6 @@ class PostRideController extends GetxController {
                 int.parse(resp['data']['ride']['middle_seats'].toString());
             seatBack.value =
                 int.parse(resp['data']['ride']['back_seats'].toString());
-            skipNow.value =
-                resp['data']['ride']['skip_vehicle'] == "1" ? true : false;
             bookingType.value = resp['data']['ride']['booking_type'].toString();
 
             if (resp['data']['ride']['more_ride_detail'] != null &&
@@ -1961,13 +2005,7 @@ class PostRideController extends GetxController {
                     resp['data']['ride']['vehicle']['image'].toString();
               }
 
-              alreadyAdded.value =
-                  resp['data']['ride']['added_vehicle'] == "1" ? true : false;
-              if (resp['data']['ride']['added_vehicle'] == "1") {
-                vehicleId.value = resp['data']['ride']['vehicle_id'] == null
-                    ? ""
-                    : resp['data']['ride']['vehicle_id'].toString();
-              }
+              _syncVehicleSelectionFromRide(resp['data']['ride']);
             }
 
             smoking.value = resp['data']['ride']['smoke'].toString();
@@ -2733,8 +2771,6 @@ class PostRideController extends GetxController {
                 int.parse(resp['data']['ride']['middle_seats'].toString());
             seatBack.value =
                 int.parse(resp['data']['ride']['back_seats'].toString());
-            skipNow.value =
-                resp['data']['ride']['skip_vehicle'] == "1" ? true : false;
             bookingType.value = resp['data']['ride']['booking_type'].toString();
 
             addNewVehicle.value =
@@ -2757,13 +2793,7 @@ class PostRideController extends GetxController {
                   resp['data']['ride']['car_image'].toString();
             }
 
-            alreadyAdded.value =
-                resp['data']['ride']['added_vehicle'] == "1" ? true : false;
-            if (resp['data']['ride']['added_vehicle'] == "1") {
-              vehicleId.value = resp['data']['ride']['vehicle_id'] == null
-                  ? ""
-                  : resp['data']['ride']['vehicle_id'].toString();
-            }
+            _syncVehicleSelectionFromRide(resp['data']['ride']);
 
             smoking.value = resp['data']['ride']['smoke'].toString();
             pet.value = resp['data']['ride']['animal_friendly'].toString();

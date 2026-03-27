@@ -42,14 +42,16 @@ Widget smokingWidget(
                             onChanged: bookingCheck == true
                                 ? null
                                 : (value) async {
-                                    controller.smoking.value = value == true
-                                        ? "${controller.smokingList[i]}"
-                                        : "";
+                                    if (value == true) {
+                                      controller.smoking.value =
+                                          "${controller.smokingList[i]}";
+                                    }
                                   },
                             onTap: bookingCheck == true
                                 ? null
                                 : (){
-                              controller.smoking.value = controller.smoking.value == "${controller.smokingList[i]}" ? "" : "${controller.smokingList[i]}";
+                              controller.smoking.value =
+                                  "${controller.smokingList[i]}";
                             },
                             isError: controller.errors
                                 .where((error) => error == "smoke")

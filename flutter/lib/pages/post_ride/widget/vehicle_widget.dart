@@ -18,6 +18,10 @@ Widget vehicleWidget(
     error,
     screenHeight}) {
   String checkedVehicle = 'skip';
+  final hasExistingVehicleSelection =
+      controller.vehicleId.value.toString().trim().isNotEmpty &&
+          controller.skipNow.value == false &&
+          controller.addNewVehicle.value == false;
   return Container(
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8.0),
@@ -183,7 +187,8 @@ Widget vehicleWidget(
                                 tablet: 25.0,
                               ),
                               child: checkBoxWidget(
-                                  value: controller.alreadyAdded.value,
+                                  value: controller.alreadyAdded.value ||
+                                      hasExistingVehicleSelection,
                                   onChanged: bookingCheck == true || controller.alreadyAdded.value
                                       ? null
                                       : (value) {

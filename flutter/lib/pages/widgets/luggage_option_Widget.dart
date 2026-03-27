@@ -18,13 +18,15 @@ Widget luggageOptionWidget({ controller, context, bool bookingCheck = false}){
               extraChargesToolTip: "${controller.labelTextDetail['luggage_option5_label'] ?? ""}",
               value: controller.luggage.value == "${controller.luggageList[i]}" ? true : false,
               onChanged: bookingCheck == true ? null :  (value) async{
-                controller.luggage.value = value == true ? "${controller.luggageList[i]}" : "";
-                if (controller.errors.any((error) => error['title'] == "luggage")) {
-                  controller.errors.removeWhere((error) => error['title'] == "luggage");
+                if (value == true) {
+                  controller.luggage.value = "${controller.luggageList[i]}";
+                  if (controller.errors.any((error) => error['title'] == "luggage")) {
+                    controller.errors.removeWhere((error) => error['title'] == "luggage");
+                  }
                 }
               },
             onTap: bookingCheck == true ? null : () async{
-              controller.luggage.value = controller.luggage.value == "${controller.luggageList[i]}"  ? "" : "${controller.luggageList[i]}";
+              controller.luggage.value = "${controller.luggageList[i]}";
               if (controller.errors.any((error) => error['title'] == "luggage")) {
                 controller.errors.removeWhere((error) => error['title'] == "luggage");
               }

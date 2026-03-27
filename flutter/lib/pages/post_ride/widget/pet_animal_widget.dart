@@ -46,14 +46,15 @@ Widget petAnimalWidget(
                             onChanged: bookingCheck == true
                                 ? null
                                 : (value) async {
-                                    controller.pet.value = value == true
-                                        ? "${controller.petList[i]}"
-                                        : "";
+                                    if (value == true) {
+                                      controller.pet.value =
+                                          "${controller.petList[i]}";
+                                    }
                                   },
                             onTap: bookingCheck == true
                                 ? null
                                 : (){
-                              controller.pet.value = controller.pet.value == "${controller.petList[i]}" ? "" : "${controller.petList[i]}";
+                              controller.pet.value = "${controller.petList[i]}";
                             },
                             isError: controller.errors
                                 .where((error) => error == "animal_friendly")
