@@ -75,10 +75,21 @@ Widget ridePreferenceWidget(
                                                       "features");
                                             }
                                             if (value == true) {
-                                              controller.featureList.value = [
-                                                controller.rideFeatureList[i]
-                                                    .toString()
-                                              ];
+                                              if (controller.featureList
+                                                  .contains(controller
+                                                      .rideFeatureList[i]
+                                                      .toString())) {
+                                              } else {
+                                                controller.featureList
+                                                    .add(controller
+                                                        .rideFeatureList[i]
+                                                        .toString());
+                                              }
+                                            } else {
+                                              controller.featureList
+                                                  .remove(controller
+                                                      .rideFeatureList[i]
+                                                      .toString());
                                             }
                                           },
                             onTap: bookingCheck == true
@@ -100,10 +111,20 @@ Widget ridePreferenceWidget(
                                                       error['title'] ==
                                                       "features");
                                             }
-                                            controller.featureList.value = [
-                                              controller.rideFeatureList[i]
-                                                  .toString()
-                                            ];
+                                            if (controller.featureList
+                                                .contains(controller
+                                                    .rideFeatureList[i]
+                                                    .toString())) {
+                                              controller.featureList
+                                                  .remove(controller
+                                                      .rideFeatureList[i]
+                                                      .toString());
+                                            } else {
+                                              controller.featureList
+                                                  .add(controller
+                                                      .rideFeatureList[i]
+                                                      .toString());
+                                            }
                                           },
                             isError: controller.errors
                                 .where((error) => error == "features")

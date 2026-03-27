@@ -151,7 +151,7 @@ Route::group(['prefix' => 'app/v1', 'middleware' => ['auth:sanctum']], function 
     Route::get('post-ride', [RideController::class, '_PostRide'])->name('app.auth.post_ride');
     Route::post('post-ride', [RideController::class, '_PostRideStore'])->name('app.auth.post_ride.store');
     Route::get('edit-ride', [RideController::class, '_EditRide'])->name('app.auth.edit_ride');
-    Route::put('update-ride', [RideController::class, '_UpdateRide'])->name('app.auth.update_ride');
+    Route::put('update-ride/{ride_id}', [RideController::class, '_UpdateRide'])->name('app.auth.update_ride');
     Route::get('ride-detail', [RideController::class, '_RideDetail'])->name('app.auth.ride_detail');
 
     
