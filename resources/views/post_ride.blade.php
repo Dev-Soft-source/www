@@ -835,25 +835,25 @@
                                 <span class="text-red-500">*</span>
                             </label>
                             <div class="space-y-2 mt-2">
-                                @if ($postRidePage->payment_methods_option1?->features_setting_id)
+                                @foreach ($rideFeatureOptions['payment_method'] as $slug=>$payment_method)
                                     <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
-                                        <input id="cash" name="payment_method" type="radio"
-                                            value="{{ $postRidePage->payment_methods_option1->features_setting_id }}"
-                                            {{ $oldPaymentMethod == $postRidePage->payment_methods_option1->features_setting_id ? 'checked' : '' }}
+                                        <input id="{{$slug}}" name="payment_method" type="radio"
+                                            value="{{ $payment_method->id }}"
+                                            {{ $oldPaymentMethod == $payment_method->id ? 'checked' : '' }}
                                             class="form-check-input">
-                                        <label for="cash"
+                                        <label for="{{$slug}}"
                                             class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
-                                            @isset($postRidePage->payment_methods_option1->icon)
+                                            @isset($payment_method->icon)
                                                 <div class="w-8 h-6">
-                                                    <img src="{{ asset('home_page_icons/' . $postRidePage->payment_methods_option1->icon) }}"
+                                                    <img src="{{ asset('home_page_icons/' . $payment_method->icon) }}"
                                                         class="mx-auto w-full h-full object-contain" alt="">
                                                 </div>
                                             @endisset
                                             <span class="">
-                                                {{ $postRidePage->payment_methods_option1->name }}
+                                                {{ $payment_method->name }}
                                             </span>
                                             <span class="inline-flex cursor-help payment-method-tooltip"
-                                                data-tippy-content="{{ $postRidePage->payment_methods_option1_tooltip ?? '' }}">
+                                                data-tippy-content="{{ $payment_method->tooltip ?? '' }}">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                     fill="currentColor" class="bi bi-info-circle-fill text-black"
                                                     viewBox="0 0 16 16">
@@ -863,65 +863,7 @@
                                             </span>
                                         </label>
                                     </div>
-                                @endif
-                                @if ($postRidePage->payment_methods_option2?->features_setting_id)
-                                    <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
-                                        <input id="online" name="payment_method" type="radio"
-                                            value="{{ $postRidePage->payment_methods_option2->features_setting_id }}"
-                                            {{ $oldPaymentMethod == $postRidePage->payment_methods_option2->features_setting_id ? 'checked' : '' }}
-                                            class="form-check-input">
-                                        <label for="online"
-                                            class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
-                                            @isset($postRidePage->payment_methods_option2->icon)
-                                                <div class="w-8 h-6">
-                                                    <img src="{{ asset('home_page_icons/' . $postRidePage->payment_methods_option2->icon) }}"
-                                                        class="h-full w-full mx-auto object-contain" alt="">
-                                                </div>
-                                            @endisset
-                                            <span class="">
-                                                {{ $postRidePage->payment_methods_option2->name }}
-                                            </span>
-                                            <span class="inline-flex cursor-help payment-method-tooltip"
-                                                data-tippy-content="{{ $postRidePage->payment_methods_option2_tooltip ?? '' }}">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                    fill="currentColor" class="bi bi-info-circle-fill text-black"
-                                                    viewBox="0 0 16 16">
-                                                    <path
-                                                        d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                                                </svg>
-                                            </span>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if ($postRidePage->payment_methods_option3?->features_setting_id)
-                                    <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
-                                        <input id="secured" name="payment_method" type="radio"
-                                            value="{{ $postRidePage->payment_methods_option3->features_setting_id }}"
-                                            {{ $oldPaymentMethod == $postRidePage->payment_methods_option3->features_setting_id ? 'checked' : '' }}
-                                            class="form-check-input">
-                                        <label for="secured"
-                                            class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
-                                            @isset($postRidePage->payment_methods_option3->icon)
-                                                <div class="w-8 h-6">
-                                                    <img src="{{ asset('home_page_icons/' . $postRidePage->payment_methods_option3->icon) }}"
-                                                        class="mx-auto h-full w-full object-contain" alt="">
-                                                </div>
-                                            @endisset
-                                            <span class="">
-                                                {{ $postRidePage->payment_methods_option3->name }}
-                                            </span>
-                                            <span class="inline-flex cursor-help payment-method-tooltip"
-                                                data-tippy-content="{{ $postRidePage->payment_methods_option3_tooltip ?? '' }}">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                    fill="currentColor" class="bi bi-info-circle-fill text-black"
-                                                    viewBox="0 0 16 16">
-                                                    <path
-                                                        d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                                                </svg>
-                                            </span>
-                                        </label>
-                                    </div>
-                                @endif
+                                @endforeach
                             </div>
                             @error('payment_method')
                                 <div class="tooltip-error shadow-lg">{{ $message }}</div>
@@ -942,22 +884,22 @@
                         </div>
                         <div class="bg-white p-4">
                             <ul class="grid w-full gap-6 md:grid-cols-2">
-                                @if ($postRidePage->booking_option1?->features_setting_id)
+                                @foreach ($rideFeatureOptions['booking_method'] as $slug=>$booking_method)
                                     <li>
-                                        <input type="radio" id="instant-booking" name="booking_method"
-                                            value="{{ $postRidePage->booking_option1->features_setting_id }}"
-                                            {{ $oldBookingMethod == $postRidePage->booking_option1->features_setting_id ? 'checked' : '' }}
+                                        <input type="radio" id="{{$slug}}_booking" name="booking_method"
+                                            value="{{ $booking_method->id }}"
+                                            {{ $oldBookingMethod == $booking_method->id ? 'checked' : '' }}
                                             class="hidden peer">
-                                        <label for="instant-booking"
+                                        <label for="{{$slug}}_booking"
                                             class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
                                             <img class="w-12 h-12"
-                                                src="{{ asset('home_page_icons/' . $postRidePage->booking_option1->icon) }}"
+                                                src="{{ asset('home_page_icons/' . $booking_method->icon) }}"
                                                 alt="">
                                             <span class="font-medium text-xl">
-                                                {{ $postRidePage->booking_option1->name }}
+                                                {{ $booking_method->name }}
                                             </span>
                                             <span class="inline-flex cursor-help"
-                                                data-tippy-content="{{ $postRidePage->booking_option1_tooltip ?? '' }}">
+                                                data-tippy-content="{{ $booking_method->tooltip ?? '' }}">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                                     fill="currentColor" class="bi bi-info-circle-fill text-black"
                                                     viewBox="0 0 16 16">
@@ -967,33 +909,7 @@
                                             </span>
                                         </label>
                                     </li>
-                                @endif
-                                @if ($postRidePage->booking_option2?->features_setting_id)
-                                    <li>
-                                        <input type="radio" id="manual-approval" name="booking_method"
-                                            value="{{ $postRidePage->booking_option2->features_setting_id }}"
-                                            {{ $oldBookingMethod == $postRidePage->booking_option2->features_setting_id ? 'checked' : '' }}
-                                            class="hidden peer">
-                                        <label for="manual-approval"
-                                            class="inline-flex items-center space-x-3 w-full p-4 text-gray-800 bg-white border-2 border-gray-100 rounded cursor-pointer peer-checked:border-green-500 peer-checked:border-2 peer-checked:text-green-500 hover:border-2 hover:border-green-500">
-                                            <img class="w-12 h-12"
-                                                src="{{ asset('home_page_icons/' . $postRidePage->booking_option2->icon) }}"
-                                                alt="">
-                                            <span class="font-medium text-xl">
-                                                {{ $postRidePage->booking_option2->name }}
-                                            </span>
-                                            <span class="inline-flex cursor-help"
-                                                data-tippy-content="{{ $postRidePage->booking_option2_tooltip ?? '' }}">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                                                    fill="currentColor" class="bi bi-info-circle-fill text-black"
-                                                    viewBox="0 0 16 16">
-                                                    <path
-                                                        d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                                                </svg>
-                                            </span>
-                                        </label>
-                                    </li>
-                                @endif
+                                @endforeach
                             </ul>
                             @error('booking_method')
                                 <div class="tooltip-error shadow-lg">{{ $message }}</div>
@@ -1015,34 +931,20 @@
                     <div class="bg-white p-4">
                         <div>
                             <div class="space-y-2 mt-2">
-                                @if ($postRidePage->cancellation_policy_label1?->features_setting_id)
+                                @foreach ($rideFeatureOptions['cancellation'] as $slug=>$cancellation)
                                     <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
-                                        <input id="standard" name="booking_type" type="radio"
-                                            value="{{ $postRidePage->cancellation_policy_label1->features_setting_id }}"
-                                            {{ old('booking_type', $ride->booking_type) == $postRidePage->cancellation_policy_label1->features_setting_id || empty(old('booking_type')) ? 'checked' : '' }}
+                                        <input id="{{$slug}}" name="booking_type" type="radio"
+                                            value="{{ $cancellation->id }}"
+                                            {{ old('booking_type', $ride->booking_type) == $cancellation->id || empty(old('booking_type')) ? 'checked' : '' }}
                                             class="form-check-input">
-                                        <label for="standard"
+                                        <label for="{{$slug}}"
                                             class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
                                             <span class="">
-                                                {{ $postRidePage->cancellation_policy_label1->name }}
+                                                {{ $cancellation->name }}
                                             </span>
                                         </label>
                                     </div>
-                                @endif
-                                @if ($postRidePage->cancellation_policy_label2?->features_setting_id)
-                                    <div class="flex items-center space-x-1 md:space-x-2 mb-2 mr-2 lg:mr-2">
-                                        <input id="firm" name="booking_type" type="radio"
-                                            value="{{ $postRidePage->cancellation_policy_label2->features_setting_id }}"
-                                            {{ old('booking_type', $ride->booking_type) == $postRidePage->cancellation_policy_label2->features_setting_id ? 'checked' : '' }}
-                                            class="form-check-input">
-                                        <label for="firm"
-                                            class="ml-3 font-normal text-gray-900 flex items-center space-x-1">
-                                            <span class="">
-                                                {{ $postRidePage->cancellation_policy_label2->name }}
-                                            </span>
-                                        </label>
-                                    </div>
-                                @endif
+                                @endforeach
                             </div>
                             @error('booking_type')
                                 <div class="tooltip-error shadow-lg">{{ $message }}</div>

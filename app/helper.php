@@ -11,29 +11,31 @@ use Illuminate\Support\Facades\Session;
 if (!function_exists('getAllLanguages')) {
     function getAllLanguages()
     {
-        return Language::get();
+        return Language::getAllCached();
     }
 }
 
 if (!function_exists('getDefaultLanguage')) {
     function getDefaultLanguage($isWeb = false)
     {
-        $lang = '';
+        $languages = Language::getAllCached();
+        $lang = null;
         $webLanguage = Session::get('webLanguage');
         if ($isWeb && isset($webLanguage) && !empty($webLanguage)) {
-            $lang = Language::where('id', $webLanguage)->first();
+            $lang = $languages->firstWhere('id', (int) $webLanguage);
         } else {
-            $lang = Language::whereIsDefault(1)->first();
+            $lang = $languages->firstWhere('is_default', 1);
         }
 
-        return $lang ? $lang : Language::first();
+        return $lang ?: $languages->first();
     }
 }
 
 if (!function_exists("updateLangByAbber")) {
     function updateLangByAbber($abbreviation)
     {
-        $language = Language::where('abbreviation', $abbreviation)->first();
+        $languages = Language::getAllCached();
+        $language = $languages->firstWhere('abbreviation', $abbreviation);
         if (!$language) {
             $language = getDefaultLanguage(true);
         }

@@ -12,8 +12,9 @@ use Illuminate\Http\Request;
 
 class ProfilePassengerPreferencesController extends Controller
 {
-    public function index($lang = null){
-        $languages = Language::all();
+    public function index($lang = null)
+    {
+        $languages = Language::getAllCached();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
@@ -23,7 +24,7 @@ class ProfilePassengerPreferencesController extends Controller
         if ($selectedLanguage) {
             // Find the language by abbreviation
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-    
+
             if ($selectedLanguage) {
                 // Retrieve the HomePageSettingDetail associated with the selected language
                 $findRidePage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
@@ -38,20 +39,20 @@ class ProfilePassengerPreferencesController extends Controller
         if (auth()->user()) {
             $user_id = auth()->user()->id;
             $user = User::whereId($user_id)->first();
-            $rides = Ride::where('added_by',$user_id)->get();
-    
+            $rides = Ride::where('added_by', $user_id)->get();
+
             if ($rides->isNotEmpty()) {
                 // Fetch ratings where the driver_id matches the authenticated user's ID
                 $ratings = Rating::where(function ($query) use ($user_id) {
                     // Ratings where type is 1 and ride_id belongs to the user
                     $query->where('type', '1')
-                          ->whereHas('ride', function ($query) use ($user_id) {
-                              $query->where('added_by', $user_id);
-                          });
+                        ->whereHas('ride', function ($query) use ($user_id) {
+                            $query->where('added_by', $user_id);
+                        });
                 })
-                ->where('status', 1)
-                ->orderBy('id', 'desc')
-                ->get();
+                    ->where('status', 1)
+                    ->orderBy('id', 'desc')
+                    ->get();
 
                 // Calculate total average
                 $overallRating = $ratings->avg('average_rating') ?? 0;
@@ -62,34 +63,35 @@ class ProfilePassengerPreferencesController extends Controller
             $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
                 // Ratings where type is 1 and ride_id belongs to the user
                 $query->where('type', '1')
-                      ->whereHas('ride', function ($query) use ($user_id) {
-                          $query->where('added_by', $user_id);
-                      });
+                    ->whereHas('ride', function ($query) use ($user_id) {
+                        $query->where('added_by', $user_id);
+                    });
             })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($user_id) {
-                          $query->where('user_id', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is null and receiver_id belongs to the user
-                $query->where('type', null)
-                      ->whereHas('receiver', function ($query) use ($user_id) {
-                          $query->where('id', $user_id);
-                      });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is 2 and booking_id belongs to the user
+                    $query->where('type', '2')
+                        ->whereHas('booking', function ($query) use ($user_id) {
+                            $query->where('user_id', $user_id);
+                        });
+                })
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is null and receiver_id belongs to the user
+                    $query->where('type', null)
+                        ->whereHas('receiver', function ($query) use ($user_id) {
+                            $query->where('id', $user_id);
+                        });
+                })
+                ->orderBy('id', 'desc')
+                ->get();
 
-            return view('profile_passenger_preferences',['user' => $user,'findRidePage' => $findRidePage,'overallRating' => $overallRating,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
+            return view('profile_passenger_preferences', ['user' => $user, 'findRidePage' => $findRidePage, 'overallRating' => $overallRating, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
         } else {
             return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation]);
         }
     }
 
-    public function update($id, Request $request){
+    public function update($id, Request $request)
+    {
         $customMessages = [
             'array' => 'The :attribute must be an array',
         ];

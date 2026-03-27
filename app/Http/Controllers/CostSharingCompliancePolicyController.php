@@ -9,7 +9,7 @@ class CostSharingCompliancePolicyController extends Controller
 {
     public function index($lang = null)
     {
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
         }

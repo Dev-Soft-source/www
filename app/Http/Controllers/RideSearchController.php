@@ -467,13 +467,11 @@ class RideSearchController extends Controller
 
         $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        $postRidePage = $this->getPostRidePageWithSettingDetail();
 
         $firm_cancellation_discount = SiteSetting::value('frim_discount');
 
         View::share([
             'findRidePage' => $findRidePage,
-            // 'postRidePage' => $postRidePage,
             'rideDetailPage' => $rideDetailPage,
             'firm_cancellation_discount' => $firm_cancellation_discount,
         ]);
@@ -493,19 +491,6 @@ class RideSearchController extends Controller
             'oldDepartureDate' => old('departure_date', $departureDate),
             'oldKeyword' => old('keyword', $request->input('keyword')),
         ]);
-    }
-
-
-
-    protected function buildPostRideViewData($selectedLangId, $defaultLangId): array
-    {
-        return [
-            'vehicles' => $this->getPassengerVehicles(),
-            'isPinkRideDisabled' => auth()->user()->isPinkRideDisabled(),
-            'isExtraRideDisabled' => auth()->user()->isFolkRideDisabled(),
-            'optionGroups' => $this->getPostRideOptionGroups($selectedLangId, $defaultLangId),
-            'postRidePage' => $this->getPostRidePageWithSettingDetail(),
-        ];
     }
 
     protected function getPassengerVehicles()

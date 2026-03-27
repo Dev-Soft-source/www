@@ -12,10 +12,11 @@ use Illuminate\Http\Request;
 
 class NewsController extends Controller
 {
-    public function index($lang = null){
+    public function index($lang = null)
+    {
 
         $articles = Article::with('articleDetail')->get();
-        if(!$articles->isEmpty()){
+        if (!$articles->isEmpty()) {
             $articles = $articles->filter(function ($article) {
                 return $article->articleDetail->contains('language_id', $this->selectedLanguage->id);
             });
@@ -26,15 +27,16 @@ class NewsController extends Controller
             $this->defaultLang->id
         );
 
-        return view('news',[
+        return view('news', [
             'articles' => $articles,
             'mediaSetting' => $mediaSetting,
             'selectedLanguage' => $this->selectedLanguage,
-            ]);
+        ]);
     }
 
-    public function newsDetail($lang = null, $id){
-        $languages = Language::all();
+    public function newsDetail($lang = null, $id)
+    {
+        $languages = Language::getAllCached();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
@@ -56,27 +58,27 @@ class NewsController extends Controller
             $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
                 // Ratings where type is 1 and ride_id belongs to the user
                 $query->where('type', '1')
-                      ->whereHas('ride', function ($query) use ($user_id) {
-                          $query->where('added_by', $user_id);
-                      });
+                    ->whereHas('ride', function ($query) use ($user_id) {
+                        $query->where('added_by', $user_id);
+                    });
             })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($user_id) {
-                          $query->where('user_id', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is null and receiver_id belongs to the user
-                $query->where('type', null)
-                      ->whereHas('receiver', function ($query) use ($user_id) {
-                          $query->where('id', $user_id);
-                      });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is 2 and booking_id belongs to the user
+                    $query->where('type', '2')
+                        ->whereHas('booking', function ($query) use ($user_id) {
+                            $query->where('user_id', $user_id);
+                        });
+                })
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is null and receiver_id belongs to the user
+                    $query->where('type', null)
+                        ->whereHas('receiver', function ($query) use ($user_id) {
+                            $query->where('id', $user_id);
+                        });
+                })
+                ->orderBy('id', 'desc')
+                ->get();
         }
-        return view('news_detail',['article' => $article,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
+        return view('news_detail', ['article' => $article, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
     }
 }

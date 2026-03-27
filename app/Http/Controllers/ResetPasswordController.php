@@ -16,7 +16,7 @@ class ResetPasswordController extends Controller
 {
     public function create(Request $request, $lang = null)
     {
-        $languages = Language::all();
+        $languages = Language::getAllCached();
 
         // Check if this is from app and store in session
         if ($request->query('app') === 'true') {
@@ -70,22 +70,22 @@ class ResetPasswordController extends Controller
                         $query->where('added_by', $user_id);
                     });
             })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                    ->whereHas('booking', function ($query) use ($user_id) {
-                        $query->where('user_id', $user_id);
-                    });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is null and receiver_id belongs to the user
-                $query->where('type', null)
-                      ->whereHas('receiver', function ($query) use ($user_id) {
-                          $query->where('id', $user_id);
-                      });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is 2 and booking_id belongs to the user
+                    $query->where('type', '2')
+                        ->whereHas('booking', function ($query) use ($user_id) {
+                            $query->where('user_id', $user_id);
+                        });
+                })
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is null and receiver_id belongs to the user
+                    $query->where('type', null)
+                        ->whereHas('receiver', function ($query) use ($user_id) {
+                            $query->where('id', $user_id);
+                        });
+                })
+                ->orderBy('id', 'desc')
+                ->get();
         }
 
         return view('reset_password', ['resetPasswordPage' => $resetPasswordPage, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'request' => $request]);
@@ -127,7 +127,7 @@ class ResetPasswordController extends Controller
                 'password.string' => 'The password must be a string',
                 'password.min' => 'The password must be at least 8 characters',
                 'password.regex' => 'The password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
-            ],[
+            ], [
                 'password.required' => 'The password is required',
                 'password.confirmed' => $resetPasswordPage->password_do_not_match_error ?? 'The password confirmation does not match',
                 'password_confirmation.required' => 'The password confirmation is required',

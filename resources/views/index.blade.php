@@ -1349,25 +1349,7 @@
                     </a>
                 </div>
             </div>
-            <!-- <div class="flex flex-wrap justify-center items-center gap-4 md:gap-8 mt-4 md:mt-6 xl:mt-10">
-                    @foreach ($articles as $article)
-    <div class="rounded bg-white shadow-3xl p-5">
-                            <div class="p-4">
-                                <div>
-                                    <p class="text-2xl font-FuturaMdCnBT">{{ $article->articleDetail[0]->title }}</p>
-                                    <p class="lg:text-sm md:text-base">Agency: {{ $article->agency }}</p>
-                                    <p class="lg:text-sm md:text-base">Added by: {{ $article->added_by }}</p>
-                                </div>
-                                <div class="flex justify-center items-center mt-3">
-                                    <a href="{{ route('news_detail', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $article->id]) }}"
-                                        class="bg-primary text-white py-2 px-3 rounded">
-                                        Read article
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-    @endforeach
-                </div> -->
+
         </div>
     </section>
 

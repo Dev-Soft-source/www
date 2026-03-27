@@ -89,7 +89,7 @@ class RideController extends Controller
             $this->defaultLang->id
         );
 
-        $postRidePage = $this->getPostRidePageWithSettingDetail();
+        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $ride = $this->makeDetailOfRide($ride, $from_stop_id, $to_stop_id);
 
@@ -220,7 +220,7 @@ class RideController extends Controller
         $ride->intermediate_stops = $this->extractIntermediateStopsForForm($ride);
 
 
-        $postRidePage = $this->getPostRidePageWithSettingDetail();
+        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $postRideSubDetailPage = PostRidePageSettingSubDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $postRideStats = $user->driverPostRideStats();
@@ -367,7 +367,7 @@ class RideController extends Controller
         }
 
         $postRideSubDetailPage = PostRidePageSettingSubDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        $postRidePage = $this->getPostRidePageWithSettingDetail();
+        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $totalNoOfRides = Ride::where('added_by', $user_id)
             ->notCancelled()
@@ -428,7 +428,7 @@ class RideController extends Controller
             return redirect()->route('home', ['lang' => $this->selectedLanguage->abbreviation])->with(['message' => "Your account has been suspended by the admin"]);
         }
 
-        $postRidePage = $this->getPostRidePageWithSettingDetail();
+        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $postRideSubDetailPage = PostRidePageSettingSubDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $ride = new Ride();

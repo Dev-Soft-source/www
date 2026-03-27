@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Cache;
 
 class SiteTextDetail extends Model
 {
     use HasFactory;
+    private const CACHE_VERSION_KEY = 'site-text-detail:keyed-by-slug:version';
 
     public $table = "site_text_detail";
 
@@ -18,6 +20,12 @@ class SiteTextDetail extends Model
         'name',
         'icon',
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => static::bustKeyedBySlugCache());
+        static::deleted(fn () => static::bustKeyedBySlugCache());
+    }
 
     public function language(): BelongsTo
     {
@@ -40,40 +48,53 @@ class SiteTextDetail extends Model
      */
     public static function getByLanguageKeyedBySlug(int $languageId, int $defaultLanguageId): array
     {
-        // Get all SiteText records
-        $siteTexts = SiteText::all()->keyBy('id');
-        
-        // Get all SiteTextDetail records for the specified language and default language (1)
-        $details = static::whereIn('language_id', [$languageId, 1])
-            ->with('siteText')
-            ->get()
-            ->groupBy('slug_id');
-        
-        // Build the result array: [slug => name]
-        $result = [];
-        foreach ($siteTexts as $siteText) {
-            $slugDetails = $details->get($siteText->id);
-            
-            if ($slugDetails) {
-                // Get detail for requested language
-                $detail = $slugDetails->firstWhere('language_id', $languageId);
-                // Get default language detail (language_id = 1)
-                $defaultDetail = $slugDetails->firstWhere('language_id', $defaultLanguageId);
-                
-                // Use requested language name if not null/empty, otherwise fallback to default
-                $name = null;
-                if ($detail && !empty($detail->name)) {
-                    $name = $detail->name;
-                } elseif ($defaultDetail && !empty($defaultDetail->name)) {
-                    $name = $defaultDetail->name;
+        $cacheKey = implode(':', [
+            'site-text-detail:keyed-by-slug',
+            'v' . static::getCacheVersion(),
+            'language-' . $languageId,
+            'default-' . $defaultLanguageId,
+        ]);
+
+        return Cache::rememberForever($cacheKey, function () use ($languageId, $defaultLanguageId) {
+            $siteTexts = SiteText::all()->keyBy('id');
+
+            $details = static::whereIn('language_id', [$languageId, $defaultLanguageId])
+                ->with('siteText')
+                ->get()
+                ->groupBy('slug_id');
+
+            $result = [];
+            foreach ($siteTexts as $siteText) {
+                $slugDetails = $details->get($siteText->id);
+
+                if ($slugDetails) {
+                    $detail = $slugDetails->firstWhere('language_id', $languageId);
+                    $defaultDetail = $slugDetails->firstWhere('language_id', $defaultLanguageId);
+
+                    $name = null;
+                    if ($detail && !empty($detail->name)) {
+                        $name = $detail->name;
+                    } elseif ($defaultDetail && !empty($defaultDetail->name)) {
+                        $name = $defaultDetail->name;
+                    }
+
+                    $result[$siteText->slug] = $name;
+                } else {
+                    $result[$siteText->slug] = null;
                 }
-                
-                $result[$siteText->slug] = $name;
-            } else {
-                $result[$siteText->slug] = null;
             }
-        }
-        
-        return $result;
+
+            return $result;
+        });
+    }
+
+    public static function bustKeyedBySlugCache(): void
+    {
+        Cache::forever(self::CACHE_VERSION_KEY, uniqid('', true));
+    }
+
+    protected static function getCacheVersion(): string
+    {
+        return (string) Cache::rememberForever(self::CACHE_VERSION_KEY, fn () => '1');
     }
 }

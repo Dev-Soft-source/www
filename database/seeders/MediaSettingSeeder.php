@@ -13,7 +13,7 @@ class MediaSettingSeeder extends Seeder
     {
         $mediaSetting = MediaSetting::firstOrCreate([]);
 
-        $languages = Language::all();
+        $languages = Language::getAllCached();
 
         foreach ($languages as $language) {
             MediaSettingDetail::updateOrCreate(
@@ -34,4 +34,3 @@ class MediaSettingSeeder extends Seeder
         }
     }
 }
-

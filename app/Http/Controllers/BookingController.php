@@ -516,7 +516,7 @@ class BookingController extends Controller
 
         $booking = Booking::where('id', $id)->first();
         $ride = Ride::where('id', $booking->ride_id)->first();
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);

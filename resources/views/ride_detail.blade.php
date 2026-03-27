@@ -840,7 +840,7 @@
                                     @if (strtotime($ride->date) > strtotime('today') ||
                                             (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
                                         <div class="flex justify-end">
-                                            <a @if ($postRidePage->cancellation_policy_label2 == $userBooking->type) href="javascript:void(0);" 
+                                            <a @if ($ride->isFirmCancellation()) href="javascript:void(0);" 
                                                 onclick="toggleModalCard('card-modal', '{{ $userBooking->id }}', '{{ $selectedLanguage->abbreviation }}')"
                                             @else
                                                 href="{{ route('booking.cancel', ['lang' => $selectedLanguage->abbreviation, 'id' => $userBooking->id]) }}" @endif
@@ -866,9 +866,11 @@
                                         @php
                                             $isInstant = $ride->isInstantBooking();
 
+                                            $booking_methods = $rideFeatureOptions['booking_method'];
+
                                             $icon = $isInstant
-                                                ? asset('home_page_icons/' . $postRidePage->booking_option1->icon)
-                                                : asset('home_page_icons/' . $postRidePage->booking_option2->icon);
+                                                ? asset('home_page_icons/' . $booking_methods['instant']->icon)
+                                                : asset('home_page_icons/' . $booking_methods['manual']->icon);
 
                                             $label = $isInstant
                                                 ? ($rideDetailPage->instant_booking_btn_label ?? 'Instant Book')

@@ -35,7 +35,7 @@ class ReviewController extends Controller
             $query->withTrashed(); // Include soft-deleted users
         }])->first();
 
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
@@ -91,7 +91,7 @@ class ReviewController extends Controller
             abort(404, 'Review not found');
         }
 
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
         }
@@ -120,7 +120,7 @@ class ReviewController extends Controller
 
         $rating = Rating::whereId($id)->first();
 
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
         }
@@ -144,7 +144,7 @@ class ReviewController extends Controller
     {
         $booking = Booking::where('id', $id)->first();
         if ($booking) {
-            $languages = Language::all();
+            $languages = Language::getAllCached();
             // Store the selected language in the session
             if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
                 session(['selectedLanguage' => $lang]);
@@ -424,7 +424,7 @@ class ReviewController extends Controller
         if ($booking) {
             $ride = Ride::whereId($booking->ride_id)->first();
 
-            $languages = Language::all();
+            $languages = Language::getAllCached();
             // Store the selected language in the session
             if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
                 session(['selectedLanguage' => $lang]);

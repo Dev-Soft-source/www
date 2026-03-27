@@ -45,26 +45,21 @@ class HomeController extends Controller
 {
     public function index($lang = null)
     {
-        $rides = Ride::with(['defaultRideDetail'])->latest('added_on')->where('status', '!=', 2)->where('suspand', '!=', 1)->take(4)->get();
-        
+
         $latestFilteredReviews = Rating::latest('added_on')->where('is_disply', 1)->get();
-        
-        // $findRidePage = $this->getFindRidePageWithSettingDetail();
-        
-        $postRidePage = $this->getPostRidePageWithSettingDetail();
-        
-        $homePage = HomePageSettingDetail::where('language_id', $this->selectedLanguage->id)->first();
+
+        $homePage = HomePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $video = Video::where('page', 'Introduction Video')->orderBy('id', 'desc')->first();
         if ($video) {
-            $videoDetails = VideoDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id,['video_id' => $video->id]);
+            $videoDetails = VideoDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id, ['video_id' => $video->id]);
         }
-            
+
         $token = null;
-        if(auth()->user()){
+        if (auth()->user()) {
             // $token = FCMToken::where('user_id', auth()->user()->id)->pluck('token')->first();
             $token = auth()->user()->createToken('auth_token')->plainTextToken;
-            
+
             // from step5 with skip -> update step5 to 1 (no validations)
             if (request()->has('skip')) {
                 User::whereId(auth()->user()->id)->update([
@@ -74,37 +69,32 @@ class HomeController extends Controller
         }
 
 
-        $ratings = Rating::all();
+        // $ratings = Rating::all();
 
         $langId = $this->selectedLanguage->id;
 
-        $articles = Article::whereHas('articleDetail', function ($query) use ($langId) {
-            $query->where('language_id', $langId);
-        })->with('articleDetail')->orderBy('id', 'desc')->limit(8)->get();
-
-        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-
+        // $articles = Article::whereHas('articleDetail', function ($query) use ($langId) {
+        //     $query->where('language_id', $langId);
+        // })->with('articleDetail')->orderBy('id', 'desc')->limit(8)->get();
 
         // two rides
         $rides = Ride::limit(2)->get();
-        
-        $postRidePage = $this->getPostRidePageWithSettingDetail();
-        
-        
-        foreach($rides as $ride){
-            $ride->mapMultipleOptionColumnsToDetails(
-                ['luggage', 'payment_method', 'booking_type', 'animal_friendly', 'booking_method'],
-                $this->selectedLanguage->id,
-                $this->defaultLang->id,
-                false
-            );
-    
+
+        foreach ($rides as $ride) {
+            // $ride->mapMultipleOptionColumnsToDetails(
+            //     ['luggage', 'payment_method', 'booking_type', 'animal_friendly', 'booking_method'],
+            //     $this->selectedLanguage->id,
+            //     $this->defaultLang->id,
+            //     false
+            // );
+
             $ride = $this->makeDetailOfRide($ride);
         }
+
+        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         View::share([
             'findRidePage' => $findRidePage,
-            'postRidePage' => $postRidePage,
             'rideDetailPage' => $rideDetailPage,
         ]);
 
@@ -115,12 +105,11 @@ class HomeController extends Controller
                 'rideDetailPage' => $rideDetailPage,
                 'rides' => $rides,
                 'video' => $videoDetails,
-                'articles' => $articles,
                 'reviews' => $latestFilteredReviews,
                 'homePage' => $homePage,
-                'ratings' => $ratings,
                 'findRidePage' => $findRidePage,
-                'postRidePage' => $postRidePage
+                // 'articles' => $articles,
+                // 'ratings' => $ratings,
             ]
         );
     }
@@ -303,7 +292,7 @@ class HomeController extends Controller
 
     public function coffeeOnWallStory($lang = null)
     {
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
         }
@@ -324,7 +313,7 @@ class HomeController extends Controller
     {
         $coffeeWallPage = null;
         $paymentSettingDetail = null;
-                
+
         $coffeeWallPage = CoffeeWallPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $paymentSettingDetail = BillingAddressSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
@@ -332,10 +321,13 @@ class HomeController extends Controller
         $packages = Package::where('custom', 0)->with(['PackageDetail' => function ($query) use ($selectedLanguage) {
             $query->where('language_id', $selectedLanguage->id);
         }])->get();
-        
+
         return view('coffee_wall', [
-            'coffeeWallPage' => $coffeeWallPage, 'packages' => $packages, 
-            'paymentSettingDetail' => $paymentSettingDetail, 'stripeKey' => env('STRIPE_KEY')]);
+            'coffeeWallPage' => $coffeeWallPage,
+            'packages' => $packages,
+            'paymentSettingDetail' => $paymentSettingDetail,
+            'stripeKey' => env('STRIPE_KEY')
+        ]);
     }
 
     public function coffeeOnWallStore(Request $request)

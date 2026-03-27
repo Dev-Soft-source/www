@@ -19,6 +19,7 @@ use App\Models\FeaturesSettingDetail;
 use App\Models\SiteTextDetail;
 use App\Models\SiteSetting;
 use App\Models\VideoDetail;
+use App\Http\Controllers\ProfileStepRedirectController;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -36,9 +37,6 @@ class Controller extends BaseController
     public function __construct()
     {
 
-        // todo : If admin, ...
-        // 
-
         $this->defaultLang = getDefaultLanguage();
 
         // Initialize language-dependent data per request so POST/PUT routes
@@ -49,6 +47,7 @@ class Controller extends BaseController
             if ($lang) {
                 session(['selectedLanguage' => $lang]);
             } else {
+                // lang_id is coming from app
                 $lang = $request->query('lang') ?? $request->query('lang_id');
 
                 if (!$lang) {
@@ -65,7 +64,7 @@ class Controller extends BaseController
 
                 session(['selectedLanguage' => $lang]);
             }
-// \Log::info('dddd', [$lang, $request->query('lang'), app()->getLocale(), session('selectedLanguage')]);
+
             $this->selectedLanguage = Language::resolveLanguage(app()->getLocale());
 
             if (!$this->selectedLanguage) {
@@ -73,10 +72,8 @@ class Controller extends BaseController
                 session(['selectedLanguage' => $this->defaultLang->abbreviation]);
             }
 
-            $languages = Language::all();
-            // $featureOptions = $this->getFeatureOptionsByLanguage();
+            $languages = Language::getAllCached();
             $rideFeatureOptions = $this->getRideFeatureOptionGroups();
-            // dd($rideFeatureOptions);
 
             $this->successMessage = SuccessMessagesSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
             $siteText = SiteTextDetail::getByLanguageKeyedBySlug($this->selectedLanguage->id, $this->defaultLang->id);
@@ -87,8 +84,6 @@ class Controller extends BaseController
                 'rideFeatureOptions' => $rideFeatureOptions,
                 'siteText' => $siteText,
                 'successMessage' => $this->successMessage,
-                // 'ratings' => $ratings,
-                // 'notificationPage' => $notificationPage,
             ]);
 
             if (auth()->check()) {
@@ -96,50 +91,7 @@ class Controller extends BaseController
                 $user_id = $user->id;
                 $lang = $this->selectedLanguage->abbreviation;
 
-                // Redirect users based on their profile completion step when they try to access certain routes
-                $routeName = request()->route()->getName();
-                if ($routeName === 'profile' || $routeName === 'welcomeRoute') {
-                    if ($user->step1 == 0) {
-                        // personal information
-                        return redirect()->route('step1to5', ['lang' => $lang]);
-                    } elseif ($user->step2 == 0) {
-                        // profile image
-                        return redirect()->route('step2to5', ['lang' => $lang]);
-                    } elseif ($user->step3 == 0) {
-                        // my vehicle information
-                        return redirect()->route('step3to5', ['lang' => $lang]);
-                    } elseif ($user->step4 == 0) {
-                        // driver license information
-                        return redirect()->route('step4to5', ['lang' => $lang]);
-                    } elseif ($user->step5 == 0) {
-                        // phone number verification
-                        return redirect()->route('step5to5', ['lang' => $lang]);
-                    }
-                }
-
-                // Only require vehicle/license/phone completion when posting a ride, not when viewing My Rides
-                if ($routeName === 'post_ride') {
-                    if ($user->step3 !== 1) {
-                        // vehicle information
-                        return redirect()->route('profile.vehicle', ['lang' => $lang]);
-                    } elseif ($user->step4 !== 1) {
-                        // driver license information
-                        return redirect()->route('driver.verify', ['lang' => $lang]);
-                    } elseif ($user->step5 !== 1) {
-                        // phone number verification
-                        return redirect()->route('phone', ['lang' => $lang]);
-                    }
-                }
-
-                if ($routeName === 'my_chats') {
-                    if ($user->step1 !== 1) {
-                        // personal information
-                        return redirect()->route('profile.edit', ['lang' => $lang]);
-                    }
-                }
-
-                $notifications = Notification::where('is_delete', '0');
-                $notifications = $notifications->where(function ($query) use ($user_id) {
+                $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
                     $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
                         $query->where('added_by', $user_id);
                     })
@@ -169,16 +121,16 @@ class Controller extends BaseController
     public function getPostRidePageWithSettingDetail()
     {
         $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        if ($postRidePage) {
-            // Optimized: Batch load all option groups in a single query instead of 7 separate queries
-            $postRidePage->mapMultipleOptionColumnsToDetails(
-                ['smoking', 'booking', 'payment_methods', 'animals', 'luggage', 'cancellation_policy'],
-                $this->selectedLanguage->id,
-                $this->defaultLang->id
-            );
+        // if ($postRidePage) {
+        //     // Optimized: Batch load all option groups in a single query instead of 7 separate queries
+        //     $postRidePage->mapMultipleOptionColumnsToDetails(
+        //         ['smoking', 'booking', 'payment_methods', 'animals', 'luggage', 'cancellation_policy'],
+        //         $this->selectedLanguage->id,
+        //         $this->defaultLang->id
+        //     );
 
-            $this->hydrateLegacyFeatureOptions($postRidePage);
-        }
+        //     $this->hydrateLegacyFeatureOptions($postRidePage);
+        // }
 
         return $postRidePage;
     }
@@ -547,46 +499,46 @@ class Controller extends BaseController
             // main ride
             $from_stop_id = $ride->rideStops->first()?->id;
             $to_stop_id   = $ride->rideStops->last()?->id;
-        
+
             $ride->matched_segment_price_minor = $ride->detail->price;
             $ride->city_id = $ride->rideStops->first()?->city_id;
         } else {
-        
+
             $stopSegment = $ride->rideStopSegments()
                 ->where([
                     'from_stop_id' => $from_stop_id,
                     'to_stop_id' => $to_stop_id,
                 ])
                 ->first();
-        
+
             $stopOfFrom = $ride->rideStops->firstWhere('id', $from_stop_id);
             $stopOfTo   = $ride->rideStops->firstWhere('id', $to_stop_id);
             $ride->city_id = $stopOfFrom->city_id;
-        
+
             $ride->matched_segment_price_minor = $stopSegment?->price_minor;
 
             $ride->matched_from_stop_index = $stopOfFrom
                 ? ((int) $stopOfFrom->stop_order - 1)
                 : 0;
-        
+
             $ride->matched_to_stop_index = $stopOfTo
                 ? ((int) $stopOfTo->stop_order - 1)
                 : 1;
         }
-        
+
         $ride->matched_from_stop_id = $from_stop_id;
         $ride->matched_to_stop_id   = $to_stop_id;
-        
+
         $ride->applyDisplaySummaryAttributes();
-        
+
         $ride->matched_seats_available =
             ($ride->matched_from_stop_id && $ride->matched_to_stop_id && method_exists($ride, 'resolveSegmentAvailableSeats'))
-                ? $ride->resolveSegmentAvailableSeats(
-                    (int) $ride->matched_from_stop_id,
-                    (int) $ride->matched_to_stop_id
-                )
-                : (int) ($ride->seats_available ?? $ride->seats ?? 0);
-                
+            ? $ride->resolveSegmentAvailableSeats(
+                (int) $ride->matched_from_stop_id,
+                (int) $ride->matched_to_stop_id
+            )
+            : (int) ($ride->seats_available ?? $ride->seats ?? 0);
+
         return $ride;
     }
 }

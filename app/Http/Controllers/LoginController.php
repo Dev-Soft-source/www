@@ -22,8 +22,9 @@ use Illuminate\Support\Facades\Http;
 
 class LoginController extends Controller
 {
-    public function appLogin($lang = null){
-        $languages = Language::all();
+    public function appLogin($lang = null)
+    {
+        $languages = Language::getAllCached();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
@@ -36,10 +37,11 @@ class LoginController extends Controller
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
         }
-        return view('login_with_app',['languages' => $languages,'selectedLanguage' => $selectedLanguage]);
+        return view('login_with_app', ['languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
     }
 
-    public function create(Request $request, $lang = null){
+    public function create(Request $request, $lang = null)
+    {
         $redirectTo = $request->query('redirect_to');
 
         if (is_string($redirectTo) && str_starts_with($redirectTo, url('/'))) {
@@ -47,10 +49,10 @@ class LoginController extends Controller
         } elseif (!session()->has('url.intended')) {
             session()->put('url.intended', url()->previous());
         }
-        
+
         $loginPage = LoginPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-       
-        return view('login',['loginPage' => $loginPage]);
+
+        return view('login', ['loginPage' => $loginPage]);
     }
 
     public function store(Request $request)
@@ -98,7 +100,7 @@ class LoginController extends Controller
         // Auth logic
         $credentials = $request->only('email', 'password');
         $user        = User::where('email', $credentials['email'])->first();
-        
+
         if ($user) {
             if ($user->closed === '1') {
                 $closeModalErrorMessage = $message->account_closed_message
@@ -120,21 +122,21 @@ class LoginController extends Controller
         // When checkbox is checked, it sends '1', when unchecked it sends '0' or is missing
         $rememberValue = $request->input('remember', '0');
         $remember = ($rememberValue == '1' || $rememberValue == 'on' || $rememberValue === true || $rememberValue === 1);
-        
+
         // Log::info('Login attempt with remember me', [
         //     'email' => $request->email,
         //     'remember_input' => $rememberValue,
         //     'remember_input_type' => gettype($rememberValue),
         //     'remember_boolean' => $remember
         // ]);
-        
+
         // Attempt authentication with remember me
         if ($user && !$user->trashed() && $user->email_verified != 0) {
             $loginSuccessful = auth()->attempt($credentials, $remember);
         } else {
             $loginSuccessful = false;
         }
-        
+
         if ($loginSuccessful) {
             // Refresh user to get updated remember_token if remember was true
             $authenticatedUser = auth()->user();
@@ -151,7 +153,7 @@ class LoginController extends Controller
             if ($selectedLanguage) {
                 session(['selectedLanguage' => $selectedLanguage->abbreviation]);
             }
-            
+
             // Log successful authentication
             // Log::info('Login successful', [
             //     'user_id' => $authenticatedUser->id,
@@ -160,11 +162,20 @@ class LoginController extends Controller
             //     'remember_token_exists' => $authenticatedUser->remember_token ? 'yes' : 'no',
             //     'remember_token_length' => $authenticatedUser->remember_token ? strlen($authenticatedUser->remember_token) : 0
             // ]);
-            
+
             // IP & user_details tracking (unchanged)
             $ipAddress = null;
-            foreach (['HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP',
-                    'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR'] as $key) {
+            foreach (
+                [
+                    'HTTP_CLIENT_IP',
+                    'HTTP_X_FORWARDED_FOR',
+                    'HTTP_X_FORWARDED',
+                    'HTTP_X_CLUSTER_CLIENT_IP',
+                    'HTTP_FORWARDED_FOR',
+                    'HTTP_FORWARDED',
+                    'REMOTE_ADDR'
+                ] as $key
+            ) {
                 if (array_key_exists($key, $_SERVER) === true) {
                     foreach (explode(',', $_SERVER[$key]) as $ip) {
                         $ip = trim($ip);
@@ -263,8 +274,10 @@ class LoginController extends Controller
         return redirect()->route('login', ['lang' => $selectedLanguage->abbreviation]);
     }
 
-    public function welcomeRoute($email){
+    public function welcomeRoute($email)
+    {
         $user = User::where('email', $email)->first();
+
         $selectedLanguage = session('selectedLanguage');
         if ($selectedLanguage) {
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
@@ -278,9 +291,8 @@ class LoginController extends Controller
             $selectedLanguage = Language::where('is_default', 1)->first();
         }
 
-        if(isset($user) && !empty($user)){
-
-        }else{
+        if (isset($user) && !empty($user)) {
+        } else {
             return redirect()->route('login', ['lang' => $selectedLanguage->abbreviation])->with(['message' => "This email is not exist"]);
         }
 
@@ -297,6 +309,9 @@ class LoginController extends Controller
             return redirect()->route('step3to5', ['lang' => $selectedLanguage->abbreviation]);
         } elseif ($user->step4 == 0) {
             return redirect()->route('step4to5', ['lang' => $selectedLanguage->abbreviation]);
+        } elseif ($user->step5 == 0) {
+            // phone number verification
+            return redirect()->route('step5to5', ['lang' => $selectedLanguage->abbreviation]);
         }
 
         return redirect()->route('profile', ['lang' => $selectedLanguage->abbreviation]);
@@ -328,14 +343,15 @@ class LoginController extends Controller
             $defaultLang->id ?? $selectedLanguage->id
         );
         $greeting_message = optional($thankyouPage)->welcome_greeting ?? 'Hi';
-        $languages = Language::all();
+        $languages = Language::getAllCached();
 
         return view('welcome_message', compact('data', 'greeting_message', 'selectedLanguage', 'languages', 'thankyouPage'));
     }
 
-    public function emailVerify($token, $email, Request $request){
+    public function emailVerify($token, $email, Request $request)
+    {
         $isApp = $request->has('app') && $request->get('app') === 'true';
-        
+
         $result = DB::table('password_resets')->where('token', $token)->where('type', 'verify_email')->first();
         $user = User::where('email', $email)->first();
         $selectedLanguage = session('selectedLanguage');
@@ -356,8 +372,8 @@ class LoginController extends Controller
         if ($selectedLanguage) {
             $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('email_verified_message', 'continue_with_app_btn_label', 'create_my_profile_btn_label')->first();
         }
-        
-        if(isset($user) && !empty($user)){
+
+        if (isset($user) && !empty($user)) {
             if (!$result && $user->email_verified === '1') {
                 // User already verified - redirect appropriately
                 if ($isApp) {
@@ -371,7 +387,7 @@ class LoginController extends Controller
                 }
                 return redirect()->route('login', ['lang' => $selectedLanguage->abbreviation])->with(['message' => "This email verification token is invalid"]);
             }
-        }else{
+        } else {
             // Email doesn't exist
             if ($isApp) {
                 return redirect()->route('emailVerified', ['app' => 'true', 'error' => 'email_not_found']);
@@ -428,13 +444,13 @@ class LoginController extends Controller
             $user = auth()->login($user);
             session(['selectedLanguage' => $selectedLanguage->abbreviation]);
             $token = auth()->user()->createToken('auth_token')->plainTextToken;
-            
+
             // Redirect based on app parameter
             if ($isApp) {
                 return redirect()->route('emailVerified', ['app' => 'true', 'success' => 'verified', 'token' => $token]);
             }
-            
-            return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation])->with(['success1' => $message->email_verified_message,'continue_with_app_btn' => $message->continue_with_app_btn_label ?? "Continue with app", 'create_my_profile_btn' => $message->create_my_profile_btn_label ?? "Create my profile"]);
+
+            return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation])->with(['success1' => $message->email_verified_message, 'continue_with_app_btn' => $message->continue_with_app_btn_label ?? "Continue with app", 'create_my_profile_btn' => $message->create_my_profile_btn_label ?? "Create my profile"]);
         }
     }
 
@@ -445,12 +461,12 @@ class LoginController extends Controller
     {
         $isApp = $request->has('app') && $request->get('app') === 'true';
         $token = $request->get('token'); // Get the auth token if passed
-        
+
         if ($isApp) {
             // For app users, show a simple page that the app can detect
             $status = 'unknown';
             $message = 'Email verification status unknown';
-            
+
             if ($request->has('success')) {
                 $status = 'success';
                 $message = 'Email verified successfully';
@@ -471,11 +487,11 @@ class LoginController extends Controller
                 $status = 'already_verified';
                 $message = 'Email already verified';
             }
-            
+
             return response()->view('email-verified', compact('status', 'message', 'isApp', 'token'))
                 ->header('Content-Type', 'text/html; charset=utf-8');
         }
-        
+
         // If not from app, redirect to login
         return redirect()->route('login')->with(['message' => 'Email verification complete']);
     }

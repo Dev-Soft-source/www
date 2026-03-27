@@ -58,22 +58,16 @@ class BookingController extends Controller
     {
         $user = Auth::guard('sanctum')->user();
 
-        $findRidePage = null;
-        $postRidePage = null;
         if ($request->lang_id && $request->lang_id != 0) {
             $genderLabel = Step1PageSettingDetail::where('language_id', $request->lang_id)->select('male_option_label', 'female_option_label', 'prefer_option_label')->first();
-            $findRidePage = $this->getFindRidePageWithSettingDetail();
-            $postRidePage = $this->getPostRidePageWithSettingDetail();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $request->lang_id)->select('need_to_select_card_message', 'paypal_not_completed_message', 'acc_suspend_message', 'seat_unavailable_message', 'general_error_message')->first();
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $genderLabel = Step1PageSettingDetail::where('language_id', $selectedLanguage->id)->select('male_option_label', 'female_option_label', 'prefer_option_label')->first();
-                $findRidePage = $this->getFindRidePageWithSettingDetail();
-                $postRidePage = $this->getPostRidePageWithSettingDetail($selectedLanguage->id);
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('need_to_select_card_message', 'paypal_not_completed_message', 'acc_suspend_message', 'seat_unavailable_message', 'general_error_message')->first();
             }
         }
+
+        $messages = $this->successMessage;
 
         // Check if user has suspanded
         if ($user->suspand === '1') {

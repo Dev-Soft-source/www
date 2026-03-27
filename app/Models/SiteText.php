@@ -15,6 +15,12 @@ class SiteText extends Model
         'text',
     ];
 
+    protected static function booted(): void
+    {
+        static::saved(fn () => SiteTextDetail::bustKeyedBySlugCache());
+        static::deleted(fn () => SiteTextDetail::bustKeyedBySlugCache());
+    }
+
     public function details(): HasMany
     {
         return $this->hasMany(SiteTextDetail::class, 'slug_id');

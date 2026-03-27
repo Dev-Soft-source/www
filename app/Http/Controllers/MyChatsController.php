@@ -14,7 +14,7 @@ class MyChatsController extends Controller
 {
     public function index($lang = null)
     {
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
@@ -26,15 +26,20 @@ class MyChatsController extends Controller
             // Find the language by abbreviation
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
             $chatsPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_button','cancel_button')->first();
+            $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_button', 'cancel_button')->first();
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
             $chatsPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_button','cancel_button')->first();
+            $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_button', 'cancel_button')->first();
         }
 
 
         $notifications = null;
+        $user = auth()->user();
+        if ($user->step1 !== 1) {
+            // personal information
+            return redirect()->route('profile.edit', ['lang' => $lang]);
+        }
         $user_id = auth()->user()->id;
         $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
             // Ratings where type is 1 and ride_id belongs to the user
@@ -60,10 +65,10 @@ class MyChatsController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
-        $chats = Message::where(function ($query) use($user_id){
+        $chats = Message::where(function ($query) use ($user_id) {
             $query->where('sender', $user_id)->orWhere('receiver', $user_id);
         })
-        ->orderByDesc('created_at')
+            ->orderByDesc('created_at')
             ->get()
             ->groupBy(function ($message) use ($user_id) {
                 // Group by both user ID and ride ID to separate conversations properly
@@ -71,45 +76,45 @@ class MyChatsController extends Controller
                 return $otherUserId . '_' . ($message->ride_id ?? '0');
             });
 
-            $chats = $chats->map(function ($groupedMessages) use ($user_id) {
-                // Filter out messages that are deleted by this user
-                $visibleMessages = $groupedMessages->filter(function ($message) use ($user_id) {
-                    $deletedBy = $message->deleted_by ? explode(',', $message->deleted_by) : [];
-                    return !in_array((string)$user_id, $deletedBy);
-                });
-                
-                // If all messages are deleted, skip this group
-                if ($visibleMessages->isEmpty()) {
-                    return null;
-                }
-                
-                // Sort by created_at descending to get the latest message first
-                $visibleMessages = $visibleMessages->sortByDesc('created_at');
-                
-                // Get the latest visible message
-                $latestMessage = $visibleMessages->first()
-                    ->load(['user' => function ($query) {
-                        $query->select('id', 'first_name', 'last_name', 'profile_image', 'dob', 'online','gender');
-                        $query->withTrashed(); // Include soft-deleted users
-                    }, 'receiver' => function ($query) {
-                        $query->select('id', 'first_name', 'last_name', 'profile_image', 'dob', 'online','gender');
-                        $query->withTrashed(); // Include soft-deleted users
-                    }]);
-    
-                // Count unread messages (is_read = 0) from visible messages only
-                $unreadCount = $visibleMessages->where('receiver', $user_id)
-                    ->where('is_read', 0)
-                    ->count();
-    
-                    $messageArray = $latestMessage->toArray();
-                    $messageArray['sender'] = $messageArray['user'];
-                    unset($messageArray['user']);
-    
-                    // Append unread count
-                    $messageArray['unread_count'] = $unreadCount;
-    
-                    return $messageArray;
-            })
+        $chats = $chats->map(function ($groupedMessages) use ($user_id) {
+            // Filter out messages that are deleted by this user
+            $visibleMessages = $groupedMessages->filter(function ($message) use ($user_id) {
+                $deletedBy = $message->deleted_by ? explode(',', $message->deleted_by) : [];
+                return !in_array((string)$user_id, $deletedBy);
+            });
+
+            // If all messages are deleted, skip this group
+            if ($visibleMessages->isEmpty()) {
+                return null;
+            }
+
+            // Sort by created_at descending to get the latest message first
+            $visibleMessages = $visibleMessages->sortByDesc('created_at');
+
+            // Get the latest visible message
+            $latestMessage = $visibleMessages->first()
+                ->load(['user' => function ($query) {
+                    $query->select('id', 'first_name', 'last_name', 'profile_image', 'dob', 'online', 'gender');
+                    $query->withTrashed(); // Include soft-deleted users
+                }, 'receiver' => function ($query) {
+                    $query->select('id', 'first_name', 'last_name', 'profile_image', 'dob', 'online', 'gender');
+                    $query->withTrashed(); // Include soft-deleted users
+                }]);
+
+            // Count unread messages (is_read = 0) from visible messages only
+            $unreadCount = $visibleMessages->where('receiver', $user_id)
+                ->where('is_read', 0)
+                ->count();
+
+            $messageArray = $latestMessage->toArray();
+            $messageArray['sender'] = $messageArray['user'];
+            unset($messageArray['user']);
+
+            // Append unread count
+            $messageArray['unread_count'] = $unreadCount;
+
+            return $messageArray;
+        })
             ->filter()
             ->values()
             ->sortByDesc(function ($chat) {
@@ -117,13 +122,13 @@ class MyChatsController extends Controller
             })
             ->values();
 
-        return view('my_chats', ['successMessage' => $successMessage,'chats' => $chats, 'user_id' => $user_id, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'chatsPage' => $chatsPage]);
+        return view('my_chats', ['successMessage' => $successMessage, 'chats' => $chats, 'user_id' => $user_id, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'chatsPage' => $chatsPage]);
     }
 
 
     public function oldChats($lang = null)
     {
-        $languages = Language::all();
+        $languages = Language::getAllCached();
 
         $chatsPage = null;
         // Store the selected language in the session
@@ -191,36 +196,35 @@ class MyChatsController extends Controller
         //     'receiver.id' => 'required|integer',
         //     'sender.id' => 'required|integer',
         // ]);
-    
+
         $currentUserId = auth()->id();
 
         // Check if receiver and sender exist and have id
         $receiverId = isset($request->receiver['id']) ? $request->receiver['id'] : null;
         $senderId = isset($request->sender['id']) ? $request->sender['id'] : null;
-        
+
         if (!$receiverId || !$senderId) {
             return redirect()->back()->with('error', 'Invalid chat data.');
         }
 
         $messages = Message::where('receiver', $receiverId)
             ->where('sender', $senderId)
-            ->where('status','new')
+            ->where('status', 'new')
             ->get();
-        
-            foreach ($messages as $message) {
-                $deletedBy = $message->deleted_by;
-                $deletedByArray = $deletedBy ? explode(',', $deletedBy) : [];
-            
-                if (!in_array($currentUserId, $deletedByArray)) {
-                    $deletedByArray[] = $currentUserId;
-                    $message->deleted_by = implode(',', $deletedByArray); // save as comma-separated string
-                    $message->save();
-                }
+
+        foreach ($messages as $message) {
+            $deletedBy = $message->deleted_by;
+            $deletedByArray = $deletedBy ? explode(',', $deletedBy) : [];
+
+            if (!in_array($currentUserId, $deletedByArray)) {
+                $deletedByArray[] = $currentUserId;
+                $message->deleted_by = implode(',', $deletedByArray); // save as comma-separated string
+                $message->save();
             }
-            
-        
-    
+        }
+
+
+
         return redirect()->back()->with('status', 'Chat deleted for you.');
     }
-    
 }

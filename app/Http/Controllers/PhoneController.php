@@ -72,7 +72,7 @@ class PhoneController extends Controller
 
         try {
             $twilio = new Client($sid, $token);
-            
+
             // Check verification using Twilio Verify API
             $verificationCheck = $twilio->verify->v2->services($verifyServiceSid)
                 ->verificationChecks
@@ -113,12 +113,12 @@ class PhoneController extends Controller
         if (is_string($redirectTo) && str_starts_with($redirectTo, url('/'))) {
             session(['return_url_after_action' => $redirectTo]);
         }
-        
+
         $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $phoneSetting = MyPhoneSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        
+
         if (auth()->user()) {
             $user_id = auth()->user()->id;
             $phone_numbers = PhoneNumber::where('user_id', $user_id)->orderByRaw('`default` DESC, verified DESC')->orderBy('id', 'desc')->get();
@@ -126,10 +126,14 @@ class PhoneController extends Controller
             $countries = Country::where('status', '1')->orderBy('name', 'asc')->get();
             $user_id = auth()->user()->id;
             $user = User::whereId($user_id)->first();
-            return view('phone', ['user' => $user, 'countries' => $countries, 
-            'phoneSetting' => $phoneSetting, 'reviewSetting' => $reviewSetting, 
-            'ProfilePage' => $ProfilePage, 'ProfileSetting' => $ProfileSetting, 
-            'phone_numbers' => $phone_numbers, 
+            return view('phone', [
+                'user' => $user,
+                'countries' => $countries,
+                'phoneSetting' => $phoneSetting,
+                'reviewSetting' => $reviewSetting,
+                'ProfilePage' => $ProfilePage,
+                'ProfileSetting' => $ProfileSetting,
+                'phone_numbers' => $phone_numbers,
             ]);
         } else {
             return redirect()->route('home', ['lang' => $this->selectedLanguage->abbreviation]);
@@ -251,7 +255,7 @@ class PhoneController extends Controller
 
             $twilio = new Client($sid, $token);
             $to = $phone->phone;
-            $message = "ProximaRide: Your verification code is: $verificationCode \n This code will expire in 30 minutes." ;
+            $message = "ProximaRide: Your verification code is: $verificationCode \n This code will expire in 30 minutes.";
 
             try {
                 if (env('APP_ENV') != 'local') {
@@ -341,12 +345,12 @@ class PhoneController extends Controller
             'category' => 'system',
             'receiver_id' => $user->id,
             'posted_by' => $user->id,
-                'message' => getNotificationMessageText(
-                    'phone_removed_from_profile',
-                    $user,
-                    [],
-                    'Phone number removed from your profile'
-                ),
+            'message' => getNotificationMessageText(
+                'phone_removed_from_profile',
+                $user,
+                [],
+                'Phone number removed from your profile'
+            ),
             'status' => 'phone',
             'notification_type' => 'phone',
         ]);
@@ -429,7 +433,7 @@ class PhoneController extends Controller
 
     public function phoneCode($lang = null)
     {
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
@@ -477,7 +481,7 @@ class PhoneController extends Controller
 
     public function phoneCodeStep($lang = null)
     {
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
         }
@@ -576,7 +580,7 @@ class PhoneController extends Controller
                     $code,
                     $existingRecord->twilio_verify_sid
                 );
-                
+
                 if ($verifyResult['success']) {
                     $isValid = true;
                     // Delete the verification record
@@ -587,21 +591,21 @@ class PhoneController extends Controller
             // No matching record by code - try to find by phone number for Twilio Verify (where code is empty in DB)
             $user_id = auth()->user()->id;
             $phone_numbers = PhoneNumber::where('user_id', $user_id)->get();
-            
+
             foreach ($phone_numbers as $phone) {
                 $phoneRecord = DB::table('phone_verifications')
                     ->where('phone_number_id', $phone->id)
                     ->whereNotNull('twilio_verify_sid')
                     ->where('expires_at', '>', Carbon::now())
                     ->first();
-                
+
                 if ($phoneRecord) {
                     $verifyResult = $this->checkVerificationViaTwilioVerify(
                         $phone->phone,
                         $code,
                         $phoneRecord->twilio_verify_sid
                     );
-                    
+
                     if ($verifyResult['success']) {
                         $isValid = true;
                         $phone_number = $phone;
@@ -637,14 +641,14 @@ class PhoneController extends Controller
 
             // Check for return URL in session (to redirect back to original page)
             $returnUrl = session('return_url_after_action');
-            
+
             // Handle AJAX requests
             if ($request->ajax() || $request->wantsJson()) {
                 $response = [
                     'success' => true,
                     'message' => $message->phone_verified_message ?? 'Phone number verified successfully'
                 ];
-                
+
                 if ($request->step) {
                     $response['redirect'] = route('profile', ['lang' => $selectedLanguage->abbreviation]);
                     $response['message'] = $message->all_set_steps_message ?? "You're all set! Welcome to ProximaRide — let's get you on the road.";
@@ -655,29 +659,29 @@ class PhoneController extends Controller
                 } else {
                     $response['redirect'] = route('phone', ['lang' => $selectedLanguage->abbreviation]);
                 }
-                
+
                 session()->forget('return_url_after_action');
                 return response()->json($response);
             }
-            
+
             // Handle regular form submissions (non-AJAX)
             if ($request->step) {
                 session()->forget('return_url_after_action');
                 return redirect()->route('profile', ['lang' => $selectedLanguage->abbreviation])->with('message', $message->all_set_steps_message ?? "You're all set! Welcome to ProximaRide — let's get you on the road.");
             }
-            
+
             // If return URL exists, redirect there
             if ($returnUrl) {
                 session()->forget('return_url_after_action');
                 return redirect($returnUrl)->with('success', $message->phone_verified_message ?? 'Phone number verified successfully');
             }
-            
+
             // Legacy support for page parameter
             if ($request->page && $request->page == "booking") {
                 session()->forget('return_url_after_action');
                 return redirect()->back();
             }
-            
+
             session()->forget('return_url_after_action');
             return redirect()->route('phone', ['lang' => $selectedLanguage->abbreviation])->with('message', $message->phone_verified_message);
         }

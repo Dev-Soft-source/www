@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class Language extends Model
 {
     use HasFactory;
+    private const ALL_CACHE_KEY = 'settings:languages:all';
 
     protected $fillable = [
         'name',
@@ -17,6 +19,17 @@ class Language extends Model
         'direction',
         'flag_icon',
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => Cache::forget(self::ALL_CACHE_KEY));
+        static::deleted(fn () => Cache::forget(self::ALL_CACHE_KEY));
+    }
+
+    public static function getAllCached()
+    {
+        return Cache::rememberForever(self::ALL_CACHE_KEY, fn () => static::all());
+    }
 
 
     public function getFlagIconAttribute($value)

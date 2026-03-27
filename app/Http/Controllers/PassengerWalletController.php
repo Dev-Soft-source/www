@@ -50,7 +50,7 @@ class PassengerWalletController extends Controller
             ->orderBy('id', 'desc')
             ->paginate(6);
 
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
@@ -137,7 +137,7 @@ class PassengerWalletController extends Controller
     {
         $walletSettingPage = null;
 
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
@@ -223,7 +223,7 @@ class PassengerWalletController extends Controller
             ->orderBy('id', 'desc')
             ->paginate(6);
 
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
@@ -355,7 +355,7 @@ class PassengerWalletController extends Controller
                 'dr_amount' => $amount,
                 'stripe_id' => $provider === 'stripe' ? $providerId : null,
                 'paypal_id' => $provider === 'paypal' ? $providerId : null,
-                'added_date'=> Carbon::now(),
+                'added_date' => Carbon::now(),
             ]);
 
             $data = [
@@ -395,7 +395,7 @@ class PassengerWalletController extends Controller
                     'amount'        => $amountCents,
                     'currency'      => 'CAD',
                     'customer'      => $user->stripe_customer_id,
-                    'payment_method'=> $stripePaymentMethodId,
+                    'payment_method' => $stripePaymentMethodId,
                     'off_session'   => true,
                     'confirm'       => true,
                 ]);
@@ -444,7 +444,6 @@ class PassengerWalletController extends Controller
             }
 
             return redirect()->route('paypal.cancel');
-
         } elseif ($request->card_id == 'google_pay' || $request->card_id == 'apple_pay' || $request->card_id == 'credit_card') {
             // Use the inline Stripe token for a newly entered card, otherwise use the user's primary saved method
             $typeMap = [
@@ -521,7 +520,6 @@ class PassengerWalletController extends Controller
             }
 
             return $handleSuccessfulTopUp('stripe', $paymentIntentOrResponse->id, $card);
-
         } elseif ($request->card_id == 'google_pay') {
             // Kept for backward compatibility; primary Google Pay handling is above.
             return $genericErrorResponse();
@@ -591,7 +589,6 @@ class PassengerWalletController extends Controller
             }
 
             return $handleSuccessfulTopUp('stripe', $paymentIntentOrResponse->id, $card);
-
         }
 
         return redirect()->back()->with(['error' => $message->general_error_message ?? 'top up not found']);

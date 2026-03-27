@@ -11,7 +11,8 @@ use Illuminate\Http\Request;
 
 class PostRideAgainController extends Controller
 {
-    public function CurrentRides($lang = null){
+    public function CurrentRides($lang = null)
+    {
         $rides = Ride::where('added_by', auth()->user()->id)
             ->notCancelled()
             ->where(function ($query) {
@@ -25,8 +26,8 @@ class PostRideAgainController extends Controller
             })
             ->orderBy('id', 'desc')
             ->paginate(6);
-        
-        $languages = Language::all();
+
+        $languages = Language::getAllCached();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
@@ -50,31 +51,32 @@ class PostRideAgainController extends Controller
         $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
             // Ratings where type is 1 and ride_id belongs to the user
             $query->where('type', '1')
-                  ->whereHas('ride', function ($query) use ($user_id) {
-                      $query->where('added_by', $user_id);
-                  });
+                ->whereHas('ride', function ($query) use ($user_id) {
+                    $query->where('added_by', $user_id);
+                });
         })
-        ->orWhere(function ($query) use ($user_id) {
-            // Ratings where type is 2 and booking_id belongs to the user
-            $query->where('type', '2')
-                  ->whereHas('booking', function ($query) use ($user_id) {
-                      $query->where('user_id', $user_id);
-                  });
-        })
-        ->orWhere(function ($query) use ($user_id) {
-            // Ratings where type is null and receiver_id belongs to the user
-            $query->where('type', null)
-                  ->whereHas('receiver', function ($query) use ($user_id) {
-                      $query->where('id', $user_id);
-                  });
-        })
-        ->orderBy('id', 'desc')
-        ->get();
-        return view('post_ride_again',['rides' => $rides, 'tripsPage' => $tripsPage, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
+            ->orWhere(function ($query) use ($user_id) {
+                // Ratings where type is 2 and booking_id belongs to the user
+                $query->where('type', '2')
+                    ->whereHas('booking', function ($query) use ($user_id) {
+                        $query->where('user_id', $user_id);
+                    });
+            })
+            ->orWhere(function ($query) use ($user_id) {
+                // Ratings where type is null and receiver_id belongs to the user
+                $query->where('type', null)
+                    ->whereHas('receiver', function ($query) use ($user_id) {
+                        $query->where('id', $user_id);
+                    });
+            })
+            ->orderBy('id', 'desc')
+            ->get();
+        return view('post_ride_again', ['rides' => $rides, 'tripsPage' => $tripsPage, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
     }
 
-    public function PastRides($lang = null){
-        $rides = Ride::where('added_by',auth()->user()->id)
+    public function PastRides($lang = null)
+    {
+        $rides = Ride::where('added_by', auth()->user()->id)
             ->notCancelled()
             ->where(function ($query) {
                 $query->where(function ($query) {
@@ -87,7 +89,7 @@ class PostRideAgainController extends Controller
             })
             ->orderBy('id', 'desc')
             ->paginate(6);
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
@@ -112,32 +114,33 @@ class PostRideAgainController extends Controller
             $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
                 // Ratings where type is 1 and ride_id belongs to the user
                 $query->where('type', '1')
-                      ->whereHas('ride', function ($query) use ($user_id) {
-                          $query->where('added_by', $user_id);
-                      });
+                    ->whereHas('ride', function ($query) use ($user_id) {
+                        $query->where('added_by', $user_id);
+                    });
             })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($user_id) {
-                          $query->where('user_id', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is null and receiver_id belongs to the user
-                $query->where('type', null)
-                      ->whereHas('receiver', function ($query) use ($user_id) {
-                          $query->where('id', $user_id);
-                      });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is 2 and booking_id belongs to the user
+                    $query->where('type', '2')
+                        ->whereHas('booking', function ($query) use ($user_id) {
+                            $query->where('user_id', $user_id);
+                        });
+                })
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is null and receiver_id belongs to the user
+                    $query->where('type', null)
+                        ->whereHas('receiver', function ($query) use ($user_id) {
+                            $query->where('id', $user_id);
+                        });
+                })
+                ->orderBy('id', 'desc')
+                ->get();
         }
-        return view('post_ride_again',['rides' => $rides,'tripsPage' => $tripsPage,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
+        return view('post_ride_again', ['rides' => $rides, 'tripsPage' => $tripsPage, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
     }
 
-    public function CancelledRides($lang = null){
-        $rides = Ride::where('added_by',auth()->user()->id)
+    public function CancelledRides($lang = null)
+    {
+        $rides = Ride::where('added_by', auth()->user()->id)
             ->cancelled()
             ->orderBy('id', 'desc')
             ->paginate(6);
@@ -152,29 +155,32 @@ class PostRideAgainController extends Controller
             $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
                 // Ratings where type is 1 and ride_id belongs to the user
                 $query->where('type', '1')
-                      ->whereHas('ride', function ($query) use ($user_id) {
-                          $query->where('added_by', $user_id);
-                      });
+                    ->whereHas('ride', function ($query) use ($user_id) {
+                        $query->where('added_by', $user_id);
+                    });
             })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($user_id) {
-                          $query->where('user_id', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is null and receiver_id belongs to the user
-                $query->where('type', null)
-                      ->whereHas('receiver', function ($query) use ($user_id) {
-                          $query->where('id', $user_id);
-                      });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is 2 and booking_id belongs to the user
+                    $query->where('type', '2')
+                        ->whereHas('booking', function ($query) use ($user_id) {
+                            $query->where('user_id', $user_id);
+                        });
+                })
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is null and receiver_id belongs to the user
+                    $query->where('type', null)
+                        ->whereHas('receiver', function ($query) use ($user_id) {
+                            $query->where('id', $user_id);
+                        });
+                })
+                ->orderBy('id', 'desc')
+                ->get();
         }
-        return view('post_ride_again',['rides' => $rides,
-        'tripsPage' => $tripsPage,'notifications' => $notifications,
-        'postRidePage' => $postRidePage]);
+        return view('post_ride_again', [
+            'rides' => $rides,
+            'tripsPage' => $tripsPage,
+            'notifications' => $notifications,
+            'postRidePage' => $postRidePage
+        ]);
     }
 }

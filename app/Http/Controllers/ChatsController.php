@@ -37,7 +37,7 @@ class ChatsController extends Controller
         if (!is_string($closeUrl) || !str_starts_with($closeUrl, url('/'))) {
             $closeUrl = route('notifications', ['lang' => app()->getLocale()]);
         }
-        
+
         // Validate that ride and passenger exist
         if (!$ride || !$passenger) {
             return redirect()->route('my_chats', ['lang' => $selectedLanguage->abbreviation ?? app()->getLocale()])
@@ -45,12 +45,16 @@ class ChatsController extends Controller
         }
 
         return view('chat', [
-            'ride' => $ride, 'passenger' => $passenger, 'chatsPage' => $chatsPage, 'closeUrl' => $closeUrl]);
+            'ride' => $ride,
+            'passenger' => $passenger,
+            'chatsPage' => $chatsPage,
+            'closeUrl' => $closeUrl
+        ]);
     }
 
     public function chatDetail($lang = null, $id, $passenger)
     {
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
@@ -96,13 +100,13 @@ class ChatsController extends Controller
 
         $ride = Ride::whereId($id)->first();
         $passenger = User::whereId($passenger)->first();
-        
+
         // Validate that ride and passenger exist
         if (!$ride || !$passenger) {
             return redirect()->route('my_chats', ['lang' => $selectedLanguage->abbreviation ?? app()->getLocale()])
                 ->with('error', 'Ride or passenger not found.');
         }
-        
+
         return view('chat_detail', ['languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'notifications' => $notifications, 'ride' => $ride, 'passenger' => $passenger, 'chatsPage' => $chatsPage]);
     }
 
@@ -111,14 +115,14 @@ class ChatsController extends Controller
         if (!auth()->user()) {
             return collect([]); // Return empty collection if user is not authenticated
         }
-        
+
         $user_id = auth()->user()->id;
         return Message::with('user', 'rideDetail')
             ->where('ride_id', $id)
             ->where(function ($query) use ($user_id, $userId) {
                 $query->where('sender', $user_id)
                     ->where('receiver', $userId)
-                    ->orWhere(function($q) use ($user_id, $userId) {
+                    ->orWhere(function ($q) use ($user_id, $userId) {
                         $q->where('sender', $userId)
                             ->where('receiver', $user_id);
                     });
@@ -132,7 +136,7 @@ class ChatsController extends Controller
         if (!auth()->user()) {
             return collect([]); // Return empty collection if user is not authenticated
         }
-        
+
         $user_id = auth()->user()->id;
         return Message::with('user', 'rideDetail')
             ->where(function ($query) use ($user_id, $userId) {
@@ -150,11 +154,11 @@ class ChatsController extends Controller
     public function sendMessage(Request $request)
     {
 
-        
+
         $selectedLanguage = session('selectedLanguage');
         $messages = null;
         if ($selectedLanguage) {
-            
+
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
             $messages = SuccessMessagesSettingDetail::where('language_id', $request->lang_id)->select('message_limit_exceeded_message')->first();
         } else {
@@ -227,12 +231,11 @@ class ChatsController extends Controller
                         $booking = Booking::where('ride_id', $request->ride_id)->where('user_id', $user->id)->first();
                         $isBooked = !is_null($booking);
                         $type = $user->id === $ride->added_by ? 'driver' : 'passenger';
-                        if ($booking ) {
+                        if ($booking) {
 
-                            $data = [ 'isBooked' => $isBooked,'type' => $type,'message' => $request->input('message'), 'receiverFirstName' => $receiver->first_name, 'senderFirstName' => $user->first_name, 'senderLastName' => $user->last_name, 'seats' => $booking->seats, 'price' => $booking->fare, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => $booking->ride->date, 'time' => $booking->ride->time];
+                            $data = ['isBooked' => $isBooked, 'type' => $type, 'message' => $request->input('message'), 'receiverFirstName' => $receiver->first_name, 'senderFirstName' => $user->first_name, 'senderLastName' => $user->last_name, 'seats' => $booking->seats, 'price' => $booking->fare, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => $booking->ride->date, 'time' => $booking->ride->time];
                             Mail::to($receiver->email)->queue(new ReceiveChatMessageMail($data));
-                        }
-                        else {
+                        } else {
                             $data = [
                                 'isBooked' => false,
                                 'type' => $type,
@@ -278,10 +281,9 @@ class ChatsController extends Controller
                     $isBooked = !is_null($booking);
                     if ($booking) {
 
-                        $data = [ 'isBooked' => $isBooked,'type' => $type,'message' => $request->input('message'), 'receiverFirstName' => $receiver->first_name, 'senderFirstName' => $user->first_name, 'senderLastName' => $user->last_name, 'seats' => $booking->seats, 'price' => $booking->fare, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => $booking->ride->date, 'time' => $booking->ride->time];
+                        $data = ['isBooked' => $isBooked, 'type' => $type, 'message' => $request->input('message'), 'receiverFirstName' => $receiver->first_name, 'senderFirstName' => $user->first_name, 'senderLastName' => $user->last_name, 'seats' => $booking->seats, 'price' => $booking->fare, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => $booking->ride->date, 'time' => $booking->ride->time];
                         Mail::to($receiver->email)->queue(new ReceiveChatMessageMail($data));
-                    }
-                    else {
+                    } else {
                         $data = [
                             'isBooked' => false,
                             'type' => $type,
@@ -324,10 +326,8 @@ class ChatsController extends Controller
                     $isBooked = !is_null($booking);
                     if ($booking) {
 
-                        $data = [ 'isBooked' => $isBooked,'type' => $type,'message' => $request->input('message'), 'receiverFirstName' => $receiver->first_name, 'senderFirstName' => $user->first_name, 'senderLastName' => $user->last_name, 'seats' => $booking->seats, 'price' => $booking->fare, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => $booking->ride->date, 'time' => $booking->ride->time];
+                        $data = ['isBooked' => $isBooked, 'type' => $type, 'message' => $request->input('message'), 'receiverFirstName' => $receiver->first_name, 'senderFirstName' => $user->first_name, 'senderLastName' => $user->last_name, 'seats' => $booking->seats, 'price' => $booking->fare, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => $booking->ride->date, 'time' => $booking->ride->time];
                         Mail::to($receiver->email)->queue(new ReceiveChatMessageMail($data));
-
-                       
                     } else {
                         $data = [
                             'isBooked' => false,
@@ -346,7 +346,6 @@ class ChatsController extends Controller
                         Mail::to($receiver->email)->queue(new ReceiveChatMessageMail($data));
                     }
                 }
-                
             }
 
             if (empty($rideFirstMessage)) {
@@ -373,17 +372,16 @@ class ChatsController extends Controller
             }
 
             $message_count = Message::where('sender', $user->id)->where('receiver', $request->input('userId'))->whereBetween('created_at', [Carbon::today(), Carbon::tomorrow()])->count();
-            
+
             if (isset($contact_count) && $message_count > 0) {
 
                 $contactUserId = explode(',', $contact_count->contact_user_id);
                 if (in_array($request->input('userId'), $contactUserId)) {
-                    
                 } else {
                     $contact_count->user_inbox_count = $contact_count->user_inbox_count + 1;
-            
+
                     $contacted_by = $contact_count->contact_user_id;
-                    
+
                     if (!empty($contacted_by)) {
                         $contacted_by_array = explode(',', $contacted_by);
                         if (!in_array($request->input('userId'), $contacted_by_array)) {
@@ -392,11 +390,11 @@ class ChatsController extends Controller
                     } else {
                         $contacted_by_array = [$request->input('userId')];
                     }
-                
+
                     $contact_count->contact_user_id = implode(',', $contacted_by_array);
-                
+
                     $contact_count->save();
-                    }
+                }
             } elseif (isset($contact_count) && $message_count == 0) {
             } else {
                 $message_count = new UserMessageCount();
@@ -419,7 +417,7 @@ class ChatsController extends Controller
             }
 
             // Assuming $user and $fcmToken are defined
-            
+
             $receiver = User::find($request->userId);
             $fcmService = new FCMService();
             $fcm_tokens = FCMToken::where('user_id', $receiver->id)->get();
@@ -490,5 +488,4 @@ class ChatsController extends Controller
         }
         return ['status' => $message->message_limit_exceeded_message ?? "Message limit exceeded"];
     }
-
 }

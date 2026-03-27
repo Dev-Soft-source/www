@@ -19,7 +19,6 @@ use App\Http\Controllers\DriverController;
 use App\Http\Controllers\DriverWalletController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\ForTouristsController;
-use App\Http\Controllers\FolkRideController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
@@ -34,8 +33,6 @@ use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\PayoutController;
 use App\Http\Controllers\PayPalWebhookController;
 use App\Http\Controllers\PhoneController;
-use App\Http\Controllers\PinkRideController;
-use App\Http\Controllers\ProximaLocalRideController;
 use App\Http\Controllers\PostRideAgainController;
 use App\Http\Controllers\PrivacyPolicyController;
 use App\Http\Controllers\ProfileController;
@@ -347,8 +344,7 @@ Route::get('{lang?}/driver-wallet-paid-out', [DriverWalletController::class, 'pa
 Route::get('{lang?}/ride-fair-details/{id}', [DriverWalletController::class, 'detail'])->name('ride_fair_details')->middleware('auth');
 
 Route::get('{lang?}/my-trips', [MyTripController::class, 'MyTrips'])->name('my_trips')->middleware('auth');
-// Route::get('{lang?}/past-trips', [MyTripController::class, 'PastTrips'])->name('past_trips')->middleware('auth');
-// Route::get('{lang?}/cancelled-trips', [MyTripController::class, 'CancelledTrips'])->name('cancelled_trips')->middleware('auth');
+
 
 Route::get('{lang?}/welcome-on-board', [ProfileController::class, 'index'])->name('profile');
 Route::get('{lang?}/profile-info/{id}', [ProfileController::class, 'profileInfo'])->name('profile_info');

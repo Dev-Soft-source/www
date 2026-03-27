@@ -170,12 +170,10 @@ class MyRideController extends Controller
 
         $setting = ReviewSetting::getCached();
         $cancelSetting = CancelRideSetting::getCached();
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
         }
-
-        $postRidePage = $this->getPostRidePageWithSettingDetail();
 
 
         $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
@@ -203,7 +201,6 @@ class MyRideController extends Controller
 
         $firm_cancellation_discount = SiteSetting::value('frim_discount');
         View::share([
-            'postRidePage' => $postRidePage,
             'rideDetailPage' => $rideDetailPage,
             'firm_cancellation_discount' => $firm_cancellation_discount,
         ]);
@@ -624,7 +621,7 @@ class MyRideController extends Controller
             }])->first();
         $setting = ReviewSetting::getCached();
         $cancelSetting = CancelRideSetting::getCached();
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         $myPassengerPage = null;
         $messages = null;
 
@@ -728,7 +725,7 @@ class MyRideController extends Controller
     {
         $ride = Ride::where('id', $id)->first();
         $setting = SiteSetting::getCached();
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);

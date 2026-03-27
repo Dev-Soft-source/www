@@ -20,8 +20,9 @@ use Illuminate\Support\Facades\Validator;
 
 class VerifyDriverController extends Controller
 {
-    public function index($lang = null){
-        $languages = Language::all();
+    public function index($lang = null)
+    {
+        $languages = Language::getAllCached();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
@@ -51,34 +52,35 @@ class VerifyDriverController extends Controller
             $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
                 // Ratings where type is 1 and ride_id belongs to the user
                 $query->where('type', '1')
-                      ->whereHas('ride', function ($query) use ($user_id) {
-                          $query->where('added_by', $user_id);
-                      });
+                    ->whereHas('ride', function ($query) use ($user_id) {
+                        $query->where('added_by', $user_id);
+                    });
             })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($user_id) {
-                          $query->where('user_id', $user_id);
-                      });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is null and receiver_id belongs to the user
-                $query->where('type', null)
-                      ->whereHas('receiver', function ($query) use ($user_id) {
-                          $query->where('id', $user_id);
-                      });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is 2 and booking_id belongs to the user
+                    $query->where('type', '2')
+                        ->whereHas('booking', function ($query) use ($user_id) {
+                            $query->where('user_id', $user_id);
+                        });
+                })
+                ->orWhere(function ($query) use ($user_id) {
+                    // Ratings where type is null and receiver_id belongs to the user
+                    $query->where('type', null)
+                        ->whereHas('receiver', function ($query) use ($user_id) {
+                            $query->where('id', $user_id);
+                        });
+                })
+                ->orderBy('id', 'desc')
+                ->get();
 
-            return view('verify_driver',['reviewSetting' => $reviewSetting,'ProfilePage' => $ProfilePage,'ProfileSetting' => $ProfileSetting,'driverSettingPage' => $driverSettingPage,'user' => $user,'notifications' => $notifications,'languages' => $languages,'selectedLanguage' => $selectedLanguage]);
+            return view('verify_driver', ['reviewSetting' => $reviewSetting, 'ProfilePage' => $ProfilePage, 'ProfileSetting' => $ProfileSetting, 'driverSettingPage' => $driverSettingPage, 'user' => $user, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
         } else {
             return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation]);
         }
     }
 
-    public function update($id, Request $request){
+    public function update($id, Request $request)
+    {
         $customMessages = [
             'uploaded' => 'The image is not uploaded yet',
             'max' => 'Can not upload image size greater than 10MB',
@@ -88,17 +90,17 @@ class VerifyDriverController extends Controller
             $file = $request->file('image');
             $filename = $file->getClientOriginalName();
             $destination_path = public_path('/driver_liscenses');
-            $file->move($destination_path,$filename);
+            $file->move($destination_path, $filename);
         } elseif ($request->hasFile('existing_image')) {
             $file = $request->file('existing_image');
             $filename = $file->getClientOriginalName();
             $destination_path = public_path('/driver_liscenses');
-            $file->move($destination_path,$filename);
+            $file->move($destination_path, $filename);
         } elseif ($request->has('existing_image') && $request->input('existing_image') !== null) {
             $filename = $request->input('existing_image');
         }
 
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'image' => $request->input('existing_image') !== null ? 'nullable' : 'required|file|mimes:jpeg,png,jpg,gif|max:10240',
         ], $customMessages);
 
@@ -156,17 +158,18 @@ class VerifyDriverController extends Controller
     }
 
 
-    public function remove(Request $request){
+    public function remove(Request $request)
+    {
 
         $user_id = auth()->user()->id;
-        
+
         User::whereId($user_id)->update([
             'driver_liscense' => NUll,
             'driver_license_original_upload' => NULL,
             'driver_license_upload' => NULL,
             'driver' => 0,
         ]);
-        
+
         return response()->json(['status' => 'success']);
     }
 }

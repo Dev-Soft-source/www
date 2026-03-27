@@ -10,8 +10,9 @@ class LanguageController extends Controller
 {
     use StatusResponser;
 
-    public function index(){
-        $languages = Language::all();
+    public function index()
+    {
+        $languages = Language::getAllCached();
 
         $data = ['languages' => $languages];
         return $this->successResponse($data, 'Languages get successfully');

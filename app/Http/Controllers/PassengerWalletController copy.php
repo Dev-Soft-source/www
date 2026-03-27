@@ -48,7 +48,7 @@ class PassengerWalletController extends Controller
             ->orderBy('id', 'desc')
             ->paginate(6);
 
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
@@ -135,7 +135,7 @@ class PassengerWalletController extends Controller
     {
         $walletSettingPage = null;
 
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
@@ -221,7 +221,7 @@ class PassengerWalletController extends Controller
             ->orderBy('id', 'desc')
             ->paginate(6);
 
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
@@ -438,12 +438,11 @@ class PassengerWalletController extends Controller
             if (isset($user->email_notification) && $user->email_notification == 1) {
                 Mail::to($user->email)->queue(new TopUpReceiptMail($data));
             }
-            
+
             return redirect()->route('get_top_up_balance', ['lang' => $this->selectedLanguage->abbreviation])->with(['error' => $message->topup_balance_success_message ?? "You have successfully buy top up balance"]);
         } else {
             // 
             $card_id = $request->card_id;
-
         }
 
         return redirect()->back()->with(['error' => $message->general_error_message ?? 'top up not found']);

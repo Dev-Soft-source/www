@@ -26,14 +26,34 @@ use Illuminate\Support\Facades\Validator;
 
 class ProfileController extends Controller
 {
-    public function index($lang = null){
-        
+    public function index($lang = null)
+    {
+
         if (auth()->check()) {
+
+            $user = auth()->user();
+            if ($user->step1 == 0) {
+                // personal information
+                return redirect()->route('step1to5', ['lang' => $lang]);
+            } elseif ($user->step2 == 0) {
+                // profile image
+                return redirect()->route('step2to5', ['lang' => $lang]);
+            } elseif ($user->step3 == 0) {
+                // my vehicle information
+                return redirect()->route('step3to5', ['lang' => $lang]);
+            } elseif ($user->step4 == 0) {
+                // driver license information
+                return redirect()->route('step4to5', ['lang' => $lang]);
+            } elseif ($user->step5 == 0) {
+                // phone number verification
+                return redirect()->route('step5to5', ['lang' => $lang]);
+            }
+            
             $editProfilePage = EditProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
             $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
             $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
             $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-            
+
             $user = auth()->user();
             $user_id = $user->id;
 
@@ -41,31 +61,32 @@ class ProfileController extends Controller
             $ratings = Rating::where(function ($query) use ($user_id) {
                 // Ratings where type is 2 and user_id belongs to the user
                 $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($user_id) {
-                          $query->where('user_id', $user_id);
-                      });
+                    ->whereHas('booking', function ($query) use ($user_id) {
+                        $query->where('user_id', $user_id);
+                    });
                 // OR Ratings where type is 1 and ride_id belongs to the user
                 $query->orWhere(function ($query) use ($user_id) {
                     $query->where('type', '1')
-                          ->whereHas('ride', function ($query) use ($user_id) {
-                              $query->where('added_by', $user_id);
-                          });
+                        ->whereHas('ride', function ($query) use ($user_id) {
+                            $query->where('added_by', $user_id);
+                        });
                 });
             })
-            ->with(['from' => function ($query) {
-                $query->withTrashed(); // Include soft-deleted users
-            }])
-            ->where('status', 1)
-            ->orderBy('id', 'desc')
-            ->get();
+                ->with(['from' => function ($query) {
+                    $query->withTrashed(); // Include soft-deleted users
+                }])
+                ->where('status', 1)
+                ->orderBy('id', 'desc')
+                ->get();
 
-            return view('profile',[
+            return view('profile', [
                 'user' => $user,
                 'ratings' => $ratings,
                 'editProfilePage' => $editProfilePage,
                 'reviewSetting' => $reviewSetting,
                 'ProfileSetting' => $ProfileSetting,
-                'ProfilePage' => $ProfilePage]);
+                'ProfilePage' => $ProfilePage
+            ]);
         } else {
             return redirect()->route('home', ['lang' => $this->selectedLanguage->abbreviation]);
         }
@@ -74,37 +95,39 @@ class ProfileController extends Controller
     /**
      * Driver profile information including ratings
      */
-    public function profileInfo($lang = null, $id){
+    public function profileInfo($lang = null, $id)
+    {
 
         $user = User::whereId($id)->first();
         $ratings = Rating::where(function ($query) use ($id) {
             // Ratings where type is 2 and user_id belongs to the user
             $query->where('type', '2')
-                  ->whereHas('booking', function ($query) use ($id) {
-                      $query->where('user_id', $id);
-                  })
-                  ->where('status', 1);
+                ->whereHas('booking', function ($query) use ($id) {
+                    $query->where('user_id', $id);
+                })
+                ->where('status', 1);
 
             // OR Ratings where type is 1 and ride_id belongs to the user
             $query->orWhere(function ($query) use ($id) {
                 $query->where('type', '1')
-                      ->whereHas('ride', function ($query) use ($id) {
-                          $query->where('added_by', $id);
-                      })
-                      ->where('status', 1);
+                    ->whereHas('ride', function ($query) use ($id) {
+                        $query->where('added_by', $id);
+                    })
+                    ->where('status', 1);
             });
         })
-        ->with(['from' => function ($query) {
-            $query->withTrashed(); // Include soft-deleted users
-        }])
-        ->orderBy('id', 'desc')
-        ->get();
+            ->with(['from' => function ($query) {
+                $query->withTrashed(); // Include soft-deleted users
+            }])
+            ->orderBy('id', 'desc')
+            ->get();
 
-        return view('profile_info',['user' => $user,'ratings' => $ratings]);
+        return view('profile_info', ['user' => $user, 'ratings' => $ratings]);
     }
 
-    public function driverInfo($lang = null, $id){
-        $languages = Language::all();
+    public function driverInfo($lang = null, $id)
+    {
+        $languages = Language::getAllCached();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);
@@ -131,49 +154,49 @@ class ProfileController extends Controller
         $ratings = Rating::where(function ($query) use ($driver_id) {
             // Ratings where type is 2 and user_id belongs to the user
             $query->where('type', '2')
-                  ->whereHas('booking', function ($query) use ($driver_id) {
-                      $query->where('user_id', $driver_id);
-                  })
-                  ->where('status', 1);
+                ->whereHas('booking', function ($query) use ($driver_id) {
+                    $query->where('user_id', $driver_id);
+                })
+                ->where('status', 1);
 
             // OR Ratings where type is 1 and ride_id belongs to the user
             $query->orWhere(function ($query) use ($driver_id) {
                 $query->where('type', '1')
-                      ->whereHas('ride', function ($query) use ($driver_id) {
-                          $query->where('added_by', $driver_id);
-                      })
-                      ->where('status', 1);
+                    ->whereHas('ride', function ($query) use ($driver_id) {
+                        $query->where('added_by', $driver_id);
+                    })
+                    ->where('status', 1);
             });
         })
-        ->with(['from' => function ($query) {
-            $query->withTrashed(); // Include soft-deleted users
-        }])
-        ->orderBy('id', 'desc')
-        ->get();
+            ->with(['from' => function ($query) {
+                $query->withTrashed(); // Include soft-deleted users
+            }])
+            ->orderBy('id', 'desc')
+            ->get();
 
         $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($driver_id) {
             // Ratings where type is 1 and ride_id belongs to the user
             $query->where('type', '1')
-                  ->whereHas('ride', function ($query) use ($driver_id) {
-                      $query->where('added_by', $driver_id);
-                  });
+                ->whereHas('ride', function ($query) use ($driver_id) {
+                    $query->where('added_by', $driver_id);
+                });
         })
-        ->orWhere(function ($query) use ($driver_id) {
-            // Ratings where type is 2 and booking_id belongs to the user
-            $query->where('type', '2')
-                  ->whereHas('booking', function ($query) use ($driver_id) {
-                      $query->where('user_id', $driver_id);
-                  });
-        })
-        ->orWhere(function ($query) use ($driver_id) {
-            // Ratings where type is null and receiver_id belongs to the user
-            $query->where('type', null)
-                  ->whereHas('receiver', function ($query) use ($driver_id) {
-                      $query->where('id', $driver_id);
-                  });
-        })
-        ->orderBy('id', 'desc')
-        ->get();
+            ->orWhere(function ($query) use ($driver_id) {
+                // Ratings where type is 2 and booking_id belongs to the user
+                $query->where('type', '2')
+                    ->whereHas('booking', function ($query) use ($driver_id) {
+                        $query->where('user_id', $driver_id);
+                    });
+            })
+            ->orWhere(function ($query) use ($driver_id) {
+                // Ratings where type is null and receiver_id belongs to the user
+                $query->where('type', null)
+                    ->whereHas('receiver', function ($query) use ($driver_id) {
+                        $query->where('id', $driver_id);
+                    });
+            })
+            ->orderBy('id', 'desc')
+            ->get();
 
         $defaultLang = Language::where('is_default', 1)->first();
         $driverPage = $selectedLanguage && $defaultLang
@@ -188,9 +211,10 @@ class ProfileController extends Controller
             'driverPage' => $driverPage,
         ]);
     }
-    
-    public function edit($lang = null){
-        
+
+    public function edit($lang = null)
+    {
+
         $editProfilePage = EditProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
@@ -202,15 +226,23 @@ class ProfileController extends Controller
             $states = State::where('status', '1')->get();
             $cities = City::where('status', '1')->get();
 
-            return view('edit_profile',['editProfilePage' => $editProfilePage,'reviewSetting' => $reviewSetting,
-            'ProfilePage' => $ProfilePage,'ProfileSetting' => $ProfileSetting,'user' => $user,
-            'countries' => $countries,'states' => $states,'cities' => $cities]);
+            return view('edit_profile', [
+                'editProfilePage' => $editProfilePage,
+                'reviewSetting' => $reviewSetting,
+                'ProfilePage' => $ProfilePage,
+                'ProfileSetting' => $ProfileSetting,
+                'user' => $user,
+                'countries' => $countries,
+                'states' => $states,
+                'cities' => $cities
+            ]);
         } else {
             return redirect()->route('home', ['lang' => $this->selectedLanguage->abbreviation]);
         }
     }
 
-    public function update($id, Request $request){
+    public function update($id, Request $request)
+    {
         $customMessages = [
             'string' => 'The :attribute must be a string',
             'max' => 'The :attribute may not be greater than :max characters',
@@ -222,9 +254,9 @@ class ProfileController extends Controller
         ];
 
         $filename = "";
-        
+
         // Validate first before moving the file
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:25',
             'last_name' => 'required|string|max:25',
             'type' => 'nullable',
@@ -257,12 +289,12 @@ class ProfileController extends Controller
                 $file = $request->file('government_issued_id');
                 $filename = $file->getClientOriginalName();
                 $destination_path = public_path('users_government_ids');
-                
+
                 // Ensure the directory exists
                 if (!file_exists($destination_path)) {
                     mkdir($destination_path, 0755, true);
                 }
-                
+
                 // Move the file
                 $file->move($destination_path, $filename);
             } catch (\Exception $e) {
@@ -275,31 +307,31 @@ class ProfileController extends Controller
         } elseif ($request->has('existing_image')) {
             $filename = $request->input('existing_image');
         }
-        $isAdmin=Auth::guard('admin')->user();
-          User::whereId($id)->update([
-              'first_name' => $request->first_name,
-              'last_name' => $request->last_name,
-              'type' => $request->type ?? '',
-              'gender' => $request->gender,
-              'dob' => $request->dob,
-              'country' => $request->country,
-              'address' => $request->address,
-              'state' => $request->state,
-              'city' => $request->city,
-              'zipcode' => $request->zipcode,
-              'government_issued_id' => $filename == "" ? NULL : $filename,
-              'about' => $request->bio,
-              'updated_by' => $isAdmin ? $isAdmin->id : $id,
-              'email_notification' => isset($request->email_notification) ? 1 : 0,
-              'sms_notification' => isset($request->sms_notification) ? 1 : 0,
-              'profile_complete' => '1',
-          ]);
+        $isAdmin = Auth::guard('admin')->user();
+        User::whereId($id)->update([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'type' => $request->type ?? '',
+            'gender' => $request->gender,
+            'dob' => $request->dob,
+            'country' => $request->country,
+            'address' => $request->address,
+            'state' => $request->state,
+            'city' => $request->city,
+            'zipcode' => $request->zipcode,
+            'government_issued_id' => $filename == "" ? NULL : $filename,
+            'about' => $request->bio,
+            'updated_by' => $isAdmin ? $isAdmin->id : $id,
+            'email_notification' => isset($request->email_notification) ? 1 : 0,
+            'sms_notification' => isset($request->sms_notification) ? 1 : 0,
+            'profile_complete' => '1',
+        ]);
 
         $user = User::whereId($id)->first();
         $country = Country::whereId($user->country)->first();
         $admin = Admin::first();
 
-        
+
         $defaultLangId = Language::where('is_default', '1')->value('id');
 
         $data = [
@@ -330,7 +362,7 @@ class ProfileController extends Controller
                 $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('profile_update_message')->first();
             }
         }
-        
+
         return redirect()->route('profile', ['lang' => $selectedLanguage->abbreviation])->with('message', $message->profile_update_message);
     }
 }

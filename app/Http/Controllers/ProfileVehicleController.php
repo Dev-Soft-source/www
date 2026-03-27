@@ -259,7 +259,7 @@ class ProfileVehicleController extends Controller
                     ->with('uploaded_image', $filename ?? null);
             }
         }
-        
+
         // Handle new image upload - check this FIRST before anything else
         if ($request->hasFile('image')) {
             $file = $request->file('image');
@@ -350,7 +350,7 @@ class ProfileVehicleController extends Controller
         $user_id = $user->id;
 
         $message = null;
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         // Store the selected language in the session
         if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
             session(['selectedLanguage' => $lang]);

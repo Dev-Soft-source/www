@@ -23,22 +23,23 @@ class NotificationController extends Controller
 {
     use StatusResponser;
 
-    public function index(Request $request){
+    public function index(Request $request)
+    {
         $user = Auth::guard('sanctum')->user();
         $user_id = $user->id;
 
         $notifications = Notification::where('is_delete', '0');
 
         $bookingType = $paymentMethod = "";
-        if(isset($request->booking_type) && $request->booking_type != ""){
+        if (isset($request->booking_type) && $request->booking_type != "") {
             $bookingType = $request->booking_type;
         }
 
-        if(isset($request->payment_method) && $request->payment_method != ""){
+        if (isset($request->payment_method) && $request->payment_method != "") {
             $paymentMethod = $request->payment_method;
         }
 
-        if($bookingType == "" && $paymentMethod == ""){
+        if ($bookingType == "" && $paymentMethod == "") {
             $notifications = $notifications->where(function ($query) use ($user_id) {
                 $query->where(function ($query) use ($user_id) {
                     $query->where('type', '1')
@@ -55,16 +56,16 @@ class NotificationController extends Controller
                         ->where('receiver_id', $user_id);
                 });
             });
-        }else{
+        } else {
             $notifications = $notifications->where(function ($query) use ($user_id, $bookingType, $paymentMethod) {
                 $query->where(function ($query) use ($user_id, $bookingType, $paymentMethod) {
                     $query->where('type', '1')
                         ->whereHas('ride', function ($query) use ($user_id, $bookingType, $paymentMethod) {
                             $query->where('added_by', $user_id);
-                            if($bookingType != ""){
+                            if ($bookingType != "") {
                                 $query->where('booking_method', $bookingType);
                             }
-                            if($paymentMethod != ""){
+                            if ($paymentMethod != "") {
                                 $query->where('payment_method', $paymentMethod);
                             }
                         });
@@ -72,13 +73,13 @@ class NotificationController extends Controller
                     $query->where('type', '2')
                         ->whereHas('booking', function ($query) use ($user_id, $bookingType, $paymentMethod) {
                             $query->where('user_id', $user_id);
-                            if($bookingType != ""){
-                                $query->whereHas('ride', function($q) use($bookingType){
+                            if ($bookingType != "") {
+                                $query->whereHas('ride', function ($q) use ($bookingType) {
                                     $q->where('booking_method', $bookingType);
                                 });
                             }
-                            if($paymentMethod != ""){
-                                $query->whereHas('ride', function($q) use($paymentMethod){
+                            if ($paymentMethod != "") {
+                                $query->whereHas('ride', function ($q) use ($paymentMethod) {
                                     $q->where('payment_method', $paymentMethod);
                                 });
                             }
@@ -93,8 +94,8 @@ class NotificationController extends Controller
             $query->select('id', 'first_name', 'last_name', 'gender', 'profile_image'); // Specify the columns you want to select
             $query->withTrashed(); // Include soft-deleted users
         }])
-        ->orderBy('id', 'desc')
-        ->get();
+            ->orderBy('id', 'desc')
+            ->get();
 
         if ($request->lang_id && $request->lang_id != 0) {
             $genderLabel = Step1PageSettingDetail::where('language_id', $request->lang_id)->select('male_option_label', 'female_option_label', 'prefer_option_label')->first();
@@ -135,8 +136,7 @@ class NotificationController extends Controller
             if ($selectedLanguage) {
                 $notificationsPageSetting = NotificationsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
             }
-        }
-        else {
+        } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $notificationsPageSetting = NotificationsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
@@ -148,16 +148,16 @@ class NotificationController extends Controller
                 $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
                     $query->where('added_by', $user_id);
                 })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                        $query->where('user_id', $user_id);
+                    ->orWhere(function ($query) use ($user_id) {
+                        $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
+                            $query->where('user_id', $user_id);
+                        });
+                    })
+                    ->orWhere(function ($query) use ($user_id) {
+                        $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
+                            $query->where('id', $user_id);
+                        });
                     });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                        $query->where('id', $user_id);
-                    });
-                });
             });
         } else {
             $notifications->where(function ($query) use ($user_id, $bookingType, $paymentMethod) {
@@ -170,21 +170,21 @@ class NotificationController extends Controller
                         $query->where('payment_method', $paymentMethod);
                     }
                 })
-                ->orWhere(function ($query) use ($user_id, $bookingType, $paymentMethod) {
-                    $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id, $bookingType, $paymentMethod) {
-                        $query->where('user_id', $user_id);
-                        if ($bookingType != "") {
-                            $query->whereHas('ride', function($q) use($bookingType) {
-                                $q->where('booking_method', $bookingType);
-                            });
-                        }
-                        if ($paymentMethod != "") {
-                            $query->whereHas('ride', function($q) use($paymentMethod) {
-                                $q->where('payment_method', $paymentMethod);
-                            });
-                        }
+                    ->orWhere(function ($query) use ($user_id, $bookingType, $paymentMethod) {
+                        $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id, $bookingType, $paymentMethod) {
+                            $query->where('user_id', $user_id);
+                            if ($bookingType != "") {
+                                $query->whereHas('ride', function ($q) use ($bookingType) {
+                                    $q->where('booking_method', $bookingType);
+                                });
+                            }
+                            if ($paymentMethod != "") {
+                                $query->whereHas('ride', function ($q) use ($paymentMethod) {
+                                    $q->where('payment_method', $paymentMethod);
+                                });
+                            }
+                        });
                     });
-                });
             });
         }
 
@@ -193,7 +193,7 @@ class NotificationController extends Controller
         }])->orderBy('id', 'desc')->get();
 
         $selectedLanguage = Language::where('is_default', 1)->first();
-        $languages = Language::all();
+        $languages = Language::getAllCached();
         $bookingOptions = PostRidePageSettingDetail::select('booking_option1', 'booking_option2')->first();
         $notificationPage = ChatsPageSettingDetail::select('notification_delete_text')->first();
         // $successMessage = SuccessMessagesSettingDetail::first();
@@ -217,10 +217,16 @@ class NotificationController extends Controller
 
         return view('notifications', compact(
             // 'successMessage',
-            'notificationPage' ,'notifications', 'bookingOptions', 'paymentMethodOptions', 'notificationsPageSetting'));
+            'notificationPage',
+            'notifications',
+            'bookingOptions',
+            'paymentMethodOptions',
+            'notificationsPageSetting'
+        ));
     }
 
-    public function readNotification(Request $request){
+    public function readNotification(Request $request)
+    {
         $user = Auth::guard('sanctum')->user() ?? Auth::user();
         if (!$user) {
             return response()->json(['message' => 'Unauthenticated'], 401);
@@ -235,7 +241,8 @@ class NotificationController extends Controller
         return $this->successResponse($data, 'Get notification successfully');
     }
 
-    public function addToken(Request $request){
+    public function addToken(Request $request)
+    {
         $user_id = Auth::guard('sanctum')->user()->id;
 
         // Validate the form data
@@ -253,15 +260,15 @@ class NotificationController extends Controller
             $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
                 $query->where('added_by', $user_id);
             })
-            ->orWhere(function ($query) use ($user_id) {
-                $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                    $query->where('user_id', $user_id);
-                });
+                ->orWhere(function ($query) use ($user_id) {
+                    $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
+                        $query->where('user_id', $user_id);
+                    });
                 })->orWhere(function ($query) use ($user_id) {
-                $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                    $query->where('id', $user_id);
+                    $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
+                        $query->where('id', $user_id);
+                    });
                 });
-            });
         });
 
         $notifications = $notifications->orderBy('id', 'desc')->count();
@@ -271,7 +278,8 @@ class NotificationController extends Controller
         return $this->successResponse($data, 'FCM token updated');
     }
 
-    public function removeToken(Request $request){
+    public function removeToken(Request $request)
+    {
         $user_id = Auth::guard('sanctum')->user()->id;
 
         $user = User::whereId($user_id)->update([
@@ -280,8 +288,9 @@ class NotificationController extends Controller
 
         return $this->successResponse('', 'FCM token removed');
     }
-    
-    public function deleteNotification(Request $request){
+
+    public function deleteNotification(Request $request)
+    {
         $id = $request->id;
 
         $notification = Notification::findOrFail($id);
@@ -290,7 +299,8 @@ class NotificationController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function markAllAsRead(Request $request){
+    public function markAllAsRead(Request $request)
+    {
         $user = Auth::guard('sanctum')->user();
         $user_id = $user->id;
 
@@ -324,7 +334,8 @@ class NotificationController extends Controller
         return response()->json(['success' => true, 'message' => 'All notifications marked as read']);
     }
 
-    public function deleteAppNotification(Request $request){
+    public function deleteAppNotification(Request $request)
+    {
         $user_id = Auth::guard('sanctum')->user()->id;
 
         $notification = Notification::findOrFail($request->notificationId);
