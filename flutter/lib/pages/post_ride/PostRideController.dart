@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -10,6 +11,9 @@ import 'package:proximaride_app/services/logger_service.dart';
 import 'package:proximaride_app/services/service.dart';
 
 class PostRideController extends GetxController {
+  static const double errorTriggeringCap = 0.72;
+  static const double softWarningCap = 0.66;
+
   final serviceController = Get.find<Service>();
   ScrollController scrollController = ScrollController();
 
@@ -116,6 +120,10 @@ class PostRideController extends GetxController {
   List<int> stopCityIds = [];
   var rideDetailIds = [];
   var routePriceEntries = <Map<String, dynamic>>[].obs;
+  var routeSegmentDistances = <String, int>{}.obs;
+  var routeDistanceLoading = false.obs;
+  Timer? _routeDistanceDebounceTimer;
+  String _routeDistanceRequestKey = "";
 
   var spotsCount = 0.obs;
   var showErrorSpot = false.obs;
@@ -219,6 +227,7 @@ class PostRideController extends GetxController {
   void onClose() {
     // TODO: implement onClose
     super.onClose();
+    _routeDistanceDebounceTimer?.cancel();
     // fromTextEditingController.dispose();
     // toTextEditingController.dispose();
     // pickUpLocationTextEditingController.dispose();
@@ -389,6 +398,125 @@ class PostRideController extends GetxController {
     routePriceEntries.clear();
   }
 
+  void clearRouteDistanceState() {
+    _routeDistanceRequestKey = "";
+    routeSegmentDistances.clear();
+    routeDistanceLoading(false);
+  }
+
+  List<String> getOrderedRouteLabels() {
+    return buildOrderedRouteNodes()
+        .map((node) => node['label']?.toString().trim() ?? '')
+        .where((label) => label.isNotEmpty)
+        .toList();
+  }
+
+  String directRouteDistanceHint() {
+    final labels = getOrderedRouteLabels();
+    if (labels.length < 2) {
+      return "";
+    }
+
+    final key = buildRoutePriceKey(labels.first, labels.last);
+    final distanceMeters = routeSegmentDistances[key] ?? 0;
+
+    if (routeDistanceLoading.value && distanceMeters <= 0) {
+      return "Calculating route distance...";
+    }
+
+    if (distanceMeters <= 0) {
+      return "Warning and max price appear when distance is available.";
+    }
+
+    final seats = seatAvailable.value <= 0 ? 1 : seatAvailable.value;
+    final distanceKm = distanceMeters / 1000;
+    final warningPrice = (distanceKm * softWarningCap) / seats;
+    final maxPrice = (distanceKm * errorTriggeringCap) / seats;
+
+    return "Warning: \$${formatRouteCapPrice(warningPrice)} | Max: \$${formatRouteCapPrice(maxPrice)} (${distanceKm.toStringAsFixed(1)} km)";
+  }
+
+  String formatRouteCapPrice(double value) {
+    return value % 1 == 0 ? value.toInt().toString() : value.toStringAsFixed(2);
+  }
+
+  String routeDistanceHint(Map<String, dynamic> entry) {
+    final key = entry['key']?.toString() ?? '';
+    final distanceMeters = routeSegmentDistances[key] ?? 0;
+
+    if (routeDistanceLoading.value && distanceMeters <= 0) {
+      return "Calculating route distance...";
+    }
+
+    if (distanceMeters <= 0) {
+      return "Warning and max price appear when distance is available.";
+    }
+
+    final seats = seatAvailable.value <= 0 ? 1 : seatAvailable.value;
+    final distanceKm = distanceMeters / 1000;
+    final warningPrice = (distanceKm * softWarningCap) / seats;
+    final maxPrice = (distanceKm * errorTriggeringCap) / seats;
+
+    return "Warning: \$${formatRouteCapPrice(warningPrice)} | Max: \$${formatRouteCapPrice(maxPrice)} (${distanceKm.toStringAsFixed(1)} km)";
+  }
+
+  void scheduleRouteDistanceEstimates() {
+    _routeDistanceDebounceTimer?.cancel();
+    _routeDistanceDebounceTimer = Timer(const Duration(milliseconds: 350), () {
+      fetchRouteDistanceEstimates();
+    });
+  }
+
+  Future<void> fetchRouteDistanceEstimates() async {
+    final pointLabels = getOrderedRouteLabels();
+    if (pointLabels.length < 2) {
+      clearRouteDistanceState();
+      return;
+    }
+
+    final requestKey = pointLabels.join('||');
+    if (_routeDistanceRequestKey == requestKey && routeSegmentDistances.isNotEmpty) {
+      return;
+    }
+
+    _routeDistanceRequestKey = requestKey;
+    routeDistanceLoading(true);
+
+    try {
+      final resp = await PostRideProvider()
+          .getSegmentDistanceEstimates(serviceController.token, pointLabels);
+
+      final payload = resp is Map && resp['segment_distances_meters'] is Map
+          ? Map<String, dynamic>.from(resp['segment_distances_meters'])
+          : <String, dynamic>{};
+
+      final nextDistances = <String, int>{};
+      final nodes = buildOrderedRouteNodes();
+      for (var fromIndex = 0; fromIndex < nodes.length - 1; fromIndex++) {
+        for (var toIndex = fromIndex + 1; toIndex < nodes.length; toIndex++) {
+          final key = buildRoutePriceKey(
+            nodes[fromIndex]['label'].toString(),
+            nodes[toIndex]['label'].toString(),
+          );
+          nextDistances[key] =
+              int.tryParse((payload['$fromIndex:$toIndex'] ?? 0).toString()) ?? 0;
+        }
+      }
+
+      if (_routeDistanceRequestKey == requestKey) {
+        routeSegmentDistances.assignAll(nextDistances);
+      }
+    } catch (_) {
+      if (_routeDistanceRequestKey == requestKey) {
+        routeSegmentDistances.clear();
+      }
+    } finally {
+      if (_routeDistanceRequestKey == requestKey) {
+        routeDistanceLoading(false);
+      }
+    }
+  }
+
   void handleRoutePriceChanged(Map<String, dynamic> entry, String value) {
     if (entry['isDirect'] == true &&
         pricePerSeatTextEditingController.text != value) {
@@ -421,6 +549,7 @@ class PostRideController extends GetxController {
     clearRoutePriceEntries();
 
     if (nodes.length < 3) {
+      scheduleRouteDistanceEstimates();
       routePriceEntries.refresh();
       update();
       return;
@@ -468,6 +597,7 @@ class PostRideController extends GetxController {
     }
 
     routePriceEntries.refresh();
+    scheduleRouteDistanceEstimates();
     update();
   }
 
@@ -1665,6 +1795,8 @@ class PostRideController extends GetxController {
             if (fromSpotControllers.isNotEmpty) {
               rebuildRoutePriceEntries(
                   seedValues: routePriceSeed.isNotEmpty ? routePriceSeed : null);
+            } else {
+              scheduleRouteDistanceEstimates();
             }
 
             if (recurring.value) {
@@ -2656,6 +2788,12 @@ class PostRideController extends GetxController {
                 resp['data']['ride']['detail']['price']);
             anythingTextEditingController.text =
                 resp['data']['ride']['0'].toString();
+
+            if (fromSpotControllers.isNotEmpty) {
+              rebuildRoutePriceEntries();
+            } else {
+              scheduleRouteDistanceEstimates();
+            }
           }
         }
         isOverlayLoading(false);

@@ -64,6 +64,15 @@ Widget pricePaymentOptionWidget(
                         .isNotEmpty,
                     focusNode: controller.focusNodes[11.toString()],
                   ),
+                if (!controller.hasRoutePriceEntries &&
+                    controller.directRouteDistanceHint().isNotEmpty) ...[
+                  6.heightBox,
+                  txt14Size(
+                    title: controller.directRouteDistanceHint(),
+                    context: context,
+                    textColor: Colors.grey.shade700,
+                  ),
+                ],
                 if (controller.hasRoutePriceEntries) ...[
                   // 8.heightBox,
                   // txt16Size(
@@ -88,62 +97,73 @@ Widget pricePaymentOptionWidget(
                   // ),
                   8.heightBox,
                   for (final routeEntry in controller.routePriceEntries) ...[
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Flexible(
-                                child: txt18Size(
-                                  title: controller.shortLocationLabel(
-                                      routeEntry['fromLabel'].toString()),
-                                  context: context,
-                                  fontFamily: routeEntry['isDirect'] == true
-                                      ? bold
-                                      : regular,
-                                ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Flexible(
+                                    child: txt18Size(
+                                      title: controller.shortLocationLabel(
+                                          routeEntry['fromLabel'].toString()),
+                                      context: context,
+                                      fontFamily: routeEntry['isDirect'] == true
+                                          ? bold
+                                          : regular,
+                                    ),
+                                  ),
+                                  10.widthBox,
+                                  Icon(
+                                    Icons.arrow_right_alt,
+                                    color: routeEntry['isDirect'] == true
+                                        ? primaryColor
+                                        : Colors.grey.shade700,
+                                    size: 22,
+                                  ),
+                                  10.widthBox,
+                                  Flexible(
+                                    child: txt18Size(
+                                      title: controller.shortLocationLabel(
+                                          routeEntry['toLabel'].toString()),
+                                      context: context,
+                                      fontFamily: routeEntry['isDirect'] == true
+                                          ? bold
+                                          : regular,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              10.widthBox,
-                              Icon(
-                                Icons.arrow_right_alt,
-                                color: routeEntry['isDirect'] == true
-                                    ? primaryColor
-                                    : Colors.grey.shade700,
-                                size: 22,
+                            ),
+                            10.widthBox,
+                            SizedBox(
+                              width: 120,
+                              child: fieldsWidget(
+                                textController: routeEntry['controller'],
+                                fieldType: "number",
+                                readonly: bookingCheck,
+                                fontFamily: regular,
+                                fontSize: 18.0,
+                                placeHolder: "\$",
+                                prefixIcon: Icon(Icons.monetization_on_rounded,
+                                    color: textColor, size: 20.0),
+                                onChanged: (value) {
+                                  controller.handleRoutePriceChanged(
+                                      routeEntry, value);
+                                },
                               ),
-                              10.widthBox,
-                              Flexible(
-                                child: txt18Size(
-                                  title: controller.shortLocationLabel(
-                                      routeEntry['toLabel'].toString()),
-                                  context: context,
-                                  fontFamily: routeEntry['isDirect'] == true
-                                      ? bold
-                                      : regular,
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                        10.widthBox,
-                        SizedBox(
-                          width: 100,
-                          child: fieldsWidget(
-                            textController: routeEntry['controller'],
-                            fieldType: "number",
-                            readonly: bookingCheck,
-                            fontFamily: regular,
-                            fontSize: 18.0,
-                            placeHolder: "\$",
-                            prefixIcon: Icon(Icons.monetization_on_rounded,
-                                color: textColor, size: 20.0),
-                            onChanged: (value) {
-                              controller.handleRoutePriceChanged(
-                                  routeEntry, value);
-                            },
-                          ),
+                        4.heightBox,
+                        txt14Size(
+                          title: controller.routeDistanceHint(routeEntry),
+                          context: context,
+                          textColor: Colors.grey.shade700,
                         ),
                       ],
                     ),

@@ -198,6 +198,7 @@ const cancelRide = "cancel-ride";
 const storePassengerReviewed = "review-passenger/store";
 const removePassenger = "remove-passenger";
 const updatePostRide = "update-ride";
+const segmentDistanceEstimates = "segment-distance-estimates";
 const acceptBookingRequest = "accept-booking-request";
 const rejectBookingRequest = "reject-booking-request";
 const phoneNumbers = "phone-numbers";
