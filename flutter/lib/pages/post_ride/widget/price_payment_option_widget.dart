@@ -42,27 +42,114 @@ Widget pricePaymentOptionWidget(
                   ],
                 ),
                 3.heightBox,
-                fieldsWidget(
-                  textController: controller.pricePerSeatTextEditingController,
-                  fieldType: "number",
-                  prefixIcon: Icon(Icons.monetization_on_rounded,
-                      color: textColor, size: 20.0),
-                  readonly: bookingCheck,
-                  fontFamily: regular,
-                  fontSize: 18.0,
-                  placeHolder: "\$",
-                  onChanged: (value) {
-                    if (controller.errors
-                        .any((error) => error['title'] == "price")) {
-                      controller.errors
-                          .removeWhere((error) => error['title'] == "price");
-                    }
-                  },
-                  isError: controller.errors
-                      .where((error) => error == "price")
-                      .isNotEmpty,
-                  focusNode: controller.focusNodes[11.toString()],
-                ),
+                if (!controller.hasRoutePriceEntries)
+                  fieldsWidget(
+                    textController: controller.pricePerSeatTextEditingController,
+                    fieldType: "number",
+                    prefixIcon: Icon(Icons.monetization_on_rounded,
+                        color: textColor, size: 20.0),
+                    readonly: bookingCheck,
+                    fontFamily: regular,
+                    fontSize: 18.0,
+                    placeHolder: "\$",
+                    onChanged: (value) {
+                      if (controller.errors
+                          .any((error) => error['title'] == "price")) {
+                        controller.errors
+                            .removeWhere((error) => error['title'] == "price");
+                      }
+                    },
+                    isError: controller.errors
+                        .where((error) => error == "price")
+                        .isNotEmpty,
+                    focusNode: controller.focusNodes[11.toString()],
+                  ),
+                if (controller.hasRoutePriceEntries) ...[
+                  // 8.heightBox,
+                  // txt16Size(
+                  //   title: "Main price is synced with the direct route price.",
+                  //   context: context,
+                  //   textColor: Colors.grey.shade700,
+                  // ),
+                  // 12.heightBox,
+                  // Row(
+                  //   children: [
+                  //     txt20Size(
+                  //       title: "Available routes",
+                  //       context: context,
+                  //     ),
+                  //     txt20Size(
+                  //       title: "*",
+                  //       fontFamily: regular,
+                  //       context: context,
+                  //       textColor: Colors.red,
+                  //     ),
+                  //   ],
+                  // ),
+                  8.heightBox,
+                  for (final routeEntry in controller.routePriceEntries) ...[
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Flexible(
+                                child: txt18Size(
+                                  title: controller.shortLocationLabel(
+                                      routeEntry['fromLabel'].toString()),
+                                  context: context,
+                                  fontFamily: routeEntry['isDirect'] == true
+                                      ? bold
+                                      : regular,
+                                ),
+                              ),
+                              10.widthBox,
+                              Icon(
+                                Icons.arrow_right_alt,
+                                color: routeEntry['isDirect'] == true
+                                    ? primaryColor
+                                    : Colors.grey.shade700,
+                                size: 22,
+                              ),
+                              10.widthBox,
+                              Flexible(
+                                child: txt18Size(
+                                  title: controller.shortLocationLabel(
+                                      routeEntry['toLabel'].toString()),
+                                  context: context,
+                                  fontFamily: routeEntry['isDirect'] == true
+                                      ? bold
+                                      : regular,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        10.widthBox,
+                        SizedBox(
+                          width: 100,
+                          child: fieldsWidget(
+                            textController: routeEntry['controller'],
+                            fieldType: "number",
+                            readonly: bookingCheck,
+                            fontFamily: regular,
+                            fontSize: 18.0,
+                            placeHolder: "\$",
+                            prefixIcon: Icon(Icons.monetization_on_rounded,
+                                color: textColor, size: 20.0),
+                            onChanged: (value) {
+                              controller.handleRoutePriceChanged(
+                                  routeEntry, value);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    8.heightBox,
+                  ],
+                ],
                 if (controller.errors
                     .any((error) => error['title'] == "price")) ...[
                   toolTip(

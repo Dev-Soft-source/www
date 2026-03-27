@@ -284,20 +284,6 @@
                         <div class="space-y-3">
                             <div>
                             <div class="mt-2 relative">
-                                <label for="agree_cost_share_terms" class="flex text-sm text-gray-900 font-FuturaMdCnBT">
-                                    <input id="agree_cost_share_terms" name="agree_cost_share_terms" type="checkbox"
-                                        class=" mr-2 h-4 w-4 mt-1 rounded border-gray-700 text-blue-600 focus:ring-blue-600">
-                                    <div class="text_base">
-                                        <p>{{ $signupPage->rideshare_label ?? 'I understand that ridesharing on ProximaRide is for cost-sharing only and cannot be used as a business or commercial service.' }}</p>
-                                    </div>
-                                </label>
-                                @error('agree_cost_share_terms')
-                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            </div>
-                            <div>
-                            <div class="mt-2 relative">
                                 <label for="rideshare_disclaimer" class="flex text-sm text-gray-900 font-FuturaMdCnBT">
                                     <input id="rideshare_disclaimer" name="rideshare_disclaimer" type="checkbox" class=" mr-2 h-4 w-4 rounded border-gray-700 text-blue-600 focus:ring-blue-600">
                                     <div class="text_base -mt-2">
@@ -319,6 +305,20 @@
                                 @error('rideshare_disclaimer')
                                     <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                 @enderror
+                            </div>
+                            <div>
+                            <div class="mt-2 relative">
+                                <label for="agree_cost_share_terms" class="flex text-sm text-gray-900 font-FuturaMdCnBT">
+                                    <input id="agree_cost_share_terms" name="agree_cost_share_terms" type="checkbox"
+                                        class=" mr-2 h-4 w-4 mt-1 rounded border-gray-700 text-blue-600 focus:ring-blue-600">
+                                    <div class="text_base">
+                                        <p>{{ $signupPage->rideshare_label ?? 'I understand that ridesharing on ProximaRide is for cost-sharing only and cannot be used as a business or commercial service.' }}</p>
+                                    </div>
+                                </label>
+                                @error('agree_cost_share_terms')
+                                    <div class="tooltip-error shadow-lg">{{ $message }}</div>
+                                @enderror
+                            </div>
                             </div>
                             </div>
                         </div>

@@ -81,7 +81,7 @@ Route::group(['prefix' => 'app/v1'], function () {
     Route::post('signup', [SignupController::class, 'store'])->name('app.auth.signup');
     Route::post('forgot-password', [ForgotPasswordController::class, 'store'])->name('app.auth.forgot_password');
     Route::post('reset-password', [ResetPasswordController::class, 'store'])->name('app.auth.reset_password');
-    Route::get('ride-detail', [RideController::class, 'RideDetail'])->name('app.auth.ride_detail');
+
     Route::get('co-passengers', [RideController::class, 'coPassengers'])->name('app.auth.ride_detail');
     Route::get('driver-info', [ProfileController::class, 'driverInfo'])->name('app.auth.driver_info');
     Route::get('countries', [CountryStateCityController::class, 'getCountries'])->name('app.auth.countries');
@@ -143,13 +143,17 @@ Route::group(['prefix' => 'app/v1', 'middleware' => ['auth:sanctum']], function 
     Route::get('accept-booking-request', [BookingController::class, 'AcceptBookingRequest'])->name('app.auth.accept_booking_request');
     Route::get('reject-booking-request', [BookingController::class, 'RejectBookingRequest'])->name('app.auth.reject_booking_request');
     Route::post('no-show', [RideController::class, 'noShow'])->name('app.auth.no_show');
-    Route::get('post-ride', [RideController::class, 'PostRide'])->name('app.auth.post_ride');
     Route::get('post-ride-setting', [InfoIconController::class, 'postRideSetting'])->name('app.auth.post-ride-setting');
     Route::get('post-ride-init', [PostRideInitController::class, 'getInitData'])->name('app.auth.post-ride-init');
     Route::get('select-location-setting', [InfoIconController::class, 'selectLocationSetting'])->name('app.auth.select-location-setting');
-    Route::post('post-ride', [RideController::class, 'PostRideStore'])->name('app.auth.post_ride.store');
-    Route::get('edit-ride', [RideController::class, 'EditRide'])->name('app.auth.edit_ride');
-    Route::put('update-ride', [RideController::class, 'UpdateRide'])->name('app.auth.update_ride');
+    
+    Route::get('post-ride', [RideController::class, '_PostRide'])->name('app.auth.post_ride');
+    Route::post('post-ride', [RideController::class, '_PostRideStore'])->name('app.auth.post_ride.store');
+    Route::get('edit-ride', [RideController::class, '_EditRide'])->name('app.auth.edit_ride');
+    Route::put('update-ride', [RideController::class, '_UpdateRide'])->name('app.auth.update_ride');
+    Route::get('ride-detail', [RideController::class, '_RideDetail'])->name('app.auth.ride_detail');
+
+    
     Route::get('post-ride-again-upcoming', [PostRideAgainController::class, 'CurrentRides'])->name('app.auth.post_ride_again');
     Route::get('post-ride-again-completed', [PostRideAgainController::class, 'PastRides'])->name('app.auth.post_ride_again_completed');
     Route::get('post-ride-again-cancelled', [PostRideAgainController::class, 'CancelledRides'])->name('app.auth.post_ride_again_cancelled');

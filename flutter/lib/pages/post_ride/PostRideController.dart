@@ -115,6 +115,7 @@ class PostRideController extends GetxController {
   List<TextEditingController> timeSpotControllers = [];
   List<int> stopCityIds = [];
   var rideDetailIds = [];
+  var routePriceEntries = <Map<String, dynamic>>[].obs;
 
   var spotsCount = 0.obs;
   var showErrorSpot = false.obs;
@@ -293,6 +294,183 @@ class PostRideController extends GetxController {
     return DateFormat("HH:mm").format(parsedTime);
   }
 
+  String formatMinorPriceForDisplay(dynamic value) {
+    if (value == null || value.toString().trim().isEmpty) {
+      return "";
+    }
+
+    final parsed = num.tryParse(value.toString());
+    if (parsed == null) {
+      return value.toString();
+    }
+
+    final major = parsed / 100;
+    return major % 1 == 0 ? major.toInt().toString() : major.toStringAsFixed(2);
+  }
+
+  String buildRoutePriceKey(String fromLabel, String toLabel) {
+    return "${fromLabel.trim().toLowerCase()}__${toLabel.trim().toLowerCase()}";
+  }
+
+  String shortLocationLabel(String value) {
+    final normalized = value.trim();
+    if (normalized.isEmpty) {
+      return "";
+    }
+
+    return normalized.split(',').first.trim();
+  }
+
+  List<Map<String, dynamic>> buildOrderedRouteNodes() {
+    final nodes = <Map<String, dynamic>>[];
+
+    final fromLabel = fromTextEditingController.text.trim();
+    if (fromLabel.isNotEmpty) {
+      nodes.add({
+        'label': fromLabel,
+        'cityId': fromCityId.value,
+      });
+    }
+
+    for (var index = 0; index < fromSpotControllers.length; index++) {
+      final stopLabel = fromSpotControllers[index].text.trim();
+      if (stopLabel.isEmpty) {
+        continue;
+      }
+
+      nodes.add({
+        'label': stopLabel,
+        'cityId': stopCityIds[index],
+      });
+    }
+
+    final toLabel = toTextEditingController.text.trim();
+    if (toLabel.isNotEmpty) {
+      nodes.add({
+        'label': toLabel,
+        'cityId': toCityId.value,
+      });
+    }
+
+    return nodes;
+  }
+
+  bool get hasRoutePriceEntries => routePriceEntries.isNotEmpty;
+
+  Map<String, String> captureRoutePriceValues() {
+    final values = <String, String>{};
+
+    for (final entry in routePriceEntries) {
+      final key = entry['key']?.toString() ?? '';
+      final controller = entry['controller'] as TextEditingController?;
+      if (key.isEmpty || controller == null) {
+        continue;
+      }
+
+      values[key] = controller.text;
+    }
+
+    final nodes = buildOrderedRouteNodes();
+    if (nodes.length >= 2) {
+      values[buildRoutePriceKey(
+        nodes.first['label'].toString(),
+        nodes.last['label'].toString(),
+      )] = pricePerSeatTextEditingController.text;
+    }
+
+    return values;
+  }
+
+  void clearRoutePriceEntries() {
+    for (final entry in routePriceEntries) {
+      final controller = entry['controller'] as TextEditingController?;
+      controller?.dispose();
+    }
+    routePriceEntries.clear();
+  }
+
+  void handleRoutePriceChanged(Map<String, dynamic> entry, String value) {
+    if (entry['isDirect'] == true &&
+        pricePerSeatTextEditingController.text != value) {
+      pricePerSeatTextEditingController.text = value;
+    }
+
+    if (errors.any((error) => error['title'] == "price")) {
+      errors.removeWhere((error) => error['title'] == "price");
+    }
+  }
+
+  String routePriceValueFor(String fromLabel, String toLabel) {
+    final key = buildRoutePriceKey(fromLabel, toLabel);
+
+    for (final entry in routePriceEntries) {
+      if (entry['key'] == key) {
+        final controller = entry['controller'] as TextEditingController?;
+        return controller?.text ?? "";
+      }
+    }
+
+    return "";
+  }
+
+  void rebuildRoutePriceEntries({Map<String, String>? seedValues}) {
+    final nodes = buildOrderedRouteNodes();
+    final existingValues = seedValues ?? captureRoutePriceValues();
+    final currentMainPrice = pricePerSeatTextEditingController.text;
+
+    clearRoutePriceEntries();
+
+    if (nodes.length < 3) {
+      routePriceEntries.refresh();
+      update();
+      return;
+    }
+
+    final directKey = buildRoutePriceKey(
+      nodes.first['label'].toString(),
+      nodes.last['label'].toString(),
+    );
+
+    final entries = <Map<String, dynamic>>[];
+    for (var fromIndex = 0; fromIndex < nodes.length - 1; fromIndex++) {
+      for (var toIndex = fromIndex + 1; toIndex < nodes.length; toIndex++) {
+        final fromLabel = nodes[fromIndex]['label'].toString();
+        final toLabel = nodes[toIndex]['label'].toString();
+        final key = buildRoutePriceKey(fromLabel, toLabel);
+        final initialValue =
+            existingValues[key] ?? currentMainPrice;
+
+        final controller = TextEditingController(text: initialValue);
+        final entry = <String, dynamic>{
+          'key': key,
+          'fromLabel': fromLabel,
+          'toLabel': toLabel,
+          'controller': controller,
+          'isDirect': key == directKey,
+        };
+
+        controller.addListener(() {
+          handleRoutePriceChanged(entry, controller.text);
+        });
+
+        entries.add(entry);
+      }
+    }
+
+    routePriceEntries.assignAll(entries);
+
+    for (final entry in routePriceEntries) {
+      if (entry['isDirect'] == true) {
+        final controller = entry['controller'] as TextEditingController?;
+        pricePerSeatTextEditingController.text = controller?.text ?? "";
+        break;
+      }
+    }
+
+    routePriceEntries.refresh();
+    update();
+  }
+
   List<dynamic> extractAdditionalRideDetails(dynamic ride) {
     if (ride is! Map) {
       return <dynamic>[];
@@ -468,6 +646,7 @@ class PostRideController extends GetxController {
     dateSpotControllers[index].text = date;
     timeSpotControllers[index].text = time;
     stopCityIds[index] = cityId;
+    rebuildRoutePriceEntries();
   }
 
   Future<void> openStopForm(BuildContext context, {int? index}) async {
@@ -521,12 +700,14 @@ class PostRideController extends GetxController {
     fromTextEditingController.text = label;
     fromCityId.value = cityId;
     errors.removeWhere((error) => error['title'] == "from");
+    rebuildRoutePriceEntries();
   }
 
   void setDestinationLocation({required String label, required int cityId}) {
     toTextEditingController.text = label;
     toCityId.value = cityId;
     errors.removeWhere((error) => error['title'] == "to");
+    rebuildRoutePriceEntries();
   }
 
   void setStopLocation({
@@ -541,6 +722,7 @@ class PostRideController extends GetxController {
     fromSpotControllers[index].text = label;
     toSpotControllers[index].text = label;
     stopCityIds[index] = cityId;
+    rebuildRoutePriceEntries();
     spotsCount.refresh();
     update();
   }
@@ -1313,7 +1495,7 @@ class PostRideController extends GetxController {
           // 11. Parse ride data (if editing/duplicating)
           if (data['rideData'] != null && data['rideData']['ride'] != null) {
             var ride = data['rideData']['ride'];
-            var rideDetail = data['rideData']['rideDetail'];
+            var rideDetail = data['rideData']['detail'];
 
             if (rideTypeParam == "new") {
               // Duplicate ride - swap from/to
@@ -1401,7 +1583,7 @@ class PostRideController extends GetxController {
                   cityId: int.tryParse(stopDetail['city_id'].toString()) ?? 0,
                 );
                 priceSpotControllers[index].text =
-                    stopDetail['price']?.toString() ?? "";
+                    formatMinorPriceForDisplay(stopDetail['price']);
                 rideDetailIds[index] = "${stopDetail['id'] ?? 0}";
               }
             }
@@ -1458,9 +1640,32 @@ class PostRideController extends GetxController {
             final ridePrice = ride['price'];
             pricePerSeatTextEditingController.text =
                 (detailPrice != null && detailPrice.toString().isNotEmpty)
-                    ? detailPrice.toString()
-                    : (ridePrice != null ? ridePrice.toString() : "");
+                    ? formatMinorPriceForDisplay(detailPrice)
+                    : formatMinorPriceForDisplay(ridePrice);
             anythingTextEditingController.text = ride['notes'] ?? "";
+
+            final routePriceSeed = <String, String>{};
+            if (rideTypeParam != "new" && ride['route_price_segments'] is List) {
+              for (final segment in ride['route_price_segments']) {
+                if (segment is! Map) {
+                  continue;
+                }
+
+                final fromLabel = segment['from_label']?.toString() ?? "";
+                final toLabel = segment['to_label']?.toString() ?? "";
+                if (fromLabel.isEmpty || toLabel.isEmpty) {
+                  continue;
+                }
+
+                routePriceSeed[buildRoutePriceKey(fromLabel, toLabel)] =
+                    formatMinorPriceForDisplay(segment['price_minor']);
+              }
+            }
+
+            if (fromSpotControllers.isNotEmpty) {
+              rebuildRoutePriceEntries(
+                  seedValues: routePriceSeed.isNotEmpty ? routePriceSeed : null);
+            }
 
             if (recurring.value) {
               recurringType.value = ride['recurring_type'].toString();
@@ -1566,7 +1771,7 @@ class PostRideController extends GetxController {
                       time: formatSpotTimeValue(moreRideDetail[index]['time']),
                     );
                     priceSpotControllers[index].text =
-                        moreRideDetail[index]['price'].toString();
+                        formatMinorPriceForDisplay(moreRideDetail[index]['price']);
                     rideDetailIds[index] = "${moreRideDetail[index]['id']}";
                   }
                 }
@@ -1662,9 +1867,8 @@ class PostRideController extends GetxController {
                 resp['data']['ride']['accept_more_luggage'].toString();
             openCustomized.value =
                 resp['data']['ride']['open_customized'].toString();
-            pricePerSeatTextEditingController.text = resp['data']['ride']
-                    ['detail']['price']
-                .toString();
+            pricePerSeatTextEditingController.text = formatMinorPriceForDisplay(
+                resp['data']['ride']['detail']['price']);
             anythingTextEditingController.text =
                 resp['data']['ride']['notes'].toString();
           }
@@ -1767,6 +1971,9 @@ class PostRideController extends GetxController {
       var timeSpots = [];
       var stopCityIdsArray = [];
       var rideDetailIdsArray = [];
+      var routeFroms = [];
+      var routeTos = [];
+      var routePrices = [];
       if (fromSpotControllers.isNotEmpty) {
         for (var fromIndex = 0;
             fromIndex < fromSpotControllers.length;
@@ -1783,9 +1990,18 @@ class PostRideController extends GetxController {
         for (var priceIndex = 0;
             priceIndex < fromSpotControllers.length;
             priceIndex++) {
-          priceSpots.add(priceSpotControllers[priceIndex].text.isNotEmpty
-              ? priceSpotControllers[priceIndex].text
-              : pricePerSeatTextEditingController.text);
+          final previousLabel = priceIndex == 0
+              ? fromTextEditingController.text
+              : fromSpotControllers[priceIndex - 1].text;
+          final currentLabel = fromSpotControllers[priceIndex].text;
+          final adjacentRoutePrice =
+              routePriceValueFor(previousLabel, currentLabel);
+
+          priceSpots.add(adjacentRoutePrice.isNotEmpty
+              ? adjacentRoutePrice
+              : (priceSpotControllers[priceIndex].text.isNotEmpty
+                  ? priceSpotControllers[priceIndex].text
+                  : pricePerSeatTextEditingController.text));
         }
 
         for (var pickupIndex = 0;
@@ -1818,6 +2034,14 @@ class PostRideController extends GetxController {
 
         for (var rideIndex = 0; rideIndex < rideDetailIds.length; rideIndex++) {
           rideDetailIdsArray.add(rideDetailIds[rideIndex]);
+        }
+
+        for (final routeEntry in routePriceEntries) {
+          routeFroms.add(routeEntry['fromLabel']);
+          routeTos.add(routeEntry['toLabel']);
+          final routeController =
+              routeEntry['controller'] as TextEditingController?;
+          routePrices.add(routeController?.text ?? "");
         }
       }
 
@@ -1876,7 +2100,10 @@ class PostRideController extends GetxController {
               dropoffSpots,
               dateSpots,
               timeSpots,
-              rideDetailIdsArray)
+              rideDetailIdsArray,
+              routeFroms,
+              routeTos,
+              routePrices)
           .then((resp) async {
         errorList.clear();
         errors.clear();
@@ -2356,7 +2583,7 @@ class PostRideController extends GetxController {
                         0,
                   );
                   priceSpotControllers[index].text =
-                      moreRideDetail[index]['price'].toString();
+                      formatMinorPriceForDisplay(moreRideDetail[index]['price']);
                   rideDetailIds[index] = "${moreRideDetail[index]['id']}";
                 }
               }
@@ -2425,9 +2652,8 @@ class PostRideController extends GetxController {
                 resp['data']['ride']['accept_more_luggage'].toString();
             openCustomized.value =
                 resp['data']['ride']['open_customized'].toString();
-            pricePerSeatTextEditingController.text = resp['data']['ride']
-                    ['detail']['price']
-                .toString();
+            pricePerSeatTextEditingController.text = formatMinorPriceForDisplay(
+                resp['data']['ride']['detail']['price']);
             anythingTextEditingController.text =
                 resp['data']['ride']['0'].toString();
           }
@@ -2662,8 +2888,29 @@ class PostRideController extends GetxController {
           .then((resp) async {
         if (resp['status'] != null && resp['status'] == "Success") {
           if (resp['data'] != null && resp['data']['pricePerKm'] != null) {
-            pricePerSeatTextEditingController.text =
-                resp['data']['pricePerKm'].toString();
+            final updatedPrice = resp['data']['pricePerKm'].toString();
+            if (hasRoutePriceEntries) {
+              final orderedNodes = buildOrderedRouteNodes();
+              if (orderedNodes.length >= 2) {
+                final directKey = buildRoutePriceKey(
+                  orderedNodes.first['label'].toString(),
+                  orderedNodes.last['label'].toString(),
+                );
+
+                for (final routeEntry in routePriceEntries) {
+                  if (routeEntry['key'] == directKey) {
+                    final controller =
+                        routeEntry['controller'] as TextEditingController?;
+                    if (controller != null) {
+                      controller.text = updatedPrice;
+                    }
+                    break;
+                  }
+                }
+              }
+            } else {
+              pricePerSeatTextEditingController.text = updatedPrice;
+            }
           }
         }
         isOverlayLoading(false);
@@ -2725,5 +2972,6 @@ class PostRideController extends GetxController {
     rideDetailIds.removeAt(index);
     spotsCount.value = fromSpotControllers.length;
     spotsCount.refresh();
+    rebuildRoutePriceEntries();
   }
 }

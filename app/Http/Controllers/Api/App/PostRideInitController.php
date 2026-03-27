@@ -42,27 +42,20 @@ class PostRideInitController extends Controller
     public function getInitData(Request $request)
     {
         try {
-            $langId = $request->lang_id ?? 0;
             $rideId = $request->ride_id ?? null;
             $rideType = $request->ride_type ?? null;
 
-            // Get selected language
-            if ($langId && $langId != 0) {
-                $selectedLanguage = Language::where('id', $langId)->first();
-            } else {
-                $selectedLanguage = Language::where('is_default', 1)->first();
-                $langId = $selectedLanguage ? $selectedLanguage->id : 0;
-            }
+            $langId = $this->selectedLanguage->id;
 
             $user = Auth::guard('sanctum')->user();
 
             // Aggregate all data
             $data = [
                 // 1. Labels and page settings
-                'labels' => $this->getLabelsData($langId, $selectedLanguage),
+                'labels' => $this->getLabelsData(),
 
                 // 2. Post ride settings (pink ride, extra care, site settings)
-                'postRideSettings' => $this->getPostRideSettingsData($user, $langId),
+                // 'postRideSettings' => $this->getPostRideSettingsData($user, $langId),
 
                 // 3. User vehicles and rating
                 'userVehicles' => $this->getUserVehiclesData($user),
@@ -107,7 +100,7 @@ class PostRideInitController extends Controller
     /**
      * Get labels and page settings data
      */
-    private function getLabelsData($langId, $selectedLanguage)
+    private function getLabelsData()
     {
         $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         
@@ -155,17 +148,17 @@ class PostRideInitController extends Controller
         $folkRideSetting = FolkRideSetting::first();
         $siteSetting = SiteSetting::first();
 
-        $user = User::whereId($loggedInUser->id)->select('id', 'gender', 'email_verified', 'driver', 'dob', 'profile_complete', 'pink_ride', 'folks_ride')->first();
+        $user = User::whereId($loggedInUser->id)->first();
 
-        $genderLabel = null;
-        if ($langId && $langId != 0) {
-            $genderLabel = Step1PageSettingDetail::where('language_id', $langId)->select('male_option_label', 'female_option_label', 'prefer_option_label')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $genderLabel = Step1PageSettingDetail::where('language_id', $selectedLanguage->id)->select('male_option_label', 'female_option_label', 'prefer_option_label')->first();
-            }
-        }
+        // $genderLabel = null;
+        // if ($langId && $langId != 0) {
+        //     $genderLabel = Step1PageSettingDetail::where('language_id', $langId)->select('male_option_label', 'female_option_label', 'prefer_option_label')->first();
+        // } else {
+        //     $selectedLanguage = Language::where('is_default', 1)->first();
+        //     if ($selectedLanguage) {
+        //         $genderLabel = Step1PageSettingDetail::where('language_id', $selectedLanguage->id)->select('male_option_label', 'female_option_label', 'prefer_option_label')->first();
+        //     }
+        // }
 
         // Calculate age
         if ($user->dob) {
@@ -175,47 +168,55 @@ class PostRideInitController extends Controller
             $user->age = null;
         }
 
-        // Add gender label
-        if ($user->gender && $genderLabel) {
-            if ($user->gender === 'male') {
-                $user->gender_label = $genderLabel->male_option_label;
-            } elseif ($user->gender === 'female') {
-                $user->gender_label = $genderLabel->female_option_label;
-            } elseif ($user->gender === 'prefer not to say') {
-                $user->gender_label = $genderLabel->prefer_option_label;
-            }
-        }
+        // // Add gender label
+        // if ($user->gender && $genderLabel) {
+        //     if ($user->gender === 'male') {
+        //         $user->gender_label = $genderLabel->male_option_label;
+        //     } elseif ($user->gender === 'female') {
+        //         $user->gender_label = $genderLabel->female_option_label;
+        //     } elseif ($user->gender === 'prefer not to say') {
+        //         $user->gender_label = $genderLabel->prefer_option_label;
+        //     }
+        // }
 
         // Calculate average rating
-        $ratings = Rating::where('status', 1)->where('type', '1')->get();
-        $filteredRatings = $ratings->filter(function ($rating) use ($user) {
-            return $rating->ride && $rating->ride->added_by === $user->id;
-        });
-        $totalAverage = $filteredRatings->avg('average_rating');
-        $user->average_rating = $totalAverage;
+        $user->average_rating = Rating::where('status', 1)
+            ->where('type', '1')
+            ->whereHas('ride', function ($query) use ($user) {
+                $query->where('added_by', $user->id);
+            })
+            ->avg('average_rating');
 
         // Check phone verification
-        $phone_numbers = PhoneNumber::where('user_id', $user->id)->orderBy('id', 'desc')->get();
-        $phone_verified = '0';
-        foreach ($phone_numbers as $phone_number) {
-            if ($phone_number->verified === '1') {
-                $phone_verified = $phone_number->verified;
-                break;
-            }
-        }
-        $user->phone_verified = $phone_verified;
+        $user->phone_verified = PhoneNumber::where('user_id', $user->id)
+            ->where('verified', '1')
+            ->exists() ? '1' : '0';
 
         // Get cancellation and no-show counts
-        $cancellationCount = CancellationHistory::where('user_id', $user->id)->where('type', 'driver')->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->whereNotNull('booking_id')->count();
-        $noShowsCount = NoShowHistory::where('user_id', $user->id)->where('type', 'driver')->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->count();
+        $now = Carbon::now();
+        $threeMonthsAgo = $now->copy()->subMonths(3);
+        $today = $now->toDateString();
+        $currentTime = $now->toTimeString();
+
+        $cancellationCount = CancellationHistory::where('user_id', $user->id)
+            ->where('type', 'driver')
+            ->whereBetween('created_at', [$threeMonthsAgo, $now])
+            ->whereNotNull('booking_id')
+            ->count();
+
+        $noShowsCount = NoShowHistory::where('user_id', $user->id)
+            ->where('type', 'driver')
+            ->whereBetween('created_at', [$threeMonthsAgo, $now])
+            ->count();
+
         $totalNoOfRides = Ride::where('added_by', $user->id)
             ->where('status', '!=', 2)
-            ->where(function ($query) {
-                $query->where(function ($query) {
-                    $query->whereDate('completed_date', '<', now()->toDateString())
-                        ->orWhere(function ($query) {
-                            $query->whereDate('completed_date', '=', now()->toDateString())
-                                ->whereTime('completed_time', '<', now()->toTimeString());
+            ->where(function ($query) use ($today, $currentTime) {
+                $query->where(function ($query) use ($today, $currentTime) {
+                    $query->whereDate('completed_date', '<', $today)
+                        ->orWhere(function ($query) use ($today, $currentTime) {
+                            $query->whereDate('completed_date', '=', $today)
+                                ->whereTime('completed_time', '<', $currentTime);
                         });
                 });
             })
@@ -239,27 +240,13 @@ class PostRideInitController extends Controller
     {
         $user_id = $user->id;
         $vehicles = Vehicle::where('user_id', $user_id)->get();
-        $rides = Ride::where('added_by', $user_id)->get();
 
-        if ($rides->isNotEmpty()) {
-            $ratings = Rating::where(function ($query) use ($user_id) {
-                $query->where('type', '1')
-                    ->whereHas('ride', function ($query) use ($user_id) {
-                        $query->where('added_by', $user_id);
-                    });
-            })
+        $overallRating = Rating::where('type', '1')
             ->where('status', 1)
-            ->orderBy('id', 'desc')
-            ->get();
-
-            if ($ratings->count() > 0) {
-                $overallRating = $ratings->avg('average_rating');
-            } else {
-                $overallRating = 5;
-            }
-        } else {
-            $overallRating = 5;
-        }
+            ->whereHas('ride', function ($query) use ($user_id) {
+                $query->where('added_by', $user_id);
+            })
+            ->avg('average_rating') ?? 5;
 
         return [
             'vehicles' => $vehicles,
@@ -447,19 +434,33 @@ class PostRideInitController extends Controller
      */
     private function getRideData($rideId, $userId, $rideType)
     {
-        $ride = Ride::with(['detail', 'bookings'])->where('id', $rideId)->first();
+        $ride = Ride::with([
+            'detail',
+            'bookings',
+            'rideStops',
+            'rideStopSegments.fromStop',
+            'rideStopSegments.toStop',
+        ])->where('added_by', $userId)->where('id', $rideId)->first();
 
         if (!$ride) {
             return null;
         }
 
         $ride->intermediate_stops = $this->extractIntermediateStopsForForm($ride);
-
-        $rideDetail = $ride->detail;
+        $ride->route_price_segments = $ride->rideStopSegments
+            ->map(function ($segment) {
+                return [
+                    'from_label' => $segment->fromStop?->label,
+                    'to_label' => $segment->toStop?->label,
+                    'price_minor' => (int) ($segment->price_minor ?? 0),
+                ];
+            })
+            ->filter(fn($segment) => !empty($segment['from_label']) && !empty($segment['to_label']))
+            ->values()
+            ->toArray();
 
         return [
             'ride' => $ride,
-            'rideDetail' => $rideDetail,
         ];
     }
 }

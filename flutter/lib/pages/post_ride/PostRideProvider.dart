@@ -10,6 +10,20 @@ import 'package:proximaride_app/services/logger_service.dart';
 class PostRideProvider extends GetConnect {
   final getConnect = GetConnect(timeout: const Duration(seconds: 180));
 
+  String _toMinorUnitString(dynamic value) {
+    final normalized = value?.toString().trim() ?? '';
+    if (normalized.isEmpty) {
+      return '0';
+    }
+
+    final amount = double.tryParse(normalized.replaceAll(',', ''));
+    if (amount == null) {
+      return normalized;
+    }
+
+    return (amount * 100).round().toString();
+  }
+
   Future getLabelTextDetail(langId) async {
     try {
       var url = "$baseUrl/$postRidePage";
@@ -647,7 +661,10 @@ class PostRideProvider extends GetConnect {
       dropoffSpots,
       dateSpots,
       timeSpots,
-      rideDetailIdsArray) async {
+      rideDetailIdsArray,
+      routeFroms,
+      routeTos,
+      routePrices) async {
     try {
       final data = FormData({});
       if (rideType == "update") {
@@ -674,7 +691,8 @@ class PostRideProvider extends GetConnect {
       data.fields
           .add(MapEntry("accept_more_luggage", acceptMoreLuggage.toString()));
       data.fields.add(MapEntry("open_customized", openCustomized.toString()));
-      data.fields.add(MapEntry("price", priceTextEditingController.toString()));
+      data.fields.add(
+          MapEntry("price", _toMinorUnitString(priceTextEditingController)));
       data.fields.add(MapEntry("payment_method", paymentOption.toString()));
       data.fields
           .add(MapEntry("notes", anythingTextEditingController.toString()));
@@ -685,13 +703,25 @@ class PostRideProvider extends GetConnect {
         data.fields.add(MapEntry("from_spot", jsonEncode(fromSpots)));
         data.fields.add(MapEntry("to_spot", jsonEncode(toSpots)));
         data.fields.add(MapEntry("stop_city_ids", jsonEncode(stopCityIds)));
-        data.fields.add(MapEntry("price_spot", jsonEncode(priceSpots)));
+        data.fields.add(MapEntry(
+            "price_spot",
+            jsonEncode(
+                priceSpots.map((price) => _toMinorUnitString(price)).toList())));
         data.fields.add(MapEntry("pickup_spot", jsonEncode(pickupSpots)));
         data.fields.add(MapEntry("dropoff_spot", jsonEncode(dropoffSpots)));
         data.fields.add(MapEntry("date_spot", jsonEncode(dateSpots)));
         data.fields.add(MapEntry("time_spot", jsonEncode(timeSpots)));
         data.fields
             .add(MapEntry("ride_detail_ids", rideDetailIdsArray.toString()));
+      }
+
+      if (routeFroms.length > 0) {
+        data.fields.add(MapEntry("stop_from", jsonEncode(routeFroms)));
+        data.fields.add(MapEntry("stop_to", jsonEncode(routeTos)));
+        data.fields.add(MapEntry(
+            "stop_price_minor",
+            jsonEncode(
+                routePrices.map((price) => _toMinorUnitString(price)).toList())));
       }
 
       if (disclaimer == true) {

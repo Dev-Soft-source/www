@@ -198,3 +198,8 @@
         transform: translateY(0) scale(1);
     }
 }
+
+
+label p {
+    font-family: FuturaMdCnBT, cursive;
+}
