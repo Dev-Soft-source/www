@@ -619,7 +619,6 @@ class Ride extends Model
 
     public static function searchRides(array $filters, ?User $user = null): LengthAwarePaginator
     {
-        \Log::info('filter', $filters);
         $query = static::query()
             ->with([
                 'driver',

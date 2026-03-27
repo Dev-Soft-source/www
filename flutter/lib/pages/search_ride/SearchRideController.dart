@@ -101,11 +101,7 @@ class SearchRideController extends GetxController {
     Future.delayed(const Duration(seconds: 1), () async {
       isOverlayLoading(true);
       try {
-        await _getPreferenceOptions();
-        await _getFindRidePreferenceOptions();
-        await _getBookingOption();
-        await _getLuggage();
-        await _getPaymentOptions();
+        await _getRideFeatureOptions();
       } catch (error) {
         // Show dialog for secondary data load errors
         _handleSecondaryLoadError(error);
@@ -679,35 +675,95 @@ class SearchRideController extends GetxController {
     }
   }
 
-  // Private methods for secondary data load (throw errors for dialog display)
-  Future<void> _getPreferenceOptions() async {
+  // 
+  Future<void> _getRideFeatureOptions() async {
     await PostRideProvider()
-        .getPreferenceOptions(
+        .getSearchRideInitData(
             serviceController.token, serviceController.langId.value)
         .then((resp) async {
       if (resp['status'] != null && resp['status'] == "Success") {
-        if (resp['data'] != null &&
-            resp['data']['preferencesOptions'] != null) {
-          smokingList
-              .add(resp['data']['preferencesOptions']['smoking_option1']);
-          smokingList
-              .add(resp['data']['preferencesOptions']['smoking_option2']);
+        if (resp['data'] != null) {
 
-          smokingLabelList
-              .add(resp['data']['preferencesOptions']['smoking_option1_label']);
-          smokingLabelList
-              .add(resp['data']['preferencesOptions']['smoking_option2_label']);
+          final data = resp['data'];
+          if (data['preferences'] != null &&
+              data['preferences']['preferencesOptions'] != null) {
+            smokingList.add(
+                data['preferences']['preferencesOptions']['smoking_option1']);
+            smokingList.add(
+                data['preferences']['preferencesOptions']['smoking_option2']);
 
-          petList.add(resp['data']['preferencesOptions']['animals_option1']);
-          petList.add(resp['data']['preferencesOptions']['animals_option2']);
-          petList.add(resp['data']['preferencesOptions']['animals_option3']);
+            smoking.value = "21";
 
-          petLabelList
-              .add(resp['data']['preferencesOptions']['animals_option1_label']);
-          petLabelList
-              .add(resp['data']['preferencesOptions']['animals_option2_label']);
-          petLabelList
-              .add(resp['data']['preferencesOptions']['animals_option3_label']);
+            smokingLabelList.add(data['preferences']['preferencesOptions']
+                ['smoking_option1_label']);
+            smokingLabelList.add(data['preferences']['preferencesOptions']
+                ['smoking_option2_label']);
+
+            petList.add(
+                data['preferences']['preferencesOptions']['animals_option1']);
+            petList.add(
+                data['preferences']['preferencesOptions']['animals_option2']);
+            petList.add(
+                data['preferences']['preferencesOptions']['animals_option3']);
+
+            pet.value = "23";
+
+            petLabelList.add(data['preferences']['preferencesOptions']
+                ['animals_option1_label']);
+            petLabelList.add(data['preferences']['preferencesOptions']
+                ['animals_option2_label']);
+            petLabelList.add(data['preferences']['preferencesOptions']
+                ['animals_option3_label']);
+          }
+
+          if (data['features']['featuresOptions'] != null) {
+            rideFeatureList.addAll(data['features']['featuresOptions']);
+          }
+          if (data['passengers']['passengerRatingOptions'] != null) {
+            passengerRatingList.addAll(data['passengers']['passengerRatingOptions']);
+          }
+
+          if (data['features']['featuresLabels'] != null) {
+            rideFeatureLabelList.addAll(data['features']['featuresLabels']);
+          }
+
+          if (data['passengers']['passengerRatingLabels'] != null) {
+            passengerRatingLabelList.addAll(data['passengers']['passengerRatingLabels']);
+          }
+
+          if (data['booking']['bookingOptions'] != null) {
+            bookingOptionList.addAll(data['booking']['bookingOptions']);
+          }
+          if (data['booking']['bookingTooltips'] != null) {
+            bookingOptionToolTipList.addAll(data['booking']['bookingTooltips']);
+          }
+
+          if (data['booking']['bookingLabels'] != null) {
+            bookingOptionLabelList.addAll(data['booking']['bookingLabels']);
+          }
+
+          if (data['luggage']['luggageOptions'] != null) {
+            luggageList.addAll(data['luggage']['luggageOptions']);
+          }
+          if (data['luggage']['luggageTooltips'] != null) {
+            luggageListToolTip.addAll(data['luggage']['luggageTooltips']);
+          }
+
+          if (data['luggage']['luggageLabels'] != null) {
+            luggageListLabel.addAll(data['luggage']['luggageLabels']);
+          }
+
+          if (data['payment']['paymentOptions'] != null) {
+            paymentOptionList.addAll(data['payment']['paymentOptions']);
+          }
+
+          if (data['payment']['paymentTooltips'] != null) {
+            paymentOptionToolTipList.addAll(data['payment']['paymentTooltips']);
+          }
+          if (data['payment']['paymentLabels'] != null) {
+            paymentOptionLabelList.addAll(data['payment']['paymentLabels']);
+          }
+
         }
       }
     }, onError: (error) {
@@ -715,99 +771,8 @@ class SearchRideController extends GetxController {
     });
   }
 
-  Future<void> _getFindRidePreferenceOptions() async {
-    await SearchRideProvider()
-        .getFindRidePreferenceOptions(
-            serviceController.token, serviceController.langId.value)
-        .then((resp) async {
-      if (resp['status'] != null && resp['status'] == "Success") {
-        if (resp['data'] != null && resp['data']['featuresOptions'] != null) {
-          rideFeatureList.addAll(resp['data']['featuresOptions']);
-        }
-        if (resp['data'] != null &&
-            resp['data']['passengerRatingOptions'] != null) {
-          passengerRatingList.addAll(resp['data']['passengerRatingOptions']);
-        }
 
-        if (resp['data'] != null && resp['data']['featuresLabels'] != null) {
-          rideFeatureLabelList.addAll(resp['data']['featuresLabels']);
-        }
 
-        if (resp['data'] != null &&
-            resp['data']['passengerRatingLabels'] != null) {
-          passengerRatingLabelList
-              .addAll(resp['data']['passengerRatingLabels']);
-        }
-      }
-    }, onError: (error) {
-      throw error;
-    });
-  }
-
-  Future<void> _getBookingOption() async {
-    await PostRideProvider()
-        .getBookingOption(
-            serviceController.token, serviceController.langId.value)
-        .then((resp) async {
-      if (resp['status'] != null && resp['status'] == "Success") {
-        if (resp['data'] != null && resp['data']['bookingOptions'] != null) {
-          bookingOptionList.addAll(resp['data']['bookingOptions']);
-        }
-        if (resp['data'] != null && resp['data']['bookingTooltips'] != null) {
-          bookingOptionToolTipList.addAll(resp['data']['bookingTooltips']);
-        }
-
-        if (resp['data'] != null && resp['data']['bookingLabels'] != null) {
-          bookingOptionLabelList.addAll(resp['data']['bookingLabels']);
-        }
-      }
-    }, onError: (error) {
-      throw error;
-    });
-  }
-
-  Future<void> _getLuggage() async {
-    await PostRideProvider()
-        .getLuggage(serviceController.token, serviceController.langId.value)
-        .then((resp) async {
-      if (resp['status'] != null && resp['status'] == "Success") {
-        if (resp['data'] != null && resp['data']['luggageOptions'] != null) {
-          luggageList.addAll(resp['data']['luggageOptions']);
-        }
-        if (resp['data'] != null && resp['data']['luggageTooltips'] != null) {
-          luggageListToolTip.addAll(resp['data']['luggageTooltips']);
-        }
-
-        if (resp['data'] != null && resp['data']['luggageLabels'] != null) {
-          luggageListLabel.addAll(resp['data']['luggageLabels']);
-        }
-      }
-    }, onError: (error) {
-      throw error;
-    });
-  }
-
-  Future<void> _getPaymentOptions() async {
-    await PostRideProvider()
-        .getPaymentOptions(
-            serviceController.token, serviceController.langId.value)
-        .then((resp) async {
-      if (resp['status'] != null && resp['status'] == "Success") {
-        if (resp['data'] != null && resp['data']['paymentOptions'] != null) {
-          paymentOptionList.addAll(resp['data']['paymentOptions']);
-        }
-
-        if (resp['data'] != null && resp['data']['paymentTooltips'] != null) {
-          paymentOptionToolTipList.addAll(resp['data']['paymentTooltips']);
-        }
-        if (resp['data'] != null && resp['data']['paymentLabels'] != null) {
-          paymentOptionLabelList.addAll(resp['data']['paymentLabels']);
-        }
-      }
-    }, onError: (error) {
-      throw error;
-    });
-  }
 
   Future<void> getMoreRides() async {
     try {
@@ -949,77 +914,6 @@ class SearchRideController extends GetxController {
                 recentSearch['destination_city_id']?.toString() ??
                 '') ??
         0;
-  }
-
-  getPostRideSetting() async {
-    try {
-      PostRideProvider()
-          .getPostRideSetting(
-              serviceController.token, serviceController.langId.value)
-          .then((resp) async {
-        bool pinkRide = true;
-
-        if (resp['status'] != null && resp['status'] == "Success") {
-          if (resp['data']['user']['pink_ride'] == "1") {
-            pinkRide = true;
-          } else if (resp['data']['user']['pink_ride'] == "0") {
-            pinkRide = false;
-          } else if (resp['data'] != null &&
-              resp['data']['pinkRideSetting'] != null) {
-            if (resp['data']['pinkRideSetting']['female'] == "1" &&
-                resp['data']['user']['gender'] != "female") {
-              pinkRide = false;
-            }
-            if (resp['data']['pinkRideSetting']['verify_phone'] == "1" &&
-                resp['data']['user']['email_verified'] != "1") {
-              pinkRide = false;
-            }
-            if (resp['data']['pinkRideSetting']['verify_email'] == "1" &&
-                resp['data']['user']['email_verified'] != "1") {
-              pinkRide = false;
-            }
-            if (resp['data']['pinkRideSetting']['driver_license'] == "1" &&
-                resp['data']['user']['driver'] != "2") {
-              pinkRide = false;
-            }
-          }
-
-          if (pinkRide == false) {
-            pinkRideReadOnly.value = true;
-          }
-        }
-      }, onError: (error) {
-        isLoading(false);
-        if (error is Map &&
-            error.containsKey('type') &&
-            error.containsKey('message')) {
-          serviceController.showDialogue(error['message'], type: "error");
-        } else if (error is Map &&
-            error.containsKey('type') &&
-            error['type'] == 'network') {
-          serviceController.showDialogue(
-              "No internet connection. Please check your network and try again.",
-              type: "error");
-        } else {
-          serviceController.showDialogue(error.toString(), type: "error");
-        }
-      });
-    } catch (exception) {
-      isLoading(false);
-      if (exception is Map &&
-          exception.containsKey('type') &&
-          exception.containsKey('message')) {
-        serviceController.showDialogue(exception['message'], type: "error");
-      } else if (exception is Map &&
-          exception.containsKey('type') &&
-          exception['type'] == 'network') {
-        serviceController.showDialogue(
-            "No internet connection. Please check your network and try again.",
-            type: "error");
-      } else {
-        serviceController.showDialogue(exception.toString(), type: "error");
-      }
-    }
   }
 
   void _listenToFieldChanges() {

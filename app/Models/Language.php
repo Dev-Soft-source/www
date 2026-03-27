@@ -51,4 +51,13 @@ class Language extends Model
             ->first()
             ?? self::where('is_default', 1)->first();
     }
+    
+    public static function resolveLanguageByID($langID = null)
+    {
+        return self::when($langID, function ($query) use ($langID) {
+            $query->where('id', $langID);
+        })
+            ->first()
+            ?? self::where('is_default', 1)->first();
+    }
 }

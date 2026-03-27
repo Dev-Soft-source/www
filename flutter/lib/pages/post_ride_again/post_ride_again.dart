@@ -13,20 +13,17 @@ class PostRideAgainPage extends GetView<PostRideAgainController> {
   @override
   Widget build(BuildContext context) {
     Get.put(PostRideAgainController());
-    return PopScope(
-      canPop: false,
-      onPopInvoked: (confirmed) {
-        Get.offNamed('/post_ride/0/new');
-        return;
-      },
-      child: Scaffold(
+    return Scaffold(
           appBar: AppBar(
             backgroundColor: primaryColor,
             title: Obx(() => secondAppBarWidget(
                 title:
                     "${controller.labelTextDetail['post_ride_again_main_heading'] ?? "Post ride again"}",
                 context: context)),
-            leading: safeBackButton(context),
+            leading: safeBackButton(
+              context,
+              authenticatedFallbackRoute: '/post_ride/0/new',
+            ),
           ),
           body: SafeArea(
             child: Obx(() {
@@ -108,7 +105,7 @@ class PostRideAgainPage extends GetView<PostRideAgainController> {
                                                       .upcomingPostRideList[index]['ride_detail']['destination']
                                                       .toString(),
                                                   onTap: () {
-                                                    Get.offNamed(
+                                                    Get.toNamed(
                                                         "/post_ride/${controller.upcomingPostRideList[index]['id']}/new");
                                                   });
                                             },
@@ -172,7 +169,7 @@ class PostRideAgainPage extends GetView<PostRideAgainController> {
                                                               .completedPostRideList[
                                                           index]['ride_detail']['destination'],
                                                   onTap: () {
-                                                    Get.offNamed(
+                                                    Get.toNamed(
                                                         "/post_ride/${controller.completedPostRideList[index]['id']}/new");
                                                   });
                                             },
@@ -236,7 +233,7 @@ class PostRideAgainPage extends GetView<PostRideAgainController> {
                                                   toText: controller
                                                               .cancelledPostRideList[index]['ride_detail']['destination'],
                                                   onTap: () {
-                                                    Get.offNamed(
+                                                    Get.toNamed(
                                                         "/post_ride/${controller.cancelledPostRideList[index]['id']}/new");
                                                   });
                                             },
@@ -286,8 +283,7 @@ class PostRideAgainPage extends GetView<PostRideAgainController> {
                 );
               }
             }),
-          )),
-    );
+          ));
   }
 }
 

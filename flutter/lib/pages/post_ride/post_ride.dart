@@ -120,7 +120,7 @@ class _PostRideScaffold extends GetView<PostRideController> {
                                         fontFamily: regular),
                                     context: context,
                                     onPressed: () {
-                                      Get.offNamed("/post_ride_again");
+                                      Get.toNamed("/post_ride_again");
                                     },
                                   ),
                                 ),

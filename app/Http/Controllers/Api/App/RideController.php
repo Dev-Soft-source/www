@@ -53,10 +53,6 @@ class RideController extends WebRideController
     {
         $rides = collect();
 
-        $selectedLanguage = $this->resolveApiLanguage();
-        $findRidePage = $this->getApiFindRidePage($selectedLanguage);
-        $postRidePage = $this->getApiPostRidePage($selectedLanguage);
-
         $user = Auth::guard('sanctum')->user();
 
         if ($user && $request->filled('from') && $request->filled('to')) {
@@ -82,17 +78,9 @@ class RideController extends WebRideController
             $rides = $this->prepareAppSearchRideResults($rides, $user, $request);
         }
 
-        Log::info('search', [
-            'filters' => $searchFilters,
-            'should_run' => $this->shouldRunAppSearch($searchFilters),
-            'count' => method_exists($rides, 'count') ? $rides->count() : count($rides),
-            'total' => method_exists($rides, 'total') ? $rides->total() : count($rides),
-            'rides' => method_exists($rides, 'items') ? $rides->items() : $rides->toArray(),
-        ]);
 
-        $defaultLanguage = $this->defaultLang;
-        $defaultPostRidePage = PostRidePageSettingDetail::where('language_id', $defaultLanguage->id)->first();
-        $rideFeatureOptionGroups = $this->getRideFeatureOptionGroups($selectedLanguage?->id, $defaultLanguage?->id);
+
+        $rideFeatureOptionGroups = $this->getRideFeatureOptionGroups($this->selectedLanguage?->id, $this->defaultLang?->id);
         $bookingMethodAssets = $this->buildRideFeatureAssetMaps($rideFeatureOptionGroups, 'booking_method');
         $paymentMethodAssets = $this->buildRideFeatureAssetMaps($rideFeatureOptionGroups, 'payment_method');
         $smokingAssets = $this->buildRideFeatureAssetMaps($rideFeatureOptionGroups, 'smoking_allowed');
@@ -222,8 +210,7 @@ class RideController extends WebRideController
             $ride->driver->average_rating = $totalAverage;
         });
 
-        $recentSearches = RecentSearch::where('user_id', $user->id)->orderBy('updated_at', 'desc')->limit(10)->get();
-
+        $recentSearches = RecentSearch::where('user_id', $user->id)->orderBy('updated_at', 'desc')->limit(2)->get();
 
 
         $data = ['rides' => $rides, 'recentSearches' => $recentSearches];
@@ -1873,51 +1860,25 @@ class RideController extends WebRideController
 
     public function findRideIndex(Request $request)
     {
-        $findRidePage = null;
-        $messages = null;
-        if ($request->lang_id && $request->lang_id != 0) {
+            
+        $messages = $this->getApiSuccessMessageFields([
+            'female_user_message',
+            'star5_passenger_message',
+            'star4_passenger_message',
+            'star3_passenger_message',
+            'passenger_with_review_message',
+            'search_result_clear_message',
+        ], $this->selectedLanguage);
 
+        $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-            $selectedLanguage = Language::where('id', $request->lang_id)->first();
-            // Retrieve the FindRidePageSettingDetail associated with the selected language
-            $findRidePage = FindRidePageSettingDetail::where('language_id', $request->lang_id)->first();
-            $messages = $this->getApiSuccessMessageFields([
-                'female_user_message',
-                'star5_passenger_message',
-                'star4_passenger_message',
-                'star3_passenger_message',
-                'passenger_with_review_message',
-                'search_result_clear_message',
-            ], $selectedLanguage);
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $findRidePage = FindRidePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $messages = $this->getApiSuccessMessageFields([
-                    'female_user_message',
-                    'star5_passenger_message',
-                    'star4_passenger_message',
-                    'star3_passenger_message',
-                    'passenger_with_review_message',
-                    'search_result_clear_message',
-                ], $selectedLanguage);
-            }
-        }
-
-        if ($selectedLanguage) {
-            $locale = $selectedLanguage->abbreviation;
-        } else {
-            $locale = 'en';
-        }
-
-        App::setLocale($locale);
 
         $validationMessages = [
             'required' => trans('validation.required'),
         ];
 
         $vehicleTypeOptions = $this->getRideFeatureOptionGroups(
-            $selectedLanguage?->id,
+            $this->selectedLanguage?->id,
             $this->defaultLang?->id
         )->get('vehicle_type', collect())->values();
 

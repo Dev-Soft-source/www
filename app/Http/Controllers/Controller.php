@@ -22,6 +22,7 @@ use App\Models\VideoDetail;
 use App\Http\Controllers\ProfileStepRedirectController;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 use Carbon\Carbon;
 
 class Controller extends BaseController
@@ -42,28 +43,42 @@ class Controller extends BaseController
         // Initialize language-dependent data per request so POST/PUT routes
         // without a {lang} segment still inherit the active locale correctly.
         $this->middleware(function ($request, $next) {
-            $lang = $request->route('lang') ?? $request->route('lang_id');
+            $routeName = optional($request->route())->getName();
+            $isApiRequest = $request->is('api/*')
+                || str_starts_with((string) $routeName, 'app.')
+                || $request->expectsJson();
 
-            if ($lang) {
-                session(['selectedLanguage' => $lang]);
+            if ($isApiRequest) {
+                $lang = $request->input('lang') ?? $request->query('lang');
+                $langId = $request->input('lang_id') ?? $request->query('lang_id');
+
+                if (!$lang && $langId) {
+                    $lang = Language::whereKey($langId)->value('abbreviation');
+                } elseif ($lang && !$langId) {
+                    $lang = Language::whereKey($lang)->value('abbreviation');
+                } elseif (!$lang && $langId && auth('sanctum')->check()) {
+                    $lang = Language::whereKey(auth('sanctum')->user()->lang_id)->value('abbreviation');
+                }
+                \Log::info('api route', [Route::currentRouteName(), $lang]);
+
             } else {
-                // lang_id is coming from app
-                $lang = $request->query('lang') ?? $request->query('lang_id');
+                $lang = $request->route('lang') ?? $request->query('lang');
 
                 if (!$lang) {
                     $lang = session('selectedLanguage');
                 }
 
-                if (!$lang && auth()->check() && auth()->user()->lang) {
-                    $lang = auth()->user()->lang;
-                }
-
-                if (!$lang) {
-                    $lang = $this->defaultLang->abbreviation;
-                }
-
-                session(['selectedLanguage' => $lang]);
+                // if (!$lang && auth('web')->check() && auth('web')->user()->lang) {
+                //     $lang = auth('web')->user()->lang;
+                // }
             }
+
+            if (!$lang) {
+                $lang = $this->defaultLang->abbreviation;
+            }
+
+            session(['selectedLanguage' => $lang]);
+            app()->setLocale($lang);
 
             $this->selectedLanguage = Language::resolveLanguage(app()->getLocale());
 
@@ -421,22 +436,10 @@ class Controller extends BaseController
         return $this->defaultLang ?: Language::where('is_default', 1)->first();
     }
 
-    protected function getApiSuccessMessage(?Language $language = null)
-    {
-        $language = $language ?: $this->selectedLanguage;
-
-        if (!$language) {
-            return $this->successMessage;
-        }
-
-        $defaultLangId = $this->defaultLang?->id ?: $language->id;
-
-        return SuccessMessagesSettingDetail::getByLanguageWithFallback($language->id, $defaultLangId);
-    }
 
     protected function getApiSuccessMessageFields(array $fields, ?Language $language = null)
     {
-        $message = $this->getApiSuccessMessage($language);
+        $message = $this->successMessage;
 
         if (!$message) {
             return null;

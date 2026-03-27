@@ -1197,7 +1197,7 @@ class MyTripController extends Controller
                 }
             }
             extract($this->prepareRideFeatureContext($request->lang_id));
-            $messages = $this->getApiSuccessMessage($selectedLanguage);
+            $messages = $this->successMessage;
 
             // Calculate seats left
             $bookedSeats = $booking->ride->bookings()

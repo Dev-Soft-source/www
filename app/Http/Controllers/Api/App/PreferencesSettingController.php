@@ -14,221 +14,188 @@ class PreferencesSettingController extends Controller
 {
     use StatusResponser;
 
-    public function preferencesOptions(Request $request){
-        $preferencesOptions = PostRidePageSettingDetail::select('post_ride_page_setting_detail.smoking_option1', 'post_ride_page_setting_detail.smoking_option2', 'post_ride_page_setting_detail.animals_option1', 'post_ride_page_setting_detail.animals_option2', 'post_ride_page_setting_detail.animals_option3')
-            ->join('languages', 'languages.id', '=', 'post_ride_page_setting_detail.language_id');
 
-        if($request->lang && $request->lang != 0){
-            $preferencesOptions = $preferencesOptions->where('languages.id', $request->lang)->first();
-            if ($preferencesOptions->smoking_option1) {
-                $name1 = FeaturesSettingDetail::whereFeaturesSettingId($preferencesOptions->smoking_option1)
-                    ->whereLanguageId($request->lang)
-                    ->value('name');
-                if ($name1) {
-                    $preferencesOptions->smoking_option1_label = $name1 ?? null;
-                }
-            } else {
-                $preferencesOptions->smoking_option1_label = null; // Add `null` if smoking_option1 is null
-            }
 
-            if ($preferencesOptions->smoking_option2) {
-                $name2 = FeaturesSettingDetail::whereFeaturesSettingId($preferencesOptions->smoking_option2)
-                    ->whereLanguageId($request->lang)
-                    ->value('name');
-                if ($name2) {
-                    $preferencesOptions->smoking_option2_label = $name2 ?? null;
-                }
-            } else {
-                $preferencesOptions->smoking_option2_label = null; // Add `null` if smoking_option2 is null
-            }
+    // for search ride
+    public function getInitData(Request $request)
+    {
+        $groups = $this->getRideFeatureOptionGroups($this->selectedLanguage->id);
+        
+        $smokingOptions = collect($groups->get('smoking_allowed', collect()))
+            ->sortBy('id')
+            ->values();
+        $petOptions = collect($groups->get('pets_allowed', collect()))
+            ->sortBy('id')
+            ->values();
 
-            if ($preferencesOptions->animals_option1) {
-                $name2 = FeaturesSettingDetail::whereFeaturesSettingId($preferencesOptions->animals_option1)
-                    ->whereLanguageId($request->lang)
-                    ->value('name');
-                if ($name2) {
-                    $preferencesOptions->animals_option1_label = $name2 ?? null;
-                }
-            } else {
-                $preferencesOptions->animals_option1_label = null; // Add `null` if animals_option1 is null
-            }
+        $data['preferencesOptions'] = [
+                'smoking_option1' => $smokingOptions->get(0)?->features_setting_id,
+                'smoking_option2' => $smokingOptions->get(1)?->features_setting_id,
+                'smoking_option1_label' => $smokingOptions->get(0)?->name,
+                'smoking_option2_label' => $smokingOptions->get(1)?->name,
+                'animals_option1' => $petOptions->get(0)?->features_setting_id,
+                'animals_option2' => $petOptions->get(1)?->features_setting_id,
+                'animals_option3' => $petOptions->get(2)?->features_setting_id,
+                'animals_option1_label' => $petOptions->get(0)?->name,
+                'animals_option2_label' => $petOptions->get(1)?->name,
+                'animals_option3_label' => $petOptions->get(2)?->name,
+            ];
 
-            if ($preferencesOptions->animals_option2) {
-                $name2 = FeaturesSettingDetail::whereFeaturesSettingId($preferencesOptions->animals_option2)
-                    ->whereLanguageId($request->lang)
-                    ->value('name');
-                if ($name2) {
-                    $preferencesOptions->animals_option2_label = $name2 ?? null;
-                }
-            } else {
-                $preferencesOptions->animals_option2_label = null; // Add `null` if animals_option2 is null
-            }
+        $cancellationOptions = collect($groups->get('cancellation', collect()))
+            ->sortBy('id')
+            ->values();
 
-            if ($preferencesOptions->animals_option3) {
-                $name2 = FeaturesSettingDetail::whereFeaturesSettingId($preferencesOptions->animals_option3)
-                    ->whereLanguageId($request->lang)
-                    ->value('name');
-                if ($name2) {
-                    $preferencesOptions->animals_option3_label = $name2 ?? null;
-                }
-            } else {
-                $preferencesOptions->animals_option3_label = null; // Add `null` if animals_option3 is null
-            }
-        }else{
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            $preferencesOptions = $preferencesOptions->where('languages.id', $selectedLanguage->id)->first();
-            if ($preferencesOptions->smoking_option1) {
-                $name1 = FeaturesSettingDetail::whereFeaturesSettingId($preferencesOptions->smoking_option1)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->value('name');
-                if ($name1) {
-                    $preferencesOptions->smoking_option1_label = $name1 ?? null;
-                }
-            } else {
-                $preferencesOptions->smoking_option1_label = null; // Add `null` if smoking_option1 is null
-            }
+        $data['cancellation'] = [
+            'cancellationOptions' => $cancellationOptions
+                ->pluck('features_setting_id')
+                ->values()
+                ->all(),
+            'cancellationLabels' => $cancellationOptions
+                ->pluck('name')
+                ->values()
+                ->all(),
+            'cancellationTooltips' => $cancellationOptions
+                ->pluck('tooltip')
+                ->values()
+                ->all(),
+        ];
 
-            if ($preferencesOptions->smoking_option2) {
-                $name2 = FeaturesSettingDetail::whereFeaturesSettingId($preferencesOptions->smoking_option2)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->value('name');
-                if ($name2) {
-                    $preferencesOptions->smoking_option2_label = $name2 ?? null;
-                }
-            } else {
-                $preferencesOptions->smoking_option2_label = null; // Add `null` if smoking_option2 is null
-            }
+        $paymentOptions = collect($groups->get('payment_method', collect()))
+            ->sortBy('id')
+            ->values();
 
-            if ($preferencesOptions->animals_option1) {
-                $name2 = FeaturesSettingDetail::whereFeaturesSettingId($preferencesOptions->animals_option1)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->value('name');
-                if ($name2) {
-                    $preferencesOptions->animals_option1_label = $name2 ?? null;
-                }
-            } else {
-                $preferencesOptions->animals_option1_label = null; // Add `null` if animals_option1 is null
-            }
+        $data['payment'] = [
+            'paymentOptions' => $paymentOptions
+                ->pluck('features_setting_id')
+                ->values()
+                ->all(),
+            'paymentLabels' => $paymentOptions
+                ->pluck('name')
+                ->values()
+                ->all(),
+            'paymentTooltips' => $paymentOptions
+                ->pluck('tooltip')
+                ->values()
+                ->all(),
+        ];
 
-            if ($preferencesOptions->animals_option2) {
-                $name2 = FeaturesSettingDetail::whereFeaturesSettingId($preferencesOptions->animals_option2)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->value('name');
-                if ($name2) {
-                    $preferencesOptions->animals_option2_label = $name2 ?? null;
-                }
-            } else {
-                $preferencesOptions->animals_option2_label = null; // Add `null` if animals_option2 is null
-            }
+        $luggageOptions = collect($groups->get('luggage_size', collect()))
+            ->sortBy('id')
+            ->values();
 
-            if ($preferencesOptions->animals_option3) {
-                $name2 = FeaturesSettingDetail::whereFeaturesSettingId($preferencesOptions->animals_option3)
-                    ->whereLanguageId($selectedLanguage->id)
-                    ->value('name');
-                if ($name2) {
-                    $preferencesOptions->animals_option3_label = $name2 ?? null;
-                }
-            } else {
-                $preferencesOptions->animals_option3_label = null; // Add `null` if animals_option3 is null
-            }
-        }
+        $data['luggage'] = [
+            'luggageOptions' => $luggageOptions
+                ->pluck('features_setting_id')
+                ->values()
+                ->all(),
+            'luggageLabels' => $luggageOptions
+                ->pluck('name')
+                ->values()
+                ->all(),
+            'luggageTooltips' => $luggageOptions
+                ->pluck('tooltip')
+                ->values()
+                ->all(),
+        ];
 
-        $data = ['preferencesOptions' => $preferencesOptions];
+        $orderedFeatures = collect($groups->get('features', collect()))
+            ->sortBy('id')
+            ->filter(fn($feature) => $feature->id >= 1 && $feature->id <= 12 || 47)
+            ->values();
+        
+        $data['features'] = [
+            'featuresOptions' => $orderedFeatures->pluck('features_setting_id')->values()->all(),
+            'featuresLabels' => $orderedFeatures->pluck('name')->values()->all(),
+        ];
+
+        $orderedPassengers = collect($groups->get('features', collect()))
+            ->sortBy('id')
+            ->filter(fn($feature) => $feature->id >= 13 && $feature->id <= 16)
+            ->values();
+
+        $data['passengers'] = [
+            'passengerRatingOptions' => $orderedPassengers->pluck('features_setting_id')->values()->all(),
+            'passengerRatingLabels' => $orderedPassengers->pluck('name')->values()->all(),
+        ];
+
+        $bookingMethodOptions = collect($groups->get('booking_method', collect()))
+            ->sortBy('id')
+            ->values();
+
+        $data['booking'] = [
+            'bookingOptions' => $bookingMethodOptions
+                ->pluck('features_setting_id')
+                ->values()
+                ->all(),
+            'bookingLabels' => $bookingMethodOptions
+                ->pluck('name')
+                ->values()
+                ->all(),
+            'bookingTooltips' => $bookingMethodOptions
+                ->pluck('tooltip')
+                ->values()
+                ->all(),
+        ];
+
+
         return $this->successResponse($data, 'Get preferences options successfully');
     }
 
-    public function cancellationOptions(Request $request){
-        $cancellationLabels = [];
-        if ($request->lang && $request->lang != 0) {
-            $cancellationOptions = PostRidePageSettingDetail::select('post_ride_page_setting_detail.cancellation_policy_label1', 'post_ride_page_setting_detail.cancellation_policy_label2')
-            ->join('languages', 'languages.id', '=', 'post_ride_page_setting_detail.language_id')
-            ->where('languages.id', $request->lang)
-            ->first();
+    public function preferencesOptions(Request $request)
+    {
 
-            if ($cancellationOptions->cancellation_policy_label1) {
-                $name1 = FeaturesSettingDetail::whereFeaturesSettingId($cancellationOptions->cancellation_policy_label1)
-                    ->whereLanguageId($request->lang)
-                    ->value('name');
-                if ($name1) {
-                    $cancellationLabels[] = $name1 ?? null;
-                }
-            } else {
-                $cancellationLabels[] = null; // Add `null` if booking_option1 is null
-            }
-            
-            if ($cancellationOptions->cancellation_policy_label2) {
-                $name2 = FeaturesSettingDetail::whereFeaturesSettingId($cancellationOptions->cancellation_policy_label2)
-                    ->whereLanguageId($request->lang)
-                    ->value('name');
-                if ($name2) {
-                    $cancellationLabels[] = $name2 ?? null;
-                }
-            } else {
-                $cancellationLabels[] = null; // Add `null` if booking_option1 is null
-            }
+        $groups = $this->getRideFeatureOptionGroups($this->selectedLanguage->id);
+        $smokingOptions = collect($groups->get('smoking_allowed', collect()))
+            ->sortBy('id')
+            ->values();
+        $petOptions = collect($groups->get('pets_allowed', collect()))
+            ->sortBy('id')
+            ->values();
 
-            $cancellationTooltips = PostRidePageSettingDetail::select('post_ride_page_setting_detail.cancellation_policy_label1_tooltip', 'post_ride_page_setting_detail.cancellation_policy_label2_tooltip')
-                ->join('languages', 'languages.id', '=', 'post_ride_page_setting_detail.language_id')
-                ->where('languages.id', $request->lang)
-                ->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $cancellationOptions = PostRidePageSettingDetail::select('post_ride_page_setting_detail.cancellation_policy_label1', 'post_ride_page_setting_detail.cancellation_policy_label2')
-                    ->join('languages', 'languages.id', '=', 'post_ride_page_setting_detail.language_id')
-                    ->where('languages.id', $selectedLanguage->id)
-                    ->first();
+        return [
+            'preferencesOptions' => [
+                'smoking_option1' => $smokingOptions->get(0)?->features_setting_id,
+                'smoking_option2' => $smokingOptions->get(1)?->features_setting_id,
+                'smoking_option1_label' => $smokingOptions->get(0)?->name,
+                'smoking_option2_label' => $smokingOptions->get(1)?->name,
+                'animals_option1' => $petOptions->get(0)?->features_setting_id,
+                'animals_option2' => $petOptions->get(1)?->features_setting_id,
+                'animals_option3' => $petOptions->get(2)?->features_setting_id,
+                'animals_option1_label' => $petOptions->get(0)?->name,
+                'animals_option2_label' => $petOptions->get(1)?->name,
+                'animals_option3_label' => $petOptions->get(2)?->name,
+            ],
+        ];
 
-                if ($cancellationOptions->cancellation_policy_label1) {
-                    $name1 = FeaturesSettingDetail::whereFeaturesSettingId($cancellationOptions->cancellation_policy_label1)
-                        ->whereLanguageId($selectedLanguage->id)
-                        ->value('name');
-                    if ($name1) {
-                        $cancellationLabels[] = $name1 ?? null;
-                    }
-                } else {
-                    $cancellationLabels[] = null; // Add `null` if booking_option1 is null
-                }
-                
-                if ($cancellationOptions->cancellation_policy_label2) {
-                    $name2 = FeaturesSettingDetail::whereFeaturesSettingId($cancellationOptions->cancellation_policy_label2)
-                        ->whereLanguageId($selectedLanguage->id)
-                        ->value('name');
-                    if ($name2) {
-                        $cancellationLabels[] = $name2 ?? null;
-                    }
-                } else {
-                    $cancellationLabels[] = null; // Add `null` if booking_option1 is null
-                }
+    }
 
-                $cancellationTooltips = PostRidePageSettingDetail::select('post_ride_page_setting_detail.cancellation_policy_label1_tooltip', 'post_ride_page_setting_detail.cancellation_policy_label2_tooltip')
-                    ->join('languages', 'languages.id', '=', 'post_ride_page_setting_detail.language_id')
-                    ->where('languages.id', $selectedLanguage->id)
-                    ->first();
-            }
-        }
+    public function cancellationOptions(Request $request)
+    {
+        $cancellationOptions = collect($this->getRideFeatureOptionGroups($this->selectedLanguage->id)->get('cancellation', collect()))
+            ->sortBy('id')
+            ->values();
 
-        if ($cancellationOptions && $cancellationTooltips) {
-            $data = ['cancellationOptions' => array_values($cancellationOptions->toArray()), 'cancellationLabels' => $cancellationLabels, 'cancellationTooltips' => array_values($cancellationTooltips->toArray())];
-        } else {
-            $data = ['cancellationOptions' => $cancellationOptions, 'cancellationLabels' => $cancellationLabels, 'cancellationTooltips' => $cancellationTooltips];
-        }
-        
+        $data = [
+            'cancellationOptions' => $cancellationOptions
+                ->pluck('features_setting_id')
+                ->values()
+                ->all(),
+            'cancellationLabels' => $cancellationOptions
+                ->pluck('name')
+                ->values()
+                ->all(),
+            'cancellationTooltips' => $cancellationOptions
+                ->pluck('tooltip')
+                ->values()
+                ->all(),
+        ];
+
         return $this->successResponse($data, 'Get cancellation options successfully');
     }
 
     public function thankyouIndex(Request $request)
     {
-        $thankYouPage = null;
-        if ($request->lang_id && $request->lang_id != 0) {
-            // Retrieve the thankyouPageSettingDetail associated with the selected language
-            $thankYouPage = ThankyouPageSettingDetail::where('language_id', $request->lang_id)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $thankYouPage = ThankyouPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        }
+        $thankYouPage = ThankyouPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $data = ['thankYouPage' => $thankYouPage];
         return $this->successResponse($data, 'Thankyou page get successfully');

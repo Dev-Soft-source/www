@@ -134,6 +134,53 @@ class PostRideProvider extends GetConnect {
     }
   }
 
+  Future getSearchRideInitData(token, langId) async {
+    try {
+      var url = "$baseUrl/$searchRideInit?lang_id=$langId";
+
+      final response = await getConnect.get(url, headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      });
+
+      if (response.status.hasError) {
+        if (response.status.connectionError) {
+          return Future.error({
+            "type": "network",
+            "message":
+                "No internet connection. Please check your network and try again."
+          });
+        }
+        if (response.status.code == 422) {
+          return response.body;
+        }
+        return Future.error(response.statusText as Object);
+      } else {
+        return response.body;
+      }
+    } on SocketException {
+      return Future.error({
+        "type": "network",
+        "message":
+            "No internet connection. Please check your network and try again."
+      });
+    } on TimeoutException {
+      return Future.error({
+        "type": "network",
+        "message": "Request timed out. Please try again."
+      });
+    } on GetHttpException catch (e) {
+      logger.error("HTTP error in getSearchRideInitData: $e");
+      return Future.error({
+        "type": "server",
+        "message": "Server error occurred. Please try again later."
+      });
+    } catch (exception) {
+      logger.error("Unknown error in getSearchRideInitData: $exception");
+      return Future.error({"type": "unknown", "message": exception.toString()});
+    }
+  }
+
   Future getPreferenceOptions(token, lang) async {
     try {
       final response = await getConnect
@@ -871,51 +918,6 @@ class PostRideProvider extends GetConnect {
       });
     } catch (exception) {
       logger.error("Unknown error in editPostRideData: $exception");
-      return Future.error({"type": "unknown", "message": exception.toString()});
-    }
-  }
-
-  Future getPostRideSetting(token, langId) async {
-    try {
-      final response = await getConnect
-          .get("$baseUrl/$postRideSettingRequest?lang_id=$langId", headers: {
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $token',
-      });
-      if (response.status.hasError) {
-        if (response.status.connectionError) {
-          return Future.error({
-            "type": "network",
-            "message":
-                "No internet connection. Please check your network and try again."
-          });
-        }
-        if (response.status.code == 422) {
-          return response.body;
-        }
-        return Future.error(response.statusText as Object);
-      } else {
-        return response.body;
-      }
-    } on SocketException {
-      return Future.error({
-        "type": "network",
-        "message":
-            "No internet connection. Please check your network and try again."
-      });
-    } on TimeoutException {
-      return Future.error({
-        "type": "network",
-        "message": "Request timed out. Please try again."
-      });
-    } on GetHttpException catch (e) {
-      logger.error("HTTP error in getPostRideSetting: $e");
-      return Future.error({
-        "type": "server",
-        "message": "Server error occurred. Please try again later."
-      });
-    } catch (exception) {
-      logger.error("Unknown error in getPostRideSetting: $exception");
       return Future.error({"type": "unknown", "message": exception.toString()});
     }
   }

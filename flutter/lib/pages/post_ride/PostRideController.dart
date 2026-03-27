@@ -1546,10 +1546,10 @@ class PostRideController extends GetxController {
 
           // 5. Parse pink ride info
           if (data['pinkRide'] != null) {
-            if (data['pinkRide']['user']['pink_ride'] == "1") {
+            if (data['user']['pink_ride'] == "1") {
               pinkRideToolTipText.value =
                   "${labelTextDetail['pink_ride_tooltip_admin_enable_text'] ?? "Admin allow user to select pink ride"}";
-            } else if (data['pinkRide']['user']['pink_ride'] == "0") {
+            } else if (data['user']['pink_ride'] == "0") {
               pinkRideToolTipText.value =
                   "${labelTextDetail['pink_ride_tooltip_admin_disable_text'] ?? "Admin disable user to select pink ride"}";
             } else if (data['pinkRide']['pinkRideSetting'] != null) {
@@ -1593,10 +1593,10 @@ class PostRideController extends GetxController {
 
           // 6. Parse extra care ride info
           if (data['extraCareRide'] != null) {
-            if (data['extraCareRide']['user']['folks_ride'] == "1") {
+            if (data['user']['folks_ride'] == "1") {
               extraCareRideToolTipText.value =
                   "${labelTextDetail['extra_care_tooltip_admin_enable_text'] ?? "Admin allow user to select extra care ride"}";
-            } else if (data['extraCareRide']['user']['folks_ride'] == "0") {
+            } else if (data['user']['folks_ride'] == "0") {
               extraCareRideToolTipText.value =
                   "${labelTextDetail['extra_care_tooltip_admin_disable_text'] ?? "Admin disable user to select extra care ride"}";
             } else if (data['extraCareRide']['folkRideSetting'] != null) {
@@ -2833,212 +2833,6 @@ class PostRideController extends GetxController {
       });
     } catch (exception) {
       isOverlayLoading(false);
-      serviceController.showDialogue(exception.toString(), type: "error");
-    }
-  }
-
-  getPostRideSetting() async {
-    try {
-      await PostRideProvider()
-          .getPostRideSetting(
-              serviceController.token, serviceController.langId.value)
-          .then((resp) async {
-        bool pinkRide = true;
-        bool extraCare = true;
-
-        if (resp['status'] != null && resp['status'] == "Success") {
-          if (resp['data'] != null && resp['data']['siteSetting'] != null) {
-            firmCancellationPrice.value = int.parse(
-                resp['data']['siteSetting']['frim_discount'].toString());
-          }
-
-          if (resp['data']['user']['pink_ride'] == "1") {
-            pinkRide = true;
-          } else if (resp['data']['user']['pink_ride'] == "0") {
-            pinkRide = false;
-          } else if (resp['data'] != null &&
-              resp['data']['pinkRideSetting'] != null) {
-            if (resp['data']['pinkRideSetting']['female'] == "1" &&
-                resp['data']['user']['gender'].toString().toLowerCase() !=
-                    "female") {
-              pinkRide = false;
-            }
-            if (resp['data']['pinkRideSetting']['verify_phone'] == "1" &&
-                resp['data']['user']['phone_verified'] != "1") {
-              pinkRide = false;
-            }
-            if (resp['data']['pinkRideSetting']['verify_email'] == "1" &&
-                resp['data']['user']['email_verified'] != "1") {
-              pinkRide = false;
-            }
-            if (resp['data']['pinkRideSetting']['driver_license'] == "1" &&
-                resp['data']['user']['driver'] != "1") {}
-            if (resp['data']['user']['profile_complete'] == "0") {
-              pinkRide = false;
-            }
-          }
-
-          if (resp['data']['user']['folks_ride'] == "1") {
-            extraCare = true;
-          } else if (resp['data']['user']['folks_ride'] == "0") {
-            extraCare = false;
-          } else if (resp['data'] != null &&
-              resp['data']['folkRideSetting'] != null) {
-            if (double.parse(
-                    resp['data']['folkRideSetting']['average_rating'] ?? "0") >
-                double.parse(resp['data']['user']['average_rating'] != null
-                    ? resp['data']['user']['average_rating'].toString()
-                    : "0")) {
-              extraCare = false;
-            }
-            if (int.parse(
-                    resp['data']['folkRideSetting']['driver_age'] ?? "0") >
-                int.parse(resp['data']['user']['age'].toString())) {
-              extraCare = false;
-            }
-            if (int.parse(resp['data']['totalNoOfRides'].toString()) <
-                int.parse(resp['data']['folkRideSetting']
-                        ['extra_rides_trip_limit']
-                    .toString())) {
-              extraCare = false;
-            }
-            if (int.parse(resp['data']['noShowsCount'].toString()) > 0) {
-              extraCare = false;
-            }
-            if (int.parse(resp['data']['cancellationCount'].toString()) > 0) {
-              extraCare = false;
-            }
-            if (resp['data']['folkRideSetting']['verify_phone'] == "1" &&
-                resp['data']['user']['phone_verified'] != "1") {
-              extraCare = false;
-            }
-            if (resp['data']['folkRideSetting']['verify_email'] == "1" &&
-                resp['data']['user']['email_verified'] != "1") {
-              extraCare = false;
-            }
-            if (resp['data']['folkRideSetting']['driver_license'] == "1" &&
-                resp['data']['user']['driver'] != "1") {
-              extraCare = false;
-            }
-            if (resp['data']['user']['profile_complete'] == "0") {
-              extraCare = false;
-            }
-          }
-
-          if (pinkRide == false) {
-            pinkRideReadOnly.value = true;
-          }
-          if (extraCare == false) {
-            extraCareRideReadOnly.value = true;
-          }
-
-          //ToolTip Pink Ride
-
-          if (resp['data']['user']['pink_ride'] == "1") {
-            pinkRideToolTipText.value =
-                "${labelTextDetail['pink_ride_tooltip_admin_enable_text'] ?? "Admin allow user to select pink ride"}";
-          } else if (resp['data']['user']['pink_ride'] == "0") {
-            pinkRideToolTipText.value =
-                "${labelTextDetail['pink_ride_tooltip_admin_disable_text'] ?? "Admin disable user to select pink ride"}";
-          } else if (resp['data'] != null &&
-              resp['data']['pinkRideSetting'] != null) {
-            pinkRideToolTipText.value =
-                "${labelTextDetail['pink_ride_tooltip_only_text'] ?? "Only"}";
-            if (resp['data']['pinkRideSetting']['female'] == "1") {
-              pinkRideToolTipText.value =
-                  "${pinkRideToolTipText.value} ${labelTextDetail['pink_ride_tooltip_female_text'] ?? "female"}";
-            }
-            pinkRideToolTipText.value =
-                "${pinkRideToolTipText.value} ${labelTextDetail['pink_ride_tooltip_driver_text'] ?? "driver"}";
-
-            if (resp['data']['pinkRideSetting']['verfiy_phone'] == "1" ||
-                resp['data']['pinkRideSetting']['verfiy_email'] == "1" ||
-                resp['data']['pinkRideSetting']['driver_license'] == "1") {
-              pinkRideToolTipText.value =
-                  "${pinkRideToolTipText.value} ${labelTextDetail['pink_ride_tooltip_with_text'] ?? "with"}";
-              if (resp['data']['pinkRideSetting']['verfiy_phone'] == "1") {
-                pinkRideToolTipText.value =
-                    "${pinkRideToolTipText.value} ${labelTextDetail['pink_ride_tooltip_phone_number_text'] ?? "phone number"},";
-              }
-
-              if (resp['data']['pinkRideSetting']['verfiy_email'] == "1") {
-                pinkRideToolTipText.value =
-                    "${pinkRideToolTipText.value} ${labelTextDetail['pink_ride_tooltip_email_text'] ?? "email"},";
-              }
-              if (resp['data']['pinkRideSetting']['driver_license'] == "1") {
-                pinkRideToolTipText.value =
-                    "${pinkRideToolTipText.value} ${labelTextDetail['pink_ride_tooltip_driver_license_text'] ?? "driver license"}";
-              }
-              pinkRideToolTipText.value =
-                  "${pinkRideToolTipText.value} ${labelTextDetail['pink_ride_tooltip_verified_text'] ?? "verified"}";
-            }
-            pinkRideToolTipText.value =
-                "${pinkRideToolTipText.value} ${labelTextDetail['pink_ride_tooltip_select_this_ride_text'] ?? "can select this ride"}";
-          }
-
-          //ToolTip ExtraCare Ride
-
-          if (resp['data']['user']['folks_ride'] == "1") {
-            extraCareRideToolTipText.value =
-                "${labelTextDetail['extra_care_tooltip_admin_enable_text'] ?? "Admin allow user to select extra care ride"}";
-          } else if (resp['data']['user']['folks_ride'] == "0") {
-            extraCareRideToolTipText.value =
-                "${labelTextDetail['extra_care_tooltip_admin_disable_text'] ?? "Admin disable user to select extra care ride"}";
-          } else if (resp['data'] != null &&
-              resp['data']['folkRideSetting'] != null) {
-            extraCareRideToolTipText.value =
-                "${labelTextDetail['extra_care_tooltip_driver_review_text'] ?? "Driver whose review is"}";
-
-            if (resp['data']['folkRideSetting']['average_rating'] != "null") {
-              extraCareRideToolTipText.value =
-                  "${extraCareRideToolTipText.value} ${resp['data']['folkRideSetting']['average_rating']}";
-            } else {
-              extraCareRideToolTipText.value =
-                  "${extraCareRideToolTipText.value} 0";
-            }
-            extraCareRideToolTipText.value =
-                "${extraCareRideToolTipText.value} ${labelTextDetail['extra_care_tooltip_greater_age_text'] ?? "or greater and his age is"}";
-
-            if (resp['data']['folkRideSetting']['driver_age'] != "null") {
-              extraCareRideToolTipText.value =
-                  "${extraCareRideToolTipText.value} ${resp['data']['folkRideSetting']['driver_age']}";
-            } else {
-              extraCareRideToolTipText.value =
-                  "${extraCareRideToolTipText.value} 0";
-            }
-            extraCareRideToolTipText.value =
-                "${extraCareRideToolTipText.value} ${labelTextDetail['extra_care_tooltip_greater_text'] ?? "or greater"}";
-
-            if (resp['data']['folkRideSetting']['verfiy_phone'] == "1" ||
-                resp['data']['folkRideSetting']['verify_email'] == "1" ||
-                resp['data']['folkRideSetting']['driver_license'] == "1") {
-              extraCareRideToolTipText.value =
-                  "${extraCareRideToolTipText.value} ${labelTextDetail['extra_care_tooltip_and_his_text'] ?? "and his"}";
-              if (resp['data']['folkRideSetting']['verfiy_phone'] == "1") {
-                extraCareRideToolTipText.value =
-                    "${extraCareRideToolTipText.value} ${labelTextDetail['extra_care_tooltip_phone_number_text'] ?? "phone number"},";
-              }
-
-              if (resp['data']['folkRideSetting']['verify_email'] == "1") {
-                extraCareRideToolTipText.value =
-                    "${extraCareRideToolTipText.value} ${labelTextDetail['extra_care_tooltip_email_text'] ?? "email"},";
-              }
-
-              if (resp['data']['folkRideSetting']['driver_license'] == "1") {
-                extraCareRideToolTipText.value =
-                    "${extraCareRideToolTipText.value} ${labelTextDetail['extra_care_tooltip_driver_license_text'] ?? "driver license"}";
-              }
-              extraCareRideToolTipText.value =
-                  "${extraCareRideToolTipText.value} ${labelTextDetail['extra_care_tooltip_verified_text'] ?? "verified"}";
-            }
-          }
-          extraCareRideToolTipText.value =
-              "${extraCareRideToolTipText.value} ${labelTextDetail['extra_care_tooltip_eligible_text'] ?? "is eligible for extra care ride"}";
-        }
-      }, onError: (err) {
-        serviceController.showDialogue(err.toString(), type: "error");
-      });
-    } catch (exception) {
       serviceController.showDialogue(exception.toString(), type: "error");
     }
   }

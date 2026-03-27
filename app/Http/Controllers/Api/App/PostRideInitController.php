@@ -49,8 +49,11 @@ class PostRideInitController extends Controller
 
             $user = Auth::guard('sanctum')->user();
 
+
             // Aggregate all data
             $data = [
+                'user' => $user,
+
                 // 1. Labels and page settings
                 'labels' => $this->getLabelsData(),
 
@@ -292,7 +295,7 @@ class PostRideInitController extends Controller
 
         $orderedFeatures = collect($featureGroup)
             ->sortBy('id')
-            ->filter(fn($feature) => $feature->id >= 1 && $feature->id <= 16)
+            ->filter(fn($feature) => $feature->id >= 1 && $feature->id <= 16 || 47)
             ->values();
 
         return [
@@ -307,11 +310,9 @@ class PostRideInitController extends Controller
     private function getPinkRideData($loggedInUser)
     {
         $pinkRideSetting = PinkRideSetting::getCached();
-        $user = User::whereId($loggedInUser->id)->select('id', 'gender', 'email_verified', 'driver', 'dob', 'profile_complete', 'pink_ride', 'folks_ride')->first();
 
         return [
             'pinkRideSetting' => $pinkRideSetting,
-            'user' => $user,
         ];
     }
 
@@ -321,11 +322,9 @@ class PostRideInitController extends Controller
     private function getExtraCareRideData($loggedInUser)
     {
         $folkRideSetting = FolkRideSetting::getCached();
-        $user = User::whereId($loggedInUser->id)->select('id', 'gender', 'email_verified', 'driver', 'dob', 'profile_complete', 'pink_ride', 'folks_ride')->first();
 
         return [
             'folkRideSetting' => $folkRideSetting,
-            'user' => $user,
         ];
     }
 

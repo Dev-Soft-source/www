@@ -300,7 +300,7 @@ class SearchRidePage extends GetView<SearchRideController> {
                           child: elevatedButtonWidget(
                             textWidget: txt22Size(
                                 title:
-                                    "${controller.labelTextDetail['search_section_recent_searches'] ?? "Recent searches (${controller.recentSearchList.isNotEmpty ? controller.recentSearchList.length : 0})"}",
+                                    "${controller.labelTextDetail['search_section_recent_searches'] ?? "Recent searches (${controller.recentSearchList.length > 2 ? 2 : controller.recentSearchList.length})"}",
                                 textColor: Colors.white,
                                 context: context,
                                 fontFamily: regular),
@@ -310,7 +310,9 @@ class SearchRidePage extends GetView<SearchRideController> {
                         ),
                         10.heightBox,
                         ListView.separated(
-                            itemCount: controller.recentSearchList.length,
+                            itemCount: controller.recentSearchList.length > 2
+                                ? 2
+                                : controller.recentSearchList.length,
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             itemBuilder: (context, index) {

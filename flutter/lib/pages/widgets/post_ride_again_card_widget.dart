@@ -4,10 +4,25 @@ import 'package:intl/intl.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 Widget postRideAgainCardWidget({context, screenWidth, String fromText = "", String toText = "", String depatureAt = "", onTap, Color cardBgColor = Colors.white, String fromLabel = "From", String toLabel = "To"}){
-  
-  DateTime parsedDate = DateTime.parse(depatureAt);
-  DateFormat outputFormat = DateFormat('MMMM d, yyyy');
-  depatureAt = outputFormat.format(parsedDate);
+  final trimmedDepartureAt = depatureAt.trim();
+  String formattedDepartureAt = "";
+
+  if (trimmedDepartureAt.isNotEmpty) {
+    DateTime? parsedDate = DateTime.tryParse(trimmedDepartureAt);
+
+    if (parsedDate == null) {
+      for (final format in ['MMMM d, yyyy', 'MMMM dd, yyyy', 'yyyy-MM-dd']) {
+        try {
+          parsedDate = DateFormat(format).parseStrict(trimmedDepartureAt);
+          break;
+        } catch (_) {}
+      }
+    }
+
+    formattedDepartureAt = parsedDate != null
+        ? DateFormat('MMMM d, yyyy').format(parsedDate)
+        : trimmedDepartureAt;
+  }
   
   return InkWell(
     onTap: onTap,
@@ -70,8 +85,10 @@ Widget postRideAgainCardWidget({context, screenWidth, String fromText = "", Stri
                 txt20Size(title: "$fromLabel:", context: context),
                 5.heightBox,
                 txt20Size(title: "$toLabel:", context: context),
+                if (formattedDepartureAt.isNotEmpty) ...[
                 5.heightBox,
                 txt20Size(title: "", context: context),
+                ]
               ],
             ),
             10.widthBox,
@@ -83,8 +100,10 @@ Widget postRideAgainCardWidget({context, screenWidth, String fromText = "", Stri
                   txt20Size(title: fromText, context: context, fontFamily: bold),
                   10.heightBox,
                   txt20Size(title: toText, context: context, fontFamily: bold),
-                  10.heightBox,
-                  txt16Size(title: depatureAt, context: context)
+                  if (formattedDepartureAt.isNotEmpty) ...[
+                    10.heightBox,
+                    txt16Size(title: formattedDepartureAt, context: context)
+                  ]
                 ],
               ),
             )

@@ -143,10 +143,11 @@ Route::group(['prefix' => 'app/v1', 'middleware' => ['auth:sanctum']], function 
     Route::get('accept-booking-request', [BookingController::class, 'AcceptBookingRequest'])->name('app.auth.accept_booking_request');
     Route::get('reject-booking-request', [BookingController::class, 'RejectBookingRequest'])->name('app.auth.reject_booking_request');
     Route::post('no-show', [RideController::class, 'noShow'])->name('app.auth.no_show');
-    Route::get('post-ride-setting', [InfoIconController::class, 'postRideSetting'])->name('app.auth.post-ride-setting');
-    Route::get('post-ride-init', [PostRideInitController::class, 'getInitData'])->name('app.auth.post-ride-init');
     Route::post('segment-distance-estimates', [RideController::class, 'segmentDistanceEstimates'])->name('app.auth.segment-distance-estimates');
     Route::get('select-location-setting', [InfoIconController::class, 'selectLocationSetting'])->name('app.auth.select-location-setting');
+    
+    Route::get('post-ride-init', [PostRideInitController::class, 'getInitData'])->name('app.auth.post-ride-init');
+    Route::get('search-ride-init', [PreferencesSettingController::class, 'getInitData'])->name('app.auth.search-ride-init');
     
     Route::get('post-ride', [RideController::class, '_PostRide'])->name('app.auth.post_ride');
     Route::post('post-ride', [RideController::class, '_PostRideStore'])->name('app.auth.post_ride.store');
