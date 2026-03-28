@@ -159,7 +159,7 @@ class NotificationController extends GetxController {
                   AuthorizationStatus.provisional;
 
       if (!isPermissionGranted) {
-        logger.warning(
+        logger.info(
             "Notification permission not granted: ${notificationSettings.authorizationStatus}");
         return;
       }

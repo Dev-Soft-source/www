@@ -711,7 +711,9 @@ class PostRideProvider extends GetConnect {
       rideDetailIdsArray,
       routeFroms,
       routeTos,
-      routePrices) async {
+      routePrices,
+      totalDistanceMeters,
+      totalDurationSeconds) async {
     try {
       final data = FormData({});
       if (rideType == "update") {
@@ -745,6 +747,9 @@ class PostRideProvider extends GetConnect {
           .add(MapEntry("notes", anythingTextEditingController.toString()));
       data.fields.add(MapEntry("middle_seats", seatMiddle.toString()));
       data.fields.add(MapEntry("back_seats", seatBack.toString()));
+      data.fields.add(
+          MapEntry("distance_meters", totalDistanceMeters.toString()));
+      data.fields.add(MapEntry("duration", totalDurationSeconds.toString()));
 
       if (fromSpots.length > 0) {
         data.fields.add(MapEntry("from_spot", jsonEncode(fromSpots)));

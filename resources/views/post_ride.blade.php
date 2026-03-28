@@ -1865,6 +1865,7 @@
             const segmentDistanceLoader = document.getElementById('px-segment-distance-loader');
             const distanceMetersInput = document.getElementById('px-distance-meters-input');
             const durationInput = document.getElementById('px-duration-input');
+            const submitButtons = Array.from(document.querySelectorAll('.post-ride-submit-btn'));
             const segmentDistanceEstimateUrl = @json(route('post_ride.segment_distance_estimates', ['lang' => optional($selectedLanguage)->abbreviation]));
             let lastPxPriceValidationSignature = null;
             const initialSegmentPrices = (() => {
@@ -1905,8 +1906,15 @@
                 });
             }
 
+            function setSubmitButtonsDisabled(isDisabled) {
+                submitButtons.forEach((button) => {
+                    button.disabled = !!isDisabled;
+                });
+            }
+
             function setSegmentDistanceLoading(isLoading) {
                 setSegmentPriceInputsDisabled(isLoading);
+                setSubmitButtonsDisabled(isLoading);
 
                 if (segmentDistanceLoader) {
                     segmentDistanceLoader.classList.toggle('is-active', isLoading);
@@ -2187,6 +2195,53 @@
                 return Number.parseInt(segmentDistancesMeters[`${fromIndex}:${toIndex}`] || '0', 10) || 0;
             }
 
+            function getRouteDurationSeconds(points) {
+                if (!Array.isArray(points) || points.length < 2) {
+                    return Number.parseInt(segmentDistanceState?.totalDurationSeconds || '0', 10) || 0;
+                }
+
+                const segmentDurationsSeconds = segmentDistanceState &&
+                    segmentDistanceState.segmentDurationsSeconds &&
+                    typeof segmentDistanceState.segmentDurationsSeconds === 'object' ?
+                    segmentDistanceState.segmentDurationsSeconds :
+                    {};
+
+                let totalDurationSeconds = 0;
+                let hasResolvedAdjacentLegs = false;
+
+                for (let index = 0; index < points.length - 1; index++) {
+                    const durationSeconds = Number.parseInt(segmentDurationsSeconds[`${index}:${index + 1}`] || '0', 10) || 0;
+                    totalDurationSeconds += durationSeconds;
+                    if (durationSeconds > 0) {
+                        hasResolvedAdjacentLegs = true;
+                    }
+                }
+
+                if (hasResolvedAdjacentLegs) {
+                    return totalDurationSeconds;
+                }
+
+                if (Array.isArray(segmentDistanceState?.legDurationsSeconds) && segmentDistanceState.legDurationsSeconds.length > 0) {
+                    return segmentDistanceState.legDurationsSeconds.reduce((sum, durationSeconds) => {
+                        return sum + (Number.parseInt(durationSeconds || '0', 10) || 0);
+                    }, 0);
+                }
+
+                return Number.parseInt(segmentDistanceState?.totalDurationSeconds || '0', 10) || 0;
+            }
+
+            function syncRouteDurationInput(points = null) {
+                if (!durationInput) {
+                    return;
+                }
+
+                const routePoints = Array.isArray(points) ? points : getAllRoutePoints(getValidStopsData());
+                durationInput.value = String(getRouteDurationSeconds(routePoints));
+            }
+
+            // Exposed for price helpers defined outside DOMContentLoaded (submit + post-estimate alerts).
+            window.pxGetSegmentDistanceMeters = getSegmentDistanceMeters;
+
             function refreshExpectedSegmentPriceHints() {
                 if (!priceSegmentsList) {
                     return;
@@ -2288,6 +2343,7 @@
                     }
                     refreshExpectedSegmentPriceHints();
                     refreshSingleRouteExpectedPriceHint();
+                    validateAndAlertPxPricesAfterSegmentDistances();
                     return;
                 }
 
@@ -2349,10 +2405,7 @@
                             distanceMetersInput.value = String(segmentDistanceState.totalDistanceMeters);
                         }
                     }
-                    const durationInput = document.getElementById('px-duration-input');
-                    if (durationInput) {
-                        durationInput.value = String(segmentDistanceState.totalDurationSeconds);
-                    }
+                    syncRouteDurationInput(points);
                 } catch (error) {
                     if (segmentDistanceState.pendingKey === requestKey) {
                         segmentDistanceState.pendingKey = '';
@@ -2362,6 +2415,7 @@
                     setSegmentDistanceLoading(false);
                     refreshExpectedSegmentPriceHints();
                     refreshSingleRouteExpectedPriceHint();
+                    validateAndAlertPxPricesAfterSegmentDistances();
                 }
             }
 
@@ -2475,6 +2529,8 @@
                         durationInput.value = '0';
                     }
                 }
+
+                syncRouteDurationInput(points);
 
                 // priceLabel.textContent = 'Price per Seat (all route sections)';
                 priceSingleWrap.classList.add('hidden');
@@ -2672,6 +2728,11 @@
             // Filter out empty stops before form submission
             if (postRideForm) {
                 postRideForm.addEventListener('submit', function(event) {
+                    if (segmentDistanceState.pendingKey) {
+                        event.preventDefault();
+                        return false;
+                    }
+
                     // Check if bypass flag is already set (user already saw warning and chose to continue)
                     const bypassInput = postRideForm.querySelector('input[name="bypass_price_validation"]');
                     if (bypassInput && bypassInput.value === '1') {
@@ -2714,9 +2775,7 @@
                         priceMinorInput.value = String(toMinorFromMajor(priceMinorInput.value));
                     }
                     const durationInput = document.getElementById('px-duration-input');
-                    if (durationInput) {
-                        durationInput.value = String(Number.parseInt(segmentDistanceState.totalDurationSeconds || '0', 10) || 0);
-                    }
+                    syncRouteDurationInput();
                     syncStopPriceDeltaInputsFromSegmentRows();
                     syncSegmentPriceTotal();
 
@@ -3155,8 +3214,9 @@
         }
 
         function focusPxPriceInput(targetInput = null) {
-            const priceInput = targetInput instanceof HTMLElement ? targetInput : document.getElementById(
-                'px-price-minor-input');
+            const priceInput = targetInput instanceof HTMLElement ? targetInput :
+                (lastPxPriceValidationInput instanceof HTMLElement ? lastPxPriceValidationInput : null) ||
+                document.getElementById('px-price-minor-input');
             if (!priceInput) {
                 return;
             }
@@ -3166,8 +3226,15 @@
                 block: 'center'
             });
             setTimeout(() => {
+                if (priceInput.disabled) {
+                    return;
+                }
                 priceInput.focus();
-                priceInput.select();
+                try {
+                    if (typeof priceInput.select === 'function') {
+                        priceInput.select();
+                    }
+                } catch (e) { /* number inputs: select() unsupported in some browsers */ }
             }, 300);
         }
 
@@ -3250,7 +3317,13 @@
             const seatsTotal = selectedSeatsInput ? parseInt(selectedSeatsInput.value || '0', 10) : 0;
 
             if (sourceInput instanceof HTMLInputElement && sourceInput.classList.contains('px-segment-price-input')) {
-                const distanceMeters = Number.parseInt(sourceInput.getAttribute('data-distance-meters') || '0', 10) || 0;
+                let distanceMeters = Number.parseInt(sourceInput.getAttribute('data-distance-meters') || '0', 10) || 0;
+                const fromIndex = Number.parseInt(sourceInput.getAttribute('data-from-index') || '-1', 10);
+                const toIndex = Number.parseInt(sourceInput.getAttribute('data-to-index') || '-1', 10);
+                if (distanceMeters <= 0 && fromIndex >= 0 && toIndex >= 0 &&
+                    typeof window.pxGetSegmentDistanceMeters === 'function') {
+                    distanceMeters = window.pxGetSegmentDistanceMeters(fromIndex, toIndex);
+                }
                 const routeLabel = sourceInput.parentElement?.querySelector('label')?.textContent?.trim() || 'this segment';
                 const normalizedPrice = (sourceInput.value ?? '').toString().trim().replace(',', '.');
                 const parsedPrice = parseFloat(normalizedPrice);
@@ -3342,23 +3415,98 @@
             }
         }
 
-        function getPxSubmitValidationResult() {
-            const segmentInputs = Array.from(document.querySelectorAll('.px-segment-price-input'));
-            const contexts = [];
+        /**
+         * After segment-distance-estimates return, re-check prices vs suggested/max caps and
+         * show the same error/warning modals as on blur (e.g. when a new stop changes leg distances).
+         */
+        function validateAndAlertPxPricesAfterSegmentDistances() {
+            const segmentsListEl = document.getElementById('px-price-segments-list');
+            const segmentInputs = segmentsListEl ?
+                Array.from(segmentsListEl.querySelectorAll('.px-segment-price-input')) :
+                [];
 
-            if (segmentInputs.length > 0 && priceSegmentsWrap && !priceSegmentsWrap.classList.contains('hidden')) {
-                segmentInputs.forEach((input) => {
-                    contexts.push(getCurrentPxPriceValidationContext(input));
-                });
-            } else {
-                contexts.push(getCurrentPxPriceValidationContext());
+            if (segmentInputs.length > 0) {
+                let firstWarning = null;
+
+                for (const input of segmentInputs) {
+                    const {
+                        priceMinor,
+                        seatsTotal,
+                        distanceKm,
+                        routeLabel
+                    } = getCurrentPxPriceValidationContext(input);
+
+                    if (!priceMinor || !seatsTotal || !distanceKm || distanceKm <= 0) {
+                        continue;
+                    }
+
+                    const validation = validatePxPricePerSeat(priceMinor, distanceKm, seatsTotal);
+
+                    if (!validation.type) {
+                        continue;
+                    }
+
+                    if (!validation.valid) {
+                        lastPxPriceValidationInput = input;
+                        showPxPriceErrorModal(validation.maxPricePerSeat, routeLabel);
+                        return;
+                    }
+
+                    if (validation.type === 'warning' && firstWarning === null) {
+                        firstWarning = {
+                            input,
+                            routeLabel,
+                            validation,
+                            priceMinor,
+                            seatsTotal,
+                            distanceKm,
+                        };
+                    }
+                }
+
+                if (firstWarning) {
+                    const signature = JSON.stringify({
+                        type: firstWarning.validation.type,
+                        routeLabel: firstWarning.routeLabel,
+                        priceMinor: firstWarning.priceMinor,
+                        seatsTotal: firstWarning.seatsTotal,
+                        distanceKm: Number(firstWarning.distanceKm).toFixed(2),
+                        maxPricePerSeat: firstWarning.validation.maxPricePerSeat ?? null,
+                        softWarningPrice: firstWarning.validation.softWarningPrice ?? null,
+                    });
+
+                    if (acknowledgedPxWarningSignatures.has(signature)) {
+                        lastPxPriceValidationSignature = signature;
+                        return;
+                    }
+
+                    lastPxPriceValidationSignature = signature;
+                    lastPxPriceValidationInput = firstWarning.input;
+                    showPxPriceWarningModal(function() {
+                        closeModalById('pxPriceWarningModal');
+                    }, firstWarning.routeLabel, firstWarning.validation.softWarningPrice);
+                }
+
+                return;
             }
 
-            let firstWarning = null;
+            maybeShowPxLivePriceAlert(true);
+        }
 
-            for (const context of contexts) {
+        function getPxSubmitValidationResult() {
+            const segmentsListEl = document.getElementById('px-price-segments-list');
+            const segmentInputs = segmentsListEl ?
+                Array.from(segmentsListEl.querySelectorAll('.px-segment-price-input')) :
+                [];
+            const mainPriceInput = document.getElementById('px-price-minor-input');
+
+            let firstWarning = null;
+            let firstWarningInput = null;
+
+            const validateOne = (sourceInput) => {
+                const context = getCurrentPxPriceValidationContext(sourceInput);
                 if (!context.priceMinor || !context.seatsTotal || !context.distanceKm || context.distanceKm <= 0) {
-                    continue;
+                    return null;
                 }
 
                 const validation = validatePxPricePerSeat(
@@ -3368,6 +3516,8 @@
                 );
 
                 if (!validation.valid) {
+                    const el = sourceInput instanceof HTMLElement ? sourceInput : mainPriceInput;
+                    lastPxPriceValidationInput = el || mainPriceInput;
                     return {
                         type: 'error',
                         routeLabel: context.routeLabel,
@@ -3381,10 +3531,32 @@
                         routeLabel: context.routeLabel,
                         softWarningPrice: validation.softWarningPrice,
                     };
+                    firstWarningInput = sourceInput instanceof HTMLElement ? sourceInput : mainPriceInput;
+                }
+
+                return null;
+            };
+
+            if (segmentInputs.length > 0) {
+                for (const input of segmentInputs) {
+                    const err = validateOne(input);
+                    if (err) {
+                        return err;
+                    }
+                }
+            } else {
+                const err = validateOne(null);
+                if (err) {
+                    return err;
                 }
             }
 
-            return firstWarning ?? {
+            if (firstWarning) {
+                lastPxPriceValidationInput = firstWarningInput || mainPriceInput;
+                return firstWarning;
+            }
+
+            return {
                 type: null,
             };
         }
@@ -3401,6 +3573,12 @@
                 priceErrorParagraph3
             );
             openModalById('pxPriceErrorModal');
+            if (lastPxPriceValidationInput instanceof HTMLElement) {
+                lastPxPriceValidationInput.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
         }
 
         // Function to show warning modal (Recommended Contribution Limit)

@@ -60,7 +60,7 @@ class Controller extends BaseController
                 } elseif (!$lang && $langId && auth('sanctum')->check()) {
                     $lang = Language::whereKey(auth('sanctum')->user()->lang_id)->value('abbreviation');
                 }
-                \Log::info('api route', [Route::currentRouteName(), $lang]);
+                // \Log::info('api route', [Route::currentRouteName(), $lang]);
                 // \Log::info('search ride', $request->all());
 
             } else {

@@ -131,10 +131,10 @@ class EditProfileProvider extends GetConnect {
     }
   }
 
-  Future getCities(stateId, search, token) async {
+  Future getCities(stateId, search, token, {int? countryId}) async {
     try {
       final response = await getConnect.get(
-          "$baseUrl/$getCitiesList?state_id=$stateId&search=$search",
+          "$baseUrl/$getCitiesList?state_id=$stateId&search=$search${countryId != null ? '&country_id=$countryId' : ''}",
           headers: {
             'Accept': 'application/json',
             'Authorization': 'Bearer $token',

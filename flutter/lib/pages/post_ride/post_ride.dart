@@ -344,7 +344,8 @@ class _PostRideScaffold extends GetView<PostRideController> {
                               // color: Colors.grey.shade100,
                               width: context.screenWidth,
                               child: elevatedButtonWidget(
-                                  enabled: controller.disclaimer.value,
+                                  enabled: controller.disclaimer.value &&
+                                      !controller.routeDistanceLoading.value,
                                   textWidget: txt22Size(
                                       title: controller.rideType.value ==
                                               'update'

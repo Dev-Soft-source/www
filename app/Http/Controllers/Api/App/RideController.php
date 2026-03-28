@@ -831,7 +831,7 @@ class RideController extends WebRideController
         $rideId = $request->input('id', 0);
         $from_stop_id = $request->input('from_stop_id', 0);
         $to_stop_id = $request->input('to_stop_id', 0);
- \Log::info('search ride', $request->all());
+//  \Log::info('search ride', $request->all());
 
         $ride = Ride::where('id', $rideId)
             ->with([
@@ -846,7 +846,7 @@ class RideController extends WebRideController
 
         $ride = $this->makeDetailOfRide($ride, $from_stop_id, $to_stop_id);
 
- \Log::info('search ride', $ride->toArray());
+
 
         $selectedLanguage = $this->resolveApiLanguage($request->lang_id);
         $findRidePage = $this->getApiFindRidePage($selectedLanguage);

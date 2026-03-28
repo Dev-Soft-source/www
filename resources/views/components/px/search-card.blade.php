@@ -14,7 +14,6 @@
 @endphp
 
 @php
-
     $classes = 'rounded-lg shadow-3xl border-[3px] border-solid';
     $wrapperStart = '';
     $wrapperEnd = '';

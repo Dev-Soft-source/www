@@ -121,6 +121,7 @@ class PostRideController extends GetxController {
   var rideDetailIds = [];
   var routePriceEntries = <Map<String, dynamic>>[].obs;
   var routeSegmentDistances = <String, int>{}.obs;
+  var routeSegmentDurations = <String, int>{}.obs;
   var routeDistanceLoading = false.obs;
   Timer? _routeDistanceDebounceTimer;
   String _routeDistanceRequestKey = "";
@@ -453,7 +454,44 @@ class PostRideController extends GetxController {
   void clearRouteDistanceState() {
     _routeDistanceRequestKey = "";
     routeSegmentDistances.clear();
+    routeSegmentDurations.clear();
     routeDistanceLoading(false);
+  }
+
+  int get totalOrderedRouteDistanceMeters {
+    final nodes = buildOrderedRouteNodes();
+    if (nodes.length < 2) {
+      return 0;
+    }
+
+    var totalDistance = 0;
+    for (var index = 0; index < nodes.length - 1; index++) {
+      final key = buildRoutePriceKey(
+        nodes[index]['label'].toString(),
+        nodes[index + 1]['label'].toString(),
+      );
+      totalDistance += routeSegmentDistances[key] ?? 0;
+    }
+
+    return totalDistance;
+  }
+
+  int get totalOrderedRouteDurationSeconds {
+    final nodes = buildOrderedRouteNodes();
+    if (nodes.length < 2) {
+      return 0;
+    }
+
+    var totalDuration = 0;
+    for (var index = 0; index < nodes.length - 1; index++) {
+      final key = buildRoutePriceKey(
+        nodes[index]['label'].toString(),
+        nodes[index + 1]['label'].toString(),
+      );
+      totalDuration += routeSegmentDurations[key] ?? 0;
+    }
+
+    return totalDuration;
   }
 
   List<String> getOrderedRouteLabels() {
@@ -541,8 +579,12 @@ class PostRideController extends GetxController {
       final payload = resp is Map && resp['segment_distances_meters'] is Map
           ? Map<String, dynamic>.from(resp['segment_distances_meters'])
           : <String, dynamic>{};
+      final durationPayload = resp is Map && resp['segment_durations_seconds'] is Map
+          ? Map<String, dynamic>.from(resp['segment_durations_seconds'])
+          : <String, dynamic>{};
 
       final nextDistances = <String, int>{};
+      final nextDurations = <String, int>{};
       final nodes = buildOrderedRouteNodes();
       for (var fromIndex = 0; fromIndex < nodes.length - 1; fromIndex++) {
         for (var toIndex = fromIndex + 1; toIndex < nodes.length; toIndex++) {
@@ -552,15 +594,19 @@ class PostRideController extends GetxController {
           );
           nextDistances[key] =
               int.tryParse((payload['$fromIndex:$toIndex'] ?? 0).toString()) ?? 0;
+          nextDurations[key] =
+              int.tryParse((durationPayload['$fromIndex:$toIndex'] ?? 0).toString()) ?? 0;
         }
       }
 
       if (_routeDistanceRequestKey == requestKey) {
         routeSegmentDistances.assignAll(nextDistances);
+        routeSegmentDurations.assignAll(nextDurations);
       }
     } catch (_) {
       if (_routeDistanceRequestKey == requestKey) {
         routeSegmentDistances.clear();
+        routeSegmentDurations.clear();
       }
     } finally {
       if (_routeDistanceRequestKey == requestKey) {
@@ -913,19 +959,26 @@ class PostRideController extends GetxController {
       {String type = 'string', bool isRequired = true, int wordsLimit = 50}) {
     errors.removeWhere((element) => element['title'] == fieldName);
     List<String> errorList = [];
+    String stringOrFallback(dynamic value, String fallback) {
+      final normalized = value?.toString().trim() ?? "";
+      return normalized.isNotEmpty ? normalized : fallback;
+    }
 
     if (isRequired && fieldValue.isEmpty) {
-      var message = validationMessageDetail['required'];
+      var message = stringOrFallback(
+        validationMessageDetail['required'],
+        "This field is required.",
+      );
       if (fieldName == "from") {
-        message = labelTextDetail['origin'];
+        message = stringOrFallback(labelTextDetail['origin'], "Origin is required.");
       } else if (fieldName == "to") {
-        message = labelTextDetail['destination'];
+        message = stringOrFallback(labelTextDetail['destination'], "Destination is required.");
       } else if (fieldName == "pickup") {
-        message = labelTextDetail['pickup'];
+        message = stringOrFallback(labelTextDetail['pickup'], "Pickup is required.");
       } else if (fieldName == "dropoff") {
-        message = labelTextDetail['dropoff'];
+        message = stringOrFallback(labelTextDetail['dropoff'], "Dropoff is required.");
       } else if (fieldName == "details") {
-        message = labelTextDetail['details'];
+        message = stringOrFallback(labelTextDetail['details'], "Details are required.");
       } else if (fieldName == "make") {
         message = message.replaceAll(
             ":Attribute", labelTextDetail['make_error'] ?? "Make");
@@ -955,7 +1008,10 @@ class PostRideController extends GetxController {
     switch (type) {
       case 'numeric':
         if (fieldValue.isNotEmpty && double.tryParse(fieldValue) == null) {
-          var message = validationMessageDetail['numeric'];
+          var message = stringOrFallback(
+            validationMessageDetail['numeric'],
+            "The :attribute field must be a number.",
+          );
           if (fieldName == "price") {
             message = message.replaceAll(
                 ":attribute", labelTextDetail['price_error'] ?? "price");
@@ -968,7 +1024,10 @@ class PostRideController extends GetxController {
         break;
       case 'date':
         if (fieldValue.isNotEmpty && DateTime.tryParse(fieldValue) == null) {
-          var message = validationMessageDetail['date'];
+          var message = stringOrFallback(
+            validationMessageDetail['date'],
+            "The :attribute is not a valid date.",
+          );
           message = message.replaceAll(
               ":attribute", labelTextDetail['date_error'] ?? "date");
           errorList.add(message);
@@ -977,7 +1036,10 @@ class PostRideController extends GetxController {
       case 'time':
         if (fieldValue.isNotEmpty &&
             !RegExp(r'^\d{2}:\d{2}$').hasMatch(fieldValue)) {
-          var message = validationMessageDetail['date_format'];
+          var message = stringOrFallback(
+            validationMessageDetail['date_format'],
+            "The :attribute does not match the format :format.",
+          );
           message = message.replaceAll(
               ":attribute", labelTextDetail['time_error'] ?? "time");
           message = message.replaceAll(":format", 'HH:MM');
@@ -987,9 +1049,12 @@ class PostRideController extends GetxController {
       case 'max_words':
         if (fieldValue.isNotEmpty &&
             fieldValue.split(' ').length > wordsLimit) {
-          var message = validationMessageDetail['max_words'];
+          var message = stringOrFallback(
+            validationMessageDetail['max_words'],
+            "The :attribute may not be greater than :max words.",
+          );
           message = message.replaceAll(":attribute", fieldName);
-          message = message.replaceAll(":max", wordsLimit);
+          message = message.replaceAll(":max", wordsLimit.toString());
           errorList.add(message);
         }
         break;
@@ -2273,7 +2338,9 @@ class PostRideController extends GetxController {
               rideDetailIdsArray,
               routeFroms,
               routeTos,
-              routePrices)
+              routePrices,
+              totalOrderedRouteDistanceMeters,
+              totalOrderedRouteDurationSeconds)
           .then((resp) async {
         errorList.clear();
         errors.clear();

@@ -989,6 +989,18 @@ class RideController extends Controller
      */
     public function PostRideStore(Request $request, $ride_id = 0)
     {
+        
+        if($ride_id){
+            $ride = Ride::where('id', $ride_id)->where('added_by', auth()->id())->first();
+            if (!$ride) {
+                abort(404);
+            }
+            $this->normalizePostRideRequest($request, $ride);
+        } else {
+            $this->normalizePostRideRequest($request);
+        }
+        
+        
         // form validation
         $validator = $this->buildPostRideStoreValidator($request);
         $this->appendStopDepartureAtValidation($request, $validator);
@@ -1078,13 +1090,14 @@ class RideController extends Controller
         $totalHours = $duration / 3600;
         $fullHours = floor($totalHours);
         $minutes = round(($totalHours - $fullHours) * 60);
-        $rideDateTime->addHours($adminSetting->destination_hours ?? 0 + $fullHours)->addMinutes($minutes);
+        $rideDateTime->addHours(($adminSetting->destination_hours ?? 0) + $fullHours)->addMinutes($minutes);
         $destinationReachedDate = $rideDateTime->toDateString();
         $destinationReachedTime = $rideDateTime->toTimeString();
 
         $rideDateTime->addHours($adminSetting->ride_completed_hours ?? 0);
         $destinationCompletedDate = $rideDateTime->toDateString();
         $destinationCompletedTime = $rideDateTime->toTimeString();
+
 
         $duration += $adminSetting->destination_hours * 3600 ?? 0;
         $duration += $adminSetting->ride_completed_hours * 3600 ?? 0;
@@ -1311,6 +1324,8 @@ class RideController extends Controller
         $rideDetail->completed_date = $destinationCompletedDate;
         $rideDetail->save();
 
+       
+
         // process of multi stops
         $requestStops = is_array($request->input('stops')) ? $request->input('stops') : [];
         // available routes by stops
@@ -1363,7 +1378,7 @@ class RideController extends Controller
                 'city_id' => !empty($stop['city_id']) ? (int) $stop['city_id'] : null,
                 'label' => $label,
                 'departure_at' => !empty($stop['departure_at']) ? Carbon::parse($stop['departure_at']) : null,
-                'pickup_dropoff_location' => null,
+                'pickup_dropoff_location' => $stop['pickup_dropoff_location'],
                 'eta_at' => null,
                 'price_delta_minor' => (int) ($stop['price_delta_minor'] ?? 0),
                 'seats_available' => $initialRide->seats,
@@ -1391,7 +1406,22 @@ class RideController extends Controller
         }
 
         $stopIdByLabel = [];
+        // $previousStopRecord = null;
         foreach ($stopRecords as $stopRecord) {
+            // if (
+            //     $previousStopRecord &&
+            //     empty($stopRecord['eta_at']) &&
+            //     !empty($previousStopRecord['departure_at'])
+            // ) {
+            //     $googleApiData = $this->getDataFromGoogleApi($previousStopRecord['label'], $stopRecord['label']);
+            //     $elementStatus = $googleApiData['rows'][0]['elements'][0]['status'] ?? null;
+            //     $durationSeconds = (int) ($googleApiData['rows'][0]['elements'][0]['duration']['value'] ?? 0);
+
+            //     if ($elementStatus === 'OK' && $durationSeconds > 0) {
+            //         $stopRecord['eta_at'] = Carbon::parse($previousStopRecord['departure_at'])->addSeconds($durationSeconds);
+            //     }
+            // }
+
             $savedStop = RideStop::create([
                 'ride_id' => $initialRide->id,
                 'stop_order' => $stopRecord['stop_order'],
@@ -1410,6 +1440,8 @@ class RideController extends Controller
             if ($normalizedLabel !== '' && !isset($stopIdByLabel[$normalizedLabel])) {
                 $stopIdByLabel[$normalizedLabel] = $savedStop->id;
             }
+
+            // $previousStopRecord = $stopRecord;
         }
 
         foreach ($stopsFrom as $idx => $fromLabel) {
@@ -1875,12 +1907,12 @@ class RideController extends Controller
 
     public function PostRideUpdate($lang, $ride_id, Request $request)
     {
-        $ride = Ride::where('id', $ride_id)->where('added_by', auth()->id())->first();
-        if (!$ride) {
-            abort(404);
-        }
+        // $ride = Ride::where('id', $ride_id)->where('added_by', auth()->id())->first();
+        // if (!$ride) {
+        //     abort(404);
+        // }
 
-        $this->normalizePostRideRequest($request, $ride);
+        // $this->normalizePostRideRequest($request, $ride);
 
         return $this->PostRideStore($request, (int) $ride_id);
     }

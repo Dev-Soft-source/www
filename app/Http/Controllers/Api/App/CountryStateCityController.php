@@ -44,17 +44,22 @@ class CountryStateCityController extends Controller
     public function getCities(Request $request)
     {
         $stateId = (int) ($request->state_id ?? 0);
+        $countryId = (int) ($request->country_id ?? 0);
         $search = trim((string) ($request->search ?? ''));
         $normalizedSearch = mb_strtolower($search);
-        $cacheKey = LocationCache::key('api:locations:cities:state:' . $stateId . ':search:' . md5($normalizedSearch));
+        $cacheKey = LocationCache::key('api:locations:cities:state:' . $stateId . ':country:' . $countryId . ':search:' . md5($normalizedSearch));
 
         $cities = Cache::rememberForever(
             $cacheKey,
-            function () use ($stateId, $search) {
+            function () use ($stateId, $countryId, $search) {
                 $citiesQuery = City::with(['state:id,abrv,country_id', 'state.country:id,name']);
 
                 if ($stateId !== 0) {
                     $citiesQuery = $citiesQuery->where('state_id', $stateId);
+                } elseif ($countryId !== 0) {
+                    $citiesQuery = $citiesQuery->whereHas('state', function ($query) use ($countryId) {
+                        $query->where('country_id', $countryId);
+                    });
                 }
 
                 if ($search !== '') {

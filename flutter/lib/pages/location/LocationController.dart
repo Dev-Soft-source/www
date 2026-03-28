@@ -17,6 +17,7 @@ import 'package:proximaride_app/services/logger_service.dart';
 import 'package:proximaride_app/services/service.dart';
 
 class LocationController extends GetxController {
+  static const int canadaCountryId = 38;
   final serviceController = Get.find<Service>();
   final errorStateManager = ErrorStateManager();
   dynamic tempController;
@@ -300,8 +301,14 @@ class LocationController extends GetxController {
         searchCities.clear();
       }
       isOverlayLoading(true);
+      final countryIdFilter = stateId.value == 0 ? canadaCountryId : null;
       final resp = await EditProfileProvider()
-          .getCities(stateId.value, searchHistory, serviceController.token);
+          .getCities(
+            stateId.value,
+            searchHistory,
+            serviceController.token,
+            countryId: countryIdFilter,
+          );
 
       if (resp['status'] != null && resp['status'] == "Success") {
         if (resp['data'] != null && resp['data']['cities'] != null) {
