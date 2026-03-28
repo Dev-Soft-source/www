@@ -2388,16 +2388,16 @@ class RideController extends Controller
             $duration = isset($data['rows'][0]['elements'][0]['duration']['value']) ? $data['rows'][0]['elements'][0]['duration']['value'] : 0;
             $durationText = isset($data['rows'][0]['elements'][0]['duration']['text']) ? $data['rows'][0]['elements'][0]['duration']['text'] : 'N/A';
 
-            Log::info('Google Maps API Success', [
-                'from' => $from,
-                'to' => $to,
-                'distance_meters' => $distance,
-                'distance_km' => round($distance / 1000, 2),
-                'distance_text' => $distanceText,
-                'duration_seconds' => $duration,
-                'duration_text' => $durationText,
-                'status' => $data['status']
-            ]);
+            // Log::info('Google Maps API Success', [
+            //     'from' => $from,
+            //     'to' => $to,
+            //     'distance_meters' => $distance,
+            //     'distance_km' => round($distance / 1000, 2),
+            //     'distance_text' => $distanceText,
+            //     'duration_seconds' => $duration,
+            //     'duration_text' => $durationText,
+            //     'status' => $data['status']
+            // ]);
         } else {
             // Log if API returns an error status
             Log::warning('Google Maps API returned non-OK status', [

@@ -22,6 +22,7 @@ class PinkRideSettingController extends Controller
 
     public function update(Request $request, PinkRideSetting $setting)
     {
+        $female = $request->filled('female') ? $request->female : 0;
         $verfiy_phone_passenger = $request->filled('verfiy_phone_passenger') ? $request->verfiy_phone_passenger : 0;
         $verfiy_phone = $request->filled('verfiy_phone') ? $request->verfiy_phone : 0;
         $verify_email = $request->filled('verify_email') ? $request->verify_email : 0;
@@ -32,6 +33,7 @@ class PinkRideSettingController extends Controller
         if (!$pinkRideSetting) {
             $setting = PinkRideSetting::create([
                 'id' => '1',
+                'female' => $female,
                 'verfiy_phone_passenger' => $verfiy_phone_passenger,
                 'verfiy_phone' => $verfiy_phone,
                 'verify_email' => $verify_email,
@@ -40,12 +42,15 @@ class PinkRideSettingController extends Controller
             ]);
         }
         $result = PinkRideSetting::whereId($request->id)->update([
+            'female' => $female,
             'verfiy_phone_passenger' => $verfiy_phone_passenger,
             'verfiy_phone' => $verfiy_phone,
             'verify_email' => $verify_email,
             'driver_license' => $driver_license,
             'profile_complete' => $profile_complete,
         ]);
+
+        $setting = PinkRideSetting::whereId($request->id)->first() ?: $setting;
 
         if ($result || $setting) {
             return $this->apiSuccessResponse(new PinkRideSettingResource($setting), 'Settings have been updated successfully.');

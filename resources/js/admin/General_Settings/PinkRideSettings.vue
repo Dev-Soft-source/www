@@ -13,6 +13,32 @@
             <form class="py-4 px-4" @submit.prevent="addUpdateForm()">
                 <div class="relative z-0 w-full group">
                     <fieldset>
+                        <legend class="sr-only">Female - driver</legend>
+                        <div class="flex items-center mb-4">
+                            <input
+                                id="female"
+                                name="female"
+                                type="checkbox"
+                                value="1"
+                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                                :checked="femaleOnly"
+                                @change="updateCheckbox('female')"
+                            />
+                            <label
+                                for="female"
+                                class="ml-2 text-sm font-medium text-gray-900"
+                                >Female - driver</label
+                            >
+                        </div>
+                    </fieldset>
+                    <p
+                        class="mt-2 text-sm text-red-400"
+                        v-if="validationErros.has('female')"
+                        v-text="validationErros.get('female')"
+                    ></p>
+                </div>
+                <div class="relative z-0 w-full group">
+                    <fieldset>
                         <legend class="sr-only">Phone verify - passenger</legend>
                         <div class="flex items-center mb-4">
                             <input
@@ -169,6 +195,9 @@ export default {
         },
         phoneVerifiedPassenger: function() {
             return this.form.verfiy_phone_passenger === '1'; // Check if value is '1'
+        },
+        femaleOnly: function() {
+            return this.form.female === '1';
         },
         phoneVerified: function() {
             return this.form.verfiy_phone === '1'; // Check if value is '1'

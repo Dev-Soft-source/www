@@ -7,6 +7,7 @@ const settings = {
         error: null,
         form: {
             id: null,
+            female: null,
             verfiy_phone_passenger: null,
             verfiy_phone: null,
             verify_email: null,

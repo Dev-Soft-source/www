@@ -470,8 +470,10 @@ Route::get('success-transaction-update-booking-request/{id}/{type}/{seats}/{seat
 Route::get('success-transaction-top-up/{dr_amount}', [PassengerWalletController::class, 'successTransaction'])->name('paypal.success.top-up');
 Route::get('cancel-transaction', [BookingController::class, 'cancelTransaction'])->name('paypal.cancel');
 
-Route::post('booking-request/{id}', [BookingController::class, 'bookingRequest'])->middleware('auth')->name('booking_request');
-Route::post('instant-booking/{id}', [BookingController::class, 'instantBooking'])->middleware('auth')->name('instant_booking');
+// Route::post('booking-request/{id}', [BookingController::class, 'bookingRequest'])->middleware('auth')->name('booking_request');
+// Route::post('instant-booking/{id}', [BookingController::class, 'instantBooking'])->middleware('auth')->name('instant_booking');
+
+Route::post('booking-store/{id}', [BookingController::class, 'bookingStore'])->middleware('auth')->name('booking_store');
 
 Route::put('update-instant-booking/{id}', [BookingController::class, 'updateInstantBooking'])->middleware('auth')->name('update_instant_booking');
 Route::put('update-booking-request/{id}', [BookingController::class, 'updateBookingRequest'])->middleware('auth')->name('update_booking_request');

@@ -16,8 +16,10 @@ use App\Models\PostRidePageSettingDetail;
 use App\Models\FindRidePageSettingDetail;
 use App\Models\FeaturesSetting;
 use App\Models\FeaturesSettingDetail;
+use App\Models\NotificationMessageDetail;
 use App\Models\SiteTextDetail;
 use App\Models\City;
+use App\Models\User;
 use App\Models\VideoDetail;
 use App\Http\Controllers\ProfileStepRedirectController;
 use Illuminate\Http\Request;
@@ -25,6 +27,9 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Carbon\Carbon;
+use App\Services\FCMService;
+use App\Models\FCMToken;
+use Twilio\Rest\Client;
 
 class Controller extends BaseController
 {
@@ -165,6 +170,49 @@ class Controller extends BaseController
         }
 
         return $findRidePage;
+    }
+
+    protected function sendSmsCode($phoneNumber, $user, $sms_message): void
+    {
+        if (
+            !$phoneNumber ||
+            env('APP_ENV') === 'local' ||
+            !isset($user->sms_notification) ||
+            (int) $user->sms_notification !== 1
+        ) {
+            return;
+        }
+
+        $sid = env('TWILIO_ACCOUNT_SID');
+        $token = env('TWILIO_AUTH_TOKEN');
+        $from = env('TWILIO_PHONE_NUMBER');
+
+        $twilio = new Client($sid, $token);
+        $to = $phoneNumber->phone;
+        $currentHour = (int) date('H');
+        $title = $currentHour < 12
+            ? "Good morning {$user->first_name},"
+            : ($currentHour < 17
+                ? "Good afternoon {$user->first_name},"
+                : "Good evening {$user->first_name},");
+
+        $sms_message = $title . "\n" . $sms_message;
+
+
+        try {
+            $twilio->messages->create($to, [
+                'from' => $from,
+                'body' => $sms_message,
+            ]);
+        } catch (\Throwable $e) {
+            if (method_exists($this, 'logTwilioSmsFailure')) {
+                $this->logTwilioSmsFailure($to, $sms_message, $e);
+                return;
+            }
+
+            $msgPreview = strlen($sms_message) > 80 ? substr($sms_message, 0, 80) . '...' : $sms_message;
+            Log::info('SMS failed to ' . $to . '. Message: ' . $msgPreview . ' because ' . $e->getMessage());
+        }
     }
 
     protected function getVehicleTypesByLanguage()
@@ -511,6 +559,8 @@ class Controller extends BaseController
             $rideDetail = $ride->detail;
             $ride->departure = $rideDetail->departure;
             $ride->destination = $rideDetail->destination;
+            $ride->departure_city_id = $rideDetail->origin_city_id;
+            $ride->destination_city_id = $rideDetail->destination_city_id;
             $ride->pickup = $rideDetail->pickup;
             $ride->dropoff = $rideDetail->dropoff;
             $ride->date = $rideDetail->date;
@@ -524,7 +574,7 @@ class Controller extends BaseController
                     'to_stop_id' => $to_stop_id,
                 ])
                 ->first();
-            
+
             $stopOfFrom = $ride->rideStops->firstWhere('id', $from_stop_id);
             $stopOfTo   = $ride->rideStops->firstWhere('id', $to_stop_id);
             // $ride->city_id = $stopOfFrom->city_id;
@@ -541,6 +591,8 @@ class Controller extends BaseController
 
             $ride->departure = $stopOfFrom->label;
             $ride->destination = $stopOfTo->label;
+            $ride->departure_city_id = $stopOfFrom->city_id;
+            $ride->destination_city_id = $stopOfTo->city_id;
             $ride->pickup = $stopOfFrom->pickup_dropoff_location;
             $ride->dropoff = $stopOfTo->pickup_dropoff_location;
             $ride->date = Carbon::parse($stopOfFrom->departure_at)->toDateString();
@@ -560,7 +612,7 @@ class Controller extends BaseController
                 (int) $ride->matched_to_stop_id
             )
             : (int) ($ride->seats_available ?? $ride->seats ?? 0);
-// dd($ride);
+
         return $ride;
     }
 
@@ -777,10 +829,10 @@ class Controller extends BaseController
         return stripos((string) ($stop->label ?? ''), $label) !== false;
     }
 
-    
+
     protected function getRideDetail(Ride $ride, $originLabel = "", $destinationLabel = "", $originCityId = 0, $destinationCityId = 0, $hasLocationSearch = true,)
     {
-        if($ride->rideStopSegments()->count() == 0 || $originLabel == '') {
+        if ($ride->rideStopSegments()->count() == 0 || $originLabel == '') {
             $rideDetail = $ride->detail;
             $ride->departure = $rideDetail->departure;
             $ride->destination = $rideDetail->destination;
@@ -835,7 +887,7 @@ class Controller extends BaseController
             ? (string) ($orderedStops[$matchedToIndex]->pickup_dropoff_location)
             : null;
 
-        
+
         // \Log::info('recentSearches',[$matchedFromIndex,$matchedToIndex]);
 
         $ride->matched_segment_price_minor = $this->resolveMatchedSegmentPriceMinor(
@@ -848,14 +900,14 @@ class Controller extends BaseController
             $matchedToIndex
         );
 
-        
+
         $ride->matched_seats_available = ($ride->matched_from_stop_id && $ride->matched_to_stop_id && method_exists($ride, 'resolveSegmentAvailableSeats'))
-        ? $ride->resolveSegmentAvailableSeats(
-            (int) $ride->matched_from_stop_id,
-            (int) $ride->matched_to_stop_id
+            ? $ride->resolveSegmentAvailableSeats(
+                (int) $ride->matched_from_stop_id,
+                (int) $ride->matched_to_stop_id
             )
             : (int) ($ride->seats_available ?? $ride->seats ?? 0);
-            
+
         // update with stops'
         $ride->departure = $originLabel;
         $ride->destination = $destinationLabel;
@@ -873,4 +925,37 @@ class Controller extends BaseController
         return $ride;
     }
 
+
+    protected function sendFCM($message = '', User $user)
+    {
+        $fcmService = new FCMService();
+        $tokens = collect([$user->mobile_fcm_token])
+            ->merge(
+                FCMToken::where('user_id', $user->id)->pluck('token')
+            )
+            ->filter()
+            ->unique()
+            ->values();
+
+        foreach ($tokens as $token) {
+            try {
+                $fcmService->sendNotification($token, $message);
+            } catch (\Exception $e) {
+                Log::error("FCM Notification failed for token: {$token}, Error: " . $e->getMessage());
+            }
+        }
+    }
+
+    public function getNotificationMessage(string $slug, array $replacements = [], string $default = ''): string
+    {
+        $notificationMessage = NotificationMessageDetail::getByLanguageKeyedBySlug($this->selectedLanguage->id, $this->defaultLang->id);
+
+        $text = $notificationMessage[$slug] ?? $default;
+
+        foreach ($replacements as $key => $value) {
+            $text = str_replace('{' . $key . '}', (string) $value, $text);
+        }
+
+        return $text;
+    }
 }

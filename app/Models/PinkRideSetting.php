@@ -15,10 +15,11 @@ class PinkRideSetting extends Model
     protected $fillable = [
         'id',
         'female',
-        'verfiy_phone_passenger',
         'verfiy_phone',
         'verify_email',
         'driver_license',
+        'profile_complete',
+        'verfiy_phone_passenger',
     ];
 
     protected static function booted(): void

@@ -39,7 +39,8 @@ class Booking extends Model
     }
 
     public $timestamps  = false;
-    protected $fillable = ['user_id', 'ride_id', 'seats', 'type', 'booked_on', 'status', 'booking_credit', 'fare', 'secured_cash', 'secured_cash_code', 'expires_at', 'removed_permanently', 'uuid', 'block_days', 'block_date_time', 'tax_amount', 'ride_detail_id', 'from_stop_id', 'to_stop_id', 'departure', 'destination', 'price', 'conversation_sid', 'participant_sid', 'phone_number'];
+    protected $fillable = ['user_id', 'ride_id', 'seats', 'type', 'booked_on', 'from_stop_id', 'to_stop_id', 
+    'status', 'booking_credit', 'fare', 'secured_cash', 'secured_cash_code', 'expires_at', 'removed_permanently', 'uuid', 'block_days', 'block_date_time', 'tax_amount', 'ride_detail_id', 'from_stop_id', 'to_stop_id', 'departure', 'destination', 'price', 'conversation_sid', 'participant_sid', 'phone_number'];
 
     public static function statusLabels(): array
     {
@@ -146,6 +147,11 @@ class Booking extends Model
     public function scopeRequested($query)
     {
         return $query->where('status', self::STATUS_REQUESTED);
+    }
+
+    public function scopeWaiting($query)
+    {
+        return $query->whereIn('status', [self::STATUS_REQUESTED, self::STATUS_BOOKED]);
     }
 
     public function scopeCancelled($query)

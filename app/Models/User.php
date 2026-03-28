@@ -514,9 +514,7 @@ class User extends Authenticatable
 
     public function primaryPhone()
     {
-        return $this->phoneNumbers()
-            ->where('default', 1)
-            ->first();
+        return $this->hasOne(PhoneNumber::class, 'user_id')->where('default', 1);
     }
 
     function driver_payout()

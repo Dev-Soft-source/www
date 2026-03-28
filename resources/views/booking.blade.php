@@ -7,6 +7,10 @@
 @endsection
 
 @section('content')
+
+@php
+    $seat_price = floor($ride->price_minor / 100);
+@endphp
     <div class="booking-page">
 
         @if ($setting)
@@ -149,24 +153,15 @@
             </form>
         @endif
         <div class="container mx-auto my-10 xl:my-14 px-4 xl:px-0">
-            @php
-                $action = $ride->isInstantBooking()
-                    ? route('instant_booking', $ride->id)
-                    : ($ride->isRequestBooking()
-                        ? route('booking_request', $ride->id)
-                        : '');
 
-            @endphp
-
-            <form id="submitForm" method="POST" action="{{ $action }}" enctype="multipart/form-data">
+            <form id="submitForm" method="POST" action="{{ $action = route('booking_store', $ride->id) }}" enctype="multipart/form-data">
                 @csrf
 
-                <input type="hidden" name="ride_detail_id" value="{{ $ride->detail->id }}">
                 <input type="hidden" name="from_stop_id"
-                    value="{{ $ride->matched_from_stop_id ?? $ride->rideStops->first()?->id }}">
+                    value="{{ $ride->from_stop_id ?? 0 }}">
                 <input type="hidden" name="to_stop_id"
-                    value="{{ $ride->matched_to_stop_id ?? $ride->rideStops->last()?->id }}">
-                <input type="hidden" name="type" value="{{ $ride->booking_type }}">
+                    value="{{ $ride->to_stop_id ?? 0 }}">
+                <input type="hidden" name="booking_type" value="{{ $ride->booking_type }}">
                 <input type="hidden" name="id" value="{{ $ride->id }}">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-y-4 md:gap-4">
                     <div class="col-span-2 flex flex-wrap items-center justify-between gap-3 items-baseline">
@@ -412,7 +407,7 @@
                                     @endif
 
                                     @php
-                                        $pricePerSeat = (float) ($ride->price_minor ?? 0);
+                                        $pricePerSeat = (float) ($seat_price ?? 0);
                                         $bookingFeeZero = $user->hasBookingFeeWaiverFlag() || $pricePerSeat < 15;
                                     @endphp
                                     @if ($coffeeBalance > 0)
@@ -480,6 +475,7 @@
                                         class="form-control" readonly>
                                     <input type="hidden" name="booked_by_wallet" id="booked-by-wallet-input"
                                         class="form-control" readonly>
+
                                     <div class="flex items-center justify-between gap-2 mt-1">
                                         <p>
                                             {{ $bookingPage->total_label }}
@@ -644,7 +640,7 @@
                                         @enderror
                                     @endif
 
-                                    @if ($ride->isCashPayment() && $ride->price_minor <= 15)
+                                    @if ($ride->isCashPayment() && $seat_price <= 15)
                                         <div></div>
                                     @else
                                         <div id="paymentSection" class="space-y-4 mb-4">
@@ -786,7 +782,7 @@
             const chargeBooking =
                 {{ auth()->user() && auth()->user()->charge_booking ? auth()->user()->charge_booking : '1' }};
             const isStudentFeeWaived = (chargeBooking == '2');
-            const pricePerSeat = parseFloat(@json($ride->price_minor ?? 0));
+            const pricePerSeat = parseFloat(@json($seat_price ?? 0));
             const bookingPrice = (isStudentFeeWaived || pricePerSeat < MIN_PRICE_FOR_BOOKING_FEE) ?
                 0.0 :
                 parseFloat(pricePerSeat * BOOKING_FEE_PERCENTAGE);
@@ -796,7 +792,7 @@
                 isFirmRide: {{ $ride->isFirmCancellation() ? 'true' : 'false' }},
                 firmDiscount: parseFloat("{{ $settingFirmDiscount ?? 0 }}"),
                 taxPercentage: parseFloat("{{ $settingTaxPercentage ?? 0 }}"),
-                seatPrice: parseFloat({{ $ride->price_minor ?? 0 }}),
+                seatPrice: parseFloat({{ $seat_price ?? 0 }}),
                 paymentMethod: '{{ $ride->isCashPayment() ? 'cash' : 'online' }}'
             };
 
@@ -1005,24 +1001,14 @@
                 const onlinePayment = walletCoversCharge ? 0 : chargeTarget;
                 const cashPayment = isCashPayment ? totalSeatsAmount : 0;
 
-                // Show/hide payment section based on terms
-                const terms = getCheckedTerms();
-                const allTermsChecked = terms.agreeTerms && terms.firmTerms &&
-                    terms.pinkRideTerms && terms.extraCareTerms;
-                const shouldShowPaymentSection = allTermsChecked && onlinePayment > 0;
+                const paymentSection = document.getElementById('paymentSection');
+                if (paymentSection) {
+                    paymentSection.classList.toggle('hidden', walletCoversCharge);
+                }
+                console.log(totalAmountIn, totalSumIn, walletCoversCharge);
+                console.log(topUpBalance, chargeTarget);
+                
 
-                // ['paymentSection', 'paymentSectionGPay'].forEach(sectionId => {
-                //     const section = document.getElementById(sectionId);
-                //     if (!section) {
-                //         return;
-                //     }
-
-                //     if (shouldShowPaymentSection) {
-                //         section.classList.remove('hidden');
-                //     } else {
-                //         section.classList.add('hidden');
-                //     }
-                // });
 
                 // Update UI
                 $('#selectedSeats').text(selectedSeats);
@@ -1214,7 +1200,7 @@
                 updateTotalAmount();
 
                 // Update totals when type or coffee_wall changes
-                $('input[name="type"], input[name="coffee_wall"]').on('change', updateTotalAmount);
+                $('input[name="booking_type"], input[name="coffee_wall"]').on('change', updateTotalAmount);
 
                 // Handle payment method changes
                 $('input[type=radio][name=payment_method]').on('change', function() {
