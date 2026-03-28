@@ -16,6 +16,46 @@ import 'package:side_sheet/side_sheet.dart';
 
 class SearchRideResultPage extends StatelessWidget {
   const SearchRideResultPage({super.key});
+
+  Map<String, dynamic> _normalizeRideDetail(dynamic ride) {
+    if (ride is Map) {
+      final directRideDetail = ride['ride_detail'];
+      if (directRideDetail is Map) {
+        return Map<String, dynamic>.from(directRideDetail);
+      }
+
+      if (directRideDetail is List && directRideDetail.isNotEmpty) {
+        final firstDetail = directRideDetail.first;
+        if (firstDetail is Map) {
+          return Map<String, dynamic>.from(firstDetail);
+        }
+      }
+    }
+
+    if (ride is List && ride.isNotEmpty) {
+      final firstRide = ride.first;
+      if (firstRide is Map) {
+        return Map<String, dynamic>.from(firstRide);
+      }
+    }
+
+    return <String, dynamic>{};
+  }
+
+  String _formatMinorPriceForDisplay(dynamic value) {
+    if (value == null || value.toString().trim().isEmpty) {
+      return "0.00";
+    }
+
+    final parsed = num.tryParse(value.toString());
+    if (parsed == null) {
+      return value.toString();
+    }
+
+    final major = parsed / 100;
+    return major.toStringAsFixed(2);
+  }
+
   @override
   Widget build(BuildContext context) {
     var controller = Get.find<SearchRideController>();
@@ -40,7 +80,6 @@ class SearchRideResultPage extends StatelessWidget {
               return Stack(
                 children: [
                   SingleChildScrollView(
-                    controller: controller.scrollController,
                     child: Container(
                       padding: EdgeInsets.all(getValueForScreenType<double>(
                         context: context,
@@ -99,59 +138,115 @@ class SearchRideResultPage extends StatelessWidget {
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             itemBuilder: (context, index) {
+                              final ride = controller.rides[index];
+                              final rideDetail = _normalizeRideDetail(ride);
+                              final ridePrice =
+                                  _formatMinorPriceForDisplay(
+                                      ride['price_minor'] ??
+                                          rideDetail['price_minor'] ??
+                                          rideDetail['price']);
+                              final departure = ride['departure']?.toString() ?? "";
+                              final destination = ride['destination']?.toString() ?? "";
+                              final fromStopId =
+                                  int.tryParse(ride['from_stop_id']?.toString() ?? '') ?? 0;
+                              final toStopId =
+                                  int.tryParse(ride['to_stop_id']?.toString() ?? '') ?? 0;
+                              final pickup =
+                                  ride['pickup']?.toString() ?? "";
+                              final dropOff =
+                                  ride['dropoff']?.toString() ?? "";
+                              final totalSeats =
+                                  ride['seats']?.toString() ?? "0";
+                              final seatsLeft =
+                                  ride['seats_left']?.toString() ?? "0";
+
                               DateTime parsedDate = DateTime.parse(
-                                  controller.rides[index]['date']);
+                                  ride['date']);
                               DateFormat outputFormat =
                                   DateFormat('MMMM d, yyyy');
                               String tripDate = outputFormat.format(parsedDate);
 
                               DateTime parsedTime = DateFormat("HH:mm:ss")
-                                  .parse(controller.rides[index]['time']);
+                                  .parse(ride['time']);
                               DateFormat outputTimeFormat =
-                                  DateFormat("h:mm a");
+                                  DateFormat("HH:mm");
                               String tripTime =
                                   outputTimeFormat.format(parsedTime);
 
                               var firmPrice = 0.0;
-                              if(controller.rides[index]['booking_type'] == "37"){
-                                firmPrice = double.parse(((double.parse(controller.rides[index][0]['price'].toString()) - ((double.parse(controller.rides[index][0]['price'].toString()) * double.parse(controller.firmDiscount.value.toString())) / 100)).toString()));
+                              if (ride['booking_type'] == "37") {
+                                final parsedRidePrice =
+                                    double.tryParse(ridePrice) ?? 0.0;
+                                final parsedFirmDiscount = double.tryParse(
+                                        controller.firmDiscount.value.toString()) ??
+                                    0.0;
+                                firmPrice = parsedRidePrice -
+                                    ((parsedRidePrice * parsedFirmDiscount) /
+                                        100);
                               }
 
                               var hideDriverInfo = false;
-                              if(controller.rides[index]['bookings'].length > 0){
+                              if (ride['bookings'].length > 0) {
                                 hideDriverInfo = true;
                               }
 
-                              Color borderColor = Colors.transparent;
+                              final statusBorderColors = <Color>[];
                               var features = [];
-                              var dataFeature = controller.rides[index]['feature_ids'];
+                              var dataFeature = ride['feature_ids'];
                               features.addAll(dataFeature.split('='));
-                              if(features.contains('1')){
-                                borderColor = Color(0XFFE91E63);
-                              }else if(features.contains('2')){
-                                borderColor = Color(0XFF48bb78);
+                              if (features.contains('1')) {
+                                // pink ride
+                                statusBorderColors.add(Color(0XFFE91E63));
+                              }
+                              if (features.contains('2')) {
+                                // extra care ride
+                                statusBorderColors.add(Color(0XFF48bb78));
                               }
 
+                              if ((double.tryParse(ridePrice) ?? 0.0) < 15) {
+                                statusBorderColors.add(Colors.blue);
+                              }
+
+                              Widget wrapWithStatusBorders(Widget child) {
+                                Widget wrapped = child;
+
+                                for (var i = statusBorderColors.length - 1;
+                                    i >= 0;
+                                    i--) {
+                                  wrapped = Container(
+                                    padding: const EdgeInsets.all(3),
+                                    decoration: BoxDecoration(
+                                      color: statusBorderColors[i],
+                                      borderRadius: BorderRadius.circular(
+                                        10 + ((statusBorderColors.length - i) * 3),
+                                      ),
+                                    ),
+                                    child: wrapped,
+                                  );
+                                }
+
+                                return Padding(
+                                  padding: const EdgeInsets.all(4),
+                                  child: wrapped,
+                                );
+                              }
 
                               return InkWell(
                                 onTap: () async {
-                                    final rideDetail = controller.rides[index]['ride_detail'];
                                     final tripDetailId =
                                         rideDetail != null &&
-                                                rideDetail.isNotEmpty
+                                            rideDetail.isNotEmpty
                                             ? (rideDetail['id'] ?? 0)
                                             : 0;
                                     await controller.checkBooking(
-                                        controller.rides[index]['id'],
-                                        tripDetailId);
+                                        ride['id'],
+                                        fromStopId,
+                                        toStopId);
                                 },
-                                child: Card(
+                                child: wrapWithStatusBorders(Card(
+                                  margin: EdgeInsets.zero,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10),
-                                    side: BorderSide(
-                                      color: borderColor,
-                                      width: 1,
-                                    ),
                                   ),
                                   surfaceTintColor: index % 2 != 0
                                       ? Colors.grey.shade100
@@ -168,7 +263,7 @@ class SearchRideResultPage extends StatelessWidget {
                                           date: tripDate,
                                           time: tripTime,
                                           context: context,
-                                          price: "${controller.rides[index]['ride_detail']['price']}",
+                                          price: ridePrice,
                                           tripStatus: "search",
                                           atLabel: "${controller.labelTextDetail['card_section_at_label'] ?? 'at'}",
                                           seatLeftLabel: "${controller.labelTextDetail['card_section_seats_left'] ?? 'seats left'}",
@@ -177,21 +272,18 @@ class SearchRideResultPage extends StatelessWidget {
                                           bookingRequestLabel: "${controller.labelTextDetail['card_section_booking_request'] ?? 'booking request'}",
                                           completedStatusLabel: "${controller.labelTextDetail['card_section_completed'] ?? 'Completed'}",
                                           cancelStatusLabel: "${controller.labelTextDetail['card_section_cancelled'] ?? 'Cancelled'}",
-                                          totalSeat: "${controller.rides[index]['seats']}",
+                                          totalSeat: totalSeats,
                                           firmPrice: firmPrice,
                                       ),
                                       tripCardFromToWidget(
-                                          from:
-                                              "${controller.rides[index]['ride_detail']['departure']}",
-                                          to:
-                                              "${controller.rides[index]['ride_detail']['destination']}",
-                                          price:
-                                              "${controller.rides[index]['ride_detail']['price']}",
+                                          from: departure,
+                                          to: destination,
+                                          price: ridePrice,
                                           context: context,
                                           tripStatus: 'search',
-                                          seatsLeft: "${controller.rides[index]['seats_left']}",
-                                        pickup: "${controller.rides[index]['pickup']}",
-                                        dropOff: "${controller.rides[index]['dropoff']}",
+                                          seatsLeft: seatsLeft,
+                                        pickup: pickup,
+                                        dropOff: dropOff,
                                         fromLabel: "${controller.labelTextDetail['card_section_from_label'] ?? 'From'}",
                                         toLabel: "${controller.labelTextDetail['card_section_to_label'] ?? 'to'}",
                                         seatLeftLabel: "${controller.labelTextDetail['card_section_seats_left'] ?? 'seats left'}",
@@ -432,7 +524,7 @@ class SearchRideResultPage extends StatelessWidget {
                                                           context: context),
                                                       txt16Size(
                                                           title:
-                                                          "${controller.rides[index]['driver']['age']}",
+                                                          "${controller.rides[index]['driver_age']}",
                                                           context: context),
                                                       5.widthBox,
                                                       SizedBox(
@@ -442,10 +534,23 @@ class SearchRideResultPage extends StatelessWidget {
                                                               color: Colors.grey
                                                                   .shade400)),
                                                       5.widthBox,
-                                                      txt16Size(
-                                                          title:
-                                                          "${controller.rides[index]['driver']['gender_label']}",
-                                                          context: context),
+                                                      if ((controller.rides[index]
+                                                                      ['gender_image'] ??
+                                                                  "")
+                                                              .toString()
+                                                              .isNotEmpty)
+                                                        circleIconWidget(
+                                                            width: 20.0,
+                                                            height: 20.0,
+                                                            imagePath:
+                                                                controller.rides[index]
+                                                                    ['gender_image'],
+                                                            context: context)
+                                                      else
+                                                        txt16Size(
+                                                            title:
+                                                                "${controller.rides[index]['driver']['gender_label']}",
+                                                            context: context),
 
                                                     ],
                                                   ),
@@ -458,7 +563,7 @@ class SearchRideResultPage extends StatelessWidget {
                                                           context: context),
                                                       txt16Size(
                                                           title:
-                                                          "${controller.rides[index]['driver']['driven_rides']} ${controller.labelTextDetail['card_section_passengers'] ?? "passengers"}",
+                                                          "${controller.rides[index]['driven_count']} ${controller.labelTextDetail['card_section_passengers'] ?? "passengers"}",
                                                           context: context),
                                                       5.widthBox,
                                                       SizedBox(
@@ -473,7 +578,7 @@ class SearchRideResultPage extends StatelessWidget {
                                                           context: context),
                                                       txt16Size( //
                                                           title:
-                                                          controller.rides[index]['driver']['average_rating'] != null ? "${(controller.rides[index]['driver']['average_rating']).toStringAsFixed(1)}" : "${controller.labelTextDetail['card_section_no_review'] ?? 'No reviews'}",
+                                                          controller.rides[index]['driver_average_rating'] != null ? "${(controller.rides[index]['driver_average_rating']).toStringAsFixed(1)}" : "${controller.labelTextDetail['card_section_no_review'] ?? 'No reviews'}",
                                                           context: context),
                                                       5.widthBox,
                                                     ],
@@ -488,7 +593,7 @@ class SearchRideResultPage extends StatelessWidget {
 
                                     ],
                                   ),
-                                ),
+                                )),
                               );
                             },
                             separatorBuilder: (context, index) {

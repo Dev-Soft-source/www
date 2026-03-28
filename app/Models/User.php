@@ -25,7 +25,7 @@ class User extends Authenticatable
         return $this->hasMany(PaymentMethod::class, 'user_id');
     }
 
-    public function getProfileImageAttribute($value)
+    public function getProfileImageAttribute($value = null)
     {
         // You can perform any transformation you need here
         if ($value) {

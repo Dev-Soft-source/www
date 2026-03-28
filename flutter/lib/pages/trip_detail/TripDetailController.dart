@@ -16,8 +16,8 @@ class TripDetailController extends GetxController {
   var from = "";
   var to = "";
   var price = "";
-  var fromCityId = "";
-  var toCityId = "";
+  var fromStopId = "";
+  var toStopId = "";
   var cancelSetting = {};
   var reviewSetting = {};
   var ride = {}.obs;
@@ -28,6 +28,24 @@ class TripDetailController extends GetxController {
   var firmCancellationPrice = 0.obs;
   var labelTextDetail = {}.obs;
   var hideDriverInfo = false.obs;
+
+  Map<String, dynamic> _normalizeRideDetail(dynamic rideData) {
+    if (rideData is Map) {
+      final directRideDetail = rideData['ride_detail'];
+      if (directRideDetail is Map) {
+        return Map<String, dynamic>.from(directRideDetail);
+      }
+
+      if (directRideDetail is List && directRideDetail.isNotEmpty) {
+        final firstDetail = directRideDetail.first;
+        if (firstDetail is Map) {
+          return Map<String, dynamic>.from(firstDetail);
+        }
+      }
+    }
+
+    return <String, dynamic>{};
+  }
 
   @override
   void onInit() async {
@@ -40,8 +58,8 @@ class TripDetailController extends GetxController {
     from = Get.parameters['from'] ?? "";
     to = Get.parameters['to'] ?? "";
     price = Get.parameters['price'] ?? "";
-    fromCityId = Get.parameters['from_city_id'] ?? "0";
-    toCityId = Get.parameters['to_city_id'] ?? "0";
+    fromStopId = Get.parameters['from_stop_id'] ?? "0";
+    toStopId = Get.parameters['to_stop_id'] ?? "0";
     amountTextEditingController = TextEditingController();
     securedCashTextEditingController = TextEditingController();
     await getTripDetail();
@@ -59,7 +77,7 @@ class TripDetailController extends GetxController {
       isLoading(true);
       TripDetailProvider()
           .getTripDetail(tripId, tripDetailId, serviceController.token,
-              serviceController.langId.value, from, to, fromCityId, toCityId)
+              serviceController.langId.value, from, to, fromStopId, toStopId)
           .then((resp) async {
         if (resp['status'] != null && resp['status'] == "Success") {
           if (resp['data'] != null && resp['data']['ride'] != null) {
@@ -360,6 +378,26 @@ class TripDetailController extends GetxController {
   }
 
   checkRide(type) async {
+    final rideDetail = _normalizeRideDetail(ride);
+    final rideId = ride['id']?.toString() ?? "0";
+    final bookedSeats = ride['booked_seats']?.toString() ?? "0";
+    final resolvedFromStopId =
+        (fromStopId.toString().isNotEmpty ? fromStopId.toString() : "0");
+    final resolvedToStopId =
+        (toStopId.toString().isNotEmpty ? toStopId.toString() : "0");
+    final addBookingQuery = Uri(queryParameters: {
+      'tripId': rideId,
+      'bookedSeat': '0',
+      'fromStopId': resolvedFromStopId,
+      'toStopId': resolvedToStopId,
+    }).query;
+    final updateBookingQuery = Uri(queryParameters: {
+      'tripId': rideId,
+      'bookedSeat': bookedSeats,
+      'fromStopId': resolvedFromStopId,
+      'toStopId': resolvedToStopId,
+    }).query;
+
     if (ride['payment_method_slug'] == "secured") {
       try {
         isOverlayLoading(true);
@@ -373,11 +411,9 @@ class TripDetailController extends GetxController {
                 type: "warning");
           } else {
             if (type == "add") {
-              Get.toNamed(
-                  "/book_seat/${ride['id']}/0/${ride['ride_detail']['id'].toString()}");
+              Get.toNamed('/book_seat?$addBookingQuery');
             } else {
-              Get.toNamed(
-                  "/book_seat/${ride['id']}/${ride['booked_seats']}/${ride['ride_detail']['id'].toString()}");
+              Get.toNamed('/book_seat?$updateBookingQuery');
             }
           }
           isOverlayLoading(false);
@@ -415,11 +451,9 @@ class TripDetailController extends GetxController {
       }
     } else {
       if (type == "add") {
-        Get.toNamed(
-            "/book_seat/${ride['id']}/0/${ride['ride_detail']['id'].toString()}");
+        Get.toNamed('/book_seat?$addBookingQuery');
       } else {
-        Get.toNamed(
-            "/book_seat/${ride['id']}/${ride['booked_seats']}/${ride['ride_detail']['id'].toString()}");
+        Get.toNamed('/book_seat?$updateBookingQuery');
       }
     }
   }

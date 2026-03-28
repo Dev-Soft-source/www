@@ -4,7 +4,7 @@ import 'package:proximaride_app/pages/widgets/button_Widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 Widget tripDetailButtonWidget({context, String tripStatus = "", String rideId = "", String status = "", String driverId = "", String bookedSeat = "",
 String cancelBookingBtn = "Cancel booking", String chatWithDriverBtn = "Chat with driver", String updateBookingBtn = "Update Booking", bool showBtn = true,
-  onPressed, String noShowDriverLabel = "No show driver", String rideDetailId = "0"}){
+  onPressed, String noShowDriverLabel = "No show driver", String fromStopId = "0", String toStopId = "0"}){
   return Column(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
@@ -53,7 +53,13 @@ String cancelBookingBtn = "Cancel booking", String chatWithDriverBtn = "Chat wit
               textWidget: txt22SizeAlignCenter(title: updateBookingBtn, context: context, textColor: Colors.white),
               context: context,
               onPressed: () async{
-                Get.toNamed("/book_seat/$rideId/$bookedSeat/$rideDetailId");
+                final query = Uri(queryParameters: {
+                  'tripId': rideId,
+                  'bookedSeat': bookedSeat,
+                  'fromStopId': fromStopId,
+                  'toStopId': toStopId,
+                }).query;
+                Get.toNamed("/book_seat?$query");
               }
           ),
         )

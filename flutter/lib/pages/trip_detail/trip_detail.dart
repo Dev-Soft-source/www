@@ -29,6 +29,20 @@ class TripDetailPage extends GetView<TripDetailController> {
 
   static const double _bottomActionBarHeight = 88.0;
 
+  String _formatMinorPriceForDisplay(dynamic value) {
+    if (value == null || value.toString().trim().isEmpty) {
+      return "0.00";
+    }
+
+    final parsed = num.tryParse(value.toString());
+    if (parsed == null) {
+      return value.toString();
+    }
+
+    final major = parsed / 100;
+    return major.toStringAsFixed(2);
+  }
+
   @override
   Widget build(BuildContext context) {
     Get.put(TripDetailController());
@@ -58,7 +72,8 @@ class TripDetailPage extends GetView<TripDetailController> {
               final selectedRideDetail = controller.ride['detail'] is Map
                   ? Map<String, dynamic>.from(controller.ride['detail'])
                   : <String, dynamic>{};
-
+              
+              final rideData = controller.ride;
 
               String tripTime = "";
               if (controller.ride['time'] != null) {
@@ -133,26 +148,12 @@ class TripDetailPage extends GetView<TripDetailController> {
                             (() {
                               return fromToWidget(
                                   context: context,
-                                  from: (selectedRideDetail['departure'] ?? '')
-                                          .toString()
-                                          .isNotEmpty
-                                      ? selectedRideDetail['departure'].toString()
-                                      : controller.from,
-                                  to: (selectedRideDetail['destination'] ?? '')
-                                          .toString()
-                                          .isNotEmpty
-                                      ? selectedRideDetail['destination'].toString()
-                                      : controller.to,
+                                  from: controller.ride['departure'].toString(),
+                                  to: controller.ride['destination'].toString(),
                                   date: tripDate,
                                   time: tripTime,
                                   perSeat:
-                                      (selectedRideDetail['price'] ?? '')
-                                              .toString()
-                                              .isNotEmpty
-                                          ? selectedRideDetail['price'].toString()
-                                          : (controller.price.isNotEmpty
-                                              ? controller.price
-                                              : '0'),
+                                      _formatMinorPriceForDisplay(controller.ride['price_minor']),
                                   leftSeat:
                                       controller.ride['seats_left'].toString(),
                                   fromLabel:
@@ -426,12 +427,12 @@ class TripDetailPage extends GetView<TripDetailController> {
                                 160.heightBox,
                               ]
                             ],
-                            if (controller.type != "ride") ...[
-                              SizedBox(
-                                height: _bottomActionBarHeight +
-                                    MediaQuery.of(context).padding.bottom,
-                              ),
-                            ],
+                            // if (controller.type != "ride") ...[
+                            //   SizedBox(
+                            //     height: _bottomActionBarHeight +
+                            //         MediaQuery.of(context).padding.bottom,
+                            //   ),
+                            // ],
                           ],
                         ),
                       )),
@@ -491,8 +492,8 @@ class TripDetailPage extends GetView<TripDetailController> {
                                               : false,
                                       noShowDriverLabel:
                                           "${controller.labelTextDetail['no_show_driver_label'] ?? "No show driver"}",
-                                      rideDetailId:
-                                          "${selectedRideDetail['id'] ?? ""}",
+                                      fromStopId: controller.fromStopId,
+                                      toStopId: controller.toStopId,
                                       onPressed: () async {
                                         await controller.noShowDriverData();
                                       },

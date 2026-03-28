@@ -10,33 +10,64 @@ Widget chatDriverWidget({context, double screenWidth = 0.0 , driverId, rideId, S
         children: [
           postRideWidget(title: heading, screenWidth: screenWidth, context: context),
           Container(
-            color: btnPrimaryColor,
-              padding: EdgeInsets.fromLTRB(getValueForScreenType<double>(
+            color: Colors.white,
+              padding: EdgeInsets.all(getValueForScreenType<double>(
                 context: context,
-                mobile: 15.0,
-                tablet: 15.0,
-              ),getValueForScreenType<double>(
-                context: context,
-                mobile: 10.0,
-                tablet: 10.0,
-              ),getValueForScreenType<double>(
-                context: context,
-                mobile: 15.0,
-                tablet: 15.0,
-              ),getValueForScreenType<double>(
-                context: context,
-                mobile: 10.0,
-                tablet: 10.0,
+                mobile: 8.0,
+                tablet: 8.0,
               )),
               child: InkWell(
                 onTap: (){
                   Get.toNamed('/messaging_page/$driverId/$rideId/new');
                 },
-                child: txt20Size(
-                  title: "Ask the driver any questions you want, especially if you have extra luggage, kids, or if you need a custom pick-up, or custom drop-off",
-                  fontFamily: bold,
-                  context: context,
-                  textColor: Colors.white
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.fromLTRB(
+                    getValueForScreenType<double>(
+                      context: context,
+                      mobile: 16.0,
+                      tablet: 16.0,
+                    ),
+                    getValueForScreenType<double>(
+                      context: context,
+                      mobile: 14.0,
+                      tablet: 14.0,
+                    ),
+                    getValueForScreenType<double>(
+                      context: context,
+                      mobile: 16.0,
+                      tablet: 16.0,
+                    ),
+                    getValueForScreenType<double>(
+                      context: context,
+                      mobile: 14.0,
+                      tablet: 14.0,
+                    ),
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF25B7B2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.chat_bubble_outline,
+                        color: Colors.white,
+                        size: 22,
+                      ),
+                      12.widthBox,
+                      Expanded(
+                        child: txt20Size(
+                          title: "Ask the driver any questions you want, especially if you have extra luggage, kids, or if you need a custom pick-up, or custom drop-off",
+                          fontFamily: bold,
+                          context: context,
+                          textColor: Colors.white
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               )
           ),

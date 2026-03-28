@@ -27,36 +27,38 @@ class ProfileController extends Controller
 {
     use StatusResponser;
 
-    public function index(){
+    public function index()
+    {
         $user = Auth::guard('sanctum')->user();
         $data = ['user' => $user];
         return $this->successResponse($data, 'Get user successfully');
     }
 
-    public function profilePage(Request $request){
+    public function profilePage(Request $request)
+    {
         $user = Auth::guard('sanctum')->user();
         $user_id = $user->id;
         $ratings = Rating::where(function ($query) use ($user_id) {
             // Ratings where type is 2 and user_id belongs to the user
             $query->where('type', '2')
-                  ->whereHas('booking', function ($query) use ($user_id) {
-                      $query->where('user_id', $user_id);
-                  });
+                ->whereHas('booking', function ($query) use ($user_id) {
+                    $query->where('user_id', $user_id);
+                });
             // OR Ratings where type is 1 and ride_id belongs to the user
             $query->orWhere(function ($query) use ($user_id) {
                 $query->where('type', '1')
-                      ->whereHas('ride', function ($query) use ($user_id) {
-                          $query->where('added_by', $user_id);
-                      });
+                    ->whereHas('ride', function ($query) use ($user_id) {
+                        $query->where('added_by', $user_id);
+                    });
             });
         })
-        ->with(['from' => function ($query) {
-            $query->select('id', 'first_name', 'last_name', 'gender', 'profile_image'); // Specify the columns you want to select
-            $query->withTrashed(); // Include soft-deleted users
-        }])
-        ->orderBy('id', 'desc')
-        ->take($request->reviews_limit)
-        ->get();
+            ->with(['from' => function ($query) {
+                $query->select('id', 'first_name', 'last_name', 'gender', 'profile_image'); // Specify the columns you want to select
+                $query->withTrashed(); // Include soft-deleted users
+            }])
+            ->orderBy('id', 'desc')
+            ->take($request->reviews_limit)
+            ->get();
 
         if ($request->lang_id && $request->lang_id != 0) {
             $genderLabel = Step1PageSettingDetail::where('language_id', $request->lang_id)->select('male_option_label', 'female_option_label', 'prefer_option_label')->first();
@@ -84,15 +86,15 @@ class ProfileController extends Controller
         $total_reviews = Rating::where(function ($query) use ($user_id) {
             // Ratings where type is 2 and user_id belongs to the user
             $query->where('type', '2')
-                  ->whereHas('booking', function ($query) use ($user_id) {
-                      $query->where('user_id', $user_id);
-                  });
+                ->whereHas('booking', function ($query) use ($user_id) {
+                    $query->where('user_id', $user_id);
+                });
             // OR Ratings where type is 1 and ride_id belongs to the user
             $query->orWhere(function ($query) use ($user_id) {
                 $query->where('type', '1')
-                      ->whereHas('ride', function ($query) use ($user_id) {
-                          $query->where('added_by', $user_id);
-                      });
+                    ->whereHas('ride', function ($query) use ($user_id) {
+                        $query->where('added_by', $user_id);
+                    });
             });
         })->count();
 
@@ -137,26 +139,20 @@ class ProfileController extends Controller
                 $editProfilePage = EditProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
             }
         }
-        
+
         $data = ['user' => $user, 'passenger_driven' => $passenger_driven, 'rides_taken' => $rides_taken, 'km_shared' => '0', 'total_reviews' => $total_reviews, 'ratings' => $ratings, 'editProfilePage' => $editProfilePage];
         return $this->successResponse($data, 'Get user successfully');
     }
 
-    public function edit(Request $request){
+    public function edit(Request $request)
+    {
+
         $user = Auth::guard('sanctum')->user();
         $country = Country::where('id', $user->country)->first();
         $state = State::where('id', $user->state)->first();
         $city = City::where('id', $user->city)->first();
 
-        $editProfilePage = null;
-        if ($request->lang_id && $request->lang_id != 0) {
-            $editProfilePage = EditProfilePageSettingDetail::where('language_id', $request->lang_id)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $editProfilePage = EditProfilePageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        }
+        $editProfilePage = EditProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $validationMessages = [
             'required' => trans('validation.required'),
@@ -168,11 +164,19 @@ class ProfileController extends Controller
             'max.file' => trans('validation.max.file'),
         ];
 
-        $data = ['user' => $user, 'country' => $country, 'state' => $state, 'city' => $city, 'editProfilePage' => $editProfilePage, 'validationMessages' => $validationMessages];
+        $data = [
+            'user' => $user,
+            'country' => $country,
+            'state' => $state,
+            'city' => $city,
+            'editProfilePage' => $editProfilePage,
+            'validationMessages' => $validationMessages
+        ];
         return $this->successResponse($data, 'Get data successfully');
     }
 
-    public function update(Request $request){
+    public function update(Request $request)
+    {
         $user = Auth::guard('sanctum')->user();
 
         $customMessages = [
@@ -205,13 +209,13 @@ class ProfileController extends Controller
             $file = $request->file('government_issued_id');
             $filename = $file->getClientOriginalName();
             $destination_path = public_path('/users_government_ids');
-            $file->move($destination_path,$filename);
+            $file->move($destination_path, $filename);
 
             //Original Image Upload
             $file = $request->file('government_issued_original_id');
             $filenameoriginal = $file->getClientOriginalName();
             $destination_path = public_path('/users_government_ids');
-            $file->move($destination_path,$filenameoriginal);
+            $file->move($destination_path, $filenameoriginal);
 
             User::whereId($request->id)->update([
                 'government_issued_id' => $filename,
@@ -222,7 +226,7 @@ class ProfileController extends Controller
             $country = Country::whereId($user->country)->first();
             $admin = Admin::first();
 
-            
+
             $defaultLangId = Language::where('is_default', '1')->value('id');
 
             $data = [
@@ -237,12 +241,12 @@ class ProfileController extends Controller
             ];
             // Send upload email
             Mail::to($admin->admin_email)->queue(new GovernmentIssuedIdUploadMail($data));
-        } 
+        }
 
         User::whereId($request->id)->update([
             'profile_complete' => '1',
         ]);
-        
+
         $message = null;
         $selectedLanguage = app()->getLocale();
         if ($selectedLanguage) {
@@ -259,13 +263,14 @@ class ProfileController extends Controller
                 $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('profile_update_message')->first();
             }
         }
-        
+
         $data = ['user' => $user];
         return $this->successResponse($data, strip_tags($message->profile_update_message));
     }
 
-    public function driverInfo(Request $request){
-        $ride = Ride::select('id','added_by','make','model','vehicle_type','year','license_no','car_type','car_image')->whereId($request->ride_id)
+    public function driverInfo(Request $request)
+    {
+        $ride = Ride::select('id', 'added_by', 'make', 'model', 'vehicle_type', 'year', 'license_no', 'car_type', 'car_image')->whereId($request->ride_id)
             ->with(['driver' => function ($query) {
                 $query->select('id', 'first_name', 'last_name', 'gender', 'profile_image', 'about', 'created_at'); // Specify the columns you want to select
                 $query->withTrashed(); // Include soft-deleted users
@@ -297,36 +302,36 @@ class ProfileController extends Controller
                     $ride->driver->gender_label = $genderLabel->prefer_option_label ?? null;
                 }
             }
-    
+
             $ratings = Rating::where(function ($query) use ($driver_id) {
                 // Ratings where type is 2 and user_id belongs to the user
                 $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($driver_id) {
-                          $query->where('user_id', $driver_id);
-                      })
-                      ->where('status', 1);
-    
+                    ->whereHas('booking', function ($query) use ($driver_id) {
+                        $query->where('user_id', $driver_id);
+                    })
+                    ->where('status', 1);
+
                 // OR Ratings where type is 1 and ride_id belongs to the user
                 $query->orWhere(function ($query) use ($driver_id) {
                     $query->where('type', '1')
-                          ->whereHas('ride', function ($query) use ($driver_id) {
-                              $query->where('added_by', $driver_id);
-                          })
-                          ->where('status', 1);
+                        ->whereHas('ride', function ($query) use ($driver_id) {
+                            $query->where('added_by', $driver_id);
+                        })
+                        ->where('status', 1);
                 });
             })
-            ->with(['from' => function ($query) {
-                $query->select('id', 'first_name', 'last_name', 'gender', 'profile_image'); // Specify the columns you want to select
-                $query->withTrashed(); // Include soft-deleted users
-            }])
-            ->orderBy('id', 'desc')
-            ->take($request->reviews_limit)
-            ->get();
+                ->with(['from' => function ($query) {
+                    $query->select('id', 'first_name', 'last_name', 'gender', 'profile_image'); // Specify the columns you want to select
+                    $query->withTrashed(); // Include soft-deleted users
+                }])
+                ->orderBy('id', 'desc')
+                ->take($request->reviews_limit)
+                ->get();
 
             foreach ($ratings as $rating) {
                 $reply = $rating->replies()->first();
                 $rating->replies = $reply ? $reply : null;
-                
+
                 if ($rating->from->gender) {
                     if ($rating->from->gender === 'male') {
                         $rating->from->gender_label = $genderLabel->male_option_label ?? null;
@@ -340,19 +345,19 @@ class ProfileController extends Controller
 
             // Calculate passenger_driven
             $ride->driver->passenger_driven = Ride::where('added_by', $driver_id)
-            ->where('status', '!=', 2)
-            ->where(function ($query) {
-                $query->whereDate('completed_date', '<=', now()->toDateString())
-                    ->orWhere(function ($query) {
-                        $query->whereDate('completed_date', '=', now()->toDateString())
-                            ->whereTime('completed_time', '<=', now()->toTimeString());
-                    });
-            })
-            ->get()
-            ->flatMap(function ($ride) {
-                return $ride->bookings()->pluck('seats');
-            })
-            ->sum();
+                ->where('status', '!=', 2)
+                ->where(function ($query) {
+                    $query->whereDate('completed_date', '<=', now()->toDateString())
+                        ->orWhere(function ($query) {
+                            $query->whereDate('completed_date', '=', now()->toDateString())
+                                ->whereTime('completed_time', '<=', now()->toTimeString());
+                        });
+                })
+                ->get()
+                ->flatMap(function ($ride) {
+                    return $ride->bookings()->pluck('seats');
+                })
+                ->sum();
 
             $ride->driver->rides_taken = Ride::notCancelled()->where('added_by', $driver_id)
                 ->where(function ($query) {
@@ -369,31 +374,32 @@ class ProfileController extends Controller
             $total_reviews = Rating::where(function ($query) use ($driver_id) {
                 // Ratings where type is 2 and user_id belongs to the user
                 $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($driver_id) {
-                          $query->where('user_id', $driver_id);
-                      })
-                      ->where('status', 1);
-    
+                    ->whereHas('booking', function ($query) use ($driver_id) {
+                        $query->where('user_id', $driver_id);
+                    })
+                    ->where('status', 1);
+
                 // OR Ratings where type is 1 and ride_id belongs to the user
                 $query->orWhere(function ($query) use ($driver_id) {
                     $query->where('type', '1')
-                          ->whereHas('ride', function ($query) use ($driver_id) {
-                              $query->where('added_by', $driver_id);
-                          })
-                          ->where('status', 1);
+                        ->whereHas('ride', function ($query) use ($driver_id) {
+                            $query->where('added_by', $driver_id);
+                        })
+                        ->where('status', 1);
                 });
             })->count();
         }
 
-        $data = ['ride' => $ride,'ratings' => $ratings,'total_reviews' => $total_reviews, 'editProfilePage' => $editProfilePage];
+        $data = ['ride' => $ride, 'ratings' => $ratings, 'total_reviews' => $total_reviews, 'editProfilePage' => $editProfilePage];
         return $this->successResponse($data, 'Get driver info page successfully');
     }
 
-    public function passengerInfo(Request $request){
+    public function passengerInfo(Request $request)
+    {
         $user = User::select('id', 'first_name', 'last_name', 'gender', 'dob', 'profile_image', 'about', 'created_at')->whereId($request->user_id)->first();
         $ratings = null;
         $total_reviews = null;
-        
+
         $editProfilePage = null;
         if ($request->lang_id && $request->lang_id != 0) {
             $editProfilePage = EditProfilePageSettingDetail::where('language_id', $request->lang_id)->first();
@@ -426,36 +432,36 @@ class ProfileController extends Controller
             }
 
             $user_id = $user->id;
-    
+
             $ratings = Rating::where(function ($query) use ($user_id) {
                 // Ratings where type is 2 and user_id belongs to the user
                 $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($user_id) {
-                          $query->where('user_id', $user_id);
-                      })
-                      ->where('status', 1);
-    
+                    ->whereHas('booking', function ($query) use ($user_id) {
+                        $query->where('user_id', $user_id);
+                    })
+                    ->where('status', 1);
+
                 // OR Ratings where type is 1 and ride_id belongs to the user
                 $query->orWhere(function ($query) use ($user_id) {
                     $query->where('type', '1')
-                          ->whereHas('ride', function ($query) use ($user_id) {
-                              $query->where('added_by', $user_id);
-                          })
-                          ->where('status', 1);
+                        ->whereHas('ride', function ($query) use ($user_id) {
+                            $query->where('added_by', $user_id);
+                        })
+                        ->where('status', 1);
                 });
             })
-            ->with(['from' => function ($query) {
-                $query->select('id', 'first_name', 'last_name', 'gender', 'profile_image'); // Specify the columns you want to select
-                $query->withTrashed(); // Include soft-deleted users
-            }])
-            ->orderBy('id', 'desc')
-            ->take($request->reviews_limit)
-            ->get();
+                ->with(['from' => function ($query) {
+                    $query->select('id', 'first_name', 'last_name', 'gender', 'profile_image'); // Specify the columns you want to select
+                    $query->withTrashed(); // Include soft-deleted users
+                }])
+                ->orderBy('id', 'desc')
+                ->take($request->reviews_limit)
+                ->get();
 
             foreach ($ratings as $rating) {
                 $reply = $rating->replies()->first();
                 $rating->replies = $reply ? $reply : null;
-                
+
                 if ($rating->from->gender) {
                     if ($rating->from->gender === 'male') {
                         $rating->from->gender_label = $genderLabel->male_option_label ?? null;
@@ -498,23 +504,23 @@ class ProfileController extends Controller
             $total_reviews = Rating::where(function ($query) use ($user_id) {
                 // Ratings where type is 2 and user_id belongs to the user
                 $query->where('type', '2')
-                      ->whereHas('booking', function ($query) use ($user_id) {
-                          $query->where('user_id', $user_id);
-                      })
-                      ->where('status', 1);
-    
+                    ->whereHas('booking', function ($query) use ($user_id) {
+                        $query->where('user_id', $user_id);
+                    })
+                    ->where('status', 1);
+
                 // OR Ratings where type is 1 and ride_id belongs to the user
                 $query->orWhere(function ($query) use ($user_id) {
                     $query->where('type', '1')
-                          ->whereHas('ride', function ($query) use ($user_id) {
-                              $query->where('added_by', $user_id);
-                          })
-                          ->where('status', 1);
+                        ->whereHas('ride', function ($query) use ($user_id) {
+                            $query->where('added_by', $user_id);
+                        })
+                        ->where('status', 1);
                 });
             })->count();
         }
 
-        $data = ['user' => $user,'total_reviews' => $total_reviews,'ratings' => $ratings, 'editProfilePage' => $editProfilePage];
+        $data = ['user' => $user, 'total_reviews' => $total_reviews, 'ratings' => $ratings, 'editProfilePage' => $editProfilePage];
         return $this->successResponse($data, 'Get passenger profile successfully');
     }
 }

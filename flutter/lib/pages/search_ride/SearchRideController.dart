@@ -549,7 +549,7 @@ class SearchRideController extends GetxController {
     }
   }
 
-  Future<void> checkBooking(rideId, tripDetailId) async {
+  Future<void> checkBooking(rideId, fromStopId, toStopId) async {
     try {
       SearchRideProvider().checkBooking(rideId, serviceController.token).then(
           (resp) async {
@@ -627,18 +627,23 @@ class SearchRideController extends GetxController {
 
             if (resp['data']['hasBooking'] != null) {
               if (resp['data']['hasBooking']) {
-                Get.toNamed(
-                    "/book_seat/$rideId/${resp['data']['seats']}/$tripDetailId");
+                final query = Uri(queryParameters: {
+                  'tripId': rideId.toString(),
+                  'bookedSeat': resp['data']['seats'].toString(),
+                  'fromStopId': fromStopId.toString(),
+                  'toStopId': toStopId.toString(),
+                }).query;
+                Get.toNamed("/book_seat?$query");
                 isAlreadyBooked.value = true;
               } else {
                 final query = Uri(queryParameters: {
                   'from': fromTextEditingController.text,
                   'to': toTextEditingController.text,
-                  'from_city_id': fromCityId.value.toString(),
-                  'to_city_id': toCityId.value.toString(),
+                  'from_stop_id': fromStopId.toString(),
+                  'to_stop_id': toStopId.toString(),
                 }).query;
                 Get.toNamed(
-                    '/trip_detail/$rideId/findRide/findRide/$tripDetailId?$query');
+                    '/trip_detail/$rideId/findRide/findRide/0?$query');
               }
             }
           }
@@ -685,34 +690,33 @@ class SearchRideController extends GetxController {
         if (resp['data'] != null) {
 
           final data = resp['data'];
-          if (data['preferences'] != null &&
-              data['preferences']['preferencesOptions'] != null) {
+          if (data['preferencesOptions'] != null) {
             smokingList.add(
-                data['preferences']['preferencesOptions']['smoking_option1']);
+                data['preferencesOptions']['smoking_option1']);
             smokingList.add(
-                data['preferences']['preferencesOptions']['smoking_option2']);
+                data['preferencesOptions']['smoking_option2']);
 
             smoking.value = "21";
 
-            smokingLabelList.add(data['preferences']['preferencesOptions']
+            smokingLabelList.add(data['preferencesOptions']
                 ['smoking_option1_label']);
-            smokingLabelList.add(data['preferences']['preferencesOptions']
+            smokingLabelList.add(data['preferencesOptions']
                 ['smoking_option2_label']);
 
             petList.add(
-                data['preferences']['preferencesOptions']['animals_option1']);
+                data['preferencesOptions']['animals_option1']);
             petList.add(
-                data['preferences']['preferencesOptions']['animals_option2']);
+                data['preferencesOptions']['animals_option2']);
             petList.add(
-                data['preferences']['preferencesOptions']['animals_option3']);
+                data['preferencesOptions']['animals_option3']);
 
             pet.value = "23";
 
-            petLabelList.add(data['preferences']['preferencesOptions']
+            petLabelList.add(data['preferencesOptions']
                 ['animals_option1_label']);
-            petLabelList.add(data['preferences']['preferencesOptions']
+            petLabelList.add(data['preferencesOptions']
                 ['animals_option2_label']);
-            petLabelList.add(data['preferences']['preferencesOptions']
+            petLabelList.add(data['preferencesOptions']
                 ['animals_option3_label']);
           }
 

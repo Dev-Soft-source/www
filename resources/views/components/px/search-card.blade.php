@@ -10,7 +10,7 @@
 ])
 
 @php
-    $seatPrice = ($ride->detail->price ?? 0) / 100;
+    $seatPrice = ($priceMinor ?? 0) / 100;
 @endphp
 
 @php
@@ -87,7 +87,7 @@
                 @if ($showBookingButton)
                     <div class="my-4 min-w-64">
                         @if ($ride->isInstantBooking())
-                            <a href="{{ route('ride_detail', ['lang' => app()->getLocale(), 'id' => $ride->id]) }}"
+                            <a href="{{ route('ride_detail', ['lang' => app()->getLocale(), 'id' => $ride->id, 'from_stop_id'=>$ride->from_stop_id, 'to_stop_id'=>$ride->to_stop_id]) }}"
                                 class="button-exp-green-fill flex justify-center w-full"
                                 data-tippy-content="{{ $rideFeatureOptions['booking_method']['instant']->tooltip }}">
                                 <img class="w-8 h-8 mr-2"

@@ -22,7 +22,7 @@
     $pickupLocation = $ride->meta['pickup_location'] ?? null;
     $dropoffLocation = $ride->meta['dropoff_location'] ?? null;
 
-    $orderedStops = ($ride->stops ?? collect())->sortBy('stop_order')->values();
+    $orderedStops = ($ride->rideStops ?? collect())->sortBy('stop_order')->values();
     $matchedFromStopIndex = isset($ride->matched_from_stop_index) && $ride->matched_from_stop_index !== null
         ? (int) $ride->matched_from_stop_index
         : null;
@@ -59,6 +59,7 @@
     }
 
     $hasRouteStops = $orderedStops->count() >= 2;
+
     $showParentRouteHint = $hasRouteStops && ($segmentFromIndex > 0 || $segmentToIndex < $lastStopIndex);
     $originIsMiddleOfParentRoute = $hasRouteStops && $segmentFromIndex > 0;
     $departureIsMiddleOfParentRoute = $hasRouteStops && $segmentToIndex < $lastStopIndex;
@@ -70,6 +71,7 @@
     }
 
     $formattedDeparture = null;
+    $departureDateTime = \Carbon\Carbon::parse($ride->date . ' ' . $ride->time);
     if ($departureDateTime) {
         $formattedDeparture = formatDepartureDateTime($departureDateTime, $selectedLanguage, $rideDetailPage);
     }
@@ -124,14 +126,14 @@
             </h4>
             <div class="flex gap-2 items-baseline">
                 <h3 class="text-primary text-xl md:text-2xl md:mb-4">
-                    {{ $origin }}.
+                    {{ $ride->departure }}
                 </h3>
-                @if ($pickupLocation)
+                @if ($ride->pickup)
                     <div class="flex itmes-end text-gray-700 gap-1">
                         <label class="">
                             {{ $rideDetailPage->pickup_at_label }}: 
                         </label>
-                        <p>{{ $pickupLocation }}</p>
+                        <p>{{ $ride->pickup }}</p>
                 </div>
                 @endif
             </div>
@@ -186,14 +188,14 @@
                 </h4>
             <div class="flex gap-2 items-end md:mb-4">
                 <h3 class="text-primary text-xl md:text-2xl ">
-                    {{ $destination }}.
+                    {{ $ride->destination }}.
                 </h3>
-                @if ($dropoffLocation)
+                @if ($ride->dropoff)
                 <div class="flex itmes-end text-gray-700 gap-1">
                     <label class="">
                         {{ $rideDetailPage->dropoff_at_label }}: 
                     </label>
-                    <p>{{ $dropoffLocation }}</p>
+                    <p>{{ $ride->dropoff }}</p>
                 </div>
                 @endif
             </div>

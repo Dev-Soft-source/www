@@ -10,16 +10,15 @@ class TripDetailProvider extends GetConnect {
   final getConnect = GetConnect(timeout: const Duration(seconds: 180));
 
   Future getTripDetail(
-      rideId, rideDetailId, token, langId, from, to, fromCityId, toCityId) async {
+      rideId, rideDetailId, token, langId, from, to, fromStopId, toStopId) async {
     try {
       final queryParams = <String, String>{
         'id': rideId.toString(),
         'lang_id': langId.toString(),
-        'ride_detail_id': rideDetailId.toString(),
         'from': from.toString(),
         'to': to.toString(),
-        'from_city_id': fromCityId.toString(),
-        'to_city_id': toCityId.toString(),
+        'from_stop_id': fromStopId.toString(),
+        'to_stop_id': toStopId.toString(),
       };
       final response = await getConnect.get(
           "$baseUrl/$rideDetail?${Uri(queryParameters: queryParams).query}",

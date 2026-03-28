@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:proximaride_app/pages/chat/ChatController.dart';
 import 'package:proximaride_app/pages/messaging_page/MessagingController.dart';
@@ -209,8 +210,30 @@ class NavigationController extends GetxController {
     super.onClose();
   }
 
+  Future<bool> _canUseFirebaseMessaging() async {
+    if (!kIsWeb) {
+      return true;
+    }
+
+    try {
+      final isSupported = await FirebaseMessaging.instance.isSupported();
+      if (!isSupported) {
+        logger.warning(
+            "Skipping FCM token fetch on web because Firebase Messaging is not supported in this browser/environment.");
+      }
+      return isSupported;
+    } catch (e) {
+      logger.warning("Unable to verify Firebase Messaging support on web: $e");
+      return false;
+    }
+  }
+
   Future<void> requestPermissionAndGetToken() async {
     try {
+      if (!await _canUseFirebaseMessaging()) {
+        return;
+      }
+
       final notificationSettings =
           await FirebaseMessaging.instance.requestPermission(
         provisional: true,
@@ -249,6 +272,14 @@ class NavigationController extends GetxController {
         logger.error("Failed to update user FCM token: $err");
       });
     } catch (e, stackTrace) {
+      final errorMessage = e.toString();
+      if (kIsWeb &&
+          errorMessage.contains('failed-service-worker-registration')) {
+        logger.warning(
+            "Skipping web FCM token registration because the Firebase messaging service worker is not available.");
+        return;
+      }
+
       logger.error("Failed to get FCM token in NavigationController: $e");
       logger.error(stackTrace.toString());
     }

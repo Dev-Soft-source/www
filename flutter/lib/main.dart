@@ -246,7 +246,8 @@ class MyAppState extends State<MyApp> {
     '/search_ride_result',
     '/trip_detail/:tripId/:type/:status/:rideDetailId',
     '/co_passenger/:tripId',
-    '/book_seat/:tripId/:bookedSeat/:rideDetailId',
+    '/book_seat',
+    '/book_seat/:tripId/:bookedSeat/:fromStopId/:toStopId',
     '/notifications',
     '/book_cards',
     '/book_add_cards',
@@ -598,7 +599,11 @@ class MyAppState extends State<MyApp> {
           page: () => const CoPassengerPage(),
         ),
         GetPage(
-          name: '/book_seat/:tripId/:bookedSeat/:rideDetailId',
+          name: '/book_seat',
+          page: () => const BookSeatPage(),
+        ),
+        GetPage(
+          name: '/book_seat/:tripId/:bookedSeat/:fromStopId/:toStopId',
           page: () => const BookSeatPage(),
         ),
         GetPage(name: '/notifications', page: () => const NotificationPage()),

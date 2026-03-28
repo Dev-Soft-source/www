@@ -295,7 +295,7 @@ class PostRideInitController extends Controller
 
         $orderedFeatures = collect($featureGroup)
             ->sortBy('id')
-            ->filter(fn($feature) => $feature->id >= 1 && $feature->id <= 16 || 47)
+            ->filter(fn($feature) => ($feature->id >= 1 && $feature->id <= 16) || $feature->id == 47)
             ->values();
 
         return [

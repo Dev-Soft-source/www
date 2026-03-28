@@ -74,19 +74,9 @@ class BookingController extends Controller
             return $this->apiErrorResponse($messages->acc_suspend_message ?? null, 200);
         }
 
-        $rideDetailId = isset($request->ride_detail_id) ? $request->ride_detail_id : 0;
-
         $ride = Ride::where('id', $request->id);
 
-        if ($rideDetailId != 0) {
-            $ride = $ride->with(['rideDetail' => function ($q) use ($rideDetailId) {
-                $q->where('id', $rideDetailId);
-            }]);
-        } else {
-            $ride = $ride->with(['rideDetail' => function ($q) {
-                $q->where('default_ride', '1');
-            }]);
-        }
+        $ride = $ride->with('detail');
 
         $ride = $ride->with(['driver' => function ($query) {
             $query->select('id', 'first_name', 'last_name', 'gender', 'profile_image', 'dob'); // Specify the columns you want to select
@@ -107,99 +97,37 @@ class BookingController extends Controller
 
         $ride = $ride->first();
 
-        $defaultLanguage = Language::where('is_default', 1)->first();
-        $selectedLangId = ($request->lang_id && $request->lang_id != 0)
-            ? (int) $request->lang_id
-            : $defaultLanguage->id;
-        $rideFeatureOptionGroups = $this->getRideFeatureOptionGroups($selectedLangId, $defaultLanguage->id);
-        $buildAssetMaps = static function ($options): array {
-            $options = collect($options ?? []);
-
-            return [
-                'images' => $options
-                    ->mapWithKeys(function ($option) {
-                        $icon = $option->icon ?? null;
-
-                        return [(int) ($option->features_setting_id ?? $option->id ?? 0) => $icon ? asset('home_page_icons/' . $icon) : null];
-                    })
-                    ->all(),
-                'tooltips' => $options
-                    ->mapWithKeys(function ($option) {
-                        return [(int) ($option->features_setting_id ?? $option->id ?? 0) => $option->tooltip ?? null];
-                    })
-                    ->all(),
-            ];
-        };
-        $buildOptionMap = static function ($options): array {
-            return collect($options ?? [])
-                ->mapWithKeys(function ($option) {
-                    return [(int) ($option->features_setting_id ?? $option->id ?? 0) => $option];
-                })
-                ->all();
-        };
-        $buildResponseMap = static function ($options): array {
-            return collect($options ?? [])
-                ->mapWithKeys(function ($option) {
-                    $featureId = (int) ($option->features_setting_id ?? $option->id ?? 0);
-                    $icon = $option->icon ?? null;
-
-                    return [$featureId => [
-                        'id' => $featureId,
-                        'title' => $option->name ?? null,
-                        'image' => $icon ? asset('home_page_icons/' . $icon) : null,
-                        'tooltip' => $option->tooltip ?? null,
-                    ]];
-                })
-                ->all();
-        };
-
-        $bookingMethodAssets = $buildAssetMaps($rideFeatureOptionGroups['booking_method'] ?? []);
-        $paymentMethodAssets = $buildAssetMaps($rideFeatureOptionGroups['payment_method'] ?? []);
-        $smokingAssets = $buildAssetMaps($rideFeatureOptionGroups['smoking_allowed'] ?? []);
-        $petsAssets = $buildAssetMaps($rideFeatureOptionGroups['pets_allowed'] ?? []);
-        $luggageAssets = $buildAssetMaps($rideFeatureOptionGroups['luggage_size'] ?? []);
-
-        $bookingMethodImages = $bookingMethodAssets['images'];
-        $bookingMethodTooltips = $bookingMethodAssets['tooltips'];
-        $paymentMethodImages = $paymentMethodAssets['images'];
-        $paymentMethodTooltips = $paymentMethodAssets['tooltips'];
-        $smokeImages = $smokingAssets['images'];
-        $smokeTooltips = $smokingAssets['tooltips'];
-        $petsImages = $petsAssets['images'];
-        $petsTooltips = $petsAssets['tooltips'];
-        $luggageImages = $luggageAssets['images'];
-        $luggageTooltips = $luggageAssets['tooltips'];
-        $bookingMethodOptions = $buildOptionMap($rideFeatureOptionGroups['booking_method'] ?? []);
-        $paymentMethodOptions = $buildOptionMap($rideFeatureOptionGroups['payment_method'] ?? []);
-        $bookingTypeOptions = $buildOptionMap($rideFeatureOptionGroups['cancellation'] ?? []);
-        $featureResponseMap = $buildResponseMap($rideFeatureOptionGroups['features'] ?? []);
+        $from_stop_id = $request->input('from_stop_id', 0);
+        $to_stop_id = $request->input('to_stop_id', 0);
 
         if ($ride) {
-            $primaryDetail = $ride->detail;
-            $displayPrice = $ride->price_minor
-                ?? (int) round(((float) ($primaryDetail->price ?? 0)) / 100);
 
-            $ride->price_minor = $displayPrice;
-            if ($primaryDetail) {
-                $primaryDetail->price = $displayPrice;
-                $ride->setRelation('detail', $primaryDetail);
-            }
+            $ride = $this->makeDetailOfRide($ride, $from_stop_id, $to_stop_id);
+            // $primaryDetail = $ride->detail;
+            // $displayPrice = $ride->price_minor
+            //     ?? (int) round(((float) ($primaryDetail->price ?? 0)) / 100);
 
-            if ($ride->relationLoaded('rideDetail')) {
-                $ride->setRelation('rideDetail', collect($ride->rideDetail)->map(function ($detail) use ($displayPrice) {
-                    if ($detail instanceof RideDetail) {
-                        $detail->price = $displayPrice;
-                    } elseif (is_object($detail)) {
-                        $detail->price = $displayPrice;
-                    } elseif (is_array($detail)) {
-                        $detail['price'] = $displayPrice;
-                    } else {
-                        $detail = ['price' => $displayPrice];
-                    }
+            // $ride->price_minor = $displayPrice;
+            // if ($primaryDetail) {
+            //     $primaryDetail->price = $displayPrice;
+            //     $ride->setRelation('detail', $primaryDetail);
+            // }
 
-                    return $detail;
-                }));
-            }
+            // if ($ride->relationLoaded('rideDetail')) {
+            //     $ride->setRelation('rideDetail', collect($ride->rideDetail)->map(function ($detail) use ($displayPrice) {
+            //         if ($detail instanceof RideDetail) {
+            //             $detail->price = $displayPrice;
+            //         } elseif (is_object($detail)) {
+            //             $detail->price = $displayPrice;
+            //         } elseif (is_array($detail)) {
+            //             $detail['price'] = $displayPrice;
+            //         } else {
+            //             $detail = ['price' => $displayPrice];
+            //         }
+
+            //         return $detail;
+            //     }));
+            // }
 
             // Calculate seats left
             $bookedSeats = $ride->bookings()
@@ -208,35 +136,7 @@ class BookingController extends Controller
                 ->withActivePassenger()
                 ->sum('seats');
             $ride->seats_left = intval($ride->seats) - intval($bookedSeats);
-            // Add the image URL to ride
-            $ride->booking_method_image = $bookingMethodImages[$ride->booking_method] ?? null;
-            $ride->booking_method_tooltip = $bookingMethodTooltips[$ride->booking_method] ?? null;
-            $ride->booking_method_slug = $bookingMethodOptions[(int) $ride->booking_method]->slug ?? null;
-            $ride->booking_type_slug = $bookingTypeOptions[(int) $ride->booking_type]->slug ?? null;
-            $ride->payment_method_image = $paymentMethodImages[$ride->payment_method] ?? null;
-            $ride->payment_method_tooltip = $paymentMethodTooltips[$ride->payment_method] ?? null;
-            $ride->payment_method_slug = $paymentMethodOptions[(int) $ride->payment_method]->slug ?? null;
-            $ride->smoke_image = $smokeImages[$ride->smoke] ?? null;
-            $ride->smoke_tooltip = $smokeTooltips[$ride->smoke] ?? null;
-            $ride->animal_friendly_image = $petsImages[$ride->animal_friendly] ?? null;
-            $ride->animal_friendly_tooltip = $petsTooltips[$ride->animal_friendly] ?? null;
-            $ride->luggage_image = $luggageImages[$ride->luggage] ?? null;
-            $ride->luggage_tooltip = $luggageTooltips[$ride->luggage] ?? null;
-            $ride->feature_ids = $ride->features;
-
-            // Check if the features are a string, then explode it into an array
-            $rideFeatures = is_string($ride->features) ? explode('=', $ride->features) : $ride->features;
-
-            $features = [];
-            // Loop through each feature and add the corresponding image and title
-            foreach ($rideFeatures as $feature) {
-                if (isset($featureResponseMap[$feature])) {
-                    $features[] = $featureResponseMap[$feature];
-                }
-            }
-
-            // Assign the features array to the ride's features attribute
-            $ride->features = $features;
+            
 
             $ride->driver->driven_rides = $ride->driver->rides()
                 ->where('status', '!=', 2)
@@ -293,32 +193,23 @@ class BookingController extends Controller
             }
         }
 
-        $bookings = Booking::where('ride_id', $request->id)->where('status', '!=', '3')->where('status', '!=', '4')->get();
+        $topBalance = TopUpBalance::where('user_id', $user->id)
+            ->selectRaw('SUM(dr_amount) - SUM(cr_amount) as balance')
+            ->value('balance');
+        $coffeeBalance = CoffeeWallet::selectRaw('SUM(dr_amount) - SUM(cr_amount) as balance')
+            ->value('balance');
 
-        $seatsBooked = $bookings->sum('seats');
-        if ($seatsBooked >= $ride->seats) {
-            return $this->apiErrorResponse($messages->seat_unavailable_message ?? null, 200);
-        }
+        $bookingPage = BookingPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-
-        $getCrBalance = TopUpBalance::where('user_id', $user->id)->sum('cr_amount');
-        $getDrBalance = TopUpBalance::where('user_id', $user->id)->sum('dr_amount');
-
-
-
-        $getCoffeeCrBalance = CoffeeWallet::sum('cr_amount');
-        $getCoffeeDrBalance = CoffeeWallet::sum('dr_amount');
-
-        $bookingPage = null;
-        if ($request->lang_id && $request->lang_id != 0) {
-            $bookingPage = BookingPageSettingDetail::where('language_id', $request->lang_id)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $bookingPage = BookingPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        }
-        $data = ['ride' => $ride, 'messages' => $messages, 'setting' => $setting, 'bookingPage' => $bookingPage, 'balance' => ($getDrBalance - $getCrBalance), 'coffeeBalance' => ($getCoffeeDrBalance - $getCoffeeCrBalance), 'stateTax' => $stateTax];
+        $data = [
+            'ride' => $ride,
+            'messages' => $messages,
+            'setting' => $setting,
+            'bookingPage' => $bookingPage,
+            'balance' => $topBalance,
+            'coffeeBalance' => $coffeeBalance,
+            'stateTax' => $stateTax
+        ];
         return $this->successResponse($data, 'Get booking page successfully');
     }
 

@@ -9,10 +9,16 @@ import 'package:proximaride_app/services/logger_service.dart';
 class BookSeatProvider extends GetConnect {
   final getConnect = GetConnect(timeout: const Duration(seconds: 180));
 
-  Future getBookSeatDetail(rideId, rideDetailId, token, langId) async {
+  Future getBookSeatDetail(rideId, fromStopId, toStopId, token, langId) async {
     try {
+      final queryParams = <String, String>{
+        'id': rideId.toString(),
+        'lang_id': langId.toString(),
+        'from_stop_id': fromStopId.toString(),
+        'to_stop_id': toStopId.toString(),
+      };
       final response = await getConnect.get(
-          "$baseUrl/$bookSeats?id=$rideId&lang_id=$langId&ride_detail_id=$rideDetailId",
+          "$baseUrl/$bookSeats?${Uri(queryParameters: queryParams).query}",
           headers: {
             'Accept': 'application/json',
             'Authorization': 'Bearer $token',
@@ -81,6 +87,8 @@ class BookSeatProvider extends GetConnect {
       taxType,
       taxAmount,
       messageToDriver,
+      fromStopId,
+      toStopId,
       gPay) async {
     try {
       var url = "";
@@ -125,6 +133,8 @@ class BookSeatProvider extends GetConnect {
       data.fields.add(MapEntry("tax_type", taxType.toString()));
       data.fields.add(MapEntry("tax_amount", taxAmount.toString()));
       data.fields.add(MapEntry("driver_message", messageToDriver.toString()));
+      data.fields.add(MapEntry("from_stop_id", fromStopId.toString()));
+      data.fields.add(MapEntry("to_stop_id", toStopId.toString()));
 
       logger.info("Booking Ride URL: $url");
       logger.info("Booking Ride Data: ${data.fields.toString()}");

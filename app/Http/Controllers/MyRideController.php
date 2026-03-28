@@ -116,7 +116,7 @@ class MyRideController extends Controller
             ->paginate(6);
 
         foreach ($rides as $ride) {
-            $ride = $this->makeDetailOfRide($ride);
+            $ride = $this->getRideDetail($ride);
         }
 
         $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
@@ -187,10 +187,7 @@ class MyRideController extends Controller
         );
         $messages = $this->successMessage;
 
-
-
-        $ride = $this->makeDetailOfRide($ride);
-
+        $ride = $this->getRideDetail($ride);
 
         $ratings = Rating::all();
         $ride_cancelled = false;

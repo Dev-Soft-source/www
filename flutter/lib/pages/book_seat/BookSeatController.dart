@@ -16,7 +16,8 @@ class BookSeatController extends GetxController {
   var isLoading = false.obs;
   var isOverlayLoading = false.obs;
   var tripId = "";
-  var rideDetailId = "";
+  var fromStopId = "";
+  var toStopId = "";
   var seatAvailable = 0.obs;
   var ride = {}.obs;
   var setting = {}.obs;
@@ -85,7 +86,8 @@ class BookSeatController extends GetxController {
     addressController = TextEditingController();
     messageDriverTextEditingController = TextEditingController();
     tripId = Get.parameters['tripId'] ?? "";
-    rideDetailId = Get.parameters['rideDetailId'] ?? "";
+    fromStopId = Get.parameters['fromStopId'] ?? "0";
+    toStopId = Get.parameters['toStopId'] ?? "0";
     alreadyBookedSeat.value =
         int.parse(Get.parameters['bookedSeat'].toString());
     isLoading(true);
@@ -164,24 +166,57 @@ class BookSeatController extends GetxController {
   }
 
   double rideUnitPrice() {
+    if (ride['price_major'] != null) {
+      return double.tryParse(ride['price_major'].toString()) ?? 0.0;
+    }
+
+    if (ride['priceMajor'] != null) {
+      return double.tryParse(ride['priceMajor'].toString()) ?? 0.0;
+    }
+
     if (ride['price_minor'] != null) {
-      return double.tryParse(ride['price_minor'].toString()) ?? 0.0;
+      return (double.tryParse(ride['price_minor'].toString()) ?? 0.0) / 100;
     }
 
     if (ride['matched_segment_price_minor'] != null) {
-      return double.tryParse(ride['matched_segment_price_minor'].toString()) ??
+      return ((double.tryParse(ride['matched_segment_price_minor'].toString()) ??
+              0.0) /
+          100);
+    }
+
+    if (ride['matched_segment_price_major'] != null) {
+      return double.tryParse(ride['matched_segment_price_major'].toString()) ??
+          0.0;
+    }
+
+    if (ride['matched_segment_priceMajor'] != null) {
+      return double.tryParse(ride['matched_segment_priceMajor'].toString()) ??
+          0.0;
+    }
+
+    if (ride['ride_detail'] != null &&
+        ride['ride_detail'].isNotEmpty &&
+        ride['ride_detail']['price_major'] != null) {
+      return double.tryParse(ride['ride_detail']['price_major'].toString()) ??
+          0.0;
+    }
+
+    if (ride['ride_detail'] != null &&
+        ride['ride_detail'].isNotEmpty &&
+        ride['ride_detail']['priceMajor'] != null) {
+      return double.tryParse(ride['ride_detail']['priceMajor'].toString()) ??
           0.0;
     }
 
     if (ride['ride_detail'] != null &&
         ride['ride_detail'].isNotEmpty &&
         ride['ride_detail']['price'] != null) {
-      return double.tryParse(ride['ride_detail']['price'].toString()) ??
-          0.0;
+      return (double.tryParse(ride['ride_detail']['price'].toString()) ?? 0.0) /
+          100;
     }
 
     if (ride['price'] != null) {
-      return double.tryParse(ride['price'].toString()) ?? 0.0;
+      return (double.tryParse(ride['price'].toString()) ?? 0.0) / 100;
     }
 
     return 0.0;
@@ -190,7 +225,7 @@ class BookSeatController extends GetxController {
   getBookSeatDetail() async {
     try {
       BookSeatProvider()
-          .getBookSeatDetail(tripId, rideDetailId, serviceController.token,
+          .getBookSeatDetail(tripId, fromStopId, toStopId, serviceController.token,
               serviceController.langId.value)
           .then((resp) async {
         if (resp['status'] != null && resp['status'] == "Success") {
@@ -201,7 +236,7 @@ class BookSeatController extends GetxController {
           if (resp['data'] != null && resp['data']['ride'] != null) {
             ride.addAll(resp['data']['ride']);
 
-            policyType.value = ride['booking_type_slug'];
+            policyType.value = ride['booking_type_slug']?.toString() ?? "";
             policyTypeId.value =
                 ride['booking_type_slug'] == 'firm' ? "37" : "0";
             if (policyTypeId.value != "37") {
@@ -210,7 +245,7 @@ class BookSeatController extends GetxController {
               firmAgreeTerms.value = false;
             }
             var features = [];
-            var dataFeature = ride['feature_ids'];
+            var dataFeature = ride['feature_ids']?.toString() ?? "";
             features.addAll(dataFeature.split('='));
             if (features.contains('1')) {
               showPinkCheckBox.value = true;
@@ -306,7 +341,7 @@ class BookSeatController extends GetxController {
               labelTextDetail['booking_extra_care_ride_term_agree_text']
                   .toString();
         } else if (resp['status'] != null && resp['status'] == "Error") {
-          Get.back();
+          isLoading(false);
           serviceController.showDialogue(resp['message'], type: "error");
         }
       }, onError: (err) {
@@ -1107,6 +1142,8 @@ class BookSeatController extends GetxController {
               taxType,
               taxAmount,
               messageDriverTextEditingController.text,
+              fromStopId,
+              toStopId,
               gPay)
           .then((resp) async {
         errorList.clear();

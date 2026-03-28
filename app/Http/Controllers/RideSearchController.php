@@ -371,6 +371,8 @@ class RideSearchController extends Controller
                         RecentSearch::create([
                             'from' => $originLabel,
                             'to' => $destinationLabel,
+                            'from_city_id' => $originCityId,
+                            'to_city_id' => $destinationCityId,
                             'user_id' => $user->id,
                             'page_type' => $page_type,
                         ]);
@@ -380,48 +382,52 @@ class RideSearchController extends Controller
         }
         foreach ($rides as $ride) {
 
-            $stopsSource = $ride->stops ?? $ride->rideStops ?? null;
-            $orderedStops = $stopsSource
-                ? $stopsSource->sortBy('stop_order')->values()->all()
-                : [];
+            $ride = $this->getRideDetail($ride, $originLabel, $destinationLabel, $originCityId, $destinationCityId);
 
-            if ($hasLocationSearch) {
-                [$matchedFromIndex, $matchedToIndex] = $this->findMatchingSegmentIndices(
-                    $orderedStops,
-                    $originCityId,
-                    $destinationCityId,
-                    (string) $originLabel,
-                    (string) $destinationLabel
-                );
-            } else {
-                $matchedFromIndex = count($orderedStops) >= 2 ? 0 : null;
-                $matchedToIndex = count($orderedStops) >= 2 ? count($orderedStops) - 1 : null;
-            }
+            // $stopsSource = $ride->stops ?? $ride->rideStops ?? null;
+            // $orderedStops = $stopsSource
+            //     ? $stopsSource->sortBy('stop_order')->values()->all()
+            //     : [];
 
-            $ride->matched_from_stop_index = $matchedFromIndex;
-            $ride->matched_to_stop_index = $matchedToIndex;
-            $ride->matched_from_stop_id = ($matchedFromIndex !== null && isset($orderedStops[$matchedFromIndex]))
-                ? (int) ($orderedStops[$matchedFromIndex]->id ?? 0)
-                : null;
-            $ride->matched_to_stop_id = ($matchedToIndex !== null && isset($orderedStops[$matchedToIndex]))
-                ? (int) ($orderedStops[$matchedToIndex]->id ?? 0)
-                : null;
-            $ride->matched_segment_price_minor = $this->resolveMatchedSegmentPriceMinor(
-                $ride,
-                $originCityId,
-                $destinationCityId,
-                (string) $originLabel,
-                (string) $destinationLabel,
-                $matchedFromIndex,
-                $matchedToIndex
-            );
+            // if ($hasLocationSearch) {
+            //     [$matchedFromIndex, $matchedToIndex] = $this->findMatchingSegmentIndices(
+            //         $orderedStops,
+            //         $originCityId,
+            //         $destinationCityId,
+            //         (string) $originLabel,
+            //         (string) $destinationLabel
+            //     );
+            // } else {
+            //     $matchedFromIndex = count($orderedStops) >= 2 ? 0 : null;
+            //     $matchedToIndex = count($orderedStops) >= 2 ? count($orderedStops) - 1 : null;
+            // }
 
-            $ride->matched_seats_available = ($ride->matched_from_stop_id && $ride->matched_to_stop_id && method_exists($ride, 'resolveSegmentAvailableSeats'))
-                ? $ride->resolveSegmentAvailableSeats(
-                    (int) $ride->matched_from_stop_id,
-                    (int) $ride->matched_to_stop_id
-                )
-                : (int) ($ride->seats_available ?? $ride->seats ?? 0);
+            // $ride->matched_from_stop_index = $matchedFromIndex;
+            // $ride->matched_to_stop_index = $matchedToIndex;
+            // $ride->matched_from_stop_id = ($matchedFromIndex !== null && isset($orderedStops[$matchedFromIndex]))
+            //     ? (int) ($orderedStops[$matchedFromIndex]->id ?? 0)
+            //     : null;
+            // $ride->matched_to_stop_id = ($matchedToIndex !== null && isset($orderedStops[$matchedToIndex]))
+            //     ? (int) ($orderedStops[$matchedToIndex]->id ?? 0)
+            //     : null;
+            // $ride->matched_segment_price_minor = $this->resolveMatchedSegmentPriceMinor(
+            //     $ride,
+            //     $originCityId,
+            //     $destinationCityId,
+            //     (string) $originLabel,
+            //     (string) $destinationLabel,
+            //     $matchedFromIndex,
+            //     $matchedToIndex
+            // );
+
+            // $ride->matched_seats_available = ($ride->matched_from_stop_id && $ride->matched_to_stop_id && method_exists($ride, 'resolveSegmentAvailableSeats'))
+            //     ? $ride->resolveSegmentAvailableSeats(
+            //         (int) $ride->matched_from_stop_id,
+            //         (int) $ride->matched_to_stop_id
+            //     )
+            //     : (int) ($ride->seats_available ?? $ride->seats ?? 0);
+
+            
         }
 
         $recentSearches = collect();
@@ -502,30 +508,7 @@ class RideSearchController extends Controller
             ->get();
     }
 
-    protected function getPxSearchFilters(Request $request): array
-    {
-        $filters = [
-            'driver_age' => $request->input('driver_age'),
-            'driver_rating' => $request->input('driver_rating'),
-            'driver_phone' => $request->boolean('driver_phone') ? 1 : null,
-            'driver_name' => trim((string) $request->input('driver_name')),
-            'booking_method' => $request->input('booking_method'),
-            'vehicle_type' => trim((string) $request->input('vehicle_type')),
-            'luggage_size' => $request->input('luggage_size'),
-            'smoking_allowed' => $request->input('smoking_allowed'),
-            'pets_allowed' => $request->input('pets_allowed'),
-            'women_only' => $request->boolean('women_only') ? 1 : null,
-            'extra_care' => $request->boolean('extra_care') ? 1 : null,
-            'hide_full_rides' => $request->boolean('hide_full_rides') ? 1 : null,
-            'ride_option_ids' => array_values(array_filter(array_map('intval', (array) $request->input('ride_option_ids', [])))),
-        ];
 
-        return collect($filters)
-            ->map(function ($value) {
-                return $value === '0' ? null : $value;
-            })
-            ->all();
-    }
 
     protected function redirectPxMyRidesError(string $message)
     {
@@ -548,189 +531,8 @@ class RideSearchController extends Controller
             ->with('error', $message);
     }
 
-    protected function resolveRecentSearchCityId(?string $label): ?int
-    {
-        $label = trim((string) $label);
-        if ($label === '') {
-            return null;
-        }
 
-        $parts = array_values(array_filter(array_map('trim', explode(',', $label)), fn($part) => $part !== ''));
-        $cityName = $parts[0] ?? '';
-        $stateAbbreviation = $parts[1] ?? null;
-        $countryName = $parts[2] ?? null;
 
-        if ($cityName === '') {
-            return null;
-        }
 
-        $query = City::query()->where('status', '1')->where('name', $cityName);
-
-        if ($stateAbbreviation) {
-            $query->whereHas('state', function ($stateQuery) use ($stateAbbreviation) {
-                $stateQuery->where('abrv', $stateAbbreviation);
-            });
-        }
-
-        if ($countryName) {
-            $query->whereHas('state.country', function ($countryQuery) use ($countryName) {
-                $countryQuery->where('name', $countryName);
-            });
-        }
-
-        $city = $query->first();
-
-        if (!$city) {
-            $city = City::query()
-                ->where('status', '1')
-                ->where('name', $cityName)
-                ->first();
-        }
-
-        return $city ? (int) $city->id : null;
-    }
-
-    protected function getTemporarilyBlockedDriverIds(int $userId): array
-    {
-        return Booking::query()
-            ->join('rides', 'rides.id', '=', 'bookings.ride_id')
-            ->where('bookings.user_id', $userId)
-            ->where('bookings.removed_permanently', 1)
-            ->where('bookings.block_date_time', '>', now())
-            ->whereNotNull('rides.added_by')
-            ->distinct()
-            ->orderBy('rides.added_by')
-            ->pluck('rides.added_by')
-            ->map(static fn($driverId) => (int) $driverId)
-            ->all();
-    }
-
-    protected function resolveMatchedSegmentPriceMinor($ride, $fromCityId, $toCityId, string $fromLabel, string $toLabel, $fromIndex = null, $toIndex = null): int
-    {
-        $stopsSource = $ride->stops ?? $ride->rideStops ?? null;
-        $stops = $stopsSource
-            ? $stopsSource->sortBy('stop_order')->values()->all()
-            : [];
-
-        if (count($stops) < 2) {
-            return (int) ($ride->price_minor ?? 0);
-        }
-
-        if ($fromIndex === null || $toIndex === null) {
-            [$fromIndex, $toIndex] = $this->findMatchingSegmentIndices($stops, $fromCityId, $toCityId, $fromLabel, $toLabel);
-        }
-
-        if ($fromIndex === null || $toIndex === null || $fromIndex >= $toIndex) {
-            return (int) ($ride->price_minor ?? 0);
-        }
-
-        if (method_exists($ride, 'resolveConfiguredSegmentPriceMinor')) {
-            $configuredSegmentPriceMinor = $ride->resolveConfiguredSegmentPriceMinor((int) $fromIndex, (int) $toIndex);
-            if ($configuredSegmentPriceMinor !== null) {
-                return $configuredSegmentPriceMinor;
-            }
-        }
-
-        $fromStopId = (int) ($stops[$fromIndex]->id ?? 0);
-        $toStopId = (int) ($stops[$toIndex]->id ?? 0);
-        $storedSegment = collect($ride->rideStopSegments ?? [])->first(function ($segment) use ($fromStopId, $toStopId) {
-            return (int) ($segment->from_stop_id ?? 0) === $fromStopId
-                && (int) ($segment->to_stop_id ?? 0) === $toStopId;
-        });
-
-        if ($storedSegment) {
-            return (int) ($storedSegment->price_minor ?? 0);
-        }
-
-        $lastIndex = count($stops) - 1;
-        $totalPriceMinor = (int) ($ride->price_minor ?? 0);
-        $intermediateLegsSum = 0;
-
-        foreach ($stops as $idx => $stop) {
-            if ($idx === 0 || $idx === $lastIndex) {
-                continue;
-            }
-            $intermediateLegsSum += (int) ($stop->price_delta_minor ?? 0);
-        }
-
-        $storedFinalLegPrice = (int) ($stops[$lastIndex]->price_delta_minor ?? 0);
-        $finalLegPrice = $storedFinalLegPrice > 0
-            ? $storedFinalLegPrice
-            : max(0, $totalPriceMinor - $intermediateLegsSum);
-        $segmentPriceMinor = 0;
-
-        for ($i = $fromIndex; $i < $toIndex; $i++) {
-            $destIdx = $i + 1;
-            $segmentPriceMinor += ($destIdx === $lastIndex)
-                ? $finalLegPrice
-                : (int) ($stops[$destIdx]->price_delta_minor ?? 0);
-        }
-
-        return max(0, $segmentPriceMinor);
-    }
-
-    protected function findMatchingSegmentIndices(array $stops, $fromCityId, $toCityId, string $fromLabel, string $toLabel): array
-    {
-        [$fromIndex, $toIndex] = $this->findMatchingStopPair($stops, $fromCityId, $toCityId, $fromLabel, $toLabel);
-
-        if ($fromIndex !== null && $toIndex !== null) {
-            return [$fromIndex, $toIndex];
-        }
-
-        $lastIndex = count($stops) - 1;
-        if ($lastIndex < 1) {
-            return [null, null];
-        }
-
-        if ($fromIndex === null && (!empty($fromCityId) || trim($fromLabel) !== '')) {
-            foreach ($stops as $idx => $stop) {
-                if ($this->stopMatches($stop, $fromCityId, $fromLabel) && $idx < $lastIndex) {
-                    return [$idx, $lastIndex];
-                }
-            }
-        }
-
-        if ($toIndex === null && (!empty($toCityId) || trim($toLabel) !== '')) {
-            foreach ($stops as $idx => $stop) {
-                if ($this->stopMatches($stop, $toCityId, $toLabel) && $idx > 0) {
-                    return [0, $idx];
-                }
-            }
-        }
-
-        return [null, null];
-    }
-
-    protected function findMatchingStopPair(array $stops, $fromCityId, $toCityId, string $fromLabel, string $toLabel): array
-    {
-        $fromIndex = null;
-        $toIndex = null;
-
-        foreach ($stops as $idx => $stop) {
-            if ($fromIndex === null && $this->stopMatches($stop, $fromCityId, $fromLabel)) {
-                $fromIndex = $idx;
-            }
-
-            if ($fromIndex !== null && $idx > $fromIndex && $this->stopMatches($stop, $toCityId, $toLabel)) {
-                $toIndex = $idx;
-                break;
-            }
-        }
-
-        return [$fromIndex, $toIndex];
-    }
-
-    protected function stopMatches($stop, $cityId, string $label): bool
-    {
-        if (!empty($cityId) && (int) ($stop->city_id ?? 0) === (int) $cityId) {
-            return true;
-        }
-
-        $label = trim($label);
-        if ($label === '') {
-            return false;
-        }
-
-        return stripos((string) ($stop->label ?? ''), $label) !== false;
-    }
+    
 }

@@ -51,7 +51,199 @@ class RideController extends WebRideController
 
     public function SearchRide(Request $request)
     {
+
+        $per_page = 6;
+        $user = Auth::guard('sanctum')->user();
+        $excludedDriverIds = $user ? $this->getTemporarilyBlockedDriverIds($user->id) : [];
+
+
+        $searchFilters = $this->getPxSearchFilters($request);
+
+
+        $keyword = trim((string) $request->input('keyword'));
+        $hasActiveFilters = collect($searchFilters)->contains(function ($value) {
+            return $value !== null && $value !== '' && $value !== false;
+        });
+
+        // Check if there are search parameters
+        $originLabel = trim((string) $request->input('from'));
+        $destinationLabel = trim((string) $request->input('to'));
+        $originCityId = $request->input('from_city_id');
+        $destinationCityId = $request->input('to_city_id');
+        $departureDate = $request->input('date');
+        $hasOriginSearch = $originLabel !== '' || !empty($originCityId);
+        $hasDestinationSearch = $destinationLabel !== '' || !empty($destinationCityId);
+        $hasLocationSearch = $hasOriginSearch || $hasDestinationSearch;
+        $hasKeywordSearch = $keyword !== '';
+        $hasPrimarySearch = $hasLocationSearch || $hasKeywordSearch;
+        $shouldRunFilteredSearch = $hasPrimarySearch || $hasActiveFilters;
+
+        $filters = array_merge($searchFilters, [
+            'keyword' => $keyword,
+            'per_page' => $per_page,
+            'sort' => true ? 'soonest' : 'latest_added',
+            'excluded_driver_ids' => $excludedDriverIds,
+            'require_vehicle' => true,
+            'exclude_admin_deactive' => true,
+        ]);
+
+        if ($hasOriginSearch) {
+            $filters['origin_city_id'] = $originCityId;
+            $filters['origin_label'] = $originLabel;
+        }
+
+        if ($hasDestinationSearch) {
+            $filters['destination_city_id'] = $destinationCityId;
+            $filters['destination_label'] = $destinationLabel;
+        }
+
+        if (!empty($departureDate)) {
+            $filters['departure_date'] = $departureDate;
+        }
+
+        $rides = Ride::searchRides(
+            $shouldRunFilteredSearch ? $filters : array_diff_key($filters, array_flip([
+                'origin_city_id',
+                'origin_label',
+                'destination_city_id',
+                'destination_label',
+                'departure_date',
+            ])),
+            $user
+        );
+
+
+        if ($shouldRunFilteredSearch) {
+
+            if ($user && $hasPrimarySearch) {
+                if ($user->suspand === '1') {
+                    return redirect()
+                        ->route('home', ['lang' => optional($this->selectedLanguage)->abbreviation])
+                        ->with(['message' => 'Your account has been suspended by the admin']);
+                }
+
+                if ($keyword === '') {
+                    $existingSearch = RecentSearch::query()
+                        ->where('user_id', $user->id)
+                        ->where('from', 'like', '%' . $originLabel . '%')
+                        ->where('to', 'like', '%' . $destinationLabel . '%')
+                        ->first();
+
+                    if ($existingSearch) {
+                        $existingSearch->touch();
+                    } else {
+                        \Log::info('$originCityId', [$originCityId]);
+                        RecentSearch::create([
+                            'from' => $originLabel,
+                            'to' => $destinationLabel,
+                            'from_city_id' => $originCityId,
+                            'to_city_id' => $destinationCityId,
+                            'user_id' => $user->id,
+                        ]);
+                    }
+                }
+            }
+        }
+
+        foreach ($rides as $ride) {
+            $ride = $this->getRideDetail($ride, $originLabel, $destinationLabel, $originCityId, $destinationCityId, $hasLocationSearch);
+        }
+
+        $recentSearches = RecentSearch::query()
+            ->where('user_id', $user->id)
+            ->where('from', '!=', '')
+            ->where('to', '!=', '')
+            ->orderByDesc('updated_at')
+            ->limit(3)
+            ->get()
+            ->values();
+
+        $rideFeatureOptionGroups = $this->getRideFeatureOptionGroups($this->selectedLanguage?->id, $this->defaultLang?->id);
+        $bookingMethodAssets = $this->buildRideFeatureAssetMaps($rideFeatureOptionGroups, 'booking_method');
+        $paymentMethodAssets = $this->buildRideFeatureAssetMaps($rideFeatureOptionGroups, 'payment_method');
+        $smokingAssets = $this->buildRideFeatureAssetMaps($rideFeatureOptionGroups, 'smoking_allowed');
+        $petsAssets = $this->buildRideFeatureAssetMaps($rideFeatureOptionGroups, 'pets_allowed');
+        $luggageAssets = $this->buildRideFeatureAssetMaps($rideFeatureOptionGroups, 'luggage_size');
+
+        $bookingMethodImages = $bookingMethodAssets['images'];
+        $bookingMethodTooltips = $bookingMethodAssets['tooltips'];
+        $paymentMethodImages = $paymentMethodAssets['images'];
+        $paymentMethodTooltips = $paymentMethodAssets['tooltips'];
+        $smokeImages = $smokingAssets['images'];
+        $smokeTooltips = $smokingAssets['tooltips'];
+        $petsImages = $petsAssets['images'];
+        $petsTooltips = $petsAssets['tooltips'];
+        $luggageImages = $luggageAssets['images'];
+        $luggageTooltips = $luggageAssets['tooltips'];
+        $bookingMethodNames = $this->buildRideFeatureNameMap($rideFeatureOptionGroups, 'booking_method');
+        $paymentMethodNames = $this->buildRideFeatureNameMap($rideFeatureOptionGroups, 'payment_method');
+        $smokingNames = $this->buildRideFeatureNameMap($rideFeatureOptionGroups, 'smoking_allowed');
+        $petsNames = $this->buildRideFeatureNameMap($rideFeatureOptionGroups, 'pets_allowed');
+        $luggageNames = $this->buildRideFeatureNameMap($rideFeatureOptionGroups, 'luggage_size');
+        $bookingTypeNames = $this->buildRideFeatureNameMap($rideFeatureOptionGroups, 'cancellation');
+        $featureResponseMap = $this->buildRideFeatureResponseMap($rideFeatureOptionGroups, 'features');
+
+        // Add the image URL to each ride
+        foreach ($rides as $ride) {
+            $ride->booking_method_id = $ride->booking_method;
+            $ride->feature_ids = $ride->features;
+
+            $ride->booking_method_image = $bookingMethodImages[$ride->booking_method] ?? null;
+            $ride->booking_method_tooltip = $bookingMethodTooltips[$ride->booking_method] ?? null;
+            $ride->booking_method = $bookingMethodNames[$ride->booking_method] ?? null;
+            $ride->booking_type = $bookingTypeNames[$ride->booking_type] ?? null;
+            $ride->payment_method_image = $paymentMethodImages[$ride->payment_method] ?? null;
+            $ride->payment_method_tooltip = $paymentMethodTooltips[$ride->payment_method] ?? null;
+            $ride->payment_method = $paymentMethodNames[$ride->payment_method] ?? null;
+            $ride->smoke_image = $smokeImages[$ride->smoke] ?? null;
+            $ride->smoke_tooltip = $smokeTooltips[$ride->smoke] ?? null;
+            $ride->smoke = $smokingNames[$ride->smoke] ?? null;
+            $ride->animal_friendly_image = $petsImages[$ride->animal_friendly] ?? null;
+            $ride->animal_friendly_tooltip = $petsTooltips[$ride->animal_friendly] ?? null;
+            $ride->animal_friendly = $petsNames[$ride->animal_friendly] ?? null;
+            $ride->luggage_image = $luggageImages[$ride->luggage] ?? null;
+            $ride->luggage_tooltip = $luggageTooltips[$ride->luggage] ?? null;
+            $ride->luggage = $luggageNames[$ride->luggage] ?? null;
+
+            // Initialize a temporary array for the features
+            $features = [];
+
+            // Check if the features are a string, then explode it into an array
+            $rideFeatures = is_string($ride->features) ? explode('=', $ride->features) : $ride->features;
+
+            // Loop through each feature and add the corresponding image and title
+            foreach ($rideFeatures as $feature) {
+                if (isset($featureResponseMap[$feature])) {
+                    $features[] = $featureResponseMap[$feature];
+                }
+            }
+
+            // Assign the features array to the ride's features attribute
+            $ride->features = $features;
+
+            $bookedSeats = $ride->bookings()
+                ->where('status', '<>', 3)
+                ->where('status', '<>', 4)
+                ->withActivePassenger()
+                ->sum('seats');
+            $ride->seats_left = intval($ride->seats) - intval($bookedSeats);
+
+            $ride->driver_age = $ride->driver->getAge();
+            $ride->driven_count = $ride->driver->getPassengersDrivenCount();
+            $ride->gender_image = $ride->driver->getProfileImageAttribute();
+            $ride->driver_average_rating = $ride->driver->driverPostRideStats()['overallRating'];
+        }
+
+        $data = ['rides' => $rides, 'recentSearches' => $recentSearches];
+        return $this->successResponse($data, 'Success');
+    }
+
+
+    public function SearchRide1(Request $request)
+    {
         $rides = collect();
+
+        \Log::info('search ride', collect($request->all())->toArray());
 
         $user = Auth::guard('sanctum')->user();
 
@@ -212,7 +404,7 @@ class RideController extends WebRideController
 
         $recentSearches = RecentSearch::where('user_id', $user->id)->orderBy('updated_at', 'desc')->limit(2)->get();
 
-
+        \Log::info('recentSearches', $rides->toArray());
         $data = ['rides' => $rides, 'recentSearches' => $recentSearches];
         return $this->successResponse($data, 'Success');
     }
@@ -562,242 +754,99 @@ class RideController extends WebRideController
             ->all();
     }
 
-    protected function resolveMatchedSegmentPriceMinor($ride, $fromCityId, $toCityId, string $fromLabel, string $toLabel, $fromIndex = null, $toIndex = null): int
-    {
-        $stopsSource = $ride->stops ?? $ride->rideStops ?? null;
-        $stops = $stopsSource
-            ? $stopsSource->sortBy('stop_order')->values()->all()
-            : [];
 
-        if (count($stops) < 2) {
-            return (int) ($ride->price_minor ?? 0);
-        }
 
-        if ($fromIndex === null || $toIndex === null) {
-            [$fromIndex, $toIndex] = $this->findMatchingSegmentIndices($stops, $fromCityId, $toCityId, $fromLabel, $toLabel);
-        }
+    // protected function applyAppRequestedRideSegmentContext(Ride $ride, Request $request): Ride
+    // {
+    //     $fromLabel = trim((string) $request->input('from'));
+    //     $toLabel = trim((string) $request->input('to'));
+    //     $fromCityId = (int) $request->input('from_city_id', 0);
+    //     $toCityId = (int) $request->input('to_city_id', 0);
 
-        if ($fromIndex === null || $toIndex === null || $fromIndex >= $toIndex) {
-            return (int) ($ride->price_minor ?? 0);
-        }
+    //     $ride->fromCityId = $fromCityId > 0 ? $fromCityId : null;
+    //     $ride->toCityId = $toCityId > 0 ? $toCityId : null;
 
-        if (method_exists($ride, 'resolveConfiguredSegmentPriceMinor')) {
-            $configuredSegmentPriceMinor = $ride->resolveConfiguredSegmentPriceMinor((int) $fromIndex, (int) $toIndex);
-            if ($configuredSegmentPriceMinor !== null) {
-                return $configuredSegmentPriceMinor;
-            }
-        }
+    //     if ($fromLabel === '' && $toLabel === '' && $fromCityId === 0 && $toCityId === 0) {
+    //         return $ride;
+    //     }
 
-        $fromStopId = (int) ($stops[$fromIndex]->id ?? 0);
-        $toStopId = (int) ($stops[$toIndex]->id ?? 0);
-        $storedSegment = collect($ride->rideStopSegments ?? [])->first(function ($segment) use ($fromStopId, $toStopId) {
-            return (int) ($segment->from_stop_id ?? 0) === $fromStopId
-                && (int) ($segment->to_stop_id ?? 0) === $toStopId;
-        });
+    //     $detailSource = $ride->detail
+    //         ? collect([$ride->detail])
+    //         : collect($ride->rideDetail ?? []);
 
-        if ($storedSegment) {
-            return (int) ($storedSegment->price_minor ?? 0);
-        }
+    //     $matchedDetails = $detailSource->filter(function ($detail) use ($fromLabel, $toLabel, $fromCityId, $toCityId) {
+    //         $matchesFrom = $fromCityId > 0
+    //             ? (int) ($detail->origin_city_id ?? 0) === $fromCityId
+    //             : ($fromLabel === '' || stripos((string) ($detail->departure ?? ''), $fromLabel) !== false);
+    //         $matchesTo = $toCityId > 0
+    //             ? (int) ($detail->destination_city_id ?? 0) === $toCityId
+    //             : ($toLabel === '' || stripos((string) ($detail->destination ?? ''), $toLabel) !== false);
 
-        $lastIndex = count($stops) - 1;
-        $totalPriceMinor = (int) ($ride->price_minor ?? 0);
-        $intermediateLegsSum = 0;
+    //         return $matchesFrom && $matchesTo;
+    //     })->values();
 
-        foreach ($stops as $idx => $stop) {
-            if ($idx === 0 || $idx === $lastIndex) {
-                continue;
-            }
-            $intermediateLegsSum += (int) ($stop->price_delta_minor ?? 0);
-        }
+    //     if ($matchedDetails->isEmpty()) {
+    //         $matchedPriceMinor = $this->resolveMatchedSegmentPriceMinor($ride, $fromCityId, $toCityId, $fromLabel, $toLabel);
+    //         $baseDetail = $detailSource->first();
 
-        $storedFinalLegPrice = (int) ($stops[$lastIndex]->price_delta_minor ?? 0);
-        $finalLegPrice = $storedFinalLegPrice > 0
-            ? $storedFinalLegPrice
-            : max(0, $totalPriceMinor - $intermediateLegsSum);
-        $segmentPriceMinor = 0;
+    //         if ($baseDetail instanceof RideDetail) {
+    //             $matchedDetail = $baseDetail->replicate();
+    //         } elseif (is_object($baseDetail)) {
+    //             $matchedDetail = clone $baseDetail;
+    //         } else {
+    //             $matchedDetail = new RideDetail(is_array($baseDetail) ? $baseDetail : []);
+    //         }
 
-        for ($i = $fromIndex; $i < $toIndex; $i++) {
-            $destIdx = $i + 1;
-            $segmentPriceMinor += ($destIdx === $lastIndex)
-                ? $finalLegPrice
-                : (int) ($stops[$destIdx]->price_delta_minor ?? 0);
-        }
+    //         if ($fromLabel !== '') {
+    //             $matchedDetail->departure = $fromLabel;
+    //         }
+    //         if ($toLabel !== '') {
+    //             $matchedDetail->destination = $toLabel;
+    //         }
+    //         if ($fromCityId > 0) {
+    //             $matchedDetail->origin_city_id = $fromCityId;
+    //         }
+    //         if ($toCityId > 0) {
+    //             $matchedDetail->destination_city_id = $toCityId;
+    //         }
+    //         if ($matchedPriceMinor > 0) {
+    //             $matchedDetail->price = number_format($matchedPriceMinor / 100, 2, '.', '');
+    //             $ride->price_minor = $matchedPriceMinor;
+    //         }
 
-        return max(0, $segmentPriceMinor);
-    }
+    //         $matchedDetails = collect([$matchedDetail]);
+    //     }
 
-    protected function findMatchingSegmentIndices(array $stops, $fromCityId, $toCityId, string $fromLabel, string $toLabel): array
-    {
-        [$fromIndex, $toIndex] = $this->findMatchingStopPair($stops, $fromCityId, $toCityId, $fromLabel, $toLabel);
+    //     if ($matchedDetails->isNotEmpty()) {
+    //         $ride->setRelation('detail', $matchedDetails->first());
+    //         $ride->setRelation('rideDetail', $matchedDetails);
+    //     }
 
-        if ($fromIndex !== null && $toIndex !== null) {
-            return [$fromIndex, $toIndex];
-        }
-
-        $lastIndex = count($stops) - 1;
-        if ($lastIndex < 1) {
-            return [null, null];
-        }
-
-        if ($fromIndex === null && (!empty($fromCityId) || trim($fromLabel) !== '')) {
-            foreach ($stops as $idx => $stop) {
-                if ($this->stopMatches($stop, $fromCityId, $fromLabel) && $idx < $lastIndex) {
-                    return [$idx, $lastIndex];
-                }
-            }
-        }
-
-        if ($toIndex === null && (!empty($toCityId) || trim($toLabel) !== '')) {
-            foreach ($stops as $idx => $stop) {
-                if ($this->stopMatches($stop, $toCityId, $toLabel) && $idx > 0) {
-                    return [0, $idx];
-                }
-            }
-        }
-
-        return [null, null];
-    }
-
-    protected function findMatchingStopPair(array $stops, $fromCityId, $toCityId, string $fromLabel, string $toLabel): array
-    {
-        $fromIndex = null;
-        $toIndex = null;
-
-        foreach ($stops as $idx => $stop) {
-            if ($fromIndex === null && $this->stopMatches($stop, $fromCityId, $fromLabel)) {
-                $fromIndex = $idx;
-            }
-
-            if ($fromIndex !== null && $idx > $fromIndex && $this->stopMatches($stop, $toCityId, $toLabel)) {
-                $toIndex = $idx;
-                break;
-            }
-        }
-
-        return [$fromIndex, $toIndex];
-    }
-
-    protected function stopMatches($stop, $cityId, string $label): bool
-    {
-        if (!empty($cityId) && (int) ($stop->city_id ?? 0) === (int) $cityId) {
-            return true;
-        }
-
-        $label = trim($label);
-        if ($label === '') {
-            return false;
-        }
-
-        return stripos((string) ($stop->label ?? ''), $label) !== false;
-    }
-
-    protected function applyAppRequestedRideSegmentContext(Ride $ride, Request $request): Ride
-    {
-        $fromLabel = trim((string) $request->input('from'));
-        $toLabel = trim((string) $request->input('to'));
-        $fromCityId = (int) $request->input('from_city_id', 0);
-        $toCityId = (int) $request->input('to_city_id', 0);
-
-        $ride->fromCityId = $fromCityId > 0 ? $fromCityId : null;
-        $ride->toCityId = $toCityId > 0 ? $toCityId : null;
-
-        if ($fromLabel === '' && $toLabel === '' && $fromCityId === 0 && $toCityId === 0) {
-            return $ride;
-        }
-
-        $detailSource = $ride->detail
-            ? collect([$ride->detail])
-            : collect($ride->rideDetail ?? []);
-
-        $matchedDetails = $detailSource->filter(function ($detail) use ($fromLabel, $toLabel, $fromCityId, $toCityId) {
-            $matchesFrom = $fromCityId > 0
-                ? (int) ($detail->origin_city_id ?? 0) === $fromCityId
-                : ($fromLabel === '' || stripos((string) ($detail->departure ?? ''), $fromLabel) !== false);
-            $matchesTo = $toCityId > 0
-                ? (int) ($detail->destination_city_id ?? 0) === $toCityId
-                : ($toLabel === '' || stripos((string) ($detail->destination ?? ''), $toLabel) !== false);
-
-            return $matchesFrom && $matchesTo;
-        })->values();
-
-        if ($matchedDetails->isEmpty()) {
-            $matchedPriceMinor = $this->resolveMatchedSegmentPriceMinor($ride, $fromCityId, $toCityId, $fromLabel, $toLabel);
-            $baseDetail = $detailSource->first();
-
-            if ($baseDetail instanceof RideDetail) {
-                $matchedDetail = $baseDetail->replicate();
-            } elseif (is_object($baseDetail)) {
-                $matchedDetail = clone $baseDetail;
-            } else {
-                $matchedDetail = new RideDetail(is_array($baseDetail) ? $baseDetail : []);
-            }
-
-            if ($fromLabel !== '') {
-                $matchedDetail->departure = $fromLabel;
-            }
-            if ($toLabel !== '') {
-                $matchedDetail->destination = $toLabel;
-            }
-            if ($fromCityId > 0) {
-                $matchedDetail->origin_city_id = $fromCityId;
-            }
-            if ($toCityId > 0) {
-                $matchedDetail->destination_city_id = $toCityId;
-            }
-            if ($matchedPriceMinor > 0) {
-                $matchedDetail->price = number_format($matchedPriceMinor / 100, 2, '.', '');
-                $ride->price_minor = $matchedPriceMinor;
-            }
-
-            $matchedDetails = collect([$matchedDetail]);
-        }
-
-        if ($matchedDetails->isNotEmpty()) {
-            $ride->setRelation('detail', $matchedDetails->first());
-            $ride->setRelation('rideDetail', $matchedDetails);
-        }
-
-        return $ride;
-    }
+    //     return $ride;
+    // }
 
     public function _RideDetail(Request $request)
     {
-        $rideDetailId = isset($request->ride_detail_id) ? $request->ride_detail_id : 0;
         $ride = Ride::where('id', $request->id);
+        $rideId = $request->input('id', 0);
+        $from_stop_id = $request->input('from_stop_id', 0);
+        $to_stop_id = $request->input('to_stop_id', 0);
+ \Log::info('search ride', $request->all());
 
-        if ($rideDetailId == 0) {
-            $ride = $ride->with(['rideDetail' => function ($q) {
-                $q->where('default_ride', '1');
-            }]);
-        } else {
-            $ride = $ride->with(['rideDetail' => function ($q) use ($rideDetailId) {
-                $q->where('id', $rideDetailId);
-            }]);
-        }
+        $ride = Ride::where('id', $rideId)
+            ->with([
+                'rideDetail',
+                'rideStops' => function ($q) {
+                    $q->orderBy('stop_order');
+                },
+                'rideStopSegments',
+                'vehicle',
+            ])
+            ->first();
 
-        // $ride = $ride->with(['MoreRideDetail']);
+        $ride = $this->makeDetailOfRide($ride, $from_stop_id, $to_stop_id);
 
-        $ride = $ride->with(['driver' => function ($query) {
-            $query->select('id', 'first_name', 'last_name', 'gender', 'profile_image', 'dob'); // Specify the columns you want to select
-            $query->withTrashed(); // Include soft-deleted users
-        }])
-            ->with('vehicle')
-            ->with(['bookings' => function ($query) {
-                // Select specific columns from bookings
-                $query->select('id', 'ride_id', 'seats', 'user_id', 'booking_credit', 'status', 'secured_cash', 'secured_cash_code', 'fare', 'secured_cash_attempt_count', 'tax_amount', 'ride_detail_id', 'departure', 'destination', 'price')
-                    ->where('status', '<>', 0)
-                    ->where('status', '<>', 3)
-                    ->where('status', '<>', 4)
-                    ->withActivePassenger()
-                    ->with(['passenger' => function ($query) {
-                        // Select specific columns from passenger
-                        $query->select('id', 'first_name', 'last_name', 'gender', 'profile_image', 'dob');
-                    }]);
-            }])->first();
-
-        if ($ride) {
-            $ride = $this->applyAppRequestedRideSegmentContext($ride, $request);
-        }
+ \Log::info('search ride', $ride->toArray());
 
         $selectedLanguage = $this->resolveApiLanguage($request->lang_id);
         $findRidePage = $this->getApiFindRidePage($selectedLanguage);
@@ -839,11 +888,11 @@ class RideController extends WebRideController
         $bookingTypeOptions = $this->buildRideFeatureOptionMap($rideFeatureOptionGroups, 'cancellation');
 
         if ($ride) {
-            $primaryDetail = $ride->detail ?: collect($ride->rideDetail ?? [])->first();
-            $displayPrice = $ride->price_minor
-                ?? (int) round(((float) ($primaryDetail->price ?? 0)) / 100);
+            // $primaryDetail = $ride->detail ?: collect($ride->rideDetail ?? [])->first();
+            // $displayPrice = $ride->price_minor
+            //     ?? (int) round(((float) ($primaryDetail->price ?? 0)) / 100);
 
-            $ride->detail->price = $displayPrice;
+            // $ride->detail->price = $displayPrice;
 
             // Calculate seats left
             $bookedSeats = $ride->bookings()
@@ -1860,7 +1909,7 @@ class RideController extends WebRideController
 
     public function findRideIndex(Request $request)
     {
-            
+
         $messages = $this->getApiSuccessMessageFields([
             'female_user_message',
             'star5_passenger_message',

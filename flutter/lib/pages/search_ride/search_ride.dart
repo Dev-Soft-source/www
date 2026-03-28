@@ -295,51 +295,77 @@ class SearchRidePage extends GetView<SearchRideController> {
                               }),
                         ),
                         20.heightBox,
-                        SizedBox(
+                        Container(
                           width: context.screenWidth,
-                          child: elevatedButtonWidget(
-                            textWidget: txt22Size(
-                                title:
-                                    "${controller.labelTextDetail['search_section_recent_searches'] ?? "Recent searches (${controller.recentSearchList.length > 2 ? 2 : controller.recentSearchList.length})"}",
-                                textColor: Colors.white,
-                                context: context,
-                                fontFamily: regular),
-                            context: context,
-                            onPressed: () {},
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0x14000000),
+                                blurRadius: 8,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
                           ),
-                        ),
-                        10.heightBox,
-                        ListView.separated(
-                            itemCount: controller.recentSearchList.length > 2
-                                ? 2
-                                : controller.recentSearchList.length,
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemBuilder: (context, index) {
-                              return postRideAgainCardWidget(
-                                  context: context,
-                                  screenWidth: context.screenWidth,
-                                  fromText: controller.recentSearchList[index]
-                                      ['from'],
-                                  toText: controller.recentSearchList[index]
-                                      ['to'],
-                                  depatureAt: "",
-                                  onTap: () async {
-                                    controller.applyRecentSearch(
-                                        controller.recentSearchList[index]);
-                                    await controller.getSearchRide(1);
-                                  },
-                                  cardBgColor: index % 2 == 0
-                                      ? Colors.white
-                                      : Colors.grey.shade200,
-                                  fromLabel:
-                                      "${controller.labelTextDetail['card_section_from_label'] ?? "From"}",
-                                  toLabel:
-                                      "${controller.labelTextDetail['card_section_to_label'] ?? "To"}");
-                            },
-                            separatorBuilder: (context, index) {
-                              return const SizedBox();
-                            })
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: context.screenWidth,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 14, vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: primaryColor,
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(10),
+                                    topRight: Radius.circular(10),
+                                  ),
+                                ),
+                                child: txt22Size(
+                                    title:
+                                        "${controller.labelTextDetail['search_section_recent_searches'] ?? "Recent searches (${controller.recentSearchList.length > 2 ? 2 : controller.recentSearchList.length})"}",
+                                    textColor: Colors.white,
+                                    context: context,
+                                    fontFamily: regular),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: ListView.separated(
+                                    itemCount: controller.recentSearchList.length > 2
+                                        ? 2
+                                        : controller.recentSearchList.length,
+                                    shrinkWrap: true,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    itemBuilder: (context, index) {
+                                      return postRideAgainCardWidget(
+                                          context: context,
+                                          screenWidth: context.screenWidth,
+                                          fromText: controller.recentSearchList[index]
+                                              ['from'],
+                                          toText: controller.recentSearchList[index]
+                                              ['to'],
+                                          depatureAt: "",
+                                          onTap: () async {
+                                            controller.applyRecentSearch(
+                                                controller.recentSearchList[index]);
+                                            await controller.getSearchRide(1);
+                                          },
+                                          cardBgColor: index % 2 == 0
+                                              ? Colors.white
+                                              : Colors.grey.shade200,
+                                          fromLabel:
+                                              "${controller.labelTextDetail['card_section_from_label'] ?? "From"}",
+                                          toLabel:
+                                              "${controller.labelTextDetail['card_section_to_label'] ?? "To"}");
+                                    },
+                                    separatorBuilder: (context, index) {
+                                      return const SizedBox(height: 8);
+                                    }),
+                              ),
+                            ],
+                          ),
+                        )
                       ],
                     ),
                   ),

@@ -494,7 +494,7 @@ class MessagingPage extends StatelessWidget {
                                     onTap: message['redirect'].toString() == "1"
                                         ? () {
                                             Get.toNamed(
-                                              '/trip_detail/${message['ride_id']}/findRide/findRide/${message['ride_detail_id']}',
+                                              '/trip_detail/${message['ride_id']}/findRide/findRide',
                                             );
                                           }
                                         : null,

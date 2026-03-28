@@ -59,9 +59,7 @@ class RideController extends Controller
 
         $ride = Ride::where('id', $id)
             ->with([
-                'rideDetail' => function ($q) {
-                    $q->orderBy('id');
-                },
+                'rideDetail',
                 'rideStops' => function ($q) {
                     $q->orderBy('stop_order');
                 },

@@ -14,6 +14,36 @@ Widget pickupDropoffInfoWidget(
     String pickupLabel = "Pick up",
     String dropOffLabel = "Drop off",
     String descriptionLabel = "Description"}) {
+  Widget infoRow({
+    required String label,
+    required String value,
+    bool showDivider = true,
+  }) {
+    return Container(
+      constraints: const BoxConstraints(minHeight: 54),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        border: showDivider
+            ? Border(
+                bottom: BorderSide(color: Colors.grey.shade300),
+              )
+            : null,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          txt20Size(title: '$label: ', context: context),
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: txt20Size(title: value, context: context),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   return cardShadowWidget(
       context: context,
       widgetChild: Column(
@@ -24,8 +54,8 @@ Widget pickupDropoffInfoWidget(
               padding: EdgeInsets.fromLTRB(
                   getValueForScreenType<double>(
                     context: context,
-                    mobile: 15.0,
-                    tablet: 15.0,
+                    mobile: 10.0,
+                    tablet: 10.0,
                   ),
                   getValueForScreenType<double>(
                     context: context,
@@ -34,8 +64,8 @@ Widget pickupDropoffInfoWidget(
                   ),
                   getValueForScreenType<double>(
                     context: context,
-                    mobile: 15.0,
-                    tablet: 15.0,
+                    mobile: 10.0,
+                    tablet: 10.0,
                   ),
                   getValueForScreenType<double>(
                     context: context,
@@ -48,44 +78,12 @@ Widget pickupDropoffInfoWidget(
                     borderRadius: BorderRadius.all(Radius.circular(10))),
                 child: Column(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          txt20Size(title: '$pickupLabel: ', context: context),
-                          Expanded(
-                              child:
-                                  txt20Size(title: pickup, context: context)),
-                        ],
-                      ),
-                    ),
-                    const Divider(),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          txt20Size(title: '$dropOffLabel: ', context: context),
-                          Expanded(
-                              child:
-                                  txt20Size(title: dropoff, context: context)),
-                        ],
-                      ),
-                    ),
-                    const Divider(),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          txt20Size(
-                              title: '$descriptionLabel: ', context: context),
-                          Expanded(
-                              child: txt20Size(
-                                  title: description, context: context)),
-                        ],
-                      ),
+                    infoRow(label: pickupLabel, value: pickup),
+                    infoRow(label: dropOffLabel, value: dropoff),
+                    infoRow(
+                      label: descriptionLabel,
+                      value: description,
+                      showDivider: false,
                     ),
                   ],
                 ),

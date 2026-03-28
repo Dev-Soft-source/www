@@ -100,7 +100,7 @@ class PreferencesSettingController extends Controller
 
         $orderedFeatures = collect($groups->get('features', collect()))
             ->sortBy('id')
-            ->filter(fn($feature) => $feature->id >= 1 && $feature->id <= 12 || 47)
+            ->filter(fn($feature) => ($feature->id >= 1 && $feature->id <= 12) || $feature->id == 47)
             ->values();
         
         $data['features'] = [

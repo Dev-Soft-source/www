@@ -902,11 +902,28 @@ class Service extends GetxService {
     }
   }
 
+  void syncSelectedLanguage(dynamic selectedLanguage) {
+    if (selectedLanguage == null) return;
+
+    langIcon.value = selectedLanguage['flag_icon']?.toString() ?? "";
+    lang.value = selectedLanguage['abbreviation']?.toString() ?? lang.value;
+    loginUserDetail['langId'] = langId.value.toString();
+  }
+
+  Future<void> persistUserLanguage() async {
+    await secureStorage.write(key: "userInfo", value: jsonEncode(loginUserDetail));
+  }
+
   updateLanguage(lang, page) async {
     if (isLoading.value) return;
     isLoading.value = true;
     try {
       langId.value = lang;
+      final selectedLanguage = languages.firstWhereOrNull(
+        (element) => element['id'] == langId.value,
+      );
+      syncSelectedLanguage(selectedLanguage);
+
       if (token != "") {
         StageProvider().updateLanguageId(token, langId.value).then(
             (resp) async {
@@ -916,9 +933,7 @@ class Service extends GetxService {
             } else if (page == "signup") {
               await Get.offAllNamed('/signup');
             } else {
-              loginUserDetail['langId'] = langId.value.toString();
-              secureStorage.write(
-                  key: "userInfo", value: jsonEncode(loginUserDetail));
+              await persistUserLanguage();
               if (page == "step1") {
                 await Get.offAllNamed('/stage_one');
               } else if (page == "step2") {
@@ -941,9 +956,7 @@ class Service extends GetxService {
         } else if (page == "signup") {
           Get.offAllNamed('/signup');
         } else {
-          loginUserDetail['langId'] = langId.value.toString();
-          secureStorage.write(
-              key: "userInfo", value: jsonEncode(loginUserDetail));
+          await persistUserLanguage();
           if (page == "step1") {
             Get.offAllNamed('/stage_one');
           } else if (page == "step2") {

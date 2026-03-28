@@ -4,7 +4,7 @@
 ])
 
 @php
-    $seatPrice = ($ride->detail->price ?? 0) / 100;
+    $seatPrice = ($ride->price_minor ?? 0) / 100;
 @endphp
 
 <div class="col-span-2">
