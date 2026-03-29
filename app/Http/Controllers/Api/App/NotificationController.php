@@ -8,7 +8,7 @@ use App\Models\FeaturesSettingDetail;
 use App\Models\FindRidePageSettingDetail;
 use App\Models\Language;
 use App\Models\Notification;
-use App\Models\PostRidePageSettingDetail;
+use App\Models\Message;
 use App\Models\Step1PageSettingDetail;
 use App\Models\SuccessMessagesSettingDetail;
 use App\Models\User;
@@ -121,107 +121,119 @@ class NotificationController extends Controller
         $data = ['notifications' => $notifications];
         return $this->successResponse($data, 'Get notifications successfully');
     }
+
+
     public function notifications(Request $request)
     {
         $user = Auth::guard('sanctum')->user();
         $user_id = $user->id;
-        $notifications = Notification::where('is_delete', '0');
-        $bookingType = $request->input('booking_type', '');
-        $paymentMethod = $request->input('payment_method', '');
 
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $notificationsPageSetting = NotificationsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $notificationsPageSetting = NotificationsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        }
 
-        if ($bookingType === "" && $paymentMethod === "") {
-            $notifications->where(function ($query) use ($user_id) {
-                $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
-                    $query->where('added_by', $user_id);
-                })
-                    ->orWhere(function ($query) use ($user_id) {
-                        $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-                    })
-                    ->orWhere(function ($query) use ($user_id) {
-                        $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                            $query->where('id', $user_id);
-                        });
+        $notificationsPageSetting = NotificationsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $chatPageSetting = ChatsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+
+        $notificationRows = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
+            $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
+                $query->where('added_by', $user_id);
+            })
+                ->orWhere(function ($query) use ($user_id) {
+                    $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
+                        $query->where('user_id', $user_id);
                     });
-            });
-        } else {
-            $notifications->where(function ($query) use ($user_id, $bookingType, $paymentMethod) {
-                $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id, $bookingType, $paymentMethod) {
-                    $query->where('added_by', $user_id);
-                    if ($bookingType != "") {
-                        $query->where('booking_method', $bookingType);
-                    }
-                    if ($paymentMethod != "") {
-                        $query->where('payment_method', $paymentMethod);
-                    }
                 })
-                    ->orWhere(function ($query) use ($user_id, $bookingType, $paymentMethod) {
-                        $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id, $bookingType, $paymentMethod) {
-                            $query->where('user_id', $user_id);
-                            if ($bookingType != "") {
-                                $query->whereHas('ride', function ($q) use ($bookingType) {
-                                    $q->where('booking_method', $bookingType);
-                                });
-                            }
-                            if ($paymentMethod != "") {
-                                $query->whereHas('ride', function ($q) use ($paymentMethod) {
-                                    $q->where('payment_method', $paymentMethod);
-                                });
-                            }
-                        });
+                ->orWhere(function ($query) use ($user_id) {
+                    $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
+                        $query->where('id', $user_id);
                     });
+                });
+        })
+            ->with(['from' => function ($query) {
+                $query->select('id', 'first_name', 'last_name', 'gender', 'profile_image')->withTrashed();
+            }])
+            ->orderBy('id', 'desc')
+            ->get()
+            ->map(function ($notification) {
+                $arr = $notification->toArray();
+                if (array_key_exists('added_on', $arr)) {
+                    $arr['created_at'] = $arr['added_on'];
+                    unset($arr['added_on']);
+                }
+                if (array_key_exists('from', $arr)) {
+                    $arr['sender'] = $arr['from'];
+                    unset($arr['from']);
+                }
+                $arr['kind'] = 'notification';
+
+                return $arr;
+            })
+            ->values();
+
+        $chats = Message::where(function ($query) use ($user_id) {
+            $query->where('sender', $user_id)->orWhere('receiver', $user_id);
+        })
+            ->orderByDesc('created_at')
+            ->get()
+            ->groupBy(function ($message) use ($user_id) {
+                // Group by both user ID and ride ID to separate conversations properly
+                $otherUserId = $message->sender == $user_id ? $message->receiver : $message->sender;
+                return $otherUserId . '_' . ($message->ride_id ?? '0');
             });
-        }
 
-        $notifications = $notifications->with(['from' => function ($query) {
-            $query->select('id', 'first_name', 'last_name', 'gender', 'profile_image')->withTrashed();
-        }])->orderBy('id', 'desc')->get();
+        $chats = $chats->map(function ($groupedMessages) use ($user_id) {
+            // Filter out messages that are deleted by this user
+            $visibleMessages = $groupedMessages->filter(function ($message) use ($user_id) {
+                $deletedBy = $message->deleted_by ? explode(',', $message->deleted_by) : [];
+                return !in_array((string)$user_id, $deletedBy);
+            });
 
-        $selectedLanguage = Language::where('is_default', 1)->first();
-        $languages = Language::getAllCached();
-        $bookingOptions = PostRidePageSettingDetail::select('booking_option1', 'booking_option2')->first();
-        $notificationPage = ChatsPageSettingDetail::select('notification_delete_text')->first();
-        // $successMessage = SuccessMessagesSettingDetail::first();
-        $bookingOptions->booking_option1 = FeaturesSettingDetail::whereFeaturesSettingId($bookingOptions->booking_option1)
-            ->whereLanguageId($selectedLanguage->id)
-            ->first();
-        $bookingOptions->booking_option2 = FeaturesSettingDetail::whereFeaturesSettingId($bookingOptions->booking_option2)
-            ->whereLanguageId($selectedLanguage->id)
-            ->first();
+            // If all messages are deleted, skip this group
+            if ($visibleMessages->isEmpty()) {
+                return null;
+            }
 
-        $paymentMethodOptions = FindRidePageSettingDetail::select('payment_methods_option1', 'payment_methods_option2', 'payment_methods_option3', 'payment_methods_option4')->first();
-        $paymentMethodOptions->payment_methods_option2 = FeaturesSettingDetail::whereFeaturesSettingId($paymentMethodOptions->payment_methods_option2)
-            ->whereLanguageId($selectedLanguage->id)
-            ->first();
-        $paymentMethodOptions->payment_methods_option3 = FeaturesSettingDetail::whereFeaturesSettingId($paymentMethodOptions->payment_methods_option3)
-            ->whereLanguageId($selectedLanguage->id)
-            ->first();
-        $paymentMethodOptions->payment_methods_option4 = FeaturesSettingDetail::whereFeaturesSettingId($paymentMethodOptions->payment_methods_option4)
-            ->whereLanguageId($selectedLanguage->id)
-            ->first();
+            // Sort by created_at descending to get the latest message first
+            $visibleMessages = $visibleMessages->sortByDesc('created_at');
+
+            // Get the latest visible message
+            $latestMessage = $visibleMessages->first()
+                ->load(['user' => function ($query) {
+                    $query->select('id', 'first_name', 'last_name', 'profile_image', 'dob', 'online', 'gender');
+                    $query->withTrashed(); // Include soft-deleted users
+                }, 'receiver' => function ($query) {
+                    $query->select('id', 'first_name', 'last_name', 'profile_image', 'dob', 'online', 'gender');
+                    $query->withTrashed(); // Include soft-deleted users
+                }]);
+
+            // Count unread messages (is_read = 0) from visible messages only
+            $unreadCount = $visibleMessages->where('receiver', $user_id)
+                ->where('is_read', 0)
+                ->count();
+
+            $messageArray = $latestMessage->toArray();
+            $messageArray['sender'] = $messageArray['user'];
+            unset($messageArray['user']);
+
+            // Append unread count
+            $messageArray['unread_count'] = $unreadCount;
+            $messageArray['kind'] = 'chat';
+            $messageArray['category'] = null;
+
+            return $messageArray;
+        })
+            ->filter()
+            ->values();
+
+        $inbox = $notificationRows->concat($chats)
+            ->sortByDesc(function ($item) {
+                return $item['created_at'] ?? '';
+            })
+            ->values();
 
         return view('notifications', compact(
-            // 'successMessage',
-            'notificationPage',
-            'notifications',
-            'bookingOptions',
-            'paymentMethodOptions',
-            'notificationsPageSetting'
+            'inbox',
+            'chatPageSetting',
+            'notificationsPageSetting',
+            'user_id'
         ));
     }
 

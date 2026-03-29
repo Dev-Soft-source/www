@@ -1829,36 +1829,18 @@ class RideController extends Controller
         // Notification
         // Message config
         $messageConfig = [
-            'standard' => [
-                'key' => 'ride_live_standard',
-                'fallback' => 'Your ride is now live on ProximaRide'
-            ],
-            'pink' => [
-                'key' => 'ride_live_pink',
-                'fallback' => 'Your Pink Ride is now live on ProximaRide'
-            ],
-            'extra_care' => [
-                'key' => 'ride_live_extra_care',
-                'fallback' => 'Your Extra+ Ride is now live on ProximaRide'
-            ],
-            'pink_extra_care' => [
-                'key' => 'ride_live_pink_extra_care',
-                'fallback' => 'Your Pink and Extra+ ride is now live on ProximaRide'
-            ]
+            'standard' => 'ride_live_standard',
+            'pink' => 'ride_live_pink',
+            'extra_care' => 'ride_live_extra_care',
+            'pink_extra_care' => 'ride_live_pink_extra_care'
         ];
 
         $hasVehicle = !empty($initialRide->vehicle_id);
-        // Choose correct notification key
-        $key = $hasVehicle ? $messageConfig[$type]['key'] : 'ride_live_requires_vehicle';
-        $fallback = $hasVehicle
-            ? $messageConfig[$type]['fallback']
-            : 'Add your vehicle to make your ride live';
-
-        // Generate message
-        $message = getNotificationMessageText($key, $user, [], $fallback);
+        $slug = $hasVehicle ? $messageConfig[$type] : 'ride_live_requires_vehicle';
+        $message = $this->getNotificationMessage($slug, [], 'Add your vehicle to make your ride live');
 
         // Create notification
-        $notification = Notification::create([
+        Notification::create([
             'ride_id' => $initialRide->id,
             'posted_by' => $user->id,
             'message' => $message,
@@ -1869,33 +1851,9 @@ class RideController extends Controller
             'destination' => $rideDetail->destination
         ]);
 
-        // Send FCM
-        $body = $notification->message;
-        $fcmService = new FCMService();
-
-        // Collect tokens
-        $tokens = [];
-
-        // mobile token
-        if ($user->mobile_fcm_token) {
-            $tokens[] = $user->mobile_fcm_token;
-        }
-
-        // additional tokens
-        $tokens = array_merge(
-            $tokens,
-            FCMToken::where('user_id', $user->id)->pluck('token')->toArray()
-        );
-
-        // send notifications
-        foreach ($tokens as $token) {
-            try {
-                $fcmService->sendNotification($token, $body);
-            } catch (\Exception $e) {
-                Log::error("FCM Notification failed for token: $token. Error: " . $e->getMessage());
-            }
-        }
-
+        // Send push notification
+        $this->sendFCM($message, $user);
+        
         // Prepare redirect data
         $redirectData = [
             'message' => $this->successMessage->ride_post_message,
