@@ -281,12 +281,22 @@
                                             data_get($notification, 'departure') &&
                                             data_get($notification, 'destination')
                                         ) {
-                                            $targetUrl = route('ride_detail', [
+                                            $rideDetailParams = [
                                                 'lang' => optional($selectedLanguage)->abbreviation,
-                                                'departure' => data_get($notification, 'departure', 'unknown'),
-                                                'destination' => data_get($notification, 'destination', 'unknown'),
                                                 'id' => data_get($notification, 'ride_id', 0),
-                                            ]);
+                                            ];
+                                            $fromStopId = data_get($notification, 'from_stop_id');
+                                            $toStopId = data_get($notification, 'to_stop_id');
+                                            if (
+                                                $fromStopId !== null &&
+                                                $fromStopId !== '' &&
+                                                $toStopId !== null &&
+                                                $toStopId !== ''
+                                            ) {
+                                                $rideDetailParams['from_stop_id'] = $fromStopId;
+                                                $rideDetailParams['to_stop_id'] = $toStopId;
+                                            }
+                                            $targetUrl = route('ride_detail', $rideDetailParams);
                                             $isGeneralUpdate = false;
                                             $rowCategoryIcon = 'ride';
                                         } elseif (

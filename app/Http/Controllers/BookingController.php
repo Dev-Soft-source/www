@@ -64,145 +64,7 @@ use DateTime;
 
 class BookingController extends Controller
 {
-    /**
-     * Log Twilio SMS failure and add a hint when Twilio rejects the From/To combination
-     * (e.g. sending from US number to unsupported destination).
-     */
-    protected function logTwilioSmsFailure(string $to, string $message, \Throwable $e, string $context = ''): void
-    {
-        $msgPreview = strlen($message) > 80 ? substr($message, 0, 80) . '...' : $message;
-        Log::info('SMS failed to ' . $to . ($context ? " ({$context})" : '') . '. Message: ' . $msgPreview . ' because ' . $e->getMessage());
-        if (str_contains($e->getMessage(), "current combination of 'To'") || str_contains($e->getMessage(), "combination of 'To'")) {
-            Log::info('Twilio From/To hint: Enable the destination country in Twilio Console (Phone Numbers → Manage → Active Numbers → your number → Geographic permissions), or use a sending number that supports the recipient region.');
-        }
-    }
-
-    /**
-     * Helper method to validate and apply student booking fee waiver
-     * Checks both charge_booking field and student card expiration date
-     * 
-     * @param User $user The user making the booking
-     * @param float|string $bookingCredit The booking credit amount from request
-     * @return float|string The adjusted booking credit (0 if waived, original if not)
-     */
-    protected function validateStudentBookingFee($user, $bookingCredit)
-    {
-        if ($user->hasBookingFeeWaiverFlag()) {
-            if ($user->isBookingFeeCurrentlyWaived()) {
-                // If student is verified (student == '1') and card is expired, charge booking fee
-                return $bookingCredit;
-            }
-            // Student with valid card - booking fee is waived
-            return 0;
-        }
-        // Regular user or student with expired card - charge booking fee
-        return $bookingCredit;
-    }
-
-    protected function normalizeBookingPaymentAmounts(Request $request, Ride $ride): array
-    {
-        $bookingCredit = round((float) $request->input('booking_credit', 0), 2);
-        $seatsAmount = round((float) $request->input('seats_amount', 0), 2);
-        $taxAmount = round((float) $request->input('tax_amount', 0), 2);
-        $total = round((float) $request->input('total', 0), 2);
-        $coffeeWall = (string) $request->input('coffee_wall') === '1';
-        $walletCovered = (string) $request->input('booked_by_wallet') === '1';
-        $isCashRide = $ride->isCashPayment();
-
-        $baseOnlinePayment = $isCashRide ? $bookingCredit : $total;
-        if ($coffeeWall) {
-            $baseOnlinePayment = $isCashRide
-                ? 0.0
-                : round(max(0, $total - $bookingCredit), 2);
-        }
-
-        $onlinePayment = $walletCovered
-            ? 0.0
-            : round((float) $request->input('online_payment', $baseOnlinePayment), 2);
-
-        if (!$walletCovered) {
-            $onlinePayment = $baseOnlinePayment;
-        }
-
-        return [
-            'booking_credit' => $bookingCredit,
-            'seats_amount' => $seatsAmount,
-            'tax_amount' => $taxAmount,
-            'total' => $total,
-            'online_payment' => $onlinePayment,
-            'cash_payment' => $isCashRide ? $seatsAmount : 0.0,
-            'wallet_charge' => $walletCovered ? $baseOnlinePayment : 0.0,
-            'coffee_wall' => $coffeeWall,
-            'booked_by_wallet' => $walletCovered,
-            'is_cash_ride' => $isCashRide,
-        ];
-    }
-
-    protected function loadRideForBooking(int $rideId, ?int $rideDetailId = null, $fromStopId = null, $toStopId = null): Ride
-    {
-        $ride = Ride::with([
-            'rideStops' => fn($query) => $query->orderBy('stop_order'),
-            'rideStopSegments',
-            'detail'
-        ])->findOrFail($rideId);
-
-        $ride = $this->makeDetailOfRide($ride, $fromStopId, $toStopId);
-
-        return $ride;
-    }
-
-    protected function resolveBookingRouteData(Ride $ride, $fromStopId = null, $toStopId = null): array
-    {
-        $ride->loadMissing([
-            'rideStops' => fn($query) => $query->orderBy('stop_order'),
-            'rideStopSegments',
-            'detail'
-        ]);
-
-        $ride = $this->makeDetailOfRide($ride, $fromStopId, $toStopId);
-
-        $resolvedFromStopId = (int) ($ride->matched_from_stop_id ?? $ride->rideStops->first()?->id ?? 0);
-        $resolvedToStopId = (int) ($ride->matched_to_stop_id ?? $ride->rideStops->last()?->id ?? 0);
-
-        $fromStop = $ride->rideStops->firstWhere('id', $resolvedFromStopId);
-        $toStop = $ride->rideStops->firstWhere('id', $resolvedToStopId);
-
-        $departure = (string) ($fromStop?->label ?? $ride->detail?->departure ?? $ride->departure ?? '');
-        $destination = (string) ($toStop?->label ?? $ride->detail?->destination ?? $ride->destination ?? '');
-        $price = (string) ((int) ($ride->matched_segment_price_minor ?? $ride->detail?->price ?? 0));
-
-        // $matchedRideDetail = $ride->rideDetail->first(function ($detail) use ($departure, $destination) {
-        //     return strcasecmp(trim((string) ($detail->departure ?? '')), trim($departure)) === 0
-        //         && strcasecmp(trim((string) ($detail->destination ?? '')), trim($destination)) === 0;
-        // });
-
-        return [
-            'from_stop_id' => $resolvedFromStopId ?: null,
-            'to_stop_id' => $resolvedToStopId ?: null,
-            'departure' => $departure,
-            'destination' => $destination,
-            'price' => $price,
-            'ride_detail_id' => $ride->detail?->id,
-        ];
-    }
-
-    protected function syncBookingRouteData(Booking $booking, Ride $ride, $fromStopId = null, $toStopId = null): Booking
-    {
-        $booking->update($this->resolveBookingRouteData($ride, $fromStopId, $toStopId));
-
-        return $booking->refresh();
-    }
-
-    protected function findExistingBookingForSegment(int $rideId, int $userId, $fromStopId = null, $toStopId = null): ?Booking
-    {
-        return Booking::where('ride_id', $rideId)
-            ->where('user_id', $userId)
-            ->whereIn('status', [Booking::STATUS_REQUESTED, Booking::STATUS_BOOKED])
-            ->where('from_stop_id', $fromStopId)
-            ->where('to_stop_id', $toStopId)
-            ->latest('id')
-            ->first();
-    }
+    
 
     /**
      * Make a Booking of a Ride
@@ -747,8 +609,9 @@ class BookingController extends Controller
 
 
 
-
-        // Notifications and messages
+        //////////////////////////////////////////////
+        // Notifications and messages ////////////////
+        //////////////////////////////////////////////
 
         if ($secured_cash_code && isset($user->email_notification) && $user->email_notification == 1) {
 
@@ -924,9 +787,6 @@ class BookingController extends Controller
             "\nNumber of seats: " . ucfirst($booking->seats);
         $this->sendSmsCode($driverPhoneNumber, $ride->driver, $sms_message);
 
-
-
-
         $currentTime = now();
         $rideDateTime = Carbon::parse($ride->date . ' ' . $ride->time);
         // Check: same day + within 1 hour
@@ -960,6 +820,150 @@ class BookingController extends Controller
         }
 
         return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $this->successMessage->book_seat_message]);
+    }
+
+
+
+
+
+    /**
+     * Log Twilio SMS failure and add a hint when Twilio rejects the From/To combination
+     * (e.g. sending from US number to unsupported destination).
+     */
+    protected function logTwilioSmsFailure(string $to, string $message, \Throwable $e, string $context = ''): void
+    {
+        $msgPreview = strlen($message) > 80 ? substr($message, 0, 80) . '...' : $message;
+        Log::info('SMS failed to ' . $to . ($context ? " ({$context})" : '') . '. Message: ' . $msgPreview . ' because ' . $e->getMessage());
+        if (str_contains($e->getMessage(), "current combination of 'To'") || str_contains($e->getMessage(), "combination of 'To'")) {
+            Log::info('Twilio From/To hint: Enable the destination country in Twilio Console (Phone Numbers → Manage → Active Numbers → your number → Geographic permissions), or use a sending number that supports the recipient region.');
+        }
+    }
+
+    /**
+     * Helper method to validate and apply student booking fee waiver
+     * Checks both charge_booking field and student card expiration date
+     * 
+     * @param User $user The user making the booking
+     * @param float|string $bookingCredit The booking credit amount from request
+     * @return float|string The adjusted booking credit (0 if waived, original if not)
+     */
+    protected function validateStudentBookingFee($user, $bookingCredit)
+    {
+        if ($user->hasBookingFeeWaiverFlag()) {
+            if ($user->isBookingFeeCurrentlyWaived()) {
+                // If student is verified (student == '1') and card is expired, charge booking fee
+                return $bookingCredit;
+            }
+            // Student with valid card - booking fee is waived
+            return 0;
+        }
+        // Regular user or student with expired card - charge booking fee
+        return $bookingCredit;
+    }
+
+    protected function normalizeBookingPaymentAmounts(Request $request, Ride $ride): array
+    {
+        $bookingCredit = round((float) $request->input('booking_credit', 0), 2);
+        $seatsAmount = round((float) $request->input('seats_amount', 0), 2);
+        $taxAmount = round((float) $request->input('tax_amount', 0), 2);
+        $total = round((float) $request->input('total', 0), 2);
+        $coffeeWall = (string) $request->input('coffee_wall') === '1';
+        $walletCovered = (string) $request->input('booked_by_wallet') === '1';
+        $isCashRide = $ride->isCashPayment();
+
+        $baseOnlinePayment = $isCashRide ? $bookingCredit : $total;
+        if ($coffeeWall) {
+            $baseOnlinePayment = $isCashRide
+                ? 0.0
+                : round(max(0, $total - $bookingCredit), 2);
+        }
+
+        $onlinePayment = $walletCovered
+            ? 0.0
+            : round((float) $request->input('online_payment', $baseOnlinePayment), 2);
+
+        if (!$walletCovered) {
+            $onlinePayment = $baseOnlinePayment;
+        }
+
+        return [
+            'booking_credit' => $bookingCredit,
+            'seats_amount' => $seatsAmount,
+            'tax_amount' => $taxAmount,
+            'total' => $total,
+            'online_payment' => $onlinePayment,
+            'cash_payment' => $isCashRide ? $seatsAmount : 0.0,
+            'wallet_charge' => $walletCovered ? $baseOnlinePayment : 0.0,
+            'coffee_wall' => $coffeeWall,
+            'booked_by_wallet' => $walletCovered,
+            'is_cash_ride' => $isCashRide,
+        ];
+    }
+
+    protected function loadRideForBooking(int $rideId, ?int $rideDetailId = null, $fromStopId = null, $toStopId = null): Ride
+    {
+        $ride = Ride::with([
+            'rideStops' => fn($query) => $query->orderBy('stop_order'),
+            'rideStopSegments',
+            'detail'
+        ])->findOrFail($rideId);
+
+        $ride = $this->makeDetailOfRide($ride, $fromStopId, $toStopId);
+
+        return $ride;
+    }
+
+    protected function resolveBookingRouteData(Ride $ride, $fromStopId = null, $toStopId = null): array
+    {
+        $ride->loadMissing([
+            'rideStops' => fn($query) => $query->orderBy('stop_order'),
+            'rideStopSegments',
+            'detail'
+        ]);
+
+        $ride = $this->makeDetailOfRide($ride, $fromStopId, $toStopId);
+
+        $resolvedFromStopId = (int) ($ride->matched_from_stop_id ?? $ride->rideStops->first()?->id ?? 0);
+        $resolvedToStopId = (int) ($ride->matched_to_stop_id ?? $ride->rideStops->last()?->id ?? 0);
+
+        $fromStop = $ride->rideStops->firstWhere('id', $resolvedFromStopId);
+        $toStop = $ride->rideStops->firstWhere('id', $resolvedToStopId);
+
+        $departure = (string) ($fromStop?->label ?? $ride->detail?->departure ?? $ride->departure ?? '');
+        $destination = (string) ($toStop?->label ?? $ride->detail?->destination ?? $ride->destination ?? '');
+        $price = (string) ((int) ($ride->matched_segment_price_minor ?? $ride->detail?->price ?? 0));
+
+        // $matchedRideDetail = $ride->rideDetail->first(function ($detail) use ($departure, $destination) {
+        //     return strcasecmp(trim((string) ($detail->departure ?? '')), trim($departure)) === 0
+        //         && strcasecmp(trim((string) ($detail->destination ?? '')), trim($destination)) === 0;
+        // });
+
+        return [
+            'from_stop_id' => $resolvedFromStopId ?: null,
+            'to_stop_id' => $resolvedToStopId ?: null,
+            'departure' => $departure,
+            'destination' => $destination,
+            'price' => $price,
+            'ride_detail_id' => $ride->detail?->id,
+        ];
+    }
+
+    protected function syncBookingRouteData(Booking $booking, Ride $ride, $fromStopId = null, $toStopId = null): Booking
+    {
+        $booking->update($this->resolveBookingRouteData($ride, $fromStopId, $toStopId));
+
+        return $booking->refresh();
+    }
+
+    protected function findExistingBookingForSegment(int $rideId, int $userId, $fromStopId = null, $toStopId = null): ?Booking
+    {
+        return Booking::where('ride_id', $rideId)
+            ->where('user_id', $userId)
+            ->whereIn('status', [Booking::STATUS_REQUESTED, Booking::STATUS_BOOKED])
+            ->where('from_stop_id', $fromStopId)
+            ->where('to_stop_id', $toStopId)
+            ->latest('id')
+            ->first();
     }
 
     /**

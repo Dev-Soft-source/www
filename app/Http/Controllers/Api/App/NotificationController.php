@@ -147,9 +147,14 @@ class NotificationController extends Controller
                     });
                 });
         })
-            ->with(['from' => function ($query) {
-                $query->select('id', 'first_name', 'last_name', 'gender', 'profile_image')->withTrashed();
-            }])
+            ->with([
+                'from' => function ($query) {
+                    $query->select('id', 'first_name', 'last_name', 'gender', 'profile_image')->withTrashed();
+                },
+                'booking' => function ($query) {
+                    $query->select('id', 'from_stop_id', 'to_stop_id');
+                },
+            ])
             ->orderBy('id', 'desc')
             ->get()
             ->map(function ($notification) {
@@ -162,6 +167,11 @@ class NotificationController extends Controller
                     $arr['sender'] = $arr['from'];
                     unset($arr['from']);
                 }
+                $fromStopId = $arr['from_stop_id'] ?? $notification->booking?->from_stop_id;
+                $toStopId = $arr['to_stop_id'] ?? $notification->booking?->to_stop_id;
+                $arr['from_stop_id'] = $fromStopId !== null && $fromStopId !== '' ? (int) $fromStopId : null;
+                $arr['to_stop_id'] = $toStopId !== null && $toStopId !== '' ? (int) $toStopId : null;
+                unset($arr['booking']);
                 $arr['kind'] = 'notification';
 
                 return $arr;
@@ -236,6 +246,8 @@ class NotificationController extends Controller
             'user_id'
         ));
     }
+
+    
 
     public function readNotification(Request $request)
     {

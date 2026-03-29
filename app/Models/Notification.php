@@ -10,7 +10,7 @@ class Notification extends Model
     use HasFactory;
     public $timestamps = false;
     
-    protected $fillable = ['type','ride_id','posted_to','posted_by','receiver_id','message','status','notification_type','is_delete','is_read', 'ride_detail_id', 'departure', 'destination', 'category'];
+    protected $fillable = ['type','ride_id','posted_to','posted_by','receiver_id','message','status','notification_type','is_delete','is_read', 'ride_detail_id', 'departure', 'destination', 'from_stop_id', 'to_stop_id', 'category'];
 
     function ride(){
         return $this->belongsTo(Ride::class, 'ride_id');
