@@ -436,7 +436,7 @@
                                     {{ $rideDetailPage->ride_co_passenger_heading ?? 'My passengers' }}
                                 @endif
                             </h3>
-                            <a href="{{ route('my_passengers', ['lang' => $selectedLanguage->abbreviation, 'departure' => $ride->detail->departure, 'destination' => $ride->detail->destination, 'id' => $ride->id]) }}">
+                            <a href="{{ route('my_passengers', ['lang' => $selectedLanguage->abbreviation, 'ride_id' => $ride->id]) }}">
                                 <div class="grid divide-y">
                                     @foreach ($ride->bookings->where('status', 1) as $booking)
                                         @if ($booking->passenger)

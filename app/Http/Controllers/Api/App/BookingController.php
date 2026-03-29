@@ -76,9 +76,7 @@ class BookingController extends Controller
 
         $ride = Ride::where('id', $request->id);
 
-        $ride = $ride->with('detail');
-
-        $ride = $ride->with(['driver' => function ($query) {
+        $ride = $ride->with('detail')->with(['driver' => function ($query) {
             $query->select('id', 'first_name', 'last_name', 'gender', 'profile_image', 'dob'); // Specify the columns you want to select
             $query->withTrashed(); // Include soft-deleted users
         }])->with('pendingSeatDetail')
@@ -103,31 +101,6 @@ class BookingController extends Controller
         if ($ride) {
 
             $ride = $this->makeDetailOfRide($ride, $from_stop_id, $to_stop_id);
-            // $primaryDetail = $ride->detail;
-            // $displayPrice = $ride->price_minor
-            //     ?? (int) round(((float) ($primaryDetail->price ?? 0)) / 100);
-
-            // $ride->price_minor = $displayPrice;
-            // if ($primaryDetail) {
-            //     $primaryDetail->price = $displayPrice;
-            //     $ride->setRelation('detail', $primaryDetail);
-            // }
-
-            // if ($ride->relationLoaded('rideDetail')) {
-            //     $ride->setRelation('rideDetail', collect($ride->rideDetail)->map(function ($detail) use ($displayPrice) {
-            //         if ($detail instanceof RideDetail) {
-            //             $detail->price = $displayPrice;
-            //         } elseif (is_object($detail)) {
-            //             $detail->price = $displayPrice;
-            //         } elseif (is_array($detail)) {
-            //             $detail['price'] = $displayPrice;
-            //         } else {
-            //             $detail = ['price' => $displayPrice];
-            //         }
-
-            //         return $detail;
-            //     }));
-            // }
 
             // Calculate seats left
             $bookedSeats = $ride->bookings()

@@ -16,14 +16,9 @@
                             <div class="flex justify-between items-center">
                                 <div>
                                     <h3>{{ $booking->passenger->first_name }}</h3>
-                                    @php
-                                        // Calculate the age based on the driver's date of birth
-                                        $dob = \Carbon\Carbon::parse($booking->passenger->dob);
-                                        $age = $dob->diffInYears(\Carbon\Carbon::now());
-                                    @endphp
                                     <div class="flex">
                                         <p class="text-white leading-4 mt-2 mr-4 text-base">
-                                            {{ $myPassengerPage->age ?? 'Age' }}: <span>{{ $age }}</span></p>
+                                            {{ $myPassengerPage->age ?? 'Age' }}: <span>{{ $booking->passenger->getAge() }}</span></p>
                                         <p class="text-white leading-4 mt-2 ml-4 text-base">
                                             {{ $myPassengerPage->gender ?? 'Gender' }}: <span>
                                                 {{ ucfirst($booking->passenger->gender) }}
@@ -43,7 +38,7 @@
                             </div>
                             <div class="flex justify-between items-center space-x-2 w-full border-b">
                                 <p>{{ $myPassengerPage->my_fare_label ?? 'My fare' }}</p>
-                                <p>${{ $booking->seats * $booking->price }}</p>
+                                <p>${{ number_format(floor($booking->seats * $booking->price / 100), 2) }}</p>
                             </div>
                             <div class="flex justify-between items-center space-x-2 w-full border-b">
                                 <p>{{ $myPassengerPage->booking_fee_label ?? 'Booking fee' }}</p>
@@ -51,8 +46,7 @@
                             </div>
                             <div class="flex justify-between items-center space-x-2 w-full border-b">
                                 <p>{{ $myPassengerPage->total_amount_label ?? 'My Total' }}</p>
-                                <p>${{ $booking->seats * $booking->price + $booking->booking_credit + $booking->tax_amount }}
-                                </p>
+                                <p>${{ number_format(floor($booking->seats * $booking->price / 100) + $booking->booking_credit + $booking->tax_amount, 2) }}</p>
                             </div>
                             <div class="flex items-center justify-between pt-4">
                                 @if (strtotime($ride->date) > strtotime('today') ||
@@ -70,17 +64,6 @@
                                         </a>
                                     </div>
 
-                                    {{-- @php
-                                    if ($cancelSetting) {
-                                        // Calculate the cancellation deadline
-                                        $cancellationDeadline = strtotime('+' . $cancelSetting->driver_cancel_hours . ' hours', strtotime($booking->booked_on));
-                                    }
-                                @endphp
-                                @if (isset($cancelSetting) && $cancelSetting && isset($cancellationDeadline))
-                                    @if (strtotime('now') < $cancellationDeadline)
-                                        
-                                    @endif
-                                @endif --}}
                                 @endif
                                 @if (auth()->user())
                                     @php

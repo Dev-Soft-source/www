@@ -247,7 +247,7 @@
                                                                     <div class="pb-4">
                                                                         @if (count($ride->bookings->where('status', '<>', 3)->where('status', '<>', 4)) > 0)
                                                                             <a
-                                                                                href="{{ route('my_passengers', ['lang' => $selectedLanguage->abbreviation, 'departure' => $from, 'destination' => $to, 'id' => $ride->id]) }}">Review
+                                                                                href="{{ route('my_passengers', ['lang' => $selectedLanguage->abbreviation, 'ride_id' => $ride->id]) }}">Review
                                                                                 passenger</a>
                                                                         @endif
                                                                     </div>

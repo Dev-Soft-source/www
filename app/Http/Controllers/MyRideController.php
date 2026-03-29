@@ -604,107 +604,23 @@ class MyRideController extends Controller
         return $this->successMessage->general_error_message ?? 'Booking not found';
     }
 
-    public function MyPassengers(Request $request, $lang = null)
+    public function MyPassengers(Request $request, $lang = null, $ride_id)
     {
 
-        $from = $request->from;
-        $to = $request->to;
-        $rideId = $request->id;
-        $ride = Ride::where('id', $request->id)
-            ->with(['rideDetail' => function ($q) use ($rideId, $from, $to) {
-                $q->where('departure', 'like', '%' . $from . '%')
-                    ->where('destination', 'like', '%' . $to . '%')
-                    ->where('ride_id', $rideId);
-            }])->first();
+        $ride = Ride::where('id', $ride_id)->with(['rideDetail','bookings'])->first();
+
+        /**
+         * todo
+         * booking has ride_id, from_stop_id and to_stop_id, 
+         * so we need to filter the bookings based on the from and to stop id and the ride details to get the correct passengers for the ride detail that is being viewed
+         */
+
         $setting = ReviewSetting::getCached();
         $cancelSetting = CancelRideSetting::getCached();
-        $languages = Language::getAllCached();
-        $myPassengerPage = null;
-        $messages = null;
-
-
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            $myPassengerPage = MyPassengerSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('popup_close_btn_text', 'confirm_cancel_noshow', 'cancel_noshow_take_me_back', 'cancel_noshow_are_you_sure')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            $myPassengerPage = MyPassengerSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('popup_close_btn_text', 'confirm_cancel_noshow', 'cancel_noshow_take_me_back', 'cancel_noshow_are_you_sure')->first();
-        }
-
-
-        if ($ride) {
-            $bookings = Booking::where('ride_id', $ride->id)->where('status', 1)
-                ->withActivePassenger()
-                ->with(['passenger' => function ($query) {
-                    $query->select('id', 'first_name', 'last_name', 'gender', 'dob', 'profile_image');
-                }])
-                ->with(['ride' => function ($query) {
-                    $query->select('id', 'date', 'time');
-                }])->get();
-
-            if ($selectedLanguage) {
-                $genderLabel = Step1PageSettingDetail::where('language_id', $selectedLanguage->id)->select('male_option_label', 'female_option_label', 'prefer_option_label')->first();
-            }
-
-            foreach ($bookings as $booking) {
-
-                // Calculate age
-                if ($booking->passenger->dob) {
-                    $dob = Carbon::parse($booking->passenger->dob);
-                    $booking->passenger->age = $dob->diffInYears(Carbon::now());
-                } else {
-                    $booking->passenger->age = null; // Handle case where dob is not set
-                }
-
-                if ($booking->passenger->gender) {
-                    if ($booking->passenger->gender === 'male') {
-                        $booking->passenger->gender_label = $genderLabel->male_option_label;
-                    } elseif ($booking->passenger->gender === 'female') {
-                        $booking->passenger->gender_label = $genderLabel->female_option_label;
-                    } elseif ($booking->passenger->gender === 'prefer not to say') {
-                        $booking->passenger->gender_label = $genderLabel->prefer_option_label;
-                    }
-                }
-            }
-        }
-
-
-
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
-                // Ratings where type is 1 and ride_id belongs to the user
-                $query->where('type', '1')
-                    ->whereHas('ride', function ($query) use ($user_id) {
-                        $query->where('added_by', $user_id);
-                    });
-            })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is 2 and booking_id belongs to the user
-                    $query->where('type', '2')
-                        ->whereHas('booking', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is null and receiver_id belongs to the user
-                    $query->where('type', null)
-                        ->whereHas('receiver', function ($query) use ($user_id) {
-                            $query->where('id', $user_id);
-                        });
-                })
-                ->orderBy('id', 'desc')
-                ->get();
-        }
+            
+        $myPassengerPage = MyPassengerSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $genderLabel = Step1PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $messages = $this->successMessage;
 
         $ratings = Rating::all();
 

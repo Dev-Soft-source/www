@@ -301,7 +301,7 @@ Route::get('{lang?}/my-co-passengers/{id}', [RideController::class, 'MyCoPasseng
 Route::get('{lang?}/my-rides', [MyRideController::class, 'MyRides'])->name('my_rides')->middleware('auth');
 Route::get('{lang?}/my-ride/{id}', [MyRideController::class, 'MyRideDetail'])->middleware('auth')->name('my_ride_detail');
 
-Route::get('{lang?}/my-passengers/{departure}/to/{destination}/{id}', [MyRideController::class, 'MyPassengers'])->name('my_passengers');
+Route::get('{lang?}/my-passengers/{ride_id}', [MyRideController::class, 'MyPassengers'])->name('my_passengers');
 Route::get('{lang?}/cancel-ride/{id}', [MyRideController::class, 'cancel'])->name('ride.cancel')->middleware('auth');
 Route::get('{lang?}/cancel-passenger/{id}', [MyRideController::class, 'cancelPassenger'])->name('passenger.cancel')->middleware('auth');
 Route::put('secured-cash-code', [MyRideController::class, 'enterCode'])->name('secured_cash_code');
