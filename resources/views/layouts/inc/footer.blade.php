@@ -7,7 +7,7 @@
 <footer class="py-10 md:py-14 w-full bg-sky-700 px-4 sm:px-8 flex-initial hidefooter">
     <div class="container mx-auto">
 
-      <div class="grid lg:grid-cols-6 md:grid-cols-4 grid-cols-2 gap-8 pb-7 md:pb-14">
+      <div class="grid lg:grid-cols-5 md:grid-cols-3 grid-cols-2 gap-8 pb-7 md:pb-14">
         <div class="col-span-2 md:col-span-4 lg:col-span-2">
           <a
                 @if ($isStepRoute)
