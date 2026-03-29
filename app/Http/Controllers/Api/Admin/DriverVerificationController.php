@@ -19,8 +19,8 @@ class DriverVerificationController extends Controller
     {
         try{
 
-            $users = User::query()->whereIn('driver',[1, 2, 3]);
-    
+            $users = User::query()->whereIn('driver', [1, 2, 3])->with('vehicles');
+
             $users = $this->whereClause($users);
             $users = $this->loadRelations($users);
             $users = $this->sortingAndLimit($users);

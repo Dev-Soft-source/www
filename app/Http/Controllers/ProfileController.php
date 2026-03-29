@@ -127,21 +127,10 @@ class ProfileController extends Controller
 
     public function driverInfo($lang = null, $id)
     {
-        $languages = Language::getAllCached();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-        }
+       
 
         // Support both: driver user ID (added_by) from ride_detail, or ride ID from other callers
-        $ride = Ride::where('added_by', $id)->first();
+        $ride = Ride::where('added_by', $id)->with('driver')->first();
         if (!$ride) {
             $ride = Ride::whereId($id)->first();
         }
@@ -174,40 +163,12 @@ class ProfileController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
-        $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($driver_id) {
-            // Ratings where type is 1 and ride_id belongs to the user
-            $query->where('type', '1')
-                ->whereHas('ride', function ($query) use ($driver_id) {
-                    $query->where('added_by', $driver_id);
-                });
-        })
-            ->orWhere(function ($query) use ($driver_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                    ->whereHas('booking', function ($query) use ($driver_id) {
-                        $query->where('user_id', $driver_id);
-                    });
-            })
-            ->orWhere(function ($query) use ($driver_id) {
-                // Ratings where type is null and receiver_id belongs to the user
-                $query->where('type', null)
-                    ->whereHas('receiver', function ($query) use ($driver_id) {
-                        $query->where('id', $driver_id);
-                    });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
-
-        $defaultLang = Language::where('is_default', 1)->first();
-        $driverPage = $selectedLanguage && $defaultLang
-            ? DriverPageSettingDetail::getByLanguageWithFallback($selectedLanguage->id, $defaultLang->id)
-            : null;
+        
+        $driverPage = DriverPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         return view('driver_info', [
             'ride' => $ride,
             'ratings' => $ratings,
-            'notifications' => $notifications,
-            'selectedLanguage' => $selectedLanguage,
             'driverPage' => $driverPage,
         ]);
     }

@@ -119,13 +119,7 @@
                                 src="{{ asset('home_page_icons/' . $editProfilePage->passenger_driven_icon) }}" alt="">
                         @endisset
                         <p class="text-xl font-semibold">
-                            {{ $user->rides()->where('status', '!=', 2)->where(function ($query) {
-                                    $query->whereDate('rides.date', '<', now()->toDateString())->orWhere(function ($query) {
-                                        $query->whereDate('rides.date', '=', now()->toDateString())->whereTime('rides.time', '<=', now()->toTimeString());
-                                    });
-                                })->get()->flatMap(function ($ride) {
-                                    return $ride->bookings()->pluck('seats');
-                                })->sum() }}
+                            {{ $user->getPassengersDrivenCount() }}
                         </p>
                         <h4 class="text-black">
                             @isset($editProfilePage->passenger_driven_label)
@@ -140,11 +134,7 @@
                                 src="{{ asset('home_page_icons/' . $editProfilePage->rides_taken_icon) }}" alt="">
                         @endisset
                         <p class="text-xl font-semibold">
-                            {{ $user->rides()->where('status', '!=', 2)->where(function ($query) {
-                                    $query->whereDate('rides.date', '<', now()->toDateString())->orWhere(function ($query) {
-                                        $query->whereDate('rides.date', '=', now()->toDateString())->whereTime('rides.time', '<=', now()->toTimeString());
-                                    });
-                                })->count() }}
+                            {{ $user->getTakenRidesCount() }}
                         </p>
                         <h4 class="text-black">
                             @isset($editProfilePage->rides_taken_label)
@@ -159,14 +149,7 @@
                                 src="{{ asset('home_page_icons/' . $editProfilePage->km_shared_icon) }}" alt="">
                         @endisset
                         <p class="text-xl font-semibold">
-                            {{ number_format(
-                                $user->rides()->where('status', '!=', 2)->where(function ($query) {
-                                        $query->whereDate('rides.date', '<', now()->toDateString())->orWhere(function ($query) {
-                                            $query->whereDate('rides.date', '=', now()->toDateString())->whereTime('rides.time', '<=', now()->toTimeString());
-                                        });
-                                    })->with('rideDetail')->get()->sum(fn($ride) => (float) ($ride->rideDetail?->total_distance ?? 0)),
-                                0,
-                            ) }}
+                            {{ $user->getTakenDistanceByDriver() }}
                         </p>
                         <h4 class="text-black">
                             @isset($editProfilePage->km_shared_label)

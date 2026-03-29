@@ -109,7 +109,7 @@
                                             <div v-if="driver.vehicles.length === 1">
                                                 <ul :key="driver.vehicles[0].id" class="text-sm">
                                                     <li class="truncate">Model - {{ driver.vehicles[0].model }}</li>
-                                                    <li class="truncate">Type - {{ driver.vehicles[0].type }}</li>
+                                                    <li class="truncate">Type - {{ driver.vehicles[0].type_label || driver.vehicles[0].type }}</li>
                                                     <li class="truncate">Year - {{ driver.vehicles[0].year }}</li>
                                                     <li class="truncate">Color - {{ driver.vehicles[0].color }}</li>
                                                 </ul>
@@ -238,7 +238,7 @@
                 <ul v-if="selectedDriver && selectedDriver.vehicles">
                     <li v-for="vehicle in selectedDriver.vehicles" :key="vehicle.id">
                         <strong>Model:</strong> {{ vehicle.model }} <br>
-                        <strong>Type:</strong> {{ vehicle.type }} <br>
+                        <strong>Type:</strong> {{ vehicle.type_label || vehicle.type }} <br>
                         <strong>Year:</strong> {{ vehicle.year }} <br>
                         <strong>Color:</strong> {{ vehicle.color }}
                         <hr><br>

@@ -34,17 +34,7 @@
             <div class="flex flex-col justify-center items-center w-48 my-4">
                 <img class="w-12 h-12 object-contain" src="{{ asset('assets/ridestaken.png') }}" alt="">
                 <p class="text-xl font-semibold">
-                    {{  $ride->driver?->rides()
-                            ->where('status', '!=', 2)
-                            ->where(function ($query) {
-                                $query->whereDate('rides.date', '<', now()->toDateString())
-                                    ->orWhere(function ($query) {
-                                        $query->whereDate('rides.date', '=', now()->toDateString())
-                                            ->whereTime('rides.time', '<=', now()->toTimeString());
-                                    });
-                            })
-                            ->count()
-                    }}
+                    {{ $ride->driver?->getTakenRidesCount() }}
                 </p>
                 <h4 class="text-black">{{ optional($driverPage)->rides_taken_label ?? 'Rides taken' }}</h4>
             </div>
@@ -52,21 +42,7 @@
             <div class="flex flex-col justify-center items-center w-48 my-4">
                 <img class="w-12 h-12 object-contain" src="{{ asset('assets/passengerdriven.png') }}" alt="">
                 <p class="text-xl font-semibold">
-                    {{  $ride->driver?->rides()
-                        ->where('status', '!=', 2)
-                        ->where(function ($query) {
-                            $query->whereDate('rides.date', '<', now()->toDateString())
-                                ->orWhere(function ($query) {
-                                    $query->whereDate('rides.date', '=', now()->toDateString())
-                                        ->whereTime('rides.time', '<=', now()->toTimeString());
-                                });
-                        })
-                        ->get()
-                        ->flatMap(function ($ride) {
-                            return $ride->bookings()->pluck('seats');
-                        })
-                        ->sum()
-                    }}
+                    {{ $ride->driver?->getPassengersDrivenCount() }}
                 </p>
                 <h4 class="text-black">{{ optional($driverPage)->passengers_driven_label ?? 'Passengers driven' }}</h4>
             </div>
@@ -74,18 +50,7 @@
             <div class="flex flex-col justify-center items-center w-48 my-4">
                 <img class="w-12 h-12 object-contain" src="{{ asset('assets/kmshared.png') }}" alt="">
                 <p class="text-xl font-semibold">
-                    {{ number_format($ride->driver?->rides()
-                        ->where('status', '!=', 2)
-                        ->where(function ($query) {
-                            $query->whereDate('rides.date', '<', now()->toDateString())
-                                ->orWhere(function ($query) {
-                                    $query->whereDate('rides.date', '=', now()->toDateString())
-                                        ->whereTime('rides.time', '<=', now()->toTimeString());
-                                });
-                        })
-                        ->with('rideDetail')
-                        ->get()
-                        ->sum(fn($r) => $r->rideDetail->sum(fn($rd) => floatval($rd->total_distance ?? 0))), 0) }}
+                    {{ $ride->driver?->getTakenDistanceByDriver() }}
                 </p>
                 <h4 class="text-black">{{ optional($driverPage)->km_shared_label ?? 'KM shared' }}</h4>
             </div>

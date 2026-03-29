@@ -637,7 +637,7 @@ class User extends Authenticatable
         $now = now();
 
         return $this->rides()
-            ->where('status', '!=', 2)
+            ->notCancelled()
             ->where(function ($query) use ($now) {
                 $query->whereDate('rides.date', '<', $now->toDateString())
                     ->orWhere(function ($query) use ($now) {
@@ -650,6 +650,38 @@ class User extends Authenticatable
                 return $ride->bookings()->pluck('seats');
             })
             ->sum();
+    }
+
+    public function getTakenRidesCount(): int
+    {
+        return $this->rides()
+            ->notCancelled()
+            ->where(function ($query) {
+                $query->whereDate('rides.date', '<', now()->toDateString())
+                    ->orWhere(function ($query) {
+                        $query->whereDate('rides.date', '=', now()->toDateString())
+                            ->whereTime('rides.time', '<=', now()->toTimeString());
+                    });
+            })
+            ->count();
+    }
+
+    public function getTakenDistanceByDriver(): float
+    {
+        return $this->rides()
+            ->notCancelled()
+            ->where(function ($query) {
+                $query->whereDate('rides.date', '<', now()->toDateString())
+                    ->orWhere(function ($query) {
+                        $query->whereDate('rides.date', '=', now()->toDateString())
+                            ->whereTime('rides.time', '<=', now()->toTimeString());
+                    });
+            })
+            ->with('rideDetail')
+            ->get()
+            ->sum(fn($r) => (float) ($r->rideDetail?->total_distance ?? 0));
+
+            
     }
 
     public function getPassengerAverageRating(): float
@@ -781,7 +813,7 @@ class User extends Authenticatable
             ->whereNotNull('booking_id')
             ->count();
     }
-    
+
     public function recentPassengerCancellationCount($months = 3): int
     {
         return CancellationHistory::where('user_id', $this->id)

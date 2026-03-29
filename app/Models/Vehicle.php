@@ -17,6 +17,8 @@ class Vehicle extends Model
         'type' => 'integer',
     ];
 
+    protected $appends = ['type_label'];
+
     protected const TYPE_ASSET_MAP = [
         38 => 'convertable.png',
         39 => 'Hatchback.png',
@@ -73,14 +75,15 @@ class Vehicle extends Model
             return null;
         }
 
-        $selectedLanguage = Language::resolveLanguage(session('selectedLanguage'));
         $defaultLanguageId = Language::where('is_default', 1)->value('id') ?? 1;
+        $selectedLanguage = Language::resolveLanguage(session('selectedLanguage'));
+        $selectedLangId = $selectedLanguage?->id ?? $defaultLanguageId;
 
-        $detail = FeaturesSettingDetail::where('features_setting_id', $typeId)
-            ->whereIn('language_id', array_filter([$selectedLanguage?->id, $defaultLanguageId]))
-            ->get()
-            ->sortByDesc(fn($item) => (int) ($selectedLanguage && $item->language_id == $selectedLanguage->id))
-            ->first();
+        $detail = FeaturesSettingDetail::getByLanguageWithFallback(
+            $selectedLangId,
+            $defaultLanguageId,
+            ['features_setting_id' => $typeId]
+        );
 
         return $detail?->name;
     }
