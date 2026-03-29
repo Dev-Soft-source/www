@@ -78,7 +78,7 @@ class ContactUsPageSettingService
         ContactUsPageSettingDetail::create($fields);
         }
         else{
-            ContactUsPageSettingDetail::whereContactPageSettingId($contactUsPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            ContactUsPageSettingDetail::whereContactPageSettingId($contactUsPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

@@ -47,7 +47,7 @@ class ForTouristsPageSettingService
         if (!$forTouristsPageSettingDetail) {
             ForTouristsPageSettingDetail::create($fields);
         } else {
-            ForTouristsPageSettingDetail::whereForTouristsPageId($forTouristsPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            ForTouristsPageSettingDetail::whereForTouristsPageId($forTouristsPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
 
         return true;

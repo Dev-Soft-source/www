@@ -43,7 +43,7 @@ class NotificationsPageSettingService
             NotificationsPageSettingDetail::create($fields);
         }
         else{
-            NotificationsPageSettingDetail::where('notifications_page_setting_id', $notificationsPageSetting->id)->where('language_id', $language->id)->update($fields);
+            NotificationsPageSettingDetail::where('notifications_page_setting_id', $notificationsPageSetting->id)->where('language_id', $language->id)->first()?->update($fields);
         }
         return true;
     }

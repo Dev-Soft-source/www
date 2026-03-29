@@ -61,7 +61,7 @@ class PaymentSettingService
             PaymentSettingDetail::create($fields);
         }
         else{
-            PaymentSettingDetail::wherePaymentOptSettingId($paymentSetting->id)->whereLanguageId($language->id)->update($fields);
+            PaymentSettingDetail::wherePaymentOptSettingId($paymentSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

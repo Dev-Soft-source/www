@@ -62,7 +62,7 @@ class ThankyouPageSettingService
             ThankyouPageSettingDetail::create($fields);
         }
         else{
-            ThankyouPageSettingDetail::whereThankyouPageSettingId($thankyouPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            ThankyouPageSettingDetail::whereThankyouPageSettingId($thankyouPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

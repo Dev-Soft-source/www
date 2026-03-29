@@ -92,7 +92,7 @@ class MyPhoneSettingService
             MyPhoneSettingDetail::create($fields);
         }
         else{
-            MyPhoneSettingDetail::wherePhoneNoSettingId($myPhoneSetting->id)->whereLanguageId($language->id)->update($fields);
+            MyPhoneSettingDetail::wherePhoneNoSettingId($myPhoneSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

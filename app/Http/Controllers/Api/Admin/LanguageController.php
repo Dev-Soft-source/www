@@ -99,6 +99,7 @@ class LanguageController extends Controller
         ]);
 
         if ($result) {
+            Language::forgetCache();
             if ($request->is_default == true) {
                 $this->removeDefaultLanguage($language);
             }
@@ -139,6 +140,7 @@ class LanguageController extends Controller
         Language::where('id', '!=', $language->id)->update([
             'is_default' => 0
         ]);
+        Language::forgetCache();
     }
 
     protected function loadRelations($languages)

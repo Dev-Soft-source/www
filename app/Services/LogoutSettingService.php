@@ -45,7 +45,7 @@ class LogoutSettingService
             LogoutSettingDetail::create($fields);
         }
         else{
-            LogoutSettingDetail::whereLogoutSettingId($logoutSetting->id)->whereLanguageId($language->id)->update($fields);
+            LogoutSettingDetail::whereLogoutSettingId($logoutSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

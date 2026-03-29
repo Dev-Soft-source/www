@@ -66,7 +66,7 @@ class StudentPageSettingService
         StudentPageSettingDetail::create($fields);
         }
         else{
-            StudentPageSettingDetail::whereStudentPageSettingId($studentPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            StudentPageSettingDetail::whereStudentPageSettingId($studentPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

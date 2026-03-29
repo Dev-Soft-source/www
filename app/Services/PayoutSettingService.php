@@ -178,7 +178,7 @@ class PayoutSettingService
             PayoutOptionSettingDetail::create($fields);
         }
         else{
-            PayoutOptionSettingDetail::wherePayoutOptSettingId($payoutSetting->id)->whereLanguageId($language->id)->update($fields);
+            PayoutOptionSettingDetail::wherePayoutOptSettingId($payoutSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

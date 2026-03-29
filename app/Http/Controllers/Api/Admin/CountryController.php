@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Admin\CountryResource;
 use App\Models\Country;
+use App\Support\LocationCache;
 use App\Traits\StatusResponser;
 use Illuminate\Http\Request;
 
@@ -58,6 +59,8 @@ class CountryController extends Controller
         ]);
 
         if ($result) {
+            LocationCache::bust();
+
             return $this->apiSuccessResponse(new CountryResource($country), 'Country has been updated successfully.');
         }
         return $this->errorResponse();

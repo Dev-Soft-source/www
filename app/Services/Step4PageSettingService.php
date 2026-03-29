@@ -78,7 +78,7 @@ class Step4PageSettingService
         if (!$step4PageSettingDetail) {
             Step4PageSettingDetail::create($fields);
         } else {
-            Step4PageSettingDetail::whereStep4PageSettingId($step4PageSetting->id)->whereLanguageId($language->id)->update($fields);
+            Step4PageSettingDetail::whereStep4PageSettingId($step4PageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
 
         return true;

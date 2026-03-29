@@ -67,7 +67,7 @@ class ReferralPageSettingService
             ReferralPageSettingDetail::create($fields);
         }
         else{
-            ReferralPageSettingDetail::whereReferralPageSettingId($referralPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            ReferralPageSettingDetail::whereReferralPageSettingId($referralPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

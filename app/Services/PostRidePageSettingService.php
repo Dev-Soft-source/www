@@ -318,7 +318,7 @@ public function update($postRidePageSetting, $language, $request)
         PostRidePageSettingDetail::create($fields);
         }
         else{
-            PostRidePageSettingDetail::wherePostRidePageSettingId($postRidePageSetting->id)->whereLanguageId($language->id)->update($fields);
+            PostRidePageSettingDetail::wherePostRidePageSettingId($postRidePageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         
         if(!$postRidePageSettingSubDetail){
@@ -326,7 +326,7 @@ public function update($postRidePageSetting, $language, $request)
         PostRidePageSettingSubDetail::create($fields);
         }
         else{
-            PostRidePageSettingSubDetail::where('post_ride_page_id', $postRidePageSetting->id)->whereLanguageId($language->id)->update($subFields);
+            PostRidePageSettingSubDetail::where('post_ride_page_id', $postRidePageSetting->id)->whereLanguageId($language->id)->first()?->update($subFields);
         }
         return true;
     }

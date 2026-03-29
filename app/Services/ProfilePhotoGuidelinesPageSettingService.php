@@ -50,7 +50,7 @@ class ProfilePhotoGuidelinesPageSettingService
         if (! $exists) {
             ProfilePhotoGuidelinesPageSettingDetail::create($fields);
         } else {
-            ProfilePhotoGuidelinesPageSettingDetail::whereProfilePhotoGuidelinesPageId($profilePhotoGuidelinesPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            ProfilePhotoGuidelinesPageSettingDetail::whereProfilePhotoGuidelinesPageId($profilePhotoGuidelinesPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
 
         return true;

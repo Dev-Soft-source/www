@@ -197,7 +197,7 @@ class BookingPageSettingService
         BookingPageSettingDetail::create($fields);
         }
         else{
-            BookingPageSettingDetail::whereBookingPageSettingId($bookingPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            BookingPageSettingDetail::whereBookingPageSettingId($bookingPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

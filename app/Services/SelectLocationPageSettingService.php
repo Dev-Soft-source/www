@@ -81,7 +81,7 @@ class SelectLocationPageSettingService
             SelectLocationSettingDetail::create($fields);
         }
         else{
-            SelectLocationSettingDetail::whereLocationSettingId($selectLocationPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            SelectLocationSettingDetail::whereLocationSettingId($selectLocationPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

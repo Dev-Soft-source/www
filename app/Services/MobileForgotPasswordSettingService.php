@@ -40,7 +40,7 @@ class MobileForgotPasswordSettingService
             MobileForgotPasswordSettingDetail::create($fields);
         }
         else{
-            MobileForgotPasswordSettingDetail::whereForgotPageId($forgotPasswordPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            MobileForgotPasswordSettingDetail::whereForgotPageId($forgotPasswordPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

@@ -48,7 +48,7 @@ class TermsAndConditionPageSettingService
         TermsAndConditionPageSettingDetail::create($fields);
         }
         else{
-            TermsAndConditionPageSettingDetail::whereTermsPageId($termsAndConditionPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            TermsAndConditionPageSettingDetail::whereTermsPageId($termsAndConditionPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

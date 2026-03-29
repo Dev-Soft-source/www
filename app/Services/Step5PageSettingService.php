@@ -126,7 +126,7 @@ class Step5PageSettingService
         Step5PageSettingDetail::create($fields);
         }
         else{
-            Step5PageSettingDetail::whereStep5PageSettingId($step5PageSetting->id)->whereLanguageId($language->id)->update($fields);
+            Step5PageSettingDetail::whereStep5PageSettingId($step5PageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

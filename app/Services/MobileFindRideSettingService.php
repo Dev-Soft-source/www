@@ -134,7 +134,7 @@ class MobileFindRideSettingService
             MobileFindRideSettingDetail::create($fields);
         }
         else{
-            MobileFindRideSettingDetail::whereFindRideSettingId($findRidePageSetting->id)->whereLanguageId($language->id)->update($fields);
+            MobileFindRideSettingDetail::whereFindRideSettingId($findRidePageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

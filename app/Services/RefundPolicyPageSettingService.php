@@ -48,7 +48,7 @@ class RefundPolicyPageSettingService
         RefundPolicyPageSettingDetail::create($fields);
         }
         else{
-            RefundPolicyPageSettingDetail::whereRefundPolicyPageId($refundPolicyPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            RefundPolicyPageSettingDetail::whereRefundPolicyPageId($refundPolicyPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

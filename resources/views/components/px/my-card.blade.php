@@ -195,6 +195,8 @@
             @if ($showOptions && $ride->features)
                 <div class="border-t border-gray-300 p-3">
                     <div class="flex flex-wrap items-center gap-2">
+                        @include('partials.ride_payment_icons', [ 'ride' => $ride, ])
+                        @include('partials.ride_preference_icons', [ 'ride' => $ride ])
                         @include('partials.ride_feature_icons', [
                             'rideFeatures' => $ride->features,
                         ])

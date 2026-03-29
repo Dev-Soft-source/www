@@ -54,7 +54,7 @@ class ForgotPasswordPageSettingService
         ForgotPasswordPageSettingDetail::create($fields);
         }
         else{
-            ForgotPasswordPageSettingDetail::whereForgotPassPageId($forgotPasswordPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            ForgotPasswordPageSettingDetail::whereForgotPassPageId($forgotPasswordPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

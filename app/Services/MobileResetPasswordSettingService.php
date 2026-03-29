@@ -48,7 +48,7 @@ class MobileResetPasswordSettingService
             MobileResetPasswordSettingDetail::create($fields);
         }
         else{
-            MobileResetPasswordSettingDetail::whereResetPageId($resetPasswordPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            MobileResetPasswordSettingDetail::whereResetPageId($resetPasswordPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

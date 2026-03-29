@@ -144,7 +144,7 @@ class SignupPageSettingService
         SignupPageSettingDetail::create($fields);
         }
         else{
-            SignupPageSettingDetail::whereSignupPageSettingId($signupPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            SignupPageSettingDetail::whereSignupPageSettingId($signupPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

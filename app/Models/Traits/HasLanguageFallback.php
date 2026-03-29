@@ -56,6 +56,14 @@ trait HasLanguageFallback
         Cache::forever(static::languageFallbackVersionKey(), uniqid('', true));
     }
 
+    /**
+     * Call after Query\Builder::update() on this model (bypasses Eloquent saved events).
+     */
+    public static function forgetLanguageFallbackCache(): void
+    {
+        static::bustLanguageFallbackCache();
+    }
+
     protected static function languageFallbackCacheKey($selectedLangId, $defaultLangId, $conditions): string
     {
         $version = Cache::rememberForever(static::languageFallbackVersionKey(), fn () => '1');

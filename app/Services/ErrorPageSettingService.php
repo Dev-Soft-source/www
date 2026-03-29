@@ -35,7 +35,7 @@ class ErrorPageSettingService
         } else {
             ErrorPageSettingDetail::where('error_page_setting_id', $errorPageSetting->id)
                 ->where('language_id', $language->id)
-                ->update($fields);
+                ->first()?->update($fields);
         }
         return true;
     }

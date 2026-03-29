@@ -41,6 +41,10 @@ class ReviewSettingController extends Controller
             'respond_review_days' => $request->respond_review_days,
         ]);
 
+        if ($result) {
+            ReviewSetting::forgetCache();
+        }
+
         if ($result || $setting) {
             return $this->apiSuccessResponse(new ReviewSettingResource($setting), 'Settings have been updated successfully.');
         }

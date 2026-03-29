@@ -773,11 +773,20 @@ class User extends Authenticatable
             ->count();
     }
 
-    protected function recentDriverCancellationCount(): int
+    protected function recentDriverCancellationCount($months = 3): int
     {
         return CancellationHistory::where('user_id', $this->id)
             ->where('type', 'driver')
-            ->whereBetween('created_at', [now()->subMonths(3), now()])
+            ->whereBetween('created_at', [now()->subMonths($months), now()])
+            ->whereNotNull('booking_id')
+            ->count();
+    }
+    
+    public function recentPassengerCancellationCount($months = 3): int
+    {
+        return CancellationHistory::where('user_id', $this->id)
+            ->where('type', 'passenger')
+            ->whereBetween('created_at', [now()->subMonths($months), now()])
             ->whereNotNull('booking_id')
             ->count();
     }

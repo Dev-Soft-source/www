@@ -168,7 +168,7 @@ class MobilePostRideSettingService
             MobilePostRideSettingDetail::create($fields);
         }
         else{
-            MobilePostRideSettingDetail::wherePostRideSettingId($postRidePageSetting->id)->whereLanguageId($language->id)->update($fields);
+            MobilePostRideSettingDetail::wherePostRideSettingId($postRidePageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

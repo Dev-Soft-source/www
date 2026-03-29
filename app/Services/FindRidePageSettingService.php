@@ -315,7 +315,7 @@ class FindRidePageSettingService
         FindRidePageSettingDetail::create($fields);
         }
         else{
-            FindRidePageSettingDetail::whereFindRidePageSettingId($findRidePageSetting->id)->whereLanguageId($language->id)->update($fields);
+            FindRidePageSettingDetail::whereFindRidePageSettingId($findRidePageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

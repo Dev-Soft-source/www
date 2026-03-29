@@ -48,7 +48,7 @@ class TermsOfUsePageSettingService
         TermsOfUsePageSettingDetail::create($fields);
         }
         else{
-            TermsOfUsePageSettingDetail::whereTermsUsePageId($termsOfUsePageSetting->id)->whereLanguageId($language->id)->update($fields);
+            TermsOfUsePageSettingDetail::whereTermsUsePageId($termsOfUsePageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

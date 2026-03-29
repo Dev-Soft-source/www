@@ -47,6 +47,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
 use Srmklive\PayPal\Services\PayPal as PayPalClient;
 use Stripe\PaymentIntent;
 use Stripe\PaymentMethod;
@@ -64,7 +65,7 @@ use DateTime;
 
 class BookingController extends Controller
 {
-    
+
 
     /**
      * Make a Booking of a Ride
@@ -198,6 +199,12 @@ class BookingController extends Controller
             return redirect()->back()->with(['failure' => $message->block_booking_message ?? null]);
         }
 
+        $bookings = Booking::where('ride_id', $id)->NotRejected()->get();
+        $seatsBooked = $bookings->sum('seats') + $request->seats;
+        if ($seatsBooked > $ride->seats) {
+            return redirect()->back()->with(['failure' => $errorMsg->seat_unavailable_message]);
+        }
+
         $rules = [
             'seats' => 'required|integer|min:1',
             'driver_message' => 'required',
@@ -208,7 +215,6 @@ class BookingController extends Controller
             $rules['firm_agree_terms'] = 'accepted|required';
             $rules['firm_cancellation_understand'] = 'accepted|required';
         }
-
 
         // Passenger gatekeeping logic for Pink Ride and Extra Care Ride
         if ($ride->isPinkRide()) {
@@ -232,15 +238,6 @@ class BookingController extends Controller
             $rules['extra_care_ride_agree_terms'] = 'accepted|required';
         }
 
-
-
-
-        $bookings = Booking::where('ride_id', $id)->NotRejected()->get();
-        $seatsBooked = $bookings->sum('seats') + $request->seats;
-        if ($seatsBooked > $ride->seats) {
-            return redirect()->back()->with(['failure' => $errorMsg->seat_unavailable_message]);
-        }
-
         if (!((int) $request->input('booked_by_wallet'))) {
             $rules = array_merge($rules, [
                 'card_id' => 'required',
@@ -249,25 +246,7 @@ class BookingController extends Controller
         // validate the request with all the conditional rules
         $request->validate($rules);
 
-        // if booking method is manual
-        $expiryTime = null;
-        if ($ride->isRequestBooking()) {
-            $currentTime = now();
-            $rideDateTime = Carbon::parse($ride->date . ' ' . $ride->time);
 
-            // Use signed difference
-            $difference = $currentTime->diffInHours($rideDateTime, false);
-
-            if ($difference > 48) {
-                $expiryTime = $currentTime->copy()->addHours(12);
-            } elseif ($difference >= 24) {
-                $expiryTime = $currentTime->copy()->addHours(6);
-            } elseif ($difference >= 6) {
-                $expiryTime = $currentTime->copy()->addHours(2);
-            } else {
-                $expiryTime = $currentTime->copy()->addMinutes(30);
-            }
-        }
 
 
         ///////////////////////////////////////////////
@@ -287,9 +266,12 @@ class BookingController extends Controller
         }
 
         $bookedByWallet = (int) $request->input('booked_by_wallet');
-        $isCoffeeWall     = (int) $request->input('coffee_wall');
 
+
+
+        ///////////////////////////////////////////////////////////////////////////
         // process of payment by payment method (paypal, stripe, cash, secure cash)
+        ///////////////////////////////////////////////////////////////////////////
         $stripId = null;
 
         if (!$bookedByWallet) {
@@ -297,11 +279,55 @@ class BookingController extends Controller
             $payment_method = $request->input('card_id', 'paypal');
 
             if ($payment_method === 'paypal') {
-                // Process PayPal payment
-                $paymentResult = $this->processPayPalPayment($request, $booking_fee, $payment_amount);
-                if (!$paymentResult['success']) {
-                    return redirect()->back()->with(['error' => $paymentResult['message']]);
+
+                if (!$user->hasVerifiedPhone()) {
+                    return redirect()->back()->with(['failure' => $errorMsg->verified_number_message ?? 'Verify your phone number']);
                 }
+                // Process PayPal payment
+                $paypal = new PayPalClient;
+                $paypal->setApiCredentials(config('paypal'));
+                $token = $paypal->getAccessToken();
+                $paypal->setAccessToken($token);
+
+                $paypalEmail = null;
+
+                if (is_numeric($request->card_id)) {
+                    $paypalEmail = Card::where('id', $request->card_id)
+                        ->where('user_id', $user->id)
+                        ->where('payment_method_type', 'paypal')
+                        ->value('paypal_email');
+                }
+
+                $order = $paypal->createOrder([
+                    "intent" => "CAPTURE",
+                    "purchase_units" => [
+                        [
+                            "amount" => [
+                                "currency_code" => "CAD",
+                                "value" => number_format((float)$payment_amount, 2, '.', '')
+                            ]
+                        ]
+                    ],
+                    "application_context" => [
+                        "cancel_url" => route('paypal.cancel'),
+                        "return_url" => route('paypal.success.booking', [
+                            'id' => $id,
+                            'user_id' => $user->id,
+                        ] + array_filter([
+                            'paypal_email' => $paypalEmail,
+                        ]) + $request->except('_token')),
+                    ]
+                ]);
+
+                if (isset($order['id'])) {
+                    foreach ($order['links'] as $link) {
+                        if ($link['rel'] == 'approve') {
+                            return redirect()->away($link['href']);
+                        }
+                    }
+                }
+
+                return redirect()->route('paypal.cancel');
             } else {
                 /**
                  * Map card_id (paypal / credit_card / google_pay / apple_pay / saved card id)
@@ -348,7 +374,9 @@ class BookingController extends Controller
                     }
                 };
 
-                $stripId = null;
+
+                $stripeCardDetails = [];
+
                 try {
                     if (isset($request->gPayApplePayId) && $request->gPayApplePayId != '') {
                         // gPayApplePayId is already a PaymentIntent ID from the frontend (for Google Pay / Apple Pay)
@@ -390,6 +418,15 @@ class BookingController extends Controller
 
                         $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
 
+                        $stripeCardDetails = [
+                            'card_type' => $paymentMethod->card->brand ?? '',
+                            'cardholder_name' => $paymentMethod->billing_details->name ?? '',
+                            'last_four_digits' => $paymentMethod->card->last4 ?? '****',
+                            'expiration_date' => isset($paymentMethod->card->exp_month, $paymentMethod->card->exp_year)
+                                ? $paymentMethod->card->exp_month . '/' . $paymentMethod->card->exp_year
+                                : '',
+                        ];
+
                         if ($payment_amount > 0) {
                             $paymentIntentOrResponse = $chargeWithStripePaymentMethod($paymentMethod->id, $payment_amount);
                             if ($paymentIntentOrResponse instanceof \Illuminate\Http\RedirectResponse) {
@@ -419,6 +456,15 @@ class BookingController extends Controller
                             ->where('payment_method_type', $mappedType)
                             ->where('primary_card', 1)
                             ->first();
+
+                        $stripeCardDetails = [
+                            'card_type' => $card?->card_type ?? '',
+                            'cardholder_name' => $card?->name_on_card ?? '',
+                            'last_four_digits' => $card?->card_number ?? '****',
+                            'expiration_date' => isset($card?->exp_month, $card?->exp_year)
+                                ? $card->exp_month . '/' . $card->exp_year
+                                : '',
+                        ];
 
                         if (!$card || !$card->stripe_payment_method_id) {
                             return redirect()->back()
@@ -468,6 +514,15 @@ class BookingController extends Controller
                         $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
                         $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
 
+                        $stripeCardDetails = [
+                            'card_type' => $card->card_type ?? '',
+                            'cardholder_name' => $card->name_on_card ?? '',
+                            'last_four_digits' => $card->card_number ?? '****',
+                            'expiration_date' => isset($card->exp_month, $card->exp_year)
+                                ? $card->exp_month . '/' . $card->exp_year
+                                : '',
+                        ];
+
                         if ($payment_amount > 0) {
                             $paymentIntentOrResponse = $chargeWithStripePaymentMethod($card->stripe_payment_method_id, $payment_amount);
                             if ($paymentIntentOrResponse instanceof \Illuminate\Http\RedirectResponse) {
@@ -489,6 +544,97 @@ class BookingController extends Controller
             }
         }
 
+        // Merge Stripe card details into the request so that it can be used in the booking completion logic and transaction record creation
+        if (!empty($stripeCardDetails)) {
+            $request->merge($stripeCardDetails);
+        }
+
+        // $id is ride id
+        $this->completeBooking($id, $user->id, $stripId, $request);
+    }
+
+    public function paypalSuccess(Request $request, $id, $user_id)
+    {
+        if ($request->filled('token')) {
+            $paypal = new PayPalClient;
+            $paypal->setApiCredentials(config('paypal'));
+            $token = $paypal->getAccessToken();
+            $paypal->setAccessToken($token);
+
+            $orderDetails = $paypal->showOrderDetails($request->get('token'));
+            $paypalEmail = data_get($orderDetails, 'payer.email_address');
+
+            if ($paypalEmail) {
+                $request->merge(['paypal_email' => $paypalEmail]);
+            }
+        }
+
+        return $this->completeBooking($id, $user_id, null, $request);
+    }
+
+    public function completeBooking($id, $user_id, $stripId = null, Request $request)
+    {
+
+        /////////////////////////////////////////////////
+        // pre-processing before booking creation (e.g. load ride details, calculate booking fee, validate student booking fee waiver, etc)
+        $ride = Ride::with([
+            'rideStops' => fn($query) => $query->orderBy('stop_order'),
+            'rideStopSegments',
+            'detail'
+        ])->where('id', $id)->first();
+
+        $from_stop_id = $request->input('from_stop_id', 0);
+        $to_stop_id = $request->input('to_stop_id', 0);
+
+        $ride = $this->makeDetailOfRide($ride, $from_stop_id, $to_stop_id);
+
+        $user = User::where('id', $user_id)->with('primaryPhone')->first();
+
+        $passengerPhoneNumber = $user->primaryPhone()?->phone ?? $user->phone;
+        $driverPhoneNumber = $ride->driver?->primaryPhone()?->phone ?? $ride->driver?->phone;
+
+        // if booking method is manual : request book
+        $expiryTime = null;
+        if ($ride->isRequestBooking()) {
+            $currentTime = now();
+            $rideDateTime = Carbon::parse($ride->date . ' ' . $ride->time);
+
+            // Use signed difference
+            $difference = $currentTime->diffInHours($rideDateTime, false);
+
+            if ($difference > 48) {
+                $expiryTime = $currentTime->copy()->addHours(12);
+            } elseif ($difference >= 24) {
+                $expiryTime = $currentTime->copy()->addHours(6);
+            } elseif ($difference >= 6) {
+                $expiryTime = $currentTime->copy()->addHours(2);
+            } else {
+                $expiryTime = $currentTime->copy()->addMinutes(30);
+            }
+        }
+
+        if ($ride->price_minor < 1500) {
+            // ProximaLocal: no booking fee on rides under $15 per seat
+            $booking_fee = 0;
+        } else {
+            // Student booking fee waiver: Validate and apply waiver with card expiration check
+            $adjustedBookingCredit = $this->validateStudentBookingFee($user, $request->booking_credit);
+            $booking_fee = $adjustedBookingCredit;
+        }
+        $seats_amount = $request->seats_amount;
+        $payment_amount = $request->seats_amount;
+        if ($ride->isCashPayment()) {
+            $payment_amount = $booking_fee;
+        }
+
+
+
+        ////////////////////////////////////////////////////////
+        // create or update a booking
+        ////////////////////////////////////////////////////////
+        // when user make more booking on the same ride, 
+        // it will send notification and email again, so we need to check if the booking is new or existing one
+
         $departureTime = date('H:i', strtotime($ride->time));
         $departureDate = date('d F, Y', strtotime($ride->date));
 
@@ -499,12 +645,18 @@ class BookingController extends Controller
             $secured_cash_code = rand(1000, 9999);
         }
 
-        /////////////////////////////
-        // create or update a booking
-        ////////////////////////////////////////////////////////
-        // when user make more booking on the same ride, 
-        // it will send notification and email again, so we need to check if the booking is new or existing one
+        $seat_ids = $request->seats_id;
         $seats_number = $request->seats;
+        $booking_type = $request->booking_type;
+        $tax_amount = isset($request->tax_amount) ? $request->tax_amount : 0;
+        $total = $request->total ?? 0;
+        $tax_percentage = $request->input('tax_percentage', 0);
+        $tax_type = $request->input('tax_type');
+        $deduct_type = $request->input('deduct_tax');
+        $driver_message = $request->driver_message ?? '';
+        $bookedByWallet = (int) $request->input('booked_by_wallet');
+        $isCoffeeWall = (int) $request->input('coffee_wall');
+        $payment_method = $request->input('card_id', 'paypal');
 
         $booking = Booking::where('ride_id', $id)
             ->waiting()
@@ -512,11 +664,10 @@ class BookingController extends Controller
             ->where('to_stop_id', $to_stop_id)
             ->where('user_id', $user->id)->first();
 
-        $total = $request->total;
         if (isset($booking)) {
             $seats_amount += $booking->fare;
             $seats_number += $booking->seats;
-            $tax_amount = $booking->tax_amount + (isset($request->tax_amount) ? $request->tax_amount : 0);
+            $tax_amount = $booking->tax_amount + $tax_amount;
             $booking_fee += $booking->booking_credit;
             // update the existing booking with new seats number and fare
             $booking->update([
@@ -537,12 +688,12 @@ class BookingController extends Controller
                 'from_stop_id' => $from_stop_id,
                 'to_stop_id' => $to_stop_id,
                 'status' => $ride->isRequestBooking() ? '0' : '1',
-                'seats' => $request->seats,
-                'type' => $request->booking_type,
+                'seats' => $seats_number,
+                'type' => $booking_type,
                 'booked_on' => now(),
                 'booking_credit' => $booking_fee,
                 'fare' => $seats_amount,
-                'tax_amount' => isset($request->tax_amount) ? $request->tax_amount : 0,
+                'tax_amount' => $tax_amount,
                 'secured_cash' => $secured_cash,
                 'secured_cash_code' => $secured_cash_code,
                 'expires_at' => $expiryTime,
@@ -553,7 +704,6 @@ class BookingController extends Controller
         }
 
         // update seats in seats table to booked for the selected seats
-        $seat_ids = $request->seats_id;
         SeatDetail::whereIn('id', $seat_ids)->update([
             'status' => 'booked',
             'booking_id' => $booking->id,
@@ -568,15 +718,14 @@ class BookingController extends Controller
             'booking_fee'      => $booking_fee,
             'price'            => $payment_amount,
             'coffee_from_wall' => $isCoffeeWall,
-            'tax_amount'       => $request->input('tax_amount', 0),
-            'tax_percentage'   => $request->input('tax_percentage', 0),
-            'tax_type'         => $request->input('tax_type'),
-            'deduct_type'      => $request->input('deduct_tax'),
+            'tax_amount'       => $tax_amount,
+            'tax_percentage'   => $tax_percentage,
+            'tax_type'         => $tax_type,
+            'deduct_type'      => $deduct_type,
         ];
 
         if ($bookedByWallet) {
             $data['pay_by_account'] = true;
-            //
             // Process booking with wallet balance
             TopUpBalance::create([
                 'booking_id' => $booking->id,
@@ -585,13 +734,16 @@ class BookingController extends Controller
                 'added_date' => now()->format('Y-m-d'),
             ]);
         } else {
+            // $stripId is coming from payment processing logic above, it can be null if payment amount is 0 (e.g. fully covered by booking credit), or if payment failed but booking was still created (e.g. for cash payment or if Stripe payment failed after booking creation)
             $data['stripe_id'] = $stripId;
         }
+
+
         $transaction = Transaction::create($data);
         $transcationId = $transaction->random_id;
 
         if ($isCoffeeWall) {
-            Transaction::create([
+            $transaction = Transaction::create([
                 ...$data,
                 'price' => $booking_fee,
                 'coffee_from_wall' => true,
@@ -711,8 +863,7 @@ class BookingController extends Controller
             'ride_id' => $id,
             'receiver' => $ride->added_by,
             'sender' => $user->id,
-            'message' => $request->driver_message,
-            // 'ride_detail_id' => $booking->ride_detail_id != "" ? $booking->ride_detail_id : NULL
+            'message' => $driver_message,
         ]);
 
 
@@ -728,8 +879,8 @@ class BookingController extends Controller
                 'date' => $ride->date,
                 'time' => $ride->time,
                 'seats' => $booking->seats,
-                'booking_price' => $booking->price,
-                'total_price' => $bookingPrice,
+                'booking_price' => number_format((float)($booking->price / 100), 2, '.', ''),
+                'total_price' => number_format((float)($bookingPrice / 100), 2, '.', ''),
                 'passenger_first_name' => $user->first_name,
                 'passenger_last_name' => $user->last_name,
                 'gender' => $user->gender,
@@ -757,13 +908,35 @@ class BookingController extends Controller
 
             $data = [
                 'first_name' => $user->first_name,
+                'full_name' => $user->first_name . ' ' . $user->last_name,
                 'seats' => $booking->seats,
-                'seats_amount' => $seats_amount,
-                'booking_credit' => $booking->booking_credit,
-                'online_payment' => $request->online_payment,
-                'cash_payment' => $request->cash_payment,
-                'total' => $total
+                'seats_amount' => number_format((float)$seats_amount, 2, '.', ''),
+                'transaction_id' => $transcationId,
+                'transaction_date' => Carbon::now()->format('F j, Y \a\t H:i \E\S\T'),
+                'transaction_type' => '',
+
+                'card_type' => $request->input('card_type', ''),
+                'cardholder_name' => $request->input('cardholder_name', ''),
+                'last_four_digits' => $request->input('last_four_digits', '****'),
+                'expiration_date' => $request->input('expiration_date', ''),
+
+                'online_payment' => number_format((float)$payment_amount, 2, '.', ''),
             ];
+
+            if ($bookedByWallet) {
+                // Paid from topup balance
+                $data['transaction_type'] = 'topup_balance';
+            }
+
+            if ($payment_method == 'paypal') {
+                $data['payment_method'] = 'paypal';
+                $data['paypal_email'] = $request->input('paypal_email', $user->email ?? 'N/A');
+            } elseif ($payment_method === 'google_pay' || $payment_method === 'apple_pay') {
+                $data['payment_method'] = $request->card_id === 'google_pay' ? 'Google Pay' : 'Apple Pay';
+            } else {
+                $data['payment_method'] = 'credit_card';
+            }
+
             Mail::to($user->email)->queue(new PaymentInvoiceMail($data));
         }
 
@@ -787,9 +960,9 @@ class BookingController extends Controller
             "\nNumber of seats: " . ucfirst($booking->seats);
         $this->sendSmsCode($driverPhoneNumber, $ride->driver, $sms_message);
 
+        // Check: same day + within 1 hour before departure, if yes, send passenger list to driver for better preparation and safety
         $currentTime = now();
         $rideDateTime = Carbon::parse($ride->date . ' ' . $ride->time);
-        // Check: same day + within 1 hour
         if (
             $rideDateTime->isSameDay($currentTime) &&
             $currentTime->diffInSeconds($rideDateTime, false) <= 3600 &&
@@ -821,6 +994,831 @@ class BookingController extends Controller
 
         return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $this->successMessage->book_seat_message]);
     }
+
+    /**
+     * update cancel a booking
+     */
+    public function updateCancelBooking($id, Request $request)
+    {
+        $request->validate([
+            'booking_credit' => 'required|max:25',
+            'message' => 'required'
+        ]);
+
+        $user_id = auth()->user()->id;
+        $user = User::where('id', $user_id)->first();
+        $getSetting = SiteSetting::getCached();
+
+        $cancellationCount = $user->recentPassengerCancellationCount($getSetting->booking_cancel_duration);
+
+        if ($cancellationCount >= $getSetting->booking_cancel_limit) {
+            $bookingPage = BookingPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+            return redirect()->back()->with(['failure' => $bookingPage->booking_cancellation_limit_exceed ?? "Booking cancellation limit exceeded"]);
+        }
+
+
+        $payoutAmt = 0;
+
+        $booking = Booking::where('id', $id)->with('ride')->first();
+        $ride = $booking->ride;
+
+        $messages = $this->successMessage;
+
+
+
+        $rideDateTime = Carbon::parse($ride->date . ' ' . $ride->time);
+        $bookingDateTime = Carbon::parse($booking->booked_on);
+        $hoursDifference = $rideDateTime->diffInHours($bookingDateTime);
+
+        $originalSeats = $booking->seats;
+        $updatedSeats = $booking->seats - $request->seats;
+        $updatedBookingCredit = $updatedSeats * ($booking->booking_credit / $booking->seats);
+        $updatedFare = $updatedSeats * ($booking->fare / $booking->seats);
+
+        if ($ride->isFirmCancellation()) {
+            $transactions = Transaction::where('booking_id', $booking->id)
+                ->where('type', '1')
+                ->get();
+
+            $totalPrice = $transactions->sum('price');
+            $refundAmount = $request->seats * ($booking->fare / $booking->seats);
+            $refundTotalAmount = $request->seats * ($booking->fare / $booking->seats);
+            $refundTotalBookingFee = $request->seats * ($booking->booking_credit / $booking->seats);
+
+            // Step 2: Process each transaction for the refund
+            foreach ($transactions as $transaction) {
+
+                $getRefundEntryPrice = Transaction::where('parent_id', $transaction->id)->sum('price');
+
+                if (isset($getRefundEntryPrice) && !is_null($getRefundEntryPrice) && $getRefundEntryPrice == ((float)$transaction->price - (float)$transaction->booking_fee)) {
+                } else {
+                    $transactionAmount = ((float)$transaction->price - (float)$transaction->booking_fee);
+
+                    if ($refundAmount <= 0) {
+                        break; // No need to process further if refund is already completed
+                    }
+
+                    // Check if the current transaction can cover the remaining refund amount
+                    if ($transactionAmount >= $refundAmount) {
+
+                        $newTransaction = Transaction::create([
+                            'booking_id' => $transaction->booking_id,
+                            'ride_id' => $booking->ride_id,
+                            'parent_id' => $transaction->id,
+                            'type' => '3',
+                            'price' => $refundAmount,
+                        ]);
+                        $refundAmount = 0; // Refund is completed
+                        break;
+                    } else {
+
+                        $newTransaction = Transaction::create([
+                            'booking_id' => $transaction->booking_id,
+                            'ride_id' => $booking->ride_id,
+                            'parent_id' => $transaction->id,
+                            'type' => '3',
+                            'price' => $transactionAmount,
+                        ]);
+
+                        $refundAmount -= $transactionAmount; // Reduce the remaining refund amount
+                    }
+                }
+            }
+
+            //Add Payout Data
+
+            $getPayout = Payout::where('ride_id', $booking->ride_id)->where('booking_id', $booking->id)->first();
+            if (isset($getPayout) && !is_null($getPayout)) {
+            } else {
+                $getPayout = new Payout();
+            }
+
+
+            if (isset($getSetting->booking_fee_give_to_driver) && $getSetting->booking_fee_give_to_driver == 1) {
+                $payoutAmt = $refundTotalAmount + $refundTotalBookingFee;
+            } else {
+                $payoutAmt = $refundTotalAmount;
+            }
+
+
+            $deduct_tax = $tax_type = "";
+            $tax = 0;
+            $taxAmt = 0;
+
+
+            if (isset($getSetting) && !empty($getSetting)) {
+                if (isset($getSetting->deduct_tax) && $getSetting->deduct_tax == "deduct_from_driver") {
+                    $deduct_tax = $getSetting->deduct_tax;
+                    $tax_type = $getSetting->tax_type;
+                    if (isset($getSetting->tax_type) && $getSetting->tax_type == "state_wise_tax") {
+                        $locationBeforeComma = explode(',', $booking->departure);
+                        $getFromState = City::with('state:id,tax')->where('status', '1')->whereRaw('LOWER(`name`) LIKE ? ', ['%' . $locationBeforeComma[0] . '%'])->first();
+                        if (isset($getFromState) && !empty($getFromState)) {
+                            $tax = $getFromState->state->tax;
+                        }
+                    } else {
+                        $tax = $getSetting->tax;
+                    }
+
+                    $taxAmt = round((($payoutAmt * $tax) / 100), 2);
+                    $payoutAmt = $payoutAmt - $taxAmt;
+                }
+            }
+            if (isset($getPayout->amount)) {
+                $payoutAmt = $getPayout->amount + $payoutAmt;
+            }
+
+            $rideDateTime = Carbon::parse($ride->completed_date . ' ' . $ride->completed_time);
+
+            $getPayout->ride_id = $booking->ride_id;
+            $getPayout->booking_id = $booking->id;
+            $getPayout->user_id = $ride->added_by;
+            $getPayout->amount = $payoutAmt;
+            $getPayout->available_date = $rideDateTime;
+            $getPayout->status = "pending";
+            $getPayout->tax_amount = $taxAmt;
+            $getPayout->tax_percentage = isset($tax) && $tax != 0 ? $tax : 0;
+            $getPayout->tax_type = isset($tax_type) && $tax_type != "" ? $tax_type : NULL;
+            $getPayout->deduct_type = isset($deduct_tax) && $deduct_tax != "" ? $deduct_tax : NULL;
+            $getPayout->save();
+        } else {
+
+            $transactions = Transaction::where('booking_id', $booking->id)
+                ->where('type', '1')
+                ->get();
+
+            $totalPrice = $transactions->sum('price');
+            $refundAmount = $request->seats * ($booking->fare / $booking->seats);
+            $refundTotalAmount = $request->seats * ($booking->fare / $booking->seats);
+            $getSeatBookingPrice = $booking->booking_credit / $booking->seats;
+            $refundTotalBookingFee = $request->seats * ($booking->booking_credit / $booking->seats);
+
+            if ($hoursDifference > 48) {
+                foreach ($transactions as $transaction) {
+                    $checkPrice = 0.0;
+                    $getRefundEntryPrice = Transaction::where('parent_id', $transaction->id)->sum('price');
+                    $checkPrice = (float)$transaction->price;
+
+                    if (isset($getRefundEntryPrice) && !is_null($getRefundEntryPrice) && $getRefundEntryPrice == $checkPrice) {
+                    } else {
+                        $transactionAmount = (float)$transaction->price;
+
+                        if ($refundAmount <= 0) {
+                            break; // No need to process further if refund is already completed
+                        }
+
+                        // Check if the current transaction can cover the remaining refund amount
+
+                        $refundId = "";
+                        $totalBookingFee = $getSeatBookingPrice * $request->seats;
+                        $refundAmount = $refundAmount + $totalBookingFee;
+                        if ($transactionAmount >= $refundAmount) {
+                            if (isset($transaction->coffee_from_wall) && $transaction->coffee_from_wall == 1) {
+                                if ($transaction->booking_fee >= $totalBookingFee) {
+                                    $coffeeWallet = CoffeeWallet::create([
+                                        'booking_id' => $booking->id,
+                                        'ride_id' => $ride->id,
+                                        'user_id' => $booking->user_id,
+                                        'dr_amount' => $totalBookingFee,
+                                    ]);
+                                    $refundAmount = $refundAmount - $totalBookingFee;
+                                } else {
+                                    $coffeeWallet = CoffeeWallet::create([
+                                        'booking_id' => $booking->id,
+                                        'ride_id' => $booking->ride_id,
+                                        'user_id' => $booking->user_id,
+                                        'dr_amount' => $transaction->booking_fee,
+                                    ]);
+                                    $refundAmount = $refundAmount - $transaction->booking_fee;
+                                }
+                            }
+
+                            if ($transaction->pay_by_account == 0) {
+                                if ($transaction->paypal_id) {
+
+                                    try {
+                                        $uniqueId = strtotime(date('Y-m-d H:i:s'));
+                                        $paypal = new PayPalClient;
+                                        $paypal->setApiCredentials(config('paypal'));
+                                        $token = $paypal->getAccessToken();
+                                        $paypal->setAccessToken($token);
+                                        $response = $paypal->refundCapturedPayment(
+                                            $transaction->paypal_id,
+                                            'Invoice-' . $transaction->paypal_id,
+                                            $refundAmount,
+                                            'Refund issued.'
+                                        );
+
+                                        $refundId = isset($response['id']) ? $response['id'] : "";
+                                    } catch (\PayPal\Exception\PayPalConnectionException $e) {
+                                        $errorData = json_decode($e->getData(), true);
+                                        Log::error("PayPal error: " . $errorData['message']);
+                                    }
+                                } elseif ($transaction->stripe_id) {
+                                    // Set your Stripe API key
+                                    Stripe::setApiKey(env('STRIPE_SECRET'));
+
+                                    try {
+                                        // Create a refund using the payment intent ID
+                                        $refund = Refund::create([
+                                            'payment_intent' => $transaction->stripe_id,
+                                            'amount' => $refundAmount * 100, // Refund amount in cents
+                                        ]);
+
+                                        $refundId = $refund->id;
+                                    } catch (\Stripe\Exception\ApiErrorException $e) {
+                                    }
+                                }
+                            } else {
+                                $topUpBalance = TopUpBalance::create([
+                                    'booking_id' => $transaction->booking_id,
+                                    'user_id' => $booking->user_id,
+                                    'dr_amount' => $refundAmount,
+                                    'added_date' => date('Y-m-d'),
+                                ]);
+                            }
+
+                            $newTransaction = Transaction::create([
+                                'booking_id' => $transaction->booking_id,
+                                'ride_id' => $booking->ride_id,
+                                'parent_id' => $transaction->id,
+                                'type' => '3',
+                                'price' => $refundAmount,
+                                'paypal_id' => isset($transaction->paypal_id) ? $refundId : NULL,
+                                'stripe_id' => isset($transaction->stripe_id) ? $refundId : NULL
+                            ]);
+                            $refundAmount = 0; // Refund is completed
+                            break;
+                        } else {
+                            if ($transaction->pay_by_account == 0) {
+                                if ($transaction->paypal_id) {
+                                    if (isset($transaction->coffee_from_wall) && $transaction->coffee_from_wall == 1) {
+                                        if ($transaction->booking_fee >= $totalBookingFee) {
+                                            $coffeeWallet = CoffeeWallet::create([
+                                                'booking_id' => $booking->id,
+                                                'ride_id' => $ride->id,
+                                                'user_id' => $booking->user_id,
+                                                'dr_amount' => $totalBookingFee,
+                                            ]);
+                                            $refundAmount = $refundAmount - $totalBookingFee;
+                                        } else {
+                                            $coffeeWallet = CoffeeWallet::create([
+                                                'booking_id' => $booking->id,
+                                                'ride_id' => $booking->ride_id,
+                                                'user_id' => $booking->user_id,
+                                                'dr_amount' => $transaction->booking_fee,
+                                            ]);
+                                            $refundAmount = $refundAmount - $transaction->booking_fee;
+                                        }
+                                    }
+
+                                    try {
+                                        $uniqueId = strtotime(date('Y-m-d H:i:s'));
+                                        $paypal = new PayPalClient;
+                                        $paypal->setApiCredentials(config('paypal'));
+                                        $token = $paypal->getAccessToken();
+                                        $paypal->setAccessToken($token);
+                                        $response = $paypal->refundCapturedPayment(
+                                            $transaction->paypal_id,
+                                            'Invoice-' . $transaction->paypal_id,
+                                            $transactionAmount,
+                                            'Refund issued.'
+                                        );
+
+                                        $refundId = isset($response['id']) ? $response['id'] : "";
+                                    } catch (\PayPal\Exception\PayPalConnectionException $e) {
+                                        $errorData = json_decode($e->getData(), true);
+                                        Log::error("PayPal error: " . $errorData['message']);
+                                    }
+                                } elseif ($transaction->stripe_id) {
+                                    // Set your Stripe API key
+                                    Stripe::setApiKey(env('STRIPE_SECRET'));
+
+                                    try {
+                                        // Create a refund using the payment intent ID
+                                        $refund = Refund::create([
+                                            'payment_intent' => $transaction->stripe_id,
+                                            'amount' => $transactionAmount * 100, // Refund amount in cents
+                                        ]);
+
+                                        $refundId = $refund->id;
+                                    } catch (\Stripe\Exception\ApiErrorException $e) {
+                                    }
+                                }
+                            } else {
+                                $topUpBalance = TopUpBalance::create([
+                                    'booking_id' => $transaction->booking_id,
+                                    'user_id' => $booking->user_id,
+                                    'dr_amount' => $transactionAmount,
+                                    'added_date' => date('Y-m-d'),
+                                ]);
+                            }
+
+                            $newTransaction = Transaction::create([
+                                'booking_id' => $transaction->booking_id,
+                                'ride_id' => $booking->ride_id,
+                                'parent_id' => $transaction->id,
+                                'type' => '3',
+                                'price' => $transactionAmount,
+                                'paypal_id' => isset($transaction->paypal_id) ? $refundId : NULL,
+                                'stripe_id' => isset($transaction->stripe_id) ? $refundId : NULL
+                            ]);
+
+                            $refundAmount -= $transactionAmount; // Reduce the remaining refund amount
+                        }
+                    }
+                }
+            } elseif ($hoursDifference >= 12 && $hoursDifference <= 48) {
+
+                $passengerAndDriverRefundAmt = $refundAmount * 0.5;
+                $passengerAndDriverRefundBookingFee = $refundTotalBookingFee * 0.5;
+
+
+                foreach ($transactions as $transaction) {
+
+                    $getRefundEntryPrice = Transaction::where('parent_id', $transaction->id)->sum('price');
+
+                    if (isset($getRefundEntryPrice) && !is_null($getRefundEntryPrice) && $getRefundEntryPrice == ((float)$transaction->price - (float)$transaction->booking_fee)) {
+                    } else {
+                        $transactionAmount = ((float)$transaction->price - (float)$transaction->booking_fee);
+
+                        if ($refundAmount <= 0) {
+                            break; // No need to process further if refund is already completed
+                        }
+
+                        // Check if the current transaction can cover the remaining refund amount
+
+                        $refundId = "";
+                        if ($transactionAmount >= $refundAmount) {
+
+                            if ($transaction->pay_by_account == 0) {
+                                if ($transaction->paypal_id) {
+
+                                    try {
+                                        $uniqueId = strtotime(date('Y-m-d H:i:s'));
+                                        $paypal = new PayPalClient;
+                                        $paypal->setApiCredentials(config('paypal'));
+                                        $token = $paypal->getAccessToken();
+                                        $paypal->setAccessToken($token);
+                                        $response = $paypal->refundCapturedPayment(
+                                            $transaction->paypal_id,
+                                            'Invoice-' . $transaction->paypal_id,
+                                            $passengerAndDriverRefundAmt,
+                                            'Refund issued.'
+                                        );
+
+                                        $refundId = isset($response['id']) ? $response['id'] : "";
+                                    } catch (\PayPal\Exception\PayPalConnectionException $e) {
+                                        $errorData = json_decode($e->getData(), true);
+                                        Log::error("PayPal error: " . $errorData['message']);
+                                    }
+                                } elseif ($transaction->stripe_id) {
+                                    // Set your Stripe API key
+                                    Stripe::setApiKey(env('STRIPE_SECRET'));
+
+                                    try {
+                                        // Create a refund using the payment intent ID
+                                        $refund = Refund::create([
+                                            'payment_intent' => $transaction->stripe_id,
+                                            'amount' => $passengerAndDriverRefundAmt * 100, // Refund amount in cents
+                                        ]);
+
+                                        $refundId = $refund->id;
+                                    } catch (\Stripe\Exception\ApiErrorException $e) {
+                                    }
+                                }
+                            } else {
+                                $topUpBalance = TopUpBalance::create([
+                                    'booking_id' => $transaction->booking_id,
+                                    'user_id' => $booking->user_id,
+                                    'dr_amount' => $passengerAndDriverRefundAmt,
+                                    'added_date' => date('Y-m-d'),
+                                ]);
+                            }
+
+                            //Passenger Entry
+                            $passengerTransaction = Transaction::create([
+                                'booking_id' => $transaction->booking_id,
+                                'ride_id' => $booking->ride_id,
+                                'parent_id' => $transaction->id,
+                                'type' => '3',
+                                'price' => $passengerAndDriverRefundAmt,
+                                'paypal_id' => isset($transaction->paypal_id) ? $refundId : NULL,
+                                'stripe_id' => isset($transaction->stripe_id) ? $refundId : NULL
+                            ]);
+                            //Driver Entry
+                            $driverTransaction = Transaction::create([
+                                'booking_id' => $transaction->booking_id,
+                                'ride_id' => $booking->ride_id,
+                                'parent_id' => $transaction->id,
+                                'type' => '3',
+                                'price' => $passengerAndDriverRefundAmt
+                            ]);
+                            $refundAmount = 0; // Refund is completed
+                            break;
+                        } else {
+
+                            $passengerAndDriverRefundAmt = $transactionAmount * 0.5;
+
+                            if ($transaction->pay_by_account == 0) {
+                                if ($transaction->paypal_id) {
+
+                                    try {
+                                        $uniqueId = strtotime(date('Y-m-d H:i:s'));
+                                        $paypal = new PayPalClient;
+                                        $paypal->setApiCredentials(config('paypal'));
+                                        $token = $paypal->getAccessToken();
+                                        $paypal->setAccessToken($token);
+                                        $response = $paypal->refundCapturedPayment(
+                                            $transaction->paypal_id,
+                                            'Invoice-' . $transaction->paypal_id,
+                                            $passengerAndDriverRefundAmt,
+                                            'Refund issued.'
+                                        );
+
+                                        $refundId = isset($response['id']) ? $response['id'] : "";
+                                    } catch (\PayPal\Exception\PayPalConnectionException $e) {
+                                        $errorData = json_decode($e->getData(), true);
+                                        Log::error("PayPal error: " . $errorData['message']);
+                                    }
+                                } elseif ($transaction->stripe_id) {
+                                    // Set your Stripe API key
+                                    Stripe::setApiKey(env('STRIPE_SECRET'));
+
+                                    try {
+                                        // Create a refund using the payment intent ID
+                                        $refund = Refund::create([
+                                            'payment_intent' => $transaction->stripe_id,
+                                            'amount' => $passengerAndDriverRefundAmt * 100, // Refund amount in cents
+                                        ]);
+
+                                        $refundId = $refund->id;
+                                    } catch (\Stripe\Exception\ApiErrorException $e) {
+                                    }
+                                }
+                            } else {
+                                $topUpBalance = TopUpBalance::create([
+                                    'booking_id' => $transaction->booking_id,
+                                    'user_id' => $booking->user_id,
+                                    'dr_amount' => $passengerAndDriverRefundAmt,
+                                    'added_date' => date('Y-m-d'),
+                                ]);
+                            }
+
+                            //Passenger Transction
+                            $passengerTransaction = Transaction::create([
+                                'booking_id' => $transaction->booking_id,
+                                'ride_id' => $booking->ride_id,
+                                'parent_id' => $transaction->id,
+                                'type' => '3',
+                                'price' => $passengerAndDriverRefundAmt,
+                                'paypal_id' => isset($transaction->paypal_id) ? $refundId : NULL,
+                                'stripe_id' => isset($transaction->stripe_id) ? $refundId : NULL
+                            ]);
+
+                            //Driver Transction
+                            $driverTransaction = Transaction::create([
+                                'booking_id' => $transaction->booking_id,
+                                'ride_id' => $booking->ride_id,
+                                'parent_id' => $transaction->id,
+                                'type' => '3',
+                                'price' => $passengerAndDriverRefundAmt
+                            ]);
+
+                            $refundAmount -= $transactionAmount; // Reduce the remaining refund amount
+                        }
+                    }
+                }
+
+                //Add Payout Data
+
+                $getPayout = Payout::where('ride_id', $booking->ride_id)->where('booking_id', $booking->id)->first();
+                if (isset($getPayout) && !is_null($getPayout)) {
+                } else {
+                    $getPayout = new Payout();
+                }
+
+                if (isset($getSetting->booking_fee_give_to_driver) && $getSetting->booking_fee_give_to_driver == 1) {
+                    $payoutAmt = $passengerAndDriverRefundAmt + $passengerAndDriverRefundBookingFee;
+                } else {
+                    $payoutAmt = $passengerAndDriverRefundAmt;
+                }
+
+                $deduct_tax = $tax_type = "";
+                $tax = 0;
+                $taxAmt = 0;
+
+
+
+                if (isset($getSetting) && !empty($getSetting)) {
+                    if (isset($getSetting->deduct_tax) && $getSetting->deduct_tax == "deduct_from_driver") {
+                        $deduct_tax = $getSetting->deduct_tax;
+                        $tax_type = $getSetting->tax_type;
+                        if (isset($getSetting->tax_type) && $getSetting->tax_type == "state_wise_tax") {
+                            $locationBeforeComma = explode(',', $booking->departure);
+                            $getFromState = City::with('state:id,tax')->where('status', '1')->whereRaw('LOWER(`name`) LIKE ? ', ['%' . $locationBeforeComma[0] . '%'])->first();
+                            if (isset($getFromState) && !empty($getFromState)) {
+                                $tax = $getFromState->state->tax;
+                            }
+                        } else {
+                            $tax = $getSetting->tax;
+                        }
+
+                        $taxAmt = round((($payoutAmt * $tax) / 100), 2);
+                        $payoutAmt = $payoutAmt - $taxAmt;
+                    }
+                }
+
+                if (isset($getPayout->amount)) {
+                    $payoutAmt = $getPayout->amount + $payoutAmt;
+                }
+
+                $rideDateTime = Carbon::parse("$ride->completed_date $ride->completed_time");
+
+                $getPayout->ride_id = $booking->ride_id;
+                $getPayout->booking_id = $booking->id;
+                $getPayout->user_id = $ride->added_by;
+                $getPayout->amount = $payoutAmt;
+                $getPayout->available_date = $rideDateTime;
+                $getPayout->status = "pending";
+                $getPayout->tax_amount = $taxAmt;
+                $getPayout->tax_percentage = isset($tax) && $tax != 0 ? $tax : 0;
+                $getPayout->tax_type = isset($tax_type) && $tax_type != "" ? $tax_type : NULL;
+                $getPayout->deduct_type = isset($deduct_tax) && $deduct_tax != "" ? $deduct_tax : NULL;
+                $getPayout->save();
+            } elseif ($hoursDifference < 12) {
+                foreach ($transactions as $transaction) {
+
+                    $getRefundEntryPrice = Transaction::where('parent_id', $transaction->id)->sum('price');
+
+                    if (isset($getRefundEntryPrice) && !is_null($getRefundEntryPrice) && $getRefundEntryPrice == ((float)$transaction->price - (float)$transaction->booking_fee)) {
+                    } else {
+                        $transactionAmount = ((float)$transaction->price - (float)$transaction->booking_fee);
+
+                        if ($refundAmount <= 0) {
+                            break; // No need to process further if refund is already completed
+                        }
+
+                        // Check if the current transaction can cover the remaining refund amount
+                        if ($transactionAmount >= $refundAmount) {
+
+                            $newTransaction = Transaction::create([
+                                'booking_id' => $transaction->booking_id,
+                                'ride_id' => $booking->ride_id,
+                                'parent_id' => $transaction->id,
+                                'type' => '3',
+                                'price' => $refundAmount,
+                            ]);
+                            $refundAmount = 0; // Refund is completed
+                            break;
+                        } else {
+
+                            $newTransaction = Transaction::create([
+                                'booking_id' => $transaction->booking_id,
+                                'ride_id' => $booking->ride_id,
+                                'parent_id' => $transaction->id,
+                                'type' => '3',
+                                'price' => $transactionAmount,
+                            ]);
+
+                            $refundAmount -= $transactionAmount; // Reduce the remaining refund amount
+                        }
+                    }
+                }
+                //Add Payout Data
+
+                $getPayout = Payout::where('ride_id', $booking->ride_id)->where('booking_id', $booking->id)->first();
+                if (isset($getPayout) && !is_null($getPayout)) {
+                } else {
+                    $getPayout = new Payout();
+                }
+
+                if (isset($getSetting->booking_fee_give_to_driver) && $getSetting->booking_fee_give_to_driver == 1) {
+                    $payoutAmt = $refundTotalAmount + $refundTotalBookingFee;
+                } else {
+                    $payoutAmt = $refundTotalAmount;
+                }
+
+
+
+                $deduct_tax = $tax_type = "";
+                $tax = 0;
+                $taxAmt = 0;
+
+                if (isset($getSetting) && !empty($getSetting)) {
+                    if (isset($getSetting->deduct_tax) && $getSetting->deduct_tax == "deduct_from_driver") {
+                        $deduct_tax = $getSetting->deduct_tax;
+                        $tax_type = $getSetting->tax_type;
+                        if (isset($getSetting->tax_type) && $getSetting->tax_type == "state_wise_tax") {
+                            $locationBeforeComma = explode(',', $booking->departure);
+                            $getFromState = City::with('state:id,tax')->where('status', '1')->whereRaw('LOWER(`name`) LIKE ? ', ['%' . $locationBeforeComma[0] . '%'])->first();
+                            if (isset($getFromState) && !empty($getFromState)) {
+                                $tax = $getFromState->state->tax;
+                            }
+                        } else {
+                            $tax = $getSetting->tax;
+                        }
+
+                        $taxAmt = round((($payoutAmt * $tax) / 100), 2);
+                        $payoutAmt = $payoutAmt - $taxAmt;
+                    }
+                }
+
+                if (isset($getPayout->amount)) {
+                    $payoutAmt = $getPayout->amount + $payoutAmt;
+                }
+
+                $rideDateTime = Carbon::parse("$ride->completed_date $ride->completed_time");
+
+                $getPayout->ride_id = $booking->ride_id;
+                $getPayout->booking_id = $booking->id;
+                $getPayout->user_id = $ride->added_by;
+                $getPayout->amount = $payoutAmt;
+                $getPayout->available_date = $rideDateTime;
+                $getPayout->status = "pending";
+                $getPayout->tax_amount = $taxAmt;
+                $getPayout->tax_percentage = isset($tax) && $tax != 0 ? $tax : 0;
+                $getPayout->tax_type = isset($tax_type) && $tax_type != "" ? $tax_type : NULL;
+                $getPayout->deduct_type = isset($deduct_tax) && $deduct_tax != "" ? $deduct_tax : NULL;
+                $getPayout->save();
+            }
+        }
+
+        if ($request->seats < $booking->seats) {
+            $booking->update([
+                'seats' => $updatedSeats,
+                'booking_credit' => $updatedBookingCredit,
+                'fare' => $updatedFare,
+            ]);
+        } elseif ($request->seats == $booking->seats) {
+            $booking->update([
+                // mark as cancelled
+                'status' => '4',
+            ]);
+        } else {
+            return redirect()->back()->with(['failure' => 'Invalid number of seats to cancel.']);
+        }
+
+
+        SeatDetail::where('booking_id', $booking->id)
+            ->orderBy('id') // or seat_number
+            ->limit($request->seats)
+            ->update([
+                'status' => 'pending',
+                'booking_id' => null,
+                'user_id' => null,
+            ]);
+
+        CancellationHistory::create([
+            'ride_id' => $booking->ride_id,
+            'booking_id' => $booking->id,
+            'user_id' => $user->id,
+            'type' => 'passenger',
+        ]);
+
+
+        //////////////////////////////////////////////////////////
+        // Notify driver about cancellation
+        //////////////////////////////////////////////////////////
+        
+        $driverPhoneNumber = $ride->driver?->primaryPhone()?->phone ?? $ride->driver?->phone;
+        
+        if (isset($ride->driver->email_notification) && $ride->driver->email_notification == 1) {
+
+            $data = [
+                'driver_name' => $ride->driver->first_name,
+                'passenger_name' => $booking->passenger->first_name,
+                'seats' => $originalSeats,
+                'cancelled_searts' => $request->seats,
+                'price' => number_format((float)($booking->price / 100), 2, '.', ''),
+                'from' => $booking->departure,
+                'to' => $booking->destination,
+                'date' => Carbon::parse($ride->date)->format('F d, Y'),
+                'time' => $ride->time
+            ];
+            // Send email to driver
+            Mail::to($ride->driver->email)->queue(new PassengerCancelBookingMail($data));
+        }
+
+        $notification = Notification::create([
+            'ride_id' => $booking->ride_id,
+            'posted_by' => $booking->user_id,
+            'message' => $this->getNotificationMessage(
+                'booking_cancelled',
+                [],
+                "Booking cancelled"
+            ),
+            'status' => 'cancelled',
+            'notification_type' => 'upcoming',
+            'from_stop_id' => $booking->from_stop_id,
+            'to_stop_id' => $booking->to_stop_id,
+            'departure' => $booking->departure,
+            'destination' => $booking->destination
+        ]);
+
+        $this->sendFCM($notification->message, $ride->driver);
+
+        // Send message to driver about cancellation
+        Message::create([
+            'ride_id' => $ride->id,
+            'receiver' => $ride->added_by,
+            'sender' => $user->id,
+            'message' => $request->input('message'),
+        ]);
+
+
+        $rideDateTime = Carbon::parse($ride->date . ' ' . $ride->time);
+        $oneHourBefore = $rideDateTime->copy()->subHour();
+        // If cancellation is within 1 hour of the ride, send updated passenger list to driver
+        if (Carbon::now()->between($oneHourBefore, $rideDateTime)) {
+            // Get updated passenger list (excluding cancelled bookings)
+            $getBookings = Booking::select('user_id', DB::raw('SUM(seats) as total_seats'))
+                ->where('ride_id', $booking->ride_id)
+                ->bookedOrCompleted()
+                ->groupBy('user_id')
+                ->with('passenger')
+                ->get();
+
+            if ($getBookings->isNotEmpty()) {
+                $passengers = [];
+                foreach ($getBookings as $bookingItem) {
+                    $passengers[] = [
+                        'first_name' => $bookingItem->passenger->first_name,
+                        'seats' => $bookingItem->total_seats,
+                        'phone_number' => $bookingItem->passenger->primaryPhone()?->phone ?? $bookingItem->passenger->phone,
+                    ];
+                }
+
+                $data = [
+                    'driver_name' => $ride->driver->first_name,
+                    'from' => $booking->departure,
+                    'to' => $booking->destination,
+                    'date' => $ride->date,
+                    'time' => $ride->time,
+                    'passengers' => $passengers,
+                ];
+
+                // Send updated passenger list email
+                if ($ride->driver->email_notification == 1) {
+                    Mail::to($ride->driver->email)->queue(new PassengerListMail($data));
+                }
+
+                // Send FCM notification
+                $notification = Notification::create([
+                    'ride_id' => $booking->ride_id,
+                    'posted_by' => $booking->ride->added_by,
+                    'message' => $this->getNotificationMessage(
+                        'passenger_list_updated',
+                        [],
+                        "Your passenger list has been updated"
+                    ),
+                    'status' => 'upcoming',
+                    'notification_type' => 'upcoming',
+                    'from_stop_id' => $booking->from_stop_id,
+                    'to_stop_id' => $booking->to_stop_id,
+                    'departure' => $booking->departure,
+                    'destination' => $booking->destination,
+                ]);
+
+                $this->sendFCM($notification->message, $ride->driver);
+
+                // Send SMS notification to driver
+                
+                $passengerList = "";
+                $counter = 1;
+                foreach ($passengers as $passenger) {
+                    $seatText = $passenger['seats'] == 1 ? 'seat' : 'seats';
+                    $passengerList .= $counter . "- " . $passenger['first_name'] .
+                        ". Phone " . $passenger['phone_number'] .
+                        ". Booked: " . $passenger['seats'] . " " . $seatText . "\n";
+                    $counter++;
+                }
+
+                $sms_message = "From ProximaRide: Your passenger list has been updated for your ride from " .
+                    $booking->departure . " to " . $booking->destination .
+                    " on " . Carbon::parse($ride->date)->format('F d, Y') . " at " . $ride->time . "\n" .
+                    $passengerList . "Drive safe!";
+                $this->sendSmsCode($driverPhoneNumber, $ride->driver, $sms_message);
+            }
+        }
+
+
+        // Send SMS notification to driver about cancellation
+        $sms_message = "From ProximaRide: Ride from " .
+            $booking->departure . " to " . $booking->destination . " on " . Carbon::parse($ride->date)->format('F d, Y') . " at " . $ride->time .
+            "\nYour passenger " . $booking->passenger->first_name . " has cancelled as follows:\nBooked: " . $booking->seats .
+            " seats\nCancelled " . $request->seats . "\nRemaining: " . ($booking->seats - $request->seats) .
+            "\nAmount due to you: $" . $payoutAmt .
+            "* (* See our cancellation policy)\nWe have opened the cancelled seat(s) for other passengers to book";
+        $this->sendSmsCode($driverPhoneNumber, $ride->driver, $sms_message);
+
+
+        return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->cancel_booking_message ?? null]);
+    }
+
+
+
+
 
 
 
@@ -1149,7 +2147,10 @@ class BookingController extends Controller
     }
 
 
-
+    /**
+     * cancel booking by passenger
+     * params: booking id
+     */
     public function cancel($lang = null, $id)
     {
         $user = auth()->user();
@@ -1157,38 +2158,21 @@ class BookingController extends Controller
             return redirect()->route('login', ['lang' => $lang])->with('error', __('Please log in to cancel your booking.'));
         }
 
-        $notificationPage = ChatsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        $successMessage = $this->successMessage;
-        // Retrieve the HomePageSettingDetail associated with the selected language
-        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        $limitExceed = BookingPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-        $user_id = $user->id;
         $setting = SiteSetting::getCached();
-        $monthsAgo = Carbon::now()->subMonths($setting->booking_cancel_duration);
 
-        $cancellationCount = Booking::where('user_id', $user_id)
-            ->where('booked_on', '>=', $monthsAgo)
-            ->count();
+        $booking = Booking::where('id', $id)->with('ride')->first();
+        $ride = $booking->ride;
 
-
-        $booking = Booking::where('id', $id)->first();
-        $ride = Ride::where('id', $booking->ride_id)->first();
-        $languages = Language::getAllCached();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-
-        $sureMessage = $tripsPage->cancel_booking_confirm_message ?? "Are you sure you want to cancel booking?";
         $rideDateTime = Carbon::parse($ride->date . ' ' . $ride->time);
         $bookingDateTime = Carbon::parse($booking->booked_on);
         $hoursDifference = $rideDateTime->diffInHours($bookingDateTime);
 
-        $type = FeaturesSetting::whereId($booking->type)->first();
 
-        if ($type && $type->slug === 'firm') {
+        $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $sureMessage = $tripsPage->cancel_booking_confirm_message ?? "Are you sure you want to cancel booking?";
+
+        if ($ride->isFirmCancellation()) {
             $sureMessage = $tripsPage->cancel_booking_confirm_firm_message ?? "Are you sure you want to cancel booking?";
         } else {
             if ($hoursDifference > 48) {
@@ -1200,15 +2184,9 @@ class BookingController extends Controller
             }
         }
 
-
-
-
         return view('cancel_booking', [
-            'notificationPage' => $notificationPage,
-            'successMessage' => $successMessage,
             'booking' => $booking,
             'ride' => $ride,
-            'postRidePage' => $postRidePage,
             'setting' => $setting,
             'tripsPage' => $tripsPage,
             'sureMessage' => $sureMessage
@@ -3181,20 +4159,7 @@ class BookingController extends Controller
                 $expiryTime = $Time->addMinutes(30);
             }
 
-            $selectedLanguage = session('selectedLanguage');
-            $messages = null;
-            if ($selectedLanguage) {
-                // Find the language by abbreviation
-                $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-                if ($selectedLanguage) {
-                    $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_request_success_message')->first();
-                }
-            } else {
-                $selectedLanguage = Language::where('is_default', 1)->first();
-                if ($selectedLanguage) {
-                    $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_request_success_message')->first();
-                }
-            }
+            $message = $this->successMessage;
 
             //Booking Method
             $secured_cash = null;
@@ -5568,958 +6533,7 @@ class BookingController extends Controller
             ->with('message', 'Transaction failed.');
     }
 
-    public function updateCancelBooking($id, Request $request)
-    {
-        $user_id = auth()->user()->id;
-        $setting = SiteSetting::getCached();
-        $payoutAmt = 0;
-        $monthsAgo = Carbon::now()->subMonths($setting->booking_cancel_duration)->setTimezone('UTC');;
 
-        $cancellationCount = CancellationHistory::where('user_id', $user_id)
-            ->where('created_at', '>=', $monthsAgo)
-            ->where('type', 'driver')
-
-            ->count();
-
-
-        $booking = Booking::where('id', $id)->first();
-        $ride = Ride::where('id', $booking->ride_id)->first();
-        $getSetting = SiteSetting::getCached();
-
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_booking_message')->first();
-            $limitExceed = BookingPageSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_cancellation_limit_exceed')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_booking_message')->first();
-            $limitExceed = BookingPageSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_cancellation_limit_exceed')->first();
-        }
-        if ($cancellationCount >= $setting->booking_cancel_limit) {
-            return redirect()->back()->with(['failure' => $limitExceed->booking_cancellation_limit_exceed ?? "Booking cancellation limit exceeded"]);
-        }
-        $customMessages = [
-            'max' => 'The :attribute may not be greater than :max characters',
-        ];
-
-        $request->validate([
-            'booking_credit' => 'required|max:25',
-            'message' => 'required'
-        ], $customMessages);
-
-        $rideDateTime = Carbon::parse($ride->date . ' ' . $ride->time);
-        $bookingDateTime = Carbon::parse($booking->booked_on);
-        $hoursDifference = $rideDateTime->diffInHours($bookingDateTime);
-
-        $originalSeats = $booking->seats;
-        $updatedSeats = $booking->seats - $request->seats;
-        $updatedBookingCredit = $updatedSeats * ($booking->booking_credit / $booking->seats);
-        $updatedFare = $updatedSeats * ($booking->fare / $booking->seats);
-
-        $type = FeaturesSetting::whereId($booking->type)->first();
-        if ($type && $type->slug === 'firm') {
-            $transactions = Transaction::where('booking_id', $booking->id)
-                ->where('type', '1')
-                ->get();
-
-            $totalPrice = $transactions->sum('price');
-            $refundAmount = $request->seats * ($booking->fare / $booking->seats);
-            $refundTotalAmount = $request->seats * ($booking->fare / $booking->seats);
-            $refundTotalBookingFee = $request->seats * ($booking->booking_credit / $booking->seats);
-
-            // Step 2: Process each transaction for the refund
-            foreach ($transactions as $transaction) {
-
-                $getRefundEntryPrice = Transaction::where('parent_id', $transaction->id)->sum('price');
-
-                if (isset($getRefundEntryPrice) && !is_null($getRefundEntryPrice) && $getRefundEntryPrice == ((float)$transaction->price - (float)$transaction->booking_fee)) {
-                } else {
-                    $transactionAmount = ((float)$transaction->price - (float)$transaction->booking_fee);
-
-                    if ($refundAmount <= 0) {
-                        break; // No need to process further if refund is already completed
-                    }
-
-                    // Check if the current transaction can cover the remaining refund amount
-                    if ($transactionAmount >= $refundAmount) {
-
-                        $newTransaction = Transaction::create([
-                            'booking_id' => $transaction->booking_id,
-                            'ride_id' => $booking->ride_id,
-                            'parent_id' => $transaction->id,
-                            'type' => '3',
-                            'price' => $refundAmount,
-                        ]);
-                        $refundAmount = 0; // Refund is completed
-                        break;
-                    } else {
-
-                        $newTransaction = Transaction::create([
-                            'booking_id' => $transaction->booking_id,
-                            'ride_id' => $booking->ride_id,
-                            'parent_id' => $transaction->id,
-                            'type' => '3',
-                            'price' => $transactionAmount,
-                        ]);
-
-                        $refundAmount -= $transactionAmount; // Reduce the remaining refund amount
-                    }
-                }
-            }
-            //Add Payout Data
-
-            $getPayout = Payout::where('ride_id', $booking->ride_id)->where('booking_id', $booking->id)->first();
-            if (isset($getPayout) && !is_null($getPayout)) {
-            } else {
-                $getPayout = new Payout();
-            }
-
-
-            if (isset($getSetting->booking_fee_give_to_driver) && $getSetting->booking_fee_give_to_driver == 1) {
-                $payoutAmt = $refundTotalAmount + $refundTotalBookingFee;
-            } else {
-                $payoutAmt = $refundTotalAmount;
-            }
-
-
-            $deduct_tax = $tax_type = "";
-            $tax = 0;
-            $taxAmt = 0;
-
-
-            if (isset($getSetting) && !empty($getSetting)) {
-                if (isset($getSetting->deduct_tax) && $getSetting->deduct_tax == "deduct_from_driver") {
-                    $deduct_tax = $getSetting->deduct_tax;
-                    $tax_type = $getSetting->tax_type;
-                    if (isset($getSetting->tax_type) && $getSetting->tax_type == "state_wise_tax") {
-                        $locationBeforeComma = explode(',', $booking->departure);
-                        $getFromState = City::with('state:id,tax')->where('status', '1')->whereRaw('LOWER(`name`) LIKE ? ', ['%' . $locationBeforeComma[0] . '%'])->first();
-                        if (isset($getFromState) && !empty($getFromState)) {
-                            $tax = $getFromState->state->tax;
-                        }
-                    } else {
-                        $tax = $getSetting->tax;
-                    }
-
-                    $taxAmt = round((($payoutAmt * $tax) / 100), 2);
-                    $payoutAmt = $payoutAmt - $taxAmt;
-                }
-            }
-            if (isset($getPayout->amount)) {
-                $payoutAmt = $getPayout->amount + $payoutAmt;
-            }
-
-            $rideDateTime = Carbon::parse("$ride->completed_date $ride->completed_time");
-
-            $getPayout->ride_id = $booking->ride_id;
-            $getPayout->booking_id = $booking->id;
-            $getPayout->user_id = $ride->added_by;
-            $getPayout->amount = $payoutAmt;
-            $getPayout->available_date = $rideDateTime;
-            $getPayout->status = "pending";
-            $getPayout->tax_amount = $taxAmt;
-            $getPayout->tax_percentage = isset($tax) && $tax != 0 ? $tax : 0;
-            $getPayout->tax_type = isset($tax_type) && $tax_type != "" ? $tax_type : NULL;
-            $getPayout->deduct_type = isset($deduct_tax) && $deduct_tax != "" ? $deduct_tax : NULL;
-            $getPayout->save();
-        } elseif ($type && $type->slug === 'standard') {
-
-            $transactions = Transaction::where('booking_id', $booking->id)
-                ->where('type', '1')
-                ->get();
-
-            $totalPrice = $transactions->sum('price');
-            $refundAmount = $request->seats * ($booking->fare / $booking->seats);
-            $refundTotalAmount = $request->seats * ($booking->fare / $booking->seats);
-            $getSeatBookingPrice = $booking->booking_credit / $booking->seats;
-            $refundTotalBookingFee = $request->seats * ($booking->booking_credit / $booking->seats);
-
-            if ($hoursDifference > 48) {
-                foreach ($transactions as $transaction) {
-                    $checkPrice = 0.0;
-                    $getRefundEntryPrice = Transaction::where('parent_id', $transaction->id)->sum('price');
-                    $checkPrice = (float)$transaction->price;
-
-                    if (isset($getRefundEntryPrice) && !is_null($getRefundEntryPrice) && $getRefundEntryPrice == $checkPrice) {
-                    } else {
-                        $transactionAmount = (float)$transaction->price;
-
-                        if ($refundAmount <= 0) {
-                            break; // No need to process further if refund is already completed
-                        }
-
-                        // Check if the current transaction can cover the remaining refund amount
-
-                        $refundId = "";
-                        $totalBookingFee = $getSeatBookingPrice * $request->seats;
-                        $refundAmount = $refundAmount + $totalBookingFee;
-                        if ($transactionAmount >= $refundAmount) {
-                            if (isset($transaction->coffee_from_wall) && $transaction->coffee_from_wall == 1) {
-                                if ($transaction->booking_fee >= $totalBookingFee) {
-                                    $coffeeWallet = CoffeeWallet::create([
-                                        'booking_id' => $booking->id,
-                                        'ride_id' => $ride->id,
-                                        'user_id' => $booking->user_id,
-                                        'dr_amount' => $totalBookingFee,
-                                    ]);
-                                    $refundAmount = $refundAmount - $totalBookingFee;
-                                } else {
-                                    $coffeeWallet = CoffeeWallet::create([
-                                        'booking_id' => $booking->id,
-                                        'ride_id' => $booking->ride_id,
-                                        'user_id' => $booking->user_id,
-                                        'dr_amount' => $transaction->booking_fee,
-                                    ]);
-                                    $refundAmount = $refundAmount - $transaction->booking_fee;
-                                }
-                            }
-
-                            if ($transaction->pay_by_account == 0) {
-                                if ($transaction->paypal_id) {
-
-                                    try {
-                                        $uniqueId = strtotime(date('Y-m-d H:i:s'));
-                                        $paypal = new PayPalClient;
-                                        $paypal->setApiCredentials(config('paypal'));
-                                        $token = $paypal->getAccessToken();
-                                        $paypal->setAccessToken($token);
-                                        $response = $paypal->refundCapturedPayment(
-                                            $transaction->paypal_id,
-                                            'Invoice-' . $transaction->paypal_id,
-                                            $refundAmount,
-                                            'Refund issued.'
-                                        );
-
-                                        $refundId = isset($response['id']) ? $response['id'] : "";
-                                    } catch (\PayPal\Exception\PayPalConnectionException $e) {
-                                        $errorData = json_decode($e->getData(), true);
-                                        Log::error("PayPal error: " . $errorData['message']);
-                                    }
-                                } elseif ($transaction->stripe_id) {
-                                    // Set your Stripe API key
-                                    Stripe::setApiKey(env('STRIPE_SECRET'));
-
-                                    try {
-                                        // Create a refund using the payment intent ID
-                                        $refund = Refund::create([
-                                            'payment_intent' => $transaction->stripe_id,
-                                            'amount' => $refundAmount * 100, // Refund amount in cents
-                                        ]);
-
-                                        $refundId = $refund->id;
-                                    } catch (\Stripe\Exception\ApiErrorException $e) {
-                                    }
-                                }
-                            } else {
-                                $topUpBalance = TopUpBalance::create([
-                                    'booking_id' => $transaction->booking_id,
-                                    'user_id' => $booking->user_id,
-                                    'dr_amount' => $refundAmount,
-                                    'added_date' => date('Y-m-d'),
-                                ]);
-                            }
-
-                            $newTransaction = Transaction::create([
-                                'booking_id' => $transaction->booking_id,
-                                'ride_id' => $booking->ride_id,
-                                'parent_id' => $transaction->id,
-                                'type' => '3',
-                                'price' => $refundAmount,
-                                'paypal_id' => isset($transaction->paypal_id) ? $refundId : NULL,
-                                'stripe_id' => isset($transaction->stripe_id) ? $refundId : NULL
-                            ]);
-                            $refundAmount = 0; // Refund is completed
-                            break;
-                        } else {
-                            if ($transaction->pay_by_account == 0) {
-                                if ($transaction->paypal_id) {
-                                    if (isset($transaction->coffee_from_wall) && $transaction->coffee_from_wall == 1) {
-                                        if ($transaction->booking_fee >= $totalBookingFee) {
-                                            $coffeeWallet = CoffeeWallet::create([
-                                                'booking_id' => $booking->id,
-                                                'ride_id' => $ride->id,
-                                                'user_id' => $booking->user_id,
-                                                'dr_amount' => $totalBookingFee,
-                                            ]);
-                                            $refundAmount = $refundAmount - $totalBookingFee;
-                                        } else {
-                                            $coffeeWallet = CoffeeWallet::create([
-                                                'booking_id' => $booking->id,
-                                                'ride_id' => $booking->ride_id,
-                                                'user_id' => $booking->user_id,
-                                                'dr_amount' => $transaction->booking_fee,
-                                            ]);
-                                            $refundAmount = $refundAmount - $transaction->booking_fee;
-                                        }
-                                    }
-
-                                    try {
-                                        $uniqueId = strtotime(date('Y-m-d H:i:s'));
-                                        $paypal = new PayPalClient;
-                                        $paypal->setApiCredentials(config('paypal'));
-                                        $token = $paypal->getAccessToken();
-                                        $paypal->setAccessToken($token);
-                                        $response = $paypal->refundCapturedPayment(
-                                            $transaction->paypal_id,
-                                            'Invoice-' . $transaction->paypal_id,
-                                            $transactionAmount,
-                                            'Refund issued.'
-                                        );
-
-                                        $refundId = isset($response['id']) ? $response['id'] : "";
-                                    } catch (\PayPal\Exception\PayPalConnectionException $e) {
-                                        $errorData = json_decode($e->getData(), true);
-                                        Log::error("PayPal error: " . $errorData['message']);
-                                    }
-                                } elseif ($transaction->stripe_id) {
-                                    // Set your Stripe API key
-                                    Stripe::setApiKey(env('STRIPE_SECRET'));
-
-                                    try {
-                                        // Create a refund using the payment intent ID
-                                        $refund = Refund::create([
-                                            'payment_intent' => $transaction->stripe_id,
-                                            'amount' => $transactionAmount * 100, // Refund amount in cents
-                                        ]);
-
-                                        $refundId = $refund->id;
-                                    } catch (\Stripe\Exception\ApiErrorException $e) {
-                                    }
-                                }
-                            } else {
-                                $topUpBalance = TopUpBalance::create([
-                                    'booking_id' => $transaction->booking_id,
-                                    'user_id' => $booking->user_id,
-                                    'dr_amount' => $transactionAmount,
-                                    'added_date' => date('Y-m-d'),
-                                ]);
-                            }
-
-                            $newTransaction = Transaction::create([
-                                'booking_id' => $transaction->booking_id,
-                                'ride_id' => $booking->ride_id,
-                                'parent_id' => $transaction->id,
-                                'type' => '3',
-                                'price' => $transactionAmount,
-                                'paypal_id' => isset($transaction->paypal_id) ? $refundId : NULL,
-                                'stripe_id' => isset($transaction->stripe_id) ? $refundId : NULL
-                            ]);
-
-                            $refundAmount -= $transactionAmount; // Reduce the remaining refund amount
-                        }
-                    }
-                }
-            } elseif ($hoursDifference >= 12 && $hoursDifference <= 48) {
-
-                $passengerAndDriverRefundAmt = $refundAmount * 0.5;
-                $passengerAndDriverRefundBookingFee = $refundTotalBookingFee * 0.5;
-
-
-                foreach ($transactions as $transaction) {
-
-                    $getRefundEntryPrice = Transaction::where('parent_id', $transaction->id)->sum('price');
-
-                    if (isset($getRefundEntryPrice) && !is_null($getRefundEntryPrice) && $getRefundEntryPrice == ((float)$transaction->price - (float)$transaction->booking_fee)) {
-                    } else {
-                        $transactionAmount = ((float)$transaction->price - (float)$transaction->booking_fee);
-
-                        if ($refundAmount <= 0) {
-                            break; // No need to process further if refund is already completed
-                        }
-
-                        // Check if the current transaction can cover the remaining refund amount
-
-                        $refundId = "";
-                        if ($transactionAmount >= $refundAmount) {
-
-                            if ($transaction->pay_by_account == 0) {
-                                if ($transaction->paypal_id) {
-
-                                    try {
-                                        $uniqueId = strtotime(date('Y-m-d H:i:s'));
-                                        $paypal = new PayPalClient;
-                                        $paypal->setApiCredentials(config('paypal'));
-                                        $token = $paypal->getAccessToken();
-                                        $paypal->setAccessToken($token);
-                                        $response = $paypal->refundCapturedPayment(
-                                            $transaction->paypal_id,
-                                            'Invoice-' . $transaction->paypal_id,
-                                            $passengerAndDriverRefundAmt,
-                                            'Refund issued.'
-                                        );
-
-                                        $refundId = isset($response['id']) ? $response['id'] : "";
-                                    } catch (\PayPal\Exception\PayPalConnectionException $e) {
-                                        $errorData = json_decode($e->getData(), true);
-                                        Log::error("PayPal error: " . $errorData['message']);
-                                    }
-                                } elseif ($transaction->stripe_id) {
-                                    // Set your Stripe API key
-                                    Stripe::setApiKey(env('STRIPE_SECRET'));
-
-                                    try {
-                                        // Create a refund using the payment intent ID
-                                        $refund = Refund::create([
-                                            'payment_intent' => $transaction->stripe_id,
-                                            'amount' => $passengerAndDriverRefundAmt * 100, // Refund amount in cents
-                                        ]);
-
-                                        $refundId = $refund->id;
-                                    } catch (\Stripe\Exception\ApiErrorException $e) {
-                                    }
-                                }
-                            } else {
-                                $topUpBalance = TopUpBalance::create([
-                                    'booking_id' => $transaction->booking_id,
-                                    'user_id' => $booking->user_id,
-                                    'dr_amount' => $passengerAndDriverRefundAmt,
-                                    'added_date' => date('Y-m-d'),
-                                ]);
-                            }
-
-                            //Passenger Entry
-                            $passengerTransaction = Transaction::create([
-                                'booking_id' => $transaction->booking_id,
-                                'ride_id' => $booking->ride_id,
-                                'parent_id' => $transaction->id,
-                                'type' => '3',
-                                'price' => $passengerAndDriverRefundAmt,
-                                'paypal_id' => isset($transaction->paypal_id) ? $refundId : NULL,
-                                'stripe_id' => isset($transaction->stripe_id) ? $refundId : NULL
-                            ]);
-                            //Driver Entry
-                            $driverTransaction = Transaction::create([
-                                'booking_id' => $transaction->booking_id,
-                                'ride_id' => $booking->ride_id,
-                                'parent_id' => $transaction->id,
-                                'type' => '3',
-                                'price' => $passengerAndDriverRefundAmt
-                            ]);
-                            $refundAmount = 0; // Refund is completed
-                            break;
-                        } else {
-
-                            $passengerAndDriverRefundAmt = $transactionAmount * 0.5;
-
-                            if ($transaction->pay_by_account == 0) {
-                                if ($transaction->paypal_id) {
-
-                                    try {
-                                        $uniqueId = strtotime(date('Y-m-d H:i:s'));
-                                        $paypal = new PayPalClient;
-                                        $paypal->setApiCredentials(config('paypal'));
-                                        $token = $paypal->getAccessToken();
-                                        $paypal->setAccessToken($token);
-                                        $response = $paypal->refundCapturedPayment(
-                                            $transaction->paypal_id,
-                                            'Invoice-' . $transaction->paypal_id,
-                                            $passengerAndDriverRefundAmt,
-                                            'Refund issued.'
-                                        );
-
-                                        $refundId = isset($response['id']) ? $response['id'] : "";
-                                    } catch (\PayPal\Exception\PayPalConnectionException $e) {
-                                        $errorData = json_decode($e->getData(), true);
-                                        Log::error("PayPal error: " . $errorData['message']);
-                                    }
-                                } elseif ($transaction->stripe_id) {
-                                    // Set your Stripe API key
-                                    Stripe::setApiKey(env('STRIPE_SECRET'));
-
-                                    try {
-                                        // Create a refund using the payment intent ID
-                                        $refund = Refund::create([
-                                            'payment_intent' => $transaction->stripe_id,
-                                            'amount' => $passengerAndDriverRefundAmt * 100, // Refund amount in cents
-                                        ]);
-
-                                        $refundId = $refund->id;
-                                    } catch (\Stripe\Exception\ApiErrorException $e) {
-                                    }
-                                }
-                            } else {
-                                $topUpBalance = TopUpBalance::create([
-                                    'booking_id' => $transaction->booking_id,
-                                    'user_id' => $booking->user_id,
-                                    'dr_amount' => $passengerAndDriverRefundAmt,
-                                    'added_date' => date('Y-m-d'),
-                                ]);
-                            }
-
-                            //Passenger Transction
-                            $passengerTransaction = Transaction::create([
-                                'booking_id' => $transaction->booking_id,
-                                'ride_id' => $booking->ride_id,
-                                'parent_id' => $transaction->id,
-                                'type' => '3',
-                                'price' => $passengerAndDriverRefundAmt,
-                                'paypal_id' => isset($transaction->paypal_id) ? $refundId : NULL,
-                                'stripe_id' => isset($transaction->stripe_id) ? $refundId : NULL
-                            ]);
-
-                            //Driver Transction
-                            $driverTransaction = Transaction::create([
-                                'booking_id' => $transaction->booking_id,
-                                'ride_id' => $booking->ride_id,
-                                'parent_id' => $transaction->id,
-                                'type' => '3',
-                                'price' => $passengerAndDriverRefundAmt
-                            ]);
-
-                            $refundAmount -= $transactionAmount; // Reduce the remaining refund amount
-                        }
-                    }
-                }
-
-                //Add Payout Data
-
-                $getPayout = Payout::where('ride_id', $booking->ride_id)->where('booking_id', $booking->id)->first();
-                if (isset($getPayout) && !is_null($getPayout)) {
-                } else {
-                    $getPayout = new Payout();
-                }
-
-                if (isset($getSetting->booking_fee_give_to_driver) && $getSetting->booking_fee_give_to_driver == 1) {
-                    $payoutAmt = $passengerAndDriverRefundAmt + $passengerAndDriverRefundBookingFee;
-                } else {
-                    $payoutAmt = $passengerAndDriverRefundAmt;
-                }
-
-                $deduct_tax = $tax_type = "";
-                $tax = 0;
-                $taxAmt = 0;
-
-
-
-                if (isset($getSetting) && !empty($getSetting)) {
-                    if (isset($getSetting->deduct_tax) && $getSetting->deduct_tax == "deduct_from_driver") {
-                        $deduct_tax = $getSetting->deduct_tax;
-                        $tax_type = $getSetting->tax_type;
-                        if (isset($getSetting->tax_type) && $getSetting->tax_type == "state_wise_tax") {
-                            $locationBeforeComma = explode(',', $booking->departure);
-                            $getFromState = City::with('state:id,tax')->where('status', '1')->whereRaw('LOWER(`name`) LIKE ? ', ['%' . $locationBeforeComma[0] . '%'])->first();
-                            if (isset($getFromState) && !empty($getFromState)) {
-                                $tax = $getFromState->state->tax;
-                            }
-                        } else {
-                            $tax = $getSetting->tax;
-                        }
-
-                        $taxAmt = round((($payoutAmt * $tax) / 100), 2);
-                        $payoutAmt = $payoutAmt - $taxAmt;
-                    }
-                }
-
-                if (isset($getPayout->amount)) {
-                    $payoutAmt = $getPayout->amount + $payoutAmt;
-                }
-
-                $rideDateTime = Carbon::parse("$ride->completed_date $ride->completed_time");
-
-                $getPayout->ride_id = $booking->ride_id;
-                $getPayout->booking_id = $booking->id;
-                $getPayout->user_id = $ride->added_by;
-                $getPayout->amount = $payoutAmt;
-                $getPayout->available_date = $rideDateTime;
-                $getPayout->status = "pending";
-                $getPayout->tax_amount = $taxAmt;
-                $getPayout->tax_percentage = isset($tax) && $tax != 0 ? $tax : 0;
-                $getPayout->tax_type = isset($tax_type) && $tax_type != "" ? $tax_type : NULL;
-                $getPayout->deduct_type = isset($deduct_tax) && $deduct_tax != "" ? $deduct_tax : NULL;
-                $getPayout->save();
-            } elseif ($hoursDifference < 12) {
-                foreach ($transactions as $transaction) {
-
-                    $getRefundEntryPrice = Transaction::where('parent_id', $transaction->id)->sum('price');
-
-                    if (isset($getRefundEntryPrice) && !is_null($getRefundEntryPrice) && $getRefundEntryPrice == ((float)$transaction->price - (float)$transaction->booking_fee)) {
-                    } else {
-                        $transactionAmount = ((float)$transaction->price - (float)$transaction->booking_fee);
-
-                        if ($refundAmount <= 0) {
-                            break; // No need to process further if refund is already completed
-                        }
-
-                        // Check if the current transaction can cover the remaining refund amount
-                        if ($transactionAmount >= $refundAmount) {
-
-                            $newTransaction = Transaction::create([
-                                'booking_id' => $transaction->booking_id,
-                                'ride_id' => $booking->ride_id,
-                                'parent_id' => $transaction->id,
-                                'type' => '3',
-                                'price' => $refundAmount,
-                            ]);
-                            $refundAmount = 0; // Refund is completed
-                            break;
-                        } else {
-
-                            $newTransaction = Transaction::create([
-                                'booking_id' => $transaction->booking_id,
-                                'ride_id' => $booking->ride_id,
-                                'parent_id' => $transaction->id,
-                                'type' => '3',
-                                'price' => $transactionAmount,
-                            ]);
-
-                            $refundAmount -= $transactionAmount; // Reduce the remaining refund amount
-                        }
-                    }
-                }
-                //Add Payout Data
-
-                $getPayout = Payout::where('ride_id', $booking->ride_id)->where('booking_id', $booking->id)->first();
-                if (isset($getPayout) && !is_null($getPayout)) {
-                } else {
-                    $getPayout = new Payout();
-                }
-
-                if (isset($getSetting->booking_fee_give_to_driver) && $getSetting->booking_fee_give_to_driver == 1) {
-                    $payoutAmt = $refundTotalAmount + $refundTotalBookingFee;
-                } else {
-                    $payoutAmt = $refundTotalAmount;
-                }
-
-
-
-                $deduct_tax = $tax_type = "";
-                $tax = 0;
-                $taxAmt = 0;
-
-                if (isset($getSetting) && !empty($getSetting)) {
-                    if (isset($getSetting->deduct_tax) && $getSetting->deduct_tax == "deduct_from_driver") {
-                        $deduct_tax = $getSetting->deduct_tax;
-                        $tax_type = $getSetting->tax_type;
-                        if (isset($getSetting->tax_type) && $getSetting->tax_type == "state_wise_tax") {
-                            $locationBeforeComma = explode(',', $booking->departure);
-                            $getFromState = City::with('state:id,tax')->where('status', '1')->whereRaw('LOWER(`name`) LIKE ? ', ['%' . $locationBeforeComma[0] . '%'])->first();
-                            if (isset($getFromState) && !empty($getFromState)) {
-                                $tax = $getFromState->state->tax;
-                            }
-                        } else {
-                            $tax = $getSetting->tax;
-                        }
-
-                        $taxAmt = round((($payoutAmt * $tax) / 100), 2);
-                        $payoutAmt = $payoutAmt - $taxAmt;
-                    }
-                }
-
-                if (isset($getPayout->amount)) {
-                    $payoutAmt = $getPayout->amount + $payoutAmt;
-                }
-
-                $rideDateTime = Carbon::parse("$ride->completed_date $ride->completed_time");
-
-                $getPayout->ride_id = $booking->ride_id;
-                $getPayout->booking_id = $booking->id;
-                $getPayout->user_id = $ride->added_by;
-                $getPayout->amount = $payoutAmt;
-                $getPayout->available_date = $rideDateTime;
-                $getPayout->status = "pending";
-                $getPayout->tax_amount = $taxAmt;
-                $getPayout->tax_percentage = isset($tax) && $tax != 0 ? $tax : 0;
-                $getPayout->tax_type = isset($tax_type) && $tax_type != "" ? $tax_type : NULL;
-                $getPayout->deduct_type = isset($deduct_tax) && $deduct_tax != "" ? $deduct_tax : NULL;
-                $getPayout->save();
-            }
-        }
-
-        if ($request->seats < $booking->seats) {
-            $booking->update([
-                'seats' => $updatedSeats,
-                'booking_credit' => $updatedBookingCredit,
-                'fare' => $updatedFare,
-            ]);
-        } elseif ($request->seats == $booking->seats) {
-            $booking->update([
-                'status' => '4',
-            ]);
-        }
-
-        $getSeatDetails = SeatDetail::where('booking_id', $booking->id)->get();
-        $cancelSeatsCount = $request->seats;
-        if (isset($getSeatDetails) && !empty($getSeatDetails)) {
-            foreach ($getSeatDetails->take($cancelSeatsCount) as $key => $getSeatDetail) {
-                $getSeatDetail->status = 'pending';
-                $getSeatDetail->booking_id = NULL;
-                $getSeatDetail->user_id = NULL;
-                $getSeatDetail->save();
-            }
-        }
-
-        CancellationHistory::create([
-            'ride_id' => $booking->ride_id,
-            'booking_id' => $booking->id,
-            'user_id' => $booking->user_id,
-            'type' => 'passenger',
-        ]);
-        if (isset($booking->ride->driver->email_notification) && $booking->ride->driver->email_notification == 1) {
-
-            $data = ['driver_name' => $booking->ride->driver->first_name, 'passenger_name' => $booking->passenger->first_name, 'seats' => $originalSeats, 'cancelled_searts' => $request->seats, 'price' => $booking->price, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($booking->ride->date)->format('F d, Y'), 'time' => $booking->ride->time];
-            // Send email to driver
-            Mail::to($booking->ride->driver->email)->queue(new PassengerCancelBookingMail($data));
-        }
-
-        $notification = Notification::create([
-            'ride_id' => $booking->ride_id,
-            'posted_by' => $booking->user_id,
-            'message' => getNotificationMessageText(
-                'booking_cancelled',
-                $booking->ride->driver,
-                [],
-                'Booking cancelled'
-            ),
-            'status' => 'cancelled',
-            'notification_type' => 'upcoming',
-            'ride_detail_id' => $booking->ride_detail_id,
-            'departure' => $booking->departure,
-            'destination' => $booking->destination
-        ]);
-
-        $driverUserId = $booking->ride->added_by;
-        if ($driverUserId) {
-            $fcmService = new FCMService();
-            $fcm_tokens = FCMToken::where('user_id', $driverUserId)->get();
-            $body = $notification->message;
-
-            $driver = $booking->ride->driver ?? User::find($driverUserId);
-            $fcmToken = $driver?->mobile_fcm_token;
-            if ($fcmToken) {
-                $fcmService->sendNotification($fcmToken, $body);
-            }
-
-            foreach ($fcm_tokens as $fcm_token) {
-                try {
-                    $fcmService->sendNotification($fcm_token->token, $body);
-                } catch (\Exception $e) {
-                    Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
-                }
-            }
-        }
-
-        $chatMessage = Message::create([
-            'ride_id' => $booking->ride->id,
-            'receiver' => $booking->ride->added_by,
-            'sender' => $booking->user_id,
-            'message' => $request->input('message'),
-            'ride_detail_id' => $booking->ride_detail_id
-        ]);
-        $rideDateTime = Carbon::parse($booking->ride->date . ' ' . $booking->ride->time);
-        $oneHourBefore = $rideDateTime->copy()->subHour();
-
-        if (Carbon::now()->between($oneHourBefore, $rideDateTime)) {
-            // Get updated passenger list (excluding cancelled bookings)
-            $getBookings = Booking::with('passenger')
-                ->where('ride_id', $booking->ride_id)
-                ->whereNotIn('status', ['3', '0', '4']) // Exclude cancelled, pending, rejected
-                ->get();
-
-            if ($getBookings->isNotEmpty()) {
-                $passengers = [];
-                foreach ($getBookings as $bookingItem) {
-                    $passengers[] = [
-                        'first_name' => $bookingItem->passenger->first_name,
-                        'seats' => $bookingItem->seats,
-                    ];
-                }
-
-                $data = [
-                    'driver_name' => $booking->ride->driver->first_name,
-                    'from' => $booking->departure,
-                    'to' => $booking->destination,
-                    'date' => $booking->ride->date,
-                    'time' => $booking->ride->time,
-                    'passengers' => $passengers,
-                ];
-
-                // Send updated passenger list email
-                if ($booking->ride->driver->email_notification == 1) {
-                    Mail::to($booking->ride->driver->email)
-                        ->send(new PassengerListMail($data));
-                }
-
-                // Send FCM notification
-                $notification = Notification::create([
-                    'ride_id' => $booking->ride_id,
-                    'posted_by' => $booking->ride->added_by,
-                    'message' => getNotificationMessageText(
-                        'passenger_list_updated',
-                        $booking->ride->driver,
-                        [],
-                        'Your passenger list has been updated'
-                    ),
-                    'status' => 'upcoming',
-                    'notification_type' => 'upcoming',
-                    'ride_detail_id' => $booking->ride_detail_id,
-                    'departure' => $booking->departure,
-                    'destination' => $booking->destination,
-                ]);
-
-                $fcmService = new FCMService();
-                $fcmToken = $booking->ride->driver->mobile_fcm_token;
-                $body = $notification->message;
-
-                if ($fcmToken) {
-                    $fcmService->sendNotification($fcmToken, $body);
-                }
-
-                $fcm_tokens = FCMToken::where('user_id', $booking->ride->added_by)->get();
-
-                foreach ($fcm_tokens as $fcm_token) {
-                    try {
-                        $fcmService->sendNotification($fcm_token->token, $body);
-                    } catch (\Exception $e) {
-                        Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
-                    }
-                }
-
-                // Send SMS if enabled (same logic as in cron)
-                if (env('APP_ENV') != 'local' && isset($booking->ride->driver->sms_notification) && $booking->ride->driver->sms_notification == 1) {
-                    $phoneNumber = PhoneNumber::where('user_id', $booking->ride->added_by)
-                        ->where('verified', '1')
-                        ->orderBy('default', 'desc')
-                        ->first();
-
-                    if ($phoneNumber) {
-                        $sid = env('TWILIO_ACCOUNT_SID');
-                        $token = env('TWILIO_AUTH_TOKEN');
-                        $from = env('TWILIO_PHONE_NUMBER');
-
-                        $twilio = new Client($sid, $token);
-                        $to = $phoneNumber->phone;
-
-                        // Create greeting based on time of day
-                        $currentHour = date('H');
-                        if ($currentHour >= 0 && $currentHour < 12) {
-                            $title = "Good morning " . $booking->ride->driver->first_name . ",";
-                        } elseif ($currentHour >= 12 && $currentHour < 17) {
-                            $title = "Good afternoon " . $booking->ride->driver->first_name . ",";
-                        } else {
-                            $title = "Good evening " . $booking->ride->driver->first_name . ",";
-                        }
-
-                        $departureTime = date('H:i:s', strtotime($booking->ride->time));
-                        $departureDate = date('d F, Y', strtotime($booking->ride->date));
-                        $passengerPhoneNumber = PhoneNumber::where('user_id', $booking->passenger->id)
-                            // ->where('verified', '1')
-                            ->where('default', '1')
-                            ->first();
-
-                        $passengerPhoneToUse = $passengerPhoneNumber ? $passengerPhoneNumber->phone :  $booking->passenger->phone;
-
-
-                        // Build passenger list
-                        $passengerList = "";
-                        $counter = 1;
-                        foreach ($getBookings as $bookingItem) {
-                            // $passengerPhone = $bookingItem->passenger->phone;
-
-                            // $formattedPhone = preg_replace("/^(\d{3})(\d{3})(\d{4})$/", "($1)$2-$3", $passengerPhoneToUse);
-
-                            $seatText = $bookingItem->seats == 1 ? 'seat' : 'seats';
-
-                            $passengerList .= $counter . "- " . $bookingItem->passenger->first_name .
-                                ". Phone " . $passengerPhoneToUse .
-                                ". Booked: " . $bookingItem->seats . " " . $seatText . "\n";
-                            $counter++;
-                        }
-
-                        $message = $title . "\n" . "From ProximaRide: Your passenger list has been updated for your ride from " .
-                            $booking->departure . " to " . $booking->destination .
-                            " on " . $departureDate . " at " . $departureTime . "\n" .
-                            $passengerList . "Drive safe!";
-
-                        try {
-                            $res = $twilio->messages->create(
-                                $to,
-                                [
-                                    'from' => $from,
-                                    'body' => $message,
-                                ]
-                            );
-                            Log::info('SMS sent to ' . $to . ' for updated passenger list on ride ' . $booking->ride_id);
-                        } catch (\Exception $e) {
-                            $this->logTwilioSmsFailure($to, $message, $e, 'ride ' . $booking->ride_id);
-                        }
-                    }
-                }
-            }
-        }
-
-        $getUser = User::where('id', $booking->user_id)->first();
-
-        // Broadcast the event with error handling for Pusher timestamp issues
-        try {
-            broadcast(new MessageSentEvent($booking->ride, $getUser, $chatMessage))->toOthers();
-        } catch (\Illuminate\Broadcasting\BroadcastException $e) {
-            // Log Pusher errors (like timestamp expired) but don't crash the application
-            Log::error('Failed to broadcast message event: ' . $e->getMessage(), [
-                'booking_id' => $booking->id,
-                'ride_id' => $booking->ride_id,
-                'user_id' => $getUser->id ?? null
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Unexpected error broadcasting message event: ' . $e->getMessage(), [
-                'booking_id' => $booking->id,
-                'ride_id' => $booking->ride_id,
-                'user_id' => $getUser->id ?? null
-            ]);
-        }
-
-        $phoneNumber = PhoneNumber::where('user_id', $booking->ride->added_by)->where('verified', '1')->where('default', '1')->first();
-
-        if (!$phoneNumber) {
-            $phoneNumber = PhoneNumber::where('user_id', $booking->ride->added_by)->where('verified', '1')->first();
-        }
-
-        if ($phoneNumber && env('APP_ENV') != 'local' && isset($booking->ride->driver->sms_notification) && $booking->ride->driver->sms_notification == 1) {
-            $passengerName = $booking->passenger->first_name;
-
-            // Send the secured cash code via Twilio
-            $sid = env('TWILIO_ACCOUNT_SID');
-            $token = env('TWILIO_AUTH_TOKEN');
-            $from = env('TWILIO_PHONE_NUMBER');
-
-            $twilio = new Client($sid, $token);
-            $to = $phoneNumber->phone;
-
-
-            $title = "";
-            $currentHour = date('H');
-            if ($currentHour >= 0 && $currentHour < 12) {
-                $title = "Good morning " . $booking->passenger->first_name . ",";
-            } elseif ($currentHour >= 12 && $currentHour < 17) {
-                $title = "Good afternoon " . $booking->passenger->first_name . ",";
-            } else {
-                $title = "Good evening " . $booking->passenger->first_name . ",";
-            }
-
-            // $depatureDate = date('d F, Y H:i:s', strtotime('' . $booking->ride->date . ' ' . $booking->ride->time . ''));
-            $departureTime = date('H:i:s', strtotime($booking->ride->time));
-            $depatureDate = date('d F, Y', strtotime($booking->ride->date));
-
-            // $message = "" . $title . "\nDriver reject your booking request from this ride\nTrip detail\nOrigin: " . $booking->departure . "\nDestination: " . $booking->destination . "\nDeparture date: " . $depatureDate . "\nDriver name: " . $booking->ride->driver->first_name . "\nDriver phone number: " . $booking->ride->driver->phone . "";
-            $message = $title . "\n" . "From ProximaRide: Ride from " . $booking->departure . " to " . $booking->destination . " on " . $depatureDate . " at " . $departureTime . "\nYour passenger " . $booking->passenger->first_name . " has cancelled as follows:\nBooked: " . $booking->seats . " seats\nCancelled " . $request->seats . "\nRemaining: " . ($booking->seats - $request->seats) . "\nAmount due to you: $" . $payoutAmt . "* (* See our cancellation policy)\nWe have opened the cancelled seat(s) for other passengers to book";
-            try {
-                $res = $twilio->messages->create(
-                    $to,
-                    [
-                        'from' => $from,
-                        'body' => $message,
-                    ]
-                );
-            } catch (\Exception  $e) {
-                $this->logTwilioSmsFailure($to, $message, $e);
-
-                // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
-            }
-        }
-
-        return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $messages->cancel_booking_message ?? null]);
-    }
 
     public function createPaymentIntent(Request $request)
     {

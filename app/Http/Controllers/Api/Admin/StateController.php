@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Admin\StateResource;
 use App\Models\State;
+use App\Support\LocationCache;
 use App\Traits\StatusResponser;
 use Illuminate\Http\Request;
 
@@ -70,6 +71,8 @@ class StateController extends Controller
         ]);
 
         if ($result) {
+            LocationCache::bust();
+
             return $this->apiSuccessResponse(new StateResource($state), 'State has been updated successfully.');
         }
         return $this->errorResponse();
@@ -79,6 +82,8 @@ class StateController extends Controller
     {
         $state->cities()->delete();
         if ($state->delete()) {
+            LocationCache::bust();
+
             return $this->apiSuccessResponse(new StateResource($state), 'State has been deleted successfully.');
         }
         return $this->errorResponse();

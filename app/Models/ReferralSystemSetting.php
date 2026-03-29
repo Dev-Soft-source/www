@@ -27,8 +27,13 @@ class ReferralSystemSetting extends Model
 
     protected static function booted(): void
     {
-        static::saved(fn () => Cache::forget(self::CACHE_KEY));
-        static::deleted(fn () => Cache::forget(self::CACHE_KEY));
+        static::saved(fn () => static::forgetCache());
+        static::deleted(fn () => static::forgetCache());
+    }
+
+    public static function forgetCache(): void
+    {
+        Cache::forget(self::CACHE_KEY);
     }
 
     public static function getCached(): ?self

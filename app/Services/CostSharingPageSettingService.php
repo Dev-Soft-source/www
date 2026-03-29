@@ -48,7 +48,7 @@ class CostSharingPageSettingService
         if (! $exists) {
             CostSharingPageSettingDetail::create($fields);
         } else {
-            CostSharingPageSettingDetail::whereCostSharingPageId($costSharingPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            CostSharingPageSettingDetail::whereCostSharingPageId($costSharingPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
 
         return true;

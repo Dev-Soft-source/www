@@ -505,7 +505,7 @@ class HomePageSettingService
             );
             HomePageSettingDetail::whereHomePageSettingId($homePageSetting->id)
                 ->whereLanguageId($language->id)
-                ->update($updateData);
+                ->first()?->update($updateData);
         }
 
         return true;

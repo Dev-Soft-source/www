@@ -185,6 +185,10 @@ class SiteSettingController extends Controller
             'booking_fee_give_to_student' => isset($request->booking_fee_give_to_student) && $request->booking_fee_give_to_student == "1"  ? true : false
         ]);
 
+        if ($result) {
+            SiteSetting::forgetCache();
+        }
+
         if ($result || $setting) {
             return $this->apiSuccessResponse(new SiteSettingResource($setting), 'Settings have been updated successfully.');
         }

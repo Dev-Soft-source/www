@@ -57,7 +57,7 @@ class MyDriverSettingService
             DriverSettingDetail::create($fields);
         }
         else{
-            DriverSettingDetail::whereDriverLicSettingId($myDriverSetting->id)->whereLanguageId($language->id)->update($fields);
+            DriverSettingDetail::whereDriverLicSettingId($myDriverSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

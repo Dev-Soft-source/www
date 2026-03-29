@@ -379,8 +379,6 @@ class RideController extends Controller
                 });
             })
             ->count();
-        $noShowsCount = NoShowHistory::where('user_id', $user_id)->where('type', 'driver')->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->count();
-        $cancellationCount = CancellationHistory::where('user_id', $user_id)->where('type', 'driver')->whereBetween('created_at', [Carbon::now()->subMonths(3), Carbon::now()])->whereNotNull('booking_id')->count();
 
         $vehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $vehicleTypes = $this->getVehicleTypesByLanguage();
@@ -401,8 +399,6 @@ class RideController extends Controller
             'overallRating' => $overallRating,
             'noshows' => $noshows,
             'totalNoOfRides' => $totalNoOfRides,
-            'noShowsCount' => $noShowsCount,
-            'cancellationCount' => $cancellationCount
         ]);
     }
 
@@ -1796,7 +1792,7 @@ class RideController extends Controller
                 'on' => $request->date,
                 'at' => $request->time,
                 'seats' => $request->seats,
-                'price' => $request->price_minor,
+                'price' => number_format($request->price_minor / 100, 2, '.', ''),
                 'redirect' => route('my_rides', ['lang' => $this->selectedLanguage->abbreviation]),
             ];
 

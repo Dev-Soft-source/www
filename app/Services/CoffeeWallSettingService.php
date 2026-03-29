@@ -166,7 +166,7 @@ class CoffeeWallSettingService
             CoffeeWallPageSettingDetail::create($fields);
         }
         else{
-            CoffeeWallPageSettingDetail::whereCoffeeWallSettingId($coffeeWallSetting->id)->whereLanguageId($language->id)->update($fields);
+            CoffeeWallPageSettingDetail::whereCoffeeWallSettingId($coffeeWallSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

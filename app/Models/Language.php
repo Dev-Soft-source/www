@@ -22,8 +22,16 @@ class Language extends Model
 
     protected static function booted(): void
     {
-        static::saved(fn () => Cache::forget(self::ALL_CACHE_KEY));
-        static::deleted(fn () => Cache::forget(self::ALL_CACHE_KEY));
+        static::saved(fn () => static::forgetCache());
+        static::deleted(fn () => static::forgetCache());
+    }
+
+    /**
+     * Invalidate cached languages list (e.g. after Query\Builder::update()).
+     */
+    public static function forgetCache(): void
+    {
+        Cache::forget(self::ALL_CACHE_KEY);
     }
 
     public static function getAllCached()

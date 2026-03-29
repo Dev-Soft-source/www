@@ -62,7 +62,7 @@ class DriverPageSettingService
         DriverPageSettingDetail::create($fields);
         }
         else{
-            DriverPageSettingDetail::whereDriverPageSettingId($driverPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            DriverPageSettingDetail::whereDriverPageSettingId($driverPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

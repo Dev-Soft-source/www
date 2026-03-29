@@ -66,7 +66,7 @@ class MobileSignupSettingService
             MobileSignupSettingDetail::create($fields);
         }
         else{
-            MobileSignupSettingDetail::whereMobileSignupSettingId($signupPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            MobileSignupSettingDetail::whereMobileSignupSettingId($signupPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

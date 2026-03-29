@@ -48,7 +48,7 @@ class FirmCancellationPageSettingService
             FirmCancellationPageSettingDetail::create($fields);
         } 
         else{
-            FirmCancellationPageSettingDetail::where('firm_cancellation_id',$cancellationPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            FirmCancellationPageSettingDetail::where('firm_cancellation_id',$cancellationPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

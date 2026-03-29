@@ -80,7 +80,7 @@ class MyReviewSettingService
             MyReviewSettingDetail::create($fields);
         }
         else{
-            MyReviewSettingDetail::whereMyReviewSettingId($myReviewSetting->id)->whereLanguageId($language->id)->update($fields);
+            MyReviewSettingDetail::whereMyReviewSettingId($myReviewSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

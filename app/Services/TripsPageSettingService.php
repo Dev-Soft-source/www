@@ -161,7 +161,7 @@ class TripsPageSettingService
         TripsPageSettingDetail::create($fields);
         }
         else{
-            TripsPageSettingDetail::whereTripsPageSettingId($tripsPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            TripsPageSettingDetail::whereTripsPageSettingId($tripsPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

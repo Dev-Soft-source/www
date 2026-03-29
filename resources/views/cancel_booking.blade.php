@@ -141,6 +141,10 @@
         @endphp
         @if ($setting)
             @php
+                /*
+                In this page, it is then pushed into JavaScript as settingBookingPrice and used as the per-seat booking fee for the cancellation calculation when the ride price is above the lower thresholds. That logic is in cancel_booking.blade.php (line 166).
+                So in plain terms:  $settingBookingPrice means “the configured booking fee amount from the booking settings,” not the ride price itself.
+                */
                 $settingBookingPrice = $setting->booking_price;
             @endphp
         @else

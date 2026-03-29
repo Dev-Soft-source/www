@@ -73,7 +73,7 @@ class Step2PageSettingService
         Step2PageSettingDetail::create($fields);
         }
         else{
-            Step2PageSettingDetail::whereStep2PageSettingId($step2PageSetting->id)->whereLanguageId($language->id)->update($fields);
+            Step2PageSettingDetail::whereStep2PageSettingId($step2PageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

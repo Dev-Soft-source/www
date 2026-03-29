@@ -61,7 +61,7 @@ class ProfileSettingService
             ProfileSettingDetail::create($fields);
         }
         else{
-            ProfileSettingDetail::whereProfileSettingId($profileSetting->id)->whereLanguageId($language->id)->update($fields);
+            ProfileSettingDetail::whereProfileSettingId($profileSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

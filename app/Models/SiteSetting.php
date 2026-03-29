@@ -58,8 +58,17 @@ class SiteSetting extends Model
 
     protected static function booted(): void
     {
-        static::saved(fn () => Cache::forget(self::CACHE_KEY));
-        static::deleted(fn () => Cache::forget(self::CACHE_KEY));
+        static::saved(fn () => static::forgetCache());
+        static::deleted(fn () => static::forgetCache());
+    }
+
+    /**
+     * Invalidate the cached first site_settings row. Required after Query\Builder::update()
+     * because that bypasses Eloquent model events (saved/updated).
+     */
+    public static function forgetCache(): void
+    {
+        Cache::forget(self::CACHE_KEY);
     }
 
     public static function getCached(): ?self

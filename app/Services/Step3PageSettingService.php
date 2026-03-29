@@ -158,7 +158,7 @@ class Step3PageSettingService
         Step3PageSettingDetail::create($fields);
         }
         else{
-            Step3PageSettingDetail::whereStep3PageSettingId($step3PageSetting->id)->whereLanguageId($language->id)->update($fields);
+            Step3PageSettingDetail::whereStep3PageSettingId($step3PageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

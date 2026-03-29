@@ -47,7 +47,7 @@ class CommunityGuidelinesPageSettingService
         if (!$communityGuidelinesPageSettingDetail) {
             CommunityGuidelinesPageSettingDetail::create($fields);
         } else {
-            CommunityGuidelinesPageSettingDetail::whereCommunityGuidelinesPageId($communityGuidelinesPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            CommunityGuidelinesPageSettingDetail::whereCommunityGuidelinesPageId($communityGuidelinesPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
 
         return true;

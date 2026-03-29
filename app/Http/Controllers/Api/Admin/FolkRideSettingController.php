@@ -57,6 +57,10 @@ class FolkRideSettingController extends Controller
             'profile_complete' => $profile_complete,
         ]);
 
+        if ($result) {
+            FolkRideSetting::forgetCache();
+        }
+
         if ($result || $setting) {
             return $this->apiSuccessResponse(new FolkRideSettingResource($setting), 'Settings have been updated successfully.');
         }

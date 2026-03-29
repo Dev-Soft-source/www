@@ -627,6 +627,10 @@ class FeaturesSettingController extends Controller
             ]);
         }
 
+        PostRidePageSettingDetail::forgetLanguageFallbackCache();
+        FindRidePageSettingDetail::forgetLanguageFallbackCache();
+        FeaturesSetting::bustOptionGroupsCache();
+
         if ($postRidePageSetting && $findRidePageSetting) {
             return $this->successResponse([], "Features setting updated successfully.");
         }
@@ -674,7 +678,7 @@ class FeaturesSettingController extends Controller
         );
 
         foreach ($payload['items'] as $item) {
-            FeaturesSettingDetail::whereKey($item['id'])->update([
+            FeaturesSettingDetail::find($item['id'])?->update([
                 'name' => $item['name'],
                 'tooltip' => $item['tooltip'] ?? null,
             ]);

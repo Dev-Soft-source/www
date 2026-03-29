@@ -80,7 +80,7 @@ class MyPassengerSettingService
             MyPassengerSettingDetail::create($fields);
         }
         else{
-            MyPassengerSettingDetail::whereMyPassengerSettingId($myPassengerSetting->id)->whereLanguageId($language->id)->update($fields);
+            MyPassengerSettingDetail::whereMyPassengerSettingId($myPassengerSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

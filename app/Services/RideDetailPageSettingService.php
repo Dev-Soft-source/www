@@ -366,7 +366,7 @@ class RideDetailPageSettingService
         RideDetailPageSettingDetail::create($fields);
         }
         else{
-            RideDetailPageSettingDetail::whereRideDetailPageId($rideDetailPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            RideDetailPageSettingDetail::whereRideDetailPageId($rideDetailPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

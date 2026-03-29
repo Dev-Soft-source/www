@@ -130,7 +130,7 @@ class CloseAccountSettingService
             CloseAccountSettingDetail::create($fields);
         }
         else{
-            CloseAccountSettingDetail::whereCloseAccSettingId($closeAccountSetting->id)->whereLanguageId($language->id)->update($fields);
+            CloseAccountSettingDetail::whereCloseAccSettingId($closeAccountSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

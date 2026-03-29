@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Admin\CityResource;
 use App\Models\City;
+use App\Support\LocationCache;
 use App\Traits\StatusResponser;
 use Illuminate\Http\Request;
 
@@ -62,6 +63,8 @@ class CityController extends Controller
         ]);
 
         if ($result) {
+            LocationCache::bust();
+
             return $this->apiSuccessResponse(new CityResource($city), 'City has been updated successfully.');
         }
         return $this->errorResponse();

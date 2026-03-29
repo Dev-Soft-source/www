@@ -104,7 +104,7 @@ class ChatsPageSettingService
             ChatsPageSettingDetail::create($fields);
         }
         else{
-            ChatsPageSettingDetail::whereChatsPageSettingId($chatsPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            ChatsPageSettingDetail::whereChatsPageSettingId($chatsPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

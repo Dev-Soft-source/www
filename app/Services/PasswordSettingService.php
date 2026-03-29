@@ -62,7 +62,7 @@ class PasswordSettingService
             PasswordSettingDetail::create($fields);
         }
         else{
-            PasswordSettingDetail::wherePasswordSettingId($passwordSetting->id)->whereLanguageId($language->id)->update($fields);
+            PasswordSettingDetail::wherePasswordSettingId($passwordSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

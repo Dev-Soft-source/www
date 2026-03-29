@@ -157,7 +157,7 @@ class MyVehicleSettingService
             MyVehicleSettingDetail::create($fields);
         }
         else{
-            MyVehicleSettingDetail::whereMyVehicleSettingId($myVehicleSetting->id)->whereLanguageId($language->id)->update($fields);
+            MyVehicleSettingDetail::whereMyVehicleSettingId($myVehicleSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

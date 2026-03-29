@@ -47,7 +47,7 @@ class DisclaimerPageSettingService
         if (!$disclaimerPageSettingDetail) {
             DisclaimerPageSettingDetail::create($fields);
         } else {
-            DisclaimerPageSettingDetail::whereDisclaimerPageId($disclaimerPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            DisclaimerPageSettingDetail::whereDisclaimerPageId($disclaimerPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
 
         return true;

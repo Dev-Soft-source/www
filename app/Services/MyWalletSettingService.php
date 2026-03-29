@@ -192,7 +192,7 @@ class MyWalletSettingService
             MyWalletSettingDetail::create($fields);
         }
         else{
-            MyWalletSettingDetail::whereWalletSettingId($myWalletSetting->id)->whereLanguageId($language->id)->update($fields);
+            MyWalletSettingDetail::whereWalletSettingId($myWalletSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

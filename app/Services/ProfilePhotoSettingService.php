@@ -68,7 +68,7 @@ class ProfilePhotoSettingService
             ProfilePhotoSettingDetail::create($fields);
         }
         else{
-            ProfilePhotoSettingDetail::whereProfilePhotoSettingId($profilePhotoSetting->id)->whereLanguageId($language->id)->update($fields);
+            ProfilePhotoSettingDetail::whereProfilePhotoSettingId($profilePhotoSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

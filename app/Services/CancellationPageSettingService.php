@@ -48,7 +48,7 @@ class CancellationPageSettingService
         CancellationPageSettingDetail::create($fields);
         }
         else{
-            CancellationPageSettingDetail::whereCancellationPageId($cancellationPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            CancellationPageSettingDetail::whereCancellationPageId($cancellationPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

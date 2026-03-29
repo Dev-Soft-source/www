@@ -54,7 +54,7 @@ class MobileLoginSettingService
             MobileLoginSettingDetail::create($fields);
         }
         else{
-            MobileLoginSettingDetail::whereMobileLoginSettingId($loginPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            MobileLoginSettingDetail::whereMobileLoginSettingId($loginPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

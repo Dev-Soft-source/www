@@ -41,6 +41,10 @@ class CancelRideSettingController extends Controller
             'passenger_cancel_hours' => $request->passenger_cancel_hours,
         ]);
 
+        if ($result) {
+            CancelRideSetting::forgetCache();
+        }
+
         if ($result || $setting) {
             return $this->apiSuccessResponse(new CancelRideSettingResource($setting), 'Settings have been updated successfully.');
         }

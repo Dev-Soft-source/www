@@ -48,7 +48,7 @@ class DisputePageSettingService
         DisputePageSettingDetail::create($fields);
         }
         else{
-            DisputePageSettingDetail::whereDisputePageId($disputePageSetting->id)->whereLanguageId($language->id)->update($fields);
+            DisputePageSettingDetail::whereDisputePageId($disputePageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

@@ -50,6 +50,10 @@ class PinkRideSettingController extends Controller
             'profile_complete' => $profile_complete,
         ]);
 
+        if ($result) {
+            PinkRideSetting::forgetCache();
+        }
+
         $setting = PinkRideSetting::whereId($request->id)->first() ?: $setting;
 
         if ($result || $setting) {

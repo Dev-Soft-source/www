@@ -53,7 +53,7 @@ class ContactProximaSettingService
             ContactProximaRideSettingDetail::create($fields);
         }
         else{
-            ContactProximaRideSettingDetail::whereContactPrSettingId($contactUsSetting->id)->whereLanguageId($language->id)->update($fields);
+            ContactProximaRideSettingDetail::whereContactPrSettingId($contactUsSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

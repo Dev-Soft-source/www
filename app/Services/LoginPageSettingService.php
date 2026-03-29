@@ -107,7 +107,7 @@ class LoginPageSettingService
         LoginPageSettingDetail::create($fields);
         }
         else{
-            LoginPageSettingDetail::whereLoginPageSettingId($loginPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            LoginPageSettingDetail::whereLoginPageSettingId($loginPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

@@ -71,7 +71,7 @@ class MyStudentCardSettingService
             MyStudentCardSettingDetail::create($fields);
         }
         else{
-            MyStudentCardSettingDetail::whereStudentCardSettingId($myStudentCardSetting->id)->whereLanguageId($language->id)->update($fields);
+            MyStudentCardSettingDetail::whereStudentCardSettingId($myStudentCardSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

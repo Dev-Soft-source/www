@@ -51,7 +51,7 @@ class PassengerPageSettingService
         PassengerPageSettingDetail::create($fields);
         }
         else{
-            PassengerPageSettingDetail::wherePassengerPageSettingId($passengerPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            PassengerPageSettingDetail::wherePassengerPageSettingId($passengerPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

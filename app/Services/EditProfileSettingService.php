@@ -103,7 +103,7 @@ class EditProfileSettingService
             EditProfilePageSettingDetail::create($fields);
         }
         else{
-            EditProfilePageSettingDetail::whereEditProfileId($editProfileSetting->id)->whereLanguageId($language->id)->update($fields);
+            EditProfilePageSettingDetail::whereEditProfileId($editProfileSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

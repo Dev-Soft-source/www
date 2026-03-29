@@ -48,7 +48,7 @@ class PrivacyPolicyPageSettingService
         PrivacyPolicyPageSettingDetail::create($fields);
         }
         else{
-            PrivacyPolicyPageSettingDetail::wherePrivacyPageId($privacyPolicyPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            PrivacyPolicyPageSettingDetail::wherePrivacyPageId($privacyPolicyPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

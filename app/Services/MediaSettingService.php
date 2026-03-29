@@ -81,7 +81,7 @@ class MediaSettingService
         } else {
             MediaSettingDetail::whereMediaSettingId($mediaSetting->id)
                 ->whereLanguageId($language->id)
-                ->update($fields);
+                ->first()?->update($fields);
         }
 
         return true;

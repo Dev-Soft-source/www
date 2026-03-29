@@ -474,10 +474,13 @@ Route::get('cancel-transaction', [BookingController::class, 'cancelTransaction']
 // Route::post('instant-booking/{id}', [BookingController::class, 'instantBooking'])->middleware('auth')->name('instant_booking');
 
 Route::post('booking-store/{id}', [BookingController::class, 'bookingStore'])->middleware('auth')->name('booking_store');
+Route::get('booking-success-transaction/{id}/{user_id}', [BookingController::class, 'paypalSuccess'])->name('paypal.success.booking');
+Route::put('update-cancel-booking/{id}', [BookingController::class, 'updateCancelBooking'])->middleware('auth')->name('update_cancel_booking');
+
+
 
 Route::put('update-instant-booking/{id}', [BookingController::class, 'updateInstantBooking'])->middleware('auth')->name('update_instant_booking');
 Route::put('update-booking-request/{id}', [BookingController::class, 'updateBookingRequest'])->middleware('auth')->name('update_booking_request');
-Route::put('update-cancel-booking/{id}', [BookingController::class, 'updateCancelBooking'])->middleware('auth')->name('update_cancel_booking');
 
 Route::post('step3-5/store/{id}', [Step3to5Controller::class, 'store'])->middleware('auth')->name('step3to5.store');
 Route::post('step4-5/store/{id}', [Step4to5Controller::class, 'store'])->middleware('auth')->name('step4to5.store');

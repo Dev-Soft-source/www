@@ -68,7 +68,7 @@ class ResetPasswordPageSettingService
             ResetPasswordPageSettingDetail::create($fields);
         }
         else{
-            ResetPasswordPageSettingDetail::whereResetPassPageId($resetPasswordPageSetting->id)->whereLanguageId($language->id)->update($fields);
+            ResetPasswordPageSettingDetail::whereResetPassPageId($resetPasswordPageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

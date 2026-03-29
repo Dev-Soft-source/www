@@ -153,7 +153,7 @@ class BillingAddressSettingService
             BillingAddressSettingDetail::create($fields);
         }
         else{
-            BillingAddressSettingDetail::whereBillingAddSettingId($billingAddressSetting->id)->whereLanguageId($language->id)->update($fields);
+            BillingAddressSettingDetail::whereBillingAddSettingId($billingAddressSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }

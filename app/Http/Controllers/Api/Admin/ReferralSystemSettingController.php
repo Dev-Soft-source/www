@@ -61,6 +61,10 @@ class ReferralSystemSettingController extends Controller
             's_2_d_reward_point' => $request->s_2_d_reward_point,
         ]);
 
+        if ($result) {
+            ReferralSystemSetting::forgetCache();
+        }
+
         if ($result || $setting) {
             return $this->apiSuccessResponse(new ReferralSystemSettingResource($setting), 'Settings have been updated successfully.');
         }

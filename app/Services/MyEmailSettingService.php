@@ -51,7 +51,7 @@ class MyEmailSettingService
             MyEmailSettingDetail::create($fields);
         }
         else{
-            MyEmailSettingDetail::whereEmailAddressSettingId($myEmailSetting->id)->whereLanguageId($language->id)->update($fields);
+            MyEmailSettingDetail::whereEmailAddressSettingId($myEmailSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
         return true;
     }
