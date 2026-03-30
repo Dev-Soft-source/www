@@ -487,7 +487,8 @@
                             @endphp
                             <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl">
                                 @if ($showReviewLink && $passengerBookingUuid && $isAvailableShowInfo)
-                                    <a href="{{ route('review_driver', ['lang' => $selectedLanguage->abbreviation, 'id' => $passengerBookingUuid]) }}"
+                                {{-- left review to driver --}}
+                                    <a href="{{ route('review_driver', ['lang' => app()->getLocale(), 'id' => $booking->uuid]) }}"
                                         class="w-full text-2xl xl:text-3xl text-white hover:text-red-400 no-underline cursor-pointer">
                                         @isset($rideDetailPage->review_driver_info_label)
                                             {{ $rideDetailPage->review_driver_info_label }}

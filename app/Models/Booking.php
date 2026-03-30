@@ -165,4 +165,18 @@ class Booking extends Model
             $passengerQuery->withoutTrashed();
         });
     }
+
+    public function getPassengerRatingId()
+    {
+        return (int) $this->ride->ratings()
+            ->where('posted_by', $this->passenger->id)
+            ->value('id');
+    }
+
+    public function getDriverRatingId()
+    {
+        return (int) $this->ride->ratings()
+            ->where('posted_by', $this->ride->driver->id)
+            ->value('id');
+    }
 }

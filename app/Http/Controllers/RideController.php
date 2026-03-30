@@ -52,7 +52,7 @@ use Illuminate\Support\Facades\Validator;
 class RideController extends Controller
 {
 
-    public function RideDetail($lang = null, $id, $from_stop_id = null, $to_stop_id = null)
+    public function RideDetail($lang = null, $id, $from_stop_id = 0, $to_stop_id = 0)
     {
         $from = '$request->departure';
         $to = '$request->destination';
@@ -99,9 +99,17 @@ class RideController extends Controller
 
         $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
+        $booking = Booking::where('ride_id', $id)
+            ->where('from_stop_id', $from_stop_id)
+            ->where('to_stop_id', $to_stop_id)
+            ->where('user_id', auth()->id())
+            ->first();
+
         return view('ride_detail', [
             'from_stop_id' => $from_stop_id,
             'to_stop_id' => $to_stop_id,
+
+            'booking' => $booking,
 
             'fromLabel' => $from ?? null,
             'toLabel' => $to ?? null,
@@ -985,8 +993,8 @@ class RideController extends Controller
      */
     public function PostRideStore(Request $request, $ride_id = 0)
     {
-        
-        if($ride_id){
+
+        if ($ride_id) {
             $ride = Ride::where('id', $ride_id)->where('added_by', auth()->id())->first();
             if (!$ride) {
                 abort(404);
@@ -995,8 +1003,8 @@ class RideController extends Controller
         } else {
             $this->normalizePostRideRequest($request);
         }
-        
-        
+
+
         // form validation
         $validator = $this->buildPostRideStoreValidator($request);
         $this->appendStopDepartureAtValidation($request, $validator);
@@ -1320,7 +1328,7 @@ class RideController extends Controller
         $rideDetail->completed_date = $destinationCompletedDate;
         $rideDetail->save();
 
-       
+
 
         // process of multi stops
         $requestStops = is_array($request->input('stops')) ? $request->input('stops') : [];
@@ -1849,7 +1857,7 @@ class RideController extends Controller
 
         // Send push notification
         $this->sendFCM($message, $user);
-        
+
         // Prepare redirect data
         $redirectData = [
             'message' => $this->successMessage->ride_post_message,

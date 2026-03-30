@@ -850,4 +850,14 @@ class User extends Authenticatable
             ->where('rides.added_by', '!=', $this->id)
             ->sum('bookings.seats');
     }
+
+    public function hasBookingRating($ride_id): bool
+    {
+        return Rating::query()
+            ->join('bookings', 'bookings.id', '=', 'ratings.posted_to')
+            ->where('bookings.user_id', $this->id)
+            ->where('bookings.ride_id', $ride_id)
+            ->exists();
+    }
+
 }

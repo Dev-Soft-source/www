@@ -265,7 +265,7 @@
                                 :ride="$ride" 
                             />
                         </div>
-                        <div class="ride-seat-info">
+                        <div class="ride-seat-info flex flex-col items-end gap-2">
                             @php
                                 $ride_status = null;
                                 if ($ride->isCompleted()) {
@@ -281,7 +281,7 @@
                                 }
                             @endphp
                             @if($ride_status)
-                                <p class="w-fit px-2 py-1 rounded text-sm {{ $ride_status['class'] }}">
+                                <p class="w-fit px-2 py-1 rounded text-right text-sm {{ $ride_status['class'] }}">
                                     {{ $ride_status['label'] }}
                                 </p>
                             @endif
@@ -427,7 +427,7 @@
             </div>
             <div class="col-span-1">
                 <div class="space-y-4">
-                    @if (count($ride->bookings->where('status', 1)) > 0)
+                    {{-- @if (count($ride->bookings->where('status', 1)) > 0) --}}
                         <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                             <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl">
                                 @if ($ride->isCancelled())
@@ -438,7 +438,7 @@
                             </h3>
                             <a href="{{ route('my_passengers', ['lang' => $selectedLanguage->abbreviation, 'ride_id' => $ride->id]) }}">
                                 <div class="grid divide-y">
-                                    @foreach ($ride->bookings->where('status', 1) as $booking)
+                                    @foreach ($ride->bookings->whereIn('status', [\App\Models\Booking::STATUS_COMPLETED, \App\Models\Booking::STATUS_CANCELLED]) as $booking)
                                         @if ($booking->passenger)
                                             <div class="flex items-center p-4 space-x-2 w-full no-scrollbar overflow-x-auto gap-2">
                                                 <div class="w-12 h-12 rounded-full flex-shrink-0">
@@ -493,7 +493,7 @@
                                 </div>
                             </a>
                         </div>
-                    @endif
+                    {{-- @endif --}}
                     <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                         <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl">
                             {{ $rideDetailPage->vehicle_info_label ?? 'Vehicle info' }}</h3>

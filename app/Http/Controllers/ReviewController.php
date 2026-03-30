@@ -419,8 +419,8 @@ class ReviewController extends Controller
     public function ReviewDriver($lang, $id)
     {
 
-        $booking = Booking::where('id', $id)->first();
-        Log::info($booking);
+        $booking = Booking::where('uuid', $id)->first();
+
         if ($booking) {
             $ride = Ride::whereId($booking->ride_id)->first();
 

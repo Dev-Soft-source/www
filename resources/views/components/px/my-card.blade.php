@@ -42,7 +42,7 @@
                         :ride="$ride" 
                     />
                 </div>
-                <div class="ride-seat-info">
+                <div class="ride-seat-info flex flex-col items-end gap-2">
                     @php
                         $ride_status = null;
                         if ($ride->isCompleted()) {

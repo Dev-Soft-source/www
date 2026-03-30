@@ -5,7 +5,7 @@
 <div class="container mx-auto my-14 ">
     <h1>{{ $rideDetailPage->co_passenger_label ?? 'My Co-Passengers' }}</h1>
     <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
-        @foreach ($ride->bookings->where('status', 1) as $booking)
+        @foreach ($ride->bookings->whereIn('status', [1, 2]) as $booking)
             @if ($booking->passenger)
                 <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                     <div class="bg-primary text-white py-2 px-4">

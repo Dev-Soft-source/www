@@ -101,6 +101,7 @@ class MyTripController extends Controller
         View::share([
             'rideDetailPage' => $rideDetailPage,
             'firm_cancellation_discount' => $firm_cancellation_discount,
+            'tripsPage' => $tripsPage
         ]);
 
         $ratings = Rating::all();
@@ -114,7 +115,7 @@ class MyTripController extends Controller
             'bookings' => $bookings,
             'activeTab' => $tab,
             'ratings' => $ratings,
-            'tripsPage' => $tripsPage
+            
         ]);
     }
 

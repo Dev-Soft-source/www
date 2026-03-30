@@ -72,6 +72,12 @@ class RideCompleteCron extends Command
 
             $getSetting = SiteSetting::getCached();
             foreach ($getBookings as $key => $booking) {
+                if ((int) $booking->status === Booking::STATUS_BOOKED) {
+                    $booking->update([
+                        'status' => Booking::STATUS_COMPLETED,
+                    ]);
+                }
+
                 //Get Booked and Cancelled Ride Cost
                 $getRideCost = Transaction::where('booking_id', $booking->id)->where('type', '1')->sum('price');
                 $getRideCancelCost = Transaction::where('booking_id', $booking->id)->where('type', '3')->sum('price');
