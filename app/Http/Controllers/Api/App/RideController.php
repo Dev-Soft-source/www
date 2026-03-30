@@ -209,8 +209,12 @@ class RideController extends WebRideController
             $features = [];
 
             // Check if the features are a string, then explode it into an array
-            $rideFeatures = is_string($ride->features) ? explode('=', $ride->features) : $ride->features;
-
+            $rideFeatures = collect($ride->features)
+                ->when(is_string($ride->features), fn($c) => collect(explode('=', $ride->features)))
+                ->filter()
+                ->values()
+                ->all();
+            Log::info('$rideFeatures', [$ride->id, $rideFeatures]);
             // Loop through each feature and add the corresponding image and title
             foreach ($rideFeatures as $feature) {
                 if (isset($featureResponseMap[$feature])) {
@@ -831,7 +835,7 @@ class RideController extends WebRideController
         $rideId = $request->input('id', 0);
         $from_stop_id = $request->input('from_stop_id', 0);
         $to_stop_id = $request->input('to_stop_id', 0);
-//  \Log::info('search ride', $request->all());
+        //  \Log::info('search ride', $request->all());
 
         $ride = Ride::where('id', $rideId)
             ->with([
