@@ -175,10 +175,10 @@
                     $oldDepartureDate = old('departure_date');
                 @endphp
                     <form method="POST" action="{{ route('search_ride.validate', ['lang' => optional($selectedLanguage)->abbreviation]) }}" id="home-search-form">
-                <div class="flex flex-col md:ml-10 sm:flex-col md:flex-row lg:flex-row gap-4 px-4 md:px-8 xl:px-0">
+                <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row px-4 gap-1 md:px-8 xl:px-0">
                         @csrf
                         <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row md:items-center gap-1 relative">
-                            <div class="w-54 relative">
+                            <div class="relative">
                                 @livewire(
                                     'px.city-autocomplete',
                                     [
@@ -200,9 +200,9 @@
                                 @enderror
                             </div>
                             <div class="relative">
-                                <div class="flex justify-center items-center">
+                                <div class="flex justify-center items-center px-1">
                                     <button onclick="swapLocations()">
-                                        <div class="w-8 h-8">
+                                        <div class="w-10 h-10">
                                             @isset($homePage->swap_field_icon)
                                                 <img class="w-full h-full object-contain"
                                                     src="{{ asset('home_page_icons/' . $homePage->swap_field_icon) }}"
@@ -212,31 +212,33 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="w-54 relative">
-                                @livewire(
-                                    'px.city-autocomplete',
-                                    [
-                                        'field' => 'destination',
-                                        'placeholder' => $findRidePage->search_section_to_placeholder ?? 'Destination',
-                                        'initialLabel' => $oldDestinationLabel,
-                                        'initialCityId' => $oldDestinationCityId,
-                                        'invalidErrorMessage' => __('validation.custom.city_not_in_record.message') ?? 'Please select a valid city from the dropdown',
-                                        'class' => 'h-full w-full border-0 bg-transparent pl-10 pr-4 text-slate-900 placeholder-slate-900 focus:ring-0',
-                                    ],
-                                    key('px-search-destination')
-                                )
-                                @error('destination.label')
-                                    <div class="tooltip-error shadow-lg mt-1">
-                                        <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                            <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                        </div>
-                                    </div>
-                                @enderror
-                            </div>
                         </div>
-                        <div class="mx-auto md:mx-0 md:w-auto flex flex-col sm:flex-col md:flex-row items-center gap-2">
+
+                        <div class="relative">
+                            @livewire(
+                                'px.city-autocomplete',
+                                [
+                                    'field' => 'destination',
+                                    'placeholder' => $findRidePage->search_section_to_placeholder ?? 'Destination',
+                                    'initialLabel' => $oldDestinationLabel,
+                                    'initialCityId' => $oldDestinationCityId,
+                                    'invalidErrorMessage' => __('validation.custom.city_not_in_record.message') ?? 'Please select a valid city from the dropdown',
+                                    'class' => 'h-full w-full border-0 bg-transparent pl-10 pr-4 text-slate-900 placeholder-slate-900 focus:ring-0',
+                                ],
+                                key('px-search-destination')
+                            )
+                            @error('destination.label')
+                                <div class="tooltip-error shadow-lg mt-1">
+                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
+                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
+                                    </div>
+                                </div>
+                            @enderror
+                        </div>
+                        
+                        <div class="mx-auto md:mx-0 md:w-auto flex flex-col sm:flex-col md:flex-row items-center gap-1">
                             <div class="relative h-full">
-                                <div class="absolute inset-y-0 start-0 flex items-center pl-4 pointer-events-none">
+                                <div class="absolute inset-y-0 start-0 flex items-center pl-2 pointer-events-none">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                         fill="currentColor" aria-hidden="true">
                                         <path fill="#888888" fill-rule="evenodd"
@@ -246,7 +248,7 @@
                                 </div>
                                 <input id="departure_date" name="departure_date" value="{{ $oldDepartureDate }}"
                                     type="text" readonly
-                                    class="city-autocomplete-input h-full border-0 bg-transparent pl-10 text-slate-900 placeholder-slate-900 focus:ring-0"
+                                    class="city-autocomplete-input h-full border-0 bg-transparent pl-10 pr-4 text-slate-900 placeholder-slate-900 focus:ring-0"
                                     placeholder="{{ $findRidePage->search_section_date_placeholder ?? 'Select date' }}"
                                     autocomplete="off">
                                 <button type="button" id="departure-date-clear-button"
@@ -267,10 +269,10 @@
                                     </div>
                                 @enderror
                             </div>
-                            <div class="flex justify-center items-center">
-                                <button type="submit" class="bg-primary py-2 px-3 rounded button-exp-fill">
+                            <div class="flex justify-center items-center bg-blue-600 rounded h-full w-full px-2 md:w-auto">
+                                <button type="submit" class="bg-primary text-white flex items-center gap-2">
                                     <span class="block md:hidden">{{ $siteText['search_btn_text'] ?? 'Search' }}</span>
-                                    <div class="w-auto h-6 hidden md:block">
+                                    <div class="w-8 h-8 p-0 hidden md:block">
                                         @isset($homePage->search_field_icon)
                                             <img class="w-full h-full object-contain"
                                                 src="{{ asset('home_page_icons/' . $homePage->search_field_icon) }}"

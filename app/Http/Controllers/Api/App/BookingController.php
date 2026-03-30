@@ -597,13 +597,9 @@ class BookingController extends Controller
             $secured_cash_code = rand(1000, 9999);
         }
 
-        $seat_ids = $request->input('seats_id');
-        if (is_null($seat_ids)) {
-            $seat_ids = json_decode((string) $request->input('booked_seat_ids', '[]'), true);
-        }
-        if (!is_array($seat_ids)) {
-            $seat_ids = [];
-        }
+        $seat_ids = $this->normalizeSeatIds($request);
+
+
         $seats_number = $request->seats;
         $booking_type = $request->booking_type;
         $tax_amount = isset($request->tax_amount) ? $request->tax_amount : 0;

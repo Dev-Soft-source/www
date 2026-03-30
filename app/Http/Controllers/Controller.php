@@ -980,4 +980,32 @@ class Controller extends BaseController
         // Regular user or student with expired card - charge booking fee
         return $bookingCredit;
     }
+
+    protected function normalizeSeatIds(Request $request, string $primaryKey = 'seats_id', string $fallbackKey = 'booked_seat_ids'): array
+    {
+        $seatIds = $request->input($primaryKey);
+
+        if (is_null($seatIds) && $fallbackKey !== '') {
+            $seatIds = $request->input($fallbackKey, []);
+        }
+
+        if (is_string($seatIds)) {
+            $decodedSeatIds = json_decode($seatIds, true);
+
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decodedSeatIds)) {
+                $seatIds = $decodedSeatIds;
+            } else {
+                $seatIds = array_filter(
+                    array_map('trim', explode(',', trim($seatIds, "[] \t\n\r\0\x0B"))),
+                    static fn($value) => $value !== ''
+                );
+            }
+        }
+
+        if (!is_array($seatIds)) {
+            return [];
+        }
+
+        return array_values(array_filter(array_map('intval', $seatIds), static fn($seatId) => $seatId > 0));
+    }
 }
