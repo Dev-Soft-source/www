@@ -83,8 +83,8 @@
 
     <div class="container mx-auto p-4">
         @php
-            $unreadNotificationsOnly = $inbox
-                ? $inbox->filter(function ($n) {
+            $unreadNotificationsOnly = isset($inboxFull) && $inboxFull
+                ? $inboxFull->filter(function ($n) {
                     return data_get($n, 'kind') === 'notification' && data_get($n, 'is_read') == 0;
                 })
                 : collect();
@@ -92,7 +92,7 @@
         <div class="flex items-center justify-between">
             <h1 class="font-FuturaMdCnBT text-primary mt-6">{{ $siteText['all_notifications_heading'] }}</h1>
             <div class="flex items-center gap-3">
-                @if ($inbox && $unreadNotificationsOnly->count() > 0)
+                @if (($inboxFull ?? $inbox) && $unreadNotificationsOnly->count() > 0)
                     <div class="inline-flex items-center gap-3 border-2 border-blue-600 rounded-lg px-4 py-2 bg-gray-50">
                         <button type="button" onclick="markAllAsRead()"
                             class="text-gray-800 hover:text-primary text-[1.3125rem] font-medium flex items-center gap-2">
@@ -168,7 +168,7 @@
 
         <div class="rounded-lg overflow-hidden bg-white shadow border border-gray-100">
             <div class="p-4">
-                @if ($inbox && $inbox->count() > 0)
+                @if ($inbox && $inbox->total() > 0)
                     <ul class="divide-y divide-gray-100">
                         @foreach ($inbox as $notification)
                             @if (data_get($notification, 'kind') === 'chat')
@@ -431,6 +431,11 @@
                             @endif
                         @endforeach
                     </ul>
+                    @if ($inbox->hasPages())
+                        <div class="px-4 py-3 border-t border-gray-100 flex justify-center">
+                            {{ $inbox->appends(request()->query())->links() }}
+                        </div>
+                    @endif
                 @else
                     <div class="text-center py-12">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-300" fill="none"

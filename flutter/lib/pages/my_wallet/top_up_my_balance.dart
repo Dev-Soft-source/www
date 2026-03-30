@@ -118,7 +118,8 @@ class TopUpMyBalance extends StatelessWidget {
                               await controller.getCardsList();
                             }),
                         10.heightBox,
-                        if (controller.showPayment.value == true) ...[
+                        if (controller.showPayment.value == true &&
+                            controller.nativePayAvailable.value == true) ...[
                           Platform.isIOS
                               ? SizedBox(
                                   width: context.screenWidth,

@@ -267,9 +267,11 @@ class MyTripController extends Controller
 
             // Initialize a temporary array for the features
             $features = [];
-            // Check if the features are a string, then explode it into an array
-            $rideFeatures = is_string($booking->ride->features) ? explode('=', $booking->ride->features) : $booking->ride->features;
-            // Loop through each feature and add the corresponding image and title
+            $rideFeatures = collect($booking->ride->features)
+                ->when(is_string($booking->ride->features), fn($c) => collect(explode('=', $booking->ride->features)))
+                ->filter()
+                ->values()
+                ->all();
             foreach ($rideFeatures as $feature) {
                 if (is_string($feature) || is_int($feature)) {
                     if (isset($featureImages[$feature])) {
@@ -1222,9 +1224,11 @@ class MyTripController extends Controller
 
             // Initialize a temporary array for the features
             $features = [];
-            // Check if the features are a string, then explode it into an array
-            $rideFeatures = is_string($booking->ride->features) ? explode('=', $booking->ride->features) : $booking->ride->features;
-            // Loop through each feature and add the corresponding image and title
+            $rideFeatures = collect($booking->ride->features)
+                ->when(is_string($booking->ride->features), fn($c) => collect(explode('=', $booking->ride->features)))
+                ->filter()
+                ->values()
+                ->all();
             foreach ($rideFeatures as $feature) {
                 if (isset($featureImages[$feature])) {
                     $features[] = $featureImages[$feature];

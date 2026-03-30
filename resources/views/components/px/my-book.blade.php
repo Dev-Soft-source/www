@@ -77,7 +77,11 @@
                 <div class="border-t border-gray-300 grid grid-cols-2 divide-x divide-gray-300">
                     <div class="p-4">
                         <p class="text-center">
-                            {{ $booking->ride->getBookedSeats() }}
+                            {{-- {{ $booking->ride->getBookedSeats() }} --}}
+                            @php
+                                $user = auth()->user();
+                            @endphp
+                            {{ $user->getPassengerSeatsCount($booking->ride->id) }}
                             {{ $rideDetailPage->trips_card_section_seat_booked ?? 'Seat(s) Booked' }}
                         </p>
                     </div>

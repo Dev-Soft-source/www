@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_paypal_pay/flutter_paypal_pay.dart';
 import 'package:get/get.dart';
+import 'package:pay/pay.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
+import 'package:proximaride_app/consts/payment_config.dart';
 import 'package:proximaride_app/pages/book_seat/BookSeatProvider.dart';
 import 'package:proximaride_app/pages/edit_profile/EditProfileProvider.dart';
 import 'package:proximaride_app/pages/my_wallet/MyWalletController.dart';
@@ -13,6 +16,9 @@ import 'package:proximaride_app/services/service.dart';
 
 class BookSeatController extends GetxController {
   final serviceController = Get.find<Service>();
+  final seatSectionKey = GlobalKey();
+  final messageSectionKey = GlobalKey();
+  final termsSectionKey = GlobalKey();
   var isLoading = false.obs;
   var isOverlayLoading = false.obs;
   var tripId = "";
@@ -38,6 +44,8 @@ class BookSeatController extends GetxController {
   var alreadyBookedSeat = 0.obs;
   var currentUserBookedSeat = 0.obs;
   var captureId = "";
+  var paypalEmail = "";
+  var paypalPayerId = "";
   var userDetail = {}.obs;
   var cityDetail = {}.obs;
   var stateDetail = {}.obs;
@@ -71,6 +79,7 @@ class BookSeatController extends GetxController {
   var extraCareAgreeTerms = false.obs;
   var extraCareDisclaimer = "".obs;
   var showGPayBtn = true.obs;
+  var nativePayAvailable = false.obs;
 
   late TextEditingController cardNameController,
       cardNumberController,
@@ -93,6 +102,7 @@ class BookSeatController extends GetxController {
     alreadyBookedSeat.value =
         int.parse(Get.parameters['bookedSeat'].toString());
     isLoading(true);
+    await checkNativePayAvailability();
     await getBookSeatDetail();
     await getCancellationOption();
     await getUserDetail();
@@ -108,6 +118,31 @@ class BookSeatController extends GetxController {
     cvvCodeController.dispose();
     addressController.dispose();
     messageDriverTextEditingController.dispose();
+  }
+
+  Future<void> checkNativePayAvailability() async {
+    if (kIsWeb) {
+      nativePayAvailable.value = false;
+      return;
+    }
+
+    try {
+      final payClient = Pay({
+        PayProvider.google_pay:
+            PaymentConfiguration.fromJsonString(defaultGooglePay),
+        PayProvider.apple_pay:
+            PaymentConfiguration.fromJsonString(defaultApplePay),
+      });
+
+      final provider =
+          defaultTargetPlatform == TargetPlatform.iOS
+              ? PayProvider.apple_pay
+              : PayProvider.google_pay;
+
+      nativePayAvailable.value = await payClient.userCanPay(provider);
+    } catch (_) {
+      nativePayAvailable.value = false;
+    }
   }
 
   bool isStudent() {
@@ -501,23 +536,104 @@ class BookSeatController extends GetxController {
     }
   }
 
-  getCardsList() async {
+  bool validateBookingPrerequisites({bool requireMessage = true}) {
     errors.clear();
-    if (seatAvailable.value <= 0 || policyTypeId.value == '') {
-      if (seatAvailable.value <= 0) {
-        var err = {
-          'title': "seats",
-          'eList': ['Must select at least 1 seat']
-        };
-        errors.add(err);
+
+    if (seatAvailable.value <= 0) {
+      errors.add({
+        'title': "seats",
+        'eList': ['Must select at least 1 seat']
+      });
+    }
+
+    if (policyTypeId.value == '') {
+      errors.add({
+        'title': "policy",
+        'eList': ['Must select at least 1 policy']
+      });
+    }
+
+    if (requireMessage && messageDriverTextEditingController.text == '') {
+      errors.add({
+        'title': "message",
+        'eList': ['Please enter message']
+      });
+    }
+
+    if (agreeTerms.value != true) {
+      errors.add({
+        'title': "agree_terms",
+        'eList': ['Please select agree terms']
+      });
+    }
+
+    if (policyTypeId.value == "37" && firmAgreeTerms.value != true) {
+      errors.add({
+        'title': "firm_agree_terms",
+        'eList': ['Please select agree terms']
+      });
+    }
+
+    if (policyTypeId.value == "37" &&
+        firmCancellationUnderstandChecked.value != true) {
+      errors.add({
+        'title': "firm_cancellation_understand",
+        'eList': ['Please select agree terms']
+      });
+    }
+
+    if (showPinkCheckBox.value == true && pinkAgreeTerms.value != true) {
+      errors.add({
+        'title': "pink_agree_terms",
+        'eList': ['Please select agree terms']
+      });
+    }
+
+    if (showExtraCareCheckBox.value == true &&
+        extraCareAgreeTerms.value != true) {
+      errors.add({
+        'title': "extra_agree_terms",
+        'eList': ['Please select agree terms']
+      });
+    }
+
+    final isValid = errors.isEmpty;
+    if (!isValid) {
+      scrollToFirstError();
+    }
+
+    return isValid;
+  }
+
+  void scrollToFirstError() {
+    if (errors.isEmpty) {
+      return;
+    }
+
+    final firstErrorTitle = errors.first['title']?.toString();
+    GlobalKey targetKey = termsSectionKey;
+
+    if (firstErrorTitle == 'seats' || firstErrorTitle == 'policy') {
+      targetKey = seatSectionKey;
+    } else if (firstErrorTitle == 'message') {
+      targetKey = messageSectionKey;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final targetContext = targetKey.currentContext;
+      if (targetContext != null) {
+        Scrollable.ensureVisible(
+          targetContext,
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeInOut,
+          alignment: 0.12,
+        );
       }
-      if (policyTypeId.value == '') {
-        var err = {
-          'title': "policy",
-          'eList': ['Must select at least 1 policy']
-        };
-        errors.add(err);
-      }
+    });
+  }
+
+  getCardsList() async {
+    if (!validateBookingPrerequisites()) {
       return;
     }
 
@@ -568,32 +684,8 @@ class BookSeatController extends GetxController {
       {String paymentType = "stripe",
       bool gPay = false,
       String token = ""}) async {
-    errors.clear();
     logger.info(messageDriverTextEditingController.text);
-    if (seatAvailable.value <= 0 || policyTypeId.value == '') {
-      if (seatAvailable.value <= 0 ||
-          messageDriverTextEditingController.text == "") {
-        var err = {
-          'title': "seats",
-          'eList': ['Must select at least 1 seat']
-        };
-        errors.add(err);
-      }
-      if (policyTypeId.value == '') {
-        var err = {
-          'title': "policy",
-          'eList': ['Must select at least 1 policy']
-        };
-        errors.add(err);
-      }
-
-      if (messageDriverTextEditingController.text == '') {
-        var err = {
-          'title': "message",
-          'eList': ['Please enter message']
-        };
-        errors.add(err);
-      }
+    if (!validateBookingPrerequisites()) {
       return;
     }
 
@@ -831,7 +923,7 @@ class BookSeatController extends GetxController {
 
     var paymentMethod = "";
     if (paymentType == "paypal") {
-      paymentMethod = "paypal";
+      paymentMethod = gPay ? "credit_card" : "paypal";
       var paypalPayment = 0.0;
       if (currentUserBookedSeat.value != 0) {
         if (ride['payment_method_slug'] == "cash") {
@@ -1009,6 +1101,16 @@ class BookSeatController extends GetxController {
   paypalMethod(paypalPayment, bookingCredit, seatAmount, cashPayment, total,
       onlinePayment, paymentMethod, bookingId, taxAmount) async {
     isOverlayLoading(false);
+    paypalEmail = "";
+    paypalPayerId = "";
+
+    if (kIsWeb) {
+      serviceController.showDialogue(
+        "PayPal is not available in the web app yet. Please use credit card or Google/Apple Pay.",
+        type: "warning",
+      );
+      return;
+    }
 
     Get.to(
       PaypalPay(
@@ -1054,6 +1156,10 @@ class BookSeatController extends GetxController {
                 params['data']['purchase_units'][0]['payments']['captures']
                         [0] !=
                     null) {
+              paypalEmail =
+                  (params['data']['payer']?['email_address'] ?? '').toString();
+              paypalPayerId =
+                  (params['data']['payer']?['payer_id'] ?? '').toString();
               captureId = params['data']['purchase_units'][0]['payments']
                   ['captures'][0]['id'];
               await bookingRide(bookingCredit, seatAmount, cashPayment, total,
@@ -1076,6 +1182,11 @@ class BookSeatController extends GetxController {
       paymentMethod, bookingId, taxAmount,
       {bool gPay = false}) async {
     try {
+      if (!gPay && paymentMethod != "paypal") {
+        paypalEmail = "";
+        paypalPayerId = "";
+      }
+
       if (ride['payment_method_slug'] == "cash") {
         if (coffeeFromWall.value == true) {
           paymentMethod = "cash";
@@ -1152,7 +1263,14 @@ class BookSeatController extends GetxController {
               messageDriverTextEditingController.text,
               fromStopId,
               toStopId,
-              gPay)
+              gPay,
+              agreeTerms.value,
+              firmAgreeTerms.value,
+              pinkAgreeTerms.value,
+              extraCareAgreeTerms.value,
+              paypalEmail,
+              paypalPayerId,
+              firmCancellationUnderstandChecked.value)
           .then((resp) async {
         errorList.clear();
         if (resp['status'] != null && resp['status'] == "Error") {

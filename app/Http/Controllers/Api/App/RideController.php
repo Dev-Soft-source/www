@@ -214,7 +214,6 @@ class RideController extends WebRideController
                 ->filter()
                 ->values()
                 ->all();
-            Log::info('$rideFeatures', [$ride->id, $rideFeatures]);
             // Loop through each feature and add the corresponding image and title
             foreach ($rideFeatures as $feature) {
                 if (isset($featureResponseMap[$feature])) {
@@ -327,7 +326,11 @@ class RideController extends WebRideController
             $features = [];
 
             // Check if the features are a string, then explode it into an array
-            $rideFeatures = is_string($ride->features) ? explode('=', $ride->features) : $ride->features;
+            $rideFeatures = collect($ride->features)
+                ->when(is_string($ride->features), fn($c) => collect(explode('=', $ride->features)))
+                ->filter()
+                ->values()
+                ->all();
 
             // Loop through each feature and add the corresponding image and title
             foreach ($rideFeatures as $feature) {
@@ -709,7 +712,16 @@ class RideController extends WebRideController
             return null;
         }
 
-        return RideDetailPageSettingDetail::where('language_id', $language->id)->first();
+        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+
+        if ($rideDetailPage) {
+            $rideDetailPage->cancellation_policy_tooltip_url = route('firm_cancellation_policy', [
+                'lang' => $this->selectedLanguage->abbreviation,
+                'type' => 'firm',
+            ]);
+        }
+
+        return $rideDetailPage;
     }
 
     protected function getApiGenderLabel(?Language $language)
@@ -839,6 +851,10 @@ class RideController extends WebRideController
 
         $ride = Ride::where('id', $rideId)
             ->with([
+                'bookings' => function ($q) {
+                    $q->where('status', '<>', Booking::STATUS_CANCELLED);
+                    $q->where('status', '<>', Booking::STATUS_DECLINED);
+                },
                 'rideDetail',
                 'rideStops' => function ($q) {
                     $q->orderBy('stop_order');
@@ -855,6 +871,7 @@ class RideController extends WebRideController
         $selectedLanguage = $this->resolveApiLanguage($request->lang_id);
         $findRidePage = $this->getApiFindRidePage($selectedLanguage);
         $postRidePage = $this->getApiPostRidePage($selectedLanguage);
+        
         $rideDetailPage = $this->getApiRideDetailPage($selectedLanguage);
         $genderLabel = $this->getApiGenderLabel($selectedLanguage);
 
@@ -958,7 +975,11 @@ class RideController extends WebRideController
             $ride->total_amount = $ride->booking_fee + $ride->fare;
 
             $features = [];
-            $rideFeatures = is_string($ride->features) ? explode('=', $ride->features) : $ride->features;
+            $rideFeatures = collect($ride->features)
+                ->when(is_string($ride->features), fn($c) => collect(explode('=', $ride->features)))
+                ->filter()
+                ->values()
+                ->all();
             foreach ($rideFeatures as $feature) {
                 if (isset($featureResponseMap[$feature])) {
                     $features[] = $featureResponseMap[$feature];
@@ -1084,6 +1105,25 @@ class RideController extends WebRideController
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $rideDetailPage = RideDetailPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
+            }
+        }
+
+        if ($rideDetailPage) {
+            $language = null;
+
+            if ($request->lang_id && $request->lang_id != 0) {
+                $language = Language::find($request->lang_id);
+            }
+
+            if (!$language) {
+                $language = Language::where('is_default', 1)->first();
+            }
+
+            if ($language) {
+                $rideDetailPage->cancellation_policy_tooltip_url = route('firm_cancellation_policy', [
+                    'lang' => $language->abbreviation,
+                    'type' => 'firm',
+                ]);
             }
         }
 
@@ -1719,7 +1759,11 @@ class RideController extends WebRideController
             $features = [];
 
             // Check if the features are a string, then explode it into an array
-            $rideFeatures = is_string($ride->features) ? explode('=', $ride->features) : $ride->features;
+            $rideFeatures = collect($ride->features)
+                ->when(is_string($ride->features), fn($c) => collect(explode('=', $ride->features)))
+                ->filter()
+                ->values()
+                ->all();
 
             // Loop through each feature and add the corresponding image and title
             foreach ($rideFeatures as $feature) {

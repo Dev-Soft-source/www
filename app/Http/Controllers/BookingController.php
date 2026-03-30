@@ -583,7 +583,7 @@ class BookingController extends Controller
         return $this->completeBooking($id, $user_id, null, $request);
     }
 
-    public function completeBooking($id, $user_id, $stripId = null, Request $request)
+    public function completeBooking($id, $user_id, $stripId = null, Request $request, $isWeb = true)
     {
 
         /////////////////////////////////////////////////
@@ -1003,7 +1003,12 @@ class BookingController extends Controller
             }
         }
 
-        return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $this->successMessage->book_seat_message]);
+        if($isWeb){
+            return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $this->successMessage->book_seat_message]);
+        } else {
+            $data = ['booking' => $booking];
+            return $this->successResponse($data, $this->successMessage->book_seat_message . ' ' . $request->seats . ' ' . $this->successMessage->book_seat_message_end_part);
+        }
     }
 
     /**
@@ -1835,6 +1840,12 @@ class BookingController extends Controller
 
 
 
+
+
+
+
+
+
     /**
      * Log Twilio SMS failure and add a hint when Twilio rejects the From/To combination
      * (e.g. sending from US number to unsupported destination).
@@ -1848,27 +1859,7 @@ class BookingController extends Controller
         }
     }
 
-    /**
-     * Helper method to validate and apply student booking fee waiver
-     * Checks both charge_booking field and student card expiration date
-     * 
-     * @param User $user The user making the booking
-     * @param float|string $bookingCredit The booking credit amount from request
-     * @return float|string The adjusted booking credit (0 if waived, original if not)
-     */
-    protected function validateStudentBookingFee($user, $bookingCredit)
-    {
-        if ($user->hasBookingFeeWaiverFlag()) {
-            if ($user->isBookingFeeCurrentlyWaived()) {
-                // If student is verified (student == '1') and card is expired, charge booking fee
-                return $bookingCredit;
-            }
-            // Student with valid card - booking fee is waived
-            return 0;
-        }
-        // Regular user or student with expired card - charge booking fee
-        return $bookingCredit;
-    }
+
 
     protected function normalizeBookingPaymentAmounts(Request $request, Ride $ride): array
     {

@@ -838,4 +838,16 @@ class User extends Authenticatable
             $defaultLanguageId
         );
     }
+
+    public function getPassengerSeatsCount($ride_id): int
+    {
+        return (int) Booking::query()
+            ->join('rides', 'rides.id', '=', 'bookings.ride_id')
+            ->where('bookings.user_id', $this->id)
+            ->where('bookings.ride_id', $ride_id)
+            ->where('bookings.status', '<>', Booking::STATUS_CANCELLED)
+            ->where('bookings.status', '<>', Booking::STATUS_DECLINED)
+            ->where('rides.added_by', '!=', $this->id)
+            ->sum('bookings.seats');
+    }
 }

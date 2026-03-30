@@ -24,16 +24,9 @@ Widget onlinePaymentWidget({context, controller, screenWidth}) {
             img: paypal,
             iconHeight: 28.0,
             iconWidth: 84.0,
-            onTap: controller.agreeTerms.value != true &&
-                    controller.firmAgreeTerms.value != true &&
-                    controller.firmCancellationUnderstandChecked.value != true &&
-                    controller.pinkAgreeTerms.value != true &&
-                    controller.extraCareAgreeTerms.value != true
-                ? null
-                : () async {
-                    await controller.bookingRidePaymentType(
-                        paymentType: "paypal");
-                  }),
+            onTap: () async {
+              await controller.bookingRidePaymentType(paymentType: "paypal");
+            }),
         10.heightBox,
         paymentOptionCard(
             context: context,
@@ -42,15 +35,9 @@ Widget onlinePaymentWidget({context, controller, screenWidth}) {
                 "${controller.labelTextDetail['credit_card_label'] ?? 'Pay with credit card'}",
             iconHeight: 18.0,
             iconWidth: 86.0,
-            onTap: controller.agreeTerms.value != true &&
-                    controller.firmAgreeTerms.value != true &&
-                    controller.firmCancellationUnderstandChecked.value != true &&
-                    controller.pinkAgreeTerms.value != true &&
-                    controller.extraCareAgreeTerms.value != true
-                ? null
-                : () async {
-                    await controller.getCardsList();
-                  }),
+            onTap: () async {
+              await controller.getCardsList();
+            }),
         10.heightBox,
         if (controller.agreeTerms.value == true &&
             controller.firmAgreeTerms.value == true &&
@@ -58,7 +45,8 @@ Widget onlinePaymentWidget({context, controller, screenWidth}) {
             controller.pinkAgreeTerms.value == true &&
             controller.extraCareAgreeTerms.value == true &&
             controller.messageDriverTextEditingController.text != "" &&
-            controller.showGPayBtn.value == true) ...[
+            controller.showGPayBtn.value == true &&
+            controller.nativePayAvailable.value == true) ...[
           Platform.isIOS
               ? SizedBox(
                   width: screenWidth,

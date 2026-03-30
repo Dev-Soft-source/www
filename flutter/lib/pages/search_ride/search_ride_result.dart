@@ -185,15 +185,18 @@ class SearchRideResultPage extends StatelessWidget {
                                         100);
                               }
 
-                              var hideDriverInfo = false;
-                              if (ride['bookings'].length > 0) {
-                                hideDriverInfo = true;
-                              }
+                              final bookings = ride['bookings'];
+                              final hideDriverInfo =
+                                  bookings is List && bookings.isNotEmpty;
 
                               final statusBorderColors = <Color>[];
-                              var features = [];
-                              var dataFeature = ride['feature_ids'];
-                              features.addAll(dataFeature.split('='));
+                              final features = <String>[];
+                              final dataFeature =
+                                  ride['feature_ids']?.toString().trim();
+                              if (dataFeature != null &&
+                                  dataFeature.isNotEmpty) {
+                                features.addAll(dataFeature.split('='));
+                              }
                               if (features.contains('1')) {
                                 // pink ride
                                 statusBorderColors.add(Color(0XFFE91E63));

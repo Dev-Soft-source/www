@@ -65,7 +65,7 @@ class Controller extends BaseController
                 } elseif (!$lang && $langId && auth('sanctum')->check()) {
                     $lang = Language::whereKey(auth('sanctum')->user()->lang_id)->value('abbreviation');
                 }
-                // \Log::info('api route', [Route::currentRouteName(), $lang]);
+                \Log::info('api route', [Route::currentRouteName(), $lang]);
                 // \Log::info('search ride', $request->all());
 
             } else {
@@ -957,5 +957,27 @@ class Controller extends BaseController
         }
 
         return $text;
+    }
+
+        /**
+     * Helper method to validate and apply student booking fee waiver
+     * Checks both charge_booking field and student card expiration date
+     * 
+     * @param User $user The user making the booking
+     * @param float|string $bookingCredit The booking credit amount from request
+     * @return float|string The adjusted booking credit (0 if waived, original if not)
+     */
+    protected function validateStudentBookingFee($user, $bookingCredit)
+    {
+        if ($user->hasBookingFeeWaiverFlag()) {
+            if ($user->isBookingFeeCurrentlyWaived()) {
+                // If student is verified (student == '1') and card is expired, charge booking fee
+                return $bookingCredit;
+            }
+            // Student with valid card - booking fee is waived
+            return 0;
+        }
+        // Regular user or student with expired card - charge booking fee
+        return $bookingCredit;
     }
 }

@@ -234,10 +234,11 @@ class MyRideController extends Controller
             // Initialize a temporary array for the features
             $features = [];
 
-            // Check if the features are a string, then explode it into an array
-            $rideFeatures = is_string($ride->features) ? explode('=', $ride->features) : $ride->features;
-
-            // Loop through each feature and add the corresponding image and title
+            $rideFeatures = collect($ride->features)
+                ->when(is_string($ride->features), fn($c) => collect(explode('=', $ride->features)))
+                ->filter()
+                ->values()
+                ->all();
             foreach ($rideFeatures as $feature) {
                 if (isset($featureResponseMap[$feature])) {
                     $features[] = $featureResponseMap[$feature];
@@ -1218,11 +1219,11 @@ class MyRideController extends Controller
 
                 // Initialize a temporary array for the features
                 $features = [];
-
-                // Check if the features are a string, then explode it into an array
-                $rideFeatures = is_string($ride->features) ? explode('=', $ride->features) : $ride->features;
-
-                // Loop through each feature and add the corresponding image and title
+                $rideFeatures = collect($ride->features)
+                    ->when(is_string($ride->features), fn($c) => collect(explode('=', $ride->features)))
+                    ->filter()
+                    ->values()
+                    ->all();
                 foreach ($rideFeatures as $feature) {
                     if (isset($featureImages[$feature])) {
                         $features[] = $featureImages[$feature];

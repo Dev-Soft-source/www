@@ -59,10 +59,13 @@ class BookSeatPage extends GetView<BookSeatController> {
                             title:
                                 '* ${controller.labelTextDetail['required_fields'] ?? "* Indicates required fields"}'),
                         10.heightBox,
-                        seatAvailableWidget(
-                            context: context,
-                            controller: controller,
-                            screenWidth: context.screenWidth),
+                        Container(
+                          key: controller.seatSectionKey,
+                          child: seatAvailableWidget(
+                              context: context,
+                              controller: controller,
+                              screenWidth: context.screenWidth),
+                        ),
                         if (controller.errors.firstWhereOrNull(
                                 (element) => element['title'] == "seats") !=
                             null) ...[
@@ -84,29 +87,37 @@ class BookSeatPage extends GetView<BookSeatController> {
                             screenWidth: context.screenWidth),
                         10.heightBox,
 
-                        txt20Size(
-                            context: context,
-                            title:
-                                "${controller.labelTextDetail['message_to_driver_label'] ?? "Message to driver"}"),
-                        3.heightBox,
-                        textAreaWidget(
-                          textController:
-                              controller.messageDriverTextEditingController,
-                          readonly: false,
-                          fontSize: 18.0,
-                          fontFamily: regular,
-                          placeHolder:
-                              "${controller.labelTextDetail['message_driver_placeholder'] ?? "Tell the driver why you're traveling, introduce yourself, or just say hi\nDrivers are more likely to accept passengers who introduce themselves"}",
-                          maxLines: 4,
-                          onChanged: (value) {
-                            if (controller.errors.firstWhereOrNull((element) =>
-                                    element['title'] == "message") !=
-                                null) {
-                              controller.errors.remove(controller.errors
-                                  .firstWhereOrNull((element) =>
-                                      element['title'] == "message"));
-                            }
-                          },
+                        Container(
+                          key: controller.messageSectionKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              txt20Size(
+                                  context: context,
+                                  title:
+                                      "${controller.labelTextDetail['message_to_driver_label'] ?? "Message to driver"}"),
+                              3.heightBox,
+                              textAreaWidget(
+                                textController:
+                                    controller.messageDriverTextEditingController,
+                                readonly: false,
+                                fontSize: 18.0,
+                                fontFamily: regular,
+                                placeHolder:
+                                    "${controller.labelTextDetail['message_driver_placeholder'] ?? "Tell the driver why you're traveling, introduce yourself, or just say hi\nDrivers are more likely to accept passengers who introduce themselves"}",
+                                maxLines: 4,
+                                onChanged: (value) {
+                                  if (controller.errors.firstWhereOrNull((element) =>
+                                          element['title'] == "message") !=
+                                      null) {
+                                    controller.errors.remove(controller.errors
+                                        .firstWhereOrNull((element) =>
+                                            element['title'] == "message"));
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                         if (controller.errors.firstWhereOrNull(
                                 (element) => element['title'] == "message") !=
@@ -155,7 +166,9 @@ class BookSeatPage extends GetView<BookSeatController> {
                               ),
                             )),
                         3.heightBox,
-                        Row(
+                        Container(
+                          key: controller.termsSectionKey,
+                          child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -219,6 +232,7 @@ class BookSeatPage extends GetView<BookSeatController> {
                               ),
                             ),
                           ],
+                        ),
                         ),
                         if (controller.policyTypeId.value == "37") ...[
                           3.heightBox,

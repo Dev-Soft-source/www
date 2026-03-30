@@ -175,7 +175,13 @@ Widget pricingWidget({context, controller, screenWidth}){
               Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                  txt20Size(context: context, title: "$selectedSeatCount ${controller.labelTextDetail['seat_label'] ?? "Seat"}"),
+                  Expanded(
+                    child: txt20Size(
+                      context: context,
+                      title: "$selectedSeatCount ${controller.labelTextDetail['seat_label'] ?? "Seat"}",
+                    ),
+                  ),
+                  8.widthBox,
                   txt20Size(context: context, title: "\$${seatAmount.toStringAsFixed(2)}")
                 ],
               ),
@@ -186,7 +192,13 @@ Widget pricingWidget({context, controller, screenWidth}){
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    txt20Size(context: context, title: "${controller.labelTextDetail['firm_discount_label_price_section'] ?? "Discount"}"),
+                    Expanded(
+                      child: txt20Size(
+                        context: context,
+                        title: "${controller.labelTextDetail['firm_discount_label_price_section'] ?? "Discount"}",
+                      ),
+                    ),
+                    8.widthBox,
                     txt20Size(context: context, title: "\$${discountFirm.toStringAsFixed(2)}")
                   ],
                 ),
@@ -194,7 +206,13 @@ Widget pricingWidget({context, controller, screenWidth}){
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    txt20Size(context: context, title: "${controller.labelTextDetail['firm_your_price_label_price_section'] ?? "Your price"}"),
+                    Expanded(
+                      child: txt20Size(
+                        context: context,
+                        title: "${controller.labelTextDetail['firm_your_price_label_price_section'] ?? "Your price"}",
+                      ),
+                    ),
+                    8.widthBox,
                     txt20Size(context: context, title: "\$${amount.toStringAsFixed(2)}")
                   ],
                 ),
@@ -204,7 +222,13 @@ Widget pricingWidget({context, controller, screenWidth}){
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    txt20Size(context: context, title: "${controller.labelTextDetail['booking_fee_label'] ?? "Booking fee"}"),
+                    Expanded(
+                      child: txt20Size(
+                        context: context,
+                        title: "${controller.labelTextDetail['booking_fee_label'] ?? "Booking fee"}",
+                      ),
+                    ),
+                    8.widthBox,
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
@@ -220,7 +244,13 @@ Widget pricingWidget({context, controller, screenWidth}){
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    txt20Size(context: context, title: "${controller.labelTextDetail['booking_fee_label'] ?? "Booking fee"}"),
+                    Expanded(
+                      child: txt20Size(
+                        context: context,
+                        title: "${controller.labelTextDetail['booking_fee_label'] ?? "Booking fee"}",
+                      ),
+                    ),
+                    8.widthBox,
                     txt20Size(context: context, title: "\$${bookingFee.toStringAsFixed(2)}")
                   ],
                 ),
@@ -231,7 +261,13 @@ Widget pricingWidget({context, controller, screenWidth}){
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    txt20Size(context: context, title: "${controller.labelTextDetail['tax_label'] ?? "Tax"}"),
+                    Expanded(
+                      child: txt20Size(
+                        context: context,
+                        title: "${controller.labelTextDetail['tax_label'] ?? "Tax"}",
+                      ),
+                    ),
+                    8.widthBox,
                     txt20Size(context: context, title: "\$${taxAmt.toStringAsFixed(2)}")
                   ],
                 ),

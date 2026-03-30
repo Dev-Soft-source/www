@@ -31,19 +31,11 @@ class PaymentOptionsController extends Controller
     {
         $user = Auth::guard('sanctum')->user();
         $user_id = $user->id;
-        $cards = Card::where('user_id', $user_id)->orderBy('primary_card', 'desc')->orderBy('id', 'desc')->paginate($request->paginate_limit);
+        $cards = Card::where('user_id', $user_id)->where('payment_method_type', 'card')->orderBy('primary_card', 'desc')->orderBy('id', 'desc')->paginate($request->paginate_limit);
 
-        $paymentOptionPage = null;
-        if ($request->lang_id && $request->lang_id != 0) {
-            $paymentOptionPage = PaymentSettingDetail::where('language_id', $request->lang_id)->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $request->lang_id)->select('delete_card_message')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $paymentOptionPage = PaymentSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_card_message')->first();
-            }
-        }
+        
+        $paymentOptionPage = PaymentSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $messages = $this->successMessage;
 
         $data = ['cards' => $cards, 'paymentOptionPage' => $paymentOptionPage, 'messages' => $messages];
         return $this->successResponse($data, 'Get cards successfully');

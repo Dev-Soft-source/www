@@ -89,30 +89,51 @@ class BookSeatProvider extends GetConnect {
       messageToDriver,
       fromStopId,
       toStopId,
-      gPay) async {
+      gPay,
+      agreeTerms,
+      firmAgreeTerms,
+      pinkRideAgreeTerms,
+      extraCareRideAgreeTerms,
+      paypalEmail,
+      paypalPayerId,
+      firmCancellationUnderstand) async {
     try {
       final url = "$baseUrl/$bookingStore?id=$rideId";
       final data = FormData({});
 
+      data.fields.add(MapEntry("ride_id", rideId.toString()));
+      data.fields.add(MapEntry("id", rideId.toString()));
       data.fields.add(MapEntry("payment_method", paymentMethod.toString()));
       data.fields.add(MapEntry("booking_method", bookingType.toString()));
       data.fields.add(MapEntry("booking_id", bookingId.toString()));
       if (paymentMethod == "paypal") {
         data.fields.add(MapEntry("paypal_id", captureId.toString()));
+        data.fields.add(MapEntry("paypal_email", paypalEmail.toString()));
+        data.fields.add(MapEntry("paypal_payer_id", paypalPayerId.toString()));
       } else {
-        data.fields.add(MapEntry("card_id", cardId.toString()));
+        data.fields.add(MapEntry(
+            "card_id", gPay == true ? captureId.toString() : cardId.toString()));
       }
       data.fields.add(MapEntry("g_pay", gPay.toString()));
+      data.fields.add(MapEntry("agree_terms", agreeTerms.toString()));
+      data.fields.add(
+          MapEntry("firm_agree_terms", firmAgreeTerms.toString()));
+      data.fields.add(MapEntry(
+          "pink_ride_agree_terms", pinkRideAgreeTerms.toString()));
+      data.fields.add(MapEntry("extra_care_ride_agree_terms",
+          extraCareRideAgreeTerms.toString()));
+      data.fields.add(MapEntry("firm_cancellation_understand",
+          firmCancellationUnderstand.toString()));
       data.fields.add(MapEntry("booking_credit", bookingCredit.toString()));
       data.fields.add(MapEntry("seats", seats.toString()));
       data.fields.add(MapEntry("seats_amount", seatsAmount.toString()));
       data.fields.add(MapEntry("online_payment", onlinePayment.toString()));
       data.fields.add(MapEntry("cash_payment", cashPayment.toString()));
       data.fields.add(MapEntry("total", total.toString()));
-      data.fields.add(MapEntry('type', type.toString()));
+      data.fields.add(MapEntry('booking_type', type.toString()));
       data.fields.add(MapEntry('booked_by_wallet', bookedByWallet.toString()));
-      data.fields.add(MapEntry('booked_seat_ids', bookedSeatIds.toString()));
-      data.fields.add(MapEntry('coffee_from_wall', coffeeFromWall.toString()));
+      data.fields.add(MapEntry('seats_id', bookedSeatIds.toString()));
+      data.fields.add(MapEntry('coffee_wall', coffeeFromWall.toString()));
       data.fields.add(MapEntry("tax_percentage", taxPercentage.toString()));
       data.fields.add(MapEntry("deduct_tax", deductType.toString()));
       data.fields.add(MapEntry("tax_type", taxType.toString()));

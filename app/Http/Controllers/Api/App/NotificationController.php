@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\NotificationsPageSettingDetail;
 use App\Models\NotificationsPageSetting;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Log;
 
 class NotificationController extends Controller
@@ -233,14 +234,27 @@ class NotificationController extends Controller
             ->filter()
             ->values();
 
-        $inbox = $notificationRows->concat($chats)
+        $inboxFull = $notificationRows->concat($chats)
             ->sortByDesc(function ($item) {
                 return $item['created_at'] ?? '';
             })
             ->values();
 
+        $perPage = (int) $request->input('per_page', 20);
+        $perPage = $perPage > 0 ? min($perPage, 100) : 20;
+        $page = max((int) $request->input('page', 1), 1);
+
+        $inbox = new LengthAwarePaginator(
+            $inboxFull->forPage($page, $perPage)->values(),
+            $inboxFull->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
         return view('notifications', compact(
             'inbox',
+            'inboxFull',
             'chatPageSetting',
             'notificationsPageSetting',
             'user_id'

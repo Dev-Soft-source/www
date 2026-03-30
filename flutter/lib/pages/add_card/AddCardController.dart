@@ -14,8 +14,7 @@ import 'AddCardProvider.dart';
 
 class AddCardController extends GetxController {
   final serviceController = Get.find<Service>();
-  PaymentOptionController paymentOptionController =
-      Get.find<PaymentOptionController>();
+  late PaymentOptionController paymentOptionController;
   BookSeatController? bookSeatController;
   MyWalletController? myWalletController;
   var errorList = List.empty(growable: true).obs;
@@ -57,6 +56,11 @@ class AddCardController extends GetxController {
   void onInit() async {
     // TODO: implement onInit
     super.onInit();
+
+    if (!Get.isRegistered<PaymentOptionController>()) {
+      Get.put(PaymentOptionController());
+    }
+    paymentOptionController = Get.find<PaymentOptionController>();
 
     isLoading(true);
     await getLabelTextDetail();

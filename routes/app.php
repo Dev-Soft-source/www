@@ -132,13 +132,13 @@ Route::group(['prefix' => 'app/v1', 'middleware' => ['auth:sanctum']], function 
     Route::post('step3-5/update', [StepController::class, 'step3to5'])->name('app.auth.step3to5.update');
     Route::get('search-ride', [RideController::class, 'SearchRide'])->name('app.auth.search_ride');
     Route::get('check-booking', [RideController::class, 'checkBooking'])->name('app.auth.check_booking');
-    Route::get('booking', [BookingController::class, 'create'])->name('app.auth.booking');
     Route::get('secured/booking-number-check', [BookingController::class, 'bookingNumberCheck'])->name('app.auth.booking-number-check');
     Route::post('instant-booking', [BookingController::class, 'instantBooking'])->name('app.auth.instant_booking');
     Route::post('seat-on-hold', [BookingController::class, 'seatOnHold'])->name('app.auth.seat_on_hold');
     Route::post('create-payment-intent', [BookingController::class, 'createPaymentIntent'])->name('app.auth.create_payment_intent');
     Route::put('update-instant-booking', [BookingController::class, 'updateInstantBooking'])->name('app.auth.update_instant_booking');
     
+    Route::get('booking', [BookingController::class, 'create'])->name('app.auth.booking');
     Route::post('booking-store', [BookingController::class, 'bookingStore'])->name('app.auth.booking_store');
     
     Route::post('booking-request', [BookingController::class, 'bookingRequest'])->name('app.auth.booking_request');

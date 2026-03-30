@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_paypal_pay/flutter_paypal_pay.dart';
 import 'package:get/get.dart';
+import 'package:pay/pay.dart';
 import 'package:proximaride_app/helpers/error_state_manager.dart';
+import 'package:proximaride_app/consts/payment_config.dart';
 import 'package:proximaride_app/pages/book_seat/BookSeatProvider.dart';
 import 'package:proximaride_app/pages/edit_profile/EditProfileProvider.dart';
 import 'package:proximaride_app/pages/my_wallet/MyWalletProvider.dart';
@@ -45,6 +48,7 @@ class MyWalletController extends GetxController
   var primaryCardCheck = false.obs;
   var showPayment = false.obs;
   var gPayAmount = 0.0.obs;
+  var nativePayAvailable = false.obs;
 
   late TabController tabController, passengerTabController, driverTabController;
   late PageController pageController,
@@ -149,9 +153,35 @@ class MyWalletController extends GetxController
     }
 
     // Load initial data
+    await checkNativePayAvailability();
     await loadInitialData();
 
     super.onInit();
+  }
+
+  Future<void> checkNativePayAvailability() async {
+    if (kIsWeb) {
+      nativePayAvailable.value = false;
+      return;
+    }
+
+    try {
+      final payClient = Pay({
+        PayProvider.google_pay:
+            PaymentConfiguration.fromJsonString(defaultGooglePay),
+        PayProvider.apple_pay:
+            PaymentConfiguration.fromJsonString(defaultApplePay),
+      });
+
+      final provider =
+          defaultTargetPlatform == TargetPlatform.iOS
+              ? PayProvider.apple_pay
+              : PayProvider.google_pay;
+
+      nativePayAvailable.value = await payClient.userCanPay(provider);
+    } catch (_) {
+      nativePayAvailable.value = false;
+    }
   }
 
   Future<void> loadInitialData() async {
@@ -604,6 +634,15 @@ class MyWalletController extends GetxController
       return;
     }
     isOverlayLoading(false);
+
+    if (kIsWeb) {
+      serviceController.showDialogue(
+        "PayPal is not available in the web app yet. Please use another payment method.",
+        type: "warning",
+      );
+      return;
+    }
+
     Get.to(
       PaypalPay(
           sandboxMode: true,
