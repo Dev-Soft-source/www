@@ -26,6 +26,7 @@ Widget onlinePaymentWidget({context, controller, screenWidth}) {
             iconWidth: 84.0,
             onTap: controller.agreeTerms.value != true &&
                     controller.firmAgreeTerms.value != true &&
+                    controller.firmCancellationUnderstandChecked.value != true &&
                     controller.pinkAgreeTerms.value != true &&
                     controller.extraCareAgreeTerms.value != true
                 ? null
@@ -43,6 +44,7 @@ Widget onlinePaymentWidget({context, controller, screenWidth}) {
             iconWidth: 86.0,
             onTap: controller.agreeTerms.value != true &&
                     controller.firmAgreeTerms.value != true &&
+                    controller.firmCancellationUnderstandChecked.value != true &&
                     controller.pinkAgreeTerms.value != true &&
                     controller.extraCareAgreeTerms.value != true
                 ? null
@@ -52,6 +54,7 @@ Widget onlinePaymentWidget({context, controller, screenWidth}) {
         10.heightBox,
         if (controller.agreeTerms.value == true &&
             controller.firmAgreeTerms.value == true &&
+            controller.firmCancellationUnderstandChecked.value == true &&
             controller.pinkAgreeTerms.value == true &&
             controller.extraCareAgreeTerms.value == true &&
             controller.messageDriverTextEditingController.text != "" &&

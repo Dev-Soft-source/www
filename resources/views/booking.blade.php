@@ -13,19 +13,6 @@
 @endphp
     <div class="booking-page">
 
-        @if ($setting)
-            @php
-                $settingBookingPrice = $setting->booking_price;
-                $settingFirmDiscount = $setting->frim_discount;
-            @endphp
-        @else
-            @php
-                $settingBookingPrice = '';
-                $settingFirmDiscount = '';
-            @endphp
-        @endif
-
-
         @if (session('failure'))
             {{-- todo  --}}
             <div id="myModal" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -553,9 +540,6 @@
                                     <div class="relative">
                                         @if ($ride->isFirmCancellation())
                                             @php
-                                                if ($setting) {
-                                                    $settingFirmDiscount = $setting->frim_discount;
-                                                }
                                                 $firmText = str_replace(
                                                     ':discount',
                                                     $settingFirmDiscount,
@@ -773,25 +757,25 @@
             };
             const SEAT_HOLD_ROUTE = '{{ route('seat_on_hold') }}';
             const CSRF_TOKEN = '{{ csrf_token() }}';
-            const MAX_STUDENT_SEATS = 2;
-            const BOOKING_FEE_PERCENTAGE = 0.10; // 10%
-            const MIN_PRICE_FOR_BOOKING_FEE = 15;
+            const BOOKING_FEE_PERCENTAGE = parseFloat(@json($settingBookingFee ?? 0)); // 10%
             const topUpBalance = parseFloat(@json((float) ($topUpBalance ?? 0)));
+            const MAX_STUDENT_SEATS = 2;
+            const MIN_PRICE_FOR_BOOKING_FEE = 15;
 
             // Calculate booking price based on user status and ride price
-            const chargeBooking =
-                {{ auth()->user() && auth()->user()->charge_booking ? auth()->user()->charge_booking : '1' }};
-            const isStudentFeeWaived = (chargeBooking == '2');
+            const chargeBooking = {{ $isChargeBooking ? 'true' : 'false' }};
+            const isStudentFeeWaived = {{ $isStudentFeeWaived ? 'true' : 'false' }};
             const pricePerSeat = parseFloat(@json($seat_price ?? 0));
-            const bookingPrice = (isStudentFeeWaived || pricePerSeat < MIN_PRICE_FOR_BOOKING_FEE) ?
+            const bookingFee = (isStudentFeeWaived || pricePerSeat < MIN_PRICE_FOR_BOOKING_FEE) ?
                 0.0 :
-                parseFloat(pricePerSeat * BOOKING_FEE_PERCENTAGE);
+                parseFloat(pricePerSeat * BOOKING_FEE_PERCENTAGE / 100).toFixed(2);
 
             // Ride configuration
             const rideConfig = {
                 isFirmRide: {{ $ride->isFirmCancellation() ? 'true' : 'false' }},
                 firmDiscount: parseFloat("{{ $settingFirmDiscount ?? 0 }}"),
                 taxPercentage: parseFloat("{{ $settingTaxPercentage ?? 0 }}"),
+                bookingFeePercentage: parseFloat("{{ $settingBookingFee ?? 0 }}"),
                 seatPrice: parseFloat({{ $seat_price ?? 0 }}),
                 paymentMethod: '{{ $ride->isCashPayment() ? 'cash' : 'online' }}'
             };
@@ -957,7 +941,7 @@
                     seatCountInput.value = selectedSeats;
                 }
 
-                let totalAmount = roundCurrency(bookingPrice * selectedSeats);
+                let totalAmount = roundCurrency(bookingFee * selectedSeats);
                 let totalSeatsAmount = roundCurrency(rideConfig.seatPrice * selectedSeats);
                 const totalRideSeatAmount = totalSeatsAmount;
 

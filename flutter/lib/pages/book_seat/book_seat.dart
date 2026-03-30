@@ -70,7 +70,7 @@ class BookSeatPage extends GetView<BookSeatController> {
                               tip: controller.errors.firstWhereOrNull(
                                   (element) => element['title'] == "seats"))
                         ],
-                        // if(controller.ride['booking_type_slug'] == 'firm')...[
+                        // if(controller.policyType.value == 'firm')...[
                         //   10.heightBox,
                         //   cancellationPolicyWidget(context: context,controller: controller,screenWidth: context.screenWidth),
                         //   if(controller.errors.firstWhereOrNull((element) => element['title'] == "policy") != null) ...[
@@ -279,13 +279,102 @@ class BookSeatPage extends GetView<BookSeatController> {
                                       controller.errors.add(err);
                                     }
                                   },
-                                  child: txt20Size(
-                                      title: controller.firmDisclaimer.value !=
-                                              ""
-                                          ? controller.firmDisclaimer.value
-                                          : "I know that this ride has the Firm cancellation policy which entitles me to a 10% discount of the booking price, and it is not refundable; regardless of the cancellation time",
-                                      fontFamily: bold,
-                                      context: context),
+                                  child: AppHtmlText(
+                                    data: controller.firmDisclaimer.value != ""
+                                        ? controller.firmDisclaimer.value
+                                        : "I know that this ride has the Firm cancellation policy which entitles me to a 10% discount of the booking price, and it is not refundable; regardless of the cancellation time",
+                                    fontSize: 20,
+                                    fontFamily: bold,
+                                    linkColor: primaryColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          3.heightBox,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: 35,
+                                height: 35,
+                                child: checkBoxWidget(
+                                  value: controller
+                                      .firmCancellationUnderstandChecked.value,
+                                  onChanged: (value) {
+                                    controller
+                                        .firmCancellationUnderstandChecked
+                                        .value = value!;
+                                    if (controller
+                                            .firmCancellationUnderstandChecked
+                                            .value ==
+                                        true) {
+                                      controller.errors.remove(controller.errors
+                                          .firstWhereOrNull((element) =>
+                                              element['title'] ==
+                                              "firm_cancellation_understand"));
+                                    } else {
+                                      var err = {
+                                        'title':
+                                            "firm_cancellation_understand",
+                                        'eList': ['Please select agree terms']
+                                      };
+                                      controller.errors.add(err);
+                                    }
+                                  },
+                                  isError: controller.errors.isNotEmpty &&
+                                          controller.errors.firstWhereOrNull(
+                                                  (element) =>
+                                                      element['title'] ==
+                                                      "firm_cancellation_understand") !=
+                                              null
+                                      ? true
+                                      : false,
+                                ),
+                              ),
+                              3.widthBox,
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () {
+                                    controller
+                                            .firmCancellationUnderstandChecked
+                                            .value =
+                                        controller
+                                                .firmCancellationUnderstandChecked
+                                                .value ==
+                                            true
+                                        ? false
+                                        : true;
+                                    if (controller
+                                            .firmCancellationUnderstandChecked
+                                            .value ==
+                                        true) {
+                                      controller.errors.remove(controller.errors
+                                          .firstWhereOrNull((element) =>
+                                              element['title'] ==
+                                              "firm_cancellation_understand"));
+                                    } else {
+                                      var err = {
+                                        'title':
+                                            "firm_cancellation_understand",
+                                        'eList': ['Please select agree terms']
+                                      };
+                                      controller.errors.add(err);
+                                    }
+                                  },
+                                  child: AppHtmlText(
+                                    data: controller
+                                                .firmCancellationUnderstand
+                                                .value !=
+                                            ""
+                                        ? controller
+                                            .firmCancellationUnderstand.value
+                                        : "I understand the firm cancellation policy.",
+                                    fontSize: 20,
+                                    fontFamily: bold,
+                                    linkColor: primaryColor,
+                                  ),
                                 ),
                               ),
                             ],
@@ -350,13 +439,14 @@ class BookSeatPage extends GetView<BookSeatController> {
                                       controller.errors.add(err);
                                     }
                                   },
-                                  child: txt20Size(
-                                      title:
-                                          controller.pinkDisclaimer.value != ""
-                                              ? controller.pinkDisclaimer.value
-                                              : "Pink ride disclaimer",
-                                      fontFamily: bold,
-                                      context: context),
+                                  child: AppHtmlText(
+                                    data: controller.pinkDisclaimer.value != ""
+                                        ? controller.pinkDisclaimer.value
+                                        : "Pink ride disclaimer",
+                                    fontSize: 20,
+                                    fontFamily: bold,
+                                    linkColor: primaryColor,
+                                  ),
                                 ),
                               ),
                             ],
@@ -423,14 +513,15 @@ class BookSeatPage extends GetView<BookSeatController> {
                                       controller.errors.add(err);
                                     }
                                   },
-                                  child: txt20Size(
-                                      title: controller
-                                                  .extraCareDisclaimer.value !=
-                                              ""
-                                          ? controller.extraCareDisclaimer.value
-                                          : "Extra ride disclaimer",
-                                      fontFamily: bold,
-                                      context: context),
+                                  child: AppHtmlText(
+                                    data: controller.extraCareDisclaimer.value !=
+                                            ""
+                                        ? controller.extraCareDisclaimer.value
+                                        : "Extra ride disclaimer",
+                                    fontSize: 20,
+                                    fontFamily: bold,
+                                    linkColor: primaryColor,
+                                  ),
                                 ),
                               ),
                             ],
@@ -453,7 +544,12 @@ class BookSeatPage extends GetView<BookSeatController> {
                                     context: context),
                                 onPressed: controller.agreeTerms.value !=
                                             true &&
-                                        controller.firmAgreeTerms.value != true
+                                        controller.firmAgreeTerms.value !=
+                                            true &&
+                                        controller
+                                                .firmCancellationUnderstandChecked
+                                                .value !=
+                                            true
                                     ? null
                                     : () async {
                                         await controller.bookingRidePaymentType(
@@ -481,6 +577,10 @@ class BookSeatPage extends GetView<BookSeatController> {
                                 onPressed: controller.agreeTerms.value !=
                                             true &&
                                         controller.firmAgreeTerms.value !=
+                                            true &&
+                                        controller
+                                                .firmCancellationUnderstandChecked
+                                                .value !=
                                             true &&
                                         controller.pinkAgreeTerms.value !=
                                             true &&

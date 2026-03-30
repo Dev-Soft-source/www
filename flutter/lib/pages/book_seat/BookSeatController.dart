@@ -60,6 +60,8 @@ class BookSeatController extends GetxController {
   var agreeTerms = false.obs;
   var firmAgreeTerms = false.obs;
   var firmDisclaimer = "".obs;
+  var firmCancellationUnderstand = "".obs;
+  var firmCancellationUnderstandChecked = false.obs;
   var gPayAmount = 0.0.obs;
 
   var showPinkCheckBox = false.obs;
@@ -179,7 +181,8 @@ class BookSeatController extends GetxController {
     }
 
     if (ride['matched_segment_price_minor'] != null) {
-      return ((double.tryParse(ride['matched_segment_price_minor'].toString()) ??
+      return ((double.tryParse(
+                  ride['matched_segment_price_minor'].toString()) ??
               0.0) /
           100);
     }
@@ -225,8 +228,8 @@ class BookSeatController extends GetxController {
   getBookSeatDetail() async {
     try {
       BookSeatProvider()
-          .getBookSeatDetail(tripId, fromStopId, toStopId, serviceController.token,
-              serviceController.langId.value)
+          .getBookSeatDetail(tripId, fromStopId, toStopId,
+              serviceController.token, serviceController.langId.value)
           .then((resp) async {
         if (resp['status'] != null && resp['status'] == "Success") {
           if (resp['data'] != null && resp['data']['bookingPage'] != null) {
@@ -241,8 +244,10 @@ class BookSeatController extends GetxController {
                 ride['booking_type_slug'] == 'firm' ? "37" : "0";
             if (policyTypeId.value != "37") {
               firmAgreeTerms.value = true;
+              firmCancellationUnderstandChecked.value = true;
             } else {
               firmAgreeTerms.value = false;
+              firmCancellationUnderstandChecked.value = false;
             }
             var features = [];
             var dataFeature = ride['feature_ids']?.toString() ?? "";
@@ -270,23 +275,26 @@ class BookSeatController extends GetxController {
                   int.parse(
                       serviceController.loginUserDetail['id'].toString()));
               if (getDetail != null) {
-                cancellationDisable.value = true;
-                currentUserBookedSeat.value =
-                    int.parse(getDetail['seats'].toString());
-                policyTypeId.value = getDetail['type'].toString();
-                if (getDetail['transaction_no_coffee_sum'].length > 0 &&
-                    getDetail['transaction_no_coffee_sum'][0] != null &&
-                    getDetail['transaction_no_coffee_sum'][0]
-                            ['booking_transaction_sum'] !=
-                        null) {
-                  withOutCoffeeTransaction = double.parse(
+                if (alreadyBookedSeat.value != 0) {
+                  cancellationDisable.value = true;
+                  currentUserBookedSeat.value =
+                      int.parse(getDetail['seats'].toString());
+                  policyTypeId.value = getDetail['type'].toString();
+                  if (getDetail['transaction_no_coffee_sum'].length > 0 &&
+                      getDetail['transaction_no_coffee_sum'][0] != null &&
                       getDetail['transaction_no_coffee_sum'][0]
-                              ['booking_transaction_sum']
-                          .toString());
-                }
+                              ['booking_transaction_sum'] !=
+                          null) {
+                    withOutCoffeeTransaction = double.parse(
+                        getDetail['transaction_no_coffee_sum'][0]
+                                ['booking_transaction_sum']
+                            .toString());
+                  }
 
-                if (policyTypeId.value == "37") {
-                  policyType.value = "firm";
+                  if (policyTypeId.value == "37") {
+                    policyType.value = "firm";
+                    firmCancellationUnderstandChecked.value = false;
+                  }
                 }
               }
             }
@@ -335,6 +343,8 @@ class BookSeatController extends GetxController {
 
           firmDisclaimer.value =
               labelTextDetail['booking_disclaimer_firm'].toString();
+          firmCancellationUnderstand.value =
+              labelTextDetail['firm_cancellation_understand_text'].toString();
           pinkDisclaimer.value =
               labelTextDetail['booking_pink_ride_term_agree_text'].toString();
           extraCareDisclaimer.value =
@@ -848,8 +858,7 @@ class BookSeatController extends GetxController {
                   method: "paypal")
               .toStringAsFixed(1);
           var seatAmount1 =
-              (rideUnitPrice() *
-                      int.parse(seatAvailable.value.toString()))
+              (rideUnitPrice() * int.parse(seatAvailable.value.toString()))
                   .toStringAsFixed(1);
 
           if (policyType.value == 'firm') {
@@ -895,8 +904,7 @@ class BookSeatController extends GetxController {
                   method: "paypal")
               .toStringAsFixed(1);
           var seatAmount1 =
-              (rideUnitPrice() *
-                      int.parse(seatAvailable.value.toString()))
+              (rideUnitPrice() * int.parse(seatAvailable.value.toString()))
                   .toStringAsFixed(1);
           if (policyType.value == 'firm') {
             var data = double.parse(setting['frim_discount'].toString());

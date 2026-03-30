@@ -91,27 +91,12 @@ class BookSeatProvider extends GetConnect {
       toStopId,
       gPay) async {
     try {
-      var url = "";
-
-      if (bookingId != 0) {
-        if (bookingType == "instant") {
-          url = "$baseUrl/$updateInstantBooking?booking_id=$bookingId";
-        } else {
-          url = "$baseUrl/$updateBookingRequest?booking_id=$bookingId";
-        }
-      } else {
-        if (bookingType == "instant") {
-          url = "$baseUrl/$instantBooking?id=$rideId";
-        } else {
-          url = "$baseUrl/$requestBooking?id=$rideId";
-        }
-      }
+      final url = "$baseUrl/$bookingStore?id=$rideId";
       final data = FormData({});
-      if (bookingId != 0) {
-        data.fields.add(const MapEntry("_method", "PUT"));
-      }
 
       data.fields.add(MapEntry("payment_method", paymentMethod.toString()));
+      data.fields.add(MapEntry("booking_method", bookingType.toString()));
+      data.fields.add(MapEntry("booking_id", bookingId.toString()));
       if (paymentMethod == "paypal") {
         data.fields.add(MapEntry("paypal_id", captureId.toString()));
       } else {

@@ -55,7 +55,7 @@ String cancelBookingBtn = "Cancel booking", String chatWithDriverBtn = "Chat wit
               onPressed: () async{
                 final query = Uri(queryParameters: {
                   'tripId': rideId,
-                  'bookedSeat': bookedSeat,
+                  'bookedSeat': '0',
                   'fromStopId': fromStopId,
                   'toStopId': toStopId,
                 }).query;

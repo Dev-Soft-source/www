@@ -121,7 +121,13 @@ class BookingController extends Controller
                 $settingTaxPercentage = $setting->tax;
             }
         }
+        $settingFirmDiscount = $setting->frim_discount ?? 0;
+        $settingBookingFee = $setting->booking_price;
 
+        // user's status
+        $isStudentFeeWaived = $user->isBookingFeeCurrentlyWaived();
+        $isChargeBooking = $user->hasBookingChargeFlag();
+    
         return view(
             'booking',
             [
@@ -133,8 +139,13 @@ class BookingController extends Controller
                 'paymentSettingDetail' => $paymentSettingDetail,
                 'topUpBalance' => $topBalance,
                 'setting' => $setting,
+                'settingFirmDiscount' => $settingFirmDiscount,
+                'settingBookingFee' => $settingBookingFee,
                 'settingTaxPercentage' => $settingTaxPercentage,
                 'coffeeBalance' => $coffeeBalance,
+
+                'isChargeBooking' => $isChargeBooking,
+                'isStudentFeeWaived' => $isStudentFeeWaived,
             ]
         );
     }

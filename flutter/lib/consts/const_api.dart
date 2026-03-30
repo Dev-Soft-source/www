@@ -211,6 +211,7 @@ const sendContactUs = "contact-us/store";
 const forgotPassword = "forgot-password";
 const stripePaymentIntentEndPoint = "payment_intents";
 const deleteCardDetail = "delete-card";
+const bookingStore = "booking-store";
 const instantBooking = "instant-booking";
 const requestBooking = "booking-request";
 const socialLoginPost = "social-login";

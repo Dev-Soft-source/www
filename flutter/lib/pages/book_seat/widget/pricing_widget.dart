@@ -46,9 +46,10 @@ Widget pricingWidget({context, controller, screenWidth}){
       ),
     );
   }
-
   var amount = controller.rideUnitPrice() * selectedSeatCount;
-  var bookingFee = controller.calculateBookingFee(double.parse(controller.setting['booking_price'] != null ? controller.setting['booking_price'].toString() : "0"));
+  // controller.setting['booking_price'] is booking fee coming from admin, also it is percentage of total fare which
+  var bookingFeeRate = controller.calculateBookingFee(double.parse(controller.setting['booking_price'] != null ? controller.setting['booking_price'].toString() : "0"));
+  var bookingFee = amount * bookingFeeRate / 100;
   var coffeeBookingFee = controller.calculateBookingFee(double.parse(controller.setting['booking_price'] != null ? controller.setting['booking_price'].toString() : "0"), method: "coffee");
 
   var seatAmount = amount;
@@ -59,12 +60,14 @@ Widget pricingWidget({context, controller, screenWidth}){
     //bookingFee = bookingFee - bookingFee * (double.parse(controller.setting['frim_discount'].toString()) / 100);
   }
 
-  var taxAmt =0.0;
+  
+
+  var taxAmt = 0.0;
   if(controller.setting['deduct_tax'] != null && controller.setting['deduct_tax'] == "deduct_from_passenger"){
     if(controller.setting['tax_type'] == "state_wise_tax"){
       taxAmt = double.parse(((bookingFee * controller.stateTax.value) / 100).toString());
     }else{
-      taxAmt = double.parse(((bookingFee * double.parse(controller.setting['tax'])) / 100).toString());
+      taxAmt = double.parse(((bookingFee * double.parse(controller.setting['tax'].toString())) / 100).toString());
     }
   }
 
@@ -173,7 +176,7 @@ Widget pricingWidget({context, controller, screenWidth}){
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                   txt20Size(context: context, title: "$selectedSeatCount ${controller.labelTextDetail['seat_label'] ?? "Seat"}"),
-                  txt20Size(context: context, title: "\$${seatAmount.toStringAsFixed(1)}")
+                  txt20Size(context: context, title: "\$${seatAmount.toStringAsFixed(2)}")
                 ],
               ),
               10.heightBox,
@@ -184,7 +187,7 @@ Widget pricingWidget({context, controller, screenWidth}){
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     txt20Size(context: context, title: "${controller.labelTextDetail['firm_discount_label_price_section'] ?? "Discount"}"),
-                    txt20Size(context: context, title: "\$${discountFirm.toStringAsFixed(1)}")
+                    txt20Size(context: context, title: "\$${discountFirm.toStringAsFixed(2)}")
                   ],
                 ),
                 10.heightBox,
@@ -192,7 +195,7 @@ Widget pricingWidget({context, controller, screenWidth}){
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     txt20Size(context: context, title: "${controller.labelTextDetail['firm_your_price_label_price_section'] ?? "Your price"}"),
-                    txt20Size(context: context, title: "\$${amount.toStringAsFixed(1)}")
+                    txt20Size(context: context, title: "\$${amount.toStringAsFixed(2)}")
                   ],
                 ),
                 10.heightBox,
@@ -208,7 +211,7 @@ Widget pricingWidget({context, controller, screenWidth}){
                         5.widthBox,
                         infoTooltipButton("${controller.labelTextDetail['coffee_from_wall_tooltip'] ?? "Coffee from the wall"}"),
                         5.widthBox,
-                        txt20Size(context: context, title: "\$${bookingFee.toStringAsFixed(1)}"),
+                        txt20Size(context: context, title: "\$${bookingFee.toStringAsFixed(2)}"),
                       ],
                     )
                   ],
@@ -218,7 +221,7 @@ Widget pricingWidget({context, controller, screenWidth}){
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     txt20Size(context: context, title: "${controller.labelTextDetail['booking_fee_label'] ?? "Booking fee"}"),
-                    txt20Size(context: context, title: "\$${bookingFee.toStringAsFixed(1)}")
+                    txt20Size(context: context, title: "\$${bookingFee.toStringAsFixed(2)}")
                   ],
                 ),
               ],
@@ -304,7 +307,7 @@ Widget pricingWidget({context, controller, screenWidth}){
                         infoTooltipButton("${controller.labelTextDetail['coffee_from_wall_tooltip'] ?? "Coffee from the wall"}"),
                         if(controller.coffeeFromWall.value == true)...[
                           4.widthBox,
-                          txt20Size(context: context, title: "-\$${bookingFee.toStringAsFixed(1)}", textColor: Colors.red)
+                          txt20Size(context: context, title: "-\$${bookingFee.toStringAsFixed(2)}", textColor: Colors.red)
                         ]
                       ],
                     )
@@ -316,7 +319,7 @@ Widget pricingWidget({context, controller, screenWidth}){
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   txt20Size(context: context,title: '${controller.labelTextDetail['total_label'] ?? 'Total'}'),
-                  txt20Size(context: context, title: "\$${total.toStringAsFixed(1)}", textColor: primaryColor)
+                  txt20Size(context: context, title: "\$${total.toStringAsFixed(2)}", textColor: primaryColor)
                 ],
               ),
               if(payableSeatCount > 0)...[
@@ -325,7 +328,7 @@ Widget pricingWidget({context, controller, screenWidth}){
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     txt20Size(context: context, title: "${controller.labelTextDetail['payable_amount_heading'] ?? "Total payable amount"}"),
-                    txt20Size(context: context, title: "\$${payableTotal.toStringAsFixed(1)}", textColor: primaryColor)
+                    txt20Size(context: context, title: "\$${payableTotal.toStringAsFixed(2)}", textColor: primaryColor)
                   ],
                 )
               ],

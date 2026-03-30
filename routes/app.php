@@ -138,6 +138,9 @@ Route::group(['prefix' => 'app/v1', 'middleware' => ['auth:sanctum']], function 
     Route::post('seat-on-hold', [BookingController::class, 'seatOnHold'])->name('app.auth.seat_on_hold');
     Route::post('create-payment-intent', [BookingController::class, 'createPaymentIntent'])->name('app.auth.create_payment_intent');
     Route::put('update-instant-booking', [BookingController::class, 'updateInstantBooking'])->name('app.auth.update_instant_booking');
+    
+    Route::post('booking-store', [BookingController::class, 'bookingStore'])->name('app.auth.booking_store');
+    
     Route::post('booking-request', [BookingController::class, 'bookingRequest'])->name('app.auth.booking_request');
     Route::put('update-booking-request', [BookingController::class, 'updateBookingRequest'])->name('app.auth.update_booking_request');
     Route::get('accept-booking-request', [BookingController::class, 'AcceptBookingRequest'])->name('app.auth.accept_booking_request');

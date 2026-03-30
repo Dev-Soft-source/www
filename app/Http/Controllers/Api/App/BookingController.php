@@ -109,6 +109,15 @@ class BookingController extends Controller
                 ->withActivePassenger()
                 ->sum('seats');
             $ride->seats_left = intval($ride->seats) - intval($bookedSeats);
+
+            $rideFeatureOptionGroups = $this->getRideFeatureOptionGroups($this->selectedLanguage?->id, $this->defaultLang?->id);
+            $bookingTypeOptions = $this->buildRideFeatureOptionMap($rideFeatureOptionGroups, 'cancellation');
+            $bookingTypeOption = $bookingTypeOptions[(int) $ride->booking_type] ?? null;
+            if ($ride->booking_type) {
+                $ride->booking_type_slug = $bookingTypeOption->slug ?? null;
+                $ride->booking_type_tooltip = $bookingTypeOption->tooltip ?? null;
+                $ride->booking_type = $bookingTypeNames[$ride->booking_type] ?? null;
+            }
             
 
             $ride->driver->driven_rides = $ride->driver->rides()
@@ -184,6 +193,30 @@ class BookingController extends Controller
             'stateTax' => $stateTax
         ];
         return $this->successResponse($data, 'Get booking page successfully');
+    }
+
+    public function bookingStore(Request $request)
+    {
+        $rideDetailId = isset($request->ride_detail_id) ? $request->ride_detail_id : 0;
+
+        $ride = Ride::where('id', $request->id);
+        if ($rideDetailId != 0) {
+            $ride = $ride->with(['rideDetail' => function ($q) use ($rideDetailId) {
+                $q->where('id', $rideDetailId);
+            }]);
+        } else {
+            $ride = $ride->with(['rideDetail' => function ($q) {
+                $q->where('default_ride', '1');
+            }]);
+        }
+
+        $ride = $ride->first();
+
+        if ($ride) {
+            return $this->successResponse(['booking' => null], 'Booking created successfully');
+        } else {
+            return $this->apiErrorResponse('Ride not found', 404);
+        }
     }
 
     public function instantBooking(Request $request)
@@ -4320,5 +4353,14 @@ class BookingController extends Controller
         return response()->json([
             'status' => true
         ]);
+    }
+    
+    protected function buildRideFeatureOptionMap($optionGroups, string $groupKey): array
+    {
+        return collect($optionGroups[$groupKey] ?? [])
+            ->mapWithKeys(function ($option) {
+                return [(int) ($option->features_setting_id ?? $option->id ?? 0) => $option];
+            })
+            ->all();
     }
 }
