@@ -5,10 +5,6 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\FeaturesSetting;
 use App\Models\FeaturesSettingDetail;
-use App\Models\FindRidePageSetting;
-use App\Models\FindRidePageSettingDetail;
-use App\Models\PostRidePageSetting;
-use App\Models\PostRidePageSettingDetail;
 use App\Traits\StatusResponser;
 use Illuminate\Http\Request;
 use App\Imports\FeaturesSettingImport;
@@ -81,6 +77,7 @@ class FeaturesSettingController extends Controller
                 $featureOption1->update([
                     'name' => $request['features_option1']['features_option1_' . $language->id],
                     'icon' => $request['features_option1_icon']['features_option1_icon_' . $language->id],
+                    'tooltip' => ($request['features_option1_tooltip'] ?? [])['features_option1_tooltip_' . $language->id] ?? null,
                 ]);
             } else {
                 $featureOption1 = FeaturesSettingDetail::create([
@@ -88,6 +85,7 @@ class FeaturesSettingController extends Controller
                     'features_setting_id' => $featuresSetting1->id,
                     'name' => $request['features_option1']['features_option1_' . $language->id],
                     'icon' => $request['features_option1_icon']['features_option1_icon_' . $language->id],
+                    'tooltip' => ($request['features_option1_tooltip'] ?? [])['features_option1_tooltip_' . $language->id] ?? null,
                 ]);
             }
         }
@@ -104,6 +102,7 @@ class FeaturesSettingController extends Controller
                 $featureOption2->update([
                     'name' => $request['features_option2']['features_option2_' . $language->id],
                     'icon' => $request['features_option2_icon']['features_option2_icon_' . $language->id],
+                    'tooltip' => ($request['features_option2_tooltip'] ?? [])['features_option2_tooltip_' . $language->id] ?? null,
                 ]);
             } else {
                 $featureOption2 = FeaturesSettingDetail::create([
@@ -111,6 +110,7 @@ class FeaturesSettingController extends Controller
                     'features_setting_id' => $featuresSetting2->id,
                     'name' => $request['features_option2']['features_option2_' . $language->id],
                     'icon' => $request['features_option2_icon']['features_option2_icon_' . $language->id],
+                    'tooltip' => ($request['features_option2_tooltip'] ?? [])['features_option2_tooltip_' . $language->id] ?? null,
                 ]);
             }
         }
@@ -127,6 +127,7 @@ class FeaturesSettingController extends Controller
                 $featureOption3->update([
                     'name' => $request['features_option3']['features_option3_' . $language->id],
                     'icon' => $request['features_option3_icon']['features_option3_icon_' . $language->id],
+                    'tooltip' => ($request['features_option3_tooltip'] ?? [])['features_option3_tooltip_' . $language->id] ?? null,
                 ]);
             } else {
                 $featureOption3 = FeaturesSettingDetail::create([
@@ -134,6 +135,7 @@ class FeaturesSettingController extends Controller
                     'features_setting_id' => $featuresSetting3->id,
                     'name' => $request['features_option3']['features_option3_' . $language->id],
                     'icon' => $request['features_option3_icon']['features_option3_icon_' . $language->id],
+                    'tooltip' => ($request['features_option3_tooltip'] ?? [])['features_option3_tooltip_' . $language->id] ?? null,
                 ]);
             }
         }
@@ -150,6 +152,7 @@ class FeaturesSettingController extends Controller
                 $featureOption4->update([
                     'name' => $request['driver_features_option4']['driver_features_option4_' . $language->id],
                     'icon' => $request['driver_features_option4_icon']['driver_features_option4_icon_' . $language->id],
+                    'tooltip' => ($request['driver_features_option4_tooltip'] ?? [])['driver_features_option4_tooltip_' . $language->id] ?? null,
                 ]);
             } else {
                 $featureOption4 = FeaturesSettingDetail::create([
@@ -157,6 +160,7 @@ class FeaturesSettingController extends Controller
                     'features_setting_id' => $featuresSetting4->id,
                     'name' => $request['driver_features_option4']['driver_features_option4_' . $language->id],
                     'icon' => $request['driver_features_option4_icon']['driver_features_option4_icon_' . $language->id],
+                    'tooltip' => ($request['driver_features_option4_tooltip'] ?? [])['driver_features_option4_tooltip_' . $language->id] ?? null,
                 ]);
             }
         }
@@ -173,6 +177,7 @@ class FeaturesSettingController extends Controller
                 $featureOption5->update([
                     'name' => $request['driver_features_option5']['driver_features_option5_' . $language->id],
                     'icon' => $request['driver_features_option5_icon']['driver_features_option5_icon_' . $language->id],
+                    'tooltip' => ($request['driver_features_option5_tooltip'] ?? [])['driver_features_option5_tooltip_' . $language->id] ?? null,
                 ]);
             } else {
                 $featureOption5 = FeaturesSettingDetail::create([
@@ -180,6 +185,7 @@ class FeaturesSettingController extends Controller
                     'features_setting_id' => $featuresSetting5->id,
                     'name' => $request['driver_features_option5']['driver_features_option5_' . $language->id],
                     'icon' => $request['driver_features_option5_icon']['driver_features_option5_icon_' . $language->id],
+                    'tooltip' => ($request['driver_features_option5_tooltip'] ?? [])['driver_features_option5_tooltip_' . $language->id] ?? null,
                 ]);
             }
         }
@@ -196,6 +202,7 @@ class FeaturesSettingController extends Controller
                 $featureOption6->update([
                     'name' => $request['driver_features_option6']['driver_features_option6_' . $language->id],
                     'icon' => $request['driver_features_option6_icon']['driver_features_option6_icon_' . $language->id],
+                    'tooltip' => ($request['driver_features_option6_tooltip'] ?? [])['driver_features_option6_tooltip_' . $language->id] ?? null,
                 ]);
             } else {
                 $featureOption6 = FeaturesSettingDetail::create([
@@ -203,6 +210,7 @@ class FeaturesSettingController extends Controller
                     'features_setting_id' => $featuresSetting6->id,
                     'name' => $request['driver_features_option6']['driver_features_option6_' . $language->id],
                     'icon' => $request['driver_features_option6_icon']['driver_features_option6_icon_' . $language->id],
+                    'tooltip' => ($request['driver_features_option6_tooltip'] ?? [])['driver_features_option6_tooltip_' . $language->id] ?? null,
                 ]);
             }
         }
@@ -219,6 +227,7 @@ class FeaturesSettingController extends Controller
                 $featureOption7->update([
                     'name' => $request['driver_features_option7']['driver_features_option7_' . $language->id],
                     'icon' => $request['driver_features_option7_icon']['driver_features_option7_icon_' . $language->id],
+                    'tooltip' => ($request['driver_features_option7_tooltip'] ?? [])['driver_features_option7_tooltip_' . $language->id] ?? null,
                 ]);
             } else {
                 $featureOption7 = FeaturesSettingDetail::create([
@@ -226,6 +235,7 @@ class FeaturesSettingController extends Controller
                     'features_setting_id' => $featuresSetting7->id,
                     'name' => $request['driver_features_option7']['driver_features_option7_' . $language->id],
                     'icon' => $request['driver_features_option7_icon']['driver_features_option7_icon_' . $language->id],
+                    'tooltip' => ($request['driver_features_option7_tooltip'] ?? [])['driver_features_option7_tooltip_' . $language->id] ?? null,
                 ]);
             }
         }
@@ -242,6 +252,7 @@ class FeaturesSettingController extends Controller
                 $featureOption8->update([
                     'name' => $request['features_option8']['features_option8_' . $language->id],
                     'icon' => $request['features_option8_icon']['features_option8_icon_' . $language->id],
+                    'tooltip' => ($request['features_option8_tooltip'] ?? [])['features_option8_tooltip_' . $language->id] ?? null,
                 ]);
             } else {
                 $featureOption8 = FeaturesSettingDetail::create([
@@ -249,6 +260,7 @@ class FeaturesSettingController extends Controller
                     'features_setting_id' => $featuresSetting8->id,
                     'name' => $request['features_option8']['features_option8_' . $language->id],
                     'icon' => $request['features_option8_icon']['features_option8_icon_' . $language->id],
+                    'tooltip' => ($request['features_option8_tooltip'] ?? [])['features_option8_tooltip_' . $language->id] ?? null,
                 ]);
             }
         }
@@ -265,6 +277,7 @@ class FeaturesSettingController extends Controller
                 $featureOption9->update([
                     'name' => $request['features_option9']['features_option9_' . $language->id],
                     'icon' => $request['features_option9_icon']['features_option9_icon_' . $language->id],
+                    'tooltip' => ($request['features_option9_tooltip'] ?? [])['features_option9_tooltip_' . $language->id] ?? null,
                 ]);
             } else {
                 $featureOption9 = FeaturesSettingDetail::create([
@@ -272,6 +285,7 @@ class FeaturesSettingController extends Controller
                     'features_setting_id' => $featuresSetting9->id,
                     'name' => $request['features_option9']['features_option9_' . $language->id],
                     'icon' => $request['features_option9_icon']['features_option9_icon_' . $language->id],
+                    'tooltip' => ($request['features_option9_tooltip'] ?? [])['features_option9_tooltip_' . $language->id] ?? null,
                 ]);
             }
         }
@@ -288,6 +302,7 @@ class FeaturesSettingController extends Controller
                 $featureOption10->update([
                     'name' => $request['features_option10']['features_option10_' . $language->id],
                     'icon' => $request['features_option10_icon']['features_option10_icon_' . $language->id],
+                    'tooltip' => ($request['features_option10_tooltip'] ?? [])['features_option10_tooltip_' . $language->id] ?? null,
                 ]);
             } else {
                 $featureOption10 = FeaturesSettingDetail::create([
@@ -295,6 +310,7 @@ class FeaturesSettingController extends Controller
                     'features_setting_id' => $featuresSetting10->id,
                     'name' => $request['features_option10']['features_option10_' . $language->id],
                     'icon' => $request['features_option10_icon']['features_option10_icon_' . $language->id],
+                    'tooltip' => ($request['features_option10_tooltip'] ?? [])['features_option10_tooltip_' . $language->id] ?? null,
                 ]);
             }
         }
@@ -311,6 +327,7 @@ class FeaturesSettingController extends Controller
                 $featureOption11->update([
                     'name' => $request['features_option11']['features_option11_' . $language->id],
                     'icon' => $request['features_option11_icon']['features_option11_icon_' . $language->id],
+                    'tooltip' => ($request['features_option11_tooltip'] ?? [])['features_option11_tooltip_' . $language->id] ?? null,
                 ]);
             } else {
                 $featureOption11 = FeaturesSettingDetail::create([
@@ -318,6 +335,7 @@ class FeaturesSettingController extends Controller
                     'features_setting_id' => $featuresSetting11->id,
                     'name' => $request['features_option11']['features_option11_' . $language->id],
                     'icon' => $request['features_option11_icon']['features_option11_icon_' . $language->id],
+                    'tooltip' => ($request['features_option11_tooltip'] ?? [])['features_option11_tooltip_' . $language->id] ?? null,
                 ]);
             }
         }
@@ -334,6 +352,7 @@ class FeaturesSettingController extends Controller
                 $featureOption12->update([
                     'name' => $request['features_option12']['features_option12_' . $language->id],
                     'icon' => $request['features_option12_icon']['features_option12_icon_' . $language->id],
+                    'tooltip' => ($request['features_option12_tooltip'] ?? [])['features_option12_tooltip_' . $language->id] ?? null,
                 ]);
             } else {
                 $featureOption12 = FeaturesSettingDetail::create([
@@ -341,6 +360,7 @@ class FeaturesSettingController extends Controller
                     'features_setting_id' => $featuresSetting12->id,
                     'name' => $request['features_option12']['features_option12_' . $language->id],
                     'icon' => $request['features_option12_icon']['features_option12_icon_' . $language->id],
+                    'tooltip' => ($request['features_option12_tooltip'] ?? [])['features_option12_tooltip_' . $language->id] ?? null,
                 ]);
             }
         }
@@ -357,6 +377,7 @@ class FeaturesSettingController extends Controller
                 $featureOption13->update([
                     'name' => $request['features_option13']['features_option13_' . $language->id],
                     'icon' => $request['features_option13_icon']['features_option13_icon_' . $language->id],
+                    'tooltip' => ($request['features_option13_tooltip'] ?? [])['features_option13_tooltip_' . $language->id] ?? null,
                 ]);
             } else {
                 $featureOption13 = FeaturesSettingDetail::create([
@@ -364,6 +385,7 @@ class FeaturesSettingController extends Controller
                     'features_setting_id' => $featuresSetting13->id,
                     'name' => $request['features_option13']['features_option13_' . $language->id],
                     'icon' => $request['features_option13_icon']['features_option13_icon_' . $language->id],
+                    'tooltip' => ($request['features_option13_tooltip'] ?? [])['features_option13_tooltip_' . $language->id] ?? null,
                 ]);
             }
         }
@@ -380,6 +402,7 @@ class FeaturesSettingController extends Controller
                 $featureOption14->update([
                     'name' => $request['features_option14']['features_option14_' . $language->id],
                     'icon' => $request['features_option14_icon']['features_option14_icon_' . $language->id],
+                    'tooltip' => ($request['features_option14_tooltip'] ?? [])['features_option14_tooltip_' . $language->id] ?? null,
                 ]);
             } else {
                 $featureOption14 = FeaturesSettingDetail::create([
@@ -387,6 +410,7 @@ class FeaturesSettingController extends Controller
                     'features_setting_id' => $featuresSetting14->id,
                     'name' => $request['features_option14']['features_option14_' . $language->id],
                     'icon' => $request['features_option14_icon']['features_option14_icon_' . $language->id],
+                    'tooltip' => ($request['features_option14_tooltip'] ?? [])['features_option14_tooltip_' . $language->id] ?? null,
                 ]);
             }
         }
@@ -403,6 +427,7 @@ class FeaturesSettingController extends Controller
                 $featureOption15->update([
                     'name' => $request['features_option15']['features_option15_' . $language->id],
                     'icon' => $request['features_option15_icon']['features_option15_icon_' . $language->id],
+                    'tooltip' => ($request['features_option15_tooltip'] ?? [])['features_option15_tooltip_' . $language->id] ?? null,
                 ]);
             } else {
                 $featureOption15 = FeaturesSettingDetail::create([
@@ -410,6 +435,7 @@ class FeaturesSettingController extends Controller
                     'features_setting_id' => $featuresSetting15->id,
                     'name' => $request['features_option15']['features_option15_' . $language->id],
                     'icon' => $request['features_option15_icon']['features_option15_icon_' . $language->id],
+                    'tooltip' => ($request['features_option15_tooltip'] ?? [])['features_option15_tooltip_' . $language->id] ?? null,
                 ]);
             }
         }
@@ -426,6 +452,7 @@ class FeaturesSettingController extends Controller
                 $featureOption16->update([
                     'name' => $request['features_option16']['features_option16_' . $language->id],
                     'icon' => $request['features_option16_icon']['features_option16_icon_' . $language->id],
+                    'tooltip' => ($request['features_option16_tooltip'] ?? [])['features_option16_tooltip_' . $language->id] ?? null,
                 ]);
             } else {
                 $featureOption16 = FeaturesSettingDetail::create([
@@ -433,6 +460,7 @@ class FeaturesSettingController extends Controller
                     'features_setting_id' => $featuresSetting16->id,
                     'name' => $request['features_option16']['features_option16_' . $language->id],
                     'icon' => $request['features_option16_icon']['features_option16_icon_' . $language->id],
+                    'tooltip' => ($request['features_option16_tooltip'] ?? [])['features_option16_tooltip_' . $language->id] ?? null,
                 ]);
             }
         }
@@ -521,121 +549,17 @@ class FeaturesSettingController extends Controller
             }
         }
 
-        $postRidePageSetting = PostRidePageSetting::first();
-        if (!$postRidePageSetting) {
-            $postRidePageSetting = PostRidePageSetting::create([]);
-        }
-        foreach ($languages as $language) {
-            $postRidePageSettingDetail = PostRidePageSettingDetail::whereLanguageId($language->id)->first();
-            if (!$postRidePageSettingDetail) {
-                $postRidePageSettingDetail = PostRidePageSettingDetail::create([
-                    'post_ride_page_setting_id' => $postRidePageSetting->id,
-                    'language_id' => $language->id,
-                    'features_option1' => $featuresSetting1->id,
-                    'features_option1_tooltip' => $request['features_option1_tooltip']['features_option1_tooltip_' . $language->id],
-                    'features_option2' => $featuresSetting2->id,
-                    'features_option2_tooltip' => $request['features_option2_tooltip']['features_option2_tooltip_' . $language->id],
-                    'features_option3' => $featuresSetting3->id,
-                    'features_option3_tooltip' => $request['features_option3_tooltip']['features_option3_tooltip_' . $language->id],
-                    'features_option4' => $featuresSetting4->id,
-                    'features_option4_tooltip' => $request['driver_features_option4_tooltip']['driver_features_option4_tooltip_' . $language->id],
-                    'features_option5' => $featuresSetting5->id,
-                    'features_option5_tooltip' => $request['driver_features_option5_tooltip']['driver_features_option5_tooltip_' . $language->id],
-                    'features_option6' => $featuresSetting6->id,
-                    'features_option6_tooltip' => $request['driver_features_option6_tooltip']['driver_features_option6_tooltip_' . $language->id],
-                    'features_option7' => $featuresSetting7->id,
-                    'features_option7_tooltip' => $request['driver_features_option7_tooltip']['driver_features_option7_tooltip_' . $language->id],
-                    'features_option8' => $featuresSetting8->id,
-                    'features_option8_tooltip' => $request['features_option8_tooltip']['features_option8_tooltip_' . $language->id],
-                    'features_option9' => $featuresSetting9->id,
-                    'features_option9_tooltip' => $request['features_option9_tooltip']['features_option9_tooltip_' . $language->id],
-                    'features_option10' => $featuresSetting10->id,
-                    'features_option10_tooltip' => $request['features_option10_tooltip']['features_option10_tooltip_' . $language->id],
-                    'features_option11' => $featuresSetting11->id,
-                    'features_option11_tooltip' => $request['features_option11_tooltip']['features_option11_tooltip_' . $language->id],
-                    'features_option12' => $featuresSetting12->id,
-                    'features_option12_tooltip' => $request['features_option12_tooltip']['features_option12_tooltip_' . $language->id],
-                    'features_option13' => $featuresSetting13->id,
-                    'features_option13_tooltip' => $request['features_option13_tooltip']['features_option13_tooltip_' . $language->id],
-                    'features_option14' => $featuresSetting14->id,
-                    'features_option14_tooltip' => $request['features_option14_tooltip']['features_option14_tooltip_' . $language->id],
-                    'features_option15' => $featuresSetting15->id,
-                    'features_option15_tooltip' => $request['features_option15_tooltip']['features_option15_tooltip_' . $language->id],
-                    'features_option16' => $featuresSetting16->id,
-                    'features_option16_tooltip' => $request['features_option16_tooltip']['features_option16_tooltip_' . $language->id],
-                ]);
-            } else {
-                PostRidePageSettingDetail::whereLanguageId($language->id)->update([
-                    'features_option1' => $featuresSetting1->id,
-                    'features_option1_tooltip' => $request['features_option1_tooltip']['features_option1_tooltip_' . $language->id],
-                    'features_option2' => $featuresSetting2->id,
-                    'features_option2_tooltip' => $request['features_option2_tooltip']['features_option2_tooltip_' . $language->id],
-                    'features_option3' => $featuresSetting3->id,
-                    'features_option3_tooltip' => $request['features_option3_tooltip']['features_option3_tooltip_' . $language->id],
-                    'features_option4' => $featuresSetting4->id,
-                    'features_option4_tooltip' => $request['driver_features_option4_tooltip']['driver_features_option4_tooltip_' . $language->id],
-                    'features_option5' => $featuresSetting5->id,
-                    'features_option5_tooltip' => $request['driver_features_option5_tooltip']['driver_features_option5_tooltip_' . $language->id],
-                    'features_option6' => $featuresSetting6->id,
-                    'features_option6_tooltip' => $request['driver_features_option6_tooltip']['driver_features_option6_tooltip_' . $language->id],
-                    'features_option7' => $featuresSetting7->id,
-                    'features_option7_tooltip' => $request['driver_features_option7_tooltip']['driver_features_option7_tooltip_' . $language->id],
-                    'features_option8' => $featuresSetting8->id,
-                    'features_option8_tooltip' => $request['features_option8_tooltip']['features_option8_tooltip_' . $language->id],
-                    'features_option9' => $featuresSetting9->id,
-                    'features_option9_tooltip' => $request['features_option9_tooltip']['features_option9_tooltip_' . $language->id],
-                    'features_option10' => $featuresSetting10->id,
-                    'features_option10_tooltip' => $request['features_option10_tooltip']['features_option10_tooltip_' . $language->id],
-                    'features_option11' => $featuresSetting11->id,
-                    'features_option11_tooltip' => $request['features_option11_tooltip']['features_option11_tooltip_' . $language->id],
-                    'features_option12' => $featuresSetting12->id,
-                    'features_option12_tooltip' => $request['features_option12_tooltip']['features_option12_tooltip_' . $language->id],
-                    'features_option13' => $featuresSetting13->id,
-                    'features_option13_tooltip' => $request['features_option13_tooltip']['features_option13_tooltip_' . $language->id],
-                    'features_option14' => $featuresSetting14->id,
-                    'features_option14_tooltip' => $request['features_option14_tooltip']['features_option14_tooltip_' . $language->id],
-                    'features_option15' => $featuresSetting15->id,
-                    'features_option15_tooltip' => $request['features_option15_tooltip']['features_option15_tooltip_' . $language->id],
-                    'features_option16' => $featuresSetting16->id,
-                    'features_option16_tooltip' => $request['features_option16_tooltip']['features_option16_tooltip_' . $language->id],
-                ]);
-            }
-        }
-
-        $findRidePageSetting = FindRidePageSetting::first();
-        if (!$findRidePageSetting) {
-            $findRidePageSetting = FindRidePageSetting::create([]);
-        }
-        foreach ($languages as $language) {
-            FindRidePageSettingDetail::whereLanguageId($language->id)->update([
-                'ride_features_option1' => $featuresSetting1->id,
-                'ride_features_option2' => $featuresSetting2->id,
-                'ride_features_option3' => $featuresSetting3->id,
-                'ride_features_option4' => $PassengerFeaturesSetting4->id,
-                'ride_features_option5' => $PassengerFeaturesSetting5->id,
-                'ride_features_option6' => $PassengerFeaturesSetting6->id,
-                'ride_features_option7' => $PassengerFeaturesSetting7->id,
-                'ride_features_option8' => $featuresSetting8->id,
-                'ride_features_option9' => $featuresSetting9->id,
-                'ride_features_option10' => $featuresSetting10->id,
-                'ride_features_option11' => $featuresSetting11->id,
-                'ride_features_option12' => $featuresSetting12->id,
-                'ride_features_option13' => $featuresSetting13->id,
-                'ride_features_option14' => $featuresSetting14->id,
-                'ride_features_option15' => $featuresSetting15->id,
-                'ride_features_option16' => $featuresSetting16->id,
-            ]);
-        }
-
-        PostRidePageSettingDetail::forgetLanguageFallbackCache();
-        FindRidePageSettingDetail::forgetLanguageFallbackCache();
         FeaturesSetting::bustOptionGroupsCache();
 
-        if ($postRidePageSetting && $findRidePageSetting) {
-            return $this->successResponse([], "Features setting updated successfully.");
-        }
+        return $this->successResponse([], "Features setting updated successfully.");
+    }
 
-        return $this->errorResponse();
+    public function adminGroups()
+    {
+        return $this->successResponse(
+            ['groups' => FeaturesSetting::adminFeatureGroups()],
+            'OK'
+        );
     }
 
     public function show()
@@ -658,6 +582,7 @@ class FeaturesSettingController extends Controller
         );
 
         $detail->update($data);
+        FeaturesSetting::forgetOptionGroupsCache();
 
         return $this->successResponse(
             $detail->fresh(['language:id,name', 'featuresSetting:id,slug']),
@@ -673,16 +598,22 @@ class FeaturesSettingController extends Controller
                 'items' => ['required', 'array'],
                 'items.*.id' => ['required', 'integer', 'exists:features_setting_detail,id'],
                 'items.*.name' => ['required', 'string'],
+                'items.*.label' => ['nullable', 'string'],
                 'items.*.tooltip' => ['nullable', 'string'],
+                'items.*.icon' => ['nullable', 'string'],
             ]
         );
 
         foreach ($payload['items'] as $item) {
             FeaturesSettingDetail::find($item['id'])?->update([
                 'name' => $item['name'],
+                'label' => $item['label'] ?? null,
                 'tooltip' => $item['tooltip'] ?? null,
+                'icon' => $item['icon'] ?? null,
             ]);
         }
+
+        FeaturesSetting::forgetOptionGroupsCache();
 
         return $this->successResponse([], 'Feature details updated successfully.');
     }

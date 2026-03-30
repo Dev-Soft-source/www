@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <AppLayout>
                 <div class="relative shadow-md sm:rounded-lg bg-white py-4">
                     <header class="pt-4">
@@ -22,6 +22,30 @@
                             upload-endpoint="upload-features-setting-excel"
                             @success="onFeaturesExcelSuccess"
                         />
+                        <details
+                            v-if="featureAdminGroups.length"
+                            class="mb-4 px-4 md:px-6 lg:px-8 text-sm text-gray-600"
+                        >
+                            <summary
+                                class="cursor-pointer font-medium text-gray-800 select-none"
+                            >
+                                Feature option groups (features_setting.id)
+                            </summary>
+                            <ul class="mt-2 list-disc pl-5 space-y-1">
+                                <li
+                                    v-for="g in featureAdminGroups"
+                                    :key="g.key"
+                                >
+                                    <span class="font-medium text-gray-700">{{
+                                        g.title
+                                    }}</span>
+                                    <span class="text-gray-500">
+                                        — ids:
+                                        {{ g.ids.join(", ") }}
+                                    </span>
+                                </li>
+                            </ul>
+                        </details>
                         <div
                             class="text-sm font-medium text-center text-gray-500 border-b border-gray-200"
                         >
@@ -2695,6 +2719,7 @@ export default {
             form: {},
             validationErros: new ErrorHandling(),
             collapseStates: [true, false, false, false, false, false, false],
+            featureAdminGroups: [],
             loading: false,
             editorConfig: {
                 height: 250,
@@ -2804,300 +2829,166 @@ export default {
                             this.handleInput("", language, "features_option16_tooltip");
                             this.handleInput("", language, "features_option16_icon");
                         });
-                        this.fetchPostRidePageSetting();
+                        this.fetchFeaturesSettings();
+                        this.fetchFeatureAdminGroups();
                         languages.map((language) => {
                             this.handleInput("", language, "passenger_features_option4");
                             this.handleInput("", language, "passenger_features_option5");
                             this.handleInput("", language, "passenger_features_option6");
                             this.handleInput("", language, "passenger_features_option7");
                         });
-                        this.fetchFindRidePageSetting();
                     }
                 });
         },
-        fetchPostRidePageSetting() {
+        featuresSettingSlugFormMap() {
+            return {
+                pink_rides: {
+                    name: "features_option1",
+                    tooltip: "features_option1_tooltip",
+                    icon: "features_option1_icon",
+                },
+                extra_care_rides: {
+                    name: "features_option2",
+                    tooltip: "features_option2_tooltip",
+                    icon: "features_option2_icon",
+                },
+                wi_fi: {
+                    name: "features_option3",
+                    tooltip: "features_option3_tooltip",
+                    icon: "features_option3_icon",
+                },
+                driver_features_option4: {
+                    name: "driver_features_option4",
+                    tooltip: "driver_features_option4_tooltip",
+                    icon: "driver_features_option4_icon",
+                },
+                passenger_features_option4: {
+                    name: "passenger_features_option4",
+                    tooltip: null,
+                    icon: null,
+                },
+                driver_features_option5: {
+                    name: "driver_features_option5",
+                    tooltip: "driver_features_option5_tooltip",
+                    icon: "driver_features_option5_icon",
+                },
+                passenger_features_option5: {
+                    name: "passenger_features_option5",
+                    tooltip: null,
+                    icon: null,
+                },
+                driver_features_option6: {
+                    name: "driver_features_option6",
+                    tooltip: "driver_features_option6_tooltip",
+                    icon: "driver_features_option6_icon",
+                },
+                passenger_features_option6: {
+                    name: "passenger_features_option6",
+                    tooltip: null,
+                    icon: null,
+                },
+                driver_features_option7: {
+                    name: "driver_features_option7",
+                    tooltip: "driver_features_option7_tooltip",
+                    icon: "driver_features_option7_icon",
+                },
+                passenger_features_option7: {
+                    name: "passenger_features_option7",
+                    tooltip: null,
+                    icon: null,
+                },
+                heating: {
+                    name: "features_option8",
+                    tooltip: "features_option8_tooltip",
+                    icon: "features_option8_icon",
+                },
+                ac: {
+                    name: "features_option9",
+                    tooltip: "features_option9_tooltip",
+                    icon: "features_option9_icon",
+                },
+                bike_rack: {
+                    name: "features_option10",
+                    tooltip: "features_option10_tooltip",
+                    icon: "features_option10_icon",
+                },
+                ski_rack: {
+                    name: "features_option11",
+                    tooltip: "features_option11_tooltip",
+                    icon: "features_option11_icon",
+                },
+                winter_tires: {
+                    name: "features_option12",
+                    tooltip: "features_option12_tooltip",
+                    icon: "features_option12_icon",
+                },
+                star5_passenger: {
+                    name: "features_option13",
+                    tooltip: "features_option13_tooltip",
+                    icon: "features_option13_icon",
+                },
+                star4_passenger: {
+                    name: "features_option14",
+                    tooltip: "features_option14_tooltip",
+                    icon: "features_option14_icon",
+                },
+                star3_passenger: {
+                    name: "features_option15",
+                    tooltip: "features_option15_tooltip",
+                    icon: "features_option15_icon",
+                },
+                with_review_passenger: {
+                    name: "features_option16",
+                    tooltip: "features_option16_tooltip",
+                    icon: "features_option16_icon",
+                },
+            };
+        },
+        fetchFeaturesSettings() {
+            const slugMap = this.featuresSettingSlugFormMap();
             axios
-                .get(`${process.env.MIX_ADMIN_API_URL}get-post-ride-page-setting`)
+                .get(`${process.env.MIX_ADMIN_API_URL}get-features-setting`)
                 .then((res) => {
-                    if (res?.data?.status == "Success") {
-                        let post_ride_page_setting_detail =
-                            res?.data?.data?.post_ride_page_setting_detail || [];
-                        post_ride_page_setting_detail.map((setting) => {
-                            this.handleInput(
-                                setting?.features_option1,
-                                setting?.language,
-                                "features_option1"
-                            );
-                            this.handleInput(
-                                setting?.features_option1_tooltip,
-                                setting?.language,
-                                "features_option1_tooltip"
-                            );
-                            this.handleInput(
-                                setting?.features_option1_icon,
-                                setting?.language,
-                                "features_option1_icon"
-                            );
-                            this.handleInput(
-                                setting?.features_option2,
-                                setting?.language,
-                                "features_option2"
-                            );
-                            this.handleInput(
-                                setting?.features_option2_tooltip,
-                                setting?.language,
-                                "features_option2_tooltip"
-                            );
-                            this.handleInput(
-                                setting?.features_option2_icon,
-                                setting?.language,
-                                "features_option2_icon"
-                            );
-                            this.handleInput(
-                                setting?.features_option3,
-                                setting?.language,
-                                "features_option3"
-                            );
-                            this.handleInput(
-                                setting?.features_option3_tooltip,
-                                setting?.language,
-                                "features_option3_tooltip"
-                            );
-                            this.handleInput(
-                                setting?.features_option3_icon,
-                                setting?.language,
-                                "features_option3_icon"
-                            );
-                            this.handleInput(
-                                setting?.features_option4,
-                                setting?.language,
-                                "driver_features_option4"
-                            );
-                            this.handleInput(
-                                setting?.features_option4_tooltip,
-                                setting?.language,
-                                "driver_features_option4_tooltip"
-                            );
-                            this.handleInput(
-                                setting?.features_option4_icon,
-                                setting?.language,
-                                "driver_features_option4_icon"
-                            );
-                            this.handleInput(
-                                setting?.features_option5,
-                                setting?.language,
-                                "driver_features_option5"
-                            );
-                            this.handleInput(
-                                setting?.features_option5_tooltip,
-                                setting?.language,
-                                "driver_features_option5_tooltip"
-                            );
-                            this.handleInput(
-                                setting?.features_option5_icon,
-                                setting?.language,
-                                "driver_features_option5_icon"
-                            );
-                            this.handleInput(
-                                setting?.features_option6,
-                                setting?.language,
-                                "driver_features_option6"
-                            );
-                            this.handleInput(
-                                setting?.features_option6_tooltip,
-                                setting?.language,
-                                "driver_features_option6_tooltip"
-                            );
-                            this.handleInput(
-                                setting?.features_option6_icon,
-                                setting?.language,
-                                "driver_features_option6_icon"
-                            );
-                            this.handleInput(
-                                setting?.features_option7,
-                                setting?.language,
-                                "driver_features_option7"
-                            );
-                            this.handleInput(
-                                setting?.features_option7_tooltip,
-                                setting?.language,
-                                "driver_features_option7_tooltip"
-                            );
-                            this.handleInput(
-                                setting?.features_option7_icon,
-                                setting?.language,
-                                "driver_features_option7_icon"
-                            );
-                            this.handleInput(
-                                setting?.features_option8,
-                                setting?.language,
-                                "features_option8"
-                            );
-                            this.handleInput(
-                                setting?.features_option8_tooltip,
-                                setting?.language,
-                                "features_option8_tooltip"
-                            );
-                            this.handleInput(
-                                setting?.features_option8_icon,
-                                setting?.language,
-                                "features_option8_icon"
-                            );
-                            this.handleInput(
-                                setting?.features_option9,
-                                setting?.language,
-                                "features_option9"
-                            );
-                            this.handleInput(
-                                setting?.features_option9_tooltip,
-                                setting?.language,
-                                "features_option9_tooltip"
-                            );
-                            this.handleInput(
-                                setting?.features_option9_icon,
-                                setting?.language,
-                                "features_option9_icon"
-                            );
-                            this.handleInput(
-                                setting?.features_option10,
-                                setting?.language,
-                                "features_option10"
-                            );
-                            this.handleInput(
-                                setting?.features_option10_tooltip,
-                                setting?.language,
-                                "features_option10_tooltip"
-                            );
-                            this.handleInput(
-                                setting?.features_option10_icon,
-                                setting?.language,
-                                "features_option10_icon"
-                            );
-                            this.handleInput(
-                                setting?.features_option11,
-                                setting?.language,
-                                "features_option11"
-                            );
-                            this.handleInput(
-                                setting?.features_option11_tooltip,
-                                setting?.language,
-                                "features_option11_tooltip"
-                            );
-                            this.handleInput(
-                                setting?.features_option11_icon,
-                                setting?.language,
-                                "features_option11_icon"
-                            );
-                            this.handleInput(
-                                setting?.features_option12,
-                                setting?.language,
-                                "features_option12"
-                            );
-                            this.handleInput(
-                                setting?.features_option12_tooltip,
-                                setting?.language,
-                                "features_option12_tooltip"
-                            );
-                            this.handleInput(
-                                setting?.features_option12_icon,
-                                setting?.language,
-                                "features_option12_icon"
-                            );
-                            this.handleInput(
-                                setting?.features_option13,
-                                setting?.language,
-                                "features_option13"
-                            );
-                            this.handleInput(
-                                setting?.features_option13_tooltip,
-                                setting?.language,
-                                "features_option13_tooltip"
-                            );
-                            this.handleInput(
-                                setting?.features_option13_icon,
-                                setting?.language,
-                                "features_option13_icon"
-                            );
-                            this.handleInput(
-                                setting?.features_option14,
-                                setting?.language,
-                                "features_option14"
-                            );
-                            this.handleInput(
-                                setting?.features_option14_tooltip,
-                                setting?.language,
-                                "features_option14_tooltip"
-                            );
-                            this.handleInput(
-                                setting?.features_option14_icon,
-                                setting?.language,
-                                "features_option14_icon"
-                            );
-                            this.handleInput(
-                                setting?.features_option15,
-                                setting?.language,
-                                "features_option15"
-                            );
-                            this.handleInput(
-                                setting?.features_option15_tooltip,
-                                setting?.language,
-                                "features_option15_tooltip"
-                            );
-                            this.handleInput(
-                                setting?.features_option15_icon,
-                                setting?.language,
-                                "features_option15_icon"
-                            );
-                            this.handleInput(
-                                setting?.features_option16,
-                                setting?.language,
-                                "features_option16"
-                            );
-                            this.handleInput(
-                                setting?.features_option16_tooltip,
-                                setting?.language,
-                                "features_option16_tooltip"
-                            );
-                            this.handleInput(
-                                setting?.features_option16_icon,
-                                setting?.language,
-                                "features_option16_icon"
-                            );
+                    if (res?.data?.status != "Success") return;
+                    const rows = res?.data?.data || [];
+                    rows.forEach((fs) => {
+                        const m = slugMap[fs.slug];
+                        if (!m) return;
+                        const details =
+                            fs.features_setting_detail ||
+                            fs.featuresSettingDetail ||
+                            [];
+                        details.forEach((d) => {
+                            const lang = d.language || { id: d.language_id };
+                            this.handleInput(d.name ?? "", lang, m.name);
+                            if (m.tooltip) {
+                                this.handleInput(
+                                    d.tooltip ?? "",
+                                    lang,
+                                    m.tooltip
+                                );
+                            }
+                            if (m.icon) {
+                                this.handleInput(d.icon ?? "", lang, m.icon);
+                            }
                         });
-                    }
+                    });
                 });
         },
-        fetchFindRidePageSetting() {
+        fetchFeatureAdminGroups() {
             axios
-                .get(`${process.env.MIX_ADMIN_API_URL}get-find-ride-page-setting`)
+                .get(
+                    `${process.env.MIX_ADMIN_API_URL}get-features-setting-admin-groups`
+                )
                 .then((res) => {
-                    if (res?.data?.status == "Success") {
-                        let find_ride_page_setting_detail =
-                            res?.data?.data?.find_ride_page_setting_detail || [];
-                        find_ride_page_setting_detail.map((setting) => {
-                            this.handleInput(
-                                setting?.ride_features_option4,
-                                setting?.language,
-                                "passenger_features_option4"
-                            );
-                            this.handleInput(
-                                setting?.ride_features_option5,
-                                setting?.language,
-                                "passenger_features_option5"
-                            );
-                            this.handleInput(
-                                setting?.ride_features_option6,
-                                setting?.language,
-                                "passenger_features_option6"
-                            );
-                            this.handleInput(
-                                setting?.ride_features_option7,
-                                setting?.language,
-                                "passenger_features_option7"
-                            );
-                        });
+                    if (
+                        res?.data?.status == "Success" &&
+                        res?.data?.data?.groups
+                    ) {
+                        this.featureAdminGroups = res.data.data.groups;
                     }
-                });
+                })
+                .catch(() => {});
         },
         updatePageSetting() {
             this.loading = true;
@@ -3299,8 +3190,7 @@ export default {
             });
         },
         onFeaturesExcelSuccess() {
-            this.fetchPostRidePageSetting();
-            this.fetchFindRidePageSetting();
+            this.fetchFeaturesSettings();
         },
     },
 };

@@ -5,14 +5,8 @@
     foreach ($rideFeatureOptions as $slug=>$optionGroup) {
         if(!in_array($slug, ['luggage_size', 'smoking_allowed', 'pets_allowed'])) continue;
         
-        if($slug == 'luggage_size') $label = $rideDetailPage->luggage_label;
-        elseif($slug == 'pets_allowed') $label = $rideDetailPage->pets_label;
-        elseif($slug == 'smoking_allowed') $label = $rideDetailPage->smoking_label;
-        else $label = "";
-        
         foreach ($optionGroup as $id => $option) {
             if(in_array($option->id, [(int) $ride->smoke, (int) $ride->animal_friendly, (int) $ride->luggage])) {
-                $option->label = $label;
                 $rideOptions[] = $option;
             }
 

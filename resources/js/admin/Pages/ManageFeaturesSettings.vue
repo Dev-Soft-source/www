@@ -110,6 +110,17 @@
 
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                Label
+                                            </label>
+                                            <input
+                                                type="text"
+                                                class="can-exp-input w-full block border border-gray-300 rounded"
+                                                v-model="feature._editing.label"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">
                                                 Tooltip
                                             </label>
                                             <input
@@ -117,6 +128,47 @@
                                                 class="can-exp-input w-full block border border-gray-300 rounded"
                                                 v-model="feature._editing.tooltip"
                                             />
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                Icon
+                                            </label>
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-10 h-10 flex items-center justify-center rounded border border-gray-200 bg-white overflow-hidden">
+                                                    <img
+                                                        v-if="feature._editing.icon"
+                                                        :src="`/home_page_icons/${feature._editing.icon}`"
+                                                        alt=""
+                                                        class="w-full h-full object-contain"
+                                                    />
+                                                    <span
+                                                        v-else
+                                                        class="text-xs text-gray-400"
+                                                    >
+                                                        No icon
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        @change="onIconChange($event, feature)"
+                                                        class="block w-full text-xs text-gray-500
+                                                            file:mr-2 file:py-1.5 file:px-3
+                                                            file:rounded file:border-0
+                                                            file:text-xs file:font-semibold
+                                                            file:bg-primary file:text-white
+                                                            hover:file:bg-blue-700"
+                                                    />
+                                                    <p
+                                                        v-if="feature._editing.icon"
+                                                        class="mt-1 text-[11px] text-gray-400 break-all"
+                                                    >
+                                                        {{ feature._editing.icon }}
+                                                    </p>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -176,7 +228,7 @@ export default {
                     key: "core",
                     title: "Core ride types",
                     match: (slug) =>
-                        ["pink_rides", "extra_care_rides", "wi_fi"].includes(
+                        ["pink_rides", "extra_care_rides"].includes(
                             slug
                         ),
                 },
@@ -190,9 +242,72 @@ export default {
                     key: "vehicle_equipment",
                     title: "Vehicle comfort & equipment",
                     match: (slug) =>
-                        ["heating", "ac", "bike_rack", "ski_rack", "winter_tires"].includes(
+                        [
+                            // vehicle equipment
+                            "heating",
+                            "ac",
+                            "bike_rack",
+                            "ski_rack",
+                            "winter_tires",
+                        ].includes(slug),
+                },
+                {
+                    key: "luggage",
+                    title: "Luggage",
+                    match: (slug) =>
+                        [
+                            "no_luggage",
+                            "small_luggage",
+                            "medium_luggage",
+                            "large_luggage",
+                            "xl_luggage",
+                        ].includes(slug),
+                },
+                {
+                    key: "smoking",
+                    title: "Smoking",
+                    match: (slug) =>
+                        ["no_smoking", "indifferent_smoking"].includes(slug),
+                },
+                {
+                    key: "animals",
+                    title: "Animals",
+                    match: (slug) =>
+                        ["no_animals", "yes_animals", "caged_animals"].includes(
                             slug
                         ),
+                },
+                {
+                    key: "payment_methods",
+                    title: "Payment methods",
+                    match: (slug) =>
+                        ["cash", "online", "secured"].includes(slug),
+                },
+                {
+                    key: "booking_types",
+                    title: "Booking types",
+                    match: (slug) => ["instant", "manual"].includes(slug),
+                },
+                {
+                    key: "cancellation",
+                    title: "Cancellation",
+                    match: (slug) => ["standard", "firm"].includes(slug),
+                },
+                {
+                    key: "vehicle_types",
+                    title: "Vehicle types",
+                    match: (slug) =>
+                        [
+                            "convertible",
+                            "hatchback",
+                            "coupe",
+                            "minivan",
+                            "sedan",
+                            "station_wagon",
+                            "suv",
+                            "truck",
+                            "van",
+                        ].includes(slug),
                 },
                 {
                     key: "rating_filters",
@@ -283,13 +398,17 @@ export default {
                         features_setting_id: detail.features_setting_id,
                         slug: feature.slug,
                         name: detail.name,
+                        label: detail.label ?? "",
                         tooltip: detail.tooltip ?? "",
+                        icon: detail.icon ?? "",
                         _editing: {
                             name: detail.name,
+                            label: detail.label ?? "",
                             tooltip:
                                 detail.display_tooltip ??
                                 detail.tooltip ??
                                 "",
+                            icon: detail.icon ?? "",
                         },
                         _saving: false,
                     });
@@ -324,7 +443,9 @@ export default {
                     items.push({
                         id: feature.id,
                         name: feature._editing.name,
+                        label: feature._editing.label,
                         tooltip: feature._editing.tooltip,
+                        icon: feature._editing.icon,
                     });
                 });
             });
@@ -343,7 +464,9 @@ export default {
                     Object.values(this.featuresByLanguage).forEach((list) => {
                         list.forEach((feature) => {
                             feature.name = feature._editing.name;
+                            feature.label = feature._editing.label;
                             feature.tooltip = feature._editing.tooltip;
+                            feature.icon = feature._editing.icon;
                         });
                     });
                     if (window?.helper?.swalSuccessMessage) {
@@ -363,6 +486,29 @@ export default {
             } finally {
                 this.savingAll = false;
             }
+        },
+        onIconChange(e, feature) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            axios
+                .post("/api/admin/media/image_again_upload", formData)
+                .then((res) => {
+                    if (res?.data) {
+                        feature._editing.icon = res.data;
+                    }
+                })
+                .catch(() => {
+                    if (window?.helper?.swalErrorMessage) {
+                        helper.swalErrorMessage("Unable to upload icon.");
+                    }
+                })
+                .finally(() => {
+                    e.target.value = "";
+                });
         },
     },
 };

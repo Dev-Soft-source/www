@@ -305,8 +305,7 @@ class Controller extends BaseController
 
     protected function getFeatureOptionIds(): array
     {
-        // id is refered to db
-        return array_merge(range(1, 16), [47]);
+        return FeaturesSetting::rideFeaturesSettingIds();
     }
 
     protected function hydrateLegacyFeatureOptions($postRidePage)
@@ -331,6 +330,18 @@ class Controller extends BaseController
             $postRidePage->{$legacyKey . '_tooltip'} = $featureOption['tooltip'] ?? '';
         }
 
+        // Legacy UI columns 8–11: heating / AC / ski rack merged into winter tires (id 12).
+        if (isset($postRidePage->features_option12)) {
+            $winter = $postRidePage->features_option12;
+            $tt = $postRidePage->features_option12_tooltip ?? '';
+            $postRidePage->features_option8 = $winter;
+            $postRidePage->features_option9 = $winter;
+            $postRidePage->features_option11 = $winter;
+            $postRidePage->features_option8_tooltip = $tt;
+            $postRidePage->features_option9_tooltip = $tt;
+            $postRidePage->features_option11_tooltip = $tt;
+        }
+
         return $postRidePage;
     }
 
@@ -348,7 +359,7 @@ class Controller extends BaseController
 
         return Cache::rememberForever($cacheKey, function () use ($selectedLangId, $defaultLangId) {
             $groupFeatureIds = [
-                'features' => array_merge(range(1, 16), [47]),
+                'features' => FeaturesSetting::rideFeaturesSettingIds(),
                 'luggage_size' => range(26, 30),
                 'smoking_allowed' => [21, 22],
                 'pets_allowed' => range(23, 25),
@@ -388,6 +399,7 @@ class Controller extends BaseController
                             'features_setting_id' => $id,
                             'slug' => $featureSlugs->get($id),
                             'icon' => $detail->icon ?? $fallback?->icon,
+                            'label' => $detail->label ?? $fallback?->label,
                             'name' => $detail->name ?? $fallback?->name ?? $featureSlugs->get($id) ?? (string) $id,
                             'tooltip' => $detail->display_tooltip ?? $fallback?->display_tooltip,
                         ];
@@ -406,7 +418,7 @@ class Controller extends BaseController
         $defaultLangId = $defaultLangId ?: $this->defaultLang?->id ?: $selectedLangId;
 
         $groupFeatureIds = [
-            'features' => array_merge(range(1, 16), [47]),
+            'features' => FeaturesSetting::rideFeaturesSettingIds(),
             'luggage_size' => range(26, 30),
             'smoking_allowed' => [21, 22],
             'pets_allowed' => range(23, 25),
@@ -446,6 +458,7 @@ class Controller extends BaseController
                         'code' => $featureSlugs->get($id) ?: (string) $id,
                         'slug' => $featureSlugs->get($id),
                         'icon' => $detail->icon ?? $fallback?->icon,
+                        'label' => $detail->label ?? $fallback?->label,
                         'display_label' => $detail->name ?? $fallback?->name ?? $featureSlugs->get($id) ?? (string) $id,
                         'display_description' => $detail->display_tooltip ?? $fallback?->display_tooltip,
                     ];

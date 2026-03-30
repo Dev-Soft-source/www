@@ -82,9 +82,7 @@ import CreateCoffeeWallPageSetting from '../admin/Pages/CreateCoffeeWallPageSett
 import CreateTripsPageSetting from '../admin/Pages/CreateTripsPageSetting.vue'
 import CreateThankyouPageSetting from '../admin/Pages/CreateThankyouPageSetting.vue'
 import CreateNotificationsPageSetting from '../admin/Pages/CreateNotificationsPageSetting.vue'
-import CreateFeaturesSetting from '../admin/Pages/CreateFeaturesSetting.vue'
 import ManageFeaturesSettings from '../admin/Pages/ManageFeaturesSettings.vue'
-import CreatePreferencesSetting from '../admin/Pages/CreatePreferencesSetting.vue'
 import CreatePaymentMethodsSetting from '../admin/Pages/CreatePaymentMethodsSetting.vue'
 import CreateLuggageOptionsSetting from '../admin/Pages/CreateLuggageOptionsSetting.vue'
 import CreateProfilePageSetting from '../admin/Pages/CreateProfilePageSetting.vue'
@@ -1002,27 +1000,11 @@ const routes = [
         },
     },
     {
-        path: '/admin/pages/ride-features-settings',
-        name: 'admin.features-setting.index',
-        component: CreateFeaturesSetting,
-        meta: {
-            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Features settings', 'routeName': 'admin.features-setting.index', 'isCurrentRoute': 1}],
-        },
-    },
-    {
         path: '/admin/pages/manage-features',
         name: 'admin.features-setting.manage',
         component: ManageFeaturesSettings,
         meta: {
             breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Manage features', 'routeName': 'admin.features-setting.manage', 'isCurrentRoute': 1}],
-        },
-    },
-    {
-        path: '/admin/pages/ride-preferences-settings ',
-        name: 'admin.preferences-setting.index',
-        component: CreatePreferencesSetting,
-        meta: {
-            breadcrumbs: [{'name': 'Dashboard', 'routeName': 'admin.dashboard', 'isCurrentRoute': 0}, {'name': 'Preferences settings', 'routeName': 'admin.preferences-setting.index', 'isCurrentRoute': 1}],
         },
     },
     {

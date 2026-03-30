@@ -187,6 +187,7 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('/download-post-ride-page-setting-template', [PostRidePageSettingController::class, 'downloadTemplate']);
     Route::post('/update-features-setting', [FeaturesSettingController::class, 'update']);
     Route::get('/get-features-setting', [FeaturesSettingController::class, 'show']);
+    Route::get('/get-features-setting-admin-groups', [FeaturesSettingController::class, 'adminGroups']);
     Route::post('/features-setting-details/{id}', [FeaturesSettingController::class, 'updateDetail']);
     Route::post('/features-setting-details-bulk', [FeaturesSettingController::class, 'bulkUpdateDetails']);
     Route::post('/upload-features-setting-excel', [FeaturesSettingController::class, 'uploadExcel']);
