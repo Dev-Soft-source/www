@@ -79,7 +79,7 @@
             </div>
             
             <script>
-                // For app deep linking - try to redirect back to app after 3 seconds
+                // For app deep linking - try to redirect back to app after 2 seconds
                 setTimeout(function() {
                     // Try to open the app with custom URL scheme
                     try {
@@ -96,7 +96,7 @@
                             // Can't close, just display message
                         }
                     }
-                }, 3000);
+                }, 2000);
                 
                 // Also try immediate redirect for better UX
                 try {

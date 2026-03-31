@@ -60,14 +60,14 @@ Widget fieldsWidget(
           textColor: hintTextColor,
           context: null,
         ).copyWith(
-          fontSize: fontSize ?? 19.0,
+          fontSize: fontSize ?? 20.0,
           fontFamily: fontFamily,
         ),
         fillColor: inputColor,
         contentPadding:
             const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0)),
     style: TextStyle(
-      fontSize: fontSize ?? 19.0,
+      fontSize: fontSize ?? 20.0,
       fontFamily: fontFamily,
       color: textColor,
       height: 1.2,

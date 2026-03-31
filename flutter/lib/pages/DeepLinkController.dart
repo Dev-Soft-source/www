@@ -75,11 +75,39 @@ class DeepLinkController extends GetxController {
           }
         }
       }
+      // Handle proximaride://email-verified deep links from browser
+      else if (uri.scheme == 'proximaride' && uri.host == 'email-verified') {
+        logger.info('App-scheme email verification deep link detected');
+
+        final token = uri.queryParameters['token'];
+        final status = uri.queryParameters['status'];
+
+        logger.info('Status: $status, Token: $token');
+
+        if (token != null && token.isNotEmpty) {
+          LoginController loginController;
+          if (Get.isRegistered<LoginController>()) {
+            loginController = Get.find<LoginController>();
+          } else {
+            loginController = Get.put(LoginController());
+          }
+
+          await Future.delayed(const Duration(milliseconds: 500));
+          await loginController.loginWithToken(token, persistToken: false);
+        } else {
+          await Future.delayed(const Duration(milliseconds: 300));
+          serviceController.showDialogue(
+            status == 'success'
+                ? "Your email has been verified successfully."
+                : "This email has already been verified.",
+          );
+          Get.offAllNamed('/login');
+        }
+      }
       // Handle http://127.0.0.1:8000/en/login-with-app
       else if ((uri.scheme == 'https' || uri.scheme == 'http') &&
           (uri.host == '127.0.0.1:8000' ||
-              uri.host == '13b2407bb966.ngrok-free.app' ||
-              uri.host == 'xelentride.shop') &&
+              uri.host == 'proximaride.com') &&
           uri.path == '/en/login-with-app') {
         logger.info('Login with app deep link detected');
 
@@ -116,7 +144,7 @@ class DeepLinkController extends GetxController {
         }
       } // Handle email verification with token
       else if ((uri.scheme == 'https' || uri.scheme == 'http') &&
-          uri.host == '127.0.0.1:8000' &&
+          (uri.host == '127.0.0.1:8000' || uri.host == 'proximaride.com') &&
           uri.path == '/email-verified' &&
           uri.queryParameters['success'] == 'verified' &&
           uri.queryParameters['app'] == 'true' &&
@@ -146,7 +174,7 @@ class DeepLinkController extends GetxController {
         }
       } // Handle email already verified (no token)
       else if ((uri.scheme == 'https' || uri.scheme == 'http') &&
-          uri.host == '127.0.0.1:8000' &&
+          (uri.host == '127.0.0.1:8000' || uri.host == 'proximaride.com') &&
           uri.path == '/email-verified' &&
           uri.queryParameters['app'] == 'true' &&
           !uri.queryParameters.containsKey('token')) {
@@ -178,12 +206,12 @@ class DeepLinkController extends GetxController {
       } else {
         logger.info('Deep link does not match any known pattern.');
         logger.info('Available patterns:');
-        logger.info('1. xelentride://booking?booking_id=X&action=Y');
+        logger.info('1. proximaride://booking?booking_id=X&action=Y');
         logger.info('2. http://127.0.0.1:8000/en/login-with-app');
         logger.info('3. https://13b2407bb966.ngrok-free.app/en/login-with-app');
-        logger.info('4. https://xelentride.shop/en/login-with-app');
-        logger
-            .info('5. http://127.0.0.1:8000/mobile-close-redirect');
+        logger.info('4. https://proximaride.com/en/login-with-app');
+        logger.info('5. http://127.0.0.1:8000/mobile-close-redirect');
+        logger.info('6. proximaride://email-verified?status=success&token=...');
       }
     } catch (e, st) {
       logger.error('❌ Deep link handling ERROR: $e');

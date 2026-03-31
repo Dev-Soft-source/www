@@ -21,7 +21,7 @@ Widget dateFieldWidget({textController, fontSize, fontFamily, onTap, prefixIcon,
       contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0)
     ),
     style: TextStyle(
-      fontSize: fontSize ?? 19.0,
+      fontSize: fontSize ?? 22.0,
       fontFamily: fontFamily,
       color: textColor
     ),

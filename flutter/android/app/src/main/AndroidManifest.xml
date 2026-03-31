@@ -67,7 +67,7 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="http" />
                 <data android:scheme="https" />
-                <data android:host="xelentride.shop"
+                <data android:host="proximaride.com"
                     android:pathPrefix ="/en/login-with-app" />
             </intent-filter>
 
@@ -91,6 +91,15 @@
                 <data android:scheme="https" />
                 <data android:host="127.0.0.1:8000"
                     android:pathPrefix="/email-verified" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="proximaride"
+                    android:host="email-verified" />
             </intent-filter>
 
             <!-- Deep link for mobile-close-redirect -->
