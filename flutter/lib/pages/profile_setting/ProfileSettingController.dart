@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:proximaride_app/consts/const_api.dart';
 import 'package:proximaride_app/helpers/error_state_manager.dart';
+import 'package:proximaride_app/pages/my_profile/MyProfileController.dart';
 import 'package:proximaride_app/pages/stages/StageProvider.dart';
 import 'package:proximaride_app/services/connectivity_service.dart';
 import 'package:proximaride_app/services/logger_service.dart';
@@ -19,6 +20,14 @@ class ProfileSettingController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
+
+    if (Get.isRegistered<MyProfileController>()) {
+      final myProfileController = Get.find<MyProfileController>();
+      final title = myProfileController.labelTextDetail['profile_setting_label'];
+      if (title != null && title.toString().trim().isNotEmpty) {
+        labelTextDetail['main_heading'] = title;
+      }
+    }
 
     // Initialize connectivity service
     try {

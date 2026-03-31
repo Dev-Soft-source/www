@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:proximaride_app/helpers/error_state_manager.dart';
 import 'package:proximaride_app/pages/driver_license/DriverLicenseProvider.dart';
+import 'package:proximaride_app/pages/profile_setting/ProfileSettingController.dart';
 import 'package:proximaride_app/services/connectivity_service.dart';
 import 'package:proximaride_app/services/logger_service.dart';
 import 'package:proximaride_app/services/service.dart';
@@ -38,6 +39,15 @@ class DriverLicenseController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
+
+    if (Get.isRegistered<ProfileSettingController>()) {
+      final profileSettingController = Get.find<ProfileSettingController>();
+      final title =
+          profileSettingController.labelTextDetail['my_driver_license_label'];
+      if (title != null && title.toString().trim().isNotEmpty) {
+        labelTextDetail['main_heading'] = title;
+      }
+    }
 
     // Initialize connectivity service
     try {

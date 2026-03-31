@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/helpers/error_state_manager.dart';
+import 'package:proximaride_app/pages/profile_setting/ProfileSettingController.dart';
 import 'package:proximaride_app/pages/student_card/StudentCardProvider.dart';
 import 'package:proximaride_app/services/connectivity_service.dart';
 import 'package:proximaride_app/services/logger_service.dart';
@@ -43,6 +44,15 @@ class StudentCardController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
+
+    if (Get.isRegistered<ProfileSettingController>()) {
+      final profileSettingController = Get.find<ProfileSettingController>();
+      final title =
+          profileSettingController.labelTextDetail['my_student_card_label'];
+      if (title != null && title.toString().trim().isNotEmpty) {
+        labelTextDetail['main_heading'] = title;
+      }
+    }
 
     // Initialize connectivity service
     try {

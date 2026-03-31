@@ -11,6 +11,7 @@ import 'package:proximaride_app/helpers/error_state_manager.dart';
 import 'package:proximaride_app/consts/payment_config.dart';
 import 'package:proximaride_app/pages/book_seat/BookSeatProvider.dart';
 import 'package:proximaride_app/pages/edit_profile/EditProfileProvider.dart';
+import 'package:proximaride_app/pages/my_profile/MyProfileController.dart';
 import 'package:proximaride_app/pages/my_wallet/MyWalletProvider.dart';
 import 'package:proximaride_app/pages/payment_options/PaymentOptionsProvider.dart';
 import 'package:proximaride_app/services/connectivity_service.dart';
@@ -131,6 +132,14 @@ class MyWalletController extends GetxController
 
   @override
   void onInit() async {
+    if (Get.isRegistered<MyProfileController>()) {
+      final myProfileController = Get.find<MyProfileController>();
+      final title = myProfileController.labelTextDetail['my_wallet_label'];
+      if (title != null && title.toString().trim().isNotEmpty) {
+        labelTextDetail['main_heading'] = title;
+      }
+    }
+
     tabController = TabController(length: 2, vsync: this);
     passengerTabController = TabController(length: 3, vsync: this);
     driverTabController = TabController(length: 4, vsync: this);

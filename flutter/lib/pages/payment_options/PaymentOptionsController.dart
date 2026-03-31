@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/helpers/error_state_manager.dart';
+import 'package:proximaride_app/pages/my_profile/MyProfileController.dart';
 import 'package:proximaride_app/pages/payment_options/PaymentOptionsProvider.dart';
 import 'package:proximaride_app/services/connectivity_service.dart';
 import 'package:proximaride_app/services/logger_service.dart';
@@ -42,6 +43,14 @@ class PaymentOptionController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
+    if (Get.isRegistered<MyProfileController>()) {
+      final myProfileController = Get.find<MyProfileController>();
+      final title = myProfileController.labelTextDetail['payment_options_label'];
+      if (title != null && title.toString().trim().isNotEmpty) {
+        labelTextDetail['main_heading'] = title;
+      }
+    }
 
     // Initialize connectivity service
     try {

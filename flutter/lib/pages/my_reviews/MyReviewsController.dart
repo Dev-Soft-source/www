@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:proximaride_app/helpers/error_state_manager.dart';
+import 'package:proximaride_app/pages/my_profile/MyProfileController.dart';
 import 'package:proximaride_app/pages/my_reviews/MyReviewsProvider.dart';
 import 'package:proximaride_app/services/logger_service.dart';
 import 'package:proximaride_app/services/service.dart';
@@ -47,6 +48,15 @@ class MyReviewsController extends GetxController
   @override
   void onInit() async {
     super.onInit();
+
+    if (Get.isRegistered<MyProfileController>()) {
+      final myProfileController = Get.find<MyProfileController>();
+      final title = myProfileController.labelTextDetail['my_reviews_label'];
+      if (title != null && title.toString().trim().isNotEmpty) {
+        labelTextDetail['main_heading'] = title;
+      }
+    }
+
     tabController = TabController(length: 2, vsync: this);
     pageController = PageController(initialPage: 0);
     replyTextController = TextEditingController();

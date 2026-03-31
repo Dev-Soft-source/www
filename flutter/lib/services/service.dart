@@ -794,11 +794,14 @@ class Service extends GetxService {
     return await Get.defaultDialog(
       title: '',
       titlePadding: EdgeInsets.zero,
-      middleText: formatMessage(
-          "${welcomeMessage1.isEmpty ? "Hey" : welcomeMessage1.value} ${loginUserDetail['first_name']},  ${welcomeMessage2.isEmpty ? "nice to meet you\nPlease complete your profile, it only takes a couple of minutes" : welcomeMessage2.value}"),
+      content: Text(
+        formatMessage(
+            "${welcomeMessage1.isEmpty ? "Hey" : welcomeMessage1.value} ${loginUserDetail['first_name']},  ${welcomeMessage2.isEmpty ? "nice to meet you\nPlease complete your profile, it only takes a couple of minutes" : welcomeMessage2.value}"),
+        textAlign: TextAlign.justify,
+        style: const TextStyle(fontSize: 20),
+      ),
       barrierDismissible: false,
       titleStyle: const TextStyle(fontSize: 24, color: primaryColor),
-      middleTextStyle: const TextStyle(fontSize: 20),
       actions: [
         ElevatedButton(
           onPressed: () async {

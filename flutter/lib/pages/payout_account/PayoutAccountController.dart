@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:proximaride_app/helpers/error_state_manager.dart';
+import 'package:proximaride_app/pages/my_profile/MyProfileController.dart';
 import 'package:proximaride_app/pages/payout_account/PayoutAccountProvider.dart';
 import 'package:proximaride_app/services/connectivity_service.dart';
 import 'package:proximaride_app/services/logger_service.dart';
@@ -56,6 +57,14 @@ class PayoutAccountController extends GetxController
   @override
   void onInit() {
     super.onInit();
+
+    if (Get.isRegistered<MyProfileController>()) {
+      final myProfileController = Get.find<MyProfileController>();
+      final title = myProfileController.labelTextDetail['payout_options_label'];
+      if (title != null && title.toString().trim().isNotEmpty) {
+        labelTextDetail['main_heading'] = title;
+      }
+    }
 
     // Initialize connectivity service
     try {

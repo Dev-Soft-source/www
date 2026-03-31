@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:proximaride_app/consts/const_api.dart';
 import 'package:proximaride_app/helpers/error_state_manager.dart';
+import 'package:proximaride_app/pages/chat/ChatController.dart';
 import 'package:proximaride_app/pages/old_messages/OldMessagesProvider.dart';
 import 'package:proximaride_app/pages/stages/StageProvider.dart';
 import 'package:proximaride_app/services/connectivity_service.dart';
@@ -23,6 +24,13 @@ class OldMessagesController extends GetxController {
   void onInit() async {
     userId = serviceController.loginUserDetail['id'];
     super.onInit();
+
+    if (Get.isRegistered<ChatController>()) {
+      final chatController = Get.find<ChatController>();
+      if (chatController.labelTextDetail.isNotEmpty) {
+        labelTextDetail.addAll(chatController.labelTextDetail);
+      }
+    }
 
     // Initialize connectivity service
     try {

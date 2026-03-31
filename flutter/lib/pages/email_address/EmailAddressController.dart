@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:proximaride_app/consts/const_api.dart';
 import 'package:proximaride_app/helpers/error_state_manager.dart';
 import 'package:proximaride_app/pages/email_address/EmailAddressProvider.dart';
+import 'package:proximaride_app/pages/profile_setting/ProfileSettingController.dart';
 import 'package:proximaride_app/pages/stages/StageProvider.dart';
 import 'package:proximaride_app/services/connectivity_service.dart';
 import 'package:proximaride_app/services/logger_service.dart';
@@ -41,6 +42,15 @@ class EmailAddressController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
+
+    if (Get.isRegistered<ProfileSettingController>()) {
+      final profileSettingController = Get.find<ProfileSettingController>();
+      final title =
+          profileSettingController.labelTextDetail['my_email_address_label'];
+      if (title != null && title.toString().trim().isNotEmpty) {
+        labelTextDetail['main_heading'] = title;
+      }
+    }
 
     // Initialize connectivity service
     try {
