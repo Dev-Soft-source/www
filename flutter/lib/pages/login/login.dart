@@ -929,7 +929,7 @@ class LoginPage extends GetView<LoginController> {
                               textController: controller.emailTextController,
                               fieldType: "email",
                               readonly: false,
-                              fontSize: 16.0,
+                              fontSize: 18.0,
                               fontFamily: regular,
                               onChanged: (value) {
                                 // Email error behavior for Login:
@@ -1049,7 +1049,7 @@ class LoginPage extends GetView<LoginController> {
                                 filled: true,
                                 fillColor: inputColor,
                                 contentPadding: const EdgeInsets.symmetric(
-                                    vertical: 0.0, horizontal: 8.0),
+                                    vertical: 16.0, horizontal: 12.0),
                                 suffixIcon: IconButton(
                                   icon: Icon(
                                     controller.isPasswordVisible.value
@@ -1062,7 +1062,7 @@ class LoginPage extends GetView<LoginController> {
                                 ),
                               ),
                               style: const TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 18,
                                   fontFamily: regular,
                                   color: textColor),
                               obscureText: !controller.isPasswordVisible.value,

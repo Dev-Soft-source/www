@@ -18,10 +18,10 @@ Widget dateFieldWidget({textController, fontSize, fontFamily, onTap, prefixIcon,
       filled: true,
       fillColor: inputColor,
       prefixIcon: prefixIcon,
-      contentPadding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 8.0)
+      contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0)
     ),
     style: TextStyle(
-      fontSize: fontSize,
+      fontSize: fontSize ?? 19.0,
       fontFamily: fontFamily,
       color: textColor
     ),

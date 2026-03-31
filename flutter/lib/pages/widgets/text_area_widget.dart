@@ -42,18 +42,18 @@ Widget textAreaWidget(
       hintStyle: appPlaceholderTextStyle(
         context: null,
       ).copyWith(
-        fontSize: fontSize ?? 18.0,
+        fontSize: fontSize ?? 19.0,
         fontFamily: fontFamily,
       ),
       hintMaxLines: hintMaxLines,
       filled: true,
       fillColor: inputColor,
       contentPadding:
-          const EdgeInsets.symmetric(vertical: 14.0, horizontal: 12.0),
+          const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
       counterText: showCounter ? null : "",
     ),
     style: TextStyle(
-      fontSize: fontSize ?? 18.0,
+      fontSize: fontSize ?? 19.0,
       fontFamily: fontFamily,
       color: textColor,
       height: 1.2,
