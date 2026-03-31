@@ -99,7 +99,14 @@ class NotificationController extends Controller
             ->get();
 
         
-        $genderLabel = Step1PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        if ($request->lang_id && $request->lang_id != 0) {
+            $genderLabel = Step1PageSettingDetail::where('language_id', $request->lang_id)->select('male_option_label', 'female_option_label', 'prefer_option_label')->first();
+        } else {
+            $selectedLanguage = Language::where('is_default', 1)->first();
+            if ($selectedLanguage) {
+                $genderLabel = Step1PageSettingDetail::where('language_id', $selectedLanguage->id)->select('male_option_label', 'female_option_label', 'prefer_option_label')->first();
+            }
+        }
 
         foreach ($notifications as $notification) {
             if ($notification->from && $notification->from->gender) {
