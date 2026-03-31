@@ -534,6 +534,16 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
           } else if (rideType.value == "completed") {
             completedRideList.addAll(ridesData);
             completedRideTotal.value = rides?['total'] ?? 0;
+            for (final ride in ridesData) {
+              if (ride is Map && ride['bookings'] is List) {
+                for (final booking in ride['bookings']) {
+                  if (booking is Map) {
+                    logger.info(
+                        "Completed ride passenger payload -> ride: ${ride['id']}, booking: ${booking['id']}, passenger: ${booking['passenger']}");
+                  }
+                }
+              }
+            }
           } else {
             cancelledRideList.addAll(ridesData);
             cancelledRideTotal.value = rides?['total'] ?? 0;
@@ -1018,6 +1028,14 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
         .firstWhereOrNull((element) => element['id'] == rideId);
     if (getRideDetail != null) {
       cancelRideInfo.addAll(getRideDetail);
+      if (getRideDetail['bookings'] is List) {
+        for (final booking in getRideDetail['bookings']) {
+          if (booking is Map) {
+            logger.info(
+                "Review passenger screen payload -> ride: ${getRideDetail['id']}, booking: ${booking['id']}, passenger: ${booking['passenger']}");
+          }
+        }
+      }
       isOverlayLoading(false);
       Get.toNamed('/review_passenger/$rideId');
     }

@@ -189,7 +189,7 @@ class MyRideController extends Controller
                         ->where('status', '<>', 3)
                         ->where('status', '<>', 4)
                         ->with(['passenger' => function ($query) {
-                            $query->select('id', 'profile_image', 'gender'); // Specify the columns to select
+                            $query->select('id', 'first_name', 'last_name', 'profile_image', 'gender', 'dob'); // Include names for review-passenger and completed-ride UI
                         }]);
                 }
             ])
@@ -203,6 +203,8 @@ class MyRideController extends Controller
 
 
         foreach ($rides as $ride) {
+
+        
 
             $displayPrice = $ride->price_minor ?? number_format($ride->detail->price / 100, 2, '.', '');
             $ride->price = $displayPrice;
@@ -307,32 +309,20 @@ class MyRideController extends Controller
         $rides->getCollection()->transform(function ($ride) {
             $ride->booking_requests = $ride->bookings()->where('status', 0)
                 ->with(['passenger' => function ($query) {
-                    $query->select('id', 'profile_image', 'gender'); // Specify the columns to select
+                    $query->select('id', 'first_name', 'last_name', 'profile_image', 'gender', 'dob');
                 }])->get();
             return $ride;
         });
 
-
-        $tripsPage = null;
-        if ($request->lang_id && $request->lang_id != 0) {
-            // Retrieve the tripsPageSettingDetail associated with the selected language
-            $tripsPage = TripsPageSettingDetail::where('language_id', $request->lang_id)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $tripsPage = TripsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        }
-
-        $rideDetailPage = null;
-        if ($request->lang_id && $request->lang_id != 0) {
-            $rideDetailPage = RideDetailPageSettingDetail::where('language_id', $request->lang_id)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $rideDetailPage = RideDetailPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        }
+        Log::info('Processing rides payload', [
+            'kind' => $kind,
+            'total' => method_exists($rides, 'total') ? $rides->total() : null,
+            'count' => $rides->count(),
+            'ride_ids' => $rides->getCollection()->pluck('id')->all(),
+        ]);
+        
+        $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $data = ['rides' => $rides, 'rideDetailPage' => $rideDetailPage, 'tripsPage' => $tripsPage];
         return $this->successResponse($data, 'Get my ' . $kind . ' rides');

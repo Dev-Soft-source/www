@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:proximaride_app/pages/widgets/progress_circular_widget.dart';
+import 'package:proximaride_app/services/logger_service.dart';
 
 Widget appNetworkImage({
   required String imageUrl,
@@ -46,7 +47,10 @@ Widget appNetworkImage({
           child: Center(child: progressCircularWidget(context)),
         );
       },
-      errorBuilder: (context, error, stackTrace) => fallback(),
+      errorBuilder: (context, error, stackTrace) {
+        logger.error('Image.network failed for $normalizedUrl -> $error');
+        return fallback();
+      },
     );
   }
 
@@ -60,6 +64,9 @@ Widget appNetworkImage({
       height: height,
       child: Center(child: progressCircularWidget(context)),
     ),
-    errorWidget: (context, url, error) => fallback(),
+    errorWidget: (context, url, error) {
+      logger.error('CachedNetworkImage failed for $url -> $error');
+      return fallback();
+    },
   );
 }

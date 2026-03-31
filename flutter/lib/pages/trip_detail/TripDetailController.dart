@@ -85,6 +85,13 @@ class TripDetailController extends GetxController {
             cancelSetting.addAll(resp['data']['cancelRideSetting']);
             reviewSetting.addAll(resp['data']['reviewSetting']);
 
+            logger.info("Trip detail booking_method_image: ${ride['booking_method_image']}");
+            logger.info("Trip detail payment_method_image: ${ride['payment_method_image']}");
+            logger.info("Trip detail smoke_image: ${ride['smoke_image']}");
+            logger.info("Trip detail animal_friendly_image: ${ride['animal_friendly_image']}");
+            logger.info("Trip detail luggage_image: ${ride['luggage_image']}");
+            logger.info("Trip detail features payload: ${ride['features']}");
+
             if (ride.isNotEmpty) {
               var bookings = List<dynamic>.empty(growable: true);
               bookings.addAll(ride['bookings']);
