@@ -158,6 +158,144 @@ class SearchController extends Controller
             'route' => '/admin/pages/profile-photo-guidelines-page-settings',
             'name' => 'Profile Photo Guidelines Page Settings'
         ],
+        'success_messages_setting_detail' => [
+            'route' => '/admin/success-error-messages-setting',
+            'name' => 'Success & Error Messages Settings'
+        ],
+
+        // Additional/legacy table names observed in production DBs
+        'add_vehicle_setting_detail' => [
+            'route' => '/admin/pages/my-vehicle-settings',
+            'name' => 'My Vehicle Settings'
+        ],
+        'edit_vehicle_setting_detail' => [
+            'route' => '/admin/pages/my-vehicle-settings',
+            'name' => 'My Vehicle Settings'
+        ],
+        'my_vehicle_setting_detail' => [
+            'route' => '/admin/pages/my-vehicle-settings',
+            'name' => 'My Vehicle Settings'
+        ],
+        'my_driver_license_setting_detail' => [
+            'route' => '/admin/pages/my-driver-license-settings',
+            'name' => 'My Driver License Settings'
+        ],
+        'my_student_card_setting_detail' => [
+            'route' => '/admin/pages/my-student-card-settings',
+            'name' => 'My Student Card Settings'
+        ],
+        'my_phone_no_setting_detail' => [
+            'route' => '/admin/pages/my-phone-settings',
+            'name' => 'My Phone Settings'
+        ],
+        'my_email_address_setting_detail' => [
+            'route' => '/admin/pages/my-email-settings',
+            'name' => 'My Email Settings'
+        ],
+        'my_passenger_setting_detail' => [
+            'route' => '/admin/pages/my-passenger-settings',
+            'name' => 'My Passenger Settings'
+        ],
+        'profile_setting_detail' => [
+            'route' => '/admin/pages/profile-settings',
+            'name' => 'Profile Settings'
+        ],
+        'profile_photo_setting_detail' => [
+            'route' => '/admin/pages/profile-photo-settings',
+            'name' => 'Profile Photo Settings'
+        ],
+        'password_setting_detail' => [
+            'route' => '/admin/pages/password-settings',
+            'name' => 'Password Settings'
+        ],
+        'payment_option_setting_detail' => [
+            'route' => '/admin/pages/payment-settings',
+            'name' => 'Payment Settings'
+        ],
+        'error_page_setting_detail' => [
+            'route' => '/admin/pages/error-page-settings',
+            'name' => 'Error Page Settings'
+        ],
+        'features_setting_detail' => [
+            'route' => '/admin/pages/manage-features',
+            'name' => 'Manage Features Settings'
+        ],
+        'firm_cancellation_setting_detail' => [
+            'route' => '/admin/pages/firm-cancellation-page-settings',
+            'name' => 'Firm Cancellation Page Settings'
+        ],
+        'select_location_setting_detail' => [
+            'route' => '/admin/pages/location-page-settings',
+            'name' => 'Location Page Settings'
+        ],
+        'media_setting_detail' => [
+            'route' => '/admin/pages/media-page-settings',
+            'name' => 'Media Page Settings'
+        ],
+        'top_up_balance_setting_detail' => [
+            'route' => '/admin/pages/my-wallet-settings',
+            'name' => 'My Wallet Settings'
+        ],
+        'ride_fair_setting_detail' => [
+            'route' => '/admin/pages/ride-details-page-settings',
+            'name' => 'Ride Details Page Settings'
+        ],
+        'close_my_account_setting_detail' => [
+            'route' => '/admin/pages/close-account-settings',
+            'name' => 'Close Account Settings'
+        ],
+        'coffee_wall_setting_detail' => [
+            'route' => '/admin/pages/coffee-wall-page-settings',
+            'name' => 'Coffee Wall Page Settings'
+        ],
+        'community_guidelines_page_setting_details' => [
+            'route' => '/admin/pages/community-guidelines-page-settings',
+            'name' => 'Community Guidelines Page Settings'
+        ],
+        'referral_page_setting_details' => [
+            'route' => '/admin/pages/referral-page-settings',
+            'name' => 'Referral Page Settings'
+        ],
+        'reward_point_setting_details' => [
+            'route' => '/admin/registration-reward-settings/1/edit',
+            'name' => 'Registration Reward Settings'
+        ],
+        'footer_setting_details' => [
+            'route' => '/admin/site-text-setting',
+            'name' => 'Site Text Settings'
+        ],
+        'signup_page_setting_detail_copy1' => [
+            'route' => '/admin/pages/signup-page-settings',
+            'name' => 'Signup Page Settings'
+        ],
+        'step1_page_setting_detail' => [
+            'route' => '/admin/pages/step1-page-settings',
+            'name' => 'Step 1 Page Settings'
+        ],
+        'step2_page_setting_detail' => [
+            'route' => '/admin/pages/step2-page-settings',
+            'name' => 'Step 2 Page Settings'
+        ],
+        'step3_page_setting_detail' => [
+            'route' => '/admin/pages/step3-page-settings',
+            'name' => 'Step 3 Page Settings'
+        ],
+        'step4_page_setting_detail' => [
+            'route' => '/admin/pages/step4-page-settings',
+            'name' => 'Step 4 Page Settings'
+        ],
+        'step5_page_setting_detail' => [
+            'route' => '/admin/pages/step5-page-settings',
+            'name' => 'Step 5 Page Settings'
+        ],
+        'disclaimer_page_setting_detail' => [
+            'route' => '/admin/pages/disclaimer-page-settings',
+            'name' => 'Disclaimer Page Settings'
+        ],
+        'for_tourists_page_setting_detail' => [
+            'route' => '/admin/pages/for-tourists-page-settings',
+            'name' => 'For Tourists Page Settings'
+        ],
     ];
 
     public function search(Request $request)

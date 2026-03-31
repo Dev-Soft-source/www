@@ -40,7 +40,9 @@ class MyTripsPage extends GetView<MyTripController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(MyTripController());
+    if (!Get.isRegistered<MyTripController>()) {
+      Get.put(MyTripController());
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,

@@ -210,27 +210,7 @@
                            " />
            </div>
        </div>
-       <div class="relative z-0 w-full group">
-           <div>
-                                                <div class="flex justify-between">
-                                                    <label
-                                                        :for="`feilds_required_text_${activeLanguageId}`">Indicate required feilds text</label>
-                                                </div>
-                                                <input type="text"
-                                                    :name="`feilds_required_text_${activeLanguageId}`"
-                                                    :id="`feilds_required_text_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" "
-                                                    :value="getCurrentValue('feilds_required_text')"
-                                                    @input="handleInput($event.target.value, language, 'feilds_required_text')" />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400"
-                                                v-if="validationErros.has('feilds_required_text.feilds_required_text_${activeLanguageId}')">
-                                                {{
-                                                    validationErros.get('feilds_required_text.feilds_required_text_${activeLanguageId}')
-                                                }}
-                                            </p>
-                                        </div>
+      
                                 </div>
 
                                 <!-- top section start -->
@@ -1202,34 +1182,7 @@
                                                 "></p>
                                         </div>
                                         
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label :for="`city_not_fount_contact_text_${activeLanguageId}`">City name is not in our record contact us text</label>
-                                                </div>
-                                                <input type="text" :name="`city_not_fount_contact_text_${activeLanguageId}`"
-                                                    :id="`city_not_fount_contact_text_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" " :value="getCurrentValue(
-                                                        'city_not_fount_contact_text'
-                                                    )
-                                                        " @input="
-                                                            handleInput(
-                                                                $event.target.value,
-                                                                language,
-                                                                'city_not_fount_contact_text'
-                                                            )
-                                                            " />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="
-                                                validationErros.has(
-                                                    `city_not_fount_contact_text.city_not_fount_contact_text_${activeLanguageId}`
-                                                )
-                                            " v-text="validationErros.get(
-                                                `city_not_fount_contact_text.city_not_fount_contact_text_${activeLanguageId}`
-                                            )
-                                                "></p>
-                                        </div>
+                                        
                                         
                                         
                                     </div>
@@ -1839,27 +1792,7 @@
                                         </div>
 
 
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label
-                                                        :for="`extra_care_popup_eligible_text_${activeLanguageId}`">Extra care not eligible popup</label>
-                                                </div>
-                                                <input type="text"
-                                                    :name="`extra_care_popup_eligible_text_${activeLanguageId}`"
-                                                    :id="`extra_care_popup_eligible_text_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" "
-                                                    :value="getCurrentValue('extra_care_popup_eligible_text')"
-                                                    @input="handleInput($event.target.value, language, 'extra_care_popup_eligible_text')" />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400"
-                                                v-if="validationErros.has('extra_care_popup_eligible_text.extra_care_popup_eligible_text_${activeLanguageId}')">
-                                                {{
-                                                    validationErros.get('extra_care_popup_eligible_text.extra_care_popup_eligible_text_${activeLanguageId}')
-                                                }}
-                                            </p>
-                                        </div>
+                                        
                                         
                                        
                                         <div class="relative z-0 w-full group">
@@ -2183,66 +2116,7 @@
                                             )
                                                 "></p>
                                         </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label :for="`luggage_checkbox_label1_${activeLanguageId}`">Luggage
-                                                        checkbox label1</label>
-                                                </div>
-                                                <input type="text" :name="`luggage_checkbox_label1_${activeLanguageId}`"
-                                                    :id="`luggage_checkbox_label1_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" " :value="getCurrentValue(
-                                                        'luggage_checkbox_label1'
-                                                    )
-                                                        " @input="
-                                                            handleInput(
-                                                                $event.target.value,
-                                                                language,
-                                                                'luggage_checkbox_label1'
-                                                            )
-                                                            " />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="
-                                                validationErros.has(
-                                                    `luggage_checkbox_label1.luggage_checkbox_label1_${activeLanguageId}`
-                                                )
-                                            " v-text="validationErros.get(
-                                                `luggage_checkbox_label1.luggage_checkbox_label1_${activeLanguageId}`
-                                            )
-                                                "></p>
-                                        </div>
-                                        <div class="relative z-0 w-full group">
-                                            <div>
-                                                <div class="flex justify-between">
-                                                    <label
-                                                        :for="`luggage_checkbox_label1_tooltip_${activeLanguageId}`">Luggage
-                                                        checkbox label1 tooltip</label>
-                                                </div>
-                                                <input type="text"
-                                                    :name="`luggage_checkbox_label1_tooltip_${activeLanguageId}`"
-                                                    :id="`luggage_checkbox_label1_tooltip_${activeLanguageId}`"
-                                                    class="can-exp-input w-full block border border-gray-300 rounded"
-                                                    placeholder=" " :value="getCurrentValue(
-                                                        'luggage_checkbox_label1_tooltip'
-                                                    )
-                                                        " @input="
-                                                            handleInput(
-                                                                $event.target.value,
-                                                                language,
-                                                                'luggage_checkbox_label1_tooltip'
-                                                            )
-                                                            " />
-                                            </div>
-                                            <p class="mt-2 text-sm text-red-400" v-if="
-                                                validationErros.has(
-                                                    `luggage_checkbox_label1_tooltip.luggage_checkbox_label1_tooltip_${activeLanguageId}`
-                                                )
-                                            " v-text="validationErros.get(
-                                                `luggage_checkbox_label1_tooltip.luggage_checkbox_label1_tooltip_${activeLanguageId}`
-                                            )
-                                                "></p>
-                                        </div>
+                                        
                                         <!-- <div class="relative z-0 w-full group">
                                             <div>
                                                 <div class="flex justify-between">
@@ -2752,94 +2626,32 @@
                                             )
                                                 "></p>
                                         </div>
-                                        <!-- <div class="relative z-0 w-full group col-span-2">
+                                        <div class="relative z-0 w-full group col-span-2">
                                             <div>
-                                                <div
-                                                    class="flex justify-between"
-                                                >
-                                                    <label
-                                                        :for="`pink_ride_disclaimers_description_${activeLanguageId}`"
-                                                        >Pink ride disclaimers description</label
-                                                    >
+                                                <div class="flex justify-between">
+                                                    <label :for="`pink_ride_disclaimers_description_${activeLanguageId}`">Pink ride disclaimers description</label>
                                                 </div>
-                                                <editor
-                                                    @selectionChange="
-                                                        handleSelectionChange(
-                                                            language,
-                                                            'pink_ride_disclaimers_description'
-                                                        )
-                                                    "
-                                                    :ref="`pink_ride_disclaimers_description_${language.id}`"
-                                                    :id="`pink_ride_disclaimers_description_${language.id}`"
-                                                    :initial-value="
-                                                        form[
-                                                            `pink_ride_disclaimers_description`
-                                                        ][
-                                                            `pink_ride_disclaimers_description_${language?.id}`
-                                                        ]
-                                                    "
-                                                    :tinymce-script-src="tinymceScriptSrc"
-                                                    :init="editorConfig"
-                                                />
+                                                <textarea :name="`pink_ride_disclaimers_description_${activeLanguageId}`"
+                                                    :id="`pink_ride_disclaimers_description_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    rows="3" placeholder=" "
+                                                    :value="getCurrentValue('pink_ride_disclaimers_description')"
+                                                    @input="handleInput($event.target.value, language, 'pink_ride_disclaimers_description')"></textarea>
                                             </div>
-                                            <p
-                                                class="mt-2 text-sm text-red-400"
-                                                v-if="
-                                                    validationErros.has(
-                                                        `pink_ride_disclaimers_description.pink_ride_disclaimers_description_${activeLanguageId}`
-                                                    )
-                                                "
-                                                v-text="
-                                                    validationErros.get(
-                                                        `pink_ride_disclaimers_description.pink_ride_disclaimers_description_${activeLanguageId}`
-                                                    )
-                                                "
-                                            ></p>
                                         </div>
                                         <div class="relative z-0 w-full group col-span-2">
                                             <div>
-                                                <div
-                                                    class="flex justify-between"
-                                                >
-                                                    <label
-                                                        :for="`extra_care_ride_disclaimers_description_${activeLanguageId}`"
-                                                        >Folks ride disclaimers description</label
-                                                    >
+                                                <div class="flex justify-between">
+                                                    <label :for="`extra_care_ride_disclaimers_description_${activeLanguageId}`">Extra care ride disclaimers description</label>
                                                 </div>
-                                                <editor
-                                                    @selectionChange="
-                                                        handleSelectionChange(
-                                                            language,
-                                                            'extra_care_ride_disclaimers_description'
-                                                        )
-                                                    "
-                                                    :ref="`extra_care_ride_disclaimers_description_${language.id}`"
-                                                    :id="`extra_care_ride_disclaimers_description_${language.id}`"
-                                                    :initial-value="
-                                                        form[
-                                                            `extra_care_ride_disclaimers_description`
-                                                        ][
-                                                            `extra_care_ride_disclaimers_description_${language?.id}`
-                                                        ]
-                                                    "
-                                                    :tinymce-script-src="tinymceScriptSrc"
-                                                    :init="editorConfig"
-                                                />
+                                                <textarea :name="`extra_care_ride_disclaimers_description_${activeLanguageId}`"
+                                                    :id="`extra_care_ride_disclaimers_description_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    rows="3" placeholder=" "
+                                                    :value="getCurrentValue('extra_care_ride_disclaimers_description')"
+                                                    @input="handleInput($event.target.value, language, 'extra_care_ride_disclaimers_description')"></textarea>
                                             </div>
-                                            <p
-                                                class="mt-2 text-sm text-red-400"
-                                                v-if="
-                                                    validationErros.has(
-                                                        `extra_care_ride_disclaimers_description.extra_care_ride_disclaimers_description_${activeLanguageId}`
-                                                    )
-                                                "
-                                                v-text="
-                                                    validationErros.get(
-                                                        `extra_care_ride_disclaimers_description.extra_care_ride_disclaimers_description_${activeLanguageId}`
-                                                    )
-                                                "
-                                            ></p>
-                                        </div> -->
+                                        </div>
                                     </div>
                                 </div>
                                 <!-- disclaimers section end -->
@@ -3058,6 +2870,30 @@
                                                 `price_error_adjust_btn_label.price_error_adjust_btn_label_${activeLanguageId}`
                                             )
                                                 "></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`price_error_paragraph_1_${activeLanguageId}`">Price error paragraph 1</label>
+                                                </div>
+                                                <textarea :name="`price_error_paragraph_1_${activeLanguageId}`" :id="`price_error_paragraph_1_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" :value="getCurrentValue('price_error_paragraph_1')" @input="handleInput($event.target.value, language, 'price_error_paragraph_1')"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`price_error_paragraph_2_${activeLanguageId}`">Price error paragraph 2</label>
+                                                </div>
+                                                <textarea :name="`price_error_paragraph_2_${activeLanguageId}`" :id="`price_error_paragraph_2_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" :value="getCurrentValue('price_error_paragraph_2')" @input="handleInput($event.target.value, language, 'price_error_paragraph_2')"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`price_error_paragraph_3_${activeLanguageId}`">Price error paragraph 3</label>
+                                                </div>
+                                                <textarea :name="`price_error_paragraph_3_${activeLanguageId}`" :id="`price_error_paragraph_3_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" :value="getCurrentValue('price_error_paragraph_3')" @input="handleInput($event.target.value, language, 'price_error_paragraph_3')"></textarea>
+                                            </div>
                                         </div>
                                         <div class="relative z-0 w-full group">
                                             <div>
@@ -3435,6 +3271,18 @@
                                                 v-text="validationErros.get('select_vehicle_type.select_vehicle_type_${activeLanguageId}')">
                                             </p>
                                         </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`select_vehicle_${activeLanguageId}`">Select Vehicle</label>
+                                                </div>
+                                                <input type="text" :name="`select_vehicle_${activeLanguageId}`"
+                                                    :id="`select_vehicle_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    :value="getCurrentValue('select_vehicle')"
+                                                    @input="handleInput($event.target.value, language, 'select_vehicle')" />
+                                            </div>
+                                        </div>
 
                                         <div class="relative z-0 w-full group">
                                             <div>
@@ -3481,6 +3329,18 @@
                                                 v-if="validationErros.has('seat_text.seat_text_${activeLanguageId}')"
                                                 v-text="validationErros.get('seat_text.seat_text_${activeLanguageId}')">
                                             </p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`seats_text_${activeLanguageId}`">Seats Text</label>
+                                                </div>
+                                                <input type="text" :name="`seats_text_${activeLanguageId}`"
+                                                    :id="`seats_text_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    :value="getCurrentValue('seats_text')"
+                                                    @input="handleInput($event.target.value, language, 'seats_text')" />
+                                            </div>
                                         </div>
 
                                         <div class="relative z-0 w-full group">
@@ -3733,6 +3593,34 @@
                                                 v-text="validationErros.get('upcoming_ride_no_found_message.upcoming_ride_no_found_message_${activeLanguageId}')">
                                             </p>
                                         </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`update_ride_label_${activeLanguageId}`">Update ride label</label>
+                                                </div>
+                                                <input type="text" :name="`update_ride_label_${activeLanguageId}`"
+                                                    :id="`update_ride_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    :value="getCurrentValue('update_ride_label')"
+                                                    @input="handleInput($event.target.value, language, 'update_ride_label')" />
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`pink_ride_disclaimer_text_${activeLanguageId}`">Pink ride disclaimer text</label>
+                                                </div>
+                                                <textarea :name="`pink_ride_disclaimer_text_${activeLanguageId}`" :id="`pink_ride_disclaimer_text_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" :value="getCurrentValue('pink_ride_disclaimer_text')" @input="handleInput($event.target.value, language, 'pink_ride_disclaimer_text')"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="relative z-0 w-full group md:col-span-2">
+                                            <div>
+                                                <div class="flex justify-between">
+                                                    <label :for="`extra_care_ride_disclaimer_text_${activeLanguageId}`">Extra care ride disclaimer text</label>
+                                                </div>
+                                                <textarea :name="`extra_care_ride_disclaimer_text_${activeLanguageId}`" :id="`extra_care_ride_disclaimer_text_${activeLanguageId}`" rows="2" class="can-exp-input w-full block border border-gray-300 rounded" :value="getCurrentValue('extra_care_ride_disclaimer_text')" @input="handleInput($event.target.value, language, 'extra_care_ride_disclaimer_text')"></textarea>
+                                            </div>
+                                        </div>
 
                                         <div class="relative z-0 w-full group">
                                             <div>
@@ -3875,6 +3763,167 @@ export default {
         this.fetchLanguages();
     },
     methods: {
+        getRequiredSqlFieldKeys() {
+            return [
+                "name",
+                "meta_keywords",
+                "meta_description",
+                "main_heading",
+                "main_heading_update",
+                "post_arrived_again_label",
+                "ride_info_heading",
+                "from_label",
+                "from_placeholder",
+                "to_label",
+                "to_placeholder",
+                "pick_up_label",
+                "pick_up_placeholder",
+                "drop_off_label",
+                "drop_off_placeholder",
+                "date_time_label",
+                "at_label",
+                "recurring_label",
+                "recurring_type_label",
+                "recurring_trips_label",
+                "recurring_trips_placeholder",
+                "meeting_drop_off_description_label",
+                "meeting_drop_off_description_placeholder",
+                "seats_label",
+                "seats_middle_label",
+                "seats_back_label",
+                "vehicle_label",
+                "skip_label",
+                "add_vehicle_label",
+                "existing_label",
+                "preferences_label",
+                "smoking_label",
+                "animals_label",
+                "features_label",
+                "booking_label",
+                "max_back_seats_label",
+                "luggage_label",
+                "price_payment_heading",
+                "price_per_seat_label",
+                "payment_methods_label",
+                "anything_to_add_label",
+                "anything_to_add_placeholder",
+                "disclaimers_label",
+                "app_disclaimers_description1",
+                "app_disclaimers_description2",
+                "app_disclaimers_description3",
+                "app_disclaimers_description4",
+                "disclaimers_description",
+                "pink_ride_disclaimers_description",
+                "extra_care_ride_disclaimers_description",
+                "agree_terms_label",
+                "agree_term_error",
+                "carpool_regulation_limit_message",
+                "max_price_per_seat_message",
+                "non_commercial_carpool_requirement_message",
+                "price_error_heading",
+                "price_error_adjust_btn_label",
+                "delete_stop_modal_no_btn",
+                "delete_stop_modal_yes_btn",
+                "price_warning_heading",
+                "price_warning_adjust_btn_label",
+                "price_warning_keep_current_btn_label",
+                "price_above_reimbursement_warning",
+                "price_reduction_suggestion_message",
+                "seats_warning_modal_heading",
+                "seats_warning_modal_paragraph",
+                "seats_warning_modal_got_it_btn",
+                "seats_warning_modal_learn_more_btn",
+                "phone_required_modal_heading",
+                "phone_required_modal_body_before",
+                "phone_required_modal_link_text",
+                "phone_required_modal_body_after",
+                "phone_required_modal_close_btn",
+                "phone_required_modal_phone_btn",
+                "alert_need_government_photo_label",
+                "alert_need_driver_license_label",
+                "price_error_paragraph_1",
+                "price_error_paragraph_2",
+                "price_error_paragraph_3",
+                "mobile_agree_terms_label",
+                "mobile_term_of_service_label",
+                "mobile_agree_terms_and_label",
+                "mobile_term_of_use_label",
+                "submit_button_label",
+                "update_button_label",
+                "cancelled_ride_no_found_message",
+                "upcoming_label",
+                "completed_label",
+                "cancelled_label",
+                "upcoming_ride_no_found_message",
+                "completed_ride_no_found_message",
+                "make_placeholder",
+                "model_placeholder",
+                "pink_ride_tooltip_only_text",
+                "pink_ride_tooltip_female_text",
+                "pink_ride_tooltip_driver_text",
+                "pink_ride_tooltip_with_text",
+                "pink_ride_tooltip_phone_number_text",
+                "pink_ride_tooltip_email_text",
+                "pink_ride_tooltip_driver_license_text",
+                "pink_ride_tooltip_verified_text",
+                "pink_ride_tooltip_select_this_ride_text",
+                "extra_care_tooltip_greater_text",
+                "extra_care_tooltip_eligible_text",
+                "extra_care_tooltip_verified_text",
+                "extra_care_tooltip_driver_license_text",
+                "extra_care_tooltip_phone_number_text",
+                "extra_care_tooltip_email_text",
+                "extra_care_tooltip_and_his_text",
+                "extra_care_tooltip_greater_age_text",
+                "extra_care_tooltip_driver_review_text",
+                "select_vehicle_type",
+                "vehicle_type_placeholder",
+                "seat_text",
+                "recurring_type_select_placeholder",
+                "recurring_type_daily_label",
+                "recurring_type_weekly_label",
+                "post_ride_again_main_heading",
+                "select_vehicle",
+                "indicates_required_field_text",
+                "repost_ride_btn_label",
+                "seats_text",
+                "pink_ride_tooltip_complete_profile_text",
+                "extra_care_tooltip_complete_profile_text",
+                "extra_care_tooltip_admin_enable_text",
+                "extra_care_tooltip_admin_disable_text",
+                "pink_ride_tooltip_admin_enable_text",
+                "pink_ride_tooltip_admin_disable_text",
+                "navbar_icon",
+                "city_not_in_record",
+                "stop_along_the_way_label",
+                "add_stop_btn_label",
+                "stop_placeholder",
+                "pickup_off_placeholder",
+                "delete_stop_text",
+                "update_ride_label",
+                "pink_ride_disclaimer_text",
+                "extra_care_ride_disclaimer_text",
+                "stops_along_the_way_label",
+                "stops_remove_confirm_text",
+                "distance_suffix",
+                "stop_suggest_label",
+            ];
+        },
+        removeUnusedFieldBlocks() {
+            this.$nextTick(() => {
+                const required = new Set(this.getRequiredSqlFieldKeys());
+                Object.keys(this.form).forEach((key) => {
+                    if (required.has(key)) return;
+                    const elements = document.querySelectorAll(`[id^="${key}_"]`);
+                    elements.forEach((el) => {
+                        const block = el.closest(".relative.z-0.w-full.group");
+                        if (block) {
+                            block.remove();
+                        }
+                    });
+                });
+            });
+        },
         handleImage(e, language, key) {
             // console.log(e.target.files[0], key, language);
             var file = new FormData();
@@ -3906,6 +3955,7 @@ export default {
         },
         updateLanguageId(language) {
             this.activeLanguageId = language.id;
+            this.removeUnusedFieldBlocks();
         },
         fetchLanguages() {
             axios
@@ -3957,8 +4007,6 @@ export default {
                             this.handleInput("", language, "seats_middle_label");
                             this.handleInput("", language, "seats_back_label");
                             this.handleInput("", language, "city_not_in_record");
-                            this.handleInput("", language, "city_not_fount_contact_text");
-                            this.handleInput("", language, "extra_rides_trip_limit");
                             this.handleInput("", language, "vehicle_label");
                             this.handleInput("", language, "skip_label");
                             this.handleInput("", language, "add_vehicle_label");
@@ -3967,57 +4015,14 @@ export default {
                             this.handleInput("", language, "model_placeholder");
                             this.handleInput("", language, "preferences_label");
                             this.handleInput("", language, "smoking_label");
-                            this.handleInput("", language, "smoking_option1");
-                            this.handleInput("", language, "smoking_option2");
                             this.handleInput("", language, "animals_label");
-                            this.handleInput("", language, "animals_option1");
-                            this.handleInput("", language, "animals_option2");
-                            this.handleInput("", language, "animals_option3");
                             this.handleInput("", language, "features_label");
-                            this.handleInput("", language, "features_option1");
-                            this.handleInput("", language, "features_option2");
-                            this.handleInput("", language, "features_option3");
-                            this.handleInput("", language, "features_option4");
-                            this.handleInput("", language, "features_option5");
-                            this.handleInput("", language, "features_option6");
-                            this.handleInput("", language, "features_option7");
-                            this.handleInput("", language, "features_option8");
-                            this.handleInput("", language, "features_option9");
-                            this.handleInput("", language, "features_option10");
-                            this.handleInput("", language, "features_option11");
-                            this.handleInput("", language, "features_option12");
-                            this.handleInput("", language, "features_option13");
-                            this.handleInput("", language, "features_option14");
-                            this.handleInput("", language, "features_option15");
-                            this.handleInput("", language, "features_option16");
-                            this.handleInput("", language, "features_option17");
                             this.handleInput("", language, "booking_label");
-                            this.handleInput("", language, "booking_option1");
-                            this.handleInput("", language, "booking_option1_tooltip");
-                            this.handleInput("", language, "booking_option2");
-                            this.handleInput("", language, "booking_option2_tooltip");
                             this.handleInput("", language, "max_back_seats_label");
                             this.handleInput("", language, "luggage_label");
-                            this.handleInput("", language, "luggage_option1");
-                            this.handleInput("", language, "luggage_option2");
-                            this.handleInput("", language, "luggage_option3");
-                            this.handleInput("", language, "luggage_option4");
-                            this.handleInput("", language, "luggage_option5");
-                            this.handleInput("", language, "luggage_checkbox_label1");
-                            this.handleInput("", language, "luggage_checkbox_label1_tooltip");
-                            // this.handleInput("", language, "luggage_checkbox_label2");
-                            // this.handleInput("", language, "luggage_checkbox_label2_tooltip");
                             this.handleInput("", language, "price_payment_heading");
                             this.handleInput("", language, "price_per_seat_label");
                             this.handleInput("", language, "payment_methods_label");
-                            this.handleInput("", language, "cancellation_policy_label");
-                            this.handleInput("", language, "cancellation_policy_label1");
-                            this.handleInput("", language, "cancellation_policy_label1_tooltip");
-                            this.handleInput("", language, "cancellation_policy_label2");
-                            this.handleInput("", language, "cancellation_policy_label2_tooltip");
-                            this.handleInput("", language, "payment_methods_option1");
-                            this.handleInput("", language, "payment_methods_option2");
-                            this.handleInput("", language, "payment_methods_option3");
                             this.handleInput("", language, "anything_to_add_label");
                             this.handleInput("", language, "anything_to_add_placeholder");
                             this.handleInput("", language, "disclaimers_label");
@@ -4026,8 +4031,8 @@ export default {
                             this.handleInput("", language, "app_disclaimers_description3");
                             this.handleInput("", language, "app_disclaimers_description4");
                             this.handleInput("", language, "disclaimers_description");
-                            // this.handleInput("", language, "pink_ride_disclaimers_description");
-                            // this.handleInput("", language, "extra_care_ride_disclaimers_description");
+                            this.handleInput("", language, "pink_ride_disclaimers_description");
+                            this.handleInput("", language, "extra_care_ride_disclaimers_description");
                             this.handleInput("", language, "agree_terms_label");
                             this.handleInput("", language, "agree_term_error");
                             this.handleInput("", language, "carpool_regulation_limit_message");
@@ -4054,6 +4059,9 @@ export default {
                             this.handleInput("", language, "phone_required_modal_phone_btn");
                             this.handleInput("", language, "alert_need_government_photo_label");
                             this.handleInput("", language, "alert_need_driver_license_label");
+                            this.handleInput("", language, "price_error_paragraph_1");
+                            this.handleInput("", language, "price_error_paragraph_2");
+                            this.handleInput("", language, "price_error_paragraph_3");
                             this.handleInput("", language, "mobile_agree_terms_label");
                             this.handleInput("", language, "mobile_term_of_service_label");
                             this.handleInput("", language, "mobile_agree_terms_and_label");
@@ -4073,8 +4081,6 @@ export default {
                             this.handleInput("", language, "pink_ride_tooltip_select_this_ride_text");
                             this.handleInput("", language, "extra_care_tooltip_greater_text");
                             this.handleInput("", language, "extra_care_tooltip_eligible_text");
-                            this.handleInput("", language, "extra_care_popup_eligible_text");
-                            this.handleInput("", language, "feilds_required_text");
                             this.handleInput("", language, "extra_care_tooltip_complete_profile_text");
                             this.handleInput("", language, "extra_care_tooltip_verified_text");
                             this.handleInput("", language, "extra_care_tooltip_driver_license_text");
@@ -4084,8 +4090,10 @@ export default {
                             this.handleInput("", language, "extra_care_tooltip_greater_age_text");
                             this.handleInput("", language, "extra_care_tooltip_driver_review_text");
                             this.handleInput("", language, "select_vehicle_type");
+                            this.handleInput("", language, "select_vehicle");
                             this.handleInput("", language, "vehicle_type_placeholder");
                             this.handleInput("", language, "seat_text");
+                            this.handleInput("", language, "seats_text");
                             this.handleInput("", language, "recurring_type_select_placeholder");
                             this.handleInput("", language, "recurring_type_daily_label");
                             this.handleInput("", language, "recurring_type_weekly_label");
@@ -4096,6 +4104,9 @@ export default {
                             this.handleInput("", language, "cancelled_ride_no_found_message");
                             this.handleInput("", language, "completed_ride_no_found_message");
                             this.handleInput("", language, "upcoming_ride_no_found_message");
+                            this.handleInput("", language, "update_ride_label");
+                            this.handleInput("", language, "pink_ride_disclaimer_text");
+                            this.handleInput("", language, "extra_care_ride_disclaimer_text");
                             this.handleInput("", language, "extra_care_tooltip_admin_enable_text");
                             this.handleInput("", language, "extra_care_tooltip_admin_disable_text");
                             this.handleInput("", language, "pink_ride_tooltip_admin_enable_text");
@@ -4104,6 +4115,7 @@ export default {
 
                         });
                         this.fetchPostRidePageSetting();
+                        this.removeUnusedFieldBlocks();
                     }
                 });
         },
@@ -4351,34 +4363,9 @@ export default {
                                 "smoking_label"
                             );
                             this.handleInput(
-                                setting?.smoking_option1,
-                                setting?.language,
-                                "smoking_option1"
-                            );
-                            this.handleInput(
-                                setting?.smoking_option2,
-                                setting?.language,
-                                "smoking_option2"
-                            );
-                            this.handleInput(
                                 setting?.animals_label,
                                 setting?.language,
                                 "animals_label"
-                            );
-                            this.handleInput(
-                                setting?.animals_option1,
-                                setting?.language,
-                                "animals_option1"
-                            );
-                            this.handleInput(
-                                setting?.animals_option2,
-                                setting?.language,
-                                "animals_option2"
-                            );
-                            this.handleInput(
-                                setting?.animals_option3,
-                                setting?.language,
-                                "animals_option3"
                             );
                             this.handleInput(
                                 setting?.features_label,
@@ -4386,114 +4373,9 @@ export default {
                                 "features_label"
                             );
                             this.handleInput(
-                                setting?.features_option1,
-                                setting?.language,
-                                "features_option1"
-                            );
-                            this.handleInput(
-                                setting?.features_option2,
-                                setting?.language,
-                                "features_option2"
-                            );
-                            this.handleInput(
-                                setting?.features_option3,
-                                setting?.language,
-                                "features_option3"
-                            );
-                            this.handleInput(
-                                setting?.features_option4,
-                                setting?.language,
-                                "features_option4"
-                            );
-                            this.handleInput(
-                                setting?.features_option5,
-                                setting?.language,
-                                "features_option5"
-                            );
-                            this.handleInput(
-                                setting?.features_option6,
-                                setting?.language,
-                                "features_option6"
-                            );
-                            this.handleInput(
-                                setting?.features_option7,
-                                setting?.language,
-                                "features_option7"
-                            );
-                            this.handleInput(
-                                setting?.features_option8,
-                                setting?.language,
-                                "features_option8"
-                            );
-                            this.handleInput(
-                                setting?.features_option9,
-                                setting?.language,
-                                "features_option9"
-                            );
-                            this.handleInput(
-                                setting?.features_option10,
-                                setting?.language,
-                                "features_option10"
-                            );
-                            this.handleInput(
-                                setting?.features_option11,
-                                setting?.language,
-                                "features_option11"
-                            );
-                            this.handleInput(
-                                setting?.features_option12,
-                                setting?.language,
-                                "features_option12"
-                            );
-                            this.handleInput(
-                                setting?.features_option13,
-                                setting?.language,
-                                "features_option13"
-                            );
-                            this.handleInput(
-                                setting?.features_option14,
-                                setting?.language,
-                                "features_option14"
-                            );
-                            this.handleInput(
-                                setting?.features_option15,
-                                setting?.language,
-                                "features_option15"
-                            );
-                            this.handleInput(
-                                setting?.features_option16,
-                                setting?.language,
-                                "features_option16"
-                            );
-                            this.handleInput(
-                                setting?.features_option17,
-                                setting?.language,
-                                "features_option17"
-                            );
-                            this.handleInput(
                                 setting?.booking_label,
                                 setting?.language,
                                 "booking_label"
-                            );
-                            this.handleInput(
-                                setting?.booking_option1,
-                                setting?.language,
-                                "booking_option1"
-                            );
-                            this.handleInput(
-                                setting?.booking_option1_tooltip,
-                                setting?.language,
-                                "booking_option1_tooltip"
-                            );
-                            this.handleInput(
-                                setting?.booking_option2,
-                                setting?.language,
-                                "booking_option2"
-                            );
-                            this.handleInput(
-                                setting?.booking_option2_tooltip,
-                                setting?.language,
-                                "booking_option2_tooltip"
                             );
                             this.handleInput(
                                 setting?.max_back_seats_label,
@@ -4505,51 +4387,6 @@ export default {
                                 setting?.language,
                                 "luggage_label"
                             );
-                            this.handleInput(
-                                setting?.luggage_option1,
-                                setting?.language,
-                                "luggage_option1"
-                            );
-                            this.handleInput(
-                                setting?.luggage_option2,
-                                setting?.language,
-                                "luggage_option2"
-                            );
-                            this.handleInput(
-                                setting?.luggage_option3,
-                                setting?.language,
-                                "luggage_option3"
-                            );
-                            this.handleInput(
-                                setting?.luggage_option4,
-                                setting?.language,
-                                "luggage_option4"
-                            );
-                            this.handleInput(
-                                setting?.luggage_option5,
-                                setting?.language,
-                                "luggage_option5"
-                            );
-                            this.handleInput(
-                                setting?.luggage_checkbox_label1,
-                                setting?.language,
-                                "luggage_checkbox_label1"
-                            );
-                            this.handleInput(
-                                setting?.luggage_checkbox_label1_tooltip,
-                                setting?.language,
-                                "luggage_checkbox_label1_tooltip"
-                            );
-                            // this.handleInput(
-                            //     setting?.luggage_checkbox_label2,
-                            //     setting?.language,
-                            //     "luggage_checkbox_label2"
-                            // );
-                            // this.handleInput(
-                            //     setting?.luggage_checkbox_label2_tooltip,
-                            //     setting?.language,
-                            //     "luggage_checkbox_label2_tooltip"
-                            // );
                             this.handleInput(
                                 setting?.price_payment_heading,
                                 setting?.language,
@@ -4564,46 +4401,6 @@ export default {
                                 setting?.payment_methods_label,
                                 setting?.language,
                                 "payment_methods_label"
-                            );
-                            this.handleInput(
-                                setting?.cancellation_policy_label,
-                                setting?.language,
-                                "cancellation_policy_label"
-                            );
-                            this.handleInput(
-                                setting?.cancellation_policy_label1,
-                                setting?.language,
-                                "cancellation_policy_label1"
-                            );
-                            this.handleInput(
-                                setting?.cancellation_policy_label1_tooltip,
-                                setting?.language,
-                                "cancellation_policy_label1_tooltip"
-                            );
-                            this.handleInput(
-                                setting?.cancellation_policy_label2,
-                                setting?.language,
-                                "cancellation_policy_label2"
-                            );
-                            this.handleInput(
-                                setting?.cancellation_policy_label2_tooltip,
-                                setting?.language,
-                                "cancellation_policy_label2_tooltip"
-                            );
-                            this.handleInput(
-                                setting?.payment_methods_option1,
-                                setting?.language,
-                                "payment_methods_option1"
-                            );
-                            this.handleInput(
-                                setting?.payment_methods_option2,
-                                setting?.language,
-                                "payment_methods_option2"
-                            );
-                            this.handleInput(
-                                setting?.payment_methods_option3,
-                                setting?.language,
-                                "payment_methods_option3"
                             );
                             this.handleInput(
                                 setting?.anything_to_add_label,
@@ -4645,16 +4442,16 @@ export default {
                                 setting?.language,
                                 "disclaimers_description"
                             );
-                            // this.handleInput(
-                            //     setting?.pink_ride_disclaimers_description,
-                            //     setting?.language,
-                            //     "pink_ride_disclaimers_description"
-                            // );
-                            // this.handleInput(
-                            //     setting?.extra_care_ride_disclaimers_description,
-                            //     setting?.language,
-                            //     "extra_care_ride_disclaimers_description"
-                            // );
+                            this.handleInput(
+                                setting?.pink_ride_disclaimers_description,
+                                setting?.language,
+                                "pink_ride_disclaimers_description"
+                            );
+                            this.handleInput(
+                                setting?.extra_care_ride_disclaimers_description,
+                                setting?.language,
+                                "extra_care_ride_disclaimers_description"
+                            );
                             this.handleInput(
                                 setting?.agree_terms_label,
                                 setting?.language,
@@ -4709,6 +4506,9 @@ export default {
                             this.handleInput(setting?.phone_required_modal_phone_btn, setting?.language, "phone_required_modal_phone_btn");
                             this.handleInput(setting?.alert_need_government_photo_label, setting?.language, "alert_need_government_photo_label");
                             this.handleInput(setting?.alert_need_driver_license_label, setting?.language, "alert_need_driver_license_label");
+                            this.handleInput(setting?.price_error_paragraph_1, setting?.language, "price_error_paragraph_1");
+                            this.handleInput(setting?.price_error_paragraph_2, setting?.language, "price_error_paragraph_2");
+                            this.handleInput(setting?.price_error_paragraph_3, setting?.language, "price_error_paragraph_3");
                             this.handleInput(
                                 setting?.mobile_agree_terms_label,
                                 setting?.language,
@@ -4859,8 +4659,10 @@ export default {
                                 "extra_care_tooltip_greater_age_text"
                             );
                             this.handleInput(setting?.select_vehicle_type, setting?.language, "select_vehicle_type");
+                            this.handleInput(setting?.select_vehicle, setting?.language, "select_vehicle");
                             this.handleInput(setting?.vehicle_type_placeholder, setting?.language, "vehicle_type_placeholder");
                             this.handleInput(setting?.seat_text, setting?.language, "seat_text");
+                            this.handleInput(setting?.seats_text, setting?.language, "seats_text");
                             this.handleInput(setting?.recurring_type_select_placeholder, setting?.language, "recurring_type_select_placeholder");
                             this.handleInput(setting?.recurring_type_daily_label, setting?.language, "recurring_type_daily_label");
                             this.handleInput(setting?.recurring_type_weekly_label, setting?.language, "recurring_type_weekly_label");
@@ -4871,6 +4673,9 @@ export default {
                             this.handleInput(setting?.cancelled_ride_no_found_message, setting?.language, "cancelled_ride_no_found_message");
                             this.handleInput(setting?.completed_ride_no_found_message, setting?.language, "completed_ride_no_found_message");
                             this.handleInput(setting?.upcoming_ride_no_found_message, setting?.language, "upcoming_ride_no_found_message");
+                            this.handleInput(setting?.update_ride_label, setting?.language, "update_ride_label");
+                            this.handleInput(setting?.pink_ride_disclaimer_text, setting?.language, "pink_ride_disclaimer_text");
+                            this.handleInput(setting?.extra_care_ride_disclaimer_text, setting?.language, "extra_care_ride_disclaimer_text");
                             this.handleInput(
                                 setting?.extra_care_tooltip_admin_enable_text,
                                 setting?.language,
@@ -4894,40 +4699,27 @@ export default {
 
 
                         });
-                        let post_ride_page_setting_sub_detail =
-                        res?.data?.data?.post_ride_page_setting_sub_detail || [];
-                        post_ride_page_setting_sub_detail.map((setting) => {
-                            
-                            console.log(setting.extra_rides_trip_limit)
-                            console.log(setting.language)
-                            this.handleInput(
-                                setting?.city_not_fount_contact_text,
-                                setting?.language,
-                                "city_not_fount_contact_text"
-                            );
-                            this.handleInput(
-                                setting?.extra_care_popup_eligible_text,
-                                setting?.language,
-                                "extra_care_popup_eligible_text"
-                            );
-                            this.handleInput(
-                                setting?.feilds_required_text,
-                                setting?.language,
-                                "feilds_required_text"
-                            );
-
-
-                        });
+                        this.removeUnusedFieldBlocks();
                     }
                   
                 });
+        },
+        buildSubmitPayload() {
+            const required = new Set(this.getRequiredSqlFieldKeys());
+            const filtered = {};
+            Object.keys(this.form).forEach((key) => {
+                if (!required.has(key)) return;
+                filtered[key] = this.form[key];
+            });
+
+            return filtered;
         },
         updatePageSetting() {
             this.loading = true;
             axios
                 .post(
                     `${process.env.MIX_ADMIN_API_URL}update-post-ride-page-setting`,
-                    this.form
+                    this.buildSubmitPayload()
                 )
                 .then((res) => {
                     if (res?.data?.status == "Success") {
@@ -5055,10 +4847,6 @@ export default {
                 validationErros.has(
                     `city_not_in_record.city_not_in_record_${language.id}`
                 ) ||
-                
-                validationErros.has(
-                    `city_not_fount_contact_text.city_not_fount_contact_text_${language.id}`
-                ) ||
                 validationErros.has(
                     `vehicle_label.vehicle_label_${language.id}`
                 ) ||
@@ -5084,126 +4872,20 @@ export default {
                     `smoking_label.smoking_label_${language.id}`
                 ) ||
                 validationErros.has(
-                    `smoking_option1.smoking_option1_${language.id}`
-                ) ||
-                validationErros.has(
-                    `smoking_option2.smoking_option2_${language.id}`
-                ) ||
-                validationErros.has(
                     `animals_label.animals_label_${language.id}`
-                ) ||
-                validationErros.has(
-                    `animals_option1.animals_option1_${language.id}`
-                ) ||
-                validationErros.has(
-                    `animals_option2.animals_option2_${language.id}`
-                ) ||
-                validationErros.has(
-                    `animals_option3.animals_option3_${language.id}`
                 ) ||
                 validationErros.has(
                     `features_label.features_label_${language.id}`
                 ) ||
                 validationErros.has(
-                    `features_option1.features_option1_${language.id}`
-                ) ||
-                validationErros.has(
-                    `features_option2.features_option2_${language.id}`
-                ) ||
-                validationErros.has(
-                    `features_option3.features_option3_${language.id}`
-                ) ||
-                validationErros.has(
-                    `features_option4.features_option4_${language.id}`
-                ) ||
-                validationErros.has(
-                    `features_option5.features_option5_${language.id}`
-                ) ||
-                validationErros.has(
-                    `features_option6.features_option6_${language.id}`
-                ) ||
-                validationErros.has(
-                    `features_option7.features_option7_${language.id}`
-                ) ||
-                validationErros.has(
-                    `features_option8.features_option8_${language.id}`
-                ) ||
-                validationErros.has(
-                    `features_option9.features_option9_${language.id}`
-                ) ||
-                validationErros.has(
-                    `features_option10.features_option10_${language.id}`
-                ) ||
-                validationErros.has(
-                    `features_option11.features_option11_${language.id}`
-                ) ||
-                validationErros.has(
-                    `features_option12.features_option12_${language.id}`
-                ) ||
-                validationErros.has(
-                    `features_option13.features_option13_${language.id}`
-                ) ||
-                validationErros.has(
-                    `features_option14.features_option14_${language.id}`
-                ) ||
-                validationErros.has(
-                    `features_option15.features_option15_${language.id}`
-                ) ||
-                validationErros.has(
-                    `features_option16.features_option16_${language.id}`
-                ) ||
-                validationErros.has(
-                    `features_option17.features_option17_${language.id}`
-                ) ||
-                validationErros.has(
                     `booking_label.booking_label_${language.id}`
-                ) ||
-                validationErros.has(
-                    `booking_option1.booking_option1_${language.id}`
-                ) ||
-                validationErros.has(
-                    `booking_option1_tooltip.booking_option1_tooltip_${language.id}`
-                ) ||
-                validationErros.has(
-                    `booking_option2.booking_option2_${language.id}`
-                ) ||
-                validationErros.has(
-                    `booking_option2_tooltip.booking_option2_tooltip_${language.id}`
                 ) ||
                 validationErros.has(
                     `max_back_seats_label.max_back_seats_label_${language.id}`
                 ) ||
                 validationErros.has(
                     `luggage_label.luggage_label_${language.id}`
-                ) ||
-                validationErros.has(
-                    `luggage_option1.luggage_option1_${language.id}`
-                ) ||
-                validationErros.has(
-                    `luggage_option2.luggage_option2_${language.id}`
-                ) ||
-                validationErros.has(
-                    `luggage_option3.luggage_option3_${language.id}`
-                ) ||
-                validationErros.has(
-                    `luggage_option4.luggage_option4_${language.id}`
-                ) ||
-                validationErros.has(
-                    `luggage_option5.luggage_option5_${language.id}`
-                ) ||
-                validationErros.has(
-                    `luggage_checkbox_label1.luggage_checkbox_label1_${language.id}`
-                ) ||
-                validationErros.has(
-                    `luggage_checkbox_label1_tooltip.luggage_checkbox_label1_tooltip_${language.id}`
-                ) 
-                // ||
-                // validationErros.has(
-                //     `luggage_checkbox_label2.luggage_checkbox_label2_${language.id}`
-                // ) ||
-                // validationErros.has(
-                //     `luggage_checkbox_label2_tooltip.luggage_checkbox_label2_tooltip_${language.id}`
-                // ) 
+                )
                 ||
                 validationErros.has(
                     `price_payment_heading.price_payment_heading_${language.id}`
@@ -5213,30 +4895,6 @@ export default {
                 ) ||
                 validationErros.has(
                     `payment_methods_label.payment_methods_label_${language.id}`
-                ) ||
-                validationErros.has(
-                    `cancellation_policy_label.cancellation_policy_label_${language.id}`
-                ) ||
-                validationErros.has(
-                    `cancellation_policy_label1.cancellation_policy_label1_${language.id}`
-                ) ||
-                validationErros.has(
-                    `cancellation_policy_label1_tooltip.cancellation_policy_label1_tooltip_${language.id}`
-                ) ||
-                validationErros.has(
-                    `cancellation_policy_label2.cancellation_policy_label2_${language.id}`
-                ) ||
-                validationErros.has(
-                    `cancellation_policy_label2_tooltip.cancellation_policy_label2_tooltip_${language.id}`
-                ) ||
-                validationErros.has(
-                    `payment_methods_option1.payment_methods_option1_${language.id}`
-                ) ||
-                validationErros.has(
-                    `payment_methods_option2.payment_methods_option2_${language.id}`
-                ) ||
-                validationErros.has(
-                    `payment_methods_option3.payment_methods_option3_${language.id}`
                 ) ||
                 validationErros.has(
                     `anything_to_add_label.anything_to_add_label_${language.id}`

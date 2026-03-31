@@ -35,6 +35,8 @@ class ProfilePageSettingService
                 $errorMessages = array_merge($errorMessages, ['dispute_policy_label.dispute_policy_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['contact_proximaride_label.contact_proximaride_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['contact_proximaride_label.contact_proximaride_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['coffee_on_wall_label.coffee_on_wall_label_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['coffee_on_wall_label.coffee_on_wall_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['logout_label.logout_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['logout_label.logout_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['colse_your_contact_label.colse_your_contact_label_' . $language->id => ['required', 'string']]);
@@ -63,6 +65,7 @@ class ProfilePageSettingService
             'cancellation_policy_label' => $this->data($request, $language, 'cancellation_policy_label'),
             'dispute_policy_label' => $this->data($request, $language, 'dispute_policy_label'),
             'contact_proximaride_label' => $this->data($request, $language, 'contact_proximaride_label'),
+            'coffee_on_wall_label' => $this->data($request, $language, 'coffee_on_wall_label'),
             'logout_label' => $this->data($request, $language, 'logout_label'),
             'colse_your_contact_label' => $this->data($request, $language, 'colse_your_contact_label'),
             // 'profile_page_setting' => $this->data($request, $language, 'profile_page_setting'),

@@ -6,7 +6,7 @@
 <div class="mx-auto max-w-3xl px-4 py-8 sm:py-12">
     <div class="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden">
         <div class="border-b-2 border-black bg-white px-4 py-6 sm:px-6 flex justify-center">
-            <a href="{{ route('home', ['lang' => optional($selectedLanguage)->abbreviation]) }}">
+            <a href="{{ route('home', ['lang' => app()->getLocale()]) }}">
                 <img src="{{ asset('assets/PROXIMARIDE.png') }}" alt="ProximaRide" class="h-20 sm:h-24">
             </a>
         </div>
@@ -29,9 +29,9 @@
             </p>
         </div>
         <div class="border-t border-gray-200 px-4 py-4 sm:px-6 flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-            <a href="{{ route('contact_us', optional($selectedLanguage)->abbreviation ?? 'en') }}" class="font-FuturaMdCnBT font-semibold text-gray-900 hover:text-primary">{{ optional($thankyouPage)->welcome_footer_help_contact ?? 'Help & Contact' }}</a>
-            <a href="{{ route('terms_use', optional($selectedLanguage)->abbreviation ?? 'en') }}" class="font-FuturaMdCnBT font-semibold text-gray-900 hover:text-primary">{{ optional($thankyouPage)->welcome_footer_terms_use ?? 'Terms of Use' }}</a>
-            <a href="{{ route('coffee_on_wall', optional($selectedLanguage)->abbreviation ?? 'en') }}" class="font-FuturaMdCnBT font-semibold text-gray-900 hover:text-primary">{{ optional($thankyouPage)->welcome_footer_coffee_on_wall ?? 'Coffee on the Wall' }}</a>
+            <a href="{{ route('contact_us', ['lang' => app()->getLocale()]) }}" class="font-FuturaMdCnBT font-semibold text-gray-900 hover:text-primary">{{ optional($thankyouPage)->welcome_footer_help_contact ?? 'Help & Contact' }}</a>
+            <a href="{{ route('terms_use', ['lang' => app()->getLocale()]) }}" class="font-FuturaMdCnBT font-semibold text-gray-900 hover:text-primary">{{ optional($thankyouPage)->welcome_footer_terms_use ?? 'Terms of Use' }}</a>
+            <a href="{{ route('coffee_on_wall', ['lang' => app()->getLocale()]) }}" class="font-FuturaMdCnBT font-semibold text-gray-900 hover:text-primary">{{ optional($thankyouPage)->welcome_footer_coffee_on_wall ?? 'Coffee on the Wall' }}</a>
         </div>
     </div>
 </div>

@@ -14,7 +14,9 @@ class MyVehiclePage extends GetView<MyVehicleController> {
   const MyVehiclePage({super.key});
   @override
   Widget build(BuildContext context) {
-    Get.put(MyVehicleController());
+    if (!Get.isRegistered<MyVehicleController>()) {
+      Get.put(MyVehicleController());
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,

@@ -3,7 +3,7 @@ import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/pages/widgets/card_shadow_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import 'package:proximaride_app/pages/post_ride/widget/post_ride_widget.dart';
-Widget chatDriverWidget({context, double screenWidth = 0.0 , driverId, rideId, String heading = "Chat with the driver"}){
+Widget chatDriverWidget({context, double screenWidth = 0.0 , driverId, rideId, String heading = "Chat with the driver", String label = "Ask the driver any questions you want, especially if you have extra luggage, kids, or if you need a custom pick-up, or custom drop-off"}) {
   return cardShadowWidget(
       context: context,
       widgetChild: Column(
@@ -60,7 +60,7 @@ Widget chatDriverWidget({context, double screenWidth = 0.0 , driverId, rideId, S
                       12.widthBox,
                       Expanded(
                         child: txt20Size(
-                          title: "Ask the driver any questions you want, especially if you have extra luggage, kids, or if you need a custom pick-up, or custom drop-off",
+                          title: label,
                           fontFamily: bold,
                           context: context,
                           textColor: Colors.white

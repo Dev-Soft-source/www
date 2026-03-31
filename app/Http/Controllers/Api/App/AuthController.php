@@ -203,11 +203,11 @@ class AuthController extends Controller
             $message = null;
             if ($request->lang_id && $request->lang_id != 0) {
                 // Retrieve the SuccessMessagesSettingDetail associated with the selected language
-                $message = SuccessMessagesSettingDetail::where('language_id', $request->lang_id)->select('no_user_match_message', 'verified_email_message')->first();
+                $message = SuccessMessagesSettingDetail::where('language_id', $request->lang_id)->select('no_user_match_message', 'no_password_match_message', 'verified_email_message')->first();
             } else {
                 $selectedLanguage = Language::where('is_default', 1)->first();
                 if ($selectedLanguage) {
-                    $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('no_user_match_message', 'verified_email_message')->first();
+                    $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('no_user_match_message', 'no_password_match_message', 'verified_email_message')->first();
                 }
             }
 
@@ -217,6 +217,12 @@ class AuthController extends Controller
             } elseif ($user && $user->email_verified == 0) {
                 $data = ['verify_email' => true, 'email' => $user->email, 'url' => route('sendEmailVerify', ['email' => $user->email])];
                 return $this->apiErrorResponse($message->verified_email_message ?? null, 200, $data);
+            } elseif ($user) {
+                return response()->json([
+                    'status' => 'Error',
+                    'message' => $message->no_password_match_message ?? 'The password you entered is incorrect.',
+                    'errors' => null,
+                ], 200);
             }
 
             // Authentication failed

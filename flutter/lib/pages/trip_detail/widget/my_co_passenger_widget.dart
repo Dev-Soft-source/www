@@ -5,7 +5,7 @@ import 'package:proximaride_app/pages/widgets/circle_image_widget.dart';
 import 'package:proximaride_app/pages/post_ride/widget/post_ride_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
-Widget myCoPassengerWidget({context, coPassengerList, String tripId = "", double screenWidth = 0.0, String type = "trip",
+Widget myCoPassengerWidget({context, coPassengerList, controller, String tripId = "", double screenWidth = 0.0, String type = "trip",
   String tripCoPassengerHeading = "My co-passenger(s)", String rideCoPassengerHeading = "My passengers", String age = "Age", String review = "Review"}){
   return InkWell(
     onTap: (){
@@ -52,6 +52,7 @@ Widget myCoPassengerWidget({context, coPassengerList, String tripId = "", double
                   children: [
                     if(coPassengerList != null && coPassengerList.isNotEmpty)...[
                       for(var i= 0; i<coPassengerList.length; i++ )...[
+                        5.heightBox,
                         SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Row(
@@ -59,17 +60,14 @@ Widget myCoPassengerWidget({context, coPassengerList, String tripId = "", double
                             children: [
                               circleImageWidget(width: 36, height: 36, imageType: "network", imagePath: "${coPassengerList[i]['passenger']['profile_image']}", context: context),
                               10.widthBox,
-                              txt20SizeCapitalize(title: "${coPassengerList[i]['passenger']['first_name']}", context: context, fontFamily: bold),
-                              10.widthBox,
-                              txt20Size(title: "$age: ${coPassengerList[i]['passenger']['age']}", context: context, fontFamily: bold),
-                              10.widthBox,
-                              txt20Size(title: "${coPassengerList[i]['passenger']['gender_label']}", context: context, fontFamily: bold),
-                              10.widthBox,
-                              txt20Size(title: "$review: ${coPassengerList[i]['passenger_average_rating'] ?? ""}", context: context, fontFamily: bold)
+                              txt20Size(
+                                  title: "${coPassengerList[i]['passenger']['first_name']} | $age: ${coPassengerList[i]['passenger']['age']} | ${coPassengerList[i]['passenger']['gender_label']} | ${(coPassengerList[i]['passenger_average_rating'] == null || "${coPassengerList[i]['passenger_average_rating']}".isEmpty) ? "${controller.labelTextDetail['no_review_label'] ?? "No review yet"}" : "$review: ${coPassengerList[i]['passenger_average_rating']}"}",
+                                  context: context,
+                                  fontFamily: bold)
                             ],
                           ),
                         ),
-                        10.heightBox,
+                        5.heightBox,
                       ]
                     ]
                   ],

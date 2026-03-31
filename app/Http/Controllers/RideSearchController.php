@@ -26,7 +26,7 @@ use App\Models\State;
 use App\Models\SeatDetail;
 use App\Models\PxRideStop;
 use App\Models\RecentSearch;
-use App\Models\ExtraCareFaq;
+use App\Models\HomePageSettingDetail;
 use App\Models\ExtraCareFaqDetail;
 use App\Models\FeaturesSetting;
 use App\Models\FeaturesSettingDetail;
@@ -473,12 +473,14 @@ class RideSearchController extends Controller
 
         $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $homePage = HomePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $firm_cancellation_discount = SiteSetting::value('frim_discount');
 
         View::share([
             'findRidePage' => $findRidePage,
             'rideDetailPage' => $rideDetailPage,
+            'homePage' => $homePage,
             'firm_cancellation_discount' => $firm_cancellation_discount,
         ]);
 

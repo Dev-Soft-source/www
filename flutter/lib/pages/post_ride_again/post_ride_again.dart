@@ -12,7 +12,9 @@ class PostRideAgainPage extends GetView<PostRideAgainController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(PostRideAgainController());
+    if (!Get.isRegistered<PostRideAgainController>()) {
+      Get.put(PostRideAgainController());
+    }
     return Scaffold(
           appBar: AppBar(
             backgroundColor: primaryColor,

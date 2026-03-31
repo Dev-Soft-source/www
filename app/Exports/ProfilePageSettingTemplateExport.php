@@ -56,6 +56,7 @@ class ProfilePageSettingTemplateExport implements FromCollection, WithHeadings, 
             'cancellation_policy_label' => 'Cancellation Policy',
             'dispute_policy_label' => 'Dispute Policy',
             'contact_proximaride_label' => 'Contact ProximaRide',
+            'coffee_on_wall_label' => 'Coffee on the Wall',
             'logout_label' => 'Logout',
             'colse_your_contact_label' => 'Close Your Account',
         ];

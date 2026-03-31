@@ -15,14 +15,58 @@ class Referral extends GetView<ReferralController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(ReferralController());
+    if (!Get.isRegistered<ReferralController>()) {
+      Get.put(ReferralController());
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
-        title: Obx(() => secondAppBarWidget(
-            title:
-                "${controller.labelTextDetail['main_heading'] ?? "Earn Rewards for Referring Quality Members!"}",
-            context: context)),
+        title: Obx(
+          () => Container(
+            padding: EdgeInsets.only(
+              bottom: getValueForScreenType<double>(
+                context: context,
+                mobile: 10.0,
+                tablet: 10.0,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    "${controller.labelTextDetail['main_heading'] ?? "Earn Rewards for Referring Quality Members!"}",
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: regular,
+                      fontSize: getValueForScreenType<double>(
+                        context: context,
+                        mobile: 22.0,
+                        tablet: 22.0,
+                      ),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Image.asset(
+                  headerLogoImage,
+                  width: getValueForScreenType<double>(
+                    context: context,
+                    mobile: 50.0,
+                    tablet: 50.0,
+                  ),
+                  height: getValueForScreenType<double>(
+                    context: context,
+                    mobile: 50.0,
+                    tablet: 50.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
         leading: safeBackButton(context),
       ),
       body: SafeArea(

@@ -11,7 +11,9 @@ class ProfileSettingPage extends GetView<ProfileSettingController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(ProfileSettingController());
+    if (!Get.isRegistered<ProfileSettingController>()) {
+      Get.put(ProfileSettingController());
+    }
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,

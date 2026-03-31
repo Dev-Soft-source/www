@@ -661,6 +661,11 @@ class RideController extends WebRideController
                     return [(int) ($option->features_setting_id ?? $option->id ?? 0) => $option->tooltip ?? null];
                 })
                 ->all(),
+            'labels' => $options
+                ->mapWithKeys(function ($option) {
+                    return [($option->features_setting_id ?? $option->id ?? 0) => $option->label ?? null];
+                })
+                ->all(),
         ];
     }
 
@@ -871,7 +876,7 @@ class RideController extends WebRideController
         $selectedLanguage = $this->resolveApiLanguage($request->lang_id);
         $findRidePage = $this->getApiFindRidePage($selectedLanguage);
         $postRidePage = $this->getApiPostRidePage($selectedLanguage);
-        
+
         $rideDetailPage = $this->getApiRideDetailPage($selectedLanguage);
         $genderLabel = $this->getApiGenderLabel($selectedLanguage);
 
@@ -946,9 +951,10 @@ class RideController extends WebRideController
                 $ride->payment_method_slug = $paymentMethodOption->slug ?? null;
                 $ride->payment_method = $paymentMethodNames[$ride->payment_method] ?? null;
             }
-
+            // Log::info('rideFeatureOptionGroups', [$ride->luggage, $luggageAssets['labels'][$ride->luggage]]);
             if ($ride->luggage) {
-                $ride->luggage = (optional($rideDetailPage)->luggage_label ?? '') . $luggage;
+                $luggageLabelPrefix = $luggageAssets['labels'][$ride->luggage] ?? '';
+                $ride->luggage = $luggageLabelPrefix . ': ' . $luggage;
             }
 
             if ($ride->booking_type) {
@@ -962,11 +968,13 @@ class RideController extends WebRideController
             }
 
             if ($ride->smoke) {
-                $ride->smoke = (optional($rideDetailPage)->smoking_label ?? '') . $smoke;
+                $smokeLabelPrefix = $smokingAssets['labels'][$ride->smoke] ?? '';
+                $ride->smoke = $smokeLabelPrefix . ': ' . $smoke;
             }
 
             if ($ride->animal_friendly) {
-                $ride->animal_friendly = (optional($rideDetailPage)->pets_label ?? '') . $animalFriendly;
+                $animalFriendlyLabelPrefix = $petsAssets['labels'][$ride->animal_friendly] ?? '';
+                $ride->animal_friendly = $animalFriendlyLabelPrefix . ': ' . $animalFriendly;
             }
 
             $ride->booked_seats = $bookedSeats;

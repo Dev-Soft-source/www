@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\PostRidePageSettingDetail;
-use App\Models\PostRidePageSettingSubDetail;
 
 class PostRidePageSettingService
 {
@@ -66,11 +65,6 @@ class PostRidePageSettingService
                 $errorMessages = array_merge($errorMessages, ['max_back_seats_label.max_back_seats_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['luggage_label.luggage_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['luggage_label.luggage_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['luggage_checkbox_label1.luggage_checkbox_label1_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['luggage_checkbox_label1.luggage_checkbox_label1_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['luggage_checkbox_label1_tooltip.luggage_checkbox_label1_tooltip_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['luggage_checkbox_label1_tooltip.luggage_checkbox_label1_tooltip_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                
                 $validationRule = array_merge($validationRule, ['price_payment_heading.price_payment_heading_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['price_payment_heading.price_payment_heading_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['price_per_seat_label.price_per_seat_label_' . $language->id => ['required', 'string']]);
@@ -105,8 +99,6 @@ class PostRidePageSettingService
                 $errorMessages = array_merge($errorMessages, ['recurring_trips_label.recurring_trips_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['existing_label.existing_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['existing_label.existing_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['cancellation_policy_label.cancellation_policy_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['cancellation_policy_label.cancellation_policy_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['app_disclaimers_description1.app_disclaimers_description1_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['app_disclaimers_description1.app_disclaimers_description1_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['app_disclaimers_description2.app_disclaimers_description2_' . $language->id => ['required', 'string']]);
@@ -137,10 +129,6 @@ class PostRidePageSettingService
                 $errorMessages = array_merge($errorMessages, ['repost_ride_btn_label.repost_ride_btn_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['city_not_in_record.city_not_in_record_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['city_not_in_record.city_not_in_record_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                  $validationRule = array_merge($validationRule, ['city_not_fount_contact_text.city_not_fount_contact_text_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['city_not_fount_contact_text.city_not_fount_contact_text_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                
-               
             }
         }
         return ['validation_rules' => $validationRule, 'error_messages' => $errorMessages, 'nice_names' => $niceNames];
@@ -195,16 +183,12 @@ class PostRidePageSettingService
             'smoking_label' => $this->data($request, $language, 'smoking_label'),
             'animals_label' => $this->data($request, $language, 'animals_label'),
             'features_label' => $this->data($request, $language, 'features_label'),
-            'features_option17' => $this->data($request, $language, 'features_option17'),
             'booking_label' => $this->data($request, $language, 'booking_label'),
             'max_back_seats_label' => $this->data($request, $language, 'max_back_seats_label'),
             'luggage_label' => $this->data($request, $language, 'luggage_label'),
-            'luggage_checkbox_label1' => $this->data($request, $language, 'luggage_checkbox_label1'),
-            'luggage_checkbox_label1_tooltip' => $this->data($request, $language, 'luggage_checkbox_label1_tooltip'),
             'price_payment_heading' => $this->data($request, $language, 'price_payment_heading'),
             'price_per_seat_label' => $this->data($request, $language, 'price_per_seat_label'),
             'payment_methods_label' => $this->data($request, $language, 'payment_methods_label'),
-            'cancellation_policy_label' => $this->data($request, $language, 'cancellation_policy_label'),
             'anything_to_add_label' => $this->data($request, $language, 'anything_to_add_label'),
             'anything_to_add_placeholder' => $this->data($request, $language, 'anything_to_add_placeholder'),
             'disclaimers_label' => $this->data($request, $language, 'disclaimers_label'),
@@ -213,6 +197,8 @@ class PostRidePageSettingService
             'app_disclaimers_description3' => $this->data($request, $language, 'app_disclaimers_description3'),
             'app_disclaimers_description4' => $this->data($request, $language, 'app_disclaimers_description4'),
             'disclaimers_description' => $this->data($request, $language, 'disclaimers_description'),
+            'pink_ride_disclaimers_description' => $this->data($request, $language, 'pink_ride_disclaimers_description'),
+            'extra_care_ride_disclaimers_description' => $this->data($request, $language, 'extra_care_ride_disclaimers_description'),
             'agree_terms_label' => $this->data($request, $language, 'agree_terms_label'),
             'agree_term_error' => $this->data($request, $language, 'agree_term_error'),
             'carpool_regulation_limit_message' => $this->data($request, $language, 'carpool_regulation_limit_message'),
@@ -239,6 +225,9 @@ class PostRidePageSettingService
             'phone_required_modal_phone_btn' => $this->data($request, $language, 'phone_required_modal_phone_btn'),
             'alert_need_government_photo_label' => $this->data($request, $language, 'alert_need_government_photo_label'),
             'alert_need_driver_license_label' => $this->data($request, $language, 'alert_need_driver_license_label'),
+            'price_error_paragraph_1' => $this->data($request, $language, 'price_error_paragraph_1'),
+            'price_error_paragraph_2' => $this->data($request, $language, 'price_error_paragraph_2'),
+            'price_error_paragraph_3' => $this->data($request, $language, 'price_error_paragraph_3'),
             'submit_button_label' => $this->data($request, $language, 'submit_button_label'),
             'main_heading_update' => $this->data($request, $language, 'main_heading_update'),
             'mobile_agree_terms_label' => $this->data($request, $language, 'mobile_agree_terms_label'),
@@ -271,8 +260,10 @@ class PostRidePageSettingService
             'extra_care_tooltip_email_text' => $this->data($request, $language, 'extra_care_tooltip_email_text'),
             'extra_care_tooltip_and_his_text' => $this->data($request, $language, 'extra_care_tooltip_and_his_text'),
             'select_vehicle_type' => $this->data($request, $language, 'select_vehicle_type'),
+            'select_vehicle' => $this->data($request, $language, 'select_vehicle'),
             'vehicle_type_placeholder' => $this->data($request, $language, 'vehicle_type_placeholder'),
             'seat_text' => $this->data($request, $language, 'seat_text'),
+            'seats_text' => $this->data($request, $language, 'seats_text'),
             'recurring_type_select_placeholder' => $this->data($request, $language, 'recurring_type_select_placeholder'),
             'recurring_type_daily_label' => $this->data($request, $language, 'recurring_type_daily_label'),
             'recurring_type_weekly_label' => $this->data($request, $language, 'recurring_type_weekly_label'),
@@ -283,6 +274,9 @@ class PostRidePageSettingService
             'cancelled_ride_no_found_message' => $this->data($request, $language, 'cancelled_ride_no_found_message'),
             'completed_ride_no_found_message' => $this->data($request, $language, 'completed_ride_no_found_message'),
             'upcoming_ride_no_found_message' => $this->data($request, $language, 'upcoming_ride_no_found_message'),
+            'update_ride_label' => $this->data($request, $language, 'update_ride_label'),
+            'pink_ride_disclaimer_text' => $this->data($request, $language, 'pink_ride_disclaimer_text'),
+            'extra_care_ride_disclaimer_text' => $this->data($request, $language, 'extra_care_ride_disclaimer_text'),
             
             'extra_care_tooltip_admin_enable_text' => $this->data($request, $language, 'extra_care_tooltip_admin_enable_text'),
             'extra_care_tooltip_admin_disable_text' => $this->data($request, $language, 'extra_care_tooltip_admin_disable_text'),
@@ -291,28 +285,10 @@ class PostRidePageSettingService
 
         ];
     }
-    
-    
-    public function subFields($postRidePageSetting, $language, $request)
-    {
-        return [
-            'post_ride_page_id' => $postRidePageSetting->id,
-            'language_id' => $language->id,
-            'city_not_fount_contact_text' => $this->data($request, $language, 'city_not_fount_contact_text'),
-            'extra_care_popup_eligible_text' => $this->data($request, $language, 'extra_care_popup_eligible_text'),
-            'feilds_required_text' => $this->data($request, $language, 'feilds_required_text'),
-
-           
-        ];
-    }
-
 public function update($postRidePageSetting, $language, $request)
     {
-        // dd($postRidePageSetting);
         $fields = $this->fields($postRidePageSetting, $language, $request);
-        $subFields = $this->subFields($postRidePageSetting, $language, $request);
         $postRidePageSettingDetail = PostRidePageSettingDetail::wherePostRidePageSettingId($postRidePageSetting->id)->whereLanguageId($language->id)->exists();
-        $postRidePageSettingSubDetail = PostRidePageSettingSubDetail::wherePostRidePageId($postRidePageSetting->id)->whereLanguageId($language->id)->exists();
         if(!$postRidePageSettingDetail){
             $fields = $this->fields($postRidePageSetting, $language, $request);
         PostRidePageSettingDetail::create($fields);
@@ -320,14 +296,7 @@ public function update($postRidePageSetting, $language, $request)
         else{
             PostRidePageSettingDetail::wherePostRidePageSettingId($postRidePageSetting->id)->whereLanguageId($language->id)->first()?->update($fields);
         }
-        
-        if(!$postRidePageSettingSubDetail){
-            $fields = $this->subFields($postRidePageSetting, $language, $request);
-        PostRidePageSettingSubDetail::create($fields);
-        }
-        else{
-            PostRidePageSettingSubDetail::where('post_ride_page_id', $postRidePageSetting->id)->whereLanguageId($language->id)->first()?->update($subFields);
-        }
+
         return true;
     }
 

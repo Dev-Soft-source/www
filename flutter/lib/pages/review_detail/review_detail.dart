@@ -17,7 +17,9 @@ class ReviewDetail extends GetView<ReviewDetailController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(ReviewDetailController());
+    if (!Get.isRegistered<ReviewDetailController>()) {
+      Get.put(ReviewDetailController());
+    }
     return DefaultTabController(
       length: 2,
       child: Scaffold(

@@ -349,7 +349,8 @@ class MyRideController extends Controller
 
         $ride = Ride::where('id', $request->id)->first();
         if ($ride) {
-            $bookings = Booking::where('ride_id', $ride->id)->where('status', 1)
+            $bookings = Booking::where('ride_id', $ride->id)
+                ->whereNotIn('status', [0, 3, 4])
                 ->withActivePassenger()
                 ->with(['passenger' => function ($query) {
                     $query->select('id', 'first_name', 'last_name', 'gender', 'dob', 'profile_image');

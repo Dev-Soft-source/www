@@ -139,6 +139,7 @@ class ProfilePageSettingImport implements ToCollection, WithHeadingRow, WithVali
             'cancellation_policy_label' => 'required|string',
             'dispute_policy_label' => 'required|string',
             'contact_proximaride_label' => 'required|string',
+            'coffee_on_wall_label' => 'required|string',
             'logout_label' => 'required|string',
             'colse_your_contact_label' => 'required|string',
         ];

@@ -341,7 +341,7 @@ class StageFiveController extends GetxController {
               radius: 10,
               barrierDismissible: false,
               titleStyle: const TextStyle(
-                fontSize: 22,
+                fontSize: 26,
                 fontWeight: FontWeight.bold,
               ),
               middleText: formatMessage(
@@ -357,14 +357,15 @@ class StageFiveController extends GetxController {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: btnPrimaryColor,
+                    minimumSize: const Size.fromHeight(buttonHeight),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5),
                     ),
                   ),
-                  child: txt16SizeWithOutContext(
+                  child: txt20SizeWithOutContext(
                     title: "Noted",
                     textColor: Colors.white,
-                    fontFamily: regular,
+                    fontFamily: buttonFontFamily,
                   ),
                 ),
               ],
@@ -378,13 +379,13 @@ class StageFiveController extends GetxController {
               radius: 10,
               barrierDismissible: false,
               titleStyle: const TextStyle(
-                fontSize: 22,
+                fontSize: 26,
                 fontWeight: FontWeight.bold,
               ),
               middleText: formatMessage(
                   "Your phone number is saved Unverified. Keep in mind that you are not permitted to use Pink Rides and Extra-Care Rides until you verify it."),
               middleTextStyle: const TextStyle(
-                fontSize: 18,
+                fontSize: 20,
                 fontWeight: FontWeight.normal,
               ),
               actions: [
@@ -394,14 +395,15 @@ class StageFiveController extends GetxController {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: btnPrimaryColor,
+                    minimumSize: const Size.fromHeight(buttonHeight),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5),
                     ),
                   ),
-                  child: txt16SizeWithOutContext(
+                  child: txt20SizeWithOutContext(
                     title: "Noted",
                     textColor: Colors.white,
-                    fontFamily: regular,
+                    fontFamily: buttonFontFamily,
                   ),
                 ),
               ],
@@ -416,12 +418,12 @@ class StageFiveController extends GetxController {
             radius: 10,
             barrierDismissible: false,
             titleStyle: const TextStyle(
-              fontSize: 22,
+              fontSize: 26,
               fontWeight: FontWeight.bold,
             ),
             middleText: "Your profile is all set. Let's get started.",
             middleTextStyle: const TextStyle(
-              fontSize: 18,
+              fontSize: 20,
               fontWeight: FontWeight.normal,
             ),
             actions: [
@@ -431,14 +433,15 @@ class StageFiveController extends GetxController {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: btnPrimaryColor,
+                  minimumSize: const Size.fromHeight(buttonHeight),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5),
                   ),
                 ),
-                child: txt16SizeWithOutContext(
+                child: txt20SizeWithOutContext(
                   title: "OK",
                   textColor: Colors.white,
-                  fontFamily: regular,
+                  fontFamily: buttonFontFamily,
                 ),
               ),
             ],
@@ -517,12 +520,12 @@ class StageFiveController extends GetxController {
           radius: 10,
           barrierDismissible: false,
           titleStyle: const TextStyle(
-            fontSize: 22,
+            fontSize: 26,
             fontWeight: FontWeight.bold,
           ),
           middleText: "Your profile is all set. Welcome to ProximaRide!",
           middleTextStyle: const TextStyle(
-            fontSize: 18,
+            fontSize: 20,
             fontWeight: FontWeight.normal,
           ),
           actions: [
@@ -532,14 +535,15 @@ class StageFiveController extends GetxController {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: btnPrimaryColor,
+                minimumSize: const Size.fromHeight(buttonHeight),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5),
                 ),
               ),
-              child: txt16SizeWithOutContext(
+              child: txt20SizeWithOutContext(
                 title: "Close",
                 textColor: Colors.white,
-                fontFamily: regular,
+                fontFamily: buttonFontFamily,
               ),
             ),
           ],

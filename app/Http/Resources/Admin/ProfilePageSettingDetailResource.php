@@ -32,6 +32,7 @@ class ProfilePageSettingDetailResource extends JsonResource
             'cancellation_policy_label' => $this->cancellation_policy_label,
             'dispute_policy_label' => $this->dispute_policy_label,
             'contact_proximaride_label' => $this->contact_proximaride_label,
+            'coffee_on_wall_label' => $this->coffee_on_wall_label,
             'logout_label' => $this->logout_label,
             'colse_your_contact_label' => $this->colse_your_contact_label,
             'profile_page_setting' => new ProfilePageSettingResource($this->whenLoaded('profilePageSetting')),

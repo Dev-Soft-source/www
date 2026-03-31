@@ -247,7 +247,7 @@ class CancelBookingPage extends StatelessWidget {
                             10.heightBox,
                             Row(
                               mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 SizedBox(
                                   width: 35,
@@ -271,7 +271,7 @@ class CancelBookingPage extends StatelessWidget {
                                         controller.errors.remove(controller.errors.firstWhereOrNull((element) => element['title'] == "confirm_check"));
                                       }
                                     },
-                                    child: txt16Size(title: controller.labelTextDetail['Confirm_cancel_ride'] ?? "I confirm that i want to cancel this ride", context: context),
+                                    child: txt18Size(title: controller.labelTextDetail['Confirm_cancel_ride'] ?? "I confirm that i want to cancel this ride", context: context),
                                   )
                                 )
                               ],

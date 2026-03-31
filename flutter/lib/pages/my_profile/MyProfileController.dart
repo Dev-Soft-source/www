@@ -140,7 +140,9 @@ class MyProfileController extends GetxController {
         serviceController.disputePolicyLabel.value = resp['data']
                 ['disputePolicyHeading'] ??
             serviceController.disputePolicyLabel.value;
-        serviceController.coffeeOnWallLabel.value = "Coffee on the Wall";
+        serviceController.coffeeOnWallLabel.value = resp['data']
+                ['coffeeOnWallHeading'] ??
+            serviceController.coffeeOnWallLabel.value;
       }
     }, onError: (error) {
       throw error; // Propagate to loadInitialData

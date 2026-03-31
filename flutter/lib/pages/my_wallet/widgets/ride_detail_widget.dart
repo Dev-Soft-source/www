@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:proximaride_app/helpers/currency_formatter.dart';
 import 'package:proximaride_app/pages/my_wallet/widgets/data_row_widget.dart';
 
 Widget rideDetailWidget({context, required data, controller}) {
@@ -54,19 +55,19 @@ Widget rideDetailWidget({context, required data, controller}) {
           context: context,
           title:
           "${controller.labelTextDetail['fare_label'] ?? 'Fare'}",
-          data: '\$${(((bookingAmt - cancelBookingAmt) - (bookingFee - cancelBookingFee))- cancelBookingFee).toStringAsFixed(1)}',
+          data: formatCurrency(((bookingAmt - cancelBookingAmt) - (bookingFee - cancelBookingFee)) - cancelBookingFee),
         ),
         const Divider(),
         dataRowWidget(
           context: context,
           title: "${controller.labelTextDetail['booking_fee_label'] ?? 'Booking fee'}",
-          data: '\$${(bookingFee - cancelBookingFee).toStringAsFixed(1)}',
+          data: formatCurrency(bookingFee - cancelBookingFee),
         ),
         const Divider(),
         dataRowWidget(
           context: context,
           title: "${controller.labelTextDetail['total_label'] ?? 'Total'}",
-          data: '\$${( ((bookingAmt - cancelBookingAmt) - cancelBookingFee)).toStringAsFixed(1)}',
+          data: formatCurrency((bookingAmt - cancelBookingAmt) - cancelBookingFee),
         ),
 
       ],

@@ -76,6 +76,11 @@
 
                 @php
                     $user = auth()->user();
+                @endphp
+
+                
+                @if ($booking->isCompleted())
+                @php
                     $hasRating = $user->hasBookingRating($booking->ride_id);
 
                     $reviewUrl = $hasRating
@@ -85,25 +90,23 @@
                         ])
                         : route('review_driver', [
                             'lang' => app()->getLocale(),
-                            'id' => $booking->uuid,
+                            'id' => $booking->uuid ?? 0,
                         ]);
 
                     $reviewText = $rideDetailPage->card_section_review ?? 'Review';
                 @endphp
-
                 <div class="mt-4">
                     <a href="{{ $reviewUrl }}" class="button-exp-fill me-1">
                         {{ $reviewText }}
                     </a>
                 </div>
+                @endif
             </div>
         </div>
         @if ($showRideBookingInfo)
             <div class="border-t border-gray-300 grid grid-cols-2 divide-x divide-gray-300">
                 <div class="p-4">
                     <p class="text-center">
-
-
                         {{ $user->getPassengerSeatsCount($booking->ride->id) }}
                         {{ $rideDetailPage->trips_card_section_seat_booked ?? 'Seat(s) Booked' }}
                     </p>

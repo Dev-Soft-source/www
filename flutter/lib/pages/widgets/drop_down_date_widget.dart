@@ -3,6 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import '../../consts/constFileLink.dart';
 
+const List<Map<String, String>> _monthOptions = [
+  {'value': '01', 'label': 'January'},
+  {'value': '02', 'label': 'February'},
+  {'value': '03', 'label': 'March'},
+  {'value': '04', 'label': 'April'},
+  {'value': '05', 'label': 'May'},
+  {'value': '06', 'label': 'June'},
+  {'value': '07', 'label': 'July'},
+  {'value': '08', 'label': 'August'},
+  {'value': '09', 'label': 'September'},
+  {'value': '10', 'label': 'October'},
+  {'value': '11', 'label': 'November'},
+  {'value': '12', 'label': 'December'},
+];
+
 Widget dropdownDayWidget({controller, context}) {
   return DropdownButtonFormField(
       isExpanded: true,
@@ -49,6 +64,28 @@ Widget dropdownMonthWidget(
     screenWidth,
     String monthPlaceholder = "Month",
     String type = ""}) {
+  final now = DateTime.now();
+  final currentYear = now.year;
+  final nextMonth = now.month + 1;
+  final selectedYear = int.tryParse(controller.year.value);
+
+  final allowedMonths = type == "student" && selectedYear == currentYear
+      ? _monthOptions
+          .where((month) => int.parse(month['value']!) >= nextMonth)
+          .toList()
+      : _monthOptions;
+
+  final allowedMonthValues =
+      allowedMonths.map((month) => month['value']).whereType<String>().toSet();
+
+  if (type == "student" &&
+      controller.month.value.isNotEmpty &&
+      !allowedMonthValues.contains(controller.month.value)) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.month.value = "";
+    });
+  }
+
   return DropdownButtonFormField2(
     isExpanded: true,
     decoration: InputDecoration(
@@ -86,157 +123,26 @@ Widget dropdownMonthWidget(
             : txt18Size(
                 title: monthPlaceholder, context: context, fontFamily: bold),
       ),
-      DropdownMenuItem(
-        value: "01",
-        child: controller.month.value == "01"
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  txt18Size(
-                      title: "January", context: context, fontFamily: bold),
-                  Icon(Icons.check, color: btnPrimaryColor, size: 20)
-                ],
-              )
-            : txt18Size(title: "January", context: context, fontFamily: bold),
-      ),
-      DropdownMenuItem(
-        value: "02",
-        child: controller.month.value == "02"
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  txt18Size(
-                      title: "February", context: context, fontFamily: bold),
-                  Icon(Icons.check, color: btnPrimaryColor, size: 20)
-                ],
-              )
-            : txt18Size(title: "February", context: context, fontFamily: bold),
-      ),
-      DropdownMenuItem(
-        value: "03",
-        child: controller.month.value == "03"
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  txt18Size(title: "March", context: context, fontFamily: bold),
-                  Icon(Icons.check, color: btnPrimaryColor, size: 20)
-                ],
-              )
-            : txt18Size(title: "March", context: context, fontFamily: bold),
-      ),
-      DropdownMenuItem(
-        value: "04",
-        child: controller.month.value == "04"
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  txt18Size(title: "April", context: context, fontFamily: bold),
-                  Icon(Icons.check, color: btnPrimaryColor, size: 20)
-                ],
-              )
-            : txt18Size(title: "April", context: context, fontFamily: bold),
-      ),
-      DropdownMenuItem(
-        value: "05",
-        child: controller.month.value == "05"
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  txt18Size(title: "May", context: context, fontFamily: bold),
-                  Icon(Icons.check, color: btnPrimaryColor, size: 20)
-                ],
-              )
-            : txt18Size(title: "May", context: context, fontFamily: bold),
-      ),
-      DropdownMenuItem(
-        value: "06",
-        child: controller.month.value == "06"
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  txt18Size(title: "June", context: context, fontFamily: bold),
-                  Icon(Icons.check, color: btnPrimaryColor, size: 20)
-                ],
-              )
-            : txt18Size(title: "June", context: context, fontFamily: bold),
-      ),
-      DropdownMenuItem(
-        value: "07",
-        child: controller.month.value == "07"
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  txt18Size(title: "July", context: context, fontFamily: bold),
-                  Icon(Icons.check, color: btnPrimaryColor, size: 20)
-                ],
-              )
-            : txt18Size(title: "July", context: context, fontFamily: bold),
-      ),
-      DropdownMenuItem(
-        value: "08",
-        child: controller.month.value == "08"
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  txt18Size(
-                      title: "August", context: context, fontFamily: bold),
-                  Icon(Icons.check, color: btnPrimaryColor, size: 20)
-                ],
-              )
-            : txt18Size(title: "August", context: context, fontFamily: bold),
-      ),
-      DropdownMenuItem(
-        value: "09",
-        child: controller.month.value == "09"
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  txt18Size(
-                      title: "September", context: context, fontFamily: bold),
-                  Icon(Icons.check, color: btnPrimaryColor, size: 20)
-                ],
-              )
-            : txt18Size(title: "September", context: context, fontFamily: bold),
-      ),
-      DropdownMenuItem(
-        value: "10",
-        child: controller.month.value == "10"
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  txt18Size(
-                      title: "October", context: context, fontFamily: bold),
-                  Icon(Icons.check, color: btnPrimaryColor, size: 20)
-                ],
-              )
-            : txt18Size(title: "October", context: context, fontFamily: bold),
-      ),
-      DropdownMenuItem(
-        value: "11",
-        child: controller.month.value == "11"
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  txt18Size(
-                      title: "November", context: context, fontFamily: bold),
-                  Icon(Icons.check, color: btnPrimaryColor, size: 20)
-                ],
-              )
-            : txt18Size(title: "November", context: context, fontFamily: bold),
-      ),
-      DropdownMenuItem(
-        value: "12",
-        child: controller.month.value == "12"
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  txt18Size(
-                      title: "December", context: context, fontFamily: bold),
-                  Icon(Icons.check, color: btnPrimaryColor, size: 20)
-                ],
-              )
-            : txt18Size(title: "December", context: context, fontFamily: bold),
-      ),
+      for (final monthOption in allowedMonths) ...[
+        DropdownMenuItem(
+          value: monthOption['value'],
+          child: controller.month.value == monthOption['value']
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    txt18Size(
+                        title: monthOption['label'] ?? '',
+                        context: context,
+                        fontFamily: bold),
+                    Icon(Icons.check, color: btnPrimaryColor, size: 20)
+                  ],
+                )
+              : txt18Size(
+                  title: monthOption['label'] ?? '',
+                  context: context,
+                  fontFamily: bold),
+        ),
+      ],
     ],
     onChanged: (data) {
       controller.month.value = data!;
@@ -331,6 +237,18 @@ Widget dropdownYearWidget(
     ],
     onChanged: (data) {
       controller.year.value = data!;
+      if (type == "student") {
+        final now = DateTime.now();
+        final selectedYear = int.tryParse(controller.year.value);
+        final nextMonth = now.month + 1;
+        final selectedMonth = int.tryParse(controller.month.value);
+
+        if (selectedYear == now.year &&
+            selectedMonth != null &&
+            selectedMonth < nextMonth) {
+          controller.month.value = "";
+        }
+      }
       controller.errors.removeWhere((error) => error['title'] == "year");
       if (type == "student") {
         if (controller.errors

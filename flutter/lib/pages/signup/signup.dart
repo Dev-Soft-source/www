@@ -21,7 +21,9 @@ class SignupPage extends GetView<RegisterController> {
   const SignupPage({super.key});
   @override
   Widget build(BuildContext context) {
-    Get.put(RegisterController());
+    if (!Get.isRegistered<RegisterController>()) {
+      Get.put(RegisterController());
+    }
     return Scaffold(body: Obx(() {
       // Show loading state
       if (controller.errorStateManager.isLoading.value) {

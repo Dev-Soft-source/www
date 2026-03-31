@@ -14,7 +14,9 @@ class PaymentOptions extends GetView<PaymentOptionController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(PaymentOptionController());
+    if (!Get.isRegistered<PaymentOptionController>()) {
+      Get.put(PaymentOptionController());
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
@@ -80,11 +82,20 @@ class PaymentOptions extends GetView<PaymentOptionController> {
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Center(
-                        child: txt20Size(
+                      child: Text(
+                        "${controller.labelTextDetail['no_payment_message'] ?? 'No payment options found yet'}",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: textColor,
+                          fontFamily: regular,
+                          fontSize: getValueForScreenType<double>(
                             context: context,
-                            fontFamily: regular,
-                            title:
-                                "${controller.labelTextDetail['no_payment_message'] ?? 'No payment options found yet'}")),
+                            mobile: 20.0,
+                            tablet: 20.0,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
 

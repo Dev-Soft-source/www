@@ -19,7 +19,9 @@ class DriverLicensePage extends GetView<DriverLicenseController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(DriverLicenseController());
+    if (!Get.isRegistered<DriverLicenseController>()) {
+      Get.put(DriverLicenseController());
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,

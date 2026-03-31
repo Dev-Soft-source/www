@@ -33,8 +33,7 @@ class ChatController extends GetxController {
       connectivityService = Get.put(ConnectivityService());
     }
 
-    // Load initial data
-    await loadInitialData();
+    Future.microtask(() => loadInitialData());
   }
 
   Future<void> loadInitialData() async {

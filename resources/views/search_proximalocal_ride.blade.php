@@ -105,10 +105,10 @@
     <div class="border-b border-gray-400">
         <div class="flex gap-2">
             <div class="bg-white rounded-md p-1 h-16 w-16 flex justify-center items-center">
-                <img class="" src="{{asset('/images/proximaridelocal.png')}}" alt="">
+                <img class="" src="{{ asset('home_page_icons/' . $homePage->section1_customize_image) }}" alt="">
             </div>
             <h1 class="">
-                Search ProximaLocal Rides
+                ProximaLocal Rides — Affordable Short-Distance Travel
             </h1>
         </div>
     </div>

@@ -127,6 +127,14 @@ Future<FirebaseApp> ensureFirebaseInitialized() async {
 
   try {
     return await initialization;
+  } on FirebaseException catch (error) {
+    if (error.code == 'duplicate-app') {
+      return Firebase.app();
+    }
+    if (identical(_firebaseInitialization, initialization)) {
+      _firebaseInitialization = null;
+    }
+    rethrow;
   } catch (_) {
     if (identical(_firebaseInitialization, initialization)) {
       _firebaseInitialization = null;
@@ -316,11 +324,11 @@ class MyAppState extends State<MyApp> {
 
     // Initialize the lifecycle flutter  handler and add it as an observer
     lifecycleEventHandler = LifecycleEventHandler(
-      resumeCallBack: () async => setState(() {
+      resumeCallBack: () async {
         if (kDebugMode) {
           logger.info('resume call back obs');
         }
-      }),
+      },
       closeCallBack: () async {
         if (kDebugMode) {
           logger.info('close call back obs');

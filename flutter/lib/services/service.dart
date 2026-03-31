@@ -350,7 +350,7 @@ class Service extends GetxService {
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 22,
+                  fontSize: 26,
                   fontWeight: FontWeight.bold,
                   color: textColor,
                 ),
@@ -361,7 +361,7 @@ class Service extends GetxService {
               Text(
                 message,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 20,
                   color: textColor.withOpacity(0.7),
                   height: 1.5,
                 ),
@@ -380,21 +380,22 @@ class Service extends GetxService {
                         backgroundColor: Colors.grey[100],
                         foregroundColor: textColor,
                         elevation: 0,
+                        minimumSize: const Size.fromHeight(buttonHeight),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(5),
                         ),
                       ),
                       child: cancelNoBtn != ""
-                          ? txt14SizeWithOutContext(
+                          ? txt20SizeWithOutContext(
                               title: cancelNoBtn,
                               textColor: textColor,
-                              fontFamily: regular)
-                          : txt14SizeWithOutContext(
+                              fontFamily: buttonFontFamily)
+                          : txt20SizeWithOutContext(
                               title:
                                   "${logoutLabelTextDetail['confirmation_no_label'] ?? "No"}",
                               textColor: textColor,
-                              fontFamily: regular),
+                              fontFamily: buttonFontFamily),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -407,21 +408,22 @@ class Service extends GetxService {
                         backgroundColor: btnPrimaryColor,
                         foregroundColor: Colors.white,
                         elevation: 0,
+                        minimumSize: const Size.fromHeight(buttonHeight),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(5),
                         ),
                       ),
                       child: cancelYesBtn != ""
-                          ? txt14SizeWithOutContext(
+                          ? txt20SizeWithOutContext(
                               title: cancelYesBtn,
                               textColor: Colors.white,
-                              fontFamily: regular)
-                          : txt14SizeWithOutContext(
+                              fontFamily: buttonFontFamily)
+                          : txt20SizeWithOutContext(
                               title:
                                   "${logoutLabelTextDetail['confirmation_yes_label'] ?? "Yes"}",
                               textColor: Colors.white,
-                              fontFamily: regular),
+                              fontFamily: buttonFontFamily),
                     ),
                   ),
                 ],
@@ -485,7 +487,7 @@ class Service extends GetxService {
                         child: Text(
                           title,
                           style: const TextStyle(
-                            fontSize: 20,
+                            fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: textColor,
                           ),
@@ -506,29 +508,29 @@ class Service extends GetxService {
                         margin: Margins.zero,
                       ),
                       'p': Style(
-                        fontSize: FontSize(16),
+                        fontSize: FontSize(20),
                         padding: HtmlPaddings.symmetric(vertical: 8),
                         margin: Margins.zero,
                         lineHeight: const LineHeight(1.6),
                       ),
                       'div': Style(
-                        fontSize: FontSize(16),
+                        fontSize: FontSize(20),
                         padding: HtmlPaddings.symmetric(vertical: 8),
                         margin: Margins.zero,
                         lineHeight: const LineHeight(1.6),
                       ),
                       'h1': Style(
-                        fontSize: FontSize(24),
+                        fontSize: FontSize(28),
                         fontWeight: FontWeight.bold,
                         padding: HtmlPaddings.only(bottom: 12),
                       ),
                       'h2': Style(
-                        fontSize: FontSize(20),
+                        fontSize: FontSize(24),
                         fontWeight: FontWeight.bold,
                         padding: HtmlPaddings.only(bottom: 10),
                       ),
                       'h3': Style(
-                        fontSize: FontSize(18),
+                        fontSize: FontSize(22),
                         fontWeight: FontWeight.bold,
                         padding: HtmlPaddings.only(bottom: 8),
                       ),
@@ -553,15 +555,16 @@ class Service extends GetxService {
                       backgroundColor: btnPrimaryColor,
                       foregroundColor: Colors.white,
                       elevation: 0,
+                      minimumSize: const Size.fromHeight(buttonHeight),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(5),
                       ),
                     ),
-                    child: txt16SizeWithOutContext(
+                    child: txt20SizeWithOutContext(
                         title: closeBtnLabel.value,
                         textColor: Colors.white,
-                        fontFamily: regular),
+                        fontFamily: buttonFontFamily),
                   ),
                 ),
               ),
@@ -637,7 +640,7 @@ class Service extends GetxService {
                     Text(
                       title,
                       style: const TextStyle(
-                        fontSize: 22,
+                        fontSize: 26,
                         fontWeight: FontWeight.bold,
                         color: textColor,
                       ),
@@ -650,7 +653,7 @@ class Service extends GetxService {
               Text(
                 message,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 20,
                   color: textColor.withOpacity(0.7),
                   height: 1.5,
                 ),
@@ -681,9 +684,10 @@ class Service extends GetxService {
                           backgroundColor: secondaryColor,
                           foregroundColor: Colors.white,
                           elevation: 0,
+                          minimumSize: const Size.fromHeight(buttonHeight),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(5),
                           ),
                         ),
                       ),
@@ -702,15 +706,16 @@ class Service extends GetxService {
                         style: OutlinedButton.styleFrom(
                           foregroundColor: textColor,
                           side: BorderSide(color: Colors.grey[300]!),
+                          minimumSize: const Size.fromHeight(buttonHeight),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(5),
                           ),
                         ),
-                        child: txt16SizeWithOutContext(
+                        child: txt20SizeWithOutContext(
                           title: closeBtnLabel.value,
                           textColor: textColor,
-                          fontFamily: regular,
+                          fontFamily: buttonFontFamily,
                         ),
                       ),
                     ),
@@ -731,15 +736,16 @@ class Service extends GetxService {
                       backgroundColor: btnPrimaryColor,
                       foregroundColor: Colors.white,
                       elevation: 0,
+                      minimumSize: const Size.fromHeight(buttonHeight),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(5),
                       ),
                     ),
-                    child: txt16SizeWithOutContext(
+                    child: txt20SizeWithOutContext(
                       title: closeBtnLabel.value,
                       textColor: Colors.white,
-                      fontFamily: regular,
+                      fontFamily: buttonFontFamily,
                     ),
                   ),
                 ),
@@ -760,7 +766,7 @@ class Service extends GetxService {
           "${welcomeMessage1.isEmpty ? "Hey" : welcomeMessage1.value} ${loginUserDetail['first_name']},  ${welcomeMessage2.isEmpty ? "nice to meet you\nPlease complete your profile, it only takes a couple of minutes" : welcomeMessage2.value}"),
       barrierDismissible: false,
       titleStyle: const TextStyle(fontSize: 24, color: primaryColor),
-      middleTextStyle: const TextStyle(fontSize: 16),
+      middleTextStyle: const TextStyle(fontSize: 20),
       actions: [
         ElevatedButton(
           onPressed: () async {
@@ -770,12 +776,13 @@ class Service extends GetxService {
           },
           style: ElevatedButton.styleFrom(
               backgroundColor: primaryColor,
+              minimumSize: const Size.fromHeight(buttonHeight),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5))),
-          child: txt14SizeWithOutContext(
+          child: txt20SizeWithOutContext(
               title: welcomeButton1.isEmpty ? "Proceed" : welcomeButton1.value,
               textColor: Colors.white,
-              fontFamily: regular),
+              fontFamily: buttonFontFamily),
         ),
         // ElevatedButton(
         //   onPressed: (){

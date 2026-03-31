@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
+import 'package:proximaride_app/helpers/currency_formatter.dart';
 import 'package:proximaride_app/pages/my_wallet/widgets/data_row_widget.dart';
 
 Widget myRideWidget({context, required myRide, controller, bool changeColor = false}) {
@@ -79,19 +80,19 @@ Widget myRideWidget({context, required myRide, controller, bool changeColor = fa
         dataRowWidget(
             context: context,
             title: "${controller.labelTextDetail['passenger_my_ride_booking_fee_label'] ?? 'Booking fee'}",
-            data: '\$${(bookingFee - cancelBookingFee).toStringAsFixed(1)}',
+            data: formatCurrency(bookingFee - cancelBookingFee),
             ),
         const Divider(),
         dataRowWidget(
             context: context,
             title: "${controller.labelTextDetail['passenger_my_ride_fare_label'] ?? 'Fare'}",
-            data: '\$${((bookingAmt - cancelBookingAmt) - (bookingFee - cancelBookingFee)).toStringAsFixed(1)}',
+            data: formatCurrency((bookingAmt - cancelBookingAmt) - (bookingFee - cancelBookingFee)),
         ),
         const Divider(),
         dataRowWidget(
             context: context,
             title: "${controller.labelTextDetail['passenger_my_ride_total_amount_label'] ?? 'Total amount'}",
-            data: '\$${(bookingAmt - cancelBookingAmt).toStringAsFixed(1)}',
+            data: formatCurrency(bookingAmt - cancelBookingAmt),
         ),
         10.heightBox,
       ],

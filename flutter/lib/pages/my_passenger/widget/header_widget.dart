@@ -6,8 +6,8 @@ Widget headerWidget({context, String name = "", double screenWidth = 0.0, String
   return Container(
     height: getValueForScreenType<double>(
       context: context,
-      mobile: 70.0,
-      tablet: 70.0,
+      mobile: 56.0,
+      tablet: 56.0,
     ),
     width: screenWidth,
     decoration: const BoxDecoration(
@@ -38,7 +38,7 @@ Widget headerWidget({context, String name = "", double screenWidth = 0.0, String
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Padding(padding: const EdgeInsets.only(top: 5),
-              child: circleImageWidget(width: 30.0, height: 30.0, imagePath: image, imageType: "network", context: context, borderRadius: 100.0, bgColor: Colors.white)),
+              child: circleImageWidget(width: 48.0, height: 48.0, imagePath: image, imageType: "network", context: context, borderRadius: 100.0, bgColor: Colors.white)),
               5.widthBox,
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

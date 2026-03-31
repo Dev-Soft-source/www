@@ -17,7 +17,9 @@ class MyPhoneNumberPage extends GetView<MyPhoneNumberController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(MyPhoneNumberController());
+    if (!Get.isRegistered<MyPhoneNumberController>()) {
+      Get.put(MyPhoneNumberController());
+    }
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -373,7 +375,7 @@ class MyPhoneNumberPage extends GetView<MyPhoneNumberController> {
                               ),
                             ],
                           ),
-
+                          10.heightBox,
                           Row(
                             children: [
                               Expanded(

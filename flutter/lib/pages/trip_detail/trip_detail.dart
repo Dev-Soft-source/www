@@ -43,9 +43,24 @@ class TripDetailPage extends GetView<TripDetailController> {
     return major.toStringAsFixed(2);
   }
 
+  String _formatCurrencyDisplay(dynamic value) {
+    if (value == null || value.toString().trim().isEmpty) {
+      return "\$0.00";
+    }
+
+    final parsed = num.tryParse(value.toString());
+    if (parsed == null) {
+      return "\$${value.toString()}";
+    }
+
+    return "\$${parsed.toStringAsFixed(2)}";
+  }
+
   @override
   Widget build(BuildContext context) {
-    Get.put(TripDetailController());
+    if (!Get.isRegistered<TripDetailController>()) {
+      Get.put(TripDetailController());
+    }
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -148,8 +163,14 @@ class TripDetailPage extends GetView<TripDetailController> {
                             (() {
                               return fromToWidget(
                                   context: context,
-                                  from: controller.ride['departure'].toString(),
-                                  to: controller.ride['destination'].toString(),
+                                  from: (selectedRideDetail['departure'] ??
+                                          controller.ride['departure'] ??
+                                          '')
+                                      .toString(),
+                                  to: (selectedRideDetail['destination'] ??
+                                          controller.ride['destination'] ??
+                                          '')
+                                      .toString(),
                                   date: tripDate,
                                   time: tripTime,
                                   perSeat:
@@ -216,10 +237,12 @@ class TripDetailPage extends GetView<TripDetailController> {
                                   context: context,
                                   booked:
                                       "${controller.ride['booked_seats']} ${controller.labelTextDetail['ride_seat_label'] ?? "seats"}",
-                                  fare: "\$${controller.ride['fare']}",
-                                  fee: "\$${controller.ride['booking_fee']}",
-                                  totalAmount:
-                                      "\$${controller.ride['total_amount']}",
+                                  fare: _formatCurrencyDisplay(
+                                      controller.ride['fare']),
+                                  fee: _formatCurrencyDisplay(
+                                      controller.ride['booking_fee']),
+                                  totalAmount: _formatCurrencyDisplay(
+                                      controller.ride['total_amount']),
                                   screenWidth: context.screenWidth,
                                   controller: controller),
                               10.heightBox,
@@ -241,6 +264,7 @@ class TripDetailPage extends GetView<TripDetailController> {
                               myCoPassengerWidget(
                                   context: context,
                                   coPassengerList: controller.ride['bookings'],
+                                  controller: controller,
                                   tripId: controller.ride['id'].toString(),
                                   screenWidth: context.screenWidth,
                                   type: controller.type,
@@ -282,8 +306,21 @@ class TripDetailPage extends GetView<TripDetailController> {
                                 controller.type == "trip") ...[
                               vehicleInfoWidget(
                                   context: context,
-                                  vehicleDetail:
-                                      "${controller.ride['vehicle'] != null ? controller.ride['vehicle']['year'] : ""} ${controller.ride['vehicle'] != null ? controller.ride['vehicle']['make'] : ""} ${controller.ride['vehicle'] != null ? controller.ride['vehicle']['model'] : ""}",
+                                  vehicleDetail: [
+                                    controller.ride['vehicle'] != null
+                                        ? controller.ride['vehicle']['year']
+                                        : "",
+                                    controller.ride['vehicle'] != null
+                                        ? controller.ride['vehicle']['make']
+                                        : "",
+                                    controller.ride['vehicle'] != null
+                                        ? controller.ride['vehicle']['model']
+                                        : "",
+                                  ]
+                                      .where((part) =>
+                                          part != null &&
+                                          part.toString().trim().isNotEmpty)
+                                      .join(" | "),
                                   licenseNumber:
                                       "${controller.ride['vehicle'] != null ? controller.ride['vehicle']['license_no'] : ""}",
                                   carType:
@@ -362,53 +399,61 @@ class TripDetailPage extends GetView<TripDetailController> {
                                   rideId: "${controller.ride['id']}",
                                   driverId: "${rideDriver['id'] ?? ""}",
                                   heading:
-                                      "${controller.labelTextDetail['driver_chat_heading'] ?? "Chat with the driver"}"),
+                                      "${controller.labelTextDetail['driver_chat_heading'] ?? "Chat with the driver"}",
+                                  label:
+                                      "${controller.labelTextDetail['driver_chat_label'] ?? "Ask the driver any questions you want, especially if you have extra luggage, kids, or if you need a custom pick-up, or custom drop-off"}"),
                               10.heightBox,
                             ],
                             if (controller.type == "ride" &&
                                 controller.status == "upcoming") ...[
                               Container(
-                                padding: const EdgeInsets.only(
-                                    left: 5.0, right: 5.0),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 5.0),
                                 child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  mainAxisSize: MainAxisSize.max,
                                   children: [
-                                    InkWell(
-                                      onTap: () {
-                                        Get.toNamed(
-                                            "/post_ride/${controller.ride['id']}/update");
-                                      },
-                                      child: textWithUnderLine(
+                                    Expanded(
+                                      child: elevatedButtonWidget(
+                                        context: context,
+                                        onPressed: () {
+                                          Get.toNamed(
+                                              "/post_ride/${controller.ride['id']}/update");
+                                        },
+                                        textWidget: txt22SizeAlignCenter(
                                           title:
                                               "${controller.labelTextDetail['edit_ride_btn_label'] ?? "Edit ride"}",
-                                          textColor: primaryColor,
-                                          textSize: 22.0,
-                                          context: context),
+                                          textColor: Colors.white,
+                                          context: context,
+                                        ),
+                                      ),
                                     ),
                                     if (cancelDateTime
                                         .isAfter(currentDateTime)) ...[
-                                      InkWell(
-                                        onTap: () async {
-                                          if (controller.ride['bookings'] !=
-                                                  null &&
-                                              controller
-                                                      .ride['bookings'].length >
-                                                  0) {
-                                            Get.toNamed('/cancel_booking/ride');
-                                          } else {
-                                            await controller
-                                                .cancelRideByDriver();
-                                          }
-                                        },
-                                        child: textWithUnderLine(
+                                      10.widthBox,
+                                      Expanded(
+                                        child: elevatedButtonWidget(
+                                          context: context,
+                                          btnColor: Colors.red,
+                                          onPressed: () async {
+                                            if (controller.ride['bookings'] !=
+                                                    null &&
+                                                controller
+                                                        .ride['bookings']
+                                                        .length >
+                                                    0) {
+                                              Get.toNamed(
+                                                  '/cancel_booking/ride');
+                                            } else {
+                                              await controller
+                                                  .cancelRideByDriver();
+                                            }
+                                          },
+                                          textWidget: txt22SizeAlignCenter(
                                             title:
                                                 "${controller.labelTextDetail['cancel_ride_btn_label'] ?? "Cancel ride"}",
-                                            textColor: Colors.red,
-                                            textSize: 22.0,
+                                            textColor: Colors.white,
                                             context: context,
-                                            decorationColor: Colors.red),
+                                          ),
+                                        ),
                                       )
                                     ],
                                   ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:proximaride_app/helpers/currency_formatter.dart';
 import 'package:proximaride_app/pages/my_wallet/widgets/data_row_widget.dart';
 
 Widget myBalanceWidget({context, required data, controller, bool changeColor = false}) {
@@ -44,7 +45,7 @@ Widget myBalanceWidget({context, required data, controller, bool changeColor = f
         dataRowWidget(
             context: context,
             title: "${controller.labelTextDetail['balance_amount_label'] ?? 'Amount'}",
-            data: '${data['cr_amount'] != null && data['cr_amount'] != "" ? "-" : "+"} \$${ data['cr_amount'] ?? data['dr_amount'] }',
+            data: '${data['cr_amount'] != null && data['cr_amount'] != "" ? "-" : "+"} ${formatCurrency(data['cr_amount'] ?? data['dr_amount'])}',
             priceColor:  data['cr_amount'] != null ? Colors.red : Colors.green
         ),
         const Divider(),

@@ -16,7 +16,9 @@ class PasswordPage extends GetView<PasswordController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(PasswordController());
+    if (!Get.isRegistered<PasswordController>()) {
+      Get.put(PasswordController());
+    }
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,

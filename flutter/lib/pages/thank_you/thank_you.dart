@@ -12,7 +12,9 @@ class ThankYouPage extends GetView<ThankYouController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(ThankYouController());
+    if (!Get.isRegistered<ThankYouController>()) {
+      Get.put(ThankYouController());
+    }
     return PopScope(
         canPop: false,
         onPopInvoked: (confirmed) {

@@ -15,7 +15,9 @@ class CloseMyAccount extends GetView<CloseAccountController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(CloseAccountController());
+    if (!Get.isRegistered<CloseAccountController>()) {
+      Get.put(CloseAccountController());
+    }
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -147,9 +149,16 @@ class CloseMyAccount extends GetView<CloseAccountController> {
                             ),
                             child: Column(
                               children: [
+                                10.heightBox,
                                 ListTile(
                                   dense: true,
-                                  visualDensity: VisualDensity.compact,
+                                  visualDensity: const VisualDensity(
+                                      horizontal: -4, vertical: -2),
+                                  minVerticalPadding: 8,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  horizontalTitleGap: 12,
+                                  minLeadingWidth: 0,
                                   trailing: Checkbox(
                                     value: controller.selectedReasons.contains(
                                         "${controller.labelTextDetail['not_say_checkbox_label'] ?? 'Prefer not to say'}"),
@@ -187,7 +196,13 @@ class CloseMyAccount extends GetView<CloseAccountController> {
                                 const Divider(),
                                 ListTile(
                                   dense: true,
-                                  visualDensity: VisualDensity.compact,
+                                  visualDensity: const VisualDensity(
+                                      horizontal: -4, vertical: -2),
+                                  minVerticalPadding: 8,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  horizontalTitleGap: 12,
+                                  minLeadingWidth: 0,
                                   trailing: Checkbox(
                                     value: controller.selectedReasons.contains(
                                         "${controller.labelTextDetail['customer_service_checkbox_label'] ?? 'I do not like the phone/email customer service'}"),
@@ -227,7 +242,13 @@ class CloseMyAccount extends GetView<CloseAccountController> {
                                 const Divider(),
                                 ListTile(
                                   dense: true,
-                                  visualDensity: VisualDensity.compact,
+                                  visualDensity: const VisualDensity(
+                                      horizontal: -4, vertical: -2),
+                                  minVerticalPadding: 8,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  horizontalTitleGap: 12,
+                                  minLeadingWidth: 0,
                                   trailing: Checkbox(
                                     value: controller.selectedReasons.contains(
                                         "${controller.labelTextDetail['technical_issue_checkbox_label'] ?? 'Technical issues with the website/app'}"),
@@ -267,7 +288,13 @@ class CloseMyAccount extends GetView<CloseAccountController> {
                                 const Divider(),
                                 ListTile(
                                   dense: true,
-                                  visualDensity: VisualDensity.compact,
+                                  visualDensity: const VisualDensity(
+                                      horizontal: -4, vertical: -2),
+                                  minVerticalPadding: 8,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  horizontalTitleGap: 12,
+                                  minLeadingWidth: 0,
                                   trailing: Checkbox(
                                     value: controller.selectedReasons.contains(
                                         "${controller.labelTextDetail['difficulties_making_receiving_payments_label'] ?? 'Difficulties making/receiving payments'}"),
@@ -307,7 +334,13 @@ class CloseMyAccount extends GetView<CloseAccountController> {
                                 const Divider(),
                                 ListTile(
                                   dense: true,
-                                  visualDensity: VisualDensity.compact,
+                                  visualDensity: const VisualDensity(
+                                      horizontal: -4, vertical: -2),
+                                  minVerticalPadding: 8,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  horizontalTitleGap: 12,
+                                  minLeadingWidth: 0,
                                   trailing: Checkbox(
                                     value: controller.selectedReasons.contains(
                                         "${controller.labelTextDetail['dont_use_checkbox_label'] ?? 'I don’t use ride-sharing anymore'}"),
@@ -347,7 +380,13 @@ class CloseMyAccount extends GetView<CloseAccountController> {
                                 const Divider(),
                                 ListTile(
                                   dense: true,
-                                  visualDensity: VisualDensity.compact,
+                                  visualDensity: const VisualDensity(
+                                      horizontal: -4, vertical: -2),
+                                  minVerticalPadding: 8,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  horizontalTitleGap: 12,
+                                  minLeadingWidth: 0,
                                   trailing: Checkbox(
                                     value: controller.selectedReasons.contains(
                                         "${controller.labelTextDetail['another_account_checkbox_label'] ?? 'I have another account that I’ll be using'}"),
@@ -387,7 +426,13 @@ class CloseMyAccount extends GetView<CloseAccountController> {
                                 const Divider(),
                                 ListTile(
                                   dense: true,
-                                  visualDensity: VisualDensity.compact,
+                                  visualDensity: const VisualDensity(
+                                      horizontal: -4, vertical: -2),
+                                  minVerticalPadding: 8,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  horizontalTitleGap: 12,
+                                  minLeadingWidth: 0,
                                   trailing: Checkbox(
                                     value: controller.selectedReasons.contains(
                                         "${controller.labelTextDetail['did_not_get_booking_checkbox_label'] ?? 'I did not get bookings on the rides I posted'}"),
@@ -427,7 +472,13 @@ class CloseMyAccount extends GetView<CloseAccountController> {
                                 const Divider(),
                                 ListTile(
                                   dense: true,
-                                  visualDensity: VisualDensity.compact,
+                                  visualDensity: const VisualDensity(
+                                      horizontal: -4, vertical: -2),
+                                  minVerticalPadding: 8,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  horizontalTitleGap: 12,
+                                  minLeadingWidth: 0,
                                   trailing: Checkbox(
                                     value: controller.selectedReasons.contains(
                                         "${controller.labelTextDetail['did_not_find_ride_checkbox_label'] ?? 'I did not find rides to my destination'}"),
@@ -467,7 +518,13 @@ class CloseMyAccount extends GetView<CloseAccountController> {
                                 const Divider(),
                                 ListTile(
                                   dense: true,
-                                  visualDensity: VisualDensity.compact,
+                                  visualDensity: const VisualDensity(
+                                      horizontal: -4, vertical: -2),
+                                  minVerticalPadding: 8,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  horizontalTitleGap: 12,
+                                  minLeadingWidth: 0,
                                   trailing: Checkbox(
                                     value: controller.selectedReasons.contains(
                                         "${controller.labelTextDetail['other_checkbox_label'] ?? 'Others'}"),
@@ -504,6 +561,7 @@ class CloseMyAccount extends GetView<CloseAccountController> {
                                     fontFamily: regular,
                                   ),
                                 ),
+                                10.heightBox,
                               ],
                             ),
                           ),
@@ -550,9 +608,16 @@ class CloseMyAccount extends GetView<CloseAccountController> {
                             ),
                             child: Column(
                               children: [
+                                10.heightBox,
                                 ListTile(
                                   dense: true,
-                                  visualDensity: VisualDensity.compact,
+                                  visualDensity: const VisualDensity(
+                                      horizontal: -4, vertical: -2),
+                                  minVerticalPadding: 8,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  horizontalTitleGap: 12,
+                                  minLeadingWidth: 0,
                                   trailing: Checkbox(
                                     value: controller.wouldRecommend.value ==
                                         2, // Set value based on index
@@ -575,7 +640,13 @@ class CloseMyAccount extends GetView<CloseAccountController> {
                                 const Divider(),
                                 ListTile(
                                   dense: true,
-                                  visualDensity: VisualDensity.compact,
+                                  visualDensity: const VisualDensity(
+                                      horizontal: -4, vertical: -2),
+                                  minVerticalPadding: 8,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  horizontalTitleGap: 12,
+                                  minLeadingWidth: 0,
                                   trailing: Checkbox(
                                     value: controller.wouldRecommend.value ==
                                         1, // Set value based on index
@@ -598,7 +669,13 @@ class CloseMyAccount extends GetView<CloseAccountController> {
                                 const Divider(),
                                 ListTile(
                                   dense: true,
-                                  visualDensity: VisualDensity.compact,
+                                  visualDensity: const VisualDensity(
+                                      horizontal: -4, vertical: -2),
+                                  minVerticalPadding: 8,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  horizontalTitleGap: 12,
+                                  minLeadingWidth: 0,
                                   trailing: Checkbox(
                                     value: controller.wouldRecommend.value ==
                                         3, // Set value based on index
@@ -618,6 +695,7 @@ class CloseMyAccount extends GetView<CloseAccountController> {
                                     fontFamily: regular,
                                   ),
                                 ),
+                                10.heightBox
                               ],
                             ),
                           ),
@@ -783,6 +861,7 @@ class CloseMyAccount extends GetView<CloseAccountController> {
                           20.heightBox,
                           SizedBox(
                             width: context.screenWidth,
+                            height: 50,
                             child: elevatedButtonWidget(
                               enabled: controller.closingAccount.value,
                               textWidget: txt22Size(

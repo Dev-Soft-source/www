@@ -20,7 +20,9 @@ class ProfilePhotoPage extends GetView<ProfilePhotoController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(ProfilePhotoController());
+    if (!Get.isRegistered<ProfilePhotoController>()) {
+      Get.put(ProfilePhotoController());
+    }
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,

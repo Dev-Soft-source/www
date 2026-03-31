@@ -322,15 +322,7 @@ class LoginController extends Controller
      */
     public function showWelcomeMessage($lang = null)
     {
-        $selectedLanguage = $lang
-            ? Language::where('abbreviation', $lang)->first()
-            : (session('selectedLanguage') ? Language::where('abbreviation', session('selectedLanguage'))->first() : null);
-        if (! $selectedLanguage) {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-        }
-        if ($selectedLanguage && $lang !== $selectedLanguage->abbreviation) {
-            session(['selectedLanguage' => $selectedLanguage->abbreviation]);
-        }
+        
 
         $user = auth()->user();
         $data = [
@@ -339,13 +331,12 @@ class LoginController extends Controller
         ];
         $defaultLang = Language::where('is_default', 1)->first();
         $thankyouPage = ThankyouPageSettingDetail::getByLanguageWithFallback(
-            $selectedLanguage->id ?? $defaultLang?->id,
-            $defaultLang->id ?? $selectedLanguage->id
+            $this->selectedLanguage->id ?? $defaultLang?->id,
+            $defaultLang->id ?? $this->selectedLanguage->id
         );
         $greeting_message = optional($thankyouPage)->welcome_greeting ?? 'Hi';
-        $languages = Language::getAllCached();
 
-        return view('welcome_message', compact('data', 'greeting_message', 'selectedLanguage', 'languages', 'thankyouPage'));
+        return view('welcome_message', compact('data', 'greeting_message', 'thankyouPage'));
     }
 
     public function emailVerify($token, $email, Request $request)
@@ -354,24 +345,8 @@ class LoginController extends Controller
 
         $result = DB::table('password_resets')->where('token', $token)->where('type', 'verify_email')->first();
         $user = User::where('email', $email)->first();
-        $selectedLanguage = session('selectedLanguage');
-        $message = null;
-
-        if ($selectedLanguage) {
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-        }
-
-        if (!$selectedLanguage && $user?->lang) {
-            $selectedLanguage = Language::where('abbreviation', $user->lang)->first();
-        }
-
-        if (!$selectedLanguage) {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-        }
-
-        if ($selectedLanguage) {
-            $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('email_verified_message', 'continue_with_app_btn_label', 'create_my_profile_btn_label')->first();
-        }
+        
+        $message = $this->successMessage;
 
         if (isset($user) && !empty($user)) {
             if (!$result && $user->email_verified === '1') {
@@ -379,20 +354,20 @@ class LoginController extends Controller
                 if ($isApp) {
                     return redirect()->route('emailVerified', ['app' => 'true']);
                 }
-                return redirect()->route('login', ['lang' => $selectedLanguage->abbreviation])->with(['message' => "This email address has already been verified"]);
+                return redirect()->route('login', ['lang' => $this->selectedLanguage->abbreviation])->with(['message' => "This email address has already been verified"]);
             } elseif (!$result) {
                 // Invalid token
                 if ($isApp) {
                     return redirect()->route('emailVerified', ['app' => 'true', 'error' => 'invalid_token']);
                 }
-                return redirect()->route('login', ['lang' => $selectedLanguage->abbreviation])->with(['message' => "This email verification token is invalid"]);
+                return redirect()->route('login', ['lang' => $this->selectedLanguage->abbreviation])->with(['message' => "This email verification token is invalid"]);
             }
         } else {
             // Email doesn't exist
             if ($isApp) {
                 return redirect()->route('emailVerified', ['app' => 'true', 'error' => 'email_not_found']);
             }
-            return redirect()->route('login', ['lang' => $selectedLanguage->abbreviation])->with(['message' => "This email is not exist"]);
+            return redirect()->route('login', ['lang' => $this->selectedLanguage->abbreviation])->with(['message' => "This email is not exist"]);
         }
 
 
@@ -403,7 +378,7 @@ class LoginController extends Controller
         if ($userUpdate) {
             DB::table('password_resets')->where('token', $token)->delete();
 
-            $data = ['first_name' => $user->first_name, 'lang' => $selectedLanguage->abbreviation, 'email' => $user->email];
+            $data = ['first_name' => $user->first_name, 'lang' => $this->selectedLanguage->abbreviation, 'email' => $user->email];
             // Send email verification
             Mail::to($user->email)->queue(new WelcomeMail($data));
 
@@ -442,7 +417,7 @@ class LoginController extends Controller
             }
 
             $user = auth()->login($user);
-            session(['selectedLanguage' => $selectedLanguage->abbreviation]);
+            session(['selectedLanguage' => $this->selectedLanguage->abbreviation]);
             $token = auth()->user()->createToken('auth_token')->plainTextToken;
 
             // Redirect based on app parameter
@@ -450,7 +425,11 @@ class LoginController extends Controller
                 return redirect()->route('emailVerified', ['app' => 'true', 'success' => 'verified', 'token' => $token]);
             }
 
-            return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation])->with(['success1' => $message->email_verified_message, 'continue_with_app_btn' => $message->continue_with_app_btn_label ?? "Continue with app", 'create_my_profile_btn' => $message->create_my_profile_btn_label ?? "Create my profile"]);
+            return redirect()->route('home', ['lang' => $this->selectedLanguage->abbreviation])->with([
+                'success1' => $message->email_verified_message ?? 'Your email address has been verified successfully.',
+                'continue_with_app_btn' => $message->continue_with_app_btn_label ?? "Continue with app",
+                'create_my_profile_btn' => $message->create_my_profile_btn_label ?? "Create my profile",
+            ]);
         }
     }
 

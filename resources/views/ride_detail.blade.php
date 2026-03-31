@@ -424,7 +424,7 @@
                                     $vehicleYear = $ride->year ?: optional($ride->vehicle)->year;
                                     $vehicleMake = $ride->make ?: optional($ride->vehicle)->make;
                                     $vehicleModel = $ride->model ?: optional($ride->vehicle)->model;
-                                    $vehicleColor = $ride->color ?: optional($ride->vehicle)->color;
+                                    $vehicleColor = ucfirst($ride->color ?: optional($ride->vehicle)->color);
                                 @endphp
                                 <div class="text-left">
                                     @if ($vehicleYear || $vehicleMake || $vehicleModel || $vehicleColor)
@@ -704,7 +704,7 @@
 
                                             @isset($uuid)
                                                 <!-- Show 'Review' button if no matching rating is found -->
-                                                <a href="{{ route('review_driver', ['lang' => $selectedLanguage->abbreviation, 'id' => $uuid]) }}"
+                                                <a href="{{ route('review_driver', ['lang' => app()->getLocale(), 'id' => $uuid]) }}"
                                                     class="button-exp-fill me-1">
                                                     @isset($rideDetailPage->review_button_label)
                                                         {{ $rideDetailPage->review_button_label }}

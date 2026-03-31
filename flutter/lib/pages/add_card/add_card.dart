@@ -17,7 +17,9 @@ class AddCard extends GetView<AddCardController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(AddCardController());
+    if (!Get.isRegistered<AddCardController>()) {
+      Get.put(AddCardController());
+    }
     controller.getType();
     return Scaffold(
       resizeToAvoidBottomInset: true,

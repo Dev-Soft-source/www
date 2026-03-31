@@ -13,7 +13,9 @@ class ReviewPage extends GetView<ReviewController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(ReviewController());
+    if (!Get.isRegistered<ReviewController>()) {
+      Get.put(ReviewController());
+    }
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,

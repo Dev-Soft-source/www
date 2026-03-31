@@ -19,7 +19,9 @@ class StageTwo extends GetView<StageTowController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(StageTowController());
+    if (!Get.isRegistered<StageTowController>()) {
+      Get.put(StageTowController());
+    }
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,

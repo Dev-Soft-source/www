@@ -20,7 +20,9 @@ class BookSeatPage extends GetView<BookSeatController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(BookSeatController());
+    if (!Get.isRegistered<BookSeatController>()) {
+      Get.put(BookSeatController());
+    }
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,

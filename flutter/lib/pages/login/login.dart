@@ -845,7 +845,9 @@ class LoginPage extends GetView<LoginController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(LoginController());
+    if (!Get.isRegistered<LoginController>()) {
+      Get.put(LoginController());
+    }
     return Scaffold(
       body: Obx(() {
         // Show loading state

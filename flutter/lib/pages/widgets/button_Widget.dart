@@ -13,6 +13,8 @@ Widget elevatedButtonWidget(
     onPressed: enabled ? onPressed : null,
     style: ElevatedButton.styleFrom(
         backgroundColor: enabled ? btnColor : Colors.grey.shade600,
+        minimumSize: const Size.fromHeight(buttonHeight),
+        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
     child: DefaultTextStyle.merge(
       style: appButtonTextStyle(context: context),

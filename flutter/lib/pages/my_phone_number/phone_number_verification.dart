@@ -12,17 +12,19 @@ class PhoneNumberVerificationPage extends GetView<MyPhoneNumberController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(MyPhoneNumberController());
-    return Obx(() => Scaffold(
+    if (!Get.isRegistered<MyPhoneNumberController>()) {
+      Get.put(MyPhoneNumberController());
+    }
+    return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
-          title: secondAppBarWidget(
+          title: Obx(() => secondAppBarWidget(
               title:
                   "${controller.labelTextDetail['verify_phone_number_heading'] ?? "Verify my phone number"}",
-              context: context),
+              context: context)),
           leading: safeBackButton(context),
         ),
-        body: Stack(children: [
+        body: Obx(() => Stack(children: [
           Container(
             padding: EdgeInsets.all(getValueForScreenType<double>(
               context: context,

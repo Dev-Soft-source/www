@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
+import 'package:proximaride_app/helpers/currency_formatter.dart';
 import 'package:proximaride_app/pages/widgets/button_Widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import '../../consts/constFileLink.dart';
@@ -128,7 +129,7 @@ Widget tripCardFromToWidget({String from = "", String to = "", String pickup = "
             text: TextSpan(
               children: [
                 textSpan(
-                    title: "\$$price",
+                    title: formatCurrency(price),
                     context: context,
                     fontFamily: bold,
                     textColor: textColor,

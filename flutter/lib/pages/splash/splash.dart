@@ -8,7 +8,9 @@ class SplashPage extends GetView<SplashController> {
   const SplashPage({super.key});
   @override
   Widget build(BuildContext context) {
-    Get.put(SplashController());
+    if (!Get.isRegistered<SplashController>()) {
+      Get.put(SplashController());
+    }
     controller.getScreenSize(context);
     return Container(
       color: Colors.white,

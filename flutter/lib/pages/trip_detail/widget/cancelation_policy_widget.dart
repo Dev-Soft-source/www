@@ -37,6 +37,28 @@ class _CancellationPolicyWidgetState extends State<CancellationPolicyWidget> {
   final GlobalKey<TooltipState> _tooltipKey = GlobalKey<TooltipState>();
   bool _isTooltipVisible = false;
 
+  Future<void> _openCancellationPolicy() async {
+    try {
+      final Uri url = Uri.parse(widget.cancellationPolicyUrl);
+      final bool opened = await launchUrl(
+        url,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!opened && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open cancellation policy')),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open cancellation policy')),
+        );
+      }
+    }
+  }
+
   void _toggleTooltip() {
     setState(() {
       _isTooltipVisible = !_isTooltipVisible;
@@ -116,12 +138,32 @@ class _CancellationPolicyWidgetState extends State<CancellationPolicyWidget> {
                     children: [
                       Row(
                         children: [
-                          txt20SizeCapitalize(
-                              context: widget.context, title: widget.policyType),
-                          if (widget.bookingTypeSlug == "firm") ...[
-                            txt20Size(
-                                context: widget.context,
-                                title: ' (${widget.discountLabel} ${widget.policyRate}%)'),
+                          if (widget.bookingTypeSlug == "firm" &&
+                              widget.cancellationPolicyUrl != "") ...[
+                            InkWell(
+                              onTap: _openCancellationPolicy,
+                              child: Row(
+                                children: [
+                                  txt20SizeCapitalize(
+                                      context: widget.context,
+                                      title: widget.policyType,
+                                      textColor: primaryColor),
+                                  txt20Size(
+                                      context: widget.context,
+                                      title:
+                                          ' (${widget.discountLabel} ${widget.policyRate}%)',
+                                      textColor: primaryColor),
+                                ],
+                              ),
+                            ),
+                          ] else ...[
+                            txt20SizeCapitalize(
+                                context: widget.context, title: widget.policyType),
+                            if (widget.bookingTypeSlug == "firm") ...[
+                              txt20Size(
+                                  context: widget.context,
+                                  title: ' (${widget.discountLabel} ${widget.policyRate}%)'),
+                            ]
                           ]
                         ],
                       ),
@@ -145,43 +187,6 @@ class _CancellationPolicyWidgetState extends State<CancellationPolicyWidget> {
                     ],
                   )),
             ),
-          if (widget.bookingTypeSlug == "firm" && widget.cancellationPolicyUrl != "") ...[
-            Container(
-                padding: EdgeInsets.fromLTRB(
-                    getValueForScreenType<double>(
-                      context: widget.context,
-                      mobile: 15.0,
-                      tablet: 15.0,
-                    ),
-                    getValueForScreenType<double>(
-                      context: widget.context,
-                      mobile: 0.0,
-                      tablet: 0.0,
-                    ),
-                    getValueForScreenType<double>(
-                      context: widget.context,
-                      mobile: 15.0,
-                      tablet: 15.0,
-                    ),
-                    getValueForScreenType<double>(
-                      context: widget.context,
-                      mobile: 10.0,
-                      tablet: 10.0,
-                    )),
-                child: InkWell(
-                  onTap: () async {
-                    final Uri url = Uri.parse(widget.cancellationPolicyUrl);
-                    if (!await launchUrl(url)) {
-                      throw Exception('Could not launch $url');
-                    }
-                  },
-                  child: textWithUnderLine(
-                      title: widget.cancellationPolicyUrl,
-                      context: widget.context,
-                      textSize: 18.0,
-                      textColor: primaryColor),
-                )),
-          ]
         ],
       ));
   }

@@ -70,7 +70,7 @@
                     @method('PUT')
                     <div class="grid grid-cols-1  gap-4 mt-4">
                         <div class="us_number mt-2">
-                            <div class="flex flex-col lg:flex-row items-start items-end gap-4 mt-1">
+                            <div class="flex flex-col lg:flex-row items-start gap-4 mt-1">
                                 <div class="w-full lg:w-3/6">
                                     <label class="text-gray-700 font-FuturaMdCnBT mb-2 block">
                                         @isset($step5Page->select_country_label)
@@ -89,60 +89,46 @@
                                         @endforeach
                                     </select>
                                     @error('country')
-                                        <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip"
-                                                class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                            </div>
-                                        </div>
+                                        <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="w-full lg:w-3/6">
-                                    @isset($step5Page->phone_label)
-                                        <label for="phone"
-                                            class="text-gray-700 font-FuturaMdCnBT mb-2 block">{{ $step5Page->phone_label }}</label>
-                                    @endisset
-                                    <div class="flex gap-2">
+                                    <label for="phone" class="text-gray-700 font-FuturaMdCnBT mb-2 block">
+                                        @isset($step5Page->phone_label)
+                                            {{ $step5Page->phone_label }}
+                                        @endisset
+                                    </label>
+                                    <div class="flex ">
                                         <div class="w-2/6 hidden">
                                             <input type="tel" name="country_code"
                                                 value="{{ old('country_code', '+1') }}" maxlength="5" readonly
-                                                class="font-FuturaMdCnBT bg-gray-100 mt-1 border p-1.5 w-full rounded text-base  border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
+                                                class="font-FuturaMdCnBT bg-gray-100 border p-1.5 w-full rounded text-base  border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600">
                                         </div>
                                         <div class="w-full">
                                             <input type="tel" name="phone" value="{{ old('phone', $user->phone) }}"
-                                                class="font-FuturaMdCnBT block mt-1 border p-1.5 w-full rounded text-base border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('phone') ? 'border-red-500' : '' }}"
+                                                class="font-FuturaMdCnBT block border p-1.5 w-full rounded text-base border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('phone') ? 'border-red-500' : '' }}"
                                                 placeholder="@isset($step5Page->phone_placeholder){{ $step5Page->phone_placeholder }}@endisset"
                                                 maxlength="15" inputmode="tel" pattern="[0-9+]+"
                                                 oninput="this.value = this.value.replace(/[^0-9+]/g, '')">
                                             @error('phone')
-                                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                                    <div role="tooltip"
-                                                        class="absolute tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                        <p class="text-white leading-none text-sm lg:text-base">
-                                                            {{ $message }}</p>
-                                                    </div>
-                                                </div>
+                                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             @error('full_phone')
-                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip"
-                                        class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                    </div>
-                                </div>
+                                <div class="tooltip-error shadow-lg">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="font-FuturaMdCnBT mt-4 flex flex-row items-center gap-2 justify-center w-full mx-auto md:col-span-2">
+                        <div
+                            class="font-FuturaMdCnBT mt-4 flex flex-row items-center gap-2 justify-center w-full mx-auto md:col-span-2">
                             <div class=" items-center justify-center w-full">
                                 <p class="text-gray-700 text-base md:text-xl text-center font-FuturaMdCnBT shrink-0">
                                     @isset($step5Page->get_book_label)
                                         {{ $step5Page->get_book_label }}
                                     @endisset
-                                </p>                                
+                                </p>
                             </div>
 
                             <div class=" items-center justify-center w-full px-6">
@@ -160,15 +146,16 @@
                                         @endisset
                                     </button>
                                 </div>
-                            </div>                            
+                            </div>
                         </div>
-                        <div class="font-FuturaMdCnBT mt-4 flex flex-row items-center gap-2 justify-center w-full mx-auto md:col-span-2">
+                        <div
+                            class="font-FuturaMdCnBT mt-4 flex flex-row items-center gap-2 justify-center w-full mx-auto md:col-span-2">
                             <div class=" items-center justify-center w-full">
                                 <p class="text-gray-700 text-base md:text-xl text-center font-FuturaMdCnBT shrink-0">
                                     @isset($step5Page->unverified_number_label)
                                         {!! $step5Page->unverified_number_label !!}
                                     @endisset
-                                </p>                                
+                                </p>
                             </div>
 
                             <div class=" items-center justify-center w-full px-6">
@@ -178,22 +165,24 @@
                                         {{ $step5Page->save_button_label }}
                                     @endisset
                                 </button>
-                            </div>                            
+                            </div>
                         </div>
-                        
-                        <div class="font-FuturaMdCnBT mt-4 flex flex-row items-center gap-2 justify-center w-full mx-auto md:col-span-2">
+
+                        <div
+                            class="font-FuturaMdCnBT mt-4 flex flex-row items-center gap-2 justify-center w-full mx-auto md:col-span-2">
                             <div class=" items-center justify-center w-full">
                                 <p class="text-gray-700 text-base md:text-xl text-center font-FuturaMdCnBT shrink-0">
                                     {{ $step5Page->skip_phone_number_label ?? 'Continue without adding a phone number.' }}
-                                </p>                                
+                                </p>
                             </div>
                             <div class=" items-center justify-center w-full px-6">
-                                <button type="button" onclick="showSkipConfirmation()" class="w-full button-exp-fill skip-button-modern">
+                                <button type="button" onclick="showSkipConfirmation()"
+                                    class="w-full button-exp-fill skip-button-modern">
                                     @isset($step5Page->skip_button_label)
                                         {{ $step5Page->skip_button_label }}
                                     @endisset
                                 </button>
-                            </div>                            
+                            </div>
 
                         </div>
                     </div>
@@ -305,31 +294,34 @@
                 ],
                 'not_available' => [
                     'title' => $step5Page->whatsapp_not_available_title ?? 'WhatsApp Not Available',
-                    'message' => $step5Page->whatsapp_not_available_message ??
+                    'message' =>
+                        $step5Page->whatsapp_not_available_message ??
                         'WhatsApp is not available for this number. Verification code has been sent via SMS instead.',
                     'type' => 'warning',
                 ],
                 'success' => [
                     'title' => $step5Page->whatsapp_success_title ?? 'Success',
-                    'message' => $step5Page->whatsapp_success_message ??
-                        'Verification code sent via WhatsApp successfully!',
+                    'message' =>
+                        $step5Page->whatsapp_success_message ?? 'Verification code sent via WhatsApp successfully!',
                     'type' => 'success',
                 ],
                 'error' => [
                     'title' => $step5Page->whatsapp_error_title ?? 'Error',
-                    'message' => $step5Page->whatsapp_error_message ??
-                        'Error sending verification code. Please try again.',
+                    'message' =>
+                        $step5Page->whatsapp_error_message ?? 'Error sending verification code. Please try again.',
                     'type' => 'error',
                 ],
                 'limit' => [
                     'title' => $step5Page->whatsapp_limit_title ?? 'Limit Reached',
-                    'message' => $step5Page->whatsapp_limit_message ??
+                    'message' =>
+                        $step5Page->whatsapp_limit_message ??
                         'Maximum verification attempts reached for this number. Please try again later.',
                     'type' => 'warning',
                 ],
                 'default' => [
                     'title' => $step5Page->whatsapp_default_title ?? 'WhatsApp Notification',
-                    'message' => $step5Page->whatsapp_default_message ??
+                    'message' =>
+                        $step5Page->whatsapp_default_message ??
                         'There was an issue with WhatsApp verification. Please try again.',
                     'type' => 'warning',
                 ],
@@ -568,7 +560,7 @@
                                 '">' + value.name + '</option>');
                         });
                         $('#city-dropdown').html(
-                        '<option value="">Select State First</option>');
+                            '<option value="">Select State First</option>');
                     }
                 });
             });
@@ -743,7 +735,7 @@
 
                         // // Show remaining attempts if provided
                         // if (data.remaining_attempts !== undefined) {
-                            
+
                         //     if (data.remaining_attempts <= 1) {
                         //         showWhatsAppUnavailableModal('Warning: You have ' + data.remaining_attempts +
                         //             ' verification attempt remaining.');

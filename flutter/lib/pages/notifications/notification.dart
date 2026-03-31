@@ -17,7 +17,9 @@ class NotificationPage extends GetView<NotificationController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(NotificationController());
+    if (!Get.isRegistered<NotificationController>()) {
+      Get.put(NotificationController());
+    }
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,

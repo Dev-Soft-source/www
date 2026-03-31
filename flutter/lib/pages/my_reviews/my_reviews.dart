@@ -13,7 +13,9 @@ class MyReviews extends GetView<MyReviewsController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(MyReviewsController());
+    if (!Get.isRegistered<MyReviewsController>()) {
+      Get.put(MyReviewsController());
+    }
     return DefaultTabController(
       length: 2,
       child: Scaffold(

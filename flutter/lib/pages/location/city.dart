@@ -15,7 +15,9 @@ class CityPage extends GetView<LocationController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(LocationController());
+    if (!Get.isRegistered<LocationController>()) {
+      Get.put(LocationController());
+    }
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,

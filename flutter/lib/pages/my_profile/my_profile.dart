@@ -13,7 +13,9 @@ class MyProfilePage extends GetView<MyProfileController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(MyProfileController());
+    if (!Get.isRegistered<MyProfileController>()) {
+      Get.put(MyProfileController());
+    }
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -139,7 +141,10 @@ class MyProfilePage extends GetView<MyProfileController> {
                               context: context,
                               index: 1,
                               onTap: () {
-                                Get.toNamed("/term_condition");
+                                Get.toNamed("/term_condition", arguments: {
+                                  "title":
+                                      "${controller.labelTextDetail['terms_condition_label'] ?? "Terms and conditions"}"
+                                });
                               }),
                           10.heightBox,
                           linkWidget(

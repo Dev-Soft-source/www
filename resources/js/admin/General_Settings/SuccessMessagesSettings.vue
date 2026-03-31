@@ -416,21 +416,18 @@
                                                 >
                                             </div>
                                             <editor
-                                                @selectionChange="
-                                                    handleSelectionChange(
+                                                :model-value="
+                                                    getCurrentValue('student_card_upload_message')
+                                                "
+                                                @update:model-value="
+                                                    handleInput(
+                                                        $event,
                                                         language,
                                                         'student_card_upload_message'
                                                     )
                                                 "
                                                 :ref="`student_card_upload_message_${language.id}`"
                                                 :id="`student_card_upload_message_${language.id}`"
-                                                :initial-value="
-                                                    form[
-                                                        `student_card_upload_message`
-                                                    ][
-                                                        `student_card_upload_message_${language?.id}`
-                                                    ]
-                                                "
                                                 :tinymce-script-src="tinymceScriptSrc"
                                                 :init="editorConfig"
                                             />
@@ -894,21 +891,18 @@
                                                 >
                                             </div>
                                             <editor
-                                                @selectionChange="
-                                                    handleSelectionChange(
+                                                :model-value="
+                                                    getCurrentValue('email_verified_message')
+                                                "
+                                                @update:model-value="
+                                                    handleInput(
+                                                        $event,
                                                         language,
                                                         'email_verified_message'
                                                     )
                                                 "
                                                 :ref="`email_verified_message_${language.id}`"
                                                 :id="`email_verified_message_${language.id}`"
-                                                :initial-value="
-                                                    form[
-                                                        `email_verified_message`
-                                                    ][
-                                                        `email_verified_message_${language?.id}`
-                                                    ]
-                                                "
                                                 :tinymce-script-src="tinymceScriptSrc"
                                                 :init="editorConfig"
                                             />
@@ -3836,21 +3830,18 @@
                                                 >
                                             </div>
                                             <editor
-                                                @selectionChange="
-                                                    handleSelectionChange(
+                                                :model-value="
+                                                    getCurrentValue('closed_account_success_message')
+                                                "
+                                                @update:model-value="
+                                                    handleInput(
+                                                        $event,
                                                         language,
                                                         'closed_account_success_message'
                                                     )
                                                 "
                                                 :ref="`closed_account_success_message_${language.id}`"
                                                 :id="`closed_account_success_message_${language.id}`"
-                                                :initial-value="
-                                                    form[
-                                                        `closed_account_success_message`
-                                                    ][
-                                                        `closed_account_success_message_${language?.id}`
-                                                    ]
-                                                "
                                                 :tinymce-script-src="tinymceScriptSrc"
                                                 :init="editorConfig"
                                             />
@@ -5405,13 +5396,6 @@ export default {
                 this.form[name][`${name}_${this.activeLanguageId}`]
                 ? this.form[name][`${name}_${this.activeLanguageId}`]
                 : "";
-        },
-        handleSelectionChange(language, key) {
-            this.handleInput(
-                tinymce.get(`${key}_${language.id}`).getContent(),
-                language,
-                key
-            );
         },
         handleInput(value, language, key) {
             if (this.form.hasOwnProperty(key)) {

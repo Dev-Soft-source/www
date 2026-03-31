@@ -65,11 +65,16 @@ class _TermConditionPageState extends State<TermConditionPage> {
   Widget build(BuildContext context) {
     final String pageUrl =
         '$url/${serviceController.lang.value}/terms-and-conditions';
+    final String localizedTitle =
+        (Get.arguments is Map && Get.arguments['title'] != null)
+            ? Get.arguments['title'].toString()
+            : "Terms and Conditions";
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
-        title:
-            secondAppBarWidget(title: "Terms and Conditions", context: context),
+        title: secondAppBarWidget(
+            title: localizedTitle,
+            context: context),
         leading: safeBackButton(context),
       ),
       body: SafeArea(
@@ -78,7 +83,7 @@ class _TermConditionPageState extends State<TermConditionPage> {
           child: kIsWeb
               ? WebPageFallbackWidget(
                   pageUrl: pageUrl,
-                  title: "Terms and Conditions",
+                  title: localizedTitle,
                 )
               : WebViewWidget(controller: controller!),
         ),

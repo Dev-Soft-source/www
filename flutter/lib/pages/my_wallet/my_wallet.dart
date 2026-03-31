@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:proximaride_app/helpers/currency_formatter.dart';
 import 'package:proximaride_app/pages/my_wallet/widgets/balance_card.dart';
 import 'package:proximaride_app/pages/my_wallet/widgets/driver_available_widget.dart';
 import 'package:proximaride_app/pages/my_wallet/widgets/driver_paid_out_widget.dart';
@@ -20,7 +21,9 @@ class MyWallet extends GetView<MyWalletController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(MyWalletController());
+    if (!Get.isRegistered<MyWalletController>()) {
+      Get.put(MyWalletController());
+    }
     return Scaffold(
         appBar: AppBar(
           leading: safeBackButton(context),
@@ -56,8 +59,8 @@ class MyWallet extends GetView<MyWalletController> {
                       children: [
                         balanceCard(
                             context: context,
-                            balance:
-                                (controller.balance.value).toStringAsFixed(0),
+                            balance: formatCurrencyValue(
+                                controller.balance.value),
                             width: context.width,
                             balanceLabel:
                                 "${controller.labelTextDetail['card_heading'] ?? "Your balance"}"),

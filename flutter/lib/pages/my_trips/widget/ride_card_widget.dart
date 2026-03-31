@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
+import 'package:proximaride_app/helpers/currency_formatter.dart';
 import 'package:proximaride_app/pages/my_trips/widget/ride_price_info_widget.dart';
 import 'package:proximaride_app/pages/widgets/circle_icon_widget.dart';
 import 'package:proximaride_app/pages/widgets/circle_image_widget.dart';
@@ -17,6 +18,24 @@ Widget rideCardWidget(
     String tripStatus = "",
     onTapReviewPassenger,
     Color cardBgColor = Colors.white}) {
+  Map<String, dynamic> getRideDetailMap(dynamic rideDetail) {
+    if (rideDetail is Map) {
+      final nestedRideDetail = rideDetail['ride_detail'];
+      if (nestedRideDetail is Map) {
+        return Map<String, dynamic>.from(nestedRideDetail);
+      }
+      if (nestedRideDetail is List && nestedRideDetail.isNotEmpty) {
+        final firstRideDetail = nestedRideDetail.first;
+        if (firstRideDetail is Map) {
+          return Map<String, dynamic>.from(firstRideDetail);
+        }
+      }
+    }
+
+    return <String, dynamic>{};
+  }
+
+  final rideDetailMap = getRideDetailMap(tripDetail);
   String tripDate = "";
   if (tripDetail['date'] != null) {
     DateTime parsedDate = DateTime.parse(tripDetail['date']);
@@ -80,8 +99,8 @@ Widget rideCardWidget(
               cancelStatusLabel:
                   "${controller.labelTextDetail['card_section_cancelled'] ?? 'Cancelled'}"),
           tripCardFromToWidget(
-              from: "${tripDetail['ride_detail']['departure']}",
-              to: "${tripDetail['ride_detail']['destination']}",
+              from: "${rideDetailMap['departure'] ?? ''}",
+              to: "${rideDetailMap['destination'] ?? ''}",
               price: "${tripDetail['price']}",
               pickup: "${tripDetail['pickup']}",
               dropOff: "${tripDetail['dropoff']}",
@@ -114,19 +133,19 @@ Widget rideCardWidget(
                 ridePriceInfoWidget(
                     title:
                         "${controller.labelTextDetail['card_section_seats_fee'] ?? "Fare"}",
-                    value: "\$${tripDetail['fare']}",
+                    value: formatCurrency(tripDetail['fare']),
                     context: context),
                 const Divider(),
                 ridePriceInfoWidget(
                     title:
                         "${controller.labelTextDetail['card_section_booking_fee'] ?? "Booking fee"}",
-                    value: "\$${tripDetail['booking_fee']}",
+                    value: formatCurrency(tripDetail['booking_fee']),
                     context: context),
                 const Divider(),
                 ridePriceInfoWidget(
                     title:
                         "${controller.labelTextDetail['card_section_amount'] ?? "Total amount"}",
-                    value: "\$${tripDetail['total_amount']}",
+                    value: formatCurrency(tripDetail['total_amount']),
                     context: context),
               ],
             ],

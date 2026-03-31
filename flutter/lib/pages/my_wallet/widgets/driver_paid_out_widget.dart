@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:proximaride_app/helpers/currency_formatter.dart';
 import 'package:proximaride_app/pages/my_wallet/widgets/data_row_widget.dart';
 
 import '../../../consts/constFileLink.dart';
 
 Widget driverPaidOutWidget({context, required data, controller, bool changeColor = false}) {
+  final defaultRideDetail = data['ride']?['default_ride_detail'];
+  final rideDetail = defaultRideDetail is Map
+      ? Map<String, dynamic>.from(defaultRideDetail)
+      : (defaultRideDetail is List &&
+              defaultRideDetail.isNotEmpty &&
+              defaultRideDetail.first is Map)
+          ? Map<String, dynamic>.from(defaultRideDetail.first)
+          : <String, dynamic>{};
 
   String tripDate = "";
   if(data['paid_out_date'] != null){
@@ -41,13 +50,13 @@ Widget driverPaidOutWidget({context, required data, controller, bool changeColor
         dataRowWidget(
             context: context,
             title: "${controller.labelTextDetail['driver_paid_from_label'] ?? 'From'}",
-            data: '${data['ride']['default_ride_detail']['departure']}',
+            data: '${rideDetail['departure'] ?? ''}',
         ),
         const Divider(),
         dataRowWidget(
             context: context,
             title: "${controller.labelTextDetail['driver_paid_to_label'] ?? 'To'}",
-            data: '${data['ride']['default_ride_detail']['destination']}',
+            data: '${rideDetail['destination'] ?? ''}',
         ),
         const Divider(),
         dataRowWidget(
@@ -60,7 +69,7 @@ Widget driverPaidOutWidget({context, required data, controller, bool changeColor
         dataRowWidget(
             context: context,
             title: "${controller.labelTextDetail['driver_paid_total_amount_label'] ?? 'Total amount'}",
-            data: '\$${data['total_payout_cost']}',
+            data: formatCurrency(data['total_payout_cost']),
             onTap: (() {
               Get.toNamed('/ride_fair_detail/${data['ride_id']}/paidOut');
             })),

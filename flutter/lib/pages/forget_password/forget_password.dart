@@ -17,17 +17,19 @@ class ForgetPasswordPage extends GetView<ForgetPasswordController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(ForgetPasswordController());
-    return Obx(() => Scaffold(
+    if (!Get.isRegistered<ForgetPasswordController>()) {
+      Get.put(ForgetPasswordController());
+    }
+    return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
-          title: secondAppBarWidget(
+          title: Obx(() => secondAppBarWidget(
               title:
                   "${controller.labelTextDetail['main_heading'] ?? "Forgot password?"}",
-              context: context),
+              context: context)),
           leading: safeBackButton(context),
         ),
-        body: controller.errorStateManager.isLoading.value
+        body: Obx(() => controller.errorStateManager.isLoading.value
             ? Center(child: progressCircularWidget(context))
             : controller.errorStateManager.hasError.value
                 ? ErrorStateWidget(
@@ -152,7 +154,8 @@ class ForgetPasswordPage extends GetView<ForgetPasswordController> {
                             ]
                           ],
                         ),
-                      )));
+                      )),
+      );
   }
 }
 

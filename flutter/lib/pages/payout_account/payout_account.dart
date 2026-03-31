@@ -19,14 +19,16 @@ class PayoutAccountPage extends GetView<PayoutAccountController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(PayoutAccountController());
-    return Obx(() => Scaffold(
+    if (!Get.isRegistered<PayoutAccountController>()) {
+      Get.put(PayoutAccountController());
+    }
+    return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
-          title: secondAppBarWidget(
+          title: Obx(() => secondAppBarWidget(
               title:
                   "${controller.labelTextDetail['main_heading'] ?? "Payout Options"}",
-              context: context),
+              context: context)),
           leading: safeBackButton(context),
         ),
         body: SafeArea(
@@ -1088,7 +1090,7 @@ class PayoutAccountPage extends GetView<PayoutAccountController> {
               );
             }
           }),
-        )));
+        ));
   }
 }
 

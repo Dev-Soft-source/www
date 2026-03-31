@@ -13,6 +13,7 @@ use App\Models\RefundPolicyPageSettingDetail;
 use App\Models\PrivacyPolicyPageSettingDetail;
 use App\Models\CancellationPageSettingDetail;
 use App\Models\DisputePageSettingDetail;
+use App\Models\CoffeeWallPageSettingDetail;
 
 use App\Traits\StatusResponser;
 
@@ -32,7 +33,7 @@ class ProfilePageSettingController extends Controller
         }
 
         $logoutPage = null;
-        $termsAndConditionHeading = $privacyPolicyHeading = $termsofuseHeading  = $refundPolicyHeading = $cancellationPolicyHeading = $disputePolicyHeading = ""; 
+        $termsAndConditionHeading = $privacyPolicyHeading = $termsofuseHeading  = $refundPolicyHeading = $cancellationPolicyHeading = $disputePolicyHeading = $coffeeOnWallHeading = ""; 
         if ($request->lang_id && $request->lang_id != 0) {
             $logoutPage = LogoutSettingDetail::where('language_id', $request->lang_id)->first();
             $termsAndConditionHeading = TermsAndConditionPageSettingDetail::where('language_id', $request->lang_id)->value('main_heading');
@@ -42,7 +43,8 @@ class ProfilePageSettingController extends Controller
             $termsofuseHeading  = TermsOfUsePageSettingDetail::where('language_id', $request->lang_id)->value('main_heading'); 
             $refundPolicyHeading = RefundPolicyPageSettingDetail::where('language_id', $request->lang_id)->value('main_heading');
             $cancellationPolicyHeading = CancellationPageSettingDetail::where('language_id', $request->lang_id)->value('main_heading');
-            $disputePolicyHeading = DisputePageSettingDetail::where('language_id', $request->lang_id)->value('main_heading');;
+            $disputePolicyHeading = DisputePageSettingDetail::where('language_id', $request->lang_id)->value('main_heading');
+            $coffeeOnWallHeading = CoffeeWallPageSettingDetail::where('language_id', $request->lang_id)->value('main_heading');
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
@@ -53,11 +55,12 @@ class ProfilePageSettingController extends Controller
                 $refundPolicyHeading = RefundPolicyPageSettingDetail::where('language_id', $selectedLanguage->id)->value('main_heading');
                 $cancellationPolicyHeading = CancellationPageSettingDetail::where('language_id', $selectedLanguage->id)->value('main_heading');
                 $disputePolicyHeading = DisputePageSettingDetail::where('language_id', $selectedLanguage->id)->value('main_heading');
+                $coffeeOnWallHeading = CoffeeWallPageSettingDetail::where('language_id', $selectedLanguage->id)->value('main_heading');
             }
         }
 
 
-        $data = ['myProfilePage' => $myProfilePage, 'logoutPage' => $logoutPage, "termsAndConditionHeading" => $termsAndConditionHeading, "privacyPolicyHeading" => $privacyPolicyHeading, "termsofuseHeading" => $termsofuseHeading, "refundPolicyHeading" => $refundPolicyHeading, "cancellationPolicyHeading" => $cancellationPolicyHeading, "disputePolicyHeading" => $disputePolicyHeading];
+        $data = ['myProfilePage' => $myProfilePage, 'logoutPage' => $logoutPage, "termsAndConditionHeading" => $termsAndConditionHeading, "privacyPolicyHeading" => $privacyPolicyHeading, "termsofuseHeading" => $termsofuseHeading, "refundPolicyHeading" => $refundPolicyHeading, "cancellationPolicyHeading" => $cancellationPolicyHeading, "disputePolicyHeading" => $disputePolicyHeading, "coffeeOnWallHeading" => $coffeeOnWallHeading];
         return $this->successResponse($data, 'Profile page setting get successfully');
     }
 }

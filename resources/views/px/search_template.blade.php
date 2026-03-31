@@ -76,12 +76,12 @@
                                 </label>
 
                                 @if ($searchFilters['proximalocal'])
-                                    <div class="flex items-start justify-between p-3">
+                                    <label class="flex items-start justify-between p-3">
                                         <span class="text-green-500 text-lg font-medium">
                                             {{ $findRidePage->short_distance_ride_text ?? 'ProximaLocal Rides — Under $15 per seat (no booking fee)' }}
                                         </span>
                                         <span class="text-2xl text-gray-500 ml-1">✓</span>
-                                    </div>
+                                    </label>
                                 @else
                                     <label class="flex items-center justify-between p-3">
                                         <span class="text-green-600 text-base md:text-lg">{{ $extraRideLabel }}</span>

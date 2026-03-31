@@ -261,9 +261,8 @@ class LoginController extends GetxController {
   }
 
   bool isValidEmail(String email) {
-    // Regular expression for email validation
     final RegExp emailRegExp =
-        RegExp(r'^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+        RegExp(r"^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$", caseSensitive: false);
     return emailRegExp.hasMatch(email);
   }
   // Add these methods to your controller
@@ -310,53 +309,12 @@ class LoginController extends GetxController {
 
   login() async {
     try {
-      // if (emailTextController.text.isEmpty ||
-      //     passwordTextController.text.isEmpty) {
-      //   if (emailTextController.text.isEmpty) {
-      //     var message = validationMessageDetail['required'];
-      //     message = message.replaceAll(
-      //         ":Attribute", labelTextDetail['email_error'] ?? "Email");
-      //     var err = {
-      //       'title': "email",
-      //       'eList': [message]
-      //     };
-      //     errors.add(err);
-      //   }
+      errors.removeWhere((element) =>
+          element['title'] == "email" || element['title'] == "password");
 
-      //   if (passwordTextController.text.isEmpty) {
-      //     var message = validationMessageDetail['required'];
-      //     message = message.replaceAll(
-      //         ":Attribute", labelTextDetail['password_error'] ?? "Password");
-      //     var err = {
-      //       'title': "password",
-      //       'eList': [message]
-      //     };
-      //     errors.add(err);
-      //   }
-
-      //   return;
-      // }
-
-      // errors.clear(); // Clear previous errors
-
-      // Validate email and password
-      
       validateEmail();
-      validatePassword(); // Commented out - no password validation on login screen
+      validatePassword();
 
-      // Check only if password is empty (basic check for login)
-      if (passwordTextController.text.trim().isEmpty) {
-        var message =
-            validationMessageDetail['required'] ?? ":Attribute is required";
-        message = message.replaceAll(
-            ":Attribute", labelTextDetail['password_error'] ?? "Password");
-        errors.add({
-          'title': 'password',
-          'eList': [message]
-        });
-      }
-
-      // If there are validation errors, don't proceed
       if (errors.isNotEmpty) {
         return;
       }
@@ -544,41 +502,23 @@ class LoginController extends GetxController {
     String email = emailTextController.text.trim();
 
     if (email.isEmpty) {
-      _addError("email", ['Email is required'], 3);
+      var message =
+          validationMessageDetail['required'] ?? ":Attribute is required";
+      message = message.replaceAll(
+          ":Attribute", labelTextDetail['email_error'] ?? "Email");
+      _addError("email", [message], 3);
     } else if (!isValidEmail(email)) {
       _addError("email", ['Enter a valid email e.g test@example.com'], 3);
     }
   }
 
   void validatePassword() {
-    String password = passwordTextController.text;
-    List<String> passwordErrors = [];
-
-    if (password.isEmpty) {
-      passwordErrors.add('Password is required');
-    } else {
-      if (password.length < 8) {
-        passwordErrors.add('Password must be at least 8 characters long');
-      }
-      if (!RegExp(r'[a-z]').hasMatch(password)) {
-        passwordErrors
-            .add('Password must contain at least one lowercase letter');
-      }
-      if (!RegExp(r'[A-Z]').hasMatch(password)) {
-        passwordErrors
-            .add('Password must contain at least one uppercase letter');
-      }
-      if (!RegExp(r'[0-9]').hasMatch(password)) {
-        passwordErrors.add('Password must contain at least one number');
-      }
-      if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(password)) {
-        passwordErrors
-            .add('Password must contain at least one special character');
-      }
-    }
-
-    if (passwordErrors.isNotEmpty) {
-      _addError("password", passwordErrors, 4);
+    if (passwordTextController.text.trim().isEmpty) {
+      var message =
+          validationMessageDetail['required'] ?? ":Attribute is required";
+      message = message.replaceAll(
+          ":Attribute", labelTextDetail['password_error'] ?? "Password");
+      _addError("password", [message], 4);
     }
   }
 

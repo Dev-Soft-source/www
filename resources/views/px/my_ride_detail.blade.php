@@ -331,14 +331,14 @@
                     @endphp
 
                     @if ($isUpcoming && $ride->status !== 'cancelled')
-                        <div class="flex justify-center pt-8 gap-4">
+                        <div class="flex w-full pt-8 gap-4">
                             @if ($showEditAndCancel)
                                 <a href="{{ route('px.post_ride.edit', ['lang' => optional($selectedLanguage)->abbreviation, 'id' => $ride->id]) }}"
-                                    class="button-exp-fill w-36">
+                                    class="button-exp-fill flex-1 text-center">
                                     {{ $rideDetailPage->edit_ride_btn_label ?? 'Edit ride' }}
                                 </a>
                                 <a id="cancelRideBtn" href="#"
-                                    class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 w-36">
+                                    class="inline-flex flex-1 justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400">
                                     {{ $rideDetailPage->cancel_ride_btn_label ?? 'Cancel ride' }}
                                 </a>
                             @elseif ($isUpcomingStatus)

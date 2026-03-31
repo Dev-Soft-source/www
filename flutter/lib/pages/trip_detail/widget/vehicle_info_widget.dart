@@ -43,8 +43,8 @@ Widget vehicleInfoWidget({context, String vehicleDetail = "", String vehicleImag
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                         hidePhoto == true ? circleImageWidget(width: 60, height: 60, imageType: "network", imagePath: vehicleImage, borderRadius: 50.0, context: context) : SizedBox(),
-                        5.widthBox,
+                         hidePhoto == true ? circleImageWidget(width: 84, height: 84, imageType: "network", imagePath: vehicleImage, borderRadius: 50.0, context: context) : SizedBox(),
+                        15.widthBox,
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

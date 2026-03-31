@@ -15,7 +15,9 @@ class EmailAddressPage extends GetView<EmailAddressController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(EmailAddressController());
+    if (!Get.isRegistered<EmailAddressController>()) {
+      Get.put(EmailAddressController());
+    }
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,

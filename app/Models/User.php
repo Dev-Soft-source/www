@@ -223,9 +223,9 @@ class User extends Authenticatable
         }
 
         // Explicitly enabled by admin flag.
-        if ((string) $this->pink_ride === '1') {
-            return true;
-        }
+        // if ((string) $this->pink_ride === '1') {
+        //     return true;
+        // }
 
         // Fallback to the same business rules used to build the tooltip/error message.
         return $this->pinkRideEligibilityError($pinkRideSetting) === null;
@@ -243,9 +243,9 @@ class User extends Authenticatable
             return false;
         }
 
-        if ((string) $this->folks_ride === '1') {
-            return true;
-        }
+        // if ((string) $this->folks_ride === '1') {
+        //     return true;
+        // }
 
         $folkRideSetting = $folkRideSetting ?: FolkRideSetting::getCached();
 
@@ -383,7 +383,7 @@ class User extends Authenticatable
         if (!$pinkRideSetting) {
             return null;
         }
-
+        
         if ($pinkRideSetting->requiresFemaleDriver()) {
             if ((string) $this->pink_ride !== '1') {
                 if ($this->isPinkRideDisabled()) {

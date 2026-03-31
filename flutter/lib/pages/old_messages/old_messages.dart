@@ -12,7 +12,9 @@ class OldMessages extends GetView<OldMessagesController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(OldMessagesController());
+    if (!Get.isRegistered<OldMessagesController>()) {
+      Get.put(OldMessagesController());
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,

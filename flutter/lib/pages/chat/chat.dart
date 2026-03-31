@@ -14,7 +14,9 @@ class ChatPage extends GetView<ChatController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(ChatController());
+    if (!Get.isRegistered<ChatController>()) {
+      Get.put(ChatController());
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,

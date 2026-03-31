@@ -14,7 +14,9 @@ class NavigationPage extends GetView<NavigationController> {
   @override
   Widget build(BuildContext context) {
     var pages = [const ChatPage(), const MyTripsPage(), const MyProfilePage()];
-    Get.put(NavigationController());
+    if (!Get.isRegistered<NavigationController>()) {
+      Get.put(NavigationController());
+    }
     return PopScope(
       canPop: true, //When false, blocks the current route from being popped.
       onPopInvoked: (didPop) {

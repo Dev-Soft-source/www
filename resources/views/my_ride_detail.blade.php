@@ -438,7 +438,7 @@
                             </h3>
                             <a href="{{ route('my_passengers', ['lang' => $selectedLanguage->abbreviation, 'ride_id' => $ride->id]) }}">
                                 <div class="grid divide-y">
-                                    @foreach ($ride->bookings->whereIn('status', [\App\Models\Booking::STATUS_COMPLETED, \App\Models\Booking::STATUS_CANCELLED]) as $booking)
+                                    @foreach ($ride->bookings->whereNotIn('status', [\App\Models\Booking::STATUS_DECLINED, \App\Models\Booking::STATUS_CANCELLED]) as $booking)
                                         @if ($booking->passenger)
                                             <div class="flex items-center p-4 space-x-2 w-full no-scrollbar overflow-x-auto gap-2">
                                                 <div class="w-12 h-12 rounded-full flex-shrink-0">
@@ -538,13 +538,13 @@
                     @if (strtotime($ride->date) > strtotime('today') ||
                             (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
                         @if (!$ride->isCancelled())
-                            <div class="flex justify-center gap-4">
+                            <div class="flex w-full gap-4">
                                 <a href="{{ route('edit_ride', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id]) }}"
-                                    class="button-exp-fill w-36">
+                                    class="button-exp-fill flex-1 text-center">
                                     {{ $rideDetailPage->edit_ride_btn_label ?? 'Edit ride' }}
                                 </a>
                                 <a id="cancelRideBtn" href="#"
-                                    class="inline-flex justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400 w-36">
+                                    class="inline-flex flex-1 justify-center rounded bg-red-500 px-3 py-2 font-FuturaMdCnBT text-lg font-medium text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-red-400">
                                     {{ $rideDetailPage->cancel_ride_btn_label ?? 'Cancel ride' }}
                                 </a>
                             </div>

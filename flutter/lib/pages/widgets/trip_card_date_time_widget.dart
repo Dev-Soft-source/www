@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:proximaride_app/helpers/currency_formatter.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import '../../consts/constFileLink.dart';
 
@@ -59,12 +60,13 @@ Widget tripCardDateTimeWidget({String date = "", String time = "", String seatLe
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    txt16SizeLineThrough(title: "\$$price", context: context),
+                    txt16SizeLineThrough(
+                        title: formatCurrency(price), context: context),
                     2.widthBox,
                     RichText(
                       text: TextSpan(
                         children: [
-                          textSpan(title: "\$$firmPrice", context: context, fontFamily: bold, textColor: textColor, textSize: 24.0),
+                          textSpan(title: formatCurrency(firmPrice), context: context, fontFamily: bold, textColor: textColor, textSize: 24.0),
                           textSpan(title: perSeatLabel, context: context, fontFamily: bold, textColor: textColor, textSize: 16.0),
                         ],
                       ),
@@ -75,7 +77,7 @@ Widget tripCardDateTimeWidget({String date = "", String time = "", String seatLe
                 RichText(
                   text: TextSpan(
                     children: [
-                      textSpan(title: "\$$price", context: context, fontFamily: bold, textColor: textColor, textSize: 24.0),
+                      textSpan(title: formatCurrency(price), context: context, fontFamily: bold, textColor: textColor, textSize: 24.0),
                       textSpan(title: perSeatLabel, context: context, fontFamily: bold, textColor: textColor, textSize: 16.0),
                     ],
                   ),

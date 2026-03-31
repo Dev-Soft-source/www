@@ -8,6 +8,7 @@ Widget outlineButtonWidget({ textWidget, onPressed, Color btnColor = btnPrimaryC
   return OutlinedButton(
     onPressed: onPressed,
     style: OutlinedButton.styleFrom(
+      minimumSize: const Size.fromHeight(buttonHeight),
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(5)
         ),

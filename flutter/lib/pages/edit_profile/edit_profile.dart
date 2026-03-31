@@ -23,7 +23,9 @@ class EditProfilePage extends GetView<EditProfileController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(EditProfileController());
+    if (!Get.isRegistered<EditProfileController>()) {
+      Get.put(EditProfileController());
+    }
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,

@@ -17,7 +17,9 @@ class ContactUsPage extends GetView<ContactUsController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(ContactUsController());
+    if (!Get.isRegistered<ContactUsController>()) {
+      Get.put(ContactUsController());
+    }
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,

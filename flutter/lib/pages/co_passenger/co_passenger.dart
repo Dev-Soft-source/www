@@ -11,7 +11,9 @@ class CoPassengerPage extends GetView<CoPassengerController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(CoPassengerController());
+    if (!Get.isRegistered<CoPassengerController>()) {
+      Get.put(CoPassengerController());
+    }
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,

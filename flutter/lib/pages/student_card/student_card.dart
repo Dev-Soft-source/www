@@ -20,7 +20,9 @@ class StudentCardPage extends GetView<StudentCardController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(StudentCardController());
+    if (!Get.isRegistered<StudentCardController>()) {
+      Get.put(StudentCardController());
+    }
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,

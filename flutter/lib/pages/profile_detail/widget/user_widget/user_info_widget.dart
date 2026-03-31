@@ -82,7 +82,7 @@ Widget userInfoWidget(
                           fontFamily: buttonFontFamily,
                           textColor: Colors.white,
                           linkColor: Colors.white,
-                          textAlign: TextAlign.center,
+                          textAlign: TextAlign.justify,
                           openLinksExternally: false,
                         )
                       : buttonLabelText(

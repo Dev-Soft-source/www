@@ -241,7 +241,8 @@ class SearchRidePage extends GetView<SearchRideController> {
                                         title:
                                             "${controller.labelTextDetail['search_section_pink_ride_label'] ?? "Pink rides"}",
                                         fontFamily: regular,
-                                        context: context),
+                                        context: context,
+                                        textColor: const Color.fromARGB(255, 180, 20, 9)),
                                   ),
                                 ),
                               ],
@@ -273,7 +274,8 @@ class SearchRidePage extends GetView<SearchRideController> {
                                       title:
                                           "${controller.labelTextDetail['search_section_extra_care_label'] ?? "Extra care rides"}",
                                       fontFamily: regular,
-                                      context: context),
+                                      context: context,
+                                      textColor: const Color.fromARGB(255, 39, 114, 42)),
                                 ))
                               ],
                             ))

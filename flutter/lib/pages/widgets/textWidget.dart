@@ -434,6 +434,20 @@ Widget txt16SizeWithOutContext(
   );
 }
 
+Widget txt20SizeWithOutContext(
+    {String title = "",
+    String fontFamily = regular,
+    Color textColor = textColor}) {
+  return Text(
+    title,
+    style: TextStyle(
+      fontFamily: fontFamily,
+      fontSize: 20,
+      color: textColor,
+    ),
+  );
+}
+
 Widget textWithUnderLine(
     {String title = "",
     String fontFamily = regular,

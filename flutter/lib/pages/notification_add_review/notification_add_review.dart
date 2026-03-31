@@ -19,7 +19,9 @@ class NotificationAddReviewPage
 
   @override
   Widget build(BuildContext context) {
-    Get.put(NotificationAddReviewController());
+    if (!Get.isRegistered<NotificationAddReviewController>()) {
+      Get.put(NotificationAddReviewController());
+    }
     return Scaffold(
       appBar: AppBar(
         leading: safeBackButton(context),

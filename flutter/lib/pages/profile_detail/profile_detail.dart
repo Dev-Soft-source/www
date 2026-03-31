@@ -18,18 +18,19 @@ class ProfileDetailPage extends GetView<ProfileDetailController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(ProfileDetailController());
-    return Obx(
-      () => Scaffold(
+    if (!Get.isRegistered<ProfileDetailController>()) {
+      Get.put(ProfileDetailController());
+    }
+    return Scaffold(
           appBar: AppBar(
             backgroundColor: primaryColor,
-            title: secondAppBarWidget(
+            title: Obx(() => secondAppBarWidget(
                 title: controller.profileType == "driver"
                     ? controller.driverTitle.value
                     : controller.profileType == "passenger"
                         ? "${controller.userProfile['first_name'] ?? "User"}'s ${controller.labelTextDetail['profile_label'] ?? "profile"}"
                         : "${controller.userProfile['first_name'] ?? "User"}'s ${controller.labelTextDetail['profile_label'] ?? "profile"}",
-                context: context),
+                context: context)),
             leading: safeBackButton(context),
           ),
           body: SafeArea(
@@ -318,7 +319,7 @@ class ProfileDetailPage extends GetView<ProfileDetailController> {
                 );
               }
             }),
-          )),
+          ),
     );
   }
 }

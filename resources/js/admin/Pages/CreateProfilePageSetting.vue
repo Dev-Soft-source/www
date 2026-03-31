@@ -319,6 +319,50 @@
                                                     class="flex justify-between"
                                                 >
                                                     <label
+                                                        :for="`coffee_on_wall_label_${activeLanguageId}`"
+                                                        >Coffee on the Wall</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`coffee_on_wall_label_${activeLanguageId}`"
+                                                    :id="`coffee_on_wall_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'coffee_on_wall_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'coffee_on_wall_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `coffee_on_wall_label.coffee_on_wall_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `coffee_on_wall_label.coffee_on_wall_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
                                                         :for="`refund_policy_label_${activeLanguageId}`"
                                                         >Refund Policy</label
                                                     >
@@ -893,6 +937,7 @@ export default {
                             this.handleInput("", language, "cancellation_policy_label");
                             this.handleInput("", language, "dispute_policy_label");
                             this.handleInput("", language, "contact_proximaride_label");
+                            this.handleInput("", language, "coffee_on_wall_label");
                             this.handleInput("", language, "logout_label");
                             this.handleInput("", language, "colse_your_contact_label");
                             // this.handleInput("", language, "profile_page_setting");
@@ -962,6 +1007,11 @@ export default {
                                 setting?.contact_proximaride_label,
                                 setting?.language,
                                 "contact_proximaride_label"
+                            );
+                            this.handleInput(
+                                setting?.coffee_on_wall_label,
+                                setting?.language,
+                                "coffee_on_wall_label"
                             );
                             this.handleInput(
                                 setting?.logout_label,
@@ -1074,6 +1124,9 @@ export default {
                 ) ||
                 validationErros.has(
                     `contact_proximaride_label.contact_proximaride_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `coffee_on_wall_label.coffee_on_wall_label_${language.id}`
                 ) ||
                 validationErros.has(
                     `logout_label.logout_label_${language.id}`

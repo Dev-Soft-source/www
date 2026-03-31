@@ -16,7 +16,9 @@ class StageFive extends GetView<StageFiveController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(StageFiveController());
+    if (!Get.isRegistered<StageFiveController>()) {
+      Get.put(StageFiveController());
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,

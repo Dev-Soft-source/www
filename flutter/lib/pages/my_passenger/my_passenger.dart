@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
+import 'package:proximaride_app/helpers/currency_formatter.dart';
 import 'package:proximaride_app/pages/my_passenger/MyPassengerController.dart';
 import 'package:proximaride_app/pages/my_passenger/widget/header_widget.dart';
 import 'package:proximaride_app/pages/my_passenger/widget/seat_booked_row_widget.dart';
@@ -16,7 +17,9 @@ class MyPassengerPage extends GetView<MyPassengerController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(MyPassengerController());
+    if (!Get.isRegistered<MyPassengerController>()) {
+      Get.put(MyPassengerController());
+    }
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -46,6 +49,16 @@ class MyPassengerPage extends GetView<MyPassengerController> {
           if (controller.isLoading.value == true) {
             return Center(child: progressCircularWidget(context));
           } else {
+            if (controller.myPassengers.isEmpty) {
+              return Center(
+                child: txt20Size(
+                  title:
+                      "${controller.labelTextDetail['no_passenger_found_message'] ?? "No passengers found"}",
+                  context: context,
+                ),
+              );
+            }
+
             return Container(
                 padding: const EdgeInsets.all(15.0),
                 child: ListView.separated(
@@ -89,23 +102,22 @@ class MyPassengerPage extends GetView<MyPassengerController> {
                             seatBookedRowWidget(
                                 title:
                                     "${controller.labelTextDetail['my_fare_label'] ?? "My fare"}",
-                                value:
-                                    "${controller.myPassengers[index]['fare'] ?? 0}",
+                                value: formatCurrency(
+                                    controller.myPassengers[index]['fare'] ?? 0),
                                 context: context),
                             const Divider(),
                             seatBookedRowWidget(
                                 title:
                                     "${controller.labelTextDetail['booking_fee_label'] ?? "Booking fee"}",
-                                value: double.parse(controller
-                                        .myPassengers[index]['booking_credit']
-                                        .toString())
-                                    .toStringAsFixed(1),
+                                value: formatCurrency(double.parse(controller
+                                    .myPassengers[index]['booking_credit']
+                                    .toString())),
                                 context: context),
                             const Divider(),
                             seatBookedRowWidget(
                                 title:
                                     "${controller.labelTextDetail['total_amount_label'] ?? "Total amount"}",
-                                value: (double.parse(controller
+                                value: formatCurrency((double.parse(controller
                                             .myPassengers[index]
                                                 ['booking_credit']
                                             .toString()) +
@@ -117,7 +129,7 @@ class MyPassengerPage extends GetView<MyPassengerController> {
                                                         ['fare']
                                                     .toString()
                                                 : '0'))
-                                    .toStringAsFixed(1),
+                                    ),
                                 context: context),
                             const Divider(),
                             10.heightBox,

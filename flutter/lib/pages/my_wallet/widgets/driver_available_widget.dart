@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:proximaride_app/helpers/currency_formatter.dart';
 import 'package:proximaride_app/pages/my_wallet/widgets/data_row_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
 import '../../../consts/constFileLink.dart';
 
 Widget driverAvailableWidget({context, required data, controller, bool changeColor = false}) {
+  final defaultRideDetail = data['ride']?['default_ride_detail'];
+  final rideDetail = defaultRideDetail is Map
+      ? Map<String, dynamic>.from(defaultRideDetail)
+      : (defaultRideDetail is List &&
+              defaultRideDetail.isNotEmpty &&
+              defaultRideDetail.first is Map)
+          ? Map<String, dynamic>.from(defaultRideDetail.first)
+          : <String, dynamic>{};
 
   String tripDate = "";
   if(data['ride']['completed_date'] != null){
@@ -60,13 +69,13 @@ Widget driverAvailableWidget({context, required data, controller, bool changeCol
         dataRowWidget(
             context: context,
             title: "${controller.labelTextDetail['driver_available_from_label'] ?? 'From'}",
-            data: '${data['ride']['default_ride_detail']['departure']}',
+            data: '${rideDetail['departure'] ?? ''}',
         ),
         const Divider(),
         dataRowWidget(
             context: context,
             title: "${controller.labelTextDetail['driver_available_to_label'] ?? 'To'}",
-            data: '${data['ride']['default_ride_detail']['destination']}',
+            data: '${rideDetail['destination'] ?? ''}',
         ),
         const Divider(),
         dataRowWidget(
@@ -78,7 +87,7 @@ Widget driverAvailableWidget({context, required data, controller, bool changeCol
         dataRowWidget(
             context: context,
             title: "${controller.labelTextDetail['driver_available_total_amount_label'] ?? 'Total amount'}",
-            data: '\$${data['total_payout_cost']}',
+            data: formatCurrency(data['total_payout_cost']),
             onTap: (() {
               Get.toNamed('/ride_fair_detail/${data['ride_id']}/available');
             })),
