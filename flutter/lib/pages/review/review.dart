@@ -8,14 +8,14 @@ import 'package:proximaride_app/pages/widgets/second_appbar_widget.dart';
 
 import '../widgets/textWidget.dart';
 
-class ReviewPage extends GetView<ReviewController> {
+class ReviewPage extends StatelessWidget {
   const ReviewPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<ReviewController>()) {
-      Get.put(ReviewController());
-    }
+    final ReviewController controller = Get.isRegistered<ReviewController>()
+        ? Get.find<ReviewController>()
+        : Get.put(ReviewController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -171,3 +171,5 @@ class ReviewPage extends GetView<ReviewController> {
         }));
   }
 }
+
+

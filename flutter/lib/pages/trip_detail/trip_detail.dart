@@ -24,7 +24,7 @@ import 'package:proximaride_app/pages/widgets/second_appbar_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import 'package:proximaride_app/services/logger_service.dart';
 
-class TripDetailPage extends GetView<TripDetailController> {
+class TripDetailPage extends StatelessWidget {
   const TripDetailPage({super.key});
 
   static const double _bottomActionBarHeight = 88.0;
@@ -58,9 +58,9 @@ class TripDetailPage extends GetView<TripDetailController> {
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<TripDetailController>()) {
-      Get.put(TripDetailController());
-    }
+    final TripDetailController controller = Get.isRegistered<TripDetailController>()
+        ? Get.find<TripDetailController>()
+        : Get.put(TripDetailController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -564,4 +564,6 @@ class TripDetailPage extends GetView<TripDetailController> {
         }));
   }
 }
+
+
 

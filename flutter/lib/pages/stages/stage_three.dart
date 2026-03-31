@@ -16,14 +16,14 @@ import 'package:proximaride_app/pages/widgets/step_appbar_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import '../widgets/tool_tip.dart';
 
-class StageThree extends GetView<StageThreeController> {
+class StageThree extends StatelessWidget {
   const StageThree({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<StageThreeController>()) {
-      Get.put(StageThreeController());
-    }
+    final StageThreeController controller = Get.isRegistered<StageThreeController>()
+        ? Get.find<StageThreeController>()
+        : Get.put(StageThreeController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -1757,3 +1757,5 @@ class StageThree extends GetView<StageThreeController> {
       );
   }
 }
+
+

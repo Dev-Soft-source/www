@@ -12,14 +12,14 @@ import 'package:proximaride_app/services/logger_service.dart';
 // import 'package:side_sheet/side_sheet.dart';
 import 'NotificationController.dart';
 
-class NotificationPage extends GetView<NotificationController> {
+class NotificationPage extends StatelessWidget {
   const NotificationPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<NotificationController>()) {
-      Get.put(NotificationController());
-    }
+    final NotificationController controller = Get.isRegistered<NotificationController>()
+        ? Get.find<NotificationController>()
+        : Get.put(NotificationController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -1074,4 +1074,6 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 }
+
+
 

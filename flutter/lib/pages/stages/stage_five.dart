@@ -11,14 +11,14 @@ import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
 import '../widgets/tool_tip.dart';
 
-class StageFive extends GetView<StageFiveController> {
+class StageFive extends StatelessWidget {
   const StageFive({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<StageFiveController>()) {
-      Get.put(StageFiveController());
-    }
+    final StageFiveController controller = Get.isRegistered<StageFiveController>()
+        ? Get.find<StageFiveController>()
+        : Get.put(StageFiveController());
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
@@ -450,3 +450,5 @@ class StageFive extends GetView<StageFiveController> {
     );
   }
 }
+
+

@@ -13,15 +13,14 @@ import 'package:proximaride_app/pages/widgets/text_area_widget.dart';
 
 import '../widgets/tool_tip.dart';
 
-class NotificationAddReviewPage
-    extends GetView<NotificationAddReviewController> {
+class NotificationAddReviewPage extends StatelessWidget {
   const NotificationAddReviewPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<NotificationAddReviewController>()) {
-      Get.put(NotificationAddReviewController());
-    }
+    final NotificationAddReviewController controller = Get.isRegistered<NotificationAddReviewController>()
+        ? Get.find<NotificationAddReviewController>()
+        : Get.put(NotificationAddReviewController());
     return Scaffold(
       appBar: AppBar(
         leading: safeBackButton(context),
@@ -315,4 +314,6 @@ class NotificationAddReviewPage
     );
   }
 }
+
+
 

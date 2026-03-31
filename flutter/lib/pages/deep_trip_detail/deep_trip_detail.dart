@@ -19,14 +19,14 @@ import 'package:proximaride_app/pages/widgets/progress_circular_widget.dart';
 import 'package:proximaride_app/pages/widgets/second_appbar_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
-class DeepTripDetailPage extends GetView<DeepTripDetailController> {
+class DeepTripDetailPage extends StatelessWidget {
   const DeepTripDetailPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<DeepTripDetailController>()) {
-      Get.put(DeepTripDetailController());
-    }
+    final DeepTripDetailController controller = Get.isRegistered<DeepTripDetailController>()
+        ? Get.find<DeepTripDetailController>()
+        : Get.put(DeepTripDetailController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -284,3 +284,5 @@ class DeepTripDetailPage extends GetView<DeepTripDetailController> {
         }));
   }
 }
+
+

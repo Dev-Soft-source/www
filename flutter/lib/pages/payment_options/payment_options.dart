@@ -9,14 +9,14 @@ import 'package:proximaride_app/pages/widgets/progress_circular_widget.dart';
 import 'package:proximaride_app/pages/widgets/second_appbar_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
-class PaymentOptions extends GetView<PaymentOptionController> {
+class PaymentOptions extends StatelessWidget {
   const PaymentOptions({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<PaymentOptionController>()) {
-      Get.put(PaymentOptionController());
-    }
+    final PaymentOptionController controller = Get.isRegistered<PaymentOptionController>()
+        ? Get.find<PaymentOptionController>()
+        : Get.put(PaymentOptionController());
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
@@ -153,4 +153,6 @@ class PaymentOptions extends GetView<PaymentOptionController> {
     );
   }
 }
+
+
 

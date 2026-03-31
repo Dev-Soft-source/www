@@ -15,14 +15,14 @@ import 'package:proximaride_app/pages/widgets/text_area_widget.dart';
 import '../widgets/button_Widget.dart';
 import '../widgets/tool_tip.dart';
 
-class BookSeatPage extends GetView<BookSeatController> {
+class BookSeatPage extends StatelessWidget {
   const BookSeatPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<BookSeatController>()) {
-      Get.put(BookSeatController());
-    }
+    final BookSeatController controller = Get.isRegistered<BookSeatController>()
+        ? Get.find<BookSeatController>()
+        : Get.put(BookSeatController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -632,3 +632,5 @@ class BookSeatPage extends GetView<BookSeatController> {
         }));
   }
 }
+
+

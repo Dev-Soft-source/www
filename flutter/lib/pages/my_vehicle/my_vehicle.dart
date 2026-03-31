@@ -10,13 +10,13 @@ import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import 'package:proximaride_app/services/logger_service.dart';
 import 'package:proximaride_app/pages/widgets/error_state_widget.dart';
 
-class MyVehiclePage extends GetView<MyVehicleController> {
+class MyVehiclePage extends StatelessWidget {
   const MyVehiclePage({super.key});
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<MyVehicleController>()) {
-      Get.put(MyVehicleController());
-    }
+    final MyVehicleController controller = Get.isRegistered<MyVehicleController>()
+        ? Get.find<MyVehicleController>()
+        : Get.put(MyVehicleController());
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
@@ -269,3 +269,5 @@ class MyVehiclePage extends GetView<MyVehicleController> {
     );
   }
 }
+
+

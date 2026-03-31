@@ -7,7 +7,39 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/helpers/format_message.dart';
+import 'package:proximaride_app/pages/add_card/AddCardController.dart';
+import 'package:proximaride_app/pages/book_seat/BookSeatController.dart';
+import 'package:proximaride_app/pages/chat/ChatController.dart';
+import 'package:proximaride_app/pages/close_my_account/CloseAccountController.dart';
+import 'package:proximaride_app/pages/co_passenger/CoPassengerController.dart';
+import 'package:proximaride_app/pages/contact_us/ContactUsController.dart';
+import 'package:proximaride_app/pages/deep_trip_detail/DeepTripDetailController.dart';
+import 'package:proximaride_app/pages/driver_license/DriverLicenseController.dart';
+import 'package:proximaride_app/pages/edit_profile/EditProfileController.dart';
+import 'package:proximaride_app/pages/email_address/EmailAddressController.dart';
+import 'package:proximaride_app/pages/forget_password/ForgetPasswordController.dart';
+import 'package:proximaride_app/pages/login/LoginController.dart';
+import 'package:proximaride_app/pages/my_passenger/MyPassengerController.dart';
+import 'package:proximaride_app/pages/my_phone_number/MyPhoneNumberController.dart';
+import 'package:proximaride_app/pages/my_profile/MyProfileController.dart';
+import 'package:proximaride_app/pages/my_reviews/MyReviewsController.dart';
+import 'package:proximaride_app/pages/my_trips/MyTripController.dart';
+import 'package:proximaride_app/pages/my_vehicle/MyVehicleController.dart';
+import 'package:proximaride_app/pages/my_wallet/MyWalletController.dart';
+import 'package:proximaride_app/pages/navigation/NavigationController.dart';
+import 'package:proximaride_app/pages/notifications/NotificationController.dart';
+import 'package:proximaride_app/pages/password/PasswordController.dart';
+import 'package:proximaride_app/pages/payment_options/PaymentOptionsController.dart';
+import 'package:proximaride_app/pages/payout_account/PayoutAccountController.dart';
+import 'package:proximaride_app/pages/profile_detail/ProfileDetailController.dart';
+import 'package:proximaride_app/pages/profile_photo/ProfilePhotoController.dart';
+import 'package:proximaride_app/pages/profile_setting/ProfileSettingController.dart';
+import 'package:proximaride_app/pages/referals/ReferralController.dart';
+import 'package:proximaride_app/pages/search_ride/SearchRideController.dart';
+import 'package:proximaride_app/pages/signup/RegisterController.dart';
+import 'package:proximaride_app/pages/student_card/StudentCardController.dart';
 import 'package:proximaride_app/pages/stages/StageProvider.dart';
+import 'package:proximaride_app/pages/trip_detail/TripDetailController.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import 'package:proximaride_app/services/logger_service.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -944,6 +976,47 @@ class Service extends GetxService {
     await secureStorage.write(key: "userInfo", value: jsonEncode(loginUserDetail));
   }
 
+  void _deleteControllerIfRegistered<T>() {
+    if (Get.isRegistered<T>()) {
+      Get.delete<T>(force: true);
+    }
+  }
+
+  void _resetControllersForLanguageChange() {
+    _deleteControllerIfRegistered<LoginController>();
+    _deleteControllerIfRegistered<RegisterController>();
+    _deleteControllerIfRegistered<ForgetPasswordController>();
+    _deleteControllerIfRegistered<NavigationController>();
+    _deleteControllerIfRegistered<ChatController>();
+    _deleteControllerIfRegistered<MyTripController>();
+    _deleteControllerIfRegistered<MyProfileController>();
+    _deleteControllerIfRegistered<NotificationController>();
+    _deleteControllerIfRegistered<SearchRideController>();
+    _deleteControllerIfRegistered<TripDetailController>();
+    _deleteControllerIfRegistered<DeepTripDetailController>();
+    _deleteControllerIfRegistered<BookSeatController>();
+    _deleteControllerIfRegistered<CoPassengerController>();
+    _deleteControllerIfRegistered<MyWalletController>();
+    _deleteControllerIfRegistered<MyReviewsController>();
+    _deleteControllerIfRegistered<MyPassengerController>();
+    _deleteControllerIfRegistered<ProfileDetailController>();
+    _deleteControllerIfRegistered<ProfilePhotoController>();
+    _deleteControllerIfRegistered<ProfileSettingController>();
+    _deleteControllerIfRegistered<PasswordController>();
+    _deleteControllerIfRegistered<MyPhoneNumberController>();
+    _deleteControllerIfRegistered<EmailAddressController>();
+    _deleteControllerIfRegistered<StudentCardController>();
+    _deleteControllerIfRegistered<DriverLicenseController>();
+    _deleteControllerIfRegistered<MyVehicleController>();
+    _deleteControllerIfRegistered<PaymentOptionController>();
+    _deleteControllerIfRegistered<PayoutAccountController>();
+    _deleteControllerIfRegistered<AddCardController>();
+    _deleteControllerIfRegistered<EditProfileController>();
+    _deleteControllerIfRegistered<ReferralController>();
+    _deleteControllerIfRegistered<CloseAccountController>();
+    _deleteControllerIfRegistered<ContactUsController>();
+  }
+
   updateLanguage(lang, page) async {
     if (isLoading.value) return;
     isLoading.value = true;
@@ -958,6 +1031,7 @@ class Service extends GetxService {
         StageProvider().updateLanguageId(token, langId.value).then(
             (resp) async {
           if (resp['status'] != null && resp['status'] == "Success") {
+            _resetControllersForLanguageChange();
             if (page == "login") {
               await Get.offAllNamed('/login');
             } else if (page == "signup") {
@@ -981,6 +1055,7 @@ class Service extends GetxService {
           showDialogue(err.toString());
         });
       } else {
+        _resetControllersForLanguageChange();
         if (page == "login") {
           Get.offAllNamed('/login');
         } else if (page == "signup") {

@@ -6,14 +6,14 @@ import 'package:proximaride_app/pages/widgets/progress_circular_widget.dart';
 import 'package:proximaride_app/pages/widgets/second_appbar_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
-class CoPassengerPage extends GetView<CoPassengerController> {
+class CoPassengerPage extends StatelessWidget {
   const CoPassengerPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<CoPassengerController>()) {
-      Get.put(CoPassengerController());
-    }
+    final CoPassengerController controller = Get.isRegistered<CoPassengerController>()
+        ? Get.find<CoPassengerController>()
+        : Get.put(CoPassengerController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -68,4 +68,6 @@ class CoPassengerPage extends GetView<CoPassengerController> {
         }));
   }
 }
+
+
 

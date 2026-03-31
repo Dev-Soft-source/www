@@ -10,14 +10,14 @@ import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import 'package:proximaride_app/pages/widgets/error_state_widget.dart';
 import '../widgets/overlay_widget.dart';
 
-class CountryPage extends GetView<LocationController> {
+class CountryPage extends StatelessWidget {
   const CountryPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<LocationController>()) {
-      Get.put(LocationController());
-    }
+    final LocationController controller = Get.isRegistered<LocationController>()
+        ? Get.find<LocationController>()
+        : Get.put(LocationController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -143,4 +143,6 @@ class CountryPage extends GetView<LocationController> {
         }));
   }
 }
+
+
 

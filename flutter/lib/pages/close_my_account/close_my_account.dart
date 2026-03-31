@@ -10,14 +10,14 @@ import '../widgets/textWidget.dart';
 import '../widgets/tool_tip.dart';
 import 'CloseAccountController.dart';
 
-class CloseMyAccount extends GetView<CloseAccountController> {
+class CloseMyAccount extends StatelessWidget {
   const CloseMyAccount({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<CloseAccountController>()) {
-      Get.put(CloseAccountController());
-    }
+    final CloseAccountController controller = Get.isRegistered<CloseAccountController>()
+        ? Get.find<CloseAccountController>()
+        : Get.put(CloseAccountController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -910,4 +910,6 @@ class CloseMyAccount extends GetView<CloseAccountController> {
         ));
   }
 }
+
+
 

@@ -13,14 +13,14 @@ import 'package:proximaride_app/pages/widgets/progress_circular_widget.dart';
 import 'package:proximaride_app/pages/widgets/second_appbar_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
-class ProfileDetailPage extends GetView<ProfileDetailController> {
+class ProfileDetailPage extends StatelessWidget {
   const ProfileDetailPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<ProfileDetailController>()) {
-      Get.put(ProfileDetailController());
-    }
+    final ProfileDetailController controller = Get.isRegistered<ProfileDetailController>()
+        ? Get.find<ProfileDetailController>()
+        : Get.put(ProfileDetailController());
     return Scaffold(
           appBar: AppBar(
             backgroundColor: primaryColor,
@@ -323,4 +323,6 @@ class ProfileDetailPage extends GetView<ProfileDetailController> {
     );
   }
 }
+
+
 

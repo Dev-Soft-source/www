@@ -12,14 +12,14 @@ import '../widgets/second_appbar_widget.dart';
 import '../widgets/textWidget.dart';
 import '../widgets/text_area_widget.dart';
 
-class ReviewDetail extends GetView<ReviewDetailController> {
+class ReviewDetail extends StatelessWidget {
   const ReviewDetail({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<ReviewDetailController>()) {
-      Get.put(ReviewDetailController());
-    }
+    final ReviewDetailController controller = Get.isRegistered<ReviewDetailController>()
+        ? Get.find<ReviewDetailController>()
+        : Get.put(ReviewDetailController());
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -295,3 +295,5 @@ class ReviewDetail extends GetView<ReviewDetailController> {
     );
   }
 }
+
+

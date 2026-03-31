@@ -12,14 +12,14 @@ import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
 import '../widgets/tool_tip.dart';
 
-class ForgetPasswordPage extends GetView<ForgetPasswordController> {
+class ForgetPasswordPage extends StatelessWidget {
   const ForgetPasswordPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<ForgetPasswordController>()) {
-      Get.put(ForgetPasswordController());
-    }
+    final ForgetPasswordController controller = Get.isRegistered<ForgetPasswordController>()
+        ? Get.find<ForgetPasswordController>()
+        : Get.put(ForgetPasswordController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -158,4 +158,6 @@ class ForgetPasswordPage extends GetView<ForgetPasswordController> {
       );
   }
 }
+
+
 

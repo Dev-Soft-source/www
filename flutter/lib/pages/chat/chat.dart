@@ -9,14 +9,14 @@ import 'Widget/chat_card.dart';
 import 'package:proximaride_app/pages/widgets/error_state_widget.dart';
 // import 'package:flutter_localizations/flutter_localizations.dart';
 
-class ChatPage extends GetView<ChatController> {
+class ChatPage extends StatelessWidget {
   const ChatPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<ChatController>()) {
-      Get.put(ChatController());
-    }
+    final ChatController controller = Get.isRegistered<ChatController>()
+        ? Get.find<ChatController>()
+        : Get.put(ChatController());
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
@@ -170,3 +170,5 @@ class ChatPage extends GetView<ChatController> {
     );
   }
 }
+
+

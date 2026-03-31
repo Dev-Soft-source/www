@@ -14,14 +14,14 @@ import 'package:proximaride_app/services/logger_service.dart';
 
 import '../widgets/tool_tip.dart';
 
-class DriverLicensePage extends GetView<DriverLicenseController> {
+class DriverLicensePage extends StatelessWidget {
   const DriverLicensePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<DriverLicenseController>()) {
-      Get.put(DriverLicenseController());
-    }
+    final DriverLicenseController controller = Get.isRegistered<DriverLicenseController>()
+        ? Get.find<DriverLicenseController>()
+        : Get.put(DriverLicenseController());
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
@@ -233,4 +233,6 @@ class DriverLicensePage extends GetView<DriverLicenseController> {
     );
   }
 }
+
+
 

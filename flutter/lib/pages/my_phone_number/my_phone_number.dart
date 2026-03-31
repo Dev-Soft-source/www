@@ -12,14 +12,14 @@ import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
 import '../widgets/tool_tip.dart';
 
-class MyPhoneNumberPage extends GetView<MyPhoneNumberController> {
+class MyPhoneNumberPage extends StatelessWidget {
   const MyPhoneNumberPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<MyPhoneNumberController>()) {
-      Get.put(MyPhoneNumberController());
-    }
+    final MyPhoneNumberController controller = Get.isRegistered<MyPhoneNumberController>()
+        ? Get.find<MyPhoneNumberController>()
+        : Get.put(MyPhoneNumberController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -411,4 +411,6 @@ class MyPhoneNumberPage extends GetView<MyPhoneNumberController> {
         ));
   }
 }
+
+
 

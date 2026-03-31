@@ -12,14 +12,14 @@ import 'package:proximaride_app/pages/widgets/text_area_widget.dart';
 
 import '../widgets/tool_tip.dart';
 
-class ContactUsPage extends GetView<ContactUsController> {
+class ContactUsPage extends StatelessWidget {
   const ContactUsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<ContactUsController>()) {
-      Get.put(ContactUsController());
-    }
+    final ContactUsController controller = Get.isRegistered<ContactUsController>()
+        ? Get.find<ContactUsController>()
+        : Get.put(ContactUsController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -228,4 +228,6 @@ class ContactUsPage extends GetView<ContactUsController> {
         ));
   }
 }
+
+
 

@@ -7,14 +7,14 @@ import 'package:proximaride_app/pages/widgets/second_appbar_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 
-class PhoneNumberVerificationPage extends GetView<MyPhoneNumberController> {
+class PhoneNumberVerificationPage extends StatelessWidget {
   const PhoneNumberVerificationPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<MyPhoneNumberController>()) {
-      Get.put(MyPhoneNumberController());
-    }
+    final MyPhoneNumberController controller = Get.isRegistered<MyPhoneNumberController>()
+        ? Get.find<MyPhoneNumberController>()
+        : Get.put(MyPhoneNumberController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -166,4 +166,6 @@ class PhoneNumberVerificationPage extends GetView<MyPhoneNumberController> {
         ])));
   }
 }
+
+
 

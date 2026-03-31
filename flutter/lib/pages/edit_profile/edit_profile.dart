@@ -18,14 +18,14 @@ import 'package:proximaride_app/pages/widgets/error_state_widget.dart';
 import '../widgets/network_cache_image_widget.dart';
 import '../widgets/tool_tip.dart';
 
-class EditProfilePage extends GetView<EditProfileController> {
+class EditProfilePage extends StatelessWidget {
   const EditProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<EditProfileController>()) {
-      Get.put(EditProfileController());
-    }
+    final EditProfileController controller = Get.isRegistered<EditProfileController>()
+        ? Get.find<EditProfileController>()
+        : Get.put(EditProfileController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -649,4 +649,6 @@ class EditProfilePage extends GetView<EditProfileController> {
         ));
   }
 }
+
+
 

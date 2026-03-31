@@ -7,14 +7,14 @@ import 'package:proximaride_app/pages/widgets/progress_circular_widget.dart';
 import 'package:proximaride_app/pages/widgets/second_appbar_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
-class ThankYouPage extends GetView<ThankYouController> {
+class ThankYouPage extends StatelessWidget {
   const ThankYouPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<ThankYouController>()) {
-      Get.put(ThankYouController());
-    }
+    final ThankYouController controller = Get.isRegistered<ThankYouController>()
+        ? Get.find<ThankYouController>()
+        : Get.put(ThankYouController());
     return PopScope(
         canPop: false,
         onPopInvoked: (confirmed) {
@@ -284,3 +284,5 @@ class ThankYouPage extends GetView<ThankYouController> {
                     })));
   }
 }
+
+

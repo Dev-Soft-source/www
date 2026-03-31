@@ -840,13 +840,23 @@ import 'package:proximaride_app/services/logger_service.dart';
 import 'package:signin_with_linkedin/signin_with_linkedin.dart';
 //import 'package:tiktok_login_flutter/tiktok_login_flutter.dart';
 
-class LoginPage extends GetView<LoginController> {
+class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<LoginController>()) {
-      Get.put(LoginController());
+    final LoginController controller;
+    if (Get.isRegistered<LoginController>()) {
+      final existingController = Get.find<LoginController>();
+      if (existingController.loadedLangId !=
+          existingController.serviceController.langId.value) {
+        Get.delete<LoginController>(force: true);
+        controller = Get.put(LoginController());
+      } else {
+        controller = existingController;
+      }
+    } else {
+      controller = Get.put(LoginController());
     }
     return Scaffold(
       body: Obx(() {

@@ -6,14 +6,14 @@ import 'package:proximaride_app/pages/widgets/error_state_widget.dart';
 import 'package:proximaride_app/pages/widgets/progress_circular_widget.dart';
 import 'package:proximaride_app/pages/widgets/second_appbar_widget.dart';
 
-class ProfileSettingPage extends GetView<ProfileSettingController> {
+class ProfileSettingPage extends StatelessWidget {
   const ProfileSettingPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<ProfileSettingController>()) {
-      Get.put(ProfileSettingController());
-    }
+    final ProfileSettingController controller = Get.isRegistered<ProfileSettingController>()
+        ? Get.find<ProfileSettingController>()
+        : Get.put(ProfileSettingController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -161,3 +161,5 @@ class ProfileSettingPage extends GetView<ProfileSettingController> {
         ));
   }
 }
+
+

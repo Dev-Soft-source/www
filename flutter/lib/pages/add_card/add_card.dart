@@ -12,14 +12,14 @@ import '../widgets/fields_widget.dart';
 import '../widgets/tool_tip.dart';
 import 'AddCardController.dart';
 
-class AddCard extends GetView<AddCardController> {
+class AddCard extends StatelessWidget {
   const AddCard({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<AddCardController>()) {
-      Get.put(AddCardController());
-    }
+    final AddCardController controller = Get.isRegistered<AddCardController>()
+        ? Get.find<AddCardController>()
+        : Get.put(AddCardController());
     controller.getType();
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -616,4 +616,6 @@ class AddCard extends GetView<AddCardController> {
     );
   }
 }
+
+
 

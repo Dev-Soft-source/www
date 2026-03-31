@@ -10,14 +10,14 @@ import 'package:proximaride_app/pages/widgets/progress_circular_widget.dart';
 import 'package:proximaride_app/pages/widgets/second_appbar_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
-class Referral extends GetView<ReferralController> {
+class Referral extends StatelessWidget {
   const Referral({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<ReferralController>()) {
-      Get.put(ReferralController());
-    }
+    final ReferralController controller = Get.isRegistered<ReferralController>()
+        ? Get.find<ReferralController>()
+        : Get.put(ReferralController());
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
@@ -225,4 +225,6 @@ class Referral extends GetView<ReferralController> {
     );
   }
 }
+
+
 

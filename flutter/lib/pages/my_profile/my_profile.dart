@@ -8,14 +8,15 @@ import 'package:proximaride_app/pages/widgets/overlay_widget.dart';
 import 'package:proximaride_app/pages/widgets/progress_circular_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
-class MyProfilePage extends GetView<MyProfileController> {
+class MyProfilePage extends StatelessWidget {
   const MyProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<MyProfileController>()) {
-      Get.put(MyProfileController());
-    }
+    final MyProfileController controller =
+        Get.isRegistered<MyProfileController>()
+            ? Get.find<MyProfileController>()
+            : Get.put(MyProfileController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,

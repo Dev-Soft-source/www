@@ -17,13 +17,13 @@ import 'package:signin_with_linkedin/signin_with_linkedin.dart';
 //import 'package:tiktok_login_flutter/tiktok_login_flutter.dart';
 import '../widgets/tool_tip.dart';
 
-class SignupPage extends GetView<RegisterController> {
+class SignupPage extends StatelessWidget {
   const SignupPage({super.key});
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<RegisterController>()) {
-      Get.put(RegisterController());
-    }
+    final RegisterController controller = Get.isRegistered<RegisterController>()
+        ? Get.find<RegisterController>()
+        : Get.put(RegisterController());
     return Scaffold(body: Obx(() {
       // Show loading state
       if (controller.errorStateManager.isLoading.value) {
@@ -1233,3 +1233,5 @@ class SignupPage extends GetView<RegisterController> {
     }
   }
 }
+
+

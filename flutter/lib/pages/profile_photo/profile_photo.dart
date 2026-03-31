@@ -15,14 +15,14 @@ import 'package:proximaride_app/services/logger_service.dart';
 import 'package:proximaride_app/pages/widgets/error_state_widget.dart';
 import '../widgets/tool_tip.dart';
 
-class ProfilePhotoPage extends GetView<ProfilePhotoController> {
+class ProfilePhotoPage extends StatelessWidget {
   const ProfilePhotoPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<ProfilePhotoController>()) {
-      Get.put(ProfilePhotoController());
-    }
+    final ProfilePhotoController controller = Get.isRegistered<ProfilePhotoController>()
+        ? Get.find<ProfilePhotoController>()
+        : Get.put(ProfilePhotoController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -276,4 +276,6 @@ class ProfilePhotoPage extends GetView<ProfilePhotoController> {
         ));
   }
 }
+
+
 

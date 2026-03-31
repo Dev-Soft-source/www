@@ -16,7 +16,7 @@ import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
 import '../widgets/tool_tip.dart';
 
-class SearchRidePage extends GetView<SearchRideController> {
+class SearchRidePage extends StatelessWidget {
   const SearchRidePage({super.key});
   @override
   Widget build(BuildContext context) {

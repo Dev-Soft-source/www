@@ -16,14 +16,14 @@ import '../widgets/button_Widget.dart';
 import '../widgets/second_appbar_widget.dart';
 import 'MyWalletController.dart';
 
-class MyWallet extends GetView<MyWalletController> {
+class MyWallet extends StatelessWidget {
   const MyWallet({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<MyWalletController>()) {
-      Get.put(MyWalletController());
-    }
+    final MyWalletController controller = Get.isRegistered<MyWalletController>()
+        ? Get.find<MyWalletController>()
+        : Get.put(MyWalletController());
     return Scaffold(
         appBar: AppBar(
           leading: safeBackButton(context),
@@ -841,4 +841,6 @@ class MyWallet extends GetView<MyWalletController> {
         ));
   }
 }
+
+
 

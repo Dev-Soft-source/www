@@ -14,14 +14,14 @@ import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
 import '../widgets/tool_tip.dart';
 
-class PayoutAccountPage extends GetView<PayoutAccountController> {
+class PayoutAccountPage extends StatelessWidget {
   const PayoutAccountPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<PayoutAccountController>()) {
-      Get.put(PayoutAccountController());
-    }
+    final PayoutAccountController controller = Get.isRegistered<PayoutAccountController>()
+        ? Get.find<PayoutAccountController>()
+        : Get.put(PayoutAccountController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -1093,4 +1093,6 @@ class PayoutAccountPage extends GetView<PayoutAccountController> {
         ));
   }
 }
+
+
 

@@ -7,14 +7,14 @@ import '../chat/Widget/chat_card.dart';
 import '../widgets/progress_circular_widget.dart';
 import 'OldMessagesController.dart';
 
-class OldMessages extends GetView<OldMessagesController> {
+class OldMessages extends StatelessWidget {
   const OldMessages({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<OldMessagesController>()) {
-      Get.put(OldMessagesController());
-    }
+    final OldMessagesController controller = Get.isRegistered<OldMessagesController>()
+        ? Get.find<OldMessagesController>()
+        : Get.put(OldMessagesController());
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
@@ -101,4 +101,6 @@ class OldMessages extends GetView<OldMessagesController> {
     );
   }
 }
+
+
 

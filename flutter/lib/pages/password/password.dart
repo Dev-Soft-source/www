@@ -11,14 +11,14 @@ import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import 'package:proximaride_app/pages/widgets/error_state_widget.dart';
 import '../widgets/tool_tip.dart';
 
-class PasswordPage extends GetView<PasswordController> {
+class PasswordPage extends StatelessWidget {
   const PasswordPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<PasswordController>()) {
-      Get.put(PasswordController());
-    }
+    final PasswordController controller = Get.isRegistered<PasswordController>()
+        ? Get.find<PasswordController>()
+        : Get.put(PasswordController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -612,4 +612,6 @@ String _getStrengthText(int completedRequirements) {
       return "Unknown";
   }
 }
+
+
 

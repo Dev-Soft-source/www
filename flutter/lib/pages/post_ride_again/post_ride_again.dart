@@ -7,14 +7,14 @@ import 'package:proximaride_app/pages/widgets/progress_circular_widget.dart';
 import 'package:proximaride_app/pages/widgets/second_appbar_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
-class PostRideAgainPage extends GetView<PostRideAgainController> {
+class PostRideAgainPage extends StatelessWidget {
   const PostRideAgainPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<PostRideAgainController>()) {
-      Get.put(PostRideAgainController());
-    }
+    final PostRideAgainController controller = Get.isRegistered<PostRideAgainController>()
+        ? Get.find<PostRideAgainController>()
+        : Get.put(PostRideAgainController());
     return Scaffold(
           appBar: AppBar(
             backgroundColor: primaryColor,
@@ -288,4 +288,6 @@ class PostRideAgainPage extends GetView<PostRideAgainController> {
           ));
   }
 }
+
+
 

@@ -4,13 +4,13 @@ import 'package:proximaride_app/pages/splash/SplashController.dart';
 
 
 
-class SplashPage extends GetView<SplashController> {
+class SplashPage extends StatelessWidget {
   const SplashPage({super.key});
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<SplashController>()) {
-      Get.put(SplashController());
-    }
+    final SplashController controller = Get.isRegistered<SplashController>()
+        ? Get.find<SplashController>()
+        : Get.put(SplashController());
     controller.getScreenSize(context);
     return Container(
       color: Colors.white,
@@ -32,4 +32,6 @@ class SplashPage extends GetView<SplashController> {
     );
   }
 }
+
+
 

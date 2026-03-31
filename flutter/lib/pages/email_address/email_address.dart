@@ -10,14 +10,14 @@ import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import '../widgets/fields_widget.dart';
 import '../widgets/progress_circular_widget.dart';
 
-class EmailAddressPage extends GetView<EmailAddressController> {
+class EmailAddressPage extends StatelessWidget {
   const EmailAddressPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<EmailAddressController>()) {
-      Get.put(EmailAddressController());
-    }
+    final EmailAddressController controller = Get.isRegistered<EmailAddressController>()
+        ? Get.find<EmailAddressController>()
+        : Get.put(EmailAddressController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -129,4 +129,6 @@ class EmailAddressPage extends GetView<EmailAddressController> {
         ));
   }
 }
+
+
 

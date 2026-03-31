@@ -14,14 +14,14 @@ import '../widgets/image_upload_bottom_sheet.dart';
 import '../widgets/image_upload_widget.dart';
 import '../widgets/tool_tip.dart';
 
-class StageTwo extends GetView<StageTowController> {
+class StageTwo extends StatelessWidget {
   const StageTwo({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<StageTowController>()) {
-      Get.put(StageTowController());
-    }
+    final StageTowController controller = Get.isRegistered<StageTowController>()
+        ? Get.find<StageTowController>()
+        : Get.put(StageTowController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -213,4 +213,6 @@ class StageTwo extends GetView<StageTowController> {
         }));
   }
 }
+
+
 

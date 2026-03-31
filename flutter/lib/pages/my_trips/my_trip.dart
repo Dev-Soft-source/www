@@ -10,7 +10,7 @@ import 'package:proximaride_app/pages/widgets/overlay_widget.dart';
 import 'package:proximaride_app/pages/widgets/progress_circular_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
-class MyTripsPage extends GetView<MyTripController> {
+class MyTripsPage extends StatelessWidget {
   const MyTripsPage({super.key});
 
   Widget _emptyState(BuildContext context, String imagePath, String title) {
@@ -40,9 +40,9 @@ class MyTripsPage extends GetView<MyTripController> {
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<MyTripController>()) {
-      Get.put(MyTripController());
-    }
+    final MyTripController controller = Get.isRegistered<MyTripController>()
+        ? Get.find<MyTripController>()
+        : Get.put(MyTripController());
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
@@ -894,3 +894,5 @@ class MyTripsPage extends GetView<MyTripController> {
     );
   }
 }
+
+

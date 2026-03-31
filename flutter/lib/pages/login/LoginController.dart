@@ -17,6 +17,7 @@ import 'package:proximaride_app/services/service.dart';
 
 class LoginController extends GetxController {
   late TextEditingController emailTextController, passwordTextController;
+  int loadedLangId = -1;
 
   final Map<String, FocusNode> focusNodes = {};
   final formKey = GlobalKey<FormState>();
@@ -170,7 +171,9 @@ class LoginController extends GetxController {
         .getLabelTextDetail(serviceController.langId.value, loginPage)
         .then((resp) async {
       if (resp['status'] != null && resp['status'] == "Success") {
+        loadedLangId = serviceController.langId.value;
         if (resp['data'] != null && resp['data']['loginPage'] != null) {
+          labelTextDetail.clear();
           labelTextDetail.addAll(resp['data']['loginPage']);
           serviceController.requestVerificationEmailLabel.value =
               labelTextDetail['new_verification_email_btn_label'] ??
@@ -178,6 +181,7 @@ class LoginController extends GetxController {
         }
         if (resp['data'] != null &&
             resp['data']['validationMessages'] != null) {
+          validationMessageDetail.clear();
           validationMessageDetail.addAll(resp['data']['validationMessages']);
         }
         if (resp['data'] != null && resp['data']['messages'] != null) {

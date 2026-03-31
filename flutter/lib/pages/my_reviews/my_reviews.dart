@@ -8,14 +8,14 @@ import '../widgets/review_card.dart';
 import '../widgets/second_appbar_widget.dart';
 import '../widgets/textWidget.dart';
 
-class MyReviews extends GetView<MyReviewsController> {
+class MyReviews extends StatelessWidget {
   const MyReviews({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<MyReviewsController>()) {
-      Get.put(MyReviewsController());
-    }
+    final MyReviewsController controller = Get.isRegistered<MyReviewsController>()
+        ? Get.find<MyReviewsController>()
+        : Get.put(MyReviewsController());
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -343,4 +343,6 @@ class MyReviews extends GetView<MyReviewsController> {
     );
   }
 }
+
+
 

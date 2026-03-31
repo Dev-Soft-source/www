@@ -8,15 +8,16 @@ import 'package:proximaride_app/pages/my_trips/my_trip.dart';
 import 'package:proximaride_app/pages/navigation/NavigationController.dart';
 import 'package:proximaride_app/pages/widgets/app_network_image.dart';
 
-class NavigationPage extends GetView<NavigationController> {
+class NavigationPage extends StatelessWidget {
   const NavigationPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     var pages = [const ChatPage(), const MyTripsPage(), const MyProfilePage()];
-    if (!Get.isRegistered<NavigationController>()) {
-      Get.put(NavigationController());
-    }
+    final NavigationController controller =
+        Get.isRegistered<NavigationController>()
+            ? Get.find<NavigationController>()
+            : Get.put(NavigationController());
     return PopScope(
       canPop: true, //When false, blocks the current route from being popped.
       onPopInvoked: (didPop) {

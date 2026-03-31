@@ -15,14 +15,14 @@ import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
 import '../widgets/tool_tip.dart';
 
-class StudentCardPage extends GetView<StudentCardController> {
+class StudentCardPage extends StatelessWidget {
   const StudentCardPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!Get.isRegistered<StudentCardController>()) {
-      Get.put(StudentCardController());
-    }
+    final StudentCardController controller = Get.isRegistered<StudentCardController>()
+        ? Get.find<StudentCardController>()
+        : Get.put(StudentCardController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -318,4 +318,6 @@ class StudentCardPage extends GetView<StudentCardController> {
         ));
   }
 }
+
+
 

@@ -69,11 +69,12 @@ class _PostRidePageState extends State<PostRidePage> {
   }
 }
 
-class _PostRideScaffold extends GetView<PostRideController> {
+class _PostRideScaffold extends StatelessWidget {
   const _PostRideScaffold();
 
   @override
   Widget build(BuildContext context) {
+    final PostRideController controller = Get.find<PostRideController>();
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
