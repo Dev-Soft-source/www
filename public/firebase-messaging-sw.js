@@ -1,22 +1,22 @@
 importScripts('https://www.gstatic.com/firebasejs/8.3.2/firebase-app.js');
 importScripts('https://www.gstatic.com/firebasejs/8.3.2/firebase-messaging.js');
-   
+
 // TODO: Replace with your new Firebase project (proxima-ride-app-devop) web app config
 const firebaseConfig = {
-  apiKey: "AIzaSyBt3Y5R24dI1V-qArWRVVXwSvrwrvreyf0",
-  authDomain: "proxima-ride-app-devop.firebaseapp.com",
-  projectId: "proxima-ride-app-devop",
-  storageBucket: "proxima-ride-app-devop.firebasestorage.app",
-  messagingSenderId: "785619130237",
-  appId: "1:785619130237:web:20f9ee0f705e60e4b5de14"
+    apiKey: "AIzaSyBt3Y5R24dI1V-qArWRVVXwSvrwrvreyf0",
+    authDomain: "proxima-ride-app-devop.firebaseapp.com",
+    projectId: "proxima-ride-app-devop",
+    storageBucket: "proxima-ride-app-devop.firebasestorage.app",
+    messagingSenderId: "785619130237",
+    appId: "1:785619130237:web:20f9ee0f705e60e4b5de14"
 };
-  
+
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
 // Background message handler
-messaging.onBackgroundMessage(function(payload) {
+messaging.onBackgroundMessage(function (payload) {
     console.log('[firebase-messaging-sw.js] Received background message ', payload);
     // Customize notification here
     const notificationTitle = payload.notification.title || 'ProximaRide';
@@ -37,9 +37,9 @@ messaging.onBackgroundMessage(function(payload) {
 });
 
 // Handle notification clicks
-self.addEventListener('notificationclick', function(event) {
+self.addEventListener('notificationclick', function (event) {
     console.log('[firebase-messaging-sw.js] Notification click received.', event);
-    
+
     event.notification.close();
 
     const notificationData = event.notification.data || {};
@@ -94,7 +94,7 @@ self.addEventListener('notificationclick', function(event) {
 
     // Open the target URL
     event.waitUntil(
-        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clientList) {
             // Check if there's already a window open
             for (let i = 0; i < clientList.length; i++) {
                 const client = clientList[i];

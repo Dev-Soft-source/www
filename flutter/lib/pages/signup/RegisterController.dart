@@ -784,9 +784,26 @@ class RegisterController extends GetxController {
       // Trigger the authentication flow
       final GoogleSignInAccount? googleUser =
           await GoogleSignIn(scopes: ["profile", "email"]).signIn();
+
+      if (googleUser == null) {
+        logger.info('Google sign-in cancelled by user.');
+        return;
+      }
+
       // Obtain the auth details from the request
       final GoogleSignInAuthentication? googleAuth =
           await googleUser?.authentication;
+
+      if ((googleAuth?.idToken?.isEmpty ?? true) &&
+          (googleAuth?.accessToken?.isEmpty ?? true)) {
+        logger.error(
+            'Google sign-in returned no tokens. Check Firebase OAuth and SHA configuration for this Android package.');
+        serviceController.showDialogue(
+          "Google Sign-In is not configured correctly for this app build.",
+          type: "error",
+        );
+        return;
+      }
 
       // Create a new credential
       final credential = GoogleAuthProvider.credential(
@@ -807,7 +824,7 @@ class RegisterController extends GetxController {
       serviceController.showDialogue(e.message ?? "Google login error");
     } catch (e) {
       logger.error("Google login error: $e");
-      serviceController.showDialogue("Something went wrong");
+      serviceController.showDialogue(e.toString());
     }
   }
 

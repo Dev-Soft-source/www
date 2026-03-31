@@ -60,8 +60,10 @@ class DefaultFirebaseOptions {
     messagingSenderId: '785619130237',
     projectId: 'proxima-ride-app-devop',
     storageBucket: 'proxima-ride-app-devop.firebasestorage.app',
-    androidClientId: '785619130237-21qtien4t7pvrkcqned4h3bac7o39qg5.apps.googleusercontent.com',
-    iosClientId: '785619130237-11kpq56e9sbtu64inc3l5d812h4ad41j.apps.googleusercontent.com',
+    androidClientId:
+        '785619130237-21qtien4t7pvrkcqned4h3bac7o39qg5.apps.googleusercontent.com',
+    iosClientId:
+        '785619130237-11kpq56e9sbtu64inc3l5d812h4ad41j.apps.googleusercontent.com',
     iosBundleId: 'com.example.proximaRide',
   );
 
@@ -73,5 +75,4 @@ class DefaultFirebaseOptions {
     authDomain: 'proxima-ride-app-devop.firebaseapp.com',
     storageBucket: 'proxima-ride-app-devop.firebasestorage.app',
   );
-
 }

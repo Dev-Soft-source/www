@@ -5,8 +5,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="Travel your way with ProximaRide: women-only Pink Rides, Extra+ rides with verified drivers, customizable options, fair prices—and no booking fee for students.">
-    <meta name="keywords" content="ridesharing, rideshare, women-only rides, pink rides, extra care rides, safe rides, affordable rides, student rides, no booking fee, carpool, ProximaRide">
+    <meta name="description"
+        content="Travel your way with ProximaRide: women-only Pink Rides, Extra+ rides with verified drivers, customizable options, fair prices—and no booking fee for students.">
+    <meta name="keywords"
+        content="ridesharing, rideshare, women-only rides, pink rides, extra care rides, safe rides, affordable rides, student rides, no booking fee, carpool, ProximaRide">
     <meta name="author" content="ProximaRide">
     <meta name="robots" content="index, follow">
     <link rel="icon" type="image/x-icon" href="/assets/favicon.png">
@@ -84,8 +86,10 @@
         input::placeholder,
         textarea::placeholder {
             font-style: italic !important;
-            font-size: 0.9375rem !important; /* 15px - smaller than text-lg (18px) but not too small */
-            color: rgb(107 114 128) !important; /* gray-500 */
+            font-size: 0.9375rem !important;
+            /* 15px - smaller than text-lg (18px) but not too small */
+            color: rgb(107 114 128) !important;
+            /* gray-500 */
         }
 
         /* Ensure consistency across all input types */
@@ -106,6 +110,7 @@
         .modal-border {
             border: 3px solid #00A99D;
         }
+
         .modal-border1 {
             border: 3px solid rgb(204, 91, 91);
         }
@@ -178,7 +183,7 @@
             @yield('content')
         </div>
 
-      
+
         <button type="button" data-mdb-ripple="true" data-mdb-ripple-color="light"
             class="hideTopIcon inline-block p-3 w-10 h-10 z-20 fixed bottom-2 right-5 bg-gray-600/50 text-white font-medium text-xs leading-tight uppercase rounded-full shadow-md hover:bg-gray-600 hover:shadow-lg focus:bg-gray-600 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-gray-600 active:shadow-lg transition duration-150 ease-in-out"
             id="btn-back-to-top">
@@ -193,40 +198,55 @@
         @include('layouts.inc.footer')
     </div>
 
-    @if(isset($birthdayData) && $birthdayData)
-    {{-- Birthday Fireworks Overlay (Google Doodle style) --}}
-    <div id="birthday-fireworks-overlay" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center hidden overflow-hidden">
-        <canvas id="birthday-fireworks-canvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
-        <div class="relative z-10 flex flex-col items-center gap-6 p-8 mx-4 rounded-2xl bg-white shadow-2xl animate__animated animate__fadeIn">
-            <button type="button" id="birthday-close-btn" class="absolute -top-2 -right-2 p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition" title="Close" aria-label="Close">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    @if (isset($birthdayData) && $birthdayData)
+        {{-- Birthday Fireworks Overlay (Google Doodle style) --}}
+        <div id="birthday-fireworks-overlay"
+            class="fixed inset-0 z-[9999] flex flex-col items-center justify-center hidden overflow-hidden">
+            <canvas id="birthday-fireworks-canvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
+            <div
+                class="relative z-10 flex flex-col items-center gap-6 p-8 mx-4 rounded-2xl bg-white shadow-2xl animate__animated animate__fadeIn">
+                <button type="button" id="birthday-close-btn"
+                    class="absolute -top-2 -right-2 p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition"
+                    title="Close" aria-label="Close">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                {{-- Circle: user photo or country flag --}}
+                <div class="w-28 h-28 rounded-full overflow-hidden border-4 border-amber-400 shadow-lg flex-shrink-0">
+                    @if ($birthdayData['has_profile_image'] && $birthdayData['profile_image'])
+                        <img src="{{ $birthdayData['profile_image'] }}" alt="{{ $birthdayData['username'] }}"
+                            class="w-full h-full object-cover" />
+                    @else
+                        <img src="{{ $birthdayData['flag_url'] }}" alt="" class="w-full h-full object-cover" />
+                    @endif
+                </div>
+                {{-- Rectangle: Happy Birthday message --}}
+                <div class="px-8 py-4 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 shadow-lg">
+                    <p class="text-xl md:text-2xl font-bold text-white text-center">Happy Birthday
+                        {{ $birthdayData['username'] }}!</p>
+                </div>
+            </div>
+            {{-- Replay button (bottom center, like Google Doodle) --}}
+            <button type="button" id="birthday-replay-btn"
+                class="fixed bottom-8 left-1/2 -translate-x-1/2 z-20 p-3 rounded-full bg-white/90 hover:bg-white shadow-lg transition-all hover:scale-110"
+                title="Replay fireworks">
+                <svg class="w-8 h-8 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                        d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" />
+                </svg>
             </button>
-            {{-- Circle: user photo or country flag --}}
-            <div class="w-28 h-28 rounded-full overflow-hidden border-4 border-amber-400 shadow-lg flex-shrink-0">
-                @if($birthdayData['has_profile_image'] && $birthdayData['profile_image'])
-                    <img src="{{ $birthdayData['profile_image'] }}" alt="{{ $birthdayData['username'] }}" class="w-full h-full object-cover" />
-                @else
-                    <img src="{{ $birthdayData['flag_url'] }}" alt="" class="w-full h-full object-cover" />
-                @endif
-            </div>
-            {{-- Rectangle: Happy Birthday message --}}
-            <div class="px-8 py-4 rounded-xl bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 shadow-lg">
-                <p class="text-xl md:text-2xl font-bold text-white text-center">Happy Birthday {{ $birthdayData['username'] }}!</p>
-            </div>
         </div>
-        {{-- Replay button (bottom center, like Google Doodle) --}}
-        <button type="button" id="birthday-replay-btn" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-20 p-3 rounded-full bg-white/90 hover:bg-white shadow-lg transition-all hover:scale-110" title="Replay fireworks">
-            <svg class="w-8 h-8 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+        {{-- Floating icon to replay birthday (visible when overlay was shown today, like Google) --}}
+        <button type="button" id="birthday-floating-icon"
+            class="fixed bottom-20 left-5 z-[9998] p-2.5 rounded-full bg-amber-400/90 hover:bg-amber-400 shadow-lg transition-all hover:scale-110 hidden"
+            title="Replay birthday fireworks" aria-label="Replay birthday fireworks">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                    d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" />
             </svg>
         </button>
-    </div>
-    {{-- Floating icon to replay birthday (visible when overlay was shown today, like Google) --}}
-    <button type="button" id="birthday-floating-icon" class="fixed bottom-20 left-5 z-[9998] p-2.5 rounded-full bg-amber-400/90 hover:bg-amber-400 shadow-lg transition-all hover:scale-110 hidden" title="Replay birthday fireworks" aria-label="Replay birthday fireworks">
-        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
-        </svg>
-    </button>
     @endif
 
     <div class="hidden overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none justify-center items-center"
@@ -242,8 +262,8 @@
                         <button type="button"
                             class="mt-1 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-full border border-primary text-sm p-1 ml-auto inline-flex items-center"
                             data-modal-hide="defaultModal" onclick="toggleModal('modal-id')">
-                            <svg aria-hidden="true" class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20"
-                                xmlns="http://www.w3.org/2000/svg">
+                            <svg aria-hidden="true" class="w-5 h-5 text-primary" fill="currentColor"
+                                viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd"
                                     d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
                                     clip-rule="evenodd"></path>
@@ -305,7 +325,8 @@
                 <button type="button" onclick="toggleModal('logout-modal')"
                     class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12">
                         </path>
                     </svg>
                 </button>
@@ -315,8 +336,8 @@
                     </div>
                     <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                         <div class="">
-                            <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4"
-                                id="modal-title">{!! session('heading') !!}</h3>
+                            <h3 class="text-3xl text-center font-FuturaMdCnBT text-gray-900 mb-4" id="modal-title">
+                                {!! session('heading') !!}</h3>
                         </div>
                         <div class="mt-2 w-full">
                             <p class="can-exp-p text-center">
@@ -327,14 +348,14 @@
                 </div>
                 <div class="px-4 pb-6 pt-4 flex items-center space-x-2 sm:space-x-4 sm:px-6 justify-center">
                     <a href="{{ route('logout', ['lang' => optional($selectedLanguage)->abbreviation]) }}"
-                    class="button-exp-fill w-auto bg-greenXS hover:bg-greenXS text-white text-center flex items-center justify-center">
+                        class="button-exp-fill w-auto bg-greenXS hover:bg-greenXS text-white text-center flex items-center justify-center">
                         {{ $logoutPage->confirmation_yes_label ?? 'Yes' }}
                     </a>
 
                     <a href="javascript:void(0)" onclick="toggleModal('logout-modal')"
                         class="button-exp-fill w-auto">
                         {{ $logoutPage->confirmation_no_label ?? 'No, stay logged in' }}
-                </a>
+                    </a>
                 </div>
 
             </div>
@@ -353,571 +374,609 @@
         }
     </script>
 
-<script>
-    window.addEventListener('scroll', function() {
-        if (window.scrollY > 0) {
-            document.getElementById("navbar").style.padding = "4px 0";
-            document.getElementById("navbar").style.transition = "all 500ms ease-in-out";
-        } else {
-            document.getElementById("navbar").style.padding = "8px 0";
-            document.getElementById("navbar").style.transition = "all 500ms ease-in-out";
+    <script>
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 0) {
+                document.getElementById("navbar").style.padding = "4px 0";
+                document.getElementById("navbar").style.transition = "all 500ms ease-in-out";
+            } else {
+                document.getElementById("navbar").style.padding = "8px 0";
+                document.getElementById("navbar").style.transition = "all 500ms ease-in-out";
+            }
+        });
+
+        const dropdownMobileButton = document.getElementById('dropdownMobileButton');
+        const dropdownDesktopButton = document.getElementById('dropdownDesktopButton');
+        const dropdownProfileButton = document.getElementById('dropdownProfileButton');
+        const dropdownNotificationButton = document.getElementById('dropdownNotificationButton');
+        const dropdownMobile = document.getElementById('dropdown_mobile');
+        const dropdownDesktop = document.getElementById('dropdown_desktop');
+        const dropdownProfile = document.getElementById('dropdown_profile');
+        const dropdownNotification = document.getElementById('dropdown_notification');
+
+        // Function to close all dropdowns
+        function closeAllDropdowns() {
+            if (dropdownMobile) dropdownMobile.classList.add('hidden');
+            if (dropdownDesktop) dropdownDesktop.classList.add('hidden');
+            if (dropdownProfile) dropdownProfile.classList.add('hidden');
+            if (dropdownNotification) dropdownNotification.classList.add('hidden');
         }
-    });
 
-    const dropdownMobileButton = document.getElementById('dropdownMobileButton');
-    const dropdownDesktopButton = document.getElementById('dropdownDesktopButton');
-    const dropdownProfileButton = document.getElementById('dropdownProfileButton');
-    const dropdownNotificationButton = document.getElementById('dropdownNotificationButton');
-    const dropdownMobile = document.getElementById('dropdown_mobile');
-    const dropdownDesktop = document.getElementById('dropdown_desktop');
-    const dropdownProfile = document.getElementById('dropdown_profile');
-    const dropdownNotification = document.getElementById('dropdown_notification');
-
-    // Function to close all dropdowns
-    function closeAllDropdowns() {
-        if (dropdownMobile) dropdownMobile.classList.add('hidden');
-        if (dropdownDesktop) dropdownDesktop.classList.add('hidden');
-        if (dropdownProfile) dropdownProfile.classList.add('hidden');
-        if (dropdownNotification) dropdownNotification.classList.add('hidden');
-    }
-
-    // Toggle dropdowns
-    if (dropdownMobileButton) {
-        dropdownMobileButton.addEventListener('click', function(event) {
-            const wasHidden = dropdownMobile.classList.contains('hidden');
-            closeAllDropdowns();
-            if (wasHidden) {
-                dropdownMobile.classList.remove('hidden');
-            }
-            event.stopPropagation();
-        });
-    }
-
-    if (dropdownDesktopButton) {
-        dropdownDesktopButton.addEventListener('click', function(event) {
-            const wasHidden = dropdownDesktop.classList.contains('hidden');
-            closeAllDropdowns();
-            if (wasHidden) {
-                dropdownDesktop.classList.remove('hidden');
-            }
-            event.stopPropagation();
-        });
-    }
-
-    if (dropdownProfileButton) {
-        dropdownProfileButton.addEventListener('click', function(event) {
-            const wasHidden = dropdownProfile.classList.contains('hidden');
-            closeAllDropdowns();
-            if (wasHidden) {
-                dropdownProfile.classList.remove('hidden');
-            }
-            event.stopPropagation();
-        });
-    }
-
-    if (dropdownNotificationButton) {
-        dropdownNotificationButton.addEventListener('click', function(event) {
-            const wasHidden = dropdownNotification.classList.contains('hidden');
-            closeAllDropdowns();
-            if (wasHidden) {
-                dropdownNotification.classList.remove('hidden');
-            }
-            event.stopPropagation();
-        });
-    }
-
-    // Close all dropdowns when clicking outside
-    document.addEventListener('click', function(event) {
-        const clickedInsideAnyDropdown = 
-            (dropdownMobileButton && (dropdownMobileButton.contains(event.target) || (dropdownMobile && dropdownMobile.contains(event.target)))) ||
-            (dropdownDesktopButton && (dropdownDesktopButton.contains(event.target) || (dropdownDesktop && dropdownDesktop.contains(event.target)))) ||
-            (dropdownProfileButton && (dropdownProfileButton.contains(event.target) || (dropdownProfile && dropdownProfile.contains(event.target)))) ||
-            (dropdownNotificationButton && (dropdownNotificationButton.contains(event.target) || (dropdownNotification && dropdownNotification.contains(event.target))));
-
-        if (!clickedInsideAnyDropdown) {
-            closeAllDropdowns();
-        }
-    });
-
-    // Prevent clicks within dropdowns from closing them
-    if (dropdownMobile) {
-        dropdownMobile.addEventListener('click', function(event) {
-            event.stopPropagation();
-        });
-    }
-    if (dropdownDesktop) {
-        dropdownDesktop.addEventListener('click', function(event) {
-            event.stopPropagation();
-        });
-    }
-    if (dropdownProfile) {
-        dropdownProfile.addEventListener('click', function(event) {
-            event.stopPropagation();
-        });
-    }
-    if (dropdownNotification) {
-        dropdownNotification.addEventListener('click', function(event) {
-            // Only prevent closing the dropdown for specific elements (like delete buttons and "View All")
-            // Allow notification links to close the dropdown by not stopping propagation
-            const target = event.target.closest('button[onclick*="openModal"], .button-exp-fill, button[onclick*="openModal"] svg, button[onclick*="openModal"] path');
-            if (target) {
+        // Toggle dropdowns
+        if (dropdownMobileButton) {
+            dropdownMobileButton.addEventListener('click', function(event) {
+                const wasHidden = dropdownMobile.classList.contains('hidden');
+                closeAllDropdowns();
+                if (wasHidden) {
+                    dropdownMobile.classList.remove('hidden');
+                }
                 event.stopPropagation();
-            }
-            // For notification links (a tags with href), don't stop propagation to allow dropdown to close
-        });
-    }
-
-    // Toggle the navbar
-    function toggleNavbar() {
-        const navbar = document.getElementById("navbar-default");
-        const profilebar = document.getElementById("profilebar-default");
-        if (navbar.classList.contains('hidden')) {
-            navbar.classList.remove('hidden');
-            if (profilebar && !profilebar.classList.contains('hidden')) {
-                profilebar.classList.add('hidden');
-            }
-        } else {
-            navbar.classList.add('hidden');
+            });
         }
-    }
 
-    // Toggle the profile bar
-    function toggleProfilebar() {
-        const profilebar = document.getElementById("profilebar-default");
-        const navbar = document.getElementById("navbar-default");
-        if (profilebar.classList.contains('hidden')) {
-            profilebar.classList.remove('hidden');
-            if (navbar && !navbar.classList.contains('hidden')) {
+        if (dropdownDesktopButton) {
+            dropdownDesktopButton.addEventListener('click', function(event) {
+                const wasHidden = dropdownDesktop.classList.contains('hidden');
+                closeAllDropdowns();
+                if (wasHidden) {
+                    dropdownDesktop.classList.remove('hidden');
+                }
+                event.stopPropagation();
+            });
+        }
+
+        if (dropdownProfileButton) {
+            dropdownProfileButton.addEventListener('click', function(event) {
+                const wasHidden = dropdownProfile.classList.contains('hidden');
+                closeAllDropdowns();
+                if (wasHidden) {
+                    dropdownProfile.classList.remove('hidden');
+                }
+                event.stopPropagation();
+            });
+        }
+
+        if (dropdownNotificationButton) {
+            dropdownNotificationButton.addEventListener('click', function(event) {
+                const wasHidden = dropdownNotification.classList.contains('hidden');
+                closeAllDropdowns();
+                if (wasHidden) {
+                    dropdownNotification.classList.remove('hidden');
+                }
+                event.stopPropagation();
+            });
+        }
+
+        // Close all dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            const clickedInsideAnyDropdown =
+                (dropdownMobileButton && (dropdownMobileButton.contains(event.target) || (dropdownMobile &&
+                    dropdownMobile.contains(event.target)))) ||
+                (dropdownDesktopButton && (dropdownDesktopButton.contains(event.target) || (dropdownDesktop &&
+                    dropdownDesktop.contains(event.target)))) ||
+                (dropdownProfileButton && (dropdownProfileButton.contains(event.target) || (dropdownProfile &&
+                    dropdownProfile.contains(event.target)))) ||
+                (dropdownNotificationButton && (dropdownNotificationButton.contains(event.target) || (
+                    dropdownNotification && dropdownNotification.contains(event.target))));
+
+            if (!clickedInsideAnyDropdown) {
+                closeAllDropdowns();
+            }
+        });
+
+        // Prevent clicks within dropdowns from closing them
+        if (dropdownMobile) {
+            dropdownMobile.addEventListener('click', function(event) {
+                event.stopPropagation();
+            });
+        }
+        if (dropdownDesktop) {
+            dropdownDesktop.addEventListener('click', function(event) {
+                event.stopPropagation();
+            });
+        }
+        if (dropdownProfile) {
+            dropdownProfile.addEventListener('click', function(event) {
+                event.stopPropagation();
+            });
+        }
+        if (dropdownNotification) {
+            dropdownNotification.addEventListener('click', function(event) {
+                // Only prevent closing the dropdown for specific elements (like delete buttons and "View All")
+                // Allow notification links to close the dropdown by not stopping propagation
+                const target = event.target.closest(
+                    'button[onclick*="openModal"], .button-exp-fill, button[onclick*="openModal"] svg, button[onclick*="openModal"] path'
+                );
+                if (target) {
+                    event.stopPropagation();
+                }
+                // For notification links (a tags with href), don't stop propagation to allow dropdown to close
+            });
+        }
+
+        // Toggle the navbar
+        function toggleNavbar() {
+            const navbar = document.getElementById("navbar-default");
+            const profilebar = document.getElementById("profilebar-default");
+            if (navbar.classList.contains('hidden')) {
+                navbar.classList.remove('hidden');
+                if (profilebar && !profilebar.classList.contains('hidden')) {
+                    profilebar.classList.add('hidden');
+                }
+            } else {
                 navbar.classList.add('hidden');
             }
-        } else {
-            profilebar.classList.add('hidden');
         }
-    }
 
-    // Add event listeners for navbar and profile bar toggles
-    const toggleButton = document.querySelector('[data-collapse-toggle="navbar-default"]');
-    if (toggleButton) {
-        toggleButton.addEventListener("click", toggleNavbar);
-    }
-
-    const toggleProfileButton = document.querySelector('[data-collapse-toggle="profilebar-default"]');
-    if (toggleProfileButton) {
-        toggleProfileButton.addEventListener("click", toggleProfilebar);
-    }
-
-    // Back-to-top button
-    const btn = document.getElementById('btn-back-to-top');
-    if (btn) {
-        window.addEventListener('scroll', function() {
-            if (window.scrollY > 500) {
-                btn.classList.add('show');
+        // Toggle the profile bar
+        function toggleProfilebar() {
+            const profilebar = document.getElementById("profilebar-default");
+            const navbar = document.getElementById("navbar-default");
+            if (profilebar.classList.contains('hidden')) {
+                profilebar.classList.remove('hidden');
+                if (navbar && !navbar.classList.contains('hidden')) {
+                    navbar.classList.add('hidden');
+                }
             } else {
-                btn.classList.remove('show');
+                profilebar.classList.add('hidden');
             }
-        });
+        }
 
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
-    }
+        // Add event listeners for navbar and profile bar toggles
+        const toggleButton = document.querySelector('[data-collapse-toggle="navbar-default"]');
+        if (toggleButton) {
+            toggleButton.addEventListener("click", toggleNavbar);
+        }
 
-    // Auto-scroll to first error field on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add slight delay to ensure all error elements are rendered
-        setTimeout(function() {
-            scrollToFirstErrorField();
-        }, 200);
-    });
+        const toggleProfileButton = document.querySelector('[data-collapse-toggle="profilebar-default"]');
+        if (toggleProfileButton) {
+            toggleProfileButton.addEventListener("click", toggleProfilebar);
+        }
 
-    function scrollToFirstErrorField() {
-        // Find the first error element (validation errors)
-        const errorSelectors = [
-            '.tooltip:not(.hidden)'
-        ];
-        
-        let firstError = null;
-        let firstErrorPosition = Infinity;
-        
-        // Check each selector to find the first error
-        for (const selector of errorSelectors) {
-            const elements = document.querySelectorAll(selector);
-            for (const element of elements) {
-                // Skip if element is hidden or not visible
-                if (element.offsetParent === null || !isElementVisible(element)) continue;
-                
-                // Find the associated form field
-                let targetField = null;
-                let errorPosition = 0;
-                
-                if (element.classList.contains('tooltip') || element.querySelector('.tooltip')) {
-                    // For tooltip errors, find the input field
-                    const parent = element.parentElement;
-                    targetField = parent ? parent.querySelector('input, select, textarea') : null;
-                } else if (element.classList.contains('border-red-500') || element.classList.contains('is-invalid')) {
-                    // The element itself is the field
-                    targetField = element;
-                } else if (element.tagName && ['INPUT', 'SELECT', 'TEXTAREA'].includes(element.tagName)) {
-                    // Element is already a form field
-                    targetField = element;
+        // Back-to-top button
+        const btn = document.getElementById('btn-back-to-top');
+        if (btn) {
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 500) {
+                    btn.classList.add('show');
                 } else {
-                    // For other error elements, try to find nearby input
-                    const container = element.closest('div, .form-group, .field-group');
-                    if (container) {
-                        targetField = container.querySelector('input, select, textarea');
-                        // If no field in container, look for the previous field
-                        if (!targetField) {
-                            targetField = container.querySelector('label');
-                            if (targetField) {
-                                const labelFor = targetField.getAttribute('for');
-                                if (labelFor) {
-                                    targetField = document.getElementById(labelFor);
+                    btn.classList.remove('show');
+                }
+            });
+
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        }
+
+        // Auto-scroll to first error field on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add slight delay to ensure all error elements are rendered
+            setTimeout(function() {
+                scrollToFirstErrorField();
+            }, 200);
+        });
+
+        function scrollToFirstErrorField() {
+            // Find the first error element (validation errors)
+            const errorSelectors = [
+                '.tooltip:not(.hidden)'
+            ];
+
+            let firstError = null;
+            let firstErrorPosition = Infinity;
+
+            // Check each selector to find the first error
+            for (const selector of errorSelectors) {
+                const elements = document.querySelectorAll(selector);
+                for (const element of elements) {
+                    // Skip if element is hidden or not visible
+                    if (element.offsetParent === null || !isElementVisible(element)) continue;
+
+                    // Find the associated form field
+                    let targetField = null;
+                    let errorPosition = 0;
+
+                    if (element.classList.contains('tooltip') || element.querySelector('.tooltip')) {
+                        // For tooltip errors, find the input field
+                        const parent = element.parentElement;
+                        targetField = parent ? parent.querySelector('input, select, textarea') : null;
+                    } else if (element.classList.contains('border-red-500') || element.classList.contains('is-invalid')) {
+                        // The element itself is the field
+                        targetField = element;
+                    } else if (element.tagName && ['INPUT', 'SELECT', 'TEXTAREA'].includes(element.tagName)) {
+                        // Element is already a form field
+                        targetField = element;
+                    } else {
+                        // For other error elements, try to find nearby input
+                        const container = element.closest('div, .form-group, .field-group');
+                        if (container) {
+                            targetField = container.querySelector('input, select, textarea');
+                            // If no field in container, look for the previous field
+                            if (!targetField) {
+                                targetField = container.querySelector('label');
+                                if (targetField) {
+                                    const labelFor = targetField.getAttribute('for');
+                                    if (labelFor) {
+                                        targetField = document.getElementById(labelFor);
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                
-                if (targetField) {
-                    errorPosition = targetField.getBoundingClientRect().top + window.pageYOffset;
-                    if (errorPosition < firstErrorPosition) {
-                        firstError = targetField;
-                        firstErrorPosition = errorPosition;
-                    }
-                }
-            }
-        }
-        
-        // If we found an error field, scroll to it
-        if (firstError) {
-            // Find the field's container or label to get the complete field area
-            let fieldContainer = firstError.closest('.mt-2, .form-group, div');
-            let targetElement = firstError;
-            
-            // Look for the label associated with this field to include it in the scroll target
-            const label = fieldContainer ? fieldContainer.querySelector('label') : null;
-            if (label) {
-                targetElement = label;
-            } else {
-                // If no label in container, check if there's a label with 'for' attribute
-                const fieldId = firstError.getAttribute('id');
-                if (fieldId) {
-                    const associatedLabel = document.querySelector(`label[for="${fieldId}"]`);
-                    if (associatedLabel) {
-                        targetElement = associatedLabel;
-                    }
-                }
-            }
-            
-            // Calculate position to put the target element at the very top
-            const navbarHeight = document.getElementById('navbar') ? document.getElementById('navbar').offsetHeight : 0;
-            const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
-            
-            window.scrollTo({
-                top: Math.max(0, targetPosition),
-                behavior: 'smooth'
-            });
-            
-            // Focus the input field for better UX (with delay to avoid scroll interruption)
-            setTimeout(() => {
-                if (firstError.focus) {
-                    firstError.focus();
-                }
-            }, 500);
-        }
-    }
-    
-    // Helper function to check if element is actually visible
-    function isElementVisible(element) {
-        return element.offsetWidth > 0 && element.offsetHeight > 0 && 
-               getComputedStyle(element).visibility !== 'hidden' &&
-               getComputedStyle(element).display !== 'none';
-    }
 
-    // Global function to scroll to first error (can be called after AJAX submissions)
-    window.scrollToFirstError = function() {
-        scrollToFirstErrorField();
-    };
-</script>
+                    if (targetField) {
+                        errorPosition = targetField.getBoundingClientRect().top + window.pageYOffset;
+                        if (errorPosition < firstErrorPosition) {
+                            firstError = targetField;
+                            firstErrorPosition = errorPosition;
+                        }
+                    }
+                }
+            }
+
+            // If we found an error field, scroll to it
+            if (firstError) {
+                // Find the field's container or label to get the complete field area
+                let fieldContainer = firstError.closest('.mt-2, .form-group, div');
+                let targetElement = firstError;
+
+                // Look for the label associated with this field to include it in the scroll target
+                const label = fieldContainer ? fieldContainer.querySelector('label') : null;
+                if (label) {
+                    targetElement = label;
+                } else {
+                    // If no label in container, check if there's a label with 'for' attribute
+                    const fieldId = firstError.getAttribute('id');
+                    if (fieldId) {
+                        const associatedLabel = document.querySelector(`label[for="${fieldId}"]`);
+                        if (associatedLabel) {
+                            targetElement = associatedLabel;
+                        }
+                    }
+                }
+
+                // Calculate position to put the target element at the very top
+                const navbarHeight = document.getElementById('navbar') ? document.getElementById('navbar').offsetHeight : 0;
+                const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
+
+                window.scrollTo({
+                    top: Math.max(0, targetPosition),
+                    behavior: 'smooth'
+                });
+
+                // Focus the input field for better UX (with delay to avoid scroll interruption)
+                setTimeout(() => {
+                    if (firstError.focus) {
+                        firstError.focus();
+                    }
+                }, 500);
+            }
+        }
+
+        // Helper function to check if element is actually visible
+        function isElementVisible(element) {
+            return element.offsetWidth > 0 && element.offsetHeight > 0 &&
+                getComputedStyle(element).visibility !== 'hidden' &&
+                getComputedStyle(element).display !== 'none';
+        }
+
+        // Global function to scroll to first error (can be called after AJAX submissions)
+        window.scrollToFirstError = function() {
+            scrollToFirstErrorField();
+        };
+    </script>
 
     <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.3.2/firebase-messaging.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="{{ asset('js/front.js') }}" defer></script>
 
-    @if(isset($birthdayData) && $birthdayData)
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
-    <script>
-    (function() {
-        var storageKey = 'birthday_seen_{{ date("Y-m-d") }}_{{ $birthdayData["user_id"] ?? 0 }}';
-        var overlay = document.getElementById('birthday-fireworks-overlay');
-        var canvas = document.getElementById('birthday-fireworks-canvas');
-        var replayBtn = document.getElementById('birthday-replay-btn');
-        var closeBtn = document.getElementById('birthday-close-btn');
-        var floatingIcon = document.getElementById('birthday-floating-icon');
-        var fireworksRunning = false;
-        var fireworksRaf = null;
-        var fireworks = [];
-        var particles = [];
-        var sparks = [];
-        var explosions = [];
-        var colors = ['#f59e0b', '#fbbf24', '#facc15', '#eab308', '#f97316', '#fb923c', '#ef4444', '#f43f5e', '#ec4899', '#f472b6', '#f9a8d4', '#a855f7', '#c084fc', '#e879f9', '#8b5cf6', '#6366f1', '#818cf8', '#3b82f6', '#60a5fa', '#0ea5e9', '#38bdf8', '#06b6d4', '#22d3ee', '#14b8a6', '#2dd4bf', '#10b981', '#34d399', '#22c55e', '#84cc16', '#a3e635', '#f0abfc', '#e879f9', '#d946ef', '#c026d3'];
-        var lastLaunch = 0;
+    @if (isset($birthdayData) && $birthdayData)
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+        <script>
+            (function() {
+                var storageKey = 'birthday_seen_{{ date('Y-m-d') }}_{{ $birthdayData['user_id'] ?? 0 }}';
+                var overlay = document.getElementById('birthday-fireworks-overlay');
+                var canvas = document.getElementById('birthday-fireworks-canvas');
+                var replayBtn = document.getElementById('birthday-replay-btn');
+                var closeBtn = document.getElementById('birthday-close-btn');
+                var floatingIcon = document.getElementById('birthday-floating-icon');
+                var fireworksRunning = false;
+                var fireworksRaf = null;
+                var fireworks = [];
+                var particles = [];
+                var sparks = [];
+                var explosions = [];
+                var colors = ['#f59e0b', '#fbbf24', '#facc15', '#eab308', '#f97316', '#fb923c', '#ef4444', '#f43f5e',
+                    '#ec4899', '#f472b6', '#f9a8d4', '#a855f7', '#c084fc', '#e879f9', '#8b5cf6', '#6366f1', '#818cf8',
+                    '#3b82f6', '#60a5fa', '#0ea5e9', '#38bdf8', '#06b6d4', '#22d3ee', '#14b8a6', '#2dd4bf', '#10b981',
+                    '#34d399', '#22c55e', '#84cc16', '#a3e635', '#f0abfc', '#e879f9', '#d946ef', '#c026d3'
+                ];
+                var lastLaunch = 0;
 
-        function resizeCanvas() {
-            if (!canvas || !overlay) return;
-            var rect = overlay.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-        }
-
-        function random(min, max) {
-            return Math.random() * (max - min) + min;
-        }
-
-        function createRocket() {
-            var targetY = random(canvas.height * 0.1, canvas.height * 0.75);
-            return {
-                x: random(canvas.width * 0.15, canvas.width * 0.85),
-                y: canvas.height + 5,
-                vx: random(-0.3, 0.3),
-                vy: -random(11, 15),
-                targetY: targetY,
-                color: colors[Math.floor(Math.random() * colors.length)],
-                trail: []
-            };
-        }
-
-        function explode(rocket) {
-            var cx = rocket.x, cy = rocket.y;
-            explosions.push({ x: cx, y: cy, life: 1, decay: 0.04 });
-            var sparkCount = 100 + Math.floor(Math.random() * 50);
-            for (var i = 0; i < sparkCount; i++) {
-                var angle = (Math.PI * 2 * i) / sparkCount + random(-0.3, 0.3);
-                var len = random(20, 55);
-                sparks.push({
-                    cx: cx, cy: cy, angle: angle, length: 0, maxLength: len,
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    life: 1, decay: random(0.006, 0.015),
-                    extend: random(2, 4), lineWidth: random(1, 2.5)
-                });
-            }
-            var particleCount = 60 + Math.floor(Math.random() * 30);
-            for (var j = 0; j < particleCount; j++) {
-                var a = Math.PI * 2 * Math.random();
-                var s = random(3, 8);
-                particles.push({
-                    x: cx, y: cy, vx: Math.cos(a) * s, vy: Math.sin(a) * s - random(0.5, 2),
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    life: 1, decay: random(0.008, 0.018), size: random(1.5, 3)
-                });
-            }
-        }
-
-        function drawFireworks() {
-            if (!canvas || !fireworksRunning || !overlay.classList.contains('flex')) return;
-            var ctx = canvas.getContext('2d');
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            var now = Date.now();
-            if (now - lastLaunch > 200) {
-                fireworks.push(createRocket());
-                fireworks.push(createRocket());
-                lastLaunch = now;
-            }
-
-            for (var e = explosions.length - 1; e >= 0; e--) {
-                var ex = explosions[e];
-                ex.life -= ex.decay;
-                if (ex.life <= 0) {
-                    explosions.splice(e, 1);
-                    continue;
+                function resizeCanvas() {
+                    if (!canvas || !overlay) return;
+                    var rect = overlay.getBoundingClientRect();
+                    canvas.width = rect.width;
+                    canvas.height = rect.height;
                 }
-                var r = 8 + (1 - ex.life) * 25;
-                var g = ctx.createRadialGradient(ex.x, ex.y, 0, ex.x, ex.y, r);
-                g.addColorStop(0, 'rgba(255,255,255,' + ex.life * 0.9 + ')');
-                g.addColorStop(0.3, 'rgba(255,220,180,' + ex.life * 0.4 + ')');
-                g.addColorStop(1, 'rgba(255,200,100,0)');
-                ctx.fillStyle = g;
-                ctx.beginPath();
-                ctx.arc(ex.x, ex.y, r, 0, Math.PI * 2);
-                ctx.fill();
-            }
 
-            for (var i = fireworks.length - 1; i >= 0; i--) {
-                var r = fireworks[i];
-                r.x += r.vx;
-                r.y += r.vy;
-                r.vy += 0.08;
-                r.trail.push({ x: r.x, y: r.y });
-                if (r.trail.length > 35) r.trail.shift();
+                function random(min, max) {
+                    return Math.random() * (max - min) + min;
+                }
 
-                if (r.trail.length > 2) {
-                    for (var t = 1; t < r.trail.length; t++) {
-                        var frac = t / r.trail.length;
-                        ctx.strokeStyle = r.color;
-                        ctx.lineWidth = 1 + frac * 1.5;
-                        ctx.globalAlpha = 0.3 + frac * 0.65;
-                        ctx.beginPath();
-                        ctx.moveTo(r.trail[t-1].x, r.trail[t-1].y);
-                        ctx.lineTo(r.trail[t].x, r.trail[t].y);
-                        ctx.stroke();
+                function createRocket() {
+                    var targetY = random(canvas.height * 0.1, canvas.height * 0.75);
+                    return {
+                        x: random(canvas.width * 0.15, canvas.width * 0.85),
+                        y: canvas.height + 5,
+                        vx: random(-0.3, 0.3),
+                        vy: -random(11, 15),
+                        targetY: targetY,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        trail: []
+                    };
+                }
+
+                function explode(rocket) {
+                    var cx = rocket.x,
+                        cy = rocket.y;
+                    explosions.push({
+                        x: cx,
+                        y: cy,
+                        life: 1,
+                        decay: 0.04
+                    });
+                    var sparkCount = 100 + Math.floor(Math.random() * 50);
+                    for (var i = 0; i < sparkCount; i++) {
+                        var angle = (Math.PI * 2 * i) / sparkCount + random(-0.3, 0.3);
+                        var len = random(20, 55);
+                        sparks.push({
+                            cx: cx,
+                            cy: cy,
+                            angle: angle,
+                            length: 0,
+                            maxLength: len,
+                            color: colors[Math.floor(Math.random() * colors.length)],
+                            life: 1,
+                            decay: random(0.006, 0.015),
+                            extend: random(2, 4),
+                            lineWidth: random(1, 2.5)
+                        });
+                    }
+                    var particleCount = 60 + Math.floor(Math.random() * 30);
+                    for (var j = 0; j < particleCount; j++) {
+                        var a = Math.PI * 2 * Math.random();
+                        var s = random(3, 8);
+                        particles.push({
+                            x: cx,
+                            y: cy,
+                            vx: Math.cos(a) * s,
+                            vy: Math.sin(a) * s - random(0.5, 2),
+                            color: colors[Math.floor(Math.random() * colors.length)],
+                            life: 1,
+                            decay: random(0.008, 0.018),
+                            size: random(1.5, 3)
+                        });
                     }
                 }
-                ctx.globalAlpha = 1;
 
-                if (r.y <= r.targetY || r.vy >= 0) {
-                    explode(r);
-                    fireworks.splice(i, 1);
+                function drawFireworks() {
+                    if (!canvas || !fireworksRunning || !overlay.classList.contains('flex')) return;
+                    var ctx = canvas.getContext('2d');
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    var now = Date.now();
+                    if (now - lastLaunch > 200) {
+                        fireworks.push(createRocket());
+                        fireworks.push(createRocket());
+                        lastLaunch = now;
+                    }
+
+                    for (var e = explosions.length - 1; e >= 0; e--) {
+                        var ex = explosions[e];
+                        ex.life -= ex.decay;
+                        if (ex.life <= 0) {
+                            explosions.splice(e, 1);
+                            continue;
+                        }
+                        var r = 8 + (1 - ex.life) * 25;
+                        var g = ctx.createRadialGradient(ex.x, ex.y, 0, ex.x, ex.y, r);
+                        g.addColorStop(0, 'rgba(255,255,255,' + ex.life * 0.9 + ')');
+                        g.addColorStop(0.3, 'rgba(255,220,180,' + ex.life * 0.4 + ')');
+                        g.addColorStop(1, 'rgba(255,200,100,0)');
+                        ctx.fillStyle = g;
+                        ctx.beginPath();
+                        ctx.arc(ex.x, ex.y, r, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    for (var i = fireworks.length - 1; i >= 0; i--) {
+                        var r = fireworks[i];
+                        r.x += r.vx;
+                        r.y += r.vy;
+                        r.vy += 0.08;
+                        r.trail.push({
+                            x: r.x,
+                            y: r.y
+                        });
+                        if (r.trail.length > 35) r.trail.shift();
+
+                        if (r.trail.length > 2) {
+                            for (var t = 1; t < r.trail.length; t++) {
+                                var frac = t / r.trail.length;
+                                ctx.strokeStyle = r.color;
+                                ctx.lineWidth = 1 + frac * 1.5;
+                                ctx.globalAlpha = 0.3 + frac * 0.65;
+                                ctx.beginPath();
+                                ctx.moveTo(r.trail[t - 1].x, r.trail[t - 1].y);
+                                ctx.lineTo(r.trail[t].x, r.trail[t].y);
+                                ctx.stroke();
+                            }
+                        }
+                        ctx.globalAlpha = 1;
+
+                        if (r.y <= r.targetY || r.vy >= 0) {
+                            explode(r);
+                            fireworks.splice(i, 1);
+                        }
+                    }
+
+                    for (var s = sparks.length - 1; s >= 0; s--) {
+                        var sp = sparks[s];
+                        var expandEase = 1 - Math.pow(1 - sp.length / sp.maxLength, 2);
+                        sp.length = Math.min(sp.length + sp.extend * (0.5 + expandEase * 0.5), sp.maxLength);
+                        sp.life -= sp.decay;
+                        if (sp.life <= 0) {
+                            sparks.splice(s, 1);
+                            continue;
+                        }
+                        var ex = sp.cx + Math.cos(sp.angle) * sp.length;
+                        var ey = sp.cy + Math.sin(sp.angle) * sp.length;
+                        var alpha = sp.life * Math.pow(sp.length / sp.maxLength, 0.7);
+                        ctx.strokeStyle = sp.color;
+                        ctx.lineWidth = (sp.lineWidth || 1.5) * alpha;
+                        ctx.globalAlpha = Math.min(1, alpha * 1.2);
+                        ctx.beginPath();
+                        ctx.moveTo(sp.cx, sp.cy);
+                        ctx.lineTo(ex, ey);
+                        ctx.stroke();
+                    }
+                    ctx.globalAlpha = 1;
+
+                    for (var j = particles.length - 1; j >= 0; j--) {
+                        var p = particles[j];
+                        var px = p.x,
+                            py = p.y;
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        p.vy += 0.08;
+                        p.vx *= 0.98;
+                        p.vy *= 0.98;
+                        p.life -= p.decay;
+
+                        if (p.life <= 0) {
+                            particles.splice(j, 1);
+                            continue;
+                        }
+                        var sz = (p.size || 2) * p.life;
+                        ctx.fillStyle = p.color;
+                        ctx.globalAlpha = p.life;
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, sz, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.globalAlpha = p.life * 0.5;
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, sz * 1.5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.globalAlpha = 1;
+
+                    fireworksRaf = requestAnimationFrame(drawFireworks);
                 }
-            }
 
-            for (var s = sparks.length - 1; s >= 0; s--) {
-                var sp = sparks[s];
-                var expandEase = 1 - Math.pow(1 - sp.length / sp.maxLength, 2);
-                sp.length = Math.min(sp.length + sp.extend * (0.5 + expandEase * 0.5), sp.maxLength);
-                sp.life -= sp.decay;
-                if (sp.life <= 0) {
-                    sparks.splice(s, 1);
-                    continue;
+                function startCanvasFireworks() {
+                    if (!canvas || !overlay) return;
+                    fireworks = [];
+                    particles = [];
+                    sparks = [];
+                    explosions = [];
+                    lastLaunch = 0;
+                    fireworksRunning = true;
+                    requestAnimationFrame(function() {
+                        resizeCanvas();
+                        drawFireworks();
+                    });
                 }
-                var ex = sp.cx + Math.cos(sp.angle) * sp.length;
-                var ey = sp.cy + Math.sin(sp.angle) * sp.length;
-                var alpha = sp.life * Math.pow(sp.length / sp.maxLength, 0.7);
-                ctx.strokeStyle = sp.color;
-                ctx.lineWidth = (sp.lineWidth || 1.5) * alpha;
-                ctx.globalAlpha = Math.min(1, alpha * 1.2);
-                ctx.beginPath();
-                ctx.moveTo(sp.cx, sp.cy);
-                ctx.lineTo(ex, ey);
-                ctx.stroke();
-            }
-            ctx.globalAlpha = 1;
 
-            for (var j = particles.length - 1; j >= 0; j--) {
-                var p = particles[j];
-                var px = p.x, py = p.y;
-                p.x += p.vx;
-                p.y += p.vy;
-                p.vy += 0.08;
-                p.vx *= 0.98;
-                p.vy *= 0.98;
-                p.life -= p.decay;
-
-                if (p.life <= 0) {
-                    particles.splice(j, 1);
-                    continue;
+                function stopCanvasFireworks() {
+                    fireworksRunning = false;
+                    if (fireworksRaf) {
+                        cancelAnimationFrame(fireworksRaf);
+                        fireworksRaf = null;
+                    }
+                    if (canvas) {
+                        var ctx = canvas.getContext('2d');
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    }
                 }
-                var sz = (p.size || 2) * p.life;
-                ctx.fillStyle = p.color;
-                ctx.globalAlpha = p.life;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, sz, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalAlpha = p.life * 0.5;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, sz * 1.5, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            ctx.globalAlpha = 1;
 
-            fireworksRaf = requestAnimationFrame(drawFireworks);
-        }
-
-        function startCanvasFireworks() {
-            if (!canvas || !overlay) return;
-            fireworks = [];
-            particles = [];
-            sparks = [];
-            explosions = [];
-            lastLaunch = 0;
-            fireworksRunning = true;
-            requestAnimationFrame(function() {
-                resizeCanvas();
-                drawFireworks();
-            });
-        }
-
-        function stopCanvasFireworks() {
-            fireworksRunning = false;
-            if (fireworksRaf) {
-                cancelAnimationFrame(fireworksRaf);
-                fireworksRaf = null;
-            }
-            if (canvas) {
-                var ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-            }
-        }
-
-        function runConfettiBurst() {
-            if (typeof confetti !== 'function') return;
-            confetti({ particleCount: 30, spread: 70, origin: { y: 0.6 }, colors: colors });
-        }
-
-        function showOverlay() {
-            if (overlay) {
-                overlay.classList.remove('hidden');
-                overlay.classList.add('flex');
-                if (floatingIcon) floatingIcon.classList.add('hidden');
-                startCanvasFireworks();
-                runConfettiBurst();
-                window.addEventListener('resize', resizeCanvas);
-            }
-        }
-
-        function hideOverlay() {
-            stopCanvasFireworks();
-            window.removeEventListener('resize', resizeCanvas);
-            if (overlay) {
-                overlay.classList.add('hidden');
-                overlay.classList.remove('flex');
-            }
-            if (floatingIcon) floatingIcon.classList.remove('hidden');
-        }
-
-        function initBirthday() {
-            if (!overlay) return;
-            var alreadySeen = localStorage.getItem(storageKey);
-            if (!alreadySeen) {
-                localStorage.setItem(storageKey, '1');
-                showOverlay();
-            } else {
-                if (floatingIcon) floatingIcon.classList.remove('hidden');
-            }
-        }
-
-        if (replayBtn) {
-            replayBtn.addEventListener('click', function() {
-                runConfettiBurst();
-                if (fireworksRunning) {
-                    fireworks.push(createRocket());
-                    fireworks.push(createRocket());
+                function runConfettiBurst() {
+                    if (typeof confetti !== 'function') return;
+                    confetti({
+                        particleCount: 30,
+                        spread: 70,
+                        origin: {
+                            y: 0.6
+                        },
+                        colors: colors
+                    });
                 }
-            });
-        }
-        if (closeBtn) {
-            closeBtn.addEventListener('click', hideOverlay);
-        }
-        if (floatingIcon) {
-            floatingIcon.addEventListener('click', function() {
-                showOverlay();
-            });
-        }
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initBirthday);
-        } else {
-            initBirthday();
-        }
-    })();
-    </script>
+                function showOverlay() {
+                    if (overlay) {
+                        overlay.classList.remove('hidden');
+                        overlay.classList.add('flex');
+                        if (floatingIcon) floatingIcon.classList.add('hidden');
+                        startCanvasFireworks();
+                        runConfettiBurst();
+                        window.addEventListener('resize', resizeCanvas);
+                    }
+                }
+
+                function hideOverlay() {
+                    stopCanvasFireworks();
+                    window.removeEventListener('resize', resizeCanvas);
+                    if (overlay) {
+                        overlay.classList.add('hidden');
+                        overlay.classList.remove('flex');
+                    }
+                    if (floatingIcon) floatingIcon.classList.remove('hidden');
+                }
+
+                function initBirthday() {
+                    if (!overlay) return;
+                    var alreadySeen = localStorage.getItem(storageKey);
+                    if (!alreadySeen) {
+                        localStorage.setItem(storageKey, '1');
+                        showOverlay();
+                    } else {
+                        if (floatingIcon) floatingIcon.classList.remove('hidden');
+                    }
+                }
+
+                if (replayBtn) {
+                    replayBtn.addEventListener('click', function() {
+                        runConfettiBurst();
+                        if (fireworksRunning) {
+                            fireworks.push(createRocket());
+                            fireworks.push(createRocket());
+                        }
+                    });
+                }
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', hideOverlay);
+                }
+                if (floatingIcon) {
+                    floatingIcon.addEventListener('click', function() {
+                        showOverlay();
+                    });
+                }
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initBirthday);
+                } else {
+                    initBirthday();
+                }
+            })();
+        </script>
     @endif
 
     <script>
@@ -1006,125 +1065,132 @@
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 
     @auth
-    <script>
-        // Initialize Pusher for real-time chat updates
-        (function() {
-            const authUserId = {{ auth()->id() }};
-            const pusherKey = '{{ config('broadcasting.connections.pusher.key') }}';
-            const pusherCluster = '{{ config('broadcasting.connections.pusher.options.cluster') }}';
+        <script>
+            // Initialize Pusher for real-time chat updates
+            (function() {
+                const authUserId = {{ auth()->id() }};
+                const pusherKey = '{{ config('broadcasting.connections.pusher.key') }}';
+                const pusherCluster = '{{ config('broadcasting.connections.pusher.options.cluster') }}';
 
-            if (pusherKey && authUserId) {
-                const pusher = new Pusher(pusherKey, {
-                    cluster: pusherCluster,
-                    forceTLS: true
-                });
+                if (pusherKey && authUserId) {
+                    const pusher = new Pusher(pusherKey, {
+                        cluster: pusherCluster,
+                        forceTLS: true
+                    });
 
-                // Subscribe to the user's chat channel
-                const channel = pusher.subscribe('chat.' + authUserId);
+                    // Subscribe to the user's chat channel
+                    const channel = pusher.subscribe('chat.' + authUserId);
 
-                // Listen for new messages
-                channel.bind('message.event', function(data) {
-                    console.log('Real-time message received:', data);
+                    // Listen for new messages
+                    channel.bind('message.event', function(data) {
+                        console.log('Real-time message received:', data);
 
-                    // Check if we're on the My Chats (inbox) page
-                    const isInboxPage = window.location.pathname.includes('/my-chats') ||
-                                        document.querySelector('[data-page="my-chats"]') !== null;
+                        // Check if we're on the My Chats (inbox) page
+                        const isInboxPage = window.location.pathname.includes('/my-chats') ||
+                            document.querySelector('[data-page="my-chats"]') !== null;
 
-                    // Check if we're on a chat detail page (actively viewing the conversation)
-                    const isOnChatPage = window.location.pathname.includes('/chat') ||
-                                        window.isOnChatDetailPage ||
-                                        document.querySelector('#ridesharing_app') !== null;
+                        // Check if we're on a chat detail page (actively viewing the conversation)
+                        const isOnChatPage = window.location.pathname.includes('/chat') ||
+                            window.isOnChatDetailPage ||
+                            document.querySelector('#ridesharing_app') !== null;
 
-                    // Get message details to check if it's for the current conversation
-                    const messageReceiver = parseInt((data.message && data.message.receiver) || data.receiver_id || (data.message && data.message.receiver));
-                    const messageSender = parseInt((data.message && data.message.sender) || data.user_id || (data.user && data.user.id));
-                    const currentUserId = {{ auth()->id() }};
-                    const currentRideId = parseInt(window.ride || 0);
-                    const messageRideId = parseInt((data.ride && data.ride.id) || (data.ride_id) || (data.message && data.message.ride_id) || 0);
-                    const currentPassenger = parseInt(window.passenger || 0);
+                        // Get message details to check if it's for the current conversation
+                        const messageReceiver = parseInt((data.message && data.message.receiver) || data
+                            .receiver_id || (data.message && data.message.receiver));
+                        const messageSender = parseInt((data.message && data.message.sender) || data.user_id || (
+                            data.user && data.user.id));
+                        const currentUserId = {{ auth()->id() }};
+                        const currentRideId = parseInt(window.ride || 0);
+                        const messageRideId = parseInt((data.ride && data.ride.id) || (data.ride_id) || (data
+                            .message && data.message.ride_id) || 0);
+                        const currentPassenger = parseInt(window.passenger || 0);
 
-                    // Determine if this message is for the currently viewed chat
-                    const isCurrentChat = isOnChatPage && 
-                                         messageRideId === currentRideId && 
-                                         (messageReceiver === currentUserId || messageSender === currentUserId) &&
-                                         (currentPassenger === 0 || messageSender === currentPassenger || messageReceiver === currentPassenger);
+                        // Determine if this message is for the currently viewed chat
+                        const isCurrentChat = isOnChatPage &&
+                            messageRideId === currentRideId &&
+                            (messageReceiver === currentUserId || messageSender === currentUserId) &&
+                            (currentPassenger === 0 || messageSender === currentPassenger || messageReceiver ===
+                                currentPassenger);
 
-                    if (isInboxPage) {
-                        // Refresh the inbox page to show new messages
-                        // Use a small delay to avoid too frequent refreshes
-                        if (!window.inboxRefreshPending) {
-                            window.inboxRefreshPending = true;
-                            setTimeout(function() {
-                                window.location.reload();
-                            }, 1000);
+                        if (isInboxPage) {
+                            // Refresh the inbox page to show new messages
+                            // Use a small delay to avoid too frequent refreshes
+                            if (!window.inboxRefreshPending) {
+                                window.inboxRefreshPending = true;
+                                setTimeout(function() {
+                                    window.location.reload();
+                                }, 1000);
+                            }
                         }
-                    }
 
-                    // Only update notification count if:
-                    // 1. User is NOT currently viewing this specific chat conversation
-                    // 2. The message is for the current user (they are the receiver)
-                    const shouldUpdateNotification = !isCurrentChat && messageReceiver === currentUserId;
+                        // Only update notification count if:
+                        // 1. User is NOT currently viewing this specific chat conversation
+                        // 2. The message is for the current user (they are the receiver)
+                        const shouldUpdateNotification = !isCurrentChat && messageReceiver === currentUserId;
 
-                    if (shouldUpdateNotification) {
-                        // Update notification count in bell icon using more specific selector
-                        const notificationButton = document.querySelector('#dropdownNotificationButton');
-                        if (notificationButton) {
-                            const countElement = notificationButton.querySelector('.absolute.-top-3.-right-2');
-                            if (countElement) {
-                                try {
-                                    const currentCount = parseInt(countElement.textContent.trim()) || 0;
-                                    const newCount = currentCount + 1;
-                                    countElement.textContent = newCount;
-                                    // Ensure the element is visible
-                                    countElement.style.display = 'flex';
-                                    countElement.style.visibility = 'visible';
-                                    countElement.classList.remove('hidden');
-                                    // Make sure parent is visible too
-                                    if (countElement.parentElement) {
-                                        countElement.parentElement.style.display = '';
+                        if (shouldUpdateNotification) {
+                            // Update notification count in bell icon using more specific selector
+                            const notificationButton = document.querySelector('#dropdownNotificationButton');
+                            if (notificationButton) {
+                                const countElement = notificationButton.querySelector('.absolute.-top-3.-right-2');
+                                if (countElement) {
+                                    try {
+                                        const currentCount = parseInt(countElement.textContent.trim()) || 0;
+                                        const newCount = currentCount + 1;
+                                        countElement.textContent = newCount;
+                                        // Ensure the element is visible
+                                        countElement.style.display = 'flex';
+                                        countElement.style.visibility = 'visible';
+                                        countElement.classList.remove('hidden');
+                                        // Make sure parent is visible too
+                                        if (countElement.parentElement) {
+                                            countElement.parentElement.style.display = '';
+                                        }
+                                        console.log('Notification count updated:', newCount);
+                                    } catch (error) {
+                                        console.error('Error updating notification count:', error);
                                     }
-                                    console.log('Notification count updated:', newCount);
-                                } catch (error) {
-                                    console.error('Error updating notification count:', error);
+                                } else {
+                                    console.warn('Notification count element not found within button');
                                 }
                             } else {
-                                console.warn('Notification count element not found within button');
+                                // Fallback: try to find the element directly
+                                const countElement = document.querySelector(
+                                    '#dropdownNotificationButton .absolute.-top-3.-right-2');
+                                if (countElement) {
+                                    try {
+                                        const currentCount = parseInt(countElement.textContent.trim()) || 0;
+                                        const newCount = currentCount + 1;
+                                        countElement.textContent = newCount;
+                                        // Ensure the element is visible
+                                        countElement.style.display = 'flex';
+                                        countElement.style.visibility = 'visible';
+                                        countElement.classList.remove('hidden');
+                                        // Make sure parent is visible too
+                                        if (countElement.parentElement) {
+                                            countElement.parentElement.style.display = '';
+                                        }
+                                        console.log('Notification count updated (fallback):', newCount);
+                                    } catch (error) {
+                                        console.error('Error updating notification count (fallback):', error);
+                                    }
+                                } else {
+                                    console.warn('Notification count element not found anywhere');
+                                }
                             }
                         } else {
-                            // Fallback: try to find the element directly
-                            const countElement = document.querySelector('#dropdownNotificationButton .absolute.-top-3.-right-2');
-                            if (countElement) {
-                                try {
-                                    const currentCount = parseInt(countElement.textContent.trim()) || 0;
-                                    const newCount = currentCount + 1;
-                                    countElement.textContent = newCount;
-                                    // Ensure the element is visible
-                                    countElement.style.display = 'flex';
-                                    countElement.style.visibility = 'visible';
-                                    countElement.classList.remove('hidden');
-                                    // Make sure parent is visible too
-                                    if (countElement.parentElement) {
-                                        countElement.parentElement.style.display = '';
-                                    }
-                                    console.log('Notification count updated (fallback):', newCount);
-                                } catch (error) {
-                                    console.error('Error updating notification count (fallback):', error);
-                                }
-                            } else {
-                                console.warn('Notification count element not found anywhere');
-                            }
+                            console.log(
+                                'Skipping notification update - user is viewing this chat or not the receiver', {
+                                    isCurrentChat: isCurrentChat,
+                                    messageReceiver: messageReceiver,
+                                    currentUserId: currentUserId
+                                });
                         }
-                    } else {
-                        console.log('Skipping notification update - user is viewing this chat or not the receiver', {
-                            isCurrentChat: isCurrentChat,
-                            messageReceiver: messageReceiver,
-                            currentUserId: currentUserId
-                        });
-                    }
-                });
-            }
-        })();
-    </script>
+                    });
+                }
+            })
+            ();
+        </script>
     @endauth
 
     <script>

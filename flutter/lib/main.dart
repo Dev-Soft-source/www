@@ -112,8 +112,31 @@ void main() async {
   runApp(const MyApp());
 }
 
+Future<FirebaseApp>? _firebaseInitialization;
+
+Future<FirebaseApp> ensureFirebaseInitialized() async {
+  for (final app in Firebase.apps) {
+    if (app.name == defaultFirebaseAppName) {
+      return app;
+    }
+  }
+
+  final initialization = _firebaseInitialization ??= Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  try {
+    return await initialization;
+  } catch (_) {
+    if (identical(_firebaseInitialization, initialization)) {
+      _firebaseInitialization = null;
+    }
+    rethrow;
+  }
+}
+
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  await ensureFirebaseInitialized();
 
   logger.info("[BG] Notification received:");
   logger.info("Notification: ");
@@ -144,7 +167,7 @@ Future<void> bootstrapCoreAppState() async {
 }
 
 Future<void> bootstrapDeferredServices() async {
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await ensureFirebaseInitialized();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   await NotificationService().initNotification();

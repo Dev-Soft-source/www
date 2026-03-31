@@ -79,7 +79,7 @@ self.addEventListener('notificationclick', function (event) {
     fetch(`/read-notification?id=${notificationId}`, {
       method: 'GET',
       credentials: 'include',
-    }).catch(function () {});
+    }).catch(function () { });
   }
 
   event.waitUntil(

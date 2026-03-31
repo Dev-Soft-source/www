@@ -1,85 +1,42 @@
 {
   "project_info": {
-    "project_number": "785619130237",
-    "project_id": "proxima-ride-app-devop",
-    "storage_bucket": "proxima-ride-app-devop.firebasestorage.app"
+    "project_number": "320350283658",
+    "project_id": "proxima-ride-app-devop-78bda",
+    "storage_bucket": "proxima-ride-app-devop-78bda.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:785619130237:android:d4cb52be6e99a1c1b5de14",
+        "mobilesdk_app_id": "1:320350283658:android:2ce4cb96820694aaa04a73",
         "android_client_info": {
           "package_name": "com.devop360.proximaride"
         }
       },
       "oauth_client": [
         {
-          "client_id": "785619130237-21qtien4t7pvrkcqned4h3bac7o39qg5.apps.googleusercontent.com",
+          "client_id": "320350283658-qfl86jinb8tph4k20ebma0v3a4vdiren.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.devop360.proximaride",
-            "certificate_hash": "0af55908ddefd2d3dde48c29986b911722af88b8"
+            "certificate_hash": "1a1d712286a5847c1913fe0092821861219789b4"
           }
         },
         {
-          "client_id": "785619130237-aj4t1uln1k8dnqih2a5qu4c19bon5pha.apps.googleusercontent.com",
+          "client_id": "320350283658-m32nu2ffdrauef6ira2qb7qkqjkd2al7.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAdd9MkUNuU_06gYjVZEX6rDvVNEK9Qv_I"
+          "current_key": "AIzaSyC5YWvqTaEJwypF3MZD6sfC4FswvPGfT8s"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "785619130237-aj4t1uln1k8dnqih2a5qu4c19bon5pha.apps.googleusercontent.com",
+              "client_id": "320350283658-m32nu2ffdrauef6ira2qb7qkqjkd2al7.apps.googleusercontent.com",
               "client_type": 3
-            },
-            {
-              "client_id": "785619130237-11kpq56e9sbtu64inc3l5d812h4ad41j.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.example.proximaRide"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:785619130237:android:3f65ff9f248dd13cb5de14",
-        "android_client_info": {
-          "package_name": "com.example.proxima_ride"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "785619130237-aj4t1uln1k8dnqih2a5qu4c19bon5pha.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyAdd9MkUNuU_06gYjVZEX6rDvVNEK9Qv_I"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "785619130237-aj4t1uln1k8dnqih2a5qu4c19bon5pha.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "785619130237-11kpq56e9sbtu64inc3l5d812h4ad41j.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.example.proximaRide"
-              }
             }
           ]
         }
