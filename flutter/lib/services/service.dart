@@ -132,7 +132,30 @@ class Service extends GetxService {
 
   getUserInfo() async {
     if (token != "") {
-      var data = jsonDecode(await secureStorage.read(key: "userInfo") ?? "");
+      final rawUserInfo = await secureStorage.read(key: "userInfo") ?? "";
+      if (rawUserInfo.trim().isEmpty) {
+        logger.warning(
+            "Stored token exists but userInfo is empty. Clearing stale session.");
+        await _clearLocalSessionAndNavigateToLogin();
+        return;
+      }
+
+      dynamic data;
+      try {
+        data = jsonDecode(rawUserInfo);
+      } catch (error) {
+        logger.error("Failed to decode stored userInfo: $error");
+        await _clearLocalSessionAndNavigateToLogin();
+        return;
+      }
+
+      if (data is! Map) {
+        logger.warning(
+            "Stored userInfo is not a JSON object. Clearing stale session.");
+        await _clearLocalSessionAndNavigateToLogin();
+        return;
+      }
+
       loginUserDetail['id'] = data['id'];
       loginUserDetail['first_name'] = data['first_name'].toString();
       loginUserDetail['last_name'] = data['last_name'].toString();

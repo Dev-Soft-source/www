@@ -76,6 +76,12 @@ Future<void> initializeApiConfig() async {
   final androidDebugTarget =
       _envRawValue('ANDROID_DEBUG_TARGET', 'auto').toLowerCase();
 
+  debugPrint('[API CONFIG] ANDROID_DEBUG_TARGET=$androidDebugTarget');
+  debugPrint('[API CONFIG] LAN_APP_URL=$lanAppUrl');
+  debugPrint('[API CONFIG] LAN_API_URL=$lanApiUrl');
+  debugPrint('[API CONFIG] PROD_APP_URL=$productionAppUrl');
+  debugPrint('[API CONFIG] PROD_API_URL=$productionApiUrl');
+
   if (kReleaseMode) {
     _setResolvedUrls(productionAppUrl, productionApiUrl, 'production');
     return;
@@ -94,6 +100,11 @@ Future<void> initializeApiConfig() async {
     }
 
     if (androidDebugTarget == 'phone') {
+      _setResolvedUrls(lanAppUrl, lanApiUrl, 'android-phone-lan-forced');
+      return;
+    }
+
+    if (androidDebugTarget == 'prod' || androidDebugTarget == 'production') {
       _setResolvedUrls(
           productionAppUrl, productionApiUrl, 'android-phone-production-forced');
       return;
@@ -103,8 +114,14 @@ Future<void> initializeApiConfig() async {
       _setResolvedUrls(emulatorAppUrl, emulatorApiUrl, 'android-emulator');
       return;
     }
-    
-    _setResolvedUrls(productionAppUrl, productionApiUrl, 'android-phone-production');
+
+    if (await _isReachable(lanAppUrl)) {
+      _setResolvedUrls(lanAppUrl, lanApiUrl, 'android-phone-lan');
+      return;
+    }
+
+    _setResolvedUrls(
+        productionAppUrl, productionApiUrl, 'android-phone-production');
     return;
   } else if (defaultTargetPlatform == TargetPlatform.iOS) {
     _setResolvedUrls(productionAppUrl, productionApiUrl, 'ios-phone-production');
