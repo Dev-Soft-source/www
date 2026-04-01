@@ -48,112 +48,113 @@ class StageTwo extends StatelessWidget {
             return SafeArea(
               child: Stack(
                 children: [
-                  Container(
-                    padding: EdgeInsets.all(getValueForScreenType<double>(
-                      context: context,
-                      mobile: 15.0,
-                      tablet: 15.0,
-                    )),
-                    child: SingleChildScrollView(
-                      physics: AlwaysScrollableScrollPhysics(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Center(
-                              child: txt25Size(
-                                  title:
-                                      // "${controller.labelTextDetail['main_heading'] ??
-                                      "Step 2 of 5 - Profile Picture",
+                  Column(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.all(getValueForScreenType<double>(
+                            context: context,
+                            mobile: 15.0,
+                            tablet: 15.0,
+                          )),
+                          child: SingleChildScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Center(
+                                    child: txt25Size(
+                                        title:
+                                            // "${controller.labelTextDetail['main_heading'] ??
+                                            "Step 2 of 5 - Profile Picture",
 
-                                  //  }",
-                                  context: context)),
-                          15.heightBox,
-                          Html(
-                            data:
-                                "${controller.labelTextDetail['sub_heading_text'] ?? "If you are signing up as a driver, then please note that to be eligible to post Pink Rides and Extra-Care Rides, you must upload your profile photo"}",
-                            style: {
-                              "body": Style(
-                                  padding: HtmlPaddings.zero,
-                                  margin: Margins.zero),
-                              'p': Style(
-                                fontSize: FontSize(20),
-                                padding: HtmlPaddings.zero,
-                                margin: Margins.zero,
-                              ),
-                              'div': Style(
-                                fontSize: FontSize(20),
-                                padding: HtmlPaddings.zero,
-                                margin: Margins.zero,
-                              ),
-                              'a': Style(
-                                color: Colors.blue,
-                                textDecoration: TextDecoration.underline,
-                              )
-                            },
-                            onLinkTap: (url, attributes, element) async {
-                              if (url != null) {
-                                try {
-                                  final Uri uri = Uri.parse(url);
-                                  if (await canLaunchUrl(uri)) {
-                                    await launchUrl(uri,
-                                        mode: LaunchMode.externalApplication);
-                                  } else {
-                                    logger.error('Could not launch $url');
-                                  }
-                                } catch (e) {
-                                  logger.error('Error launching URL: $e');
-                                }
-                              }
-                            },
-                          ),
-                          // txt16Size(
-                          //     title:
-                          //         "${controller.labelTextDetail['sub_heading_text'] ?? "If you are signing up as a driver, then please note that to be eligible to post Pink Rides and Extra-Care Rides, you must upload your profile photo"}",
-                          //     context: context),
-                          10.heightBox,
-                          imageUploadWidget(
-                              context: context,
-                              onTap: () async {
-                                logger.info("Uploading image");
+                                        //  }",
+                                        context: context)),
+                                15.heightBox,
+                                Html(
+                                  data:
+                                      "${controller.labelTextDetail['sub_heading_text'] ?? "If you are signing up as a driver, then please note that to be eligible to post Pink Rides and Extra-Care Rides, you must upload your profile photo"}",
+                                  style: {
+                                    "body": Style(
+                                        padding: HtmlPaddings.zero,
+                                        margin: Margins.zero),
+                                    'p': Style(
+                                      fontSize: FontSize(20),
+                                      padding: HtmlPaddings.zero,
+                                      margin: Margins.zero,
+                                    ),
+                                    'div': Style(
+                                      fontSize: FontSize(20),
+                                      padding: HtmlPaddings.zero,
+                                      margin: Margins.zero,
+                                    ),
+                                    'a': Style(
+                                      color: Colors.blue,
+                                      textDecoration: TextDecoration.underline,
+                                    )
+                                  },
+                                  onLinkTap: (url, attributes, element) async {
+                                    if (url != null) {
+                                      try {
+                                        final Uri uri = Uri.parse(url);
+                                        if (await canLaunchUrl(uri)) {
+                                          await launchUrl(uri,
+                                              mode: LaunchMode.externalApplication);
+                                        } else {
+                                          logger.error('Could not launch $url');
+                                        }
+                                      } catch (e) {
+                                        logger.error('Error launching URL: $e');
+                                      }
+                                    }
+                                  },
+                                ),
+                                10.heightBox,
+                                imageUploadWidget(
+                                    context: context,
+                                    onTap: () async {
+                                      logger.info("Uploading image");
 
-                                await imageUploadBottomSheet(
-                                    controller, context);
-                                logger.info("Image uploaded");
-                                logger.info("Errors: ${controller.errors}");
+                                      await imageUploadBottomSheet(
+                                          controller, context);
+                                      logger.info("Image uploaded");
+                                      logger.info("Errors: ${controller.errors}");
+                                      if (controller.errors.firstWhereOrNull(
+                                              (element) =>
+                                                  element['title'] == "image") !=
+                                          null) {
+                                        controller.errors.remove(controller.errors
+                                            .firstWhereOrNull((element) =>
+                                                element['title'] == "image"));
+                                      }
+                                      controller.validateStageTwoFields();
+                                    },
+                                    title:
+                                        "${controller.labelTextDetail['mobile_photo_label'] ?? "Upload profile photo."}",
+                                    title1: "",
+                                    title2:
+                                        "(JPG, PNG, JPEG, and GIF. 10MB max.)",
+                                    imageFile:
+                                        controller.profileImageName.value == ""
+                                            ? null
+                                            : controller.profileImagePath.value,
+                                    screenWidth: context.screenWidth),
                                 if (controller.errors.firstWhereOrNull(
-                                        (element) =>
-                                            element['title'] == "image") !=
-                                    null) {
-                                  controller.errors.remove(controller.errors
-                                      .firstWhereOrNull((element) =>
-                                          element['title'] == "image"));
-                                }
-                                controller.validateStageTwoFields();
-                              },
-                              title:
-                                  "${controller.labelTextDetail['mobile_photo_label'] ?? "Upload profile photo."}",
-                              title1: "",
-                              title2: "(JPG, PNG, JPEG, and GIF. 10MB max.)",
-                              imageFile: controller.profileImageName.value == ""
-                                  ? null
-                                  : controller.profileImagePath.value,
-                              screenWidth: context.screenWidth),
-                          if (controller.errors.firstWhereOrNull(
-                                  (element) => element['title'] == "image") !=
-                              null) ...[
-                            toolTip(
-                                tip: controller.errors.firstWhereOrNull(
-                                    (element) => element['title'] == "image"))
-                          ],
-                          100.heightBox,
-                        ],
+                                        (element) => element['title'] == "image") !=
+                                    null) ...[
+                                  toolTip(
+                                      tip: controller.errors.firstWhereOrNull(
+                                          (element) =>
+                                              element['title'] == "image"))
+                                ],
+                                24.heightBox,
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
+                      Container(
                         color: Colors.grey.shade100,
                         padding: EdgeInsets.all(getValueForScreenType<double>(
                           context: context,
@@ -200,6 +201,7 @@ class StageTwo extends StatelessWidget {
                             ),
                           ],
                         )),
+                    ],
                   ),
                   if (controller.isOverlayLoading.value == true) ...[
                     overlayWidget(context)

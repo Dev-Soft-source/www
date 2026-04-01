@@ -10,6 +10,6 @@ const placeholderFontFamily = regular;
 const descriptiveFontFamily = regular;
 
 const buttonFontSize = 24.0;
-const buttonHeight = 50.0;
+const buttonHeight = 48.0;
 const placeholderFontSize = 18.0;
 const descriptiveFontSize = 18.0;

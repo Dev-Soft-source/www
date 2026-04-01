@@ -197,25 +197,31 @@ class ProfileController extends Controller
             'bio' => 'required|string',
         ], $customMessages);
 
+        $filename = null;
+        $filenameoriginal = null;
+
         // Map 'bio' to 'about' in the $validated array
         $validated['about'] = $validated['bio'];
         unset($validated['bio']); // Remove the 'bio' field
+        unset($validated['government_issued_id']);
 
         User::whereId($request->id)->update($validated);
 
         $user = User::whereId($request->id)->first();
 
-        if (isset($government_issued_id) && $request->hasFile('government_issued_id')) {
+        if ($request->hasFile('government_issued_id')) {
             $file = $request->file('government_issued_id');
             $filename = $file->getClientOriginalName();
             $destination_path = public_path('/users_government_ids');
             $file->move($destination_path, $filename);
 
             //Original Image Upload
-            $file = $request->file('government_issued_original_id');
-            $filenameoriginal = $file->getClientOriginalName();
-            $destination_path = public_path('/users_government_ids');
-            $file->move($destination_path, $filenameoriginal);
+            if ($request->hasFile('government_issued_original_id')) {
+                $file = $request->file('government_issued_original_id');
+                $filenameoriginal = $file->getClientOriginalName();
+                $destination_path = public_path('/users_government_ids');
+                $file->move($destination_path, $filenameoriginal);
+            }
 
             User::whereId($request->id)->update([
                 'government_issued_id' => $filename,

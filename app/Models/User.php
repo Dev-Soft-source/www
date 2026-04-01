@@ -226,7 +226,6 @@ class User extends Authenticatable
         // if ((string) $this->pink_ride === '1') {
         //     return true;
         // }
-
         // Fallback to the same business rules used to build the tooltip/error message.
         return $this->pinkRideEligibilityError($pinkRideSetting) === null;
     }
@@ -369,7 +368,7 @@ class User extends Authenticatable
             return 'Extra Care Rides require at least ' . $rideLimit . ' completed rides.';
         }
 
-        if ($this->home_address == '') {
+        if ($this->address == '') {
             return 'You have to address.';
         }
 
@@ -400,7 +399,7 @@ class User extends Authenticatable
             return 'A government-issued photo ID (driver\'s license) is required to post Pink Rides. Please upload your driver\'s license in your profile.';
         }
 
-        if ($this->home_address == '') {
+        if ($this->address == '') {
             return 'You have to address.';
         }
 

@@ -86,7 +86,7 @@ class ChatPage extends StatelessWidget {
                               foregroundColor: Colors
                                   .white, // or use a light shade for subtle look
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 12),
+                                  horizontal: 12, vertical: 4),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(4),
                                 side: BorderSide(color: primaryColor),

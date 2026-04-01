@@ -543,6 +543,7 @@ class EditProfilePage extends StatelessWidget {
                               ),
                             ),
                             5.heightBox,
+                            // TODO: 
                             Stack(children: [
                               imageUploadWidget(
                                 context: context,
@@ -565,13 +566,9 @@ class EditProfilePage extends StatelessWidget {
                                   controller.governmentImageName.value ==
                                       "") ...[
                                 InkWell(
-                                  onTap: () {
-                                    controller
-                                            .serviceController.showImage.value =
-                                        controller
-                                            .governmentImagePathOriginalOld
-                                            .value;
-                                    Get.toNamed("/show_image");
+                                  onTap: () async {
+                                    await imageUploadBottomSheet(
+                                        controller, context);
                                   },
                                   child: Container(
                                     padding: const EdgeInsets.all(1.0),

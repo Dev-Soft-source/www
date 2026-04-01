@@ -54,17 +54,20 @@ class AddVehiclePage extends StatelessWidget {
           return SafeArea(
             child: Stack(
               children: [
-                Container(
-                    padding: EdgeInsets.all(getValueForScreenType<double>(
-                      context: context,
-                      mobile: 15.0,
-                      tablet: 15.0,
-                    )),
-                    child: SingleChildScrollView(
-                      controller: controller.formScrollController,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                Column(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.all(getValueForScreenType<double>(
+                          context: context,
+                          mobile: 15.0,
+                          tablet: 15.0,
+                        )),
+                        child: SingleChildScrollView(
+                          controller: controller.formScrollController,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
                           10.heightBox,
                           txt20Size(
                               title:
@@ -976,30 +979,31 @@ class AddVehiclePage extends StatelessWidget {
                               ],
                             ),
                           ],
-                          100.heightBox,
+                          24.heightBox,
                         ],
+                          ),
+                        ),
                       ),
-                    )),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                    width: context.screenWidth,
-                    padding: const EdgeInsets.all(15.0),
-                    color: Colors.grey.shade100,
-                    child: elevatedButtonWidget(
-                      textWidget: txt28Size(
-                          title: controller.vehicleId.value == 0
-                              ? "${controller.labelTextDetail['add_vehicle_button_text'] ?? "Add vehicle"}"
-                              : "${controller.labelTextDetail['update_vehicle_button_text'] ?? "Update vehicle"}",
-                          textColor: Colors.white,
-                          context: context,
-                          fontFamily: regular),
-                      onPressed: () async {
-                        await controller.addNewVehicle(
-                            context, context.screenHeight);
-                      },
                     ),
-                  ),
+                    Container(
+                      width: context.screenWidth,
+                      padding: const EdgeInsets.all(15.0),
+                      color: Colors.grey.shade100,
+                      child: elevatedButtonWidget(
+                        textWidget: txt28Size(
+                            title: controller.vehicleId.value == 0
+                                ? "${controller.labelTextDetail['add_vehicle_button_text'] ?? "Add vehicle"}"
+                                : "${controller.labelTextDetail['update_vehicle_button_text'] ?? "Update vehicle"}",
+                            textColor: Colors.white,
+                            context: context,
+                            fontFamily: regular),
+                        onPressed: () async {
+                          await controller.addNewVehicle(
+                              context, context.screenHeight);
+                        },
+                      ),
+                    ),
+                  ],
                 ),
                 if (controller.isOverlayLoading.value == true) ...[
                   overlayWidget(context)

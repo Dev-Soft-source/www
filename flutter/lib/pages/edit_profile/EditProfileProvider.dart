@@ -212,13 +212,13 @@ class EditProfileProvider extends GetConnect {
 
       if (imagePath != "") {
         data.files.add(MapEntry(
-            "image",
+            "government_issued_id",
             MultipartFile(File(imagePath),
                 filename: imageName, contentType: "image/png")));
       }
       if (imagePathOriginal != "") {
         data.files.add(MapEntry(
-            "image_original",
+            "government_issued_original_id",
             MultipartFile(File(imagePathOriginal),
                 filename: imageNameOriginal, contentType: "image/png")));
       }
