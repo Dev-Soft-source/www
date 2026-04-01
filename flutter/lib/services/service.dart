@@ -419,15 +419,17 @@ class Service extends GetxService {
                         ),
                       ),
                       child: cancelNoBtn != ""
-                          ? txt20SizeWithOutContext(
+                          ? buttonLabelText(
                               title: cancelNoBtn,
                               textColor: textColor,
-                              fontFamily: buttonFontFamily)
-                          : txt20SizeWithOutContext(
+                              textAlign: TextAlign.center,
+                            )
+                          : buttonLabelText(
                               title:
                                   "${logoutLabelTextDetail['confirmation_no_label'] ?? "No"}",
                               textColor: textColor,
-                              fontFamily: buttonFontFamily),
+                              textAlign: TextAlign.center,
+                            ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -447,15 +449,17 @@ class Service extends GetxService {
                         ),
                       ),
                       child: cancelYesBtn != ""
-                          ? txt20SizeWithOutContext(
+                          ? buttonLabelText(
                               title: cancelYesBtn,
                               textColor: Colors.white,
-                              fontFamily: buttonFontFamily)
-                          : txt20SizeWithOutContext(
+                              textAlign: TextAlign.center,
+                            )
+                          : buttonLabelText(
                               title:
                                   "${logoutLabelTextDetail['confirmation_yes_label'] ?? "Yes"}",
                               textColor: Colors.white,
-                              fontFamily: buttonFontFamily),
+                              textAlign: TextAlign.center,
+                            ),
                     ),
                   ),
                 ],

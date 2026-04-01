@@ -9,6 +9,7 @@ import 'package:proximaride_app/pages/post_ride/PostRideProvider.dart';
 import 'package:proximaride_app/pages/stages/StageProvider.dart';
 import 'package:proximaride_app/services/connectivity_service.dart';
 import 'package:proximaride_app/services/logger_service.dart';
+import 'package:proximaride_app/services/notification_service.dart';
 import 'package:proximaride_app/services/service.dart';
 
 import 'NotificationProvider.dart';
@@ -211,6 +212,7 @@ class NotificationController extends GetxController {
         // Keep global unread notifications count in sync
         serviceController.notificationCount.value = unreadCount;
         serviceController.notificationCount.refresh();
+        await NotificationService().setBadgeCount(unreadCount);
         logger.info("Notifications Length: ${notificationsList.length}");
         logger.info("Unread Notifications Count: $unreadCount");
         Get.log("The notification list is $notificationsList");
@@ -249,6 +251,7 @@ class NotificationController extends GetxController {
           // Keep global unread notifications count in sync
           serviceController.notificationCount.value = unreadCount;
           serviceController.notificationCount.refresh();
+          await NotificationService().setBadgeCount(unreadCount);
           logger.info("Notifications Length: ${notificationsList.length}");
           logger.info("Unread Notifications Count: $unreadCount");
           Get.log("The notification list is $notificationsList");
@@ -310,6 +313,8 @@ class NotificationController extends GetxController {
           serviceController.notificationCount.value =
               serviceController.notificationCount.value - 1;
           serviceController.notificationCount.refresh();
+          await NotificationService()
+              .setBadgeCount(serviceController.notificationCount.value);
         }
       }, onError: (error) {
         if (!showError) {
@@ -367,6 +372,8 @@ class NotificationController extends GetxController {
           notificationsList.removeWhere((element) =>
               element['id'].toString() == notificationId.toString());
           serviceController.notificationCount.refresh();
+          await NotificationService()
+              .setBadgeCount(serviceController.notificationCount.value);
           notificationsList.refresh();
           isOverlayLoading(false);
         }

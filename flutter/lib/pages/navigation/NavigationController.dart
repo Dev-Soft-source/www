@@ -9,6 +9,7 @@ import 'package:proximaride_app/pages/navigation/navigationProvider.dart';
 import 'package:proximaride_app/pages/notifications/NotificationProvider.dart';
 import 'package:proximaride_app/pages/stages/StageProvider.dart';
 import 'package:proximaride_app/services/logger_service.dart';
+import 'package:proximaride_app/services/notification_service.dart';
 import 'package:proximaride_app/services/pusher_service.dart';
 import 'package:proximaride_app/services/service.dart';
 
@@ -268,6 +269,8 @@ class NavigationController extends GetxController {
         logger.info("Update User FCM Token Response: ${resp.toString()}");
         serviceController.notificationCount.value =
             int.parse(resp['data']['notificationCount'].toString());
+        await NotificationService()
+            .setBadgeCount(serviceController.notificationCount.value);
       }, onError: (err) {
         logger.error("Failed to update user FCM token: $err");
       });
@@ -304,6 +307,8 @@ class NavigationController extends GetxController {
           serviceController.notificationCount.value =
               filteredNotifications.length;
           serviceController.notificationCount.refresh();
+          await NotificationService()
+              .setBadgeCount(serviceController.notificationCount.value);
           logger.info(
               "Notification count loaded: ${serviceController.notificationCount.value}");
         }

@@ -64,7 +64,9 @@
 // }
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:get/get.dart';
 import 'package:proximaride_app/services/service.dart';
@@ -72,10 +74,13 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 
 class NotificationService {
+  static const String _badgeCountStorageKey = 'notification_badge_count';
+  static const FlutterSecureStorage _storage = FlutterSecureStorage();
   final FlutterLocalNotificationsPlugin notificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  final serviceController = Get.find<Service>();
+  Service? get serviceController =>
+      Get.isRegistered<Service>() ? Get.find<Service>() : null;
 
   Future<void> initNotification() async {
     developer.log('Initializing notification service',
@@ -115,6 +120,7 @@ class NotificationService {
 
     // Request permissions
     await _requestPermissions();
+    await syncBadgeCountFromStorage();
   }
 
   Future<void> _requestPermissions() async {
@@ -143,7 +149,7 @@ class NotificationService {
         name: 'NotificationService');
 
     try {
-      serviceController.backgroundNotification = "backgroundNotification";
+      serviceController?.backgroundNotification = "backgroundNotification";
 
       // Handle different notification types based on payload
       if (response.payload != null) {
@@ -309,8 +315,8 @@ class NotificationService {
     }
   }
 
-  NotificationDetails notificationDetails() {
-    return const NotificationDetails(
+  NotificationDetails notificationDetails({int badgeCount = 0}) {
+    return NotificationDetails(
       android: AndroidNotificationDetails(
         'channelId',
         'channelName',
@@ -318,13 +324,73 @@ class NotificationService {
         importance: Importance.high,
         priority: Priority.high,
         showWhen: false,
+        channelShowBadge: true,
+        number: badgeCount > 0 ? badgeCount : 0,
       ),
       iOS: DarwinNotificationDetails(
         presentAlert: true,
         presentBadge: true,
         presentSound: true,
+        badgeNumber: badgeCount,
       ),
     );
+  }
+
+  Future<int> getStoredBadgeCount() async {
+    if (kIsWeb) {
+      return 0;
+    }
+
+    final rawValue = await _storage.read(key: _badgeCountStorageKey);
+    return int.tryParse(rawValue ?? '') ?? 0;
+  }
+
+  Future<void> setBadgeCount(int count) async {
+    if (kIsWeb) {
+      return;
+    }
+
+    final safeCount = count < 0 ? 0 : count;
+    await _storage.write(
+      key: _badgeCountStorageKey,
+      value: safeCount.toString(),
+    );
+
+    if (serviceController != null) {
+      serviceController!.notificationCount.value = safeCount;
+      serviceController!.notificationCount.refresh();
+    }
+
+    final iosPlugin = notificationsPlugin.resolvePlatformSpecificImplementation<
+        IOSFlutterLocalNotificationsPlugin>();
+    await iosPlugin?.requestPermissions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+  }
+
+  Future<int> incrementBadgeCount() async {
+    final currentCount = await getStoredBadgeCount();
+    final nextCount = currentCount + 1;
+    await setBadgeCount(nextCount);
+    return nextCount;
+  }
+
+  Future<int> decrementBadgeCount() async {
+    final currentCount = await getStoredBadgeCount();
+    final nextCount = currentCount > 0 ? currentCount - 1 : 0;
+    await setBadgeCount(nextCount);
+    return nextCount;
+  }
+
+  Future<void> clearBadgeCount() async {
+    await setBadgeCount(0);
+  }
+
+  Future<void> syncBadgeCountFromStorage() async {
+    final currentCount = await getStoredBadgeCount();
+    await setBadgeCount(currentCount);
   }
 
   Future<void> showNotification(
@@ -335,11 +401,12 @@ class NotificationService {
     developer.log('Payload: $payload', name: 'NotificationService');
 
     try {
+      final badgeCount = await incrementBadgeCount();
       await notificationsPlugin.show(
         id,
         title,
         body,
-        notificationDetails(),
+        notificationDetails(badgeCount: badgeCount),
         payload: payload,
       );
       developer.log('Notification shown successfully',
@@ -396,6 +463,7 @@ class NotificationService {
   // Method to cancel all notifications
   Future<void> cancelAllNotifications() async {
     await notificationsPlugin.cancelAll();
+    await clearBadgeCount();
     developer.log('All notifications cancelled', name: 'NotificationService');
   }
 }
