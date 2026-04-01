@@ -5,6 +5,7 @@ import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/consts/const_api.dart';
 import 'package:proximaride_app/pages/signup/RegisterController.dart';
 import 'package:proximaride_app/pages/widgets/error_state_widget.dart';
+import 'package:proximaride_app/pages/widgets/app_html_text.dart';
 import 'package:proximaride_app/pages/widgets/language_bottom_sheet.dart';
 import 'package:proximaride_app/pages/widgets/network_cache_image_widget.dart';
 import 'package:proximaride_app/pages/widgets/other_login_widget.dart';
@@ -19,6 +20,32 @@ import '../widgets/tool_tip.dart';
 
 class SignupPage extends StatelessWidget {
   const SignupPage({super.key});
+
+  Future<void> _handleAgreementLinkTap(String link) async {
+    final normalizedLink = link.toLowerCase();
+    final uri = Uri.tryParse(link);
+    final path = (uri?.path ?? normalizedLink).toLowerCase();
+
+    if (normalizedLink.contains('term_condition') ||
+        path.contains('term-condition') ||
+        path.contains('terms-and-conditions')) {
+      Get.toNamed('/term_condition');
+      return;
+    }
+
+    if (normalizedLink.contains('term_of_use') ||
+        path.contains('term-of-use') ||
+        path.contains('terms-of-use')) {
+      Get.toNamed('/term_of_use');
+      return;
+    }
+
+    if (normalizedLink.contains('privacy_policy') ||
+        path.contains('privacy-policy')) {
+      Get.toNamed('/privacy_policy');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final RegisterController controller = Get.isRegistered<RegisterController>()
@@ -917,69 +944,19 @@ class SignupPage extends StatelessWidget {
                               activeTrackColor: primaryColor,
                             ),
                             Expanded(
-                              child: RichText(
-                                  text: TextSpan(children: [
-                                textSpan(
-                                    context: context,
-                                    textColor: textColor,
-                                    fontFamily: regular,
-                                    title:
-                                        "${controller.labelTextDetail['app_agree_terms_part1_label'] ?? 'I have read and accepted the '}",
-                                    textSize: 18.0),
-                                textSpan(
-                                  context: context,
-                                  textColor: primaryColor,
-                                  fontFamily: regular,
-                                  title:
-                                      " ${controller.labelTextDetail['app_agree_terms_link1_label'] ?? 'Terms and Conditions'},",
-                                  textSize: 18.0,
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      Get.toNamed('/term_condition');
-                                    },
-                                ),
-                                textSpan(
-                                  context: context,
-                                  textColor: primaryColor,
-                                  fontFamily: regular,
-                                  title:
-                                      " ${controller.labelTextDetail['app_agree_terms_link2_label'] ?? ' Terms of Use'}",
-                                  textSize: 18.0,
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      Get.toNamed('/term_of_use');
-                                    },
-                                ),
-                                textSpan(
-                                  context: context,
-                                  textColor: Colors.black,
-                                  fontFamily: regular,
-                                  title:
-                                      " ${controller.labelTextDetail['app_agree_terms_part2_label'] ?? ' and'}",
-                                  textSize: 18.0,
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {},
-                                ),
-                                textSpan(
-                                  context: context,
-                                  textColor: primaryColor,
-                                  fontFamily: regular,
-                                  title:
-                                      " ${controller.labelTextDetail['app_agree_terms_link3_label'] ?? ' Privacy policy'},",
-                                  textSize: 18.0,
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      Get.toNamed('/privacy_policy');
-                                    },
-                                ),
-                                textSpan(
-                                    context: context,
-                                    textColor: textColor,
-                                    fontFamily: bold,
-                                    title:
-                                        " ${controller.labelTextDetail['app_agree_terms_part3_label'] ?? '  and I confirm that I am at least 18 years old'}",
-                                    textSize: 18.0),
-                              ])),
+                              child: AppHtmlText(
+                                data: controller.labelTextDetail[
+                                        'agree_terms_label'] ??
+                                    'I confirm that I am at least 18 years old and I have read and agree to ProximaRide <a href="/term_condition">Terms of services</a>, <a href="/term_of_use">Term of use</a>, <a href="/privacy_policy">Privacy policy</a> and all associated rules and policies.',
+                                fontSize: 18,
+                                fontFamily: regular,
+                                fontWeight: FontWeight.w400,
+                                textColor: textColor,
+                                linkColor: primaryColor,
+                                lineHeight: 1.4,
+                                openLinksExternally: false,
+                                onLinkTapCallback: _handleAgreementLinkTap,
+                              ),
                             )
                           ],
                         ),
@@ -998,9 +975,9 @@ class SignupPage extends StatelessWidget {
                               activeTrackColor: primaryColor,
                             ),
                             Expanded(
-                              child: txt20Size(
+                              child: txt18Size(
                                   title:
-                                      "Ride sharing cannot be used as a business dummy text, will be changed after you have provided",
+                                  " ${controller.labelTextDetail['rideshare_label'] ?? 'Ride sharing cannot be used as a business dummy text, will be changed after you have provided'}",
                                   fontFamily: regular,
                                   textColor: textColor,
                                   context: context),

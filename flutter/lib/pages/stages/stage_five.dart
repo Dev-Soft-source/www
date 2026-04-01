@@ -336,6 +336,8 @@ class StageFive extends StatelessWidget {
                                     width: context.screenWidth / 2,
                                     height: 50,
                                     child: elevatedButtonWidget(
+                                      enabled:
+                                          controller.secondsRemaining.value == 0,
                                       textWidget: txt22Size(
                                           title:
                                               "${controller.labelTextDetail['send_button_label'] ?? "Resend code"}",
@@ -346,9 +348,8 @@ class StageFive extends StatelessWidget {
                                               : Colors.black26,
                                           context: context,
                                           fontFamily: regular),
-                                      onPressed: () {
-                                        controller.secondsRemaining.value = 60;
-                                        controller.sendVerificationCode();
+                                      onPressed: () async {
+                                        await controller.sendVerificationCode();
                                       },
                                       btnColor:
                                           controller.secondsRemaining.value == 0
@@ -404,9 +405,11 @@ class StageFive extends StatelessWidget {
                             context: context,
                             fontFamily: regular),
                         onPressed: () async {
-                          controller.finishBtn.value == false
-                              ? controller.sendVerificationCode()
-                              : controller.verifyPhoneNumber();
+                          if (controller.finishBtn.value == false) {
+                            await controller.sendVerificationCode();
+                          } else {
+                            await controller.verifyPhoneNumber();
+                          }
                         },
                       ),
                     ),

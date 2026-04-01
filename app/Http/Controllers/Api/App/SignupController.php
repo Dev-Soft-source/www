@@ -25,25 +25,7 @@ class SignupController extends Controller
 
     public function create(Request $request)
     {
-        $signupPage = null;
-        if ($request->lang_id && $request->lang_id != 0) {
-            $selectedLanguage = Language::whereId($request->lang_id)->first();
-            // Retrieve the SignupPageSettingDetail associated with the selected language
-            $signupPage = SignupPageSettingDetail::where('language_id', $request->lang_id)->select('app_main_heading', 'or_label', 'required_label', 'first_name_label', 'last_name_label', 'email_label', 'password_label', 'password_placeholder', 'confirm_password_label', 'app_agree_terms_part1_label', 'app_agree_terms_link1_label', 'app_agree_terms_link2_label', 'app_agree_terms_part2_label', 'app_agree_terms_link3_label', 'app_agree_terms_part3_label', 'button_label', 'no_account_label', 'signin_link_label', 'now_label')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $signupPage = SignupPageSettingDetail::where('language_id', $selectedLanguage->id)->select('app_main_heading', 'or_label', 'required_label', 'first_name_label', 'last_name_label', 'email_label', 'password_label', 'password_placeholder', 'confirm_password_label', 'app_agree_terms_part1_label', 'app_agree_terms_link1_label', 'app_agree_terms_link2_label', 'app_agree_terms_part2_label', 'app_agree_terms_link3_label', 'app_agree_terms_part3_label', 'button_label', 'no_account_label', 'signin_link_label', 'now_label')->first();
-            }
-        }
-
-        if ($selectedLanguage) {
-            $locale = $selectedLanguage->abbreviation;
-        } else {
-            $locale = 'en';
-        }
-
-        App::setLocale($locale);
+        $signupPage = SignupPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $validationMessages = [
             'required' => trans('validation.required'),

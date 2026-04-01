@@ -247,67 +247,76 @@ class AuthController extends Controller
         }
 
         if ($existingUser) {
-            if ($existingUser->provider === $request->type && $existingUser->provider_id === $request->type_id) {
+            $existingUser->lang_id = $defaultLangId;
+            $existingUser->email_verified = '1';
 
-                $existingUser->lang_id = $defaultLangId;
-                $existingUser->save();
-                // Log in the existing user
-                auth()->login($existingUser);
-    
-                $token = $existingUser->createToken('ridesharing')->plainTextToken;
-    
-                $ratings = Rating::where('status', 1)->where('type', '1')->get();
-                // Calculate average rating
-                $filteredRatings = $ratings->filter(function ($rating) use ($existingUser) {
-                    return optional($rating->ride)->added_by === $existingUser->id;
-                });
-    
-                $driver_total_ratings = $filteredRatings->count();
-                $totalAverage = $filteredRatings->avg('average_rating');
-                $driver_average_rating = $totalAverage;
-    
-                $ratings = Rating::where('status', 1)->where('type', '2')->get();
-                // Calculate average rating
-                $filteredRatings = $ratings->filter(function ($rating) use ($existingUser) {
-                    return optional($rating->booking)->user_id === $existingUser->id;
-                });
-    
-                $passenger_total_ratings = $filteredRatings->count();
-                $totalAverage = $filteredRatings->avg('average_rating');
-                $passenger_average_rating = $totalAverage;
-                
-                $ratings = Rating::where(function ($query) use ($existingUser) {
-                    // Ratings where type is 2 and user_id belongs to the user
-                    $query->where('type', '2')
-                          ->whereHas('booking', function ($query) use ($existingUser) {
-                              $query->where('user_id', $existingUser->id);
-                          });
-                    // OR Ratings where type is 1 and ride_id belongs to the user
-                    $query->orWhere(function ($query) use ($existingUser) {
-                        $query->where('type', '1')
-                              ->whereHas('ride', function ($query) use ($existingUser) {
-                                  $query->where('added_by', $existingUser->id);
-                              });
-                    });
-                })->get();
-    
-                $user_total_ratings = $ratings->count();
-                $totalAverage = $ratings->avg('average_rating');
-                $user_average_rating = $totalAverage;
-    
-                if ($existingUser->gender === 'male') {
-                    $existingUser->gender_label = $genderLabel->male_option_label;
-                } elseif ($existingUser->gender === 'female') {
-                    $existingUser->gender_label = $genderLabel->female_option_label;
-                } elseif ($existingUser->gender === 'prefer not to say') {
-                    $existingUser->gender_label = $genderLabel->prefer_option_label;
-                }
-
-                $data = ['token' => $token, 'first_name' => $existingUser->first_name, 'last_name' => $existingUser->last_name, 'gender' => $existingUser->gender, 'gender_label' => $existingUser->gender_label, 'profile_image' => $existingUser->profile_image, 'profile_original_image' => $existingUser->profile_original_image, 'email' => $existingUser->email, 'step' => $existingUser->step, 'driver' => $existingUser->driver,'id' => $existingUser->id, 'driver_average_rating' => $driver_average_rating, 'passenger_average_rating' => $passenger_average_rating, 'user_average_rating' => $user_average_rating, 'driver_total_ratings' => $driver_total_ratings, 'passenger_total_ratings' => $passenger_total_ratings, 'langId' => isset($existingUser->lang_id) ? $existingUser->lang_id : $defaultLangId,'user_total_ratings' => $user_total_ratings];
-                return $this->successResponse($data, 'Login successfully!');
-            } else {
-                return $this->apiErrorResponse( $message->email_already_exist_message ?? 'The email with this account is already associated with an existing account', 200);
+            if (empty($existingUser->provider)) {
+                $existingUser->provider = $request->type;
             }
+
+            if (empty($existingUser->provider_id)) {
+                $existingUser->provider_id = $request->type_id;
+            }
+
+            if (empty($existingUser->profile_image) && !empty($request->photourl)) {
+                $existingUser->profile_image = $request->photourl;
+            }
+
+            $existingUser->save();
+            // Log in the existing user
+            auth()->login($existingUser);
+
+            $token = $existingUser->createToken('ridesharing')->plainTextToken;
+
+            $ratings = Rating::where('status', 1)->where('type', '1')->get();
+            // Calculate average rating
+            $filteredRatings = $ratings->filter(function ($rating) use ($existingUser) {
+                return optional($rating->ride)->added_by === $existingUser->id;
+            });
+
+            $driver_total_ratings = $filteredRatings->count();
+            $totalAverage = $filteredRatings->avg('average_rating');
+            $driver_average_rating = $totalAverage;
+
+            $ratings = Rating::where('status', 1)->where('type', '2')->get();
+            // Calculate average rating
+            $filteredRatings = $ratings->filter(function ($rating) use ($existingUser) {
+                return optional($rating->booking)->user_id === $existingUser->id;
+            });
+
+            $passenger_total_ratings = $filteredRatings->count();
+            $totalAverage = $filteredRatings->avg('average_rating');
+            $passenger_average_rating = $totalAverage;
+
+            $ratings = Rating::where(function ($query) use ($existingUser) {
+                // Ratings where type is 2 and user_id belongs to the user
+                $query->where('type', '2')
+                      ->whereHas('booking', function ($query) use ($existingUser) {
+                          $query->where('user_id', $existingUser->id);
+                      });
+                // OR Ratings where type is 1 and ride_id belongs to the user
+                $query->orWhere(function ($query) use ($existingUser) {
+                    $query->where('type', '1')
+                          ->whereHas('ride', function ($query) use ($existingUser) {
+                              $query->where('added_by', $existingUser->id);
+                          });
+                });
+            })->get();
+
+            $user_total_ratings = $ratings->count();
+            $totalAverage = $ratings->avg('average_rating');
+            $user_average_rating = $totalAverage;
+
+            if ($existingUser->gender === 'male') {
+                $existingUser->gender_label = $genderLabel->male_option_label;
+            } elseif ($existingUser->gender === 'female') {
+                $existingUser->gender_label = $genderLabel->female_option_label;
+            } elseif ($existingUser->gender === 'prefer not to say') {
+                $existingUser->gender_label = $genderLabel->prefer_option_label;
+            }
+
+            $data = ['token' => $token, 'first_name' => $existingUser->first_name, 'last_name' => $existingUser->last_name, 'gender' => $existingUser->gender, 'gender_label' => $existingUser->gender_label, 'profile_image' => $existingUser->profile_image, 'profile_original_image' => $existingUser->profile_original_image, 'email' => $existingUser->email, 'step' => $existingUser->step, 'driver' => $existingUser->driver,'id' => $existingUser->id, 'driver_average_rating' => $driver_average_rating, 'passenger_average_rating' => $passenger_average_rating, 'user_average_rating' => $user_average_rating, 'driver_total_ratings' => $driver_total_ratings, 'passenger_total_ratings' => $passenger_total_ratings, 'langId' => isset($existingUser->lang_id) ? $existingUser->lang_id : $defaultLangId,'user_total_ratings' => $user_total_ratings];
+            return $this->successResponse($data, 'Login successfully!');
         }
 
         // Split the full name into first and last names

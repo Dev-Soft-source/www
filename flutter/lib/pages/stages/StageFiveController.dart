@@ -19,6 +19,8 @@ import 'package:proximaride_app/services/logger_service.dart';
 import 'package:proximaride_app/services/service.dart';
 
 class StageFiveController extends GetxController {
+  static const int verificationResendCooldownSeconds = 60;
+
   final serviceController = Get.find<Service>();
   final errorStateManager = ErrorStateManager();
   final secureStorage = const FlutterSecureStorage();
@@ -547,7 +549,7 @@ class StageFiveController extends GetxController {
     }
   }
 
-  void sendVerificationCode({String phoneId = "0"}) {
+  Future<void> sendVerificationCode({String phoneId = "0"}) async {
     errors.clear();
     if (phoneId == "0") {
       if (countryCodeTextEditingController.text == "" ||
@@ -563,15 +565,44 @@ class StageFiveController extends GetxController {
       }
     }
 
-    final phoneNumber = countryCodeTextEditingController.text +
-        phoneNumberTextEditingController.text;
-    serviceController.showDialogue('Verification code sent to your phone.',
-        type: "info");
-    MyPhoneNumberProvider()
-        .sendVerificationCode(serviceController.token, phoneNumber, phoneId);
-    secondsRemaining.value = 10;
-    startTimer();
-    finishBtn.value = true;
+    final phoneNumber =
+        '${countryCodeTextEditingController.text}${phoneNumberTextEditingController.text}'
+            .replaceAll(' ', '');
+
+    isOverlayLoading(true);
+    try {
+      final resp = await MyPhoneNumberProvider()
+          .sendVerificationCode(serviceController.token, phoneNumber, phoneId);
+
+      if (resp['errors'] != null) {
+        final phoneErrors = resp['errors']['phone'];
+        if (phoneErrors is List && phoneErrors.isNotEmpty) {
+          errors.add({'title': "number", 'eList': phoneErrors});
+          return;
+        }
+      }
+
+      if (resp['status'] != null && resp['status'] == "Success") {
+        verificationCode = "";
+        isVerificationCodeEntered.value = false;
+        secondsRemaining.value = verificationResendCooldownSeconds;
+        startTimer();
+        finishBtn.value = true;
+        serviceController.showDialogue(
+          resp['message']?.toString() ?? 'Verification code sent to your phone.',
+          type: "info",
+        );
+      } else {
+        serviceController.showDialogue(
+          resp['message']?.toString() ?? 'Unable to send verification code.',
+          type: "error",
+        );
+      }
+    } catch (error) {
+      serviceController.showDialogue(error.toString(), type: "error");
+    } finally {
+      isOverlayLoading(false);
+    }
   }
 
   Future<void> verifyPhoneNumber() async {
