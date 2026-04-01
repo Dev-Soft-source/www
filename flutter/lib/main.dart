@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -161,6 +162,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     NotificationService().showNotification(
       title: message.notification!.title,
       body: message.notification!.body,
+      payload: jsonEncode(message.data),
     );
   }
 }
@@ -210,6 +212,7 @@ Future<void> bootstrapDeferredServices() async {
       NotificationService().showNotification(
         title: message.notification!.title,
         body: message.notification!.body,
+        payload: jsonEncode(message.data),
       );
     }
   });

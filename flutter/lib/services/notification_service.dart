@@ -63,10 +63,12 @@
 //   }
 // }
 
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:get/get.dart';
 import 'package:proximaride_app/services/service.dart';
+import 'dart:convert';
 import 'dart:developer' as developer;
 
 class NotificationService {
@@ -173,6 +175,18 @@ class NotificationService {
         name: 'NotificationService');
 
     try {
+      final decodedPayload = jsonDecode(payload);
+      if (decodedPayload is Map) {
+        _navigateFromNotificationData(
+          Map<String, dynamic>.from(decodedPayload),
+        );
+        return;
+      }
+    } catch (_) {
+      // Keep backwards compatibility with the legacy non-JSON payload format.
+    }
+
+    try {
       // Parse payload and perform specific actions
       if (payload.contains('chat')) {
         _navigateToChat(payload);
@@ -191,29 +205,108 @@ class NotificationService {
 
   void _navigateToChat(String payload) {
     developer.log('Navigating to chat', name: 'NotificationService');
-    // Example: Extract chat ID from payload
-    // Get.toNamed('/chat', arguments: {'chatId': extractChatId(payload)});
-    Get.toNamed('/chat');
+    _performDefaultAction();
   }
 
   void _navigateToRide(String payload) {
     developer.log('Navigating to ride', name: 'NotificationService');
-    // Example: Extract ride ID from payload
-    // Get.toNamed('/ride', arguments: {'rideId': extractRideId(payload)});
-    Get.toNamed('/ride');
+    _performDefaultAction();
   }
 
   void _navigateToBooking(String payload) {
     developer.log('Navigating to booking', name: 'NotificationService');
-    // Example: Extract booking ID from payload
-    // Get.toNamed('/booking', arguments: {'bookingId': extractBookingId(payload)});
-    Get.toNamed('/booking');
+    _performDefaultAction();
   }
 
   void _performDefaultAction() {
     developer.log('Performing default action', name: 'NotificationService');
-    // Navigate to home or main screen
-    Get.toNamed('/home');
+    Get.toNamed('/notifications');
+  }
+
+  void _navigateFromNotificationData(Map<String, dynamic> data) {
+    final notificationType = data['notification_type']?.toString();
+    final type = data['type']?.toString();
+    final rideId = data['ride_id']?.toString();
+    final postedBy = data['posted_by']?.toString();
+    final postedTo = data['posted_to']?.toString();
+    final id = data['id']?.toString();
+    final rideDetailId = data['ride_detail_id']?.toString() ?? '0';
+
+    developer.log('Decoded notification payload: $data',
+        name: 'NotificationService');
+
+    if (notificationType == 'review' && rideId != null && id != null) {
+      final route = type == '1'
+          ? '/notification_add_review/passenger/$rideId/${postedTo ?? '0'}/$id/$rideDetailId'
+          : '/notification_add_review/driver/$rideId/0/$id/$rideDetailId';
+      _navigateSafely(route);
+      return;
+    }
+
+    if (notificationType == 'chat received') {
+      final candidateUserId =
+          postedBy ?? data['sender'] ?? data['sender_id'] ?? data['user_id'];
+      final candidateRideId = rideId ?? data['rideId'] ?? data['ride'] ?? '0';
+
+      final chatUserId = (candidateUserId != null &&
+              candidateUserId.toString().isNotEmpty &&
+              candidateUserId.toString() != 'null')
+          ? candidateUserId.toString()
+          : '';
+      final chatRideId = (candidateRideId != null &&
+              candidateRideId.toString().isNotEmpty &&
+              candidateRideId.toString() != 'null')
+          ? candidateRideId.toString()
+          : '0';
+
+      if (chatUserId.isEmpty) {
+        _navigateSafely('/navigation');
+        return;
+      }
+
+      _navigateSafely('/messaging_page/$chatUserId/$chatRideId/new');
+      return;
+    }
+
+    if (notificationType == 'phone') {
+      _navigateSafely('/my_phone_number');
+      return;
+    }
+
+    if (notificationType == 'profile') {
+      _navigateSafely('/profile_setting');
+      return;
+    }
+
+    if (notificationType != null && rideId != null) {
+      final tripType = type == '1' ? 'ride' : 'trip';
+      _navigateSafely(
+        '/trip_detail/$rideId/$tripType/$notificationType/$rideDetailId',
+      );
+      return;
+    }
+
+    _performDefaultAction();
+  }
+
+  void _navigateSafely(String route) {
+    try {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.microtask(() {
+          if (Get.currentRoute == route) {
+            return;
+          }
+          Get.toNamed(route);
+        });
+      });
+    } catch (_) {
+      Future.delayed(const Duration(milliseconds: 120), () {
+        if (Get.currentRoute == route) {
+          return;
+        }
+        Get.toNamed(route);
+      });
+    }
   }
 
   NotificationDetails notificationDetails() {
