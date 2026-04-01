@@ -31,12 +31,20 @@ Widget appNetworkImage({
   }
 
   if (kIsWeb) {
+    final parsedUrl = Uri.tryParse(normalizedUrl);
+    final host = parsedUrl?.host.toLowerCase() ?? '';
+    final shouldForceHtmlImageElement =
+        host.contains('googleusercontent.com') ||
+        host.contains('googleapis.com');
+
     return Image.network(
       normalizedUrl,
       width: width,
       height: height,
       fit: fit,
-      webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
+      webHtmlElementStrategy: shouldForceHtmlImageElement
+          ? WebHtmlElementStrategy.fallback
+          : WebHtmlElementStrategy.prefer,
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) {
           return child;
@@ -48,7 +56,7 @@ Widget appNetworkImage({
         );
       },
       errorBuilder: (context, error, stackTrace) {
-        logger.error('Image.network failed for $normalizedUrl -> $error');
+        logger.warning('Image.network failed for $normalizedUrl -> $error');
         return fallback();
       },
     );

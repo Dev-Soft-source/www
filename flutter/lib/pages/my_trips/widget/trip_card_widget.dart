@@ -49,6 +49,9 @@ Widget tripCardWidget(
     }
   }
 
+  final hasDriverReview = tripDetail['driver'] != null &&
+      tripDetail['driver']['average_rating'] != null;
+
   return InkWell(
     onTap: onTapTripCard,
     child: Card(
@@ -327,12 +330,9 @@ Widget tripCardWidget(
                               child: Container(color: Colors.grey.shade400)),
                           5.widthBox,
                           txt20Size(
-                              title:
-                                  "${controller.labelTextDetail['card_section_review'] ?? "Review"}:",
-                              context: context),
-                          txt20Size(
-                              title:
-                                  "${tripDetail['driver'] != null && tripDetail['driver']['average_rating'] != null ? tripDetail['driver']['average_rating'].toStringAsFixed(1) : ""}",
+                              title: hasDriverReview
+                                  ? "${controller.labelTextDetail['card_section_review'] ?? "Review"}: ${tripDetail['driver']['average_rating'].toStringAsFixed(1)}"
+                                  : "${controller.labelTextDetail['no_review_yet_label'] ?? "No review yet"}",
                               context: context),
                           5.widthBox,
                         ],

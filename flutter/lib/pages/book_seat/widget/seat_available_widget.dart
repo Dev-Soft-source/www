@@ -9,7 +9,10 @@ Widget seatAvailableWidget({context, controller, screenWidth}){
     widgetChild: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        postRideWidget(title: "${controller.labelTextDetail['seats_available_label'] ?? "Seats available"}", screenWidth: screenWidth, context: context,isRequired: true, infoIcon: "${controller.labelTextDetail['seats_available_info_text'] ?? "Seats available info text"}"),
+        postRideWidget(title: "${controller.labelTextDetail['seats_available_label'] ?? "Seats Available"}", 
+        screenWidth: screenWidth, context: context,isRequired: true, 
+        // infoIcon: "${controller.labelTextDetail['seats_available_info_text'] ?? "Seats available info text"}"
+        ),
         Container(
           padding: EdgeInsets.fromLTRB(getValueForScreenType<double>(
             context: context,

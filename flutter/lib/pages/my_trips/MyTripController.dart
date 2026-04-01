@@ -954,6 +954,7 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
           }
         } else if (resp['status'] != null && resp['status'] == "Success") {
           if (pageType == "trip") {
+            await updateMyTrips();
             isOverlayLoading(false);
             serviceController.navigationIndex.value = 0;
             serviceController.showDialogue(resp['message'].toString(),
@@ -1283,6 +1284,6 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
     tripType.value = "upcoming";
     rideType.value = "upcoming";
     firstTimePage = 0;
-    getAllTrips();
+    await getAllTrips();
   }
 }

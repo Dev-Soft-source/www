@@ -42,7 +42,7 @@ String cancelBookingBtn = "Cancel booking", String chatWithDriverBtn = "Chat wit
             onPressed: () async{
               Get.toNamed('/messaging_page/$driverId/$rideId/new');
             },
-          btnColor: Colors.grey,
+          btnColor: const Color.fromARGB(255, 25, 110, 136),
         ),
       ),
       if(showBtn == true)...[

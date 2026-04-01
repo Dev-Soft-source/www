@@ -561,7 +561,7 @@ class BookingController extends Controller
         }
 
         // $id is ride id
-        $this->completeBooking($id, $user->id, $stripId, $request);
+        return $this->completeBooking($id, $user->id, $stripId, $request);
     }
 
     public function paypalSuccess(Request $request, $id, $user_id)
@@ -657,7 +657,7 @@ class BookingController extends Controller
         }
 
         $seat_ids = $this->normalizeSeatIds($request);
-        
+        log::info('Normalized seat IDs: ' . implode(', ', $seat_ids), $seat_ids);
         $seats_number = $request->seats;
         $booking_type = $request->booking_type;
         $tax_amount = isset($request->tax_amount) ? $request->tax_amount : 0;
@@ -1004,12 +1004,7 @@ class BookingController extends Controller
             }
         }
 
-        if($isWeb){
-            return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $this->successMessage->book_seat_message]);
-        } else {
-            $data = ['booking' => $booking];
-            return $this->successResponse($data, $this->successMessage->book_seat_message . ' ' . $request->seats . ' ' . $this->successMessage->book_seat_message_end_part);
-        }
+        return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $this->successMessage->book_seat_message]);
     }
 
     /**

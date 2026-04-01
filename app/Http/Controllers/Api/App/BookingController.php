@@ -395,19 +395,17 @@ class BookingController extends Controller
 
             Log::info('saved card payment');
 
-            $this->completeBooking($id, $user->id, $paymentIntent->id, $request);
+            $bookingResponse = $this->completeBooking($id, $user->id, $paymentIntent->id, $request);
 
-            return $this->successResponse([
-                'payment' => [
-                    'status' => 'paid',
-                    'amount' => $amount,
-                    'payment_method' => 'credit_card',
-                    'reference' => $paymentIntent->id,
-                    'card_id' => (string) $request->input('card_id'),
-                    'provider' => 'stripe',
-                    'card' => $savedCardDetails,
-                ],
-            ], 'Payment processed successfully');
+            return $this->mergeBookingResponseWithPayment($bookingResponse, [
+                'status' => 'paid',
+                'amount' => $amount,
+                'payment_method' => 'credit_card',
+                'reference' => $paymentIntent->id,
+                'card_id' => (string) $request->input('card_id'),
+                'provider' => 'stripe',
+                'card' => $savedCardDetails,
+            ]);
         } catch (\Throwable $e) {
             Log::error('Booking payment failed', [
                 'user_id' => $user?->id,
@@ -425,33 +423,29 @@ class BookingController extends Controller
 
         if ($isWalletPayment) {
 
-            $this->completeBooking($id, $user->id, null, $request);
+            $bookingResponse = $this->completeBooking($id, $user->id, null, $request);
 
-            return $this->successResponse([
-                'payment' => [
-                    'status' => 'paid',
-                    'amount' => $amount,
-                    'payment_method' => 'wallet',
-                    'reference' => null,
-                    'provider' => 'wallet',
-                ],
-            ], 'Payment processed successfully');
+            return $this->mergeBookingResponseWithPayment($bookingResponse, [
+                'status' => 'paid',
+                'amount' => $amount,
+                'payment_method' => 'wallet',
+                'reference' => null,
+                'provider' => 'wallet',
+            ]);
         }
 
         if ($request->input('payment_method') === 'paypal') {
 
-            $this->completeBooking($id, $user->id, (string) $request->input('paypal_id'), $request);
+            $bookingResponse = $this->completeBooking($id, $user->id, (string) $request->input('paypal_id'), $request);
 
-            return $this->successResponse([
-                'payment' => [
-                    'status' => 'paid',
-                    'amount' => $amount,
-                    'payment_method' => 'paypal',
-                    'reference' => (string) $request->input('paypal_id'),
-                    'paypal_email' => (string) $request->input('paypal_email'),
-                    'paypal_payer_id' => (string) $request->input('paypal_payer_id'),
-                ],
-            ], 'Payment processed successfully');
+            return $this->mergeBookingResponseWithPayment($bookingResponse, [
+                'status' => 'paid',
+                'amount' => $amount,
+                'payment_method' => 'paypal',
+                'reference' => (string) $request->input('paypal_id'),
+                'paypal_email' => (string) $request->input('paypal_email'),
+                'paypal_payer_id' => (string) $request->input('paypal_payer_id'),
+            ]);
         }
 
         if ($isNativePay) {
@@ -464,19 +458,32 @@ class BookingController extends Controller
                 'cardholder_name' => $nativePayDetails['cardholder_name'] ?? null,
             ]);
 
-            $this->completeBooking($id, $user->id, (string) $request->input('card_id'), $request);
+            $bookingResponse = $this->completeBooking($id, $user->id, (string) $request->input('card_id'), $request);
 
-            return $this->successResponse([
-                'payment' => [
-                    'status' => 'paid',
-                    'amount' => $amount,
-                    'payment_method' => 'credit_card',
-                    'reference' => (string) $request->input('card_id'),
-                    'provider' => 'stripe_native_pay',
-                    'card' => $nativePayDetails,
-                ],
-            ], 'Payment processed successfully');
+            return $this->mergeBookingResponseWithPayment($bookingResponse, [
+                'status' => 'paid',
+                'amount' => $amount,
+                'payment_method' => 'credit_card',
+                'reference' => (string) $request->input('card_id'),
+                'provider' => 'stripe_native_pay',
+                'card' => $nativePayDetails,
+            ]);
         }
+    }
+
+    private function mergeBookingResponseWithPayment(array $bookingResponse, array $paymentData): array
+    {
+        if (($bookingResponse['status'] ?? null) !== 'Success') {
+            return $bookingResponse;
+        }
+
+        $data = is_array($bookingResponse['data'] ?? null) ? $bookingResponse['data'] : [];
+        $data['payment'] = $paymentData;
+
+        return $this->successResponse(
+            $data,
+            $bookingResponse['message'] ?? 'Payment processed successfully'
+        );
     }
 
 
@@ -525,7 +532,7 @@ class BookingController extends Controller
         }
     }
 
-    private function completeBooking($id, $user_id, $stripId = null, Request $request, $isWeb = false)
+    private function completeBooking($id, $user_id, $stripId = null, Request $request)
     {
         /////////////////////////////////////////////////
         // pre-processing before booking creation (e.g. load ride details, calculate booking fee, validate student booking fee waiver, etc)
@@ -948,12 +955,8 @@ class BookingController extends Controller
             }
         }
 
-        if ($isWeb) {
-            return redirect()->route('my_trips', ['lang' => $this->selectedLanguage->abbreviation])->with(['success' => $this->successMessage->book_seat_message]);
-        } else {
-            $data = ['booking' => $booking];
-            return $this->successResponse($data, $this->successMessage->book_seat_message . ' ' . $request->seats . ' ' . $this->successMessage->book_seat_message_end_part);
-        }
+        $data = ['booking' => $booking];
+        return $this->successResponse($data, $this->successMessage->book_seat_message . ' ' . $request->seats . ' ' . $this->successMessage->book_seat_message_end_part);
     }
 
 

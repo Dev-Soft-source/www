@@ -57,7 +57,10 @@ Widget securedCashWidget({context, bookingList, double screenWidth = 0.0, contro
                             children: [
                               circleImageWidget(width: 36, height: 36, imageType: "network", imagePath: "${booking['passenger']['profile_image']}", context: context),
                               5.widthBox,
-                              txt20Size(context: context, title: "${booking['passenger']['first_name']} ${controller.labelTextDetail['driver_age_label'] ?? "Age"}: ${booking['passenger']['age']}  ${booking['passenger']['gender_label']} ${controller.labelTextDetail['review_label'] ?? "Review"}: ${booking['passenger']['average_rating'] != null ? booking['passenger']['average_rating'].toStringAsFixed(1) : ""} ")
+                              txt20Size(
+                                  context: context,
+                                  title:
+                                      "${booking['passenger']['first_name']} | ${controller.labelTextDetail['driver_age_label'] ?? "Age"}: ${booking['passenger']['age']} | ${booking['passenger']['gender_label']} | ${(booking['passenger']['average_rating'] == null || "${booking['passenger']['average_rating']}".isEmpty) ? "${controller.labelTextDetail['no_review_label'] ?? "No review yet"}" : "${controller.labelTextDetail['review_label'] ?? "Review"}: ${booking['passenger']['average_rating'].toStringAsFixed(1)}"} ")
                             ],
                           ),
                           showBtn == true ? elevatedButtonWidget(

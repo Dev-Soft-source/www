@@ -289,10 +289,14 @@ class CancelBookingPage extends StatelessWidget {
                                     title: "${controller.labelTextTripDetail['booking_cancel_btn_label'] ?? "Cancel ride"}",
                                     context: context,
                                     textColor: Colors.white),
-                                onPressed: controller.confirmRideCheckBox.value == false ? null : () async {
-                                  await controller
-                                      .cancelMyBooking(controller.cancelRideInfo['id']);
-                                },
+                                onPressed: controller.pageType == "ride" &&
+                                        controller.confirmRideCheckBox.value ==
+                                            false
+                                    ? null
+                                    : () async {
+                                        await controller.cancelMyBooking(
+                                            controller.cancelRideInfo['id']);
+                                      },
                                 context: context),
                           ),
                         ],

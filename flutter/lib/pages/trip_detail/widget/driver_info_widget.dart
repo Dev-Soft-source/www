@@ -5,6 +5,7 @@ import 'package:proximaride_app/pages/widgets/circle_image_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import 'package:proximaride_app/pages/post_ride/widget/post_ride_widget.dart';
 Widget driverInfoWidget({context, String driverName = "", String driverRating = "", String driverImage = "", String rideId = "",  double screenWidth = 0.0, String pageType ="0", String heading = "Driver info", bool hidePhoto = true}){
+  final hasDriverRating = driverRating.trim().isNotEmpty;
   return InkWell(
     onTap: (){
 
@@ -43,13 +44,14 @@ Widget driverInfoWidget({context, String driverName = "", String driverRating = 
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         txt20SizeCapitalize(title: driverName, context: context),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Image.asset(reviewsImage, width: 14, height: 14),
-                            txt20Size(title: driverRating, context: context, fontFamily: bold)
-                          ],
-                        )
+                        if (hasDriverRating)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Image.asset(reviewsImage, width: 14, height: 14),
+                              txt20Size(title: driverRating, context: context, fontFamily: bold)
+                            ],
+                          )
                       ],
                     )
                   ],
