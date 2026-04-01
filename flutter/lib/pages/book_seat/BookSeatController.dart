@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_paypal_pay/flutter_paypal_pay.dart';
 import 'package:get/get.dart';
@@ -80,6 +81,7 @@ class BookSeatController extends GetxController {
   var extraCareDisclaimer = "".obs;
   var showGPayBtn = true.obs;
   var nativePayAvailable = false.obs;
+  var hasShownSeatHoldWarning = false.obs;
 
   late TextEditingController cardNameController,
       cardNumberController,
@@ -96,6 +98,7 @@ class BookSeatController extends GetxController {
     cvvCodeController = TextEditingController();
     addressController = TextEditingController();
     messageDriverTextEditingController = TextEditingController();
+    _resetSeatSelectionState();
     tripId = Get.parameters['tripId'] ?? "";
     fromStopId = Get.parameters['fromStopId'] ?? "0";
     toStopId = Get.parameters['toStopId'] ?? "0";
@@ -118,6 +121,15 @@ class BookSeatController extends GetxController {
     cvvCodeController.dispose();
     addressController.dispose();
     messageDriverTextEditingController.dispose();
+  }
+
+  void _resetSeatSelectionState() {
+    seatAvailable.value = 0;
+    alreadyBookedSeat.value = 0;
+    currentUserBookedSeat.value = 0;
+    cancellationDisable.value = false;
+    bookedSeatIds.clear();
+    hasShownSeatHoldWarning.value = false;
   }
 
   Future<void> checkNativePayAvailability() async {
@@ -146,11 +158,21 @@ class BookSeatController extends GetxController {
   }
 
   bool isStudent() {
-    if (serviceController.loginUserDetail['student'] == "1") {
+    final studentValue =
+        (userDetail['student'] ?? serviceController.loginUserDetail['student'])
+            ?.toString();
+
+            logger.info("isStudent: ${studentValue.toString()}");
+    if (studentValue == "1") {
       DateTime now = DateTime.now();
 
-      String dateString =
-          serviceController.loginUserDetail['student_card_exp_date'].toString();
+      final dateString =
+          (userDetail['student_card_exp_date'] ??
+                  serviceController.loginUserDetail['student_card_exp_date'])
+              .toString();
+      if (dateString.isEmpty || dateString == "null" || !dateString.contains('-')) {
+        return false;
+      }
       List<String> dateParts = dateString.split('-');
       int cardYear = int.parse(dateParts[0]);
       int cardMonth = int.parse(dateParts[1]);
@@ -181,7 +203,9 @@ class BookSeatController extends GetxController {
           bookingFee * (seatAvailable.value + currentUserBookedSeat.value);
     }
 
-    if (isStudent()) {}
+    if (isStudent()) {
+      return 0.0;
+    }
 
     var price = rideUnitPrice();
     if (price <= 15) {
@@ -262,6 +286,8 @@ class BookSeatController extends GetxController {
 
   getBookSeatDetail() async {
     try {
+      _resetSeatSelectionState();
+      ride.clear();
       BookSeatProvider()
           .getBookSeatDetail(tripId, fromStopId, toStopId,
               serviceController.token, serviceController.langId.value)
@@ -432,6 +458,20 @@ class BookSeatController extends GetxController {
         if (resp['status'] != null && resp['status'] == "Success") {
           if (resp['data'] != null && resp['data']['user'] != null) {
             userDetail.addAll(resp['data']['user']);
+            serviceController.loginUserDetail.addAll({
+              ...serviceController.loginUserDetail,
+              ...Map<String, Object>.fromEntries(
+                (resp['data']['user'] as Map)
+                    .entries
+                    .where((entry) => entry.value != null)
+                    .map((entry) => MapEntry(entry.key.toString(), entry.value as Object)),
+              ),
+            });
+            serviceController.loginUserDetail.refresh();
+            await serviceController.secureStorage.write(
+              key: "userInfo",
+              value: jsonEncode(serviceController.loginUserDetail),
+            );
           }
 
           if (resp['data'] != null && resp['data']['city'] != null) {
@@ -1330,13 +1370,28 @@ class BookSeatController extends GetxController {
               type: "error");
         } else if (resp['status'] != null && resp['status'] == "Success") {
           if (type == "add") {
+            final shouldShowSeatHoldWarning =
+                bookedSeatIds.isEmpty && hasShownSeatHoldWarning.value == false;
             bookedSeatIds.add(seatId);
             ride['pending_seat_detail'][index - 1]['status'] = "hold";
             seatAvailable.value = bookedSeatIds.length;
+            if (shouldShowSeatHoldWarning) {
+              final seatHoldMessage =
+                  labelTextDetail['seat_hold_message'] ??
+                      "Your selected seat(s) will be held for 10 minutes. If the booking isn't completed within that time, the seat(s) will be released and made available to others.";
+              hasShownSeatHoldWarning.value = true;
+              serviceController.showDialogue(
+                seatHoldMessage.toString(),
+                type: "info",
+              );
+            }
           } else {
             bookedSeatIds.remove(seatId);
             ride['pending_seat_detail'][index - 1]['status'] = "pending";
             seatAvailable.value = bookedSeatIds.length;
+            if (bookedSeatIds.isEmpty) {
+              hasShownSeatHoldWarning.value = false;
+            }
           }
         }
         isOverlayLoading(false);

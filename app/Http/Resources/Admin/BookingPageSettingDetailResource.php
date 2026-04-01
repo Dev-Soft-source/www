@@ -50,6 +50,8 @@ class BookingPageSettingDetailResource extends JsonResource
             'payable_amount_label' => $this->payable_amount_label,
             'coffee_from_amount_wall_tooltip' => $this->coffee_from_amount_wall_tooltip,
             'seats_available_info_text' => $this->seats_available_info_text,
+            'seat_hold_alert_message' => $this->seat_hold_alert_message,
+            'seat_hold_message' => $this->seat_hold_message,
             'seats_available_tooltip' => $this->seats_available_tooltip,
             'chat_with_driver_tooltip' => $this->chat_with_driver_tooltip,
             'aggreement_tooltip' => $this->aggreement_tooltip,

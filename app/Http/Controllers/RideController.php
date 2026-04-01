@@ -188,6 +188,7 @@ class RideController extends Controller
             $this->defaultLang->id
         );
         $ratings = Rating::all();
+        
         return view('my_co_passengers', [
             'ride' => $ride,
             'setting' => $setting,

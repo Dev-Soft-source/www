@@ -390,6 +390,96 @@
                                                 "
                                             ></p>
                                         </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`seat_hold_alert_message_${activeLanguageId}`"
+                                                        >Seat hold alert title</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`seat_hold_alert_message_${activeLanguageId}`"
+                                                    :id="`seat_hold_alert_message_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'seat_hold_alert_message'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'seat_hold_alert_message'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `seat_hold_alert_message.seat_hold_alert_message_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `seat_hold_alert_message.seat_hold_alert_message_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`seat_hold_message_${activeLanguageId}`"
+                                                        >Seat hold message</label
+                                                    >
+                                                </div>
+                                                <textarea
+                                                    :name="`seat_hold_message_${activeLanguageId}`"
+                                                    :id="`seat_hold_message_${activeLanguageId}`"
+                                                    rows="4"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'seat_hold_message'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'seat_hold_message'
+                                                        )
+                                                    "
+                                                ></textarea>
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `seat_hold_message.seat_hold_message_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `seat_hold_message.seat_hold_message_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
  
                                         <div class="relative z-0 w-full group">
                                             <div>
@@ -2683,6 +2773,8 @@ export default {
                             this.handleInput("", language, "main_heading");
                             this.handleInput("", language, "seats_available_label");
                             this.handleInput("", language, "seats_available_info_text");
+                            this.handleInput("", language, "seat_hold_alert_message");
+                            this.handleInput("", language, "seat_hold_message");
                             this.handleInput("", language, "seats_available_tooltip");
                             this.handleInput("", language, "chat_with_driver_tooltip");
                             this.handleInput("", language, "aggreement_tooltip");
@@ -2777,6 +2869,16 @@ this.handleInput("", language, "like_to_pay_label");
                                 setting?.seats_available_info_text,
                                 setting?.language,
                                 "seats_available_info_text"
+                            );
+                            this.handleInput(
+                                setting?.seat_hold_alert_message,
+                                setting?.language,
+                                "seat_hold_alert_message"
+                            );
+                            this.handleInput(
+                                setting?.seat_hold_message,
+                                setting?.language,
+                                "seat_hold_message"
                             );
                             this.handleInput(
                                 setting?.seats_available_tooltip,
@@ -3204,6 +3306,12 @@ this.handleInput(
                 )||
                 validationErros.has(
                     `seats_available_info_text.seats_available_info_text_${language.id}`
+                ) ||
+                validationErros.has(
+                    `seat_hold_alert_message.seat_hold_alert_message_${language.id}`
+                ) ||
+                validationErros.has(
+                    `seat_hold_message.seat_hold_message_${language.id}`
                 ) ||
                 validationErros.has(
                     `seats_available_tooltip.seats_available_tooltip_${language.id}`

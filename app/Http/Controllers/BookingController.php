@@ -1970,19 +1970,9 @@ class BookingController extends Controller
 
     public function seatOnHold(Request $request)
     {
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('seat_hold_message')->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('seat_hold_message')->first();
-            }
-        }
+
+        $messages = $this->successMessage;
+        $bookingPage = BookingPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $user = auth()->user();
         $getSeatDetail = SeatDetail::where('id', $request->seat_id)->first();
@@ -2016,7 +2006,7 @@ class BookingController extends Controller
                     $getSeatDetail->status = 'pending';
                     $getSeatDetail->save();
                     $data['getSeatDetail'] = $getSeatDetail;
-                    $data['message'] = 'Your selected seat(s) will be held for 10 minutes. If the booking isn\'t completed within that time, the seat(s) will be released and made available to others.';
+                    $data['message'] = $bookingPage->seat_hold_message ?? 'Your selected seat(s) will be held for 10 minutes. If the booking isn\'t completed within that time, the seat(s) will be released and made available to others.';
                     return response()->json($data);
                 } else {
                     $data['message'] = $messages->seat_hold_message ?? null;

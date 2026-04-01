@@ -58,14 +58,7 @@ class BookingController extends Controller
     {
         $user = Auth::guard('sanctum')->user();
 
-        if ($request->lang_id && $request->lang_id != 0) {
-            $genderLabel = Step1PageSettingDetail::where('language_id', $request->lang_id)->select('male_option_label', 'female_option_label', 'prefer_option_label')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $genderLabel = Step1PageSettingDetail::where('language_id', $selectedLanguage->id)->select('male_option_label', 'female_option_label', 'prefer_option_label')->first();
-            }
-        }
+        $genderLabel = Step1PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $messages = $this->successMessage;
 
@@ -102,6 +95,17 @@ class BookingController extends Controller
 
             $ride = $this->makeDetailOfRide($ride, $from_stop_id, $to_stop_id);
 
+            if($ride->isCashPayment()){
+                $ride->payment_method_slug = 'cash';
+            } elseif ($ride->isSecureCashPayment()) {
+                $ride->payment_method_slug = 'secured_cash';
+            } else {
+                $ride->payment_method_slug = 'online';
+            }
+Log::info('Ride payment method', [
+                'ride_id' => $ride->id,
+                'payment_method_slug' => $ride->payment_method_slug,
+            ]);
             // Calculate seats left
             $bookedSeats = $ride->bookings()
                 ->where('status', '<>', 3)

@@ -28,6 +28,10 @@ class BookingPageSettingService
 
                 $validationRule = array_merge($validationRule, ['seats_available_info_text.seats_available_info_text_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['seats_available_info_text.seats_available_info_text_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['seat_hold_alert_message.seat_hold_alert_message_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['seat_hold_alert_message.seat_hold_alert_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['seat_hold_message.seat_hold_message_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['seat_hold_message.seat_hold_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
 
                 $validationRule = array_merge($validationRule, ['cancellation_policy_label.cancellation_policy_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['cancellation_policy_label.cancellation_policy_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
@@ -131,6 +135,8 @@ class BookingPageSettingService
             // Plural/range template used by booking seat-availability label.
             'seats_available' => $this->data($request, $language, 'seats_available'),
             'seats_available_info_text' => $this->data($request, $language, 'seats_available_info_text'),
+            'seat_hold_alert_message' => $this->data($request, $language, 'seat_hold_alert_message'),
+            'seat_hold_message' => $this->data($request, $language, 'seat_hold_message'),
             'seats_available_tooltip' => $this->data($request, $language, 'seats_available_tooltip'),
 
             'chat_with_driver_tooltip' => $this->data($request, $language, 'chat_with_driver_tooltip'),

@@ -71,7 +71,8 @@ Widget pricingWidget({context, controller, screenWidth}){
     }
   }
 
-  var total = amount + bookingFee + taxAmt;
+  final bool isCashPayment = controller.ride['payment_method_slug'] == "cash";
+  var total = isCashPayment ? bookingFee + taxAmt : amount + bookingFee + taxAmt;
 
 
 
@@ -94,7 +95,7 @@ Widget pricingWidget({context, controller, screenWidth}){
 
   var payableTotal = payableAmount + payableBookingFee + payableTaxAmt;
 
-  if(controller.ride['payment_method_slug'] == "cash"){
+  if(isCashPayment){
     controller.gPayAmount.value = payableBookingFee + payableTaxAmt;
   }else{
     controller.gPayAmount.value = payableTotal;
@@ -113,7 +114,7 @@ Widget pricingWidget({context, controller, screenWidth}){
     total = total - bookingFee;
     payableTotal = payableTotal - payableBookingFee;
 
-    if(controller.ride['payment_method_slug'] == "cash"){
+    if(isCashPayment){
       controller.gPayAmount.value = controller.gPayAmount.value  - payableBookingFee;
     }else{
       controller.gPayAmount.value = payableTotal;
@@ -129,8 +130,8 @@ Widget pricingWidget({context, controller, screenWidth}){
 
 
 
-  if(controller.ride['payment_method_slug'] == "cash"){
-    if(bookingFee <= controller.balanceAmt && controller.balanceAmt != 0.0){
+  if(isCashPayment){
+    if(total <= controller.balanceAmt && controller.balanceAmt != 0.0){
       controller.bookedByWallet.value = true;
     }else{
       controller.bookedByWallet.value = false;

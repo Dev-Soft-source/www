@@ -227,7 +227,7 @@
                                                 </h3>
                                             </div>
                                         </div>
-                                        @if ($user->isStudent() && $ride->isCashPayment())
+                                        @if ($user->isVerifiedStudent() && $ride->isCashPayment())
                                             <div class="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                                                 <p class="text-yellow-800 text-sm">
                                                     {!! $bookingPage->note_for_students_text ??
@@ -764,7 +764,7 @@
 
             // Calculate booking price based on user status and ride price
             const chargeBooking = {{ $isChargeBooking ? 'true' : 'false' }};
-            const isStudentFeeWaived = {{ $isStudentFeeWaived ? 'true' : 'false' }};
+            const isStudentFeeWaived = {{ $isStudentFeeWaived && (auth()->user() && auth()->user()->student == '1') ? 'true' : 'false' }};
             const pricePerSeat = parseFloat(@json($seat_price ?? 0));
             const bookingFee = (isStudentFeeWaived || pricePerSeat < MIN_PRICE_FOR_BOOKING_FEE) ?
                 0.0 :
@@ -952,13 +952,17 @@
                     $(".firmDiscountAmt").text('$' + firmDiscountAmount.toFixed(2));
                     $(".yourPriceAmt").text('$' + totalSeatsAmount.toFixed(2));
                 }
+                
+                const isCashPayment = rideConfig.paymentMethod === 'cash';
+                if(isCashPayment) {
+                    totalSeatsAmount = 0;
+                }
 
                 // Calculate tax
                 const taxAmount = roundCurrency((totalAmount * rideConfig.taxPercentage) / 100);
                 const totalSum = roundCurrency(totalAmount + totalSeatsAmount + taxAmount);
                 let totalAmountIn = totalAmount;
                 let totalSumIn = totalSum;
-                const isCashPayment = rideConfig.paymentMethod === 'cash';
                 let displayedTotalSum = totalSum;
 
                 // Handle coffee wall option
@@ -1033,7 +1037,7 @@
                 event.stopPropagation();
 
                 const isStudent =
-                    {{ auth()->user() && (auth()->user()->student == '1' || auth()->user()->student == '2') ? 'true' : 'false' }};
+                    {{ auth()->user() && (auth()->user()->student == '1') ? 'true' : 'false' }};
                 const paymentMethod = $('#check_payment_method').val();
                 const isCashPayment = (paymentMethod === 'cash');
 
@@ -1111,6 +1115,7 @@
                 // Determine seats to hold/release
                 const toHold = newSelectionIds.filter(id => currentlySelectedIds.indexOf(id) < 0);
                 const toRelease = currentlySelectedIds.filter(id => newSelectionIds.indexOf(id) < 0);
+                const shouldShowSeatHoldPopup = currentlySelectedIds.length === 0 && newSelectionIds.length > 0;
 
                 // If no changes, just update totals
                 if (toHold.length === 0 && toRelease.length === 0) {
@@ -1133,7 +1138,7 @@
                 });
 
                 const seatHoldInfoMessage = {!! json_encode(
-                    $bookingPage->seats_available_info_text_ ??
+                    $bookingPage->seat_hold_message ??
                         "Your selected seat(s) will be held for 10 minutes. If the booking isn't completed within that time, the seat(s) will be released and made available to others.",
                 ) !!};
 
@@ -1155,7 +1160,7 @@
                             .message)) || [{}])[0].message;
                         if (modalMessageEl) modalMessageEl.textContent = errMsg || 'Seat could not be held.';
                         if (bookingModal) bookingModal.classList.remove('hidden');
-                    } else if (toHold.length > 0) {
+                    } else if (shouldShowSeatHoldPopup) {
                         if (modalMessageEl) modalMessageEl.textContent = seatHoldInfoMessage;
                         if (bookingModal) bookingModal.classList.remove('hidden');
                     }
