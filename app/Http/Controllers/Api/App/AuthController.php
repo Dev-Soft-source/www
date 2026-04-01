@@ -78,22 +78,9 @@ class AuthController extends Controller
             $defaultLangId = Language::where('is_default', '1')->value('id');
         }
 
-        $message = null;
+        $message = $this->successMessage;
+        $genderLabel = Step1PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-        if ($request->lang_id && $request->lang_id != 0) {
-            
-            $message = SuccessMessagesSettingDetail::where('language_id', $request->lang_id)->select('no_user_match_message', 'verified_email_message', 'admin_block_account_message')->first();
-
-            $genderLabel = Step1PageSettingDetail::where('language_id', $request->lang_id)->select('male_option_label', 'female_option_label', 'prefer_option_label')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->lang_id)->select('no_user_match_message', 'verified_email_message', 'admin_block_account_message')->first();
-
-                $genderLabel = Step1PageSettingDetail::where('language_id', $selectedLanguage->id)->select('male_option_label', 'female_option_label', 'prefer_option_label')->first();
-            }
-        }
         
         if ($user && !$user->trashed() && $user->email_verified != 0 && auth()->attempt($credentials)) {
 

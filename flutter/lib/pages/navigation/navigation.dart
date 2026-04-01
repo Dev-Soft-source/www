@@ -157,8 +157,12 @@ class NavigationPage extends StatelessWidget {
               bool isRegistered = Get.isRegistered<MyTripController>();
               if (isRegistered == true) {
                 var tripController = Get.find<MyTripController>();
-                tripController.tripTabController.index = 0;
-                tripController.rideTabController.index = 0;
+                if (value == 1) {
+                  tripController.openDefaultTabForCurrentUser();
+                } else {
+                  tripController.tripTabController.index = 0;
+                  tripController.rideTabController.index = 0;
+                }
               }
               controller.currentNavIndex.value = value;
             },

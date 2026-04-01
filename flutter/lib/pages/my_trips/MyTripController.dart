@@ -104,6 +104,23 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
   var cancelledRideTotal = 0.obs;
   var confirmRideCheckBox = false.obs;
 
+  bool get shouldOpenDriverRidesFirst {
+    final isDriver = serviceController.loginUserDetail['driver']?.toString();
+    final driverLicense =
+        serviceController.loginUserDetail['driver_liscense']?.toString();
+
+    return isDriver == "1" &&
+        driverLicense != null &&
+        driverLicense.isNotEmpty &&
+        driverLicense != "null";
+  }
+
+  void openDefaultTabForCurrentUser() {
+    tabController.index = shouldOpenDriverRidesFirst ? 1 : 0;
+    tripTabController.index = 0;
+    rideTabController.index = 0;
+  }
+
   @override
   void onInit() async {
     super.onInit();
@@ -193,11 +210,7 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
 
       logger.info("Driver: ${serviceController.loginUserDetail['driver']}");
 
-      if (isDriver != null && isDriver == "1") {
-        tabController.index = 1;
-      } else {
-        tabController.index = 0;
-      }
+      openDefaultTabForCurrentUser();
       logger.info("Tab Index: ${tabController.index}");
 
       errorStateManager.setSuccess();
