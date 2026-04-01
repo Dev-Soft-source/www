@@ -25,7 +25,7 @@ class CancelBookingPage extends StatelessWidget {
         title: Obx(() => secondAppBarWidget(
             context: context,
             title: controller.pageType == "trip"
-                ? "${controller.labelTextTripDetail['cancel_booking_main_heading1'] ?? ""}"
+                ? "${controller.labelTextTripDetail['cancel_booking_main_heading1'] ?? controller.labelTextTripDetail['booking_cancel_btn_label'] ?? "Cancel booking"}"
                 : "${controller.labelTextTripDetail['cancel_ride_setting'] ?? "Cancel ride"}")),
         backgroundColor: primaryColor,
       ),

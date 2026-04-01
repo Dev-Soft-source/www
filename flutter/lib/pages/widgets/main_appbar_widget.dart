@@ -6,26 +6,31 @@ import '../../consts/constFileLink.dart';
 
 Widget mainAppBarWidget(
     context1, langId, langIcon, screeWidth, serviceController) {
-  return Container(
-    padding: const EdgeInsets.only(bottom: 10.0),
+  return SizedBox(
+    height: kToolbarHeight,
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Image.asset(
-          headerLogoImage,
-          width: getValueForScreenType<double>(
-            context: context1,
-            mobile: 50.0,
-            tablet: 50.0,
-          ),
-          height: getValueForScreenType<double>(
-            context: context1,
-            mobile: 50.0,
-            tablet: 50.0,
+        Align(
+          alignment: Alignment.center,
+          child: Image.asset(
+            headerLogoImage,
+            width: getValueForScreenType<double>(
+              context: context1,
+              mobile: 50.0,
+              tablet: 50.0,
+            ),
+            height: getValueForScreenType<double>(
+              context: context1,
+              mobile: 50.0,
+              tablet: 50.0,
+            ),
           ),
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             iconGrid(
               imagePath: langIcon,

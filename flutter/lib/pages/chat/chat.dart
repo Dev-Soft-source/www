@@ -86,9 +86,9 @@ class ChatPage extends StatelessWidget {
                               foregroundColor: Colors
                                   .white, // or use a light shade for subtle look
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 8),
+                                  horizontal: 12, vertical: 12),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(4),
                                 side: BorderSide(color: primaryColor),
                               ),
                             ),
@@ -139,6 +139,9 @@ class ChatPage extends StatelessWidget {
                                       message: chat['message'],
                                       numberOfMessages: chat['unread_count'],
                                       chatObj: chat,
+                                      onDelete: () async {
+                                        await controller.deleteChat(chat);
+                                      },
                                       onTap: () {
                                         // Use ride_id from chat object if available, otherwise use 0
                                         var chatRideId =

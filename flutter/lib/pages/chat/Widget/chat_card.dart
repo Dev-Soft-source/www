@@ -14,7 +14,8 @@ Widget chatCard(
     time = "12:00:00",
     numberOfMessages = 0,
     onTap,
-    chatObj}) {
+    chatObj,
+    Future<void> Function()? onDelete}) {
   return InkWell(
     onTap: onTap,
     child: cardShadowWidget(
@@ -68,13 +69,15 @@ Widget chatCard(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          InkWell(
-                            onTap: () async {
-                              await controller.deleteChat(chatObj);
-                            },
-                            child: Icon(Icons.close_sharp,
-                                color: primaryColor, size: 20),
-                          ),
+                          if (onDelete != null) ...[
+                            InkWell(
+                              onTap: () async {
+                                await onDelete();
+                              },
+                              child: Icon(Icons.close_sharp,
+                                  color: primaryColor, size: 20),
+                            ),
+                          ],
                           txt20Size(
                               title: time,
                               context: context,

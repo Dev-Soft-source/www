@@ -24,13 +24,28 @@ class ProfileDetailPage extends StatelessWidget {
     return Scaffold(
           appBar: AppBar(
             backgroundColor: primaryColor,
-            title: Obx(() => secondAppBarWidget(
-                title: controller.profileType == "driver"
-                    ? controller.driverTitle.value
-                    : controller.profileType == "passenger"
-                        ? "${controller.userProfile['first_name'] ?? "User"}'s ${controller.labelTextDetail['profile_label'] ?? "profile"}"
-                        : "${controller.userProfile['first_name'] ?? "User"}'s ${controller.labelTextDetail['profile_label'] ?? "profile"}",
-                context: context)),
+            title: Obx(() {
+              String title = ""; //Loading...
+
+              if (controller.profileType == "driver") {
+                if (controller.ride['driver'] != null &&
+                    controller.ride['driver']['first_name'] != null &&
+                    controller.labelTextDetail['profile_label'] != null) {
+                  title =
+                      "${controller.ride['driver']['first_name']}'s ${controller.labelTextDetail['profile_label']}";
+                }
+              } else if (controller.userProfile['first_name'] != null &&
+                  controller.userProfile['first_name'].toString().trim().isNotEmpty &&
+                  controller.labelTextDetail['profile_label'] != null) {
+                title =
+                    "${controller.userProfile['first_name']}'s ${controller.labelTextDetail['profile_label']}";
+              }
+
+              return secondAppBarWidget(
+                title: title,
+                context: context,
+              );
+            }),
             leading: safeBackButton(context),
           ),
           body: SafeArea(

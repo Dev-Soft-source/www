@@ -7,27 +7,37 @@ import '../../consts/constFileLink.dart';
 
 
 Widget secondAppBarWidget({String title = "", context}){
-  return Container(
-    padding: EdgeInsets.only(bottom: getValueForScreenType<double>(
-      context: context,
-      mobile: 10.0,
-      tablet: 10.0,
-    )),
+  return SizedBox(
+    height: kToolbarHeight,
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Expanded(child: txt25Size(title: title, fontFamily: regular, textColor: Colors.white, context: context)),
-        Image.asset(
-          headerLogoImage,
-          width: getValueForScreenType<double>(
-            context: context,
-            mobile: 50.0,
-            tablet: 50.0,
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: txt25Size(
+              title: title,
+              fontFamily: regular,
+              textColor: Colors.white,
+              context: context,
+            ),
           ),
-          height: getValueForScreenType<double>(
-            context: context,
-            mobile: 50.0,
-            tablet: 50.0,
+        ),
+        Align(
+          alignment: Alignment.center,
+          child: Image.asset(
+            headerLogoImage,
+            width: getValueForScreenType<double>(
+              context: context,
+              mobile: 50.0,
+              tablet: 50.0,
+            ),
+            height: getValueForScreenType<double>(
+              context: context,
+              mobile: 50.0,
+              tablet: 50.0,
+            ),
           ),
         ),
       ],

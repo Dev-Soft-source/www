@@ -23,7 +23,7 @@ class CloseMyAccount extends StatelessWidget {
           backgroundColor: primaryColor,
           title: Obx(() => secondAppBarWidget(
               title:
-                  "${controller.labelTextDetail['main_heading'] ?? 'Close my account'}",
+                  controller.labelTextDetail['main_heading']?.toString() ?? "",
               context: context)),
           leading: safeBackButton(context),
         ),

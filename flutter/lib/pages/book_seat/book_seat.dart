@@ -28,7 +28,9 @@ class BookSeatPage extends StatelessWidget {
           backgroundColor: primaryColor,
           title: Obx(() => secondAppBarWidget(
               title:
-                  "${controller.labelTextDetail['main_heading'] ?? "Book your seat(s)"}",
+                  controller.labelTextDetail['main_heading']?.toString().trim().isNotEmpty == true
+                      ? controller.labelTextDetail['main_heading'].toString()
+                      : "", //Loading...
               context: context)),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
