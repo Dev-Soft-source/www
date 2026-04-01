@@ -53,7 +53,7 @@ Widget elevatedButtonWidget(
     style: ElevatedButton.styleFrom(
         backgroundColor: enabled ? btnColor : Colors.grey.shade600,
         minimumSize: const Size.fromHeight(buttonHeight),
-        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
         alignment: Alignment.center,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
     child: Center(
