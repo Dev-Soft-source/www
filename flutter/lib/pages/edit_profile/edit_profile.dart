@@ -551,10 +551,8 @@ class EditProfilePage extends StatelessWidget {
                                       controller, context);
                                 },
                                 screenWidth: context.screenWidth,
-                                title1:
-                                    "${controller.labelTextDetail['choose_file_placeholder'] ?? "Choose file"}",
-                                title2:
-                                    "${controller.labelTextDetail['image_option_placeholder'] ?? "(Only JPG, PNG, JPEG and GIF are allowed. Max. 10MB)"}",
+                                title1: "",
+                                title2: "(JPG, PNG, JPEG, and GIF. 10MB max.)",
                                 title:
                                     "${controller.labelTextDetail['image_placeholder'] ?? "Upload government-issued ID."}",
                                 imageFile:

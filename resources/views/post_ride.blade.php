@@ -1123,7 +1123,7 @@
                                                 {{ $vehiclePage->image_description_label ?? 'Upload car photo' }}
                                             </p>
                                             <p class="text-sm lg:text-base text-gray-900 font-normal">
-                                                {{ $vehiclePage->images_option_placeholder ?? 'JPEG, JPG, PNG, GIF - 10MB max.' }}
+                                                (JPG, PNG, JPEG, and GIF. 10MB max.)
                                             </p>
                                         </div>
                                         <input id="dropzone-file" name="vehicle_image" type="file" accept="image/*"

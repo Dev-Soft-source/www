@@ -21,6 +21,13 @@ Widget userCard(
     onTap,
     onLongPress,
     Color bgColor = Colors.white}) {
+  final normalizedNotification = notification
+      .toString()
+      .replaceAll(r'\n', ' ')
+      .replaceAll('\n', ' ')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
+
   String tripDate = "";
   if (date != null) {
     DateTime parsedDate = DateTime.parse(date);
@@ -109,7 +116,7 @@ Widget userCard(
                     children: [
                       Expanded(
                           child: txt20Size(
-                              title: notification,
+                              title: normalizedNotification,
                               fontFamily: bold,
                               textColor: Colors.blue,
                               context: context)),

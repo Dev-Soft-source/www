@@ -241,7 +241,7 @@
                                 <!-- <span class="text-primary"> {{ $editProfilePage->choose_file_placeholder ?? 'choose a file' }}</span> -->
                             </p>
                             <p class="text-sm lg:text-base text-gray-900 font-normal">
-                                {{ $editProfilePage->image_option_placeholder ?? '(Allowed formats: JPG, JPEG, PNG. 10MB max.)' }}
+                                (JPG, PNG, JPEG, and GIF. 10MB max.)
                             </p>
                         </div>
                         <input id="dropzone-file" name="government_issued_id" type="file" onchange="previewImage(this)" accept="image/*" class="hidden" />

@@ -133,10 +133,8 @@ class StageTwo extends StatelessWidget {
                               },
                               title:
                                   "${controller.labelTextDetail['mobile_photo_label'] ?? "Upload profile photo."}",
-                              title1:
-                                  "${controller.labelTextDetail['mobile_choose_file_label'] ?? "Upload profile photo."}",
-                              title2:
-                                  "${controller.labelTextDetail['photo_label'] ?? "Upload profile photo."}",
+                              title1: "",
+                              title2: "(JPG, PNG, JPEG, and GIF. 10MB max.)",
                               imageFile: controller.profileImageName.value == ""
                                   ? null
                                   : controller.profileImagePath.value,

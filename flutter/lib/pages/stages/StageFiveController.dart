@@ -333,9 +333,9 @@ class StageFiveController extends GetxController {
           phoneNumberTextEditingController.text = "";
 
           if (skip) {
-            await Get.defaultDialog(
-              title: "Important!",
-              titlePadding: const EdgeInsets.symmetric(vertical: 12),
+            final shouldContinueBrowsing = await Get.defaultDialog<bool>(
+              title: "Safety & Reliability Notice",
+              titlePadding: const EdgeInsets.only(top: 25.0),
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               radius: 10,
@@ -344,16 +344,77 @@ class StageFiveController extends GetxController {
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
               ),
-              middleText: formatMessage(
-                  "Please keep in mind that you are not permitted to use Pink Rides and Extra-Care Rides until you verify your phone number."),
-              middleTextStyle: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.normal,
+              content: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Text(
+                    "You are currently browsing as an unverified guest.",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.normal,
+                      fontFamily: descriptiveFontFamily,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  _DialogBulletText(
+                    spans: [
+                      TextSpan(
+                        text: "Communication: ",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(
+                        text:
+                            "Drivers are required to call passengers to coordinate pickups. If your number is not verified, ",
+                      ),
+                      TextSpan(
+                        text: "we will rely solely on the driver's report ",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(
+                        text:
+                            "regarding pickup attempts and no-shows.",
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+                  _DialogBulletText(
+                    spans: [
+                      TextSpan(
+                        text: "Booking Limits: ",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(
+                        text: "You cannot book ",
+                      ),
+                      TextSpan(
+                        text: "Pink Rides or Extra-Care Rides",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(
+                        text: " without a verified phone number.",
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+                  _DialogBulletText(
+                    spans: [
+                      TextSpan(
+                        text: "Drivers: ",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(
+                        text:
+                            "You cannot post or list any rides until your account is verified.",
+                      ),
+                    ],
+                  ),
+                ],
               ),
               actions: [
                 ElevatedButton(
                   onPressed: () {
-                    Get.back();
+                    Get.back(result: false);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: btnPrimaryColor,
@@ -363,13 +424,35 @@ class StageFiveController extends GetxController {
                     ),
                   ),
                   child: txt20SizeWithOutContext(
-                    title: "Noted",
+                    title: "Verify My Number",
+                    textColor: Colors.white,
+                    fontFamily: buttonFontFamily,
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Get.back(result: true);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    minimumSize: const Size.fromHeight(buttonHeight),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+                  child: txt20SizeWithOutContext(
+                    title: "Continue Browsing",
                     textColor: Colors.white,
                     fontFamily: buttonFontFamily,
                   ),
                 ),
               ],
             );
+
+            if (shouldContinueBrowsing != true) {
+              isOverlayLoading(false);
+              return;
+            }
           } else {
             await Get.defaultDialog(
               title: "Important!",
@@ -575,5 +658,40 @@ class StageFiveController extends GetxController {
       logger.warning(
           'Failed to auto-set primary phone during stage five: $error');
     }
+  }
+}
+
+class _DialogBulletText extends StatelessWidget {
+  final List<InlineSpan> spans;
+
+  const _DialogBulletText({required this.spans});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(top: 3, right: 8),
+          child: Text(
+            "\u2022",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ),
+        Expanded(
+          child: RichText(
+            text: TextSpan(
+              style: const TextStyle(
+                fontSize: 18,
+                color: Colors.black,
+                height: 1.35,
+                fontFamily: descriptiveFontFamily,
+              ),
+              children: spans,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

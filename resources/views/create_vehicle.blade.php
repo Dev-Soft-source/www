@@ -147,7 +147,7 @@
                                     <!-- <span class="text-primary">{{ $myVehiclePage->choose_file_image_placeholder ?? " Choose file"}}</span> -->
                                 </p>
                                 <p class="text-sm lg:text-base text-gray-900 font-normal text-center">
-                                    {{ $myVehiclePage->images_option_placeholder ?? "JPG, PNG, JPEG, or GIF — up to 10 MB"}}
+                                    (JPG, PNG, JPEG, and GIF. 10MB max.)
                                 </p>
                             </div>
                         </div>

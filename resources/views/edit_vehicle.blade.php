@@ -199,9 +199,7 @@
                                 <div id="hide-text1" class="text-center w-full">
                                     <p class="text-sm lg:text-lg text-gray-900 text-center">Vehicle photo</p>
                                     <p class="text-sm lg:text-base text-gray-900 font-normal text-center">
-                                        @isset($myVehiclePage->images_option_placeholder)
-                                            {{ $myVehiclePage->images_option_placeholder }}
-                                        @endisset
+                                        (JPG, PNG, JPEG, and GIF. 10MB max.)
                                     </p>
                                 </div>
                             </div>

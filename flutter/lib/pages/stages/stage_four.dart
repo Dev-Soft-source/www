@@ -95,10 +95,8 @@ class StageFour extends StatelessWidget {
                             await imageUploadBottomSheet(controller, context);
                           },
                           title: "Upload Driver's License",
-                          title1:
-                              "${controller.labelTextDetail['mobile_driver_choose_file_label'] ?? "Choose file"}",
-                          title2:
-                              "${controller.labelTextDetail['photo_detail_label'] ?? "(Only JPG, PNG, JPEG and GIF are allowed. Max. 10MB)"}",
+                          title1: "",
+                          title2: "(JPG, PNG, JPEG, and GIF. 10MB max.)",
                           imageFile: controller.driverLicenseName.value == ""
                               ? null
                               : controller.driverLicensePath.value,

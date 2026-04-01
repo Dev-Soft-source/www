@@ -213,9 +213,15 @@ class NotificationPage extends StatelessWidget {
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                const Icon(Icons.directions_car,
+                                                const Padding(
+                                                  padding:
+                                                      EdgeInsets.only(top: 4),
+                                                  child: Icon(
+                                                    Icons.directions_car,
                                                     size: 20,
-                                                    color: Colors.white),
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
                                                 const SizedBox(width: 8),
                                                 Expanded(
                                                   child: Text(
@@ -232,10 +238,15 @@ class NotificationPage extends StatelessWidget {
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                const Icon(
+                                                const Padding(
+                                                  padding:
+                                                      EdgeInsets.only(top: 4),
+                                                  child: Icon(
                                                     Icons.chat_bubble_outline,
                                                     size: 20,
-                                                    color: Colors.white),
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
                                                 const SizedBox(width: 8),
                                                 Expanded(
                                                   child: Text(
@@ -252,11 +263,16 @@ class NotificationPage extends StatelessWidget {
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                const Icon(
+                                                const Padding(
+                                                  padding:
+                                                      EdgeInsets.only(top: 4),
+                                                  child: Icon(
                                                     Icons
                                                         .notifications_active_outlined,
                                                     size: 20,
-                                                    color: Colors.white),
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
                                                 const SizedBox(width: 8),
                                                 Expanded(
                                                   child: Text(
@@ -499,29 +515,12 @@ class NotificationPage extends StatelessWidget {
                                           }
                                         },
                                         onTap: () {
-                                          logger.info(
-                                              "=== NOTIFICATION TAP DEBUG START ===");
-                                          logger.info("Index: $index");
-                                          logger.info(
-                                              "Full notification data: ${controller.notificationsList[index]}");
-                                          logger.info(
-                                              "Notification type: ${controller.notificationsList[index]['notification_type']}");
-                                          logger.info(
-                                              "Type field: ${controller.notificationsList[index]['type']}");
-                                          logger.info(
-                                              "Ride ID: ${controller.notificationsList[index]['ride_id']}");
-                                          logger.info(
-                                              "Posted by: ${controller.notificationsList[index]['posted_by']}");
-                                          logger.info(
-                                              "Posted to: ${controller.notificationsList[index]['posted_to']}");
-                                          logger.info(
-                                              "ID: ${controller.notificationsList[index]['id']}");
-                                          logger.info(
-                                              "Ride detail ID: ${controller.notificationsList[index]['ride_detail_id']}");
-
-                                          // Mark notification as read when tapped
-                                          controller.readNotification(controller
-                                              .notificationsList[index]['id']);
+                                                                                    // Mark notification as read when tapped
+                                          controller.readNotification(
+                                            controller.notificationsList[index]
+                                                ['id'],
+                                            showError: false,
+                                          );
 
                                           // Update the notification's is_read status locally
                                           controller.notificationsList[index]

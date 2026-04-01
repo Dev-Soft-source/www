@@ -797,9 +797,7 @@
                                                     class="w-12 h-12 object-contain mb-4 cursor-pointer"
                                                     src="{{ asset('assets/image-placeholder.png') }}" alt="">
                                                 <p class="text-sm lg:text-lg text-gray-900">Upload car photo.</p>
-                                                <p class="text-sm lg:text-base text-gray-900 font-normal">JPEG, JPG, PNG,
-                                                    GIF -
-                                                    10MB max.</p>
+                                                <p class="text-sm lg:text-base text-gray-900 font-normal">(JPG, PNG, JPEG, and GIF. 10MB max.)</p>
                                             </div>
                                             <input id="dropzone-file" name="new_vehicle_image" type="file"
                                                 accept="image/jpeg,image/png,image/jpg,image/gif" class="hidden" />

@@ -146,10 +146,8 @@ class DriverLicensePage extends StatelessWidget {
                             },
                             title:
                                 "${controller.labelTextDetail['mobile_driver_license_image_placeholder'] ?? "Driver license."}",
-                            title1:
-                                "${controller.labelTextDetail['mobile_choose_file_image_placeholder'] ?? "Choose file"}",
-                            title2:
-                                "${controller.labelTextDetail['mobile_image_type_placeholder'] ?? "(Only JPG, PNG, JPEG and GIF are allowed. Max. 10MB)"}",
+                            title1: "",
+                            title2: "(JPG, PNG, JPEG, and GIF. 10MB max.)",
                             imageFile: controller.driverLicenseName.value == ""
                                 ? null
                                 : controller.driverLicensePath.value,

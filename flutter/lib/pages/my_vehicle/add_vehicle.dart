@@ -840,10 +840,9 @@ class AddVehiclePage extends StatelessWidget {
                                 },
                                 title:
                                     "${controller.labelTextDetail['upload_profile_photo_image_placeholder'] ?? "Car photo."}",
-                                title1:
-                                    "${controller.labelTextDetail['choose_file_image_placeholder'] ?? "Choose file"}",
+                                title1: "",
                                 title2:
-                                    "${controller.labelTextDetail['images_option_placeholder'] ?? "(Only JPG, PNG, JPEG and GIF are allowed. Max. 10MB)"}",
+                                    "(JPG, PNG, JPEG, and GIF. 10MB max.)",
                                 imageFile: controller.carImageName.value == ""
                                     ? null
                                     : controller.carImagePath.value,

@@ -410,6 +410,7 @@ class StageFive extends StatelessWidget {
                         },
                       ),
                     ),
+                    5.heightBox,
                     // 2) Save Unverified (save phone without verification)
                     SizedBox(
                       width: double.infinity,
@@ -426,6 +427,7 @@ class StageFive extends StatelessWidget {
                         btnColor: primaryColor,
                       ),
                     ),
+                    5.heightBox,
                     // 3) Skip for Now
                     SizedBox(
                       width: double.infinity,

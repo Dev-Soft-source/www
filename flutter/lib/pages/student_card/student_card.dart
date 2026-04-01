@@ -124,10 +124,9 @@ class StudentCardPage extends StatelessWidget {
                                   },
                                   title:
                                       "${controller.labelTextDetail['student_card_image_placeholder'] ?? "Student card."}",
-                                  title1:
-                                      "${controller.labelTextDetail['choose_file_image_placeholder'] ?? "Choose file"}",
+                                  title1: "",
                                   title2:
-                                      "${controller.labelTextDetail['mobile_image_type_placeholder'] ?? "(Only JPG, PNG, JPEG and GIF are allowed. Max. 10MB)"}",
+                                      "(JPG, PNG, JPEG, and GIF. 10MB max.)",
                                   imageFile: controller
                                               .studentCardImageName.value ==
                                           ""

@@ -70,9 +70,8 @@ class NotificationProvider extends GetConnect {
 
   Future readNotification(token, notificationId) async {
     try {
-      final response = await getConnect.post(
-        "$baseUrl/$readNotification",
-        {'notification_id': notificationId.toString()},
+      final response = await getConnect.get(
+        "$baseUrl/$rNotification?id=${notificationId.toString()}",
         headers: {
           'Accept': 'application/json',
           'Authorization': 'Bearer $token',
@@ -122,9 +121,8 @@ class NotificationProvider extends GetConnect {
 
   Future deleteNotification(token, notificationId) async {
     try {
-      final response = await getConnect.post(
-        "$baseUrl/$deleteNotification",
-        {'notification_id': notificationId.toString()},
+      final response = await getConnect.get(
+        "$baseUrl/$dNotification?notificationId=${notificationId.toString()}",
         headers: {
           'Accept': 'application/json',
           'Authorization': 'Bearer $token',

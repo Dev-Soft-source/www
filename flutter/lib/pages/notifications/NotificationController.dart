@@ -301,7 +301,7 @@ class NotificationController extends GetxController {
     await getNotifications(type: 1);
   }
 
-  Future<void> readNotification(notificationId) async {
+  Future<void> readNotification(notificationId, {bool showError = true}) async {
     try {
       await NotificationProvider()
           .readNotification(serviceController.token, notificationId)
@@ -312,6 +312,12 @@ class NotificationController extends GetxController {
           serviceController.notificationCount.refresh();
         }
       }, onError: (error) {
+        if (!showError) {
+          logger.warning(
+              "Failed to mark notification as read for id=$notificationId: $error");
+          return;
+        }
+
         if (error is Map &&
             error.containsKey('type') &&
             error.containsKey('message')) {
@@ -327,6 +333,12 @@ class NotificationController extends GetxController {
         }
       });
     } catch (exception) {
+      if (!showError) {
+        logger.warning(
+            "Failed to mark notification as read for id=$notificationId: $exception");
+        return;
+      }
+
       if (exception is Map &&
           exception.containsKey('type') &&
           exception.containsKey('message')) {

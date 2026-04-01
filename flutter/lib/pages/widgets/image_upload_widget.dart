@@ -13,8 +13,8 @@ Widget imageUploadWidget(
     imageFile,
     double screenWidth = 0.0,
     bool isError = false,
-    String title1 = "Choose file",
-    String title2 = "(Only JPG, PNG, JPEG and GIF are allowed. Max. 10MB)"}) {
+    String title1 = "",
+    String title2 = "(JPG, PNG, JPEG, and GIF. 10MB max.)"}) {
   return InkWell(
     onTap: onTap,
     child: DottedBorder(
@@ -44,12 +44,14 @@ Widget imageUploadWidget(
                           title: title,
                           textColor: textColor,
                           fontFamily: regular,
-                          context: context),
-                      txt20Size(
-                          title: title1,
-                          textColor: primaryColor,
-                          fontFamily: regular,
                           context: context)
+                      ,
+                      if (title1.trim().isNotEmpty)
+                        txt20Size(
+                            title: title1,
+                            textColor: primaryColor,
+                            fontFamily: regular,
+                            context: context)
                     ],
                   ),
                   txt20SizeAlignCenter(

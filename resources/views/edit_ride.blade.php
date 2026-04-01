@@ -1628,11 +1628,9 @@
                                                                     src="{{ asset('assets/image-placeholder.png') }}">
                                                             @endif
                                                             <p class="text-sm lg:text-lg text-gray-900"> Upload car photo.
-                                                                <span class="font-semibold text-primary"> Choose
-                                                                    file</span>
                                                             </p>
                                                             <p class="text-sm lg:text-base text-gray-900 font-normal">
-                                                                Allowed formats: JPG, JPEG. PNG, and GIF. 10MB max.
+                                                                (JPG, PNG, JPEG, and GIF. 10MB max.)
                                                             </p>
                                                         </div>
                                                         <input id="dropzone-file" name="image" type="file"

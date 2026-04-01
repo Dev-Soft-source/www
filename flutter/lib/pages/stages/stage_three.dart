@@ -825,10 +825,9 @@ class StageThree extends StatelessWidget {
                                   },
                                   title:
                                       "${controller.labelTextDetail['photo_label'] ?? "Car photo"}.",
-                                  title1:
-                                      "${controller.labelTextDetail['mobile_photo_choose_file_label'] ?? "Choose file"}",
+                                  title1: "",
                                   title2:
-                                      "${controller.labelTextDetail['photo_detail_label'] ?? "(Only JPG, PNG, JPEG and GIF are allowed. Max. 10MB)"}",
+                                      "(JPG, PNG, JPEG, and GIF. 10MB max.)",
                                   imageFile: controller.carImageName.value == ""
                                       ? null
                                       : controller.carImagePath.value,
