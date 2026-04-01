@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
+import 'package:proximaride_app/pages/post_ride/PostRideController.dart';
 import 'package:proximaride_app/pages/post_ride_again/PostRideAgainProvider.dart';
 import 'package:proximaride_app/services/service.dart';
 
@@ -33,6 +34,10 @@ class PostRideAgainController extends GetxController
   void onInit() async {
     // TODO: implement onInit
     super.onInit();
+    if (Get.isRegistered<PostRideController>()) {
+      final postRideController = Get.find<PostRideController>();
+      labelTextDetail.addAll(postRideController.labelTextDetail);
+    }
     tabController = TabController(length: 3, vsync: this);
     pageController = PageController(initialPage: selectedTabIndex.value);
     isLoading(true);

@@ -13,6 +13,7 @@ class AppHtmlText extends StatelessWidget {
   final TextAlign? textAlign;
   final double lineHeight;
   final bool openLinksExternally;
+  final Future<void> Function(String link)? onLinkTapCallback;
 
   const AppHtmlText({
     super.key,
@@ -25,6 +26,7 @@ class AppHtmlText extends StatelessWidget {
     this.textAlign,
     this.lineHeight = 1.35,
     this.openLinksExternally = true,
+    this.onLinkTapCallback,
   });
 
   @override
@@ -88,25 +90,32 @@ class AppHtmlText extends StatelessWidget {
           fontWeight: FontWeight.w700,
         ),
       },
-      onLinkTap: openLinksExternally
-          ? (link, attributes, element) async {
-              if (link == null || link.trim().isEmpty) {
-                return;
-              }
+      onLinkTap: (link, attributes, element) async {
+        if (link == null || link.trim().isEmpty) {
+          return;
+        }
 
-              final Uri? parsedLink = Uri.tryParse(link);
-              final Uri targetUri = parsedLink != null && parsedLink.hasScheme
-                  ? parsedLink
-                  : Uri.parse(url).resolve(link);
+        if (onLinkTapCallback != null) {
+          await onLinkTapCallback!(link);
+          return;
+        }
 
-              if (await canLaunchUrl(targetUri)) {
-                await launchUrl(
-                  targetUri,
-                  mode: LaunchMode.externalApplication,
-                );
-              }
-            }
-          : null,
+        if (!openLinksExternally) {
+          return;
+        }
+
+        final Uri? parsedLink = Uri.tryParse(link);
+        final Uri targetUri = parsedLink != null && parsedLink.hasScheme
+            ? parsedLink
+            : Uri.parse(url).resolve(link);
+
+        if (await canLaunchUrl(targetUri)) {
+          await launchUrl(
+            targetUri,
+            mode: LaunchMode.externalApplication,
+          );
+        }
+      },
     );
   }
 

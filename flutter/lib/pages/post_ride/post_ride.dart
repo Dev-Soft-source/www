@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/pages/post_ride/PostRideController.dart';
@@ -16,6 +15,7 @@ import 'package:proximaride_app/pages/post_ride/widget/seat_available_widget.dar
 import 'package:proximaride_app/pages/post_ride/widget/smoking_widget.dart';
 import 'package:proximaride_app/pages/post_ride/widget/vehicle_widget.dart';
 import 'package:proximaride_app/pages/widgets/button_Widget.dart';
+import 'package:proximaride_app/pages/widgets/app_html_text.dart';
 import 'package:proximaride_app/pages/widgets/overlay_widget.dart';
 import 'package:proximaride_app/pages/widgets/progress_circular_widget.dart';
 import 'package:proximaride_app/pages/widgets/second_appbar_widget.dart';
@@ -72,6 +72,31 @@ class _PostRidePageState extends State<PostRidePage> {
 class _PostRideScaffold extends StatelessWidget {
   const _PostRideScaffold();
 
+  Future<void> _handleAgreementLinkTap(String link) async {
+    final normalizedLink = link.toLowerCase();
+    final uri = Uri.tryParse(link);
+    final path = (uri?.path ?? normalizedLink).toLowerCase();
+
+    if (normalizedLink.contains('term_condition') ||
+        path.contains('term-condition') ||
+        path.contains('terms-and-conditions')) {
+      Get.toNamed('/term_condition');
+      return;
+    }
+
+    if (normalizedLink.contains('term_of_use') ||
+        path.contains('term-of-use') ||
+        path.contains('terms-of-use')) {
+      Get.toNamed('/term_of_use');
+      return;
+    }
+
+    if (normalizedLink.contains('privacy_policy') ||
+        path.contains('privacy-policy')) {
+      Get.toNamed('/privacy_policy');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final PostRideController controller = Get.find<PostRideController>();
@@ -109,11 +134,11 @@ class _PostRideScaffold extends StatelessWidget {
                                 alignment: Alignment.topRight,
                                 child: SizedBox(
                                   width: context.screenWidth,
-                                  height: getValueForScreenType<double>(
-                                    context: context,
-                                    mobile: 40.0,
-                                    tablet: 40.0,
-                                  ),
+                                  // height: getValueForScreenType<double>(
+                                  //   context: context,
+                                  //   mobile: 40.0,
+                                  //   tablet: 40.0,
+                                  // ),
                                   child: elevatedButtonWidget(
                                     textWidget: txt22Size(
                                         title:
@@ -247,89 +272,72 @@ class _PostRideScaffold extends StatelessWidget {
                                         ? false
                                         : true;
                               },
-                              child: Container(
-                                padding: EdgeInsets.only(
-                                    left: 10.0, top: 10.0, bottom: 10.0),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(5.0),
-                                    border: Border.all(
-                                        width: 1,
-                                        color: controller.disclaimer.value ==
-                                                true
-                                            ? primaryColor
-                                            : controller.errors
-                                                    .where((error) =>
-                                                        error == "agree_terms")
-                                                    .isNotEmpty
-                                                ? Colors.red
-                                                : Colors.grey.shade200),
-                                    color: controller.disclaimer.value == true
-                                        ? primaryColor.withOpacity(0.1)
-                                        : Colors.white),
-                                child: RichText(
-                                  text: TextSpan(
-                                    children: [
-                                      textSpan(
-                                          title:
-                                              "${controller.labelTextDetail['mobile_agree_terms_label'] ?? "I will abide by ProximaRide rules and I have read and agree to ProximaRide "}",
-                                          context: context,
-                                          fontFamily: bold,
-                                          textColor: textColor,
-                                          textSize: 18.0),
-                                      textSpan(
-                                        title:
-                                            " ${controller.labelTextDetail['mobile_term_of_service_label'] ?? "Terms of services"},",
-                                        context: context,
-                                        fontFamily: bold,
-                                        textColor: primaryColor,
-                                        textSize: 18.0,
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTap = () {
-                                            Get.toNamed('/term_condition');
-                                          },
-                                      ),
-                                      // textSpan(
-                                      //     title:
-                                      //         " ${controller.labelTextDetail['mobile_agree_terms_and_label'] ?? " and "}",
-                                      //     context: context,
-                                      //     fontFamily: bold,
-                                      //     textColor: textColor,
-                                      //     textSize: 18.0),
-                                      textSpan(
-                                        title:
-                                            " ${controller.labelTextDetail['mobile_term_of_use_label'] ?? "Term of use"},",
-                                        context: context,
-                                        fontFamily: bold,
-                                        textColor: primaryColor,
-                                        textSize: 18.0,
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTap = () {
-                                            Get.toNamed('/term_of_use');
-                                          },
-                                      ),
-                                      textSpan(
-                                        title:
-                                            " ${controller.labelTextDetail['mobile_privacy_policy_label'] ?? "Privacy policy"}",
-                                        context: context,
-                                        fontFamily: bold,
-                                        textColor: primaryColor,
-                                        textSize: 18.0,
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTap = () {
-                                            Get.toNamed('/privacy_policy');
-                                          },
-                                      ),
-
-                                      textSpan(
-                                          title:
-                                              " ${controller.labelTextDetail['mobile_agree_terms_label2'] ?? "and all associated rules and policies."}",
-                                          context: context,
-                                          fontFamily: bold,
-                                          textColor: textColor,
-                                          textSize: 18.0),
-                                    ],
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Checkbox(
+                                    value: controller.disclaimer.value,
+                                    activeColor: primaryColor,
+                                    side: BorderSide(
+                                      color: controller.errors.any((element) =>
+                                              element['title'] ==
+                                              "agree_terms")
+                                          ? Colors.red
+                                          : Colors.grey.shade500,
+                                    ),
+                                    onChanged: (_) {
+                                      if (controller.errors.firstWhereOrNull(
+                                              (element) =>
+                                                  element['title'] ==
+                                                  "agree_terms") !=
+                                          null) {
+                                        controller.errors.remove(controller
+                                            .errors
+                                            .firstWhereOrNull((element) =>
+                                                element['title'] ==
+                                                "agree_terms"));
+                                      }
+                                      controller.disclaimer.value =
+                                          !controller.disclaimer.value;
+                                    },
                                   ),
-                                ),
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(top: 5.0),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(
+                                            child: AppHtmlText(
+                                              data: controller.labelTextDetail[
+                                                      'agree_terms_label'] ??
+                                                  'I will abide by ProximaRide rules and I have read and agree to ProximaRide <a href="/term_condition">Terms of services</a>, <a href="/term_of_use">Term of use</a>, <a href="/privacy_policy">Privacy policy</a> and all associated rules and policies.',
+                                              fontSize: 20,
+                                              fontFamily: bold,
+                                              fontWeight: FontWeight.w400,
+                                              textColor: textColor,
+                                              linkColor: primaryColor,
+                                              lineHeight: 1.4,
+                                              openLinksExternally: false,
+                                              onLinkTapCallback:
+                                                  _handleAgreementLinkTap,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            '*',
+                                            style: TextStyle(
+                                              color: Colors.red,
+                                              fontSize: 20,
+                                              fontFamily: bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             10.heightBox,
@@ -365,7 +373,8 @@ class _PostRideScaffold extends StatelessWidget {
                             30.heightBox,
                           ],
                         ),
-                      )),
+                      ),
+                  ),
                   // Align(
                   //   alignment: Alignment.bottomCenter,
                   //   child: Container(

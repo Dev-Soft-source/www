@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:get/get.dart';
 import 'package:proximaride_app/helpers/error_state_manager.dart';
+import 'package:proximaride_app/pages/my_reviews/MyReviewsController.dart';
+import 'package:proximaride_app/pages/review/ReviewController.dart';
 import 'package:proximaride_app/pages/review_detail/ReviewDetailProvider.dart';
 import 'package:proximaride_app/services/connectivity_service.dart';
 import 'package:proximaride_app/services/logger_service.dart';
@@ -25,6 +27,20 @@ class ReviewDetailController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
+
+    if (Get.isRegistered<ReviewController>()) {
+      final reviewController = Get.find<ReviewController>();
+      final heading = reviewController.labelTextDetail['review_label'];
+      if (heading != null && heading.toString().trim().isNotEmpty) {
+        labelTextDetail['main_heading'] = heading;
+      }
+    } else if (Get.isRegistered<MyReviewsController>()) {
+      final myReviewsController = Get.find<MyReviewsController>();
+      final heading = myReviewsController.labelTextDetail['review_label'];
+      if (heading != null && heading.toString().trim().isNotEmpty) {
+        labelTextDetail['main_heading'] = heading;
+      }
+    }
 
     // Initialize connectivity service
     try {

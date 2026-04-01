@@ -3,6 +3,19 @@ import 'package:proximaride_app/pages/widgets/check_box_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 Widget checkBoxSelectionWidget({context, String title = "",  bool value = false, onChanged, onTap, Color textColor = textColor, String infoText = "", bool showToolTipBottom = false, bool isError = false, String extraChargesLabel = "Extra charges may apply; must be agreed in advance", String extraChargesToolTip = "Extra charges may apply; must be agreed in advance", String tooltipMessage= "'Must be agreed upon with the driver BEFORE booking'"}){
+  final disabled = onTap == null && onChanged == null;
+  final labelStyle = TextStyle(
+    fontFamily: bold,
+    fontSize: getValueForScreenType<double>(
+      context: context,
+      mobile: 16.0,
+      tablet: 16.0,
+    ),
+    color: disabled ? textColor.withOpacity(0.9) : textColor,
+    decoration: disabled ? TextDecoration.lineThrough : TextDecoration.none,
+    decorationColor: disabled ? textColor.withOpacity(0.9) : textColor,
+    decorationThickness: disabled ? 2 : 1,
+  );
   return Padding(
     padding: EdgeInsets.fromLTRB(
         getValueForScreenType<double>(
@@ -34,7 +47,10 @@ Widget checkBoxSelectionWidget({context, String title = "",  bool value = false,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  InkWell(onTap: onTap, child: txt16Size(title: title, fontFamily: bold, context: context, textColor: textColor)),
+                  InkWell(
+                    onTap: onTap,
+                    child: Text(title, style: labelStyle),
+                  ),
                   const SizedBox(width: 10),
                   Tooltip(
                     margin: EdgeInsets.fromLTRB(
@@ -81,7 +97,10 @@ Widget checkBoxSelectionWidget({context, String title = "",  bool value = false,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                InkWell(onTap: onTap, child: txt16Size(title: title, fontFamily: bold, context: context, textColor: textColor)),
+                InkWell(
+                  onTap: onTap,
+                  child: Text(title, style: labelStyle),
+                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,7 +185,12 @@ Widget checkBoxSelectionWidget({context, String title = "",  bool value = false,
             )
           ),
         ]else...[
-          Expanded(child: InkWell(onTap: onTap, child: txt16Size(title: title, fontFamily: bold, context: context, textColor: textColor))),
+          Expanded(
+            child: InkWell(
+              onTap: onTap,
+              child: Text(title, style: labelStyle),
+            ),
+          ),
         ],
         5.widthBox,
         SizedBox(
@@ -183,7 +207,7 @@ Widget checkBoxSelectionWidget({context, String title = "",  bool value = false,
           child: checkBoxWidget(
               value: value,
               activeColor: primaryColor,
-              onChanged: onChanged,
+              onChanged: disabled ? null : onChanged,
             isError: isError,
           ),
         ),

@@ -309,10 +309,17 @@ class PostRideInitController extends Controller
      */
     private function getPinkRideData($loggedInUser)
     {
+        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback(
+            $this->selectedLanguage->id,
+            $this->defaultLang->id
+        );
         $pinkRideSetting = PinkRideSetting::getCached();
 
         return [
             'pinkRideSetting' => $pinkRideSetting,
+            'canUse' => $loggedInUser->canUsePinkRide($pinkRideSetting),
+            'tooltip' => $loggedInUser->pinkRideTooltip($postRidePage, $pinkRideSetting),
+            'eligibilityError' => $loggedInUser->pinkRideEligibilityError($pinkRideSetting),
         ];
     }
 
@@ -321,10 +328,65 @@ class PostRideInitController extends Controller
      */
     private function getExtraCareRideData($loggedInUser)
     {
+        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback(
+            $this->selectedLanguage->id,
+            $this->defaultLang->id
+        );
         $folkRideSetting = FolkRideSetting::getCached();
+
+        $overallRating = Rating::where('type', '1')
+            ->where('status', 1)
+            ->whereHas('ride', function ($query) use ($loggedInUser) {
+                $query->where('added_by', $loggedInUser->id);
+            })
+            ->avg('average_rating') ?? 5;
+
+        $now = Carbon::now();
+        $threeMonthsAgo = $now->copy()->subMonths(3);
+        $today = $now->toDateString();
+        $currentTime = $now->toTimeString();
+
+        $cancellationCount = CancellationHistory::where('user_id', $loggedInUser->id)
+            ->where('type', 'driver')
+            ->whereBetween('created_at', [$threeMonthsAgo, $now])
+            ->whereNotNull('booking_id')
+            ->count();
+
+        $noShowsCount = NoShowHistory::where('user_id', $loggedInUser->id)
+            ->where('type', 'driver')
+            ->whereBetween('created_at', [$threeMonthsAgo, $now])
+            ->count();
+
+        $totalNoOfRides = Ride::where('added_by', $loggedInUser->id)
+            ->where('status', '!=', 2)
+            ->where(function ($query) use ($today, $currentTime) {
+                $query->where(function ($query) use ($today, $currentTime) {
+                    $query->whereDate('completed_date', '<', $today)
+                        ->orWhere(function ($query) use ($today, $currentTime) {
+                            $query->whereDate('completed_date', '=', $today)
+                                ->whereTime('completed_time', '<', $currentTime);
+                        });
+                });
+            })
+            ->count();
 
         return [
             'folkRideSetting' => $folkRideSetting,
+            'canUse' => $loggedInUser->canUseExtraRide(
+                $folkRideSetting,
+                (float) $overallRating,
+                (int) $totalNoOfRides,
+                (int) $noShowsCount,
+                (int) $cancellationCount
+            ),
+            'tooltip' => $loggedInUser->extraRideTooltip($postRidePage, $folkRideSetting),
+            'eligibilityError' => $loggedInUser->extraRideEligibilityError(
+                $folkRideSetting,
+                (float) $overallRating,
+                (int) $totalNoOfRides,
+                (int) $noShowsCount,
+                (int) $cancellationCount
+            ),
         ];
     }
 

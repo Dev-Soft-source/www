@@ -51,6 +51,10 @@ class TripDetailController extends GetxController {
   void onInit() async {
     // TODO: implement onInit
     super.onInit();
+    if (Get.isRegistered<MyTripController>()) {
+      final tripController = Get.find<MyTripController>();
+      labelTextDetail.addAll(tripController.labelTextDetail);
+    }
     tripId = Get.parameters['tripId'] ?? "";
     tripDetailId = Get.parameters['rideDetailId'] ?? "0";
     type = Get.parameters['type'] ?? "";

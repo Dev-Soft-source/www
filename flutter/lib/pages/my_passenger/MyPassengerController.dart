@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/helpers/error_state_manager.dart';
 import 'package:proximaride_app/pages/my_passenger/MyPassengerProvider.dart';
+import 'package:proximaride_app/pages/my_trips/MyTripController.dart';
 import 'package:proximaride_app/services/connectivity_service.dart';
 import 'package:proximaride_app/services/logger_service.dart';
 import 'package:proximaride_app/services/service.dart';
@@ -24,6 +25,15 @@ class MyPassengerController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
+
+    if (Get.isRegistered<MyTripController>()) {
+      final tripController = Get.find<MyTripController>();
+      final heading =
+          tripController.labelTextDetail['ride_co_passenger_heading'];
+      if (heading != null && heading.toString().trim().isNotEmpty) {
+        labelTextDetail['main_heading'] = heading;
+      }
+    }
 
     // Initialize connectivity service
     try {
