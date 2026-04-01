@@ -58,7 +58,7 @@ class _ProfilePhotoGuidelinesState extends State<ProfilePhotoGuidelines> {
         ),
       )
       ..loadRequest(Uri.parse(
-          '$url/${serviceController.lang.value}/proximaride-profile-photo-community-guidelines'));
+          '$url/${serviceController.lang.value}/profile-photo-guidelines'));
   }
 
   @override

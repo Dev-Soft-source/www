@@ -785,7 +785,8 @@ class BookSeatController extends GetxController {
                     .toString());
           } else {
             taxAmount = double.parse(
-                ((double.parse(bookingCredit.toString()) * setting['tax']) /
+                ((double.parse(bookingCredit.toString()) *
+                            double.parse(setting['tax'].toString())) /
                         100)
                     .toString());
           }

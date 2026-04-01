@@ -50,17 +50,20 @@ class EmailAddressPage extends StatelessWidget {
             } else {
               return Stack(
                 children: [
-                  Container(
-                    padding: EdgeInsets.all(getValueForScreenType<double>(
-                      context: context,
-                      mobile: 15.0,
-                      tablet: 15.0,
-                    )),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
+                  Column(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.all(getValueForScreenType<double>(
+                            context: context,
+                            mobile: 15.0,
+                            tablet: 15.0,
+                          )),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
                           // Description/body text: 20px
                           txt20Size(
                               title:
@@ -84,40 +87,41 @@ class EmailAddressPage extends StatelessWidget {
                               placeHolder:
                                   "${controller.serviceController.loginUserDetail["email"]}",
                               hintTextColor: Colors.grey),
+                              24.heightBox,
                         ],
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      color: Colors.grey.shade100,
-                      padding: EdgeInsets.all(getValueForScreenType<double>(
-                        context: context,
-                        mobile: 15.0,
-                        tablet: 15.0,
-                      )),
-                      width: context.screenWidth,
-                      child: elevatedButtonWidget(
-                          textWidget: txt22Size(
-                              title:
-                                  "${controller.labelTextDetail['update_button_text'] ?? "Update"}",
-                              fontFamily: regular,
-                              textColor: Colors.white,
-                              context: context),
-                          onPressed: () async {
-                            controller.currentEmailTextEditingController.text =
-                                controller
-                                    .serviceController.loginUserDetail['email']
-                                    .toString();
-                            controller.newEmailTextEditingController.text = "";
-                            controller.confirmEmailTextEditingController.text =
-                                "";
-                            Get.toNamed('/update_email_address');
-                          },
+                      Container(
+                        color: Colors.grey.shade100,
+                        padding: EdgeInsets.all(getValueForScreenType<double>(
                           context: context,
-                          btnRadius: 5.0),
-                    ),
+                          mobile: 15.0,
+                          tablet: 15.0,
+                        )),
+                        width: context.screenWidth,
+                        child: elevatedButtonWidget(
+                            textWidget: txt22Size(
+                                title:
+                                    "${controller.labelTextDetail['update_button_text'] ?? "Update"}",
+                                fontFamily: regular,
+                                textColor: Colors.white,
+                                context: context),
+                            onPressed: () async {
+                              controller.currentEmailTextEditingController.text =
+                                  controller
+                                      .serviceController.loginUserDetail['email']
+                                      .toString();
+                              controller.newEmailTextEditingController.text = "";
+                              controller.confirmEmailTextEditingController.text =
+                                  "";
+                              Get.toNamed('/update_email_address');
+                            },
+                            context: context,
+                            btnRadius: 5.0),
+                      ),
+                    ],
                   ),
                   if (controller.isOverlayLoading.value == true) ...[
                     overlayWidget(context)

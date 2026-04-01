@@ -112,7 +112,6 @@ class RideController extends WebRideController
             $user
         );
 
-
         if ($shouldRunFilteredSearch) {
 
             if ($user && $hasPrimarySearch) {

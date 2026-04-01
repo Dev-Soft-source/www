@@ -102,10 +102,7 @@ class BookingController extends Controller
             } else {
                 $ride->payment_method_slug = 'online';
             }
-Log::info('Ride payment method', [
-                'ride_id' => $ride->id,
-                'payment_method_slug' => $ride->payment_method_slug,
-            ]);
+
             // Calculate seats left
             $bookedSeats = $ride->bookings()
                 ->where('status', '<>', 3)
@@ -329,16 +326,18 @@ Log::info('Ride payment method', [
 
         $amount = round((float) $request->input('online_payment', 0), 2);
         $isNativePay = in_array((string) $request->input('g_pay'), ['1', 'true', 'True'], true);
+        $paymentMethod = (string) $request->input('payment_method', '');
 
         if ($amount <= 0) {
-            return $this->successResponse([
-                'payment' => [
-                    'status' => 'not_required',
-                    'amount' => 0,
-                    'payment_method' => null,
-                    'reference' => null,
-                ],
-            ], 'No online payment required');
+            $bookingResponse = $this->completeBooking($id, $user->id, null, $request);
+
+            return $this->mergeBookingResponseWithPayment($bookingResponse, [
+                'status' => 'not_required',
+                'amount' => 0,
+                'payment_method' => $ride->isCashPayment() ? 'cash' : null,
+                'reference' => null,
+                'provider' => 'none',
+            ]);
         }
 
         ///////////////////////////////////////////
@@ -360,73 +359,6 @@ Log::info('Ride payment method', [
         $stripId = null;
         // by wallet
         if ($isWalletPayment) {
-        }
-
-        // pay with saved card
-        try {
-            $card = Card::where('id', $request->input('card_id'))
-                ->where('user_id', $user->id)
-                ->firstOrFail();
-
-            if (empty($card->stripe_payment_method_id)) {
-                return $this->apiErrorResponse('Selected card is not linked to Stripe.', 422);
-            }
-
-            if (empty($user->stripe_customer_id)) {
-                return $this->apiErrorResponse('Stripe customer profile is missing for this user.', 422);
-            }
-
-            Stripe::setApiKey(env('STRIPE_SECRET'));
-
-            $paymentIntent = PaymentIntent::create([
-                'amount' => (int) round($amount * 100),
-                'currency' => 'cad',
-                'customer' => $user->stripe_customer_id,
-                'payment_method' => $card->stripe_payment_method_id,
-                'off_session' => true,
-                'confirm' => true,
-            ]);
-
-            $savedCardDetails = [
-                'card_type' => $card->card_type ?: null,
-                'last_four_digits' => $card->card_number ?: null,
-                'expiration_date' => ($card->exp_month && $card->exp_year)
-                    ? $card->exp_month . '/' . $card->exp_year
-                    : null,
-                'cardholder_name' => $card->name_on_card ?: null,
-            ];
-            $request->merge($savedCardDetails);
-
-            Log::info('saved card payment');
-
-            $bookingResponse = $this->completeBooking($id, $user->id, $paymentIntent->id, $request);
-
-            return $this->mergeBookingResponseWithPayment($bookingResponse, [
-                'status' => 'paid',
-                'amount' => $amount,
-                'payment_method' => 'credit_card',
-                'reference' => $paymentIntent->id,
-                'card_id' => (string) $request->input('card_id'),
-                'provider' => 'stripe',
-                'card' => $savedCardDetails,
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('Booking payment failed', [
-                'user_id' => $user?->id,
-                'payment_method' => $request->input('payment_method'),
-                'card_id' => $request->input('card_id'),
-                'amount' => $amount,
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            return $this->apiErrorResponse($e->getMessage(), 422);
-        }
-
-        if ($isWalletPayment) {
-
             $bookingResponse = $this->completeBooking($id, $user->id, null, $request);
 
             return $this->mergeBookingResponseWithPayment($bookingResponse, [
@@ -438,7 +370,7 @@ Log::info('Ride payment method', [
             ]);
         }
 
-        if ($request->input('payment_method') === 'paypal') {
+        if ($paymentMethod === 'paypal') {
 
             $bookingResponse = $this->completeBooking($id, $user->id, (string) $request->input('paypal_id'), $request);
 
@@ -473,6 +405,72 @@ Log::info('Ride payment method', [
                 'card' => $nativePayDetails,
             ]);
         }
+
+        if ($paymentMethod === 'credit_card') {
+            try {
+                $card = Card::where('id', $request->input('card_id'))
+                    ->where('user_id', $user->id)
+                    ->firstOrFail();
+
+                if (empty($card->stripe_payment_method_id)) {
+                    return $this->apiErrorResponse('Selected card is not linked to Stripe.', 422);
+                }
+
+                if (empty($user->stripe_customer_id)) {
+                    return $this->apiErrorResponse('Stripe customer profile is missing for this user.', 422);
+                }
+
+                Stripe::setApiKey(env('STRIPE_SECRET'));
+
+                $paymentIntent = PaymentIntent::create([
+                    'amount' => (int) round($amount * 100),
+                    'currency' => 'cad',
+                    'customer' => $user->stripe_customer_id,
+                    'payment_method' => $card->stripe_payment_method_id,
+                    'off_session' => true,
+                    'confirm' => true,
+                ]);
+
+                $savedCardDetails = [
+                    'card_type' => $card->card_type ?: null,
+                    'last_four_digits' => $card->card_number ?: null,
+                    'expiration_date' => ($card->exp_month && $card->exp_year)
+                        ? $card->exp_month . '/' . $card->exp_year
+                        : null,
+                    'cardholder_name' => $card->name_on_card ?: null,
+                ];
+                $request->merge($savedCardDetails);
+
+                Log::info('saved card payment');
+
+                $bookingResponse = $this->completeBooking($id, $user->id, $paymentIntent->id, $request);
+
+                return $this->mergeBookingResponseWithPayment($bookingResponse, [
+                    'status' => 'paid',
+                    'amount' => $amount,
+                    'payment_method' => 'credit_card',
+                    'reference' => $paymentIntent->id,
+                    'card_id' => (string) $request->input('card_id'),
+                    'provider' => 'stripe',
+                    'card' => $savedCardDetails,
+                ]);
+            } catch (\Throwable $e) {
+                Log::error('Booking payment failed', [
+                    'user_id' => $user?->id,
+                    'payment_method' => $request->input('payment_method'),
+                    'card_id' => $request->input('card_id'),
+                    'amount' => $amount,
+                    'message' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+
+                return $this->apiErrorResponse($e->getMessage(), 422);
+            }
+        }
+
+        return $this->apiErrorResponse('Unsupported payment method.', 422);
     }
 
     private function mergeBookingResponseWithPayment(array $bookingResponse, array $paymentData): array

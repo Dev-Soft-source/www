@@ -1278,7 +1278,6 @@
                             <div class="space-y-2">
                                 @foreach ($rideFeatureOptions['features'] as $featureOption)
                                     @php
-                                    
                                         $disabled = false;
                                         $tooltipText = $featureOption->tooltip;
                                         $data_ride_option_code = '';

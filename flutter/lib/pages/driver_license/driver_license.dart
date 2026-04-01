@@ -54,17 +54,20 @@ class DriverLicensePage extends StatelessWidget {
           } else {
             return Stack(
               children: [
-                Container(
-                  padding: EdgeInsets.all(getValueForScreenType<double>(
-                    context: context,
-                    mobile: 15.0,
-                    tablet: 15.0,
-                  )),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
+                Column(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: EdgeInsets.all(getValueForScreenType<double>(
+                          context: context,
+                          mobile: 15.0,
+                          tablet: 15.0,
+                        )),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
                         // Red required-fields note: 18px
                         txt18Size(
                             title:
@@ -188,37 +191,37 @@ class DriverLicensePage extends StatelessWidget {
                                 btnColor: primaryColor),
                           )
                         ],
-                        100.heightBox,
+                        24.heightBox,
                       ],
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                    color: Colors.grey.shade100,
-                    padding: EdgeInsets.all(getValueForScreenType<double>(
-                      context: context,
-                      mobile: 15.0,
-                      tablet: 15.0,
-                    )),
-                    width: context.screenWidth,
-                    child: elevatedButtonWidget(
-                      enabled: controller.isFormDirty.value,
-                      textWidget: txt22Size(
-                          title: controller.oldImagePath.value == ""
-                              ? "${controller.labelTextDetail['upload_button_text'] ?? "Upload"}"
-                              : "${controller.labelTextDetail['update_button_text'] ?? "Update"}",
-                          fontFamily: regular,
-                          textColor: Colors.white,
-                          context: context),
-                      onPressed: () async {
-                        await controller.updateDriverLicense();
-                      },
-                      context: context,
-                      btnRadius: 5.0,
+                    Container(
+                      color: Colors.grey.shade100,
+                      padding: EdgeInsets.all(getValueForScreenType<double>(
+                        context: context,
+                        mobile: 15.0,
+                        tablet: 15.0,
+                      )),
+                      width: context.screenWidth,
+                      child: elevatedButtonWidget(
+                        enabled: controller.isFormDirty.value,
+                        textWidget: txt22Size(
+                            title: controller.oldImagePath.value == ""
+                                ? "${controller.labelTextDetail['upload_button_text'] ?? "Upload"}"
+                                : "${controller.labelTextDetail['update_button_text'] ?? "Update"}",
+                            fontFamily: regular,
+                            textColor: Colors.white,
+                            context: context),
+                        onPressed: () async {
+                          await controller.updateDriverLicense();
+                        },
+                        context: context,
+                        btnRadius: 5.0,
+                      ),
                     ),
-                  ),
+                  ],
                 ),
                 if (controller.isOverlayLoading.value == true) ...[
                   overlayWidget(context)
