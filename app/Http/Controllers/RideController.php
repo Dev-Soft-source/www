@@ -188,7 +188,7 @@ class RideController extends Controller
             $this->defaultLang->id
         );
         $ratings = Rating::all();
-        
+
         return view('my_co_passengers', [
             'ride' => $ride,
             'setting' => $setting,
@@ -1028,7 +1028,6 @@ class RideController extends Controller
         if ($featureValidationResponse) {
             return $featureValidationResponse;
         }
-
         $origin = $request->origin['label'];
         $originCityId = $request->origin['city_id'];
         $destination = $request->destination['label'];
@@ -1883,15 +1882,15 @@ class RideController extends Controller
     protected function validatePostRidePermissions(User $user, $message)
     {
         if ($user->isBlockedPostRide()) {
-            return back()->with('message', $message->block_post_ride_message);
+            return back()->with('error', $message->block_post_ride_message);
         }
 
         if (!$user->hasCustomProfileImage()) {
-            return back()->with('message', $message->profile_photo_required_message ?? 'For posting a ride profile photo is required');
+            return back()->with('error', $message->profile_photo_required_message ?? 'For posting a ride profile photo is required');
         }
 
         if ($user->isSuspended()) {
-            return back()->with('message', $message->admin_block_account_message ?? 'Your account has been suspended by the admin');
+            return back()->with('error', $message->admin_block_account_message ?? 'Your account has been suspended by the admin');
         }
 
         return null;
@@ -1911,14 +1910,14 @@ class RideController extends Controller
         if (in_array("1", $selectedFeatureIds, true)) {
             $pinkRideError = $user->pinkRideEligibilityError();
             if ($pinkRideError) {
-                return back()->with('message', $pinkRideError);
+                return back()->with('error', $pinkRideError);
             }
         }
 
         if (in_array("2", $selectedFeatureIds, true)) {
             $extraCareError = $user->extraRideEligibilityError();
             if ($extraCareError) {
-                return back()->with('message', $extraCareError);
+                return back()->with('error', $extraCareError);
             }
         }
 
