@@ -381,53 +381,7 @@ class RideSearchController extends Controller
             }
         }
         foreach ($rides as $ride) {
-
             $ride = $this->getRideDetail($ride, $originLabel, $destinationLabel, $originCityId, $destinationCityId);
-
-            // $stopsSource = $ride->stops ?? $ride->rideStops ?? null;
-            // $orderedStops = $stopsSource
-            //     ? $stopsSource->sortBy('stop_order')->values()->all()
-            //     : [];
-
-            // if ($hasLocationSearch) {
-            //     [$matchedFromIndex, $matchedToIndex] = $this->findMatchingSegmentIndices(
-            //         $orderedStops,
-            //         $originCityId,
-            //         $destinationCityId,
-            //         (string) $originLabel,
-            //         (string) $destinationLabel
-            //     );
-            // } else {
-            //     $matchedFromIndex = count($orderedStops) >= 2 ? 0 : null;
-            //     $matchedToIndex = count($orderedStops) >= 2 ? count($orderedStops) - 1 : null;
-            // }
-
-            // $ride->matched_from_stop_index = $matchedFromIndex;
-            // $ride->matched_to_stop_index = $matchedToIndex;
-            // $ride->matched_from_stop_id = ($matchedFromIndex !== null && isset($orderedStops[$matchedFromIndex]))
-            //     ? (int) ($orderedStops[$matchedFromIndex]->id ?? 0)
-            //     : null;
-            // $ride->matched_to_stop_id = ($matchedToIndex !== null && isset($orderedStops[$matchedToIndex]))
-            //     ? (int) ($orderedStops[$matchedToIndex]->id ?? 0)
-            //     : null;
-            // $ride->matched_segment_price_minor = $this->resolveMatchedSegmentPriceMinor(
-            //     $ride,
-            //     $originCityId,
-            //     $destinationCityId,
-            //     (string) $originLabel,
-            //     (string) $destinationLabel,
-            //     $matchedFromIndex,
-            //     $matchedToIndex
-            // );
-
-            // $ride->matched_seats_available = ($ride->matched_from_stop_id && $ride->matched_to_stop_id && method_exists($ride, 'resolveSegmentAvailableSeats'))
-            //     ? $ride->resolveSegmentAvailableSeats(
-            //         (int) $ride->matched_from_stop_id,
-            //         (int) $ride->matched_to_stop_id
-            //     )
-            //     : (int) ($ride->seats_available ?? $ride->seats ?? 0);
-
-            
         }
 
         $recentSearches = collect();
@@ -440,7 +394,7 @@ class RideSearchController extends Controller
                 ->orderByDesc('updated_at')
                 ->limit(3)
                 ->get()
-                ->map(function (RecentSearch $recentSearch) use ($lang, $view) {
+                ->map(function (RecentSearch $recentSearch) use ($lang, $action_route) {
                     $originLabel = trim((string) $recentSearch->from);
                     $destinationLabel = trim((string) $recentSearch->to);
                     $originCityId = $this->resolveRecentSearchCityId($originLabel);
@@ -451,7 +405,7 @@ class RideSearchController extends Controller
                     $recentSearch->origin_city_id = $originCityId;
                     $recentSearch->destination_city_id = $destinationCityId;
                     $recentSearch->search_url = ($originCityId && $destinationCityId)
-                        ? route($view, [
+                        ? route($action_route, [
                             'lang' => $lang ?? optional($this->selectedLanguage)->abbreviation,
                             'origin' => [
                                 'label' => $originLabel,

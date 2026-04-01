@@ -186,4 +186,18 @@ class VerifyStudentController extends Controller
 
         return redirect()->route('student.verify', ['lang' => $this->selectedLanguage->abbreviation])->with('message', $message->student_card_upload_message);
     }
+
+    public function remove(Request $request)
+    {
+        $user_id = auth()->user()->id;
+
+        User::whereId($user_id)->update([
+            'student_card' => '',
+            'student_card_exp_date' => '',
+            'student' => 0,
+            'charge_booking' => 0,
+        ]);
+
+        return response()->json(['status' => 'success']);
+    }
 }

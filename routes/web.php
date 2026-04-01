@@ -491,6 +491,7 @@ Route::post('{lang?}/signup', [SignupController::class, 'store'])->middleware('g
 Route::put('close-account/update/{id}', [CloseAccountController::class, 'update'])->name('close_account.update');
 Route::put('verify-student/update/{id}', [VerifyStudentController::class, 'update'])->name('student.verify.update');
 Route::put('verify-driver/update/{id}', [VerifyDriverController::class, 'update'])->name('driver.verify.update');
+Route::post('verify-student/remove', [VerifyStudentController::class, 'remove'])->name('student.verify.remove');
 Route::post('verify-driver/remove', [VerifyDriverController::class, 'remove'])->name('driver.verify.remove');
 Route::put('password/update/{id}', [PasswordController::class, 'update'])->name('password.update');
 Route::put('email/update/{userId}', [EmailController::class, 'update'])->name('email.update');

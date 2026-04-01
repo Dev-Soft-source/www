@@ -11,6 +11,11 @@
 
 @php
     $seatPrice = ($ride->detail->price ?? 0) / 100;
+    $requestedBookingsCount = $ride->relationLoaded('bookings')
+        ? (int) $ride->bookings->filter(function ($booking) {
+            return in_array($booking->status, ['waiting', 0, '0'], true);
+        })->count()
+        : (int) $ride->bookings()->whereIn('status', ['waiting', 0])->count();
 @endphp
 
 @php
@@ -95,8 +100,28 @@
                                     d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
                             </svg>
                         @endif
-
                     </div>
+                    @if ($requestedBookingsCount > 0)
+                        @once
+                            <style>
+                                @keyframes px-booking-request-zoom {
+                                    0%, 100% { transform: scale(1); }
+                                    50% { transform: scale(1.08); }
+                                }
+                                ._request_booking_alert{
+                                    background-color: #ffcccf;
+                                    border: 2px solid #e47780
+                                }
+                            </style>
+                        @endonce
+                        <span
+                        {{-- uppercase tracking-[0.2em]  --}}
+                            class="inline-flex items-center self-end rounded-full px-3 py-1 text-xl text-amber-700 rounded-lg _request_booking_alert"
+                            style="animation: px-booking-request-zoom 1.15s ease-in-out infinite;"
+                        >
+                            {{ $requestedBookingsCount }} {{ $requestedBookingsCount === 1 ? 'booking request' : 'booking requests' }}
+                        </span>
+                    @endif
                 </div>
             </div>
             @if($showRideBookingInfo)

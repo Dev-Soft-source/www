@@ -59,6 +59,12 @@ Widget pricePaymentOptionWidget(
                             .removeWhere((error) => error['title'] == "price");
                       }
                     },
+                    onEditingComplete: () {
+                      controller.handlePrimaryPriceEditingComplete();
+                    },
+                    onFieldSubmitted: (_) {
+                      controller.handlePrimaryPriceEditingComplete();
+                    },
                     isError: controller.errors
                         .where((error) => error == "price")
                         .isNotEmpty,
@@ -152,6 +158,14 @@ Widget pricePaymentOptionWidget(
                                 onChanged: (value) {
                                   controller.handleRoutePriceChanged(
                                       routeEntry, value);
+                                },
+                                onEditingComplete: () {
+                                  controller.handleRoutePriceEditingComplete(
+                                      routeEntry);
+                                },
+                                onFieldSubmitted: (_) {
+                                  controller.handleRoutePriceEditingComplete(
+                                      routeEntry);
                                 },
                               ),
                             );

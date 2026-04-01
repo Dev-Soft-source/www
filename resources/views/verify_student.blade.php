@@ -279,13 +279,24 @@
                                 $imageName = basename($user->student_card);
                             @endphp
                             <input type="hidden" name="existing_image" value="{{ $imageName }}">
-                            <label for="dropzone-file" class="cursor-pointer">
-                                <div class="text-primary border border-primary px-6 py-3 rounded w-full mt-3 text-center">
-                                    <input id="dropzone-file" name="student_card" type="file" 
-                                        onchange="previewImage(this)" class="hidden" />
-                                    {{ $studentCardPage->upload_another_image_btn_label ?? 'Upload another image' }}
-                                </div>
-                            </label>
+                            <div class="flex items-center gap-3 mt-3">
+                                <label for="dropzone-file" class="cursor-pointer flex-1">
+                                    <div class="text-primary border border-primary px-6 py-3 rounded w-full text-center">
+                                        <input id="dropzone-file" name="student_card" type="file"
+                                            onchange="previewImage(this)" class="hidden" />
+                                        {{ $studentCardPage->upload_another_image_btn_label ?? 'Upload another image' }}
+                                    </div>
+                                </label>
+                                <button id="remove-student-card" type="button"
+                                    class="text-white bg-primary px-6 py-2.5 rounded flex items-center justify-center gap-1 whitespace-nowrap">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                    </svg>
+                                    <span>{{ $studentCardPage->delete_button_label ?? 'Delete' }}</span>
+                                </button>
+                            </div>
                         @endif
                         @if ($user->student_card_exp_date)
                             <input type="hidden" id="expDate" name="exp_date"
@@ -349,6 +360,79 @@
         button-label="{{ $siteText['close_btn_text'] ?? 'Close' }}"
         modal-border-class="modal-border1"
     />
+
+    <div id="deleteStudentCardConfirmationModal"
+        class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50"
+        aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div
+                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border1">
+                    <button type="button" onclick="closeDeleteStudentCardConfirmationModal()"
+                        class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="text-center w-full">
+                            <h6 class="text-2xl font-FuturaMdCnBT text-gray-900 mb-4">
+                                {{ $studentCardPage->delete_student_card_confirmation_title ?? 'Delete Student Card?' }}
+                            </h6>
+                            <p class="text-gray-700 text-left">
+                                {{ $studentCardPage->delete_student_card_confirmation_message ?? 'If you delete your student card, student benefits will be removed until you upload and verify a new one.' }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
+                        <button type="button" onclick="confirmDeleteStudentCard()"
+                            class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">
+                            {{ $studentCardPage->delete_anyway_button_label ?? 'Delete Anyway' }}
+                        </button>
+                        <button type="button" onclick="closeDeleteStudentCardConfirmationModal()"
+                            class="inline-flex w-full justify-center rounded bg-gray-300 px-3 py-2 font-FuturaMdCnBT text-lg text-gray-700 hover:bg-gray-400 sm:w-auto">
+                            {{ $studentCardPage->keep_student_card_button_label ?? 'Keep Student Card' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="studentCardDeletedModal" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50"
+        aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0 w-full">
+                <div
+                    class="relative animate__animated animate__fadeIn transform overflow-hidden rounded-2xl bg-white text-center shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg modal-border">
+                    <button type="button" onclick="closeStudentCardDeletedModal()"
+                        class="absolute top-3 right-3 text-gray-400 hover:text-gray-500">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="text-center w-full">
+                            <h6 class="text-2xl font-FuturaMdCnBT text-gray-900 mb-4">
+                                {{ $studentCardPage->student_card_deleted_title ?? 'Student Card Deleted' }}
+                            </h6>
+                            <p class="text-gray-700 text-left">
+                                {{ $studentCardPage->student_card_deleted_message ?? 'Your student card has been removed. Upload a new card any time to restore student benefits.' }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="px-4 pb-6 pt-4 sm:flex sm:flex-row-reverse sm:px-6 justify-center gap-3">
+                        <button type="button" onclick="closeStudentCardDeletedModal()"
+                            class="inline-flex w-full justify-center rounded bg-primary px-3 py-2 font-FuturaMdCnBT text-lg text-white hover:text-white hover:shadow-lg shadow-sm hover:bg-blue-400 sm:w-auto">
+                            {{ $studentCardPage->close_button_label ?? ($siteText['close_btn_text'] ?? 'Close') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -451,6 +535,7 @@
         });
         const profileImage = document.getElementById('profile-image');
         const submitBtn = document.getElementById('submit_btn');
+        const removeStudentCardButton = document.getElementById('remove-student-card');
 
         function changefield() {
             submitBtn.removeAttribute('disabled');
@@ -484,6 +569,61 @@
                 submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
                 submitBtn.classList.remove('opacity-100');
             }
+        }
+
+        if (removeStudentCardButton) {
+            removeStudentCardButton.addEventListener('click', function(event) {
+                event.preventDefault();
+                showDeleteStudentCardConfirmationModal();
+            });
+        }
+
+        function showDeleteStudentCardConfirmationModal() {
+            const modal = document.getElementById('deleteStudentCardConfirmationModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function closeDeleteStudentCardConfirmationModal() {
+            const modal = document.getElementById('deleteStudentCardConfirmationModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function showStudentCardDeletedModal() {
+            const modal = document.getElementById('studentCardDeletedModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function closeStudentCardDeletedModal() {
+            const modal = document.getElementById('studentCardDeletedModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+            window.location.reload();
+        }
+
+        function confirmDeleteStudentCard() {
+            closeDeleteStudentCardConfirmationModal();
+
+            $.ajax({
+                url: "{{ route('student.verify.remove') }}",
+                type: "POST",
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                dataType: 'json',
+                success: function(result) {
+                    showStudentCardDeletedModal();
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error deleting student card:', error);
+                }
+            });
         }
 
         const monthInput = document.getElementById('monthInput');

@@ -21,6 +21,7 @@ Widget fieldsWidget(
     onTap,
     bool autoFocus = false,
     onFieldSubmitted,
+    onEditingComplete,
     inputFormatters}) {
   return TextFormField(
     onTap: onTap,
@@ -28,7 +29,7 @@ Widget fieldsWidget(
     readOnly: readonly,
     autofocus: autoFocus,
     textAlignVertical: TextAlignVertical.center,
-    onEditingComplete: () {},
+    onEditingComplete: onEditingComplete,
     maxLength: maxLength,
     maxLines: maxLines,
     inputFormatters: inputFormatters,

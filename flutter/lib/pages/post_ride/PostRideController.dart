@@ -198,6 +198,7 @@ class PostRideController extends GetxController {
   var routeDistanceLoading = false.obs;
   Timer? _routeDistanceDebounceTimer;
   String _routeDistanceRequestKey = "";
+  final Set<String> _acknowledgedPriceWarningSignatures = <String>{};
 
   var spotsCount = 0.obs;
   var showErrorSpot = false.obs;
@@ -601,6 +602,270 @@ class PostRideController extends GetxController {
 
   String formatRouteCapPrice(double value) {
     return value % 1 == 0 ? value.toInt().toString() : value.toStringAsFixed(2);
+  }
+
+  double? parsePricePerSeat(String value) {
+    final normalized = value.trim().replaceAll(',', '.');
+    if (normalized.isEmpty) {
+      return null;
+    }
+
+    final parsed = double.tryParse(normalized);
+    if (parsed == null || parsed <= 0) {
+      return null;
+    }
+
+    return parsed;
+  }
+
+  Map<String, dynamic> validatePriceAgainstDistance({
+    required String priceText,
+    required int distanceMeters,
+    required int seats,
+    required String routeLabel,
+  }) {
+    final pricePerSeat = parsePricePerSeat(priceText);
+    if (pricePerSeat == null || distanceMeters <= 0 || seats <= 0) {
+      return {
+        'type': null,
+        'routeLabel': routeLabel,
+      };
+    }
+
+    final distanceKm = distanceMeters / 1000;
+    final maxPricePerSeat = (distanceKm * errorTriggeringCap) / seats;
+    final softWarningPricePerSeat = (distanceKm * softWarningCap) / seats;
+
+    if (pricePerSeat > maxPricePerSeat) {
+      return {
+        'type': 'error',
+        'routeLabel': routeLabel,
+        'maxPricePerSeat': formatRouteCapPrice(maxPricePerSeat),
+        'distanceKm': distanceKm.toStringAsFixed(2),
+        'pricePerSeat': pricePerSeat.toStringAsFixed(2),
+      };
+    }
+
+    if (pricePerSeat > softWarningPricePerSeat) {
+      return {
+        'type': 'warning',
+        'routeLabel': routeLabel,
+        'softWarningPrice': formatRouteCapPrice(softWarningPricePerSeat),
+        'distanceKm': distanceKm.toStringAsFixed(2),
+        'pricePerSeat': pricePerSeat.toStringAsFixed(2),
+      };
+    }
+
+    return {
+      'type': null,
+      'routeLabel': routeLabel,
+    };
+  }
+
+  String _buildPriceValidationSignature(Map<String, dynamic> validation) {
+    return [
+      validation['type']?.toString() ?? '',
+      validation['routeLabel']?.toString() ?? '',
+      validation['pricePerSeat']?.toString() ?? '',
+      validation['distanceKm']?.toString() ?? '',
+      seatAvailable.value.toString(),
+      validation['maxPricePerSeat']?.toString() ?? '',
+      validation['softWarningPrice']?.toString() ?? '',
+    ].join('|');
+  }
+
+  Future<bool> _showPriceErrorDialog(Map<String, dynamic> validation) async {
+    final heading = labelTextDetail['price_error_heading'] ??
+        'Price Limit Exceeded';
+    final message1 = labelTextDetail['carpool_regulation_limit_message'] ??
+        'To comply with Canadian and Quebec carpooling regulations, the total amount collected for a trip cannot exceed the official 2026 reimbursement rate of \$0.72/km.';
+    final message2Template = labelTextDetail['max_price_per_seat_message'] ??
+        'The maximum allowed for this trip is \$:max_per_seat per seat.';
+    final message2 = message2Template.replaceAll(
+      ':max_per_seat',
+      validation['maxPricePerSeat']?.toString() ?? '0',
+    );
+    final message3 = labelTextDetail['non_commercial_carpool_requirement_message'] ??
+        'This limit is mandatory to ensure your ride is classified as a non-commercial carpool, protecting your insurance coverage and maintaining the cost-sharing status of your contributions.';
+
+    await Get.dialog(
+      AlertDialog(
+        title: Text(heading.toString()),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(message1.toString()),
+            const SizedBox(height: 12),
+            Text(message2),
+            const SizedBox(height: 12),
+            Text(message3.toString()),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text(
+              (labelTextDetail['price_error_adjust_btn_label'] ?? 'Adjust Price')
+                  .toString(),
+            ),
+          ),
+        ],
+      ),
+      barrierDismissible: true,
+    );
+
+    return false;
+  }
+
+  Future<bool> _showPriceWarningDialog(Map<String, dynamic> validation) async {
+    final signature = _buildPriceValidationSignature(validation);
+    if (_acknowledgedPriceWarningSignatures.contains(signature)) {
+      return true;
+    }
+
+    final result = await Get.dialog<bool>(
+      AlertDialog(
+        title: Text(
+          (labelTextDetail['price_warning_heading'] ??
+                  'Recommended Contribution Limit')
+              .toString(),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              (labelTextDetail['price_above_reimbursement_warning'] ??
+                      'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Quebec.')
+                  .toString(),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              (labelTextDetail['price_reduction_suggestion_message'] ??
+                      'While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.')
+                  .toString(),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: Text(
+              (labelTextDetail['price_warning_adjust_btn_label'] ??
+                      'Adjust Price')
+                  .toString(),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Get.back(result: true),
+            child: Text(
+              (labelTextDetail['price_warning_keep_current_btn_label'] ??
+                      'Keep Current Price')
+                  .toString(),
+            ),
+          ),
+        ],
+      ),
+      barrierDismissible: true,
+    );
+
+    final shouldContinue = result == true;
+    if (shouldContinue) {
+      _acknowledgedPriceWarningSignatures.add(signature);
+    }
+    return shouldContinue;
+  }
+
+  Future<bool> handlePriceValidationResult(Map<String, dynamic> validation) async {
+    final type = validation['type']?.toString();
+    if (type == null || type.isEmpty) {
+      return true;
+    }
+
+    if (type == 'error') {
+      return _showPriceErrorDialog(validation);
+    }
+
+    if (type == 'warning') {
+      return _showPriceWarningDialog(validation);
+    }
+
+    return true;
+  }
+
+  Future<bool> handlePrimaryPriceEditingComplete() async {
+    final labels = getOrderedRouteLabels();
+    if (labels.length < 2) {
+      return true;
+    }
+
+    final key = buildRoutePriceKey(labels.first, labels.last);
+    final validation = validatePriceAgainstDistance(
+      priceText: pricePerSeatTextEditingController.text,
+      distanceMeters: routeSegmentDistances[key] ?? 0,
+      seats: seatAvailable.value <= 0 ? 1 : seatAvailable.value,
+      routeLabel: 'this trip',
+    );
+
+    return handlePriceValidationResult(validation);
+  }
+
+  Future<bool> handleRoutePriceEditingComplete(
+    Map<String, dynamic> entry,
+  ) async {
+    final controller = entry['controller'] as TextEditingController?;
+    if (controller == null) {
+      return true;
+    }
+
+    final validation = validatePriceAgainstDistance(
+      priceText: controller.text,
+      distanceMeters: routeSegmentDistances[entry['key']?.toString() ?? ''] ?? 0,
+      seats: seatAvailable.value <= 0 ? 1 : seatAvailable.value,
+      routeLabel:
+          '${shortLocationLabel(entry['fromLabel']?.toString() ?? '')} -> ${shortLocationLabel(entry['toLabel']?.toString() ?? '')}',
+    );
+
+    return handlePriceValidationResult(validation);
+  }
+
+  Future<bool> validateAllPricesBeforeSubmit() async {
+    if (hasRoutePriceEntries) {
+      Map<String, dynamic>? firstWarning;
+
+      for (final entry in routePriceEntries) {
+        final controller = entry['controller'] as TextEditingController?;
+        if (controller == null) {
+          continue;
+        }
+
+        final validation = validatePriceAgainstDistance(
+          priceText: controller.text,
+          distanceMeters:
+              routeSegmentDistances[entry['key']?.toString() ?? ''] ?? 0,
+          seats: seatAvailable.value <= 0 ? 1 : seatAvailable.value,
+          routeLabel:
+              '${shortLocationLabel(entry['fromLabel']?.toString() ?? '')} -> ${shortLocationLabel(entry['toLabel']?.toString() ?? '')}',
+        );
+
+        if (validation['type'] == 'error') {
+          return handlePriceValidationResult(validation);
+        }
+
+        if (validation['type'] == 'warning' && firstWarning == null) {
+          firstWarning = validation;
+        }
+      }
+
+      if (firstWarning != null) {
+        return handlePriceValidationResult(firstWarning);
+      }
+
+      return true;
+    }
+
+    return handlePrimaryPriceEditingComplete();
   }
 
   String routeDistanceHint(Map<String, dynamic> entry) {
@@ -2112,6 +2377,11 @@ class PostRideController extends GetxController {
           errors.add(err);
           return;
         }
+      }
+
+      final canContinueWithPrice = await validateAllPricesBeforeSubmit();
+      if (!canContinueWithPrice) {
+        return;
       }
 
       scrollField = false;

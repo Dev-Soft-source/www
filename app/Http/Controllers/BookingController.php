@@ -5060,8 +5060,9 @@ class BookingController extends Controller
                     if (!$phoneNumber) {
                         $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)->where('verified', '1')->first();
                     }
-
-                    $this->sendSecuredCashPaymentCodeSms($phoneNumber, $booking->passenger, $booking->ride, $secured_cash_code, (int) $booking->seats);
+                    
+                    $this->sendSmsCode($phoneNumber, $booking->passenger, $secured_cash_code);
+                    // $this->sendSecuredCashPaymentCodeSms($phoneNumber, $booking->passenger, $booking->ride, $secured_cash_code, (int) $booking->seats);
 
                     $driverPhoneNumber = PhoneNumber::where('user_id', $booking->ride->driver->id)
                         ->where('default', '1')
@@ -5570,7 +5571,8 @@ class BookingController extends Controller
                 $secured_cash = '1';
                 $secured_cash_code = rand(1000, 9999);
 
-                $this->sendSecuredCashPaymentCodeSms($phoneNumber, $user, $ride, $secured_cash_code, (int) $request->seats);
+                $this->sendSmsCode($phoneNumber, $user, $secured_cash_code);
+                // $this->sendSecuredCashPaymentCodeSms($phoneNumber, $user, $ride, $secured_cash_code, (int) $request->seats);
             } else {
                 $secured_cash = null;
                 $secured_cash_code = null;
