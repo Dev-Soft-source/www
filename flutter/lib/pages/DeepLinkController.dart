@@ -15,6 +15,14 @@ class DeepLinkController extends GetxController {
 
   String get pendingDeepLinkToken => _pendingDeepLinkToken;
 
+  bool _isSupportedWebDeepLinkHost(Uri uri) {
+    final host = uri.host.toLowerCase();
+    return host == '127.0.0.1' ||
+        host == 'localhost' ||
+        host == 'proximaride.com' ||
+        host == 'www.proximaride.com';
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -106,8 +114,7 @@ class DeepLinkController extends GetxController {
       }
       // Handle http://127.0.0.1:8000/en/login-with-app
       else if ((uri.scheme == 'https' || uri.scheme == 'http') &&
-          (uri.host == '127.0.0.1:8000' ||
-              uri.host == 'proximaride.com') &&
+          _isSupportedWebDeepLinkHost(uri) &&
           uri.path == '/en/login-with-app') {
         logger.info('Login with app deep link detected');
 
@@ -144,7 +151,7 @@ class DeepLinkController extends GetxController {
         }
       } // Handle email verification with token
       else if ((uri.scheme == 'https' || uri.scheme == 'http') &&
-          (uri.host == '127.0.0.1:8000' || uri.host == 'proximaride.com') &&
+          _isSupportedWebDeepLinkHost(uri) &&
           uri.path == '/email-verified' &&
           uri.queryParameters['success'] == 'verified' &&
           uri.queryParameters['app'] == 'true' &&
@@ -174,7 +181,7 @@ class DeepLinkController extends GetxController {
         }
       } // Handle email already verified (no token)
       else if ((uri.scheme == 'https' || uri.scheme == 'http') &&
-          (uri.host == '127.0.0.1:8000' || uri.host == 'proximaride.com') &&
+          _isSupportedWebDeepLinkHost(uri) &&
           uri.path == '/email-verified' &&
           uri.queryParameters['app'] == 'true' &&
           !uri.queryParameters.containsKey('token')) {
@@ -189,7 +196,7 @@ class DeepLinkController extends GetxController {
         logger.info('→ Dialog showDialog() call completed');
       } // Handle mobile-close-redirect
       else if ((uri.scheme == 'https' || uri.scheme == 'http') &&
-          uri.host == '127.0.0.1:8000' &&
+          _isSupportedWebDeepLinkHost(uri) &&
           uri.path == '/mobile-close-redirect') {
         logger.info('Mobile close redirect deep link detected');
 

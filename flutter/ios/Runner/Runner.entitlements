@@ -9,6 +9,8 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:127.0.0.1:8000</string>
+		<string>applinks:proximaride.com</string>
+		<string>applinks:www.proximaride.com</string>
 	</array>
 </dict>
 </plist>

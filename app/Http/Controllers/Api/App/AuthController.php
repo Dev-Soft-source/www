@@ -187,16 +187,7 @@ class AuthController extends Controller
             $data = ['token' => $token, 'first_name' => $user->first_name, 'last_name' => $user->last_name, 'gender' => $user->gender, 'gender_label' => $user->gender_label, 'profile_image' => $user->profile_image, 'profile_original_image' => $user->profile_original_image, 'email' => $user->email, 'student' => $user->student, 'student_card_exp_date' => $user->student_card_exp_date, 'driver' => $user->driver, 'step' => $user->step, 'id' => $user->id, 'driver_average_rating' => $driver_average_rating, 'passenger_average_rating' => $passenger_average_rating, 'user_average_rating' => $user_average_rating, 'driver_total_ratings' => $driver_total_ratings, 'passenger_total_ratings' => $passenger_total_ratings, 'user_total_ratings' => $user_total_ratings, 'langId' => isset($user->lang_id) ? $user->lang_id : $defaultLangId, 'languages' => $languages, 'driver_liscense' => $user->driver_liscense];
             return $this->successResponse($data, 'Login successfully!');
         } else {
-            $message = null;
-            if ($request->lang_id && $request->lang_id != 0) {
-                // Retrieve the SuccessMessagesSettingDetail associated with the selected language
-                $message = SuccessMessagesSettingDetail::where('language_id', $request->lang_id)->select('no_user_match_message', 'no_password_match_message', 'verified_email_message')->first();
-            } else {
-                $selectedLanguage = Language::where('is_default', 1)->first();
-                if ($selectedLanguage) {
-                    $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('no_user_match_message', 'no_password_match_message', 'verified_email_message')->first();
-                }
-            }
+            
 
             if ($user && $user->trashed()) {
                 // User account is soft deleted
