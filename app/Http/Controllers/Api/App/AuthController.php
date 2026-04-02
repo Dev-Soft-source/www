@@ -81,6 +81,15 @@ class AuthController extends Controller
         $message = $this->successMessage;
         $genderLabel = Step1PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
+        if ($user && $user->closed === '1') {
+            return response()->json([
+                'status' => 'Error',
+                'message' => $message->account_closed_message
+                    ?? "It looks like this account has been closed. We'd love to have you back! You can sign up for a new account using this email address anytime.",
+                'errors' => null,
+            ], 200);
+        }
+
         
         if ($user && !$user->trashed() && $user->email_verified != 0 && auth()->attempt($credentials)) {
 
@@ -93,16 +102,6 @@ class AuthController extends Controller
                 $user->gender_label = $genderLabel->female_option_label;
             } elseif ($user->gender === 'prefer not to say') {
                 $user->gender_label = $genderLabel->prefer_option_label;
-            }
-
-            if ($user->closed === '1') {
-                $data = ['first_name' => $user->first_name, 'last_name' => $user->last_name, 'gender' => $user->gender, 'gender_label' => $user->gender_label, 'profile_image' => $user->profile_image, 'profile_original_image' => $user->profile_original_image, 'email' => $user->email, 'id' => $user->id, 'langId' => isset($user->lang_id) ? $user->lang_id : $defaultLangId, 'driver_liscense' => $user->driver_liscense];
-                return array(
-                    'status' => 'Duplicate',
-                    'message' => 'Account has been closed',
-                    'data' => $data,
-                    'html' => '',
-                );
             }
 
             if ($user->admin_deactive_account === '1') {
@@ -237,16 +236,25 @@ class AuthController extends Controller
 
         if ($request->lang_id && $request->lang_id != 0) {
             $genderLabel = Step1PageSettingDetail::where('language_id', $request->lang_id)->select('male_option_label', 'female_option_label', 'prefer_option_label')->first();
-            $message = SuccessMessagesSettingDetail::where('language_id', $request->lang_id)->select('email_already_exist_message','general_error_message')->first();
+            $message = SuccessMessagesSettingDetail::where('language_id', $request->lang_id)->select('email_already_exist_message','general_error_message', 'account_closed_message')->first();
         } else {
             $selectedLanguage = Language::where('is_default', 1)->first();
             if ($selectedLanguage) {
                 $genderLabel = Step1PageSettingDetail::where('language_id', $selectedLanguage->id)->select('male_option_label', 'female_option_label', 'prefer_option_label')->first();
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('email_already_exist_message','general_error_message')->first();
+                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('email_already_exist_message','general_error_message', 'account_closed_message')->first();
             }
         }
 
         if ($existingUser) {
+            if ($existingUser->closed === '1') {
+                return response()->json([
+                    'status' => 'Error',
+                    'message' => $message->account_closed_message
+                        ?? "It looks like this account has been closed. We'd love to have you back! You can sign up for a new account using this email address anytime.",
+                    'errors' => null,
+                ], 200);
+            }
+
             $existingUser->lang_id = $defaultLangId;
             $existingUser->email_verified = '1';
 

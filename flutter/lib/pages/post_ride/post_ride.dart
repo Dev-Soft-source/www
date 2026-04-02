@@ -38,9 +38,10 @@ class _PostRidePageState extends State<PostRidePage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (!Get.isRegistered<PostRideController>()) {
-        Get.put(PostRideController());
+      if (Get.isRegistered<PostRideController>()) {
+        Get.delete<PostRideController>(force: true);
       }
+      Get.put(PostRideController());
       if (mounted) {
         setState(() => _controllerReady = true);
       }

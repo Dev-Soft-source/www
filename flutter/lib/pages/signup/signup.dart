@@ -26,10 +26,8 @@ class SignupPage extends StatelessWidget {
     final uri = Uri.tryParse(link);
     final path = (uri?.path ?? normalizedLink).toLowerCase();
 
-    if (normalizedLink.contains('term_condition') ||
-        path.contains('term-condition') ||
-        path.contains('terms-and-conditions')) {
-      Get.toNamed('/term_condition');
+    if (normalizedLink.contains('disclaimer')) {
+      Get.toNamed('/disclaimer');
       return;
     }
 
@@ -41,8 +39,12 @@ class SignupPage extends StatelessWidget {
     }
 
     if (normalizedLink.contains('privacy_policy') ||
-        path.contains('privacy-policy')) {
+        normalizedLink.contains('privacy-policy') ||
+        path.contains('privacy_policy') ||
+        path.contains('privacy-policy') ||
+        path.contains('privacy')) {
       Get.toNamed('/privacy_policy');
+      return;
     }
   }
 

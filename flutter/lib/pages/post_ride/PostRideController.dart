@@ -1942,51 +1942,24 @@ class PostRideController extends GetxController {
             var ride = data['rideData']['ride'];
             var rideDetail = data['rideData']['detail'];
 
-            if (rideTypeParam == "new") {
-              // Duplicate ride - swap from/to
-              fromTextEditingController.text =
-                  ride['detail']['destination'];
-              toTextEditingController.text =
-                  ride['detail']['departure'];
-              fromCityId.value =
-                  int.tryParse(ride['detail']['destination_city_id'].toString()) ?? 0;
-              toCityId.value =
-                  int.tryParse(ride['detail']['origin_city_id'].toString()) ?? 0;
-              pickUpLocationTextEditingController.text = ride['dropoff'] ?? "";
-              dropOffLocationTextEditingController.text = ride['pickup'] ?? "";
-              var timeFormat = DateFormat("HH:mm:ss");
-              var parsedTime = timeFormat.parse(ride['time'].toString());
-              timeTextEditingController.text =
-                  DateFormat("HH:mm").format(parsedTime);
-            } else {
-              // Edit ride - keep from/to as is
-              fromTextEditingController.text =
-                  ride['detail']['departure'];
-              toTextEditingController.text =
-                  ride['detail']['destination'];
-              fromCityId.value =
-                  int.tryParse(ride['detail']['origin_city_id'].toString()) ?? 0;
-              toCityId.value =
-                  int.tryParse(ride['detail']['destination_city_id'].toString()) ?? 0;
-              pickUpLocationTextEditingController.text = ride['pickup'] ?? "";
-              dropOffLocationTextEditingController.text = ride['dropoff'] ?? "";
-              dateTextEditingController.text = formatRideDateValue(ride['date']);
-              timeTextEditingController.text = formatRideTimeValue(ride['time']);
-            }
-
-            if (rideTypeParam == "new") {
-              dateTextEditingController.text = "";
-            }
+            fromTextEditingController.text = ride['detail']['departure'];
+            toTextEditingController.text = ride['detail']['destination'];
+            fromCityId.value =
+                int.tryParse(ride['detail']['origin_city_id'].toString()) ?? 0;
+            toCityId.value =
+                int.tryParse(ride['detail']['destination_city_id'].toString()) ?? 0;
+            pickUpLocationTextEditingController.text = ride['pickup'] ?? "";
+            dropOffLocationTextEditingController.text = ride['dropoff'] ?? "";
+            timeTextEditingController.text =
+                rideTypeParam == "new" ? "" : formatRideTimeValue(ride['time']);
+            dateTextEditingController.text = rideTypeParam == "new"
+                ? ""
+                : formatRideDateValue(ride['date']);
             recurring.value = ride['recurring'] == "1" ? true : false;
             recurringType.value = "";
             recurringTripsTextEditingController.text = "";
-
-            if (rideTypeParam == "new") {
-              dropOffDescriptionTextEditingController.text = "";
-            } else {
-              dropOffDescriptionTextEditingController.text =
-                  ride['details'].toString();
-            }
+            dropOffDescriptionTextEditingController.text =
+                ride['details'].toString();
 
             seatAvailable.value = int.parse(ride['seats'].toString());
             seatMiddle.value = int.parse(ride['middle_seats'].toString());
@@ -2009,11 +1982,9 @@ class PostRideController extends GetxController {
                 }
 
                 _appendEmptySpot();
-                final stopValue = rideTypeParam == "new"
-                    ? (stopDetail['destination']?.toString() ?? "")
-                    : (stopDetail['departure']?.toString() ??
-                        stopDetail['destination']?.toString() ??
-                        "");
+                final stopValue = stopDetail['departure']?.toString() ??
+                    stopDetail['destination']?.toString() ??
+                    "";
                 final pickupOffValue =
                     stopDetail['pickup']?.toString() ??
                         stopDetail['dropoff']?.toString() ??
@@ -2033,17 +2004,7 @@ class PostRideController extends GetxController {
             }
 
             // Handle vehicle data
-            if (rideTypeParam == "new") {
-              addNewVehicle.value = false;
-              makeTextEditingController.text = "";
-              modelTextEditingController.text = "";
-              licenseNumberTextEditingController.text = "";
-              colorTextEditingController.text = "";
-              yearTextEditingController.text = "";
-              vehicleType.value = "";
-              fuel.value = "";
-              carOldImagePath.value = "";
-            } else if (ride['add_vehicle'] == "1") {
+            if (ride['add_vehicle'] == "1") {
               addNewVehicle.value = true;
               makeTextEditingController.text = ride['make'].toString();
               modelTextEditingController.text = ride['model'].toString();
@@ -2084,7 +2045,7 @@ class PostRideController extends GetxController {
             anythingTextEditingController.text = ride['notes'] ?? "";
 
             final routePriceSeed = <String, String>{};
-            if (rideTypeParam != "new" && ride['route_price_segments'] is List) {
+            if (ride['route_price_segments'] is List) {
               for (final segment in ride['route_price_segments']) {
                 if (segment is! Map) {
                   continue;

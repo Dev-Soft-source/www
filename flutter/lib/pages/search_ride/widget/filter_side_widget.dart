@@ -19,14 +19,15 @@ Widget filterSideWidget({context, controller, double screenWidth = 0.0, double s
 
   return Obx((){
     return SafeArea(
-      child: Stack(
+      child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(15.0),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(15.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                   txt24Size(title: "${controller.labelTextDetail['filter_section_heading'] ?? "Search filters"}", context: context, textColor: primaryColor, fontFamily: bold),
                   const Divider(),
                   txt24Size(title: "${controller.labelTextDetail['filter1_driver_heading'] ?? "Driver"}", context: context, textColor: primaryColor),
@@ -531,46 +532,43 @@ Widget filterSideWidget({context, controller, double screenWidth = 0.0, double s
                   txt24Size(title: "${controller.labelTextDetail['pets_allowed_label'] ?? "Pets allowed"}", context: context, textColor: primaryColor),
                   5.heightBox,
                   petAnimalWidget(context: context, controller: controller, screenWidth: screenWidth),
-                  50.heightBox,
-
-                ],
+                    24.heightBox,
+                  ],
+                ),
               ),
             ),
           ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              padding: const EdgeInsets.all(5.0),
-              color: Colors.grey.shade200,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: elevatedButtonWidget(
-                      textWidget: txt22Size(title: "${controller.labelTextDetail['clear_button_label'] ?? "Clear"}", context: context, textColor: Colors.white),
-                      btnColor: primaryColor,
+          Container(
+            padding: const EdgeInsets.all(5.0),
+            color: Colors.grey.shade200,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: elevatedButtonWidget(
+                    textWidget: txt22Size(title: "${controller.labelTextDetail['clear_button_label'] ?? "Clear"}", context: context, textColor: Colors.white),
+                    btnColor: primaryColor,
+                    onPressed: () async{
+                      Get.back();
+                      controller.clearFilter();
+                      controller.actionType.value = "clear";
+                      await controller.getSearchRide(1);
+                    }
+                  ),
+                ),
+                5.widthBox,
+                Expanded(
+                  child: elevatedButtonWidget(
+                      textWidget: txt22Size(title: "${controller.labelTextDetail['apply_button_label'] ?? "Apply"}", context: context, textColor: Colors.white),
                       onPressed: () async{
                         Get.back();
-                        controller.clearFilter();
-                        controller.actionType.value = "clear";
+                        controller.actionType.value = "apply";
+                        controller.filter.value = true;
                         await controller.getSearchRide(1);
                       }
-                    ),
                   ),
-                  5.widthBox,
-                  Expanded(
-                    child: elevatedButtonWidget(
-                        textWidget: txt22Size(title: "${controller.labelTextDetail['apply_button_label'] ?? "Apply"}", context: context, textColor: Colors.white),
-                        onPressed: () async{
-                          Get.back();
-                          controller.actionType.value = "apply";
-                          controller.filter.value = true;
-                          await controller.getSearchRide(1);
-                        }
-                    ),
-                  )
-                ],
-              ),
+                )
+              ],
             ),
           )
         ],

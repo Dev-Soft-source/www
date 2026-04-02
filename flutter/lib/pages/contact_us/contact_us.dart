@@ -46,19 +46,20 @@ class ContactUsPage extends StatelessWidget {
             } else if (controller.isLoading.value == true) {
               return Center(child: progressCircularWidget(context));
             } else {
-              return Stack(
+              return Column(
                 children: [
-                  Container(
-                    padding: EdgeInsets.all(getValueForScreenType<double>(
-                      context: context,
-                      mobile: 15.0,
-                      tablet: 15.0,
-                    )),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.all(getValueForScreenType<double>(
+                        context: context,
+                        mobile: 15.0,
+                        tablet: 15.0,
+                      )),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
                           // Red required-fields note: 18px
                           txt18Size(
                               title:
@@ -189,34 +190,32 @@ class ContactUsPage extends StatelessWidget {
                                 tip: controller.errors.firstWhereOrNull(
                                     (element) => element['title'] == "message"))
                           ],
-                          100.heightBox,
-                        ],
+                            24.heightBox,
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      color: Colors.grey.shade100,
-                      padding: EdgeInsets.all(getValueForScreenType<double>(
+                  Container(
+                    color: Colors.grey.shade100,
+                    padding: EdgeInsets.all(getValueForScreenType<double>(
+                      context: context,
+                      mobile: 15.0,
+                      tablet: 15.0,
+                    )),
+                    width: context.screenWidth,
+                    child: elevatedButtonWidget(
+                        textWidget: txt22Size(
+                            title:
+                                "${controller.labelTextDetail['submit_button_text'] ?? "Submit"}",
+                            fontFamily: regular,
+                            textColor: Colors.white,
+                            context: context),
+                        onPressed: () async {
+                          await controller.storeContactUs();
+                        },
                         context: context,
-                        mobile: 15.0,
-                        tablet: 15.0,
-                      )),
-                      width: context.screenWidth,
-                      child: elevatedButtonWidget(
-                          textWidget: txt22Size(
-                              title:
-                                  "${controller.labelTextDetail['submit_button_text'] ?? "Submit"}",
-                              fontFamily: regular,
-                              textColor: Colors.white,
-                              context: context),
-                          onPressed: () async {
-                            await controller.storeContactUs();
-                          },
-                          context: context,
-                          btnRadius: 5.0),
-                    ),
+                        btnRadius: 5.0),
                   ),
                   if (controller.isOverlayLoading.value == true) ...[
                     overlayWidget(context)
