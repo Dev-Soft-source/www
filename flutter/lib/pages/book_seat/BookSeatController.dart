@@ -227,61 +227,165 @@ class BookSeatController extends GetxController {
   }
 
   double rideUnitPrice() {
-    if (ride['price_major'] != null) {
-      return double.tryParse(ride['price_major'].toString()) ?? 0.0;
+    return _minorToMajor(rideUnitPriceMinor());
+  }
+
+  int _parseMinor(dynamic value) {
+    if (value == null) {
+      return 0;
     }
 
-    if (ride['priceMajor'] != null) {
-      return double.tryParse(ride['priceMajor'].toString()) ?? 0.0;
+    if (value is int) {
+      return value;
     }
 
+    if (value is num) {
+      return value.round();
+    }
+
+    final parsed = double.tryParse(value.toString());
+    return parsed?.round() ?? 0;
+  }
+
+  int _majorToMinor(dynamic value) {
+    if (value == null) {
+      return 0;
+    }
+
+    final parsed = double.tryParse(value.toString());
+    if (parsed == null) {
+      return 0;
+    }
+
+    return (parsed * 100).round();
+  }
+
+  double _minorToMajor(int value) {
+    return value / 100;
+  }
+
+  String _minorToMajorString(int value) {
+    return _minorToMajor(value).toStringAsFixed(2);
+  }
+
+  int _selectedSeatCount({bool payable = false}) {
+    if (payable) {
+      return seatAvailable.value;
+    }
+
+    return seatAvailable.value + currentUserBookedSeat.value;
+  }
+
+  int rideUnitPriceMinor() {
     if (ride['price_minor'] != null) {
-      return (double.tryParse(ride['price_minor'].toString()) ?? 0.0) / 100;
+      return _parseMinor(ride['price_minor']);
+    }
+
+    if (ride['priceMinor'] != null) {
+      return _parseMinor(ride['priceMinor']);
     }
 
     if (ride['matched_segment_price_minor'] != null) {
-      return ((double.tryParse(
-                  ride['matched_segment_price_minor'].toString()) ??
-              0.0) /
-          100);
+      return _parseMinor(ride['matched_segment_price_minor']);
+    }
+
+    if (ride['matched_segment_priceMinor'] != null) {
+      return _parseMinor(ride['matched_segment_priceMinor']);
     }
 
     if (ride['matched_segment_price_major'] != null) {
-      return double.tryParse(ride['matched_segment_price_major'].toString()) ??
-          0.0;
+      return _majorToMinor(ride['matched_segment_price_major']);
     }
 
     if (ride['matched_segment_priceMajor'] != null) {
-      return double.tryParse(ride['matched_segment_priceMajor'].toString()) ??
-          0.0;
+      return _majorToMinor(ride['matched_segment_priceMajor']);
     }
 
-    if (ride['ride_detail'] != null &&
-        ride['ride_detail'].isNotEmpty &&
-        ride['ride_detail']['price_major'] != null) {
-      return double.tryParse(ride['ride_detail']['price_major'].toString()) ??
-          0.0;
+    if (ride['price_major'] != null) {
+      return _majorToMinor(ride['price_major']);
     }
 
-    if (ride['ride_detail'] != null &&
-        ride['ride_detail'].isNotEmpty &&
-        ride['ride_detail']['priceMajor'] != null) {
-      return double.tryParse(ride['ride_detail']['priceMajor'].toString()) ??
-          0.0;
+    if (ride['priceMajor'] != null) {
+      return _majorToMinor(ride['priceMajor']);
     }
 
-    if (ride['ride_detail'] != null &&
-        ride['ride_detail'].isNotEmpty &&
-        ride['ride_detail']['price'] != null) {
-      return (double.tryParse(ride['ride_detail']['price'].toString()) ?? 0.0) /
-          100;
+    if (ride['ride_detail'] != null && ride['ride_detail'].isNotEmpty) {
+      if (ride['ride_detail']['price_minor'] != null) {
+        return _parseMinor(ride['ride_detail']['price_minor']);
+      }
+
+      if (ride['ride_detail']['priceMinor'] != null) {
+        return _parseMinor(ride['ride_detail']['priceMinor']);
+      }
+
+      if (ride['ride_detail']['price_major'] != null) {
+        return _majorToMinor(ride['ride_detail']['price_major']);
+      }
+
+      if (ride['ride_detail']['priceMajor'] != null) {
+        return _majorToMinor(ride['ride_detail']['priceMajor']);
+      }
+
+      if (ride['ride_detail']['price'] != null) {
+        return _parseMinor(ride['ride_detail']['price']);
+      }
     }
 
     if (ride['price'] != null) {
-      return (double.tryParse(ride['price'].toString()) ?? 0.0) / 100;
+      return _parseMinor(ride['price']);
     }
 
-    return 0.0;
+    return 0;
+  }
+
+  double bookingFeeRatePercent() {
+    if (isStudent()) {
+      return 0;
+    }
+
+    final priceMinor = rideUnitPriceMinor();
+    if (priceMinor <= 1500) {
+      return 0;
+    }
+
+    if (priceMinor <= 3000) {
+      return 10;
+    }
+
+    return double.tryParse(setting['booking_price']?.toString() ?? '0') ?? 0;
+  }
+
+  int bookingFeeAmountMinorForSeatCount(int seatCount) {
+    if (seatCount <= 0) {
+      return 0;
+    }
+
+    final amountMinor = rideUnitPriceMinor() * seatCount;
+    return ((amountMinor * bookingFeeRatePercent()) / 100).round();
+  }
+
+  int _firmDiscountedMinor(int amountMinor) {
+    if (policyType.value != 'firm') {
+      return amountMinor;
+    }
+
+    final discountRate =
+        double.tryParse(setting['frim_discount']?.toString() ?? '0') ?? 0;
+
+    return (amountMinor - ((amountMinor * discountRate) / 100)).round();
+  }
+
+  int _passengerTaxMinor(int bookingCreditMinor) {
+    if (setting['deduct_tax'] == null ||
+        setting['deduct_tax'] != "deduct_from_passenger") {
+      return 0;
+    }
+
+    final taxRate = setting['tax_type'] == "state_wise_tax"
+        ? stateTax.value
+        : (double.tryParse(setting['tax']?.toString() ?? '0') ?? 0);
+
+    return ((bookingCreditMinor * taxRate) / 100).round();
   }
 
   getBookSeatDetail() async {
@@ -743,6 +847,12 @@ class BookSeatController extends GetxController {
     var cashPayment = "";
     var total = "";
     var taxAmount = 0.0;
+    var bookingCreditMinor = 0;
+    var seatAmountMinor = 0;
+    var onlinePaymentMinor = 0;
+    var cashPaymentMinor = 0;
+    var totalMinor = 0;
+    var taxAmountMinor = 0;
 
     var bookingId = 0;
 
@@ -756,354 +866,65 @@ class BookSeatController extends GetxController {
         bookingId = bookingDetail['id'];
       }
     }
+    final selectedSeatCount = _selectedSeatCount();
+    bookingCreditMinor = bookingFeeAmountMinorForSeatCount(selectedSeatCount);
+    seatAmountMinor =
+        _firmDiscountedMinor(rideUnitPriceMinor() * selectedSeatCount);
+    taxAmountMinor = _passengerTaxMinor(bookingCreditMinor);
+    totalMinor = bookingCreditMinor + seatAmountMinor + taxAmountMinor;
+
     if (ride['payment_method_slug'] == "cash") {
-      if (policyType.value == 'firm') {
-        var data = double.parse(setting['frim_discount'].toString());
-        data = data / 100;
-
-        bookingCredit = calculateBookingFee(
-                double.parse(setting['booking_price'].toString()))
-            .toStringAsFixed(1);
-        //bookingCredit = (double.parse(bookingCredit.toString()) - (double.parse(bookingCredit.toString()) * double.parse(data.toString()))).toStringAsFixed(1);
-        seatAmount = (rideUnitPrice() *
-                (int.parse(seatAvailable.value.toString()) +
-                    currentUserBookedSeat.value))
-            .toStringAsFixed(1);
-        seatAmount = (double.parse(seatAmount.toString()) -
-                (double.parse(seatAmount.toString()) *
-                    double.parse(data.toString())))
-            .toStringAsFixed(1);
-
-        onlinePayment = bookingCredit;
-        cashPayment = seatAmount;
-        if (setting['deduct_tax'] != null &&
-            setting['deduct_tax'] == "deduct_from_passenger") {
-          if (setting['tax_type'] == "state_wise_tax") {
-            taxAmount = double.parse(
-                ((double.parse(bookingCredit.toString()) * stateTax.value) /
-                        100)
-                    .toString());
-          } else {
-            taxAmount = double.parse(
-                ((double.parse(bookingCredit.toString()) *
-                            double.parse(setting['tax'].toString())) /
-                        100)
-                    .toString());
-          }
-        }
-        total = (double.parse(bookingCredit.toString()) +
-                double.parse(seatAmount.toString()) +
-                taxAmount)
-            .toStringAsFixed(1);
-      } else {
-        bookingCredit = calculateBookingFee(
-                double.parse(setting['booking_price'].toString()))
-            .toStringAsFixed(1);
-        seatAmount = (rideUnitPrice() *
-                (int.parse(seatAvailable.value.toString()) +
-                    currentUserBookedSeat.value))
-            .toStringAsFixed(1);
-
-        onlinePayment = bookingCredit;
-        cashPayment = seatAmount;
-
-        if (setting['deduct_tax'] != null &&
-            setting['deduct_tax'] == "deduct_from_passenger") {
-          if (setting['tax_type'] == "state_wise_tax") {
-            taxAmount = double.parse(
-                ((double.parse(bookingCredit.toString()) * stateTax.value) /
-                        100)
-                    .toString());
-          } else {
-            taxAmount = double.parse(((double.parse(bookingCredit.toString()) *
-                        double.parse(setting['tax'].toString())) /
-                    100)
-                .toString());
-          }
-        }
-
-        total = (double.parse(bookingCredit.toString()) +
-                double.parse(seatAmount.toString()) +
-                taxAmount)
-            .toStringAsFixed(1);
-      }
-    } else if (ride['payment_method_slug'] == "online") {
-      if (policyType.value == 'firm') {
-        var data = double.parse(setting['frim_discount'].toString());
-        data = data / 100;
-        bookingCredit = calculateBookingFee(
-                double.parse(setting['booking_price'].toString()))
-            .toStringAsFixed(1);
-        //bookingCredit = (double.parse(bookingCredit.toString()) - (double.parse(bookingCredit.toString()) * double.parse(data.toString()))).toStringAsFixed(1);
-        seatAmount = (rideUnitPrice() *
-                (int.parse(seatAvailable.value.toString()) +
-                    currentUserBookedSeat.value))
-            .toStringAsFixed(1);
-        seatAmount = (double.parse(seatAmount.toString()) -
-                (double.parse(seatAmount.toString()) *
-                    double.parse(data.toString())))
-            .toStringAsFixed(1);
-        cashPayment = 0.toString();
-
-        if (setting['deduct_tax'] != null &&
-            setting['deduct_tax'] == "deduct_from_passenger") {
-          if (setting['tax_type'] == "state_wise_tax") {
-            taxAmount = double.parse(
-                ((double.parse(bookingCredit.toString()) * stateTax.value) /
-                        100)
-                    .toString());
-          } else {
-            taxAmount = double.parse(((double.parse(bookingCredit.toString()) *
-                        double.parse(setting['tax'].toString())) /
-                    100)
-                .toString());
-          }
-        }
-
-        total = (double.parse(bookingCredit.toString()) +
-                double.parse(seatAmount.toString()) +
-                taxAmount)
-            .toStringAsFixed(1);
-        onlinePayment = (double.parse(total.toString())).toStringAsFixed(1);
-      } else {
-        bookingCredit = calculateBookingFee(
-                double.parse(setting['booking_price'].toString()))
-            .toStringAsFixed(1);
-        seatAmount = (rideUnitPrice() *
-                (int.parse(seatAvailable.value.toString()) +
-                    currentUserBookedSeat.value))
-            .toStringAsFixed(1);
-        cashPayment = 0.toString();
-        if (setting['deduct_tax'] != null &&
-            setting['deduct_tax'] == "deduct_from_passenger") {
-          if (setting['tax_type'] == "state_wise_tax") {
-            taxAmount = double.parse(
-                ((double.parse(bookingCredit.toString()) * stateTax.value) /
-                        100)
-                    .toString());
-          } else {
-            taxAmount = double.parse(((double.parse(bookingCredit.toString()) *
-                        double.parse(setting['tax'].toString())) /
-                    100)
-                .toString());
-          }
-        }
-        total = (double.parse(bookingCredit.toString()) +
-                double.parse(seatAmount.toString()) +
-                taxAmount)
-            .toStringAsFixed(1);
-        onlinePayment = (double.parse(total.toString())).toStringAsFixed(1);
-      }
+      onlinePaymentMinor = bookingCreditMinor;
+      cashPaymentMinor = seatAmountMinor;
     } else {
-      if (policyType.value == 'firm') {
-        var data = double.parse(setting['frim_discount'].toString());
-        data = data / 100;
-
-        bookingCredit = calculateBookingFee(
-                double.parse(setting['booking_price'].toString()))
-            .toStringAsFixed(1);
-        //bookingCredit = (double.parse(bookingCredit.toString()) - (double.parse(bookingCredit.toString()) * double.parse(data.toString()))).toStringAsFixed(1);
-        seatAmount = (rideUnitPrice() *
-                (int.parse(seatAvailable.value.toString()) +
-                    currentUserBookedSeat.value))
-            .toStringAsFixed(1);
-        seatAmount = (double.parse(seatAmount.toString()) -
-                (double.parse(seatAmount.toString()) *
-                    double.parse(data.toString())))
-            .toStringAsFixed(1);
-        cashPayment = 0.toString();
-        if (setting['deduct_tax'] != null &&
-            setting['deduct_tax'] == "deduct_from_passenger") {
-          if (setting['tax_type'] == "state_wise_tax") {
-            taxAmount = double.parse(
-                ((double.parse(bookingCredit.toString()) * stateTax.value) /
-                        100)
-                    .toString());
-          } else {
-            taxAmount = double.parse(((double.parse(bookingCredit.toString()) *
-                        double.parse(setting['tax'].toString())) /
-                    100)
-                .toString());
-          }
-        }
-        total = (double.parse(bookingCredit.toString()) +
-                double.parse(seatAmount.toString()) +
-                taxAmount)
-            .toStringAsFixed(1);
-        onlinePayment = (double.parse(total.toString())).toStringAsFixed(1);
-      } else {
-        bookingCredit = calculateBookingFee(
-                double.parse(setting['booking_price'].toString()))
-            .toStringAsFixed(1);
-        seatAmount = (rideUnitPrice() *
-                (int.parse(seatAvailable.value.toString()) +
-                    currentUserBookedSeat.value))
-            .toStringAsFixed(1);
-        cashPayment = 0.toString();
-        if (setting['deduct_tax'] != null &&
-            setting['deduct_tax'] == "deduct_from_passenger") {
-          if (setting['tax_type'] == "state_wise_tax") {
-            taxAmount = double.parse(
-                ((double.parse(bookingCredit.toString()) * stateTax.value) /
-                        100)
-                    .toString());
-          } else {
-            taxAmount = double.parse(((double.parse(bookingCredit.toString()) *
-                        double.parse(setting['tax'].toString())) /
-                    100)
-                .toString());
-          }
-        }
-        total = (double.parse(bookingCredit.toString()) +
-                double.parse(seatAmount.toString()) +
-                taxAmount)
-            .toStringAsFixed(1);
-        onlinePayment = (double.parse(total.toString())).toStringAsFixed(1);
-      }
+      onlinePaymentMinor = totalMinor;
+      cashPaymentMinor = 0;
     }
+
+    bookingCredit = _minorToMajorString(bookingCreditMinor);
+    seatAmount = _minorToMajorString(seatAmountMinor);
+    onlinePayment = _minorToMajorString(onlinePaymentMinor);
+    cashPayment = _minorToMajorString(cashPaymentMinor);
+    total = _minorToMajorString(totalMinor);
+    taxAmount = _minorToMajor(taxAmountMinor);
 
     var paymentMethod = "";
     if (paymentType == "paypal") {
       paymentMethod = gPay ? "credit_card" : "paypal";
       var paypalPayment = 0.0;
+      var paypalPaymentMinor = 0;
       if (currentUserBookedSeat.value != 0) {
+        final payableSeatCount = _selectedSeatCount(payable: true);
+        var payableBookingCreditMinor =
+            bookingFeeAmountMinorForSeatCount(payableSeatCount);
+        var payableSeatAmountMinor =
+            _firmDiscountedMinor(rideUnitPriceMinor() * payableSeatCount);
+        final payableTaxMinor = _passengerTaxMinor(payableBookingCreditMinor);
+
         if (ride['payment_method_slug'] == "cash") {
-          paypalPayment = calculateBookingFee(
-              double.parse(setting['booking_price'].toString()),
-              method: "paypal");
-          if (setting['deduct_tax'] != null &&
-              setting['deduct_tax'] == "deduct_from_passenger") {
-            if (setting['tax_type'] == "state_wise_tax") {
-              taxAmount = double.parse(
-                  ((paypalPayment * stateTax.value) / 100).toString());
-            } else {
-              taxAmount = double.parse(
-                  ((paypalPayment * double.parse(setting['tax'].toString())) /
-                          100)
-                      .toString());
-            }
-          }
-          paypalPayment = paypalPayment + taxAmount;
-        } else if (ride['payment_method_slug'] == "online") {
-          var bookingCredit1 = "";
-          bookingCredit1 = calculateBookingFee(
-                  double.parse(setting['booking_price'].toString()),
-                  method: "paypal")
-              .toStringAsFixed(1);
-          var seatAmount1 =
-              (rideUnitPrice() * int.parse(seatAvailable.value.toString()))
-                  .toStringAsFixed(1);
-
-          if (policyType.value == 'firm') {
-            var data = double.parse(setting['frim_discount'].toString());
-            data = data / 100;
-            //bookingCredit1 = (double.parse(bookingCredit1.toString()) - (double.parse(bookingCredit1.toString()) * double.parse(data.toString()))).toStringAsFixed(1);
-            seatAmount1 = (double.parse(seatAmount1.toString()) -
-                    (double.parse(seatAmount1.toString()) *
-                        double.parse(data.toString())))
-                .toStringAsFixed(1);
-          }
-          var taxAmount1 = 0.0;
-          if (setting['deduct_tax'] != null &&
-              setting['deduct_tax'] == "deduct_from_passenger") {
-            if (setting['tax_type'] == "state_wise_tax") {
-              taxAmount1 = double.parse(
-                  ((double.parse(bookingCredit1.toString()) * stateTax.value) /
-                          100)
-                      .toString());
-            } else {
-              taxAmount1 = double.parse(
-                  ((double.parse(bookingCredit1.toString()) *
-                              double.parse(setting['tax'].toString())) /
-                          100)
-                      .toString());
-            }
-          }
-          if (coffeeFromWall.value == false) {
-          } else {
-            bookingCredit1 = (double.parse(bookingCredit1.toString()) -
-                    double.parse(bookingCredit1.toString()))
-                .toStringAsFixed(1);
-          }
-
-          var total1 = (double.parse(bookingCredit1.toString()) +
-                  double.parse(seatAmount1.toString()) +
-                  taxAmount1)
-              .toStringAsFixed(1);
-          paypalPayment = double.parse(total1.toString());
+          paypalPaymentMinor = payableBookingCreditMinor + payableTaxMinor;
         } else {
-          var bookingCredit1 = calculateBookingFee(
-                  double.parse(setting['booking_price'].toString()),
-                  method: "paypal")
-              .toStringAsFixed(1);
-          var seatAmount1 =
-              (rideUnitPrice() * int.parse(seatAvailable.value.toString()))
-                  .toStringAsFixed(1);
-          if (policyType.value == 'firm') {
-            var data = double.parse(setting['frim_discount'].toString());
-            data = data / 100;
-            //bookingCredit1 = (double.parse(bookingCredit1.toString()) - (double.parse(bookingCredit1.toString()) * double.parse(data.toString()))).toStringAsFixed(1);
-            seatAmount1 = (double.parse(seatAmount1.toString()) -
-                    (double.parse(seatAmount1.toString()) *
-                        double.parse(data.toString())))
-                .toStringAsFixed(1);
+          if (coffeeFromWall.value == true) {
+            payableBookingCreditMinor = 0;
           }
-          var taxAmount1 = 0.0;
-          if (setting['deduct_tax'] != null &&
-              setting['deduct_tax'] == "deduct_from_passenger") {
-            if (setting['tax_type'] == "state_wise_tax") {
-              taxAmount1 = double.parse(
-                  ((double.parse(bookingCredit1.toString()) * stateTax.value) /
-                          100)
-                      .toString());
-            } else {
-              taxAmount1 = double.parse(
-                  ((double.parse(bookingCredit1.toString()) *
-                              double.parse(setting['tax'].toString())) /
-                          100)
-                      .toString());
-            }
-          }
-          if (coffeeFromWall.value == false) {
-          } else {
-            bookingCredit1 = (double.parse(bookingCredit1.toString()) -
-                    double.parse(bookingCredit1.toString()))
-                .toStringAsFixed(1);
-          }
-          var total1 = (double.parse(bookingCredit1.toString()) +
-                  double.parse(seatAmount1.toString()) +
-                  taxAmount1)
-              .toStringAsFixed(1);
-          paypalPayment = double.parse(total1.toString());
+
+          paypalPaymentMinor = payableBookingCreditMinor +
+              payableSeatAmountMinor +
+              payableTaxMinor;
         }
       } else {
         if (coffeeFromWall.value == false) {
           if (ride['payment_method_slug'] == "cash") {
-            var taxAmount2 = 0.0;
-            if (setting['deduct_tax'] != null &&
-                setting['deduct_tax'] == "deduct_from_passenger") {
-              if (setting['tax_type'] == "state_wise_tax") {
-                taxAmount2 = double.parse(
-                    ((double.parse(bookingCredit.toString()) * stateTax.value) /
-                            100)
-                        .toString());
-              } else {
-                taxAmount2 = double.parse(
-                    ((double.parse(bookingCredit.toString()) *
-                                double.parse(setting['tax'].toString())) /
-                            100)
-                        .toString());
-              }
-            }
-            paypalPayment = double.parse(onlinePayment.toString()) + taxAmount2;
+            paypalPaymentMinor = onlinePaymentMinor + taxAmountMinor;
           } else {
-            paypalPayment = double.parse(onlinePayment.toString());
+            paypalPaymentMinor = onlinePaymentMinor;
           }
         } else {
-          paypalPayment = ((double.parse(onlinePayment.toString())) -
-              double.parse(bookingCredit.toString()));
+          paypalPaymentMinor = onlinePaymentMinor - bookingCreditMinor;
         }
       }
+
+      paypalPayment = _minorToMajor(paypalPaymentMinor);
 
       if (gPay == true) {
         await getGooglePayApplePay(
@@ -1258,8 +1079,8 @@ class BookSeatController extends GetxController {
       if (ride['payment_method_slug'] == "cash") {
         onlinePayment = onlinePayment;
       } else {
-        onlinePayment = (double.parse(onlinePayment.toString()) - taxAmount)
-            .toStringAsFixed(1);
+        onlinePayment = _minorToMajorString(
+            _majorToMinor(onlinePayment) - _majorToMinor(taxAmount));
       }
 
       var taxPercentage = 0.0;

@@ -247,8 +247,10 @@ class BookSeatProvider extends GetConnect {
 
   Future createPaymentIntent(token, amount, paymentToken) async {
     try {
+      final amountMinor =
+          ((double.tryParse(amount.toString()) ?? 0.0) * 100).round();
       final data = {
-        'amount': amount * 100,
+        'amount': amountMinor,
         'currency': 'usd',
         'stripeToken': paymentToken
       };

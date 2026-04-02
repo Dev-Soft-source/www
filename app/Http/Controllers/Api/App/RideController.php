@@ -112,6 +112,8 @@ class RideController extends WebRideController
             $user
         );
 
+        Log::info($rides->count());
+
         if ($shouldRunFilteredSearch) {
 
             if ($user && $hasPrimarySearch) {

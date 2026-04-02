@@ -66,7 +66,7 @@ class Controller extends BaseController
                     $lang = Language::whereKey(auth('sanctum')->user()->lang_id)->value('abbreviation');
                 }
                 \Log::info('api route', [Route::currentRouteName(), $lang]);
-                // \Log::info('search ride', $request->all());
+                \Log::info('payload', $request->all());
 
             } else {
                 $lang = $request->route('lang') ?? $request->query('lang');

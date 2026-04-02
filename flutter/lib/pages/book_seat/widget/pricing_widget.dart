@@ -47,10 +47,10 @@ Widget pricingWidget({context, controller, screenWidth}){
     );
   }
   var amount = controller.rideUnitPrice() * selectedSeatCount;
-  // controller.setting['booking_price'] is booking fee coming from admin, also it is percentage of total fare which
-  var bookingFeeRate = controller.calculateBookingFee(double.parse(controller.setting['booking_price'] != null ? controller.setting['booking_price'].toString() : "0"));
-  var bookingFee = amount * bookingFeeRate / 100;
-  var coffeeBookingFee = controller.calculateBookingFee(double.parse(controller.setting['booking_price'] != null ? controller.setting['booking_price'].toString() : "0"), method: "coffee");
+  var bookingFee =
+      controller.bookingFeeAmountMinorForSeatCount(selectedSeatCount) / 100;
+  var coffeeBookingFee =
+      controller.bookingFeeAmountMinorForSeatCount(payableSeatCount) / 100;
 
   var seatAmount = amount;
   var discountFirm = 0.0;
@@ -77,7 +77,8 @@ Widget pricingWidget({context, controller, screenWidth}){
 
 
   var payableAmount = controller.rideUnitPrice() * payableSeatCount;
-  var payableBookingFee = controller.calculateBookingFee(double.parse(controller.setting['booking_price'] != null ? controller.setting['booking_price'].toString() : "0"), payable: true);
+  var payableBookingFee =
+      controller.bookingFeeAmountMinorForSeatCount(payableSeatCount) / 100;
 
   if(controller.policyType == 'firm') {
     payableAmount = payableAmount - payableAmount * (double.parse(controller.setting['frim_discount'].toString()) / 100);
