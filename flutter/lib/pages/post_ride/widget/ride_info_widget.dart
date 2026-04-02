@@ -287,6 +287,22 @@ Widget rideInfoWidget(
                                 DateFormat dateFormat = DateFormat.yMMMMd();
                                 controller.dateTextEditingController.text =
                                     dateFormat.format(dobDate);
+                                final returnRideValidationMessage = controller
+                                    .validateReturnRideDateTime(
+                                  dateText: controller
+                                      .dateTextEditingController.text,
+                                  timeText: controller
+                                      .timeTextEditingController.text,
+                                );
+                                if (returnRideValidationMessage != null) {
+                                  controller.serviceController.showDialogue(
+                                    returnRideValidationMessage,
+                                    type: "error",
+                                  );
+                                  controller.dateTextEditingController.text = "";
+                                  controller.timeTextEditingController.text = "";
+                                  return;
+                                }
                                 if (controller.errors
                                     .any((error) => error['title'] == "date")) {
                                   controller.errors.removeWhere(
@@ -358,6 +374,22 @@ Widget rideInfoWidget(
                                     DateFormat('HH:mm');
                                 controller.timeTextEditingController.text =
                                     formatter.format(dateTime);
+                                final returnRideValidationMessage = controller
+                                    .validateReturnRideDateTime(
+                                  dateText: controller
+                                      .dateTextEditingController.text,
+                                  timeText: controller
+                                      .timeTextEditingController.text,
+                                );
+                                if (returnRideValidationMessage != null) {
+                                  controller.serviceController.showDialogue(
+                                    returnRideValidationMessage,
+                                    type: "error",
+                                  );
+                                  controller.timeTextEditingController.text =
+                                      "";
+                                  return;
+                                }
 
                                 if (controller.errors
                                     .any((error) => error['title'] == "time")) {

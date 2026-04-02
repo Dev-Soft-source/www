@@ -62,7 +62,13 @@ Widget tripCardDateTimeWidget({String date = "", String time = "", String seatLe
                   children: [
                     txt16SizeLineThrough(
                         title: formatCurrency(price), context: context),
-                    2.widthBox,
+                    6.widthBox,
+                    txt16Size(
+                      title: "->",
+                      context: context,
+                      fontFamily: bold,
+                    ),
+                    6.widthBox,
                     RichText(
                       text: TextSpan(
                         children: [

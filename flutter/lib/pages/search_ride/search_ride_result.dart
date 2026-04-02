@@ -155,10 +155,11 @@ class SearchRideResultPage extends StatelessWidget {
                                   ride['pickup']?.toString() ?? "";
                               final dropOff =
                                   ride['dropoff']?.toString() ?? "";
-                              final totalSeats =
-                                  ride['seats']?.toString() ?? "0";
                               final seatsLeft =
                                   ride['seats_left']?.toString() ?? "0";
+                              final totalSeats = 
+                                  ride['seats']?.toString() ??
+                                  "0";
 
                               DateTime parsedDate = DateTime.parse(
                                   ride['date']);
@@ -174,7 +175,14 @@ class SearchRideResultPage extends StatelessWidget {
                                   outputTimeFormat.format(parsedTime);
 
                               var firmPrice = 0.0;
-                              if (ride['booking_type'] == "37") {
+                              final bookingTypeId =
+                                  ride['booking_type_id']?.toString() ?? "";
+                              final bookingTypeLabel =
+                                  ride['booking_type']?.toString().toLowerCase() ?? "";
+                              final isFirmCancellationRide =
+                                  bookingTypeId == "37" ||
+                                      bookingTypeLabel.contains("firm");
+                              if (isFirmCancellationRide) {
                                 final parsedRidePrice =
                                     double.tryParse(ridePrice) ?? 0.0;
                                 final parsedFirmDiscount = double.tryParse(

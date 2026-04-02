@@ -97,8 +97,9 @@ class MyPhoneNumberController extends GetxController {
   void onClose() {
     super.onClose();
     _removeFormValidationListeners();
-    countryCodeTextEditingController.dispose();
-    phoneNumberTextEditingController.dispose();
+    timer?.cancel();
+    // These controllers are shared across both phone routes and can still be
+    // referenced during route transition rebuilds, so avoid disposing them here.
   }
 
   Future<void> loadInitialData() async {

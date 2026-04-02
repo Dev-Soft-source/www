@@ -270,8 +270,8 @@ class BookingController extends Controller
             $adjustedBookingCredit = $this->validateStudentBookingFee($user, $request->booking_credit);
             $booking_fee = $adjustedBookingCredit;
         }
-        $seats_amount = $request->total;
-        $payment_amount = $request->total;
+        $seats_amount = $request->seats_amount;
+        $payment_amount = $request->seats_amount;
         if ($ride->isCashPayment()) {
             $payment_amount = $booking_fee;
         }
@@ -624,18 +624,27 @@ class BookingController extends Controller
             }
         }
 
+        $tax_amount = isset($request->tax_amount) ? $request->tax_amount : 0;
+
         if ($ride->price_minor < 1500) {
             // ProximaLocal: no booking fee on rides under $15 per seat
             $booking_fee = 0;
+            $tax_amount = 0;
         } else {
             // Student booking fee waiver: Validate and apply waiver with card expiration check
             $adjustedBookingCredit = $this->validateStudentBookingFee($user, $request->booking_credit);
             $booking_fee = $adjustedBookingCredit;
+            
+            $adjustedBookingTax = $this->validateStudentBookingFee($user, $tax_amount);
+            $tax_amount = $adjustedBookingTax;
         }
-        $seats_amount = $request->total;
-        $payment_amount = $request->total;
+
+
+        $seats_amount = $request->seats_amount;
+        $payment_amount = $seats_amount + $booking_fee + $tax_amount;
+
         if ($ride->isCashPayment()) {
-            $payment_amount = $booking_fee;
+            $payment_amount = $booking_fee + $tax_amount;
         }
 
 
@@ -660,7 +669,7 @@ class BookingController extends Controller
         log::info('Normalized seat IDs: ' . implode(', ', $seat_ids), $seat_ids);
         $seats_number = $request->seats;
         $booking_type = $request->booking_type;
-        $tax_amount = isset($request->tax_amount) ? $request->tax_amount : 0;
+        
         $total = $request->total ?? 0;
         $tax_percentage = $request->input('tax_percentage', 0);
         $tax_type = $request->input('tax_type');

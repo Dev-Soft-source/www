@@ -185,6 +185,7 @@ class RideController extends WebRideController
         // Add the image URL to each ride
         foreach ($rides as $ride) {
             $ride->booking_method_id = $ride->booking_method;
+            $ride->booking_type_id = $ride->booking_type;
             $ride->feature_ids = $ride->features;
 
             $ride->booking_method_image = $bookingMethodImages[$ride->booking_method] ?? null;
@@ -228,7 +229,9 @@ class RideController extends WebRideController
                 ->where('status', '<>', 4)
                 ->withActivePassenger()
                 ->sum('seats');
-            $ride->seats_left = intval($ride->seats) - intval($bookedSeats);
+            $ride->seats_left = isset($ride->matched_seats_available)
+                ? max(0, (int) $ride->matched_seats_available)
+                : max(0, intval($ride->seats) - intval($bookedSeats));
 
             $ride->driver_age = $ride->driver->getAge();
             $ride->driven_count = $ride->driver->getPassengersDrivenCount();
@@ -236,7 +239,12 @@ class RideController extends WebRideController
             $ride->driver_average_rating = $ride->driver->driverPostRideStats()['overallRating'];
         }
 
-        $data = ['rides' => $rides, 'recentSearches' => $recentSearches];
+        $firm_cancellation_discount = SiteSetting::value('frim_discount');
+        $data = [
+            'rides' => $rides,
+            'recentSearches' => $recentSearches,
+            'firm_cancellation_discount' => $firm_cancellation_discount,
+        ];
         return $this->successResponse($data, 'Success');
     }
 
@@ -302,6 +310,7 @@ class RideController extends WebRideController
         // Add the image URL to each ride
         foreach ($rides as $ride) {
             $ride->booking_method_id = $ride->booking_method;
+            $ride->booking_type_id = $ride->booking_type;
             $ride->feature_ids = $ride->features;
 
             $ride->booking_method_image = $bookingMethodImages[$ride->booking_method] ?? null;
@@ -346,7 +355,9 @@ class RideController extends WebRideController
                 ->where('status', '<>', 4)
                 ->withActivePassenger()
                 ->sum('seats');
-            $ride->seats_left = intval($ride->seats) - intval($bookedSeats);
+            $ride->seats_left = isset($ride->matched_seats_available)
+                ? max(0, (int) $ride->matched_seats_available)
+                : max(0, intval($ride->seats) - intval($bookedSeats));
         }
 
         // Add driven rides count to each driver
@@ -411,7 +422,12 @@ class RideController extends WebRideController
         $recentSearches = RecentSearch::where('user_id', $user->id)->orderBy('updated_at', 'desc')->limit(2)->get();
 
         \Log::info('recentSearches', $rides->toArray());
-        $data = ['rides' => $rides, 'recentSearches' => $recentSearches];
+        $firm_cancellation_discount = SiteSetting::value('frim_discount');
+        $data = [
+            'rides' => $rides,
+            'recentSearches' => $recentSearches,
+            'firm_cancellation_discount' => $firm_cancellation_discount,
+        ];
         return $this->successResponse($data, 'Success');
     }
 

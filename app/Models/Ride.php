@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -660,7 +661,7 @@ class Ride extends Model
         static::applyRideFilters($query, $filters);
 
         if (!empty($filters['departure_date'])) {
-            $date = (string) $filters['departure_date'];
+            $date = static::normalizeSearchDepartureDate($filters['departure_date']);
             $query->where(function (Builder $dateQuery) use ($date) {
                 $dateQuery->whereDate('date', $date)
                     ->orWhereHas('rideStops', function (Builder $stopQuery) use ($date) {
@@ -688,6 +689,21 @@ class Ride extends Model
         });
 
         return $rides;
+    }
+
+    protected static function normalizeSearchDepartureDate($value): string
+    {
+        $date = trim((string) $value);
+
+        if ($date === '') {
+            return $date;
+        }
+
+        try {
+            return Carbon::parse($date)->toDateString();
+        } catch (\Throwable $e) {
+            return $date;
+        }
     }
 
     protected static function applyOrderedStopFilters(Builder $query, array $filters): void
