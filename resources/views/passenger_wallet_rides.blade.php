@@ -50,38 +50,36 @@
                                     @if (!empty($myRides) && count($myRides) > 0)
                                         @foreach ($myRides as $key => $booking)
                                             <div class="relative">
-                                                <a href="">
-                                                    <div class="{{ $key % 2 != 0 ? "bg-gray-100" : "bg-white" }}  rounded-lg shadow-3xl border-[3px] border-solid  border-gray-100 " id="ride-29">
-                                                        <div class="border-gray-300 flex items-center justify-between space-x-2 p-4">
-                                                            <p>{{ $walletSettingPage->passenger_ride_id_label ?? "Ride ID"}}</p>
-                                                            <p>{{ $booking->ride->random_id }}</p>
-                                                        </div>
-                                                        <div class="border-t border-gray-300 flex items-center justify-between space-x-2 p-4">
-                                                            <p>{{ $walletSettingPage->passenger_my_ride_from_label ?? "From"}}</p>
-                                                            <p>{{ $booking->destination }}</p>
-                                                        </div>
-                                                        <div class="border-t border-gray-300 flex items-center justify-between space-x-2 p-4">
-                                                            <p>{{ $walletSettingPage->passenger_my_ride_to_label ?? "To"}}</p>
-                                                            <p>{{ $booking->departure }}</p>
-                                                        </div>
-                                                        <div class="border-t border-gray-300 flex items-center justify-between space-x-2 p-4">
-                                                            <p>{{ $walletSettingPage->passenger_my_ride_from_label ?? "Date"}}</p>
-                                                            <p>{{ $booking->ride->date }}</p>
-                                                        </div>
-                                                        <div class="border-t border-gray-300 flex items-center justify-between space-x-2 p-4">
-                                                            <p>{{ $walletSettingPage->passenger_my_ride_booking_fee_label ?? "Booking fee"}}</p>
-                                                            <p>{{ number_format($booking->booking_credit, 2) }}</p>
-                                                        </div>
-                                                        <div class="border-t border-gray-300 flex items-center justify-between space-x-2 p-4">
-                                                            <p>{{ $walletSettingPage->passenger_my_ride_fare_label ?? "Fare"}}</p>
-                                                            <p>{{ $booking->fare }}</p>
-                                                        </div>
-                                                        <div class="border-t border-gray-300 flex items-center justify-between space-x-2 p-4">
-                                                            <p>{{ $walletSettingPage->passenger_my_ride_total_amount_label ?? "Total amount"}}</p>
-                                                            <p>{{ $booking->booking_credit + $booking->fare + $booking->tax_amount }}</p>
-                                                        </div>
+                                                <div class="{{ $key % 2 != 0 ? "bg-gray-100" : "bg-white" }}  rounded-lg shadow-3xl border-[3px] border-solid  border-gray-100 " id="ride-29">
+                                                    <div class="border-gray-300 flex items-center justify-between space-x-2 p-4">
+                                                        <p>{{ $walletSettingPage->passenger_ride_id_label ?? "Ride ID"}}</p>
+                                                        <p>{{ $booking->ride->random_id }}</p>
                                                     </div>
-                                                </a>
+                                                    <div class="border-t border-gray-300 flex items-center justify-between space-x-2 p-4">
+                                                        <p>{{ $walletSettingPage->passenger_my_ride_from_label ?? "From"}}</p>
+                                                        <p>{{ $booking->destination }}</p>
+                                                    </div>
+                                                    <div class="border-t border-gray-300 flex items-center justify-between space-x-2 p-4">
+                                                        <p>{{ $walletSettingPage->passenger_my_ride_to_label ?? "To"}}</p>
+                                                        <p>{{ $booking->departure }}</p>
+                                                    </div>
+                                                    <div class="border-t border-gray-300 flex items-center justify-between space-x-2 p-4">
+                                                        <p>{{ $walletSettingPage->passenger_my_ride_from_label ?? "Date"}}</p>
+                                                        <p>{{ $booking->ride->date }}</p>
+                                                    </div>
+                                                    <div class="border-t border-gray-300 flex items-center justify-between space-x-2 p-4">
+                                                        <p>{{ $walletSettingPage->passenger_my_ride_booking_fee_label ?? "Booking fee"}}</p>
+                                                        <p>{{ number_format($booking->booking_credit, 2) }}</p>
+                                                    </div>
+                                                    <div class="border-t border-gray-300 flex items-center justify-between space-x-2 p-4">
+                                                        <p>{{ $walletSettingPage->passenger_my_ride_fare_label ?? "Fare"}}</p>
+                                                        <p>{{ $booking->fare }}</p>
+                                                    </div>
+                                                    <div class="border-t border-gray-300 flex items-center justify-between space-x-2 p-4">
+                                                        <p>{{ $walletSettingPage->passenger_my_ride_total_amount_label ?? "Total amount"}}</p>
+                                                        <p>{{ $booking->booking_credit + $booking->fare + $booking->tax_amount }}</p>
+                                                    </div>
+                                                </div>
                                             </div>
                                         @endforeach
                                     @else
