@@ -95,7 +95,7 @@ class BookingController extends Controller
 
             $ride = $this->makeDetailOfRide($ride, $from_stop_id, $to_stop_id);
 
-            if($ride->isCashPayment()){
+            if ($ride->isCashPayment()) {
                 $ride->payment_method_slug = 'cash';
             } elseif ($ride->isSecureCashPayment()) {
                 $ride->payment_method_slug = 'secured_cash';
@@ -617,7 +617,7 @@ class BookingController extends Controller
         $tax_type = $request->input('tax_type');
         $deduct_type = $request->input('deduct_tax');
         $driver_message = $request->driver_message ?? '';
-        $bookedByWallet = (int) $request->input('booked_by_wallet');
+        $isWalletPayment = in_array((string) $request->input('booked_by_wallet'), ['1', 'true', 'True'], true);
         $isCoffeeWall = (int) $request->input('coffee_wall');
         $payment_method = $request->input('card_id', 'paypal');
 
@@ -689,7 +689,9 @@ class BookingController extends Controller
             'deduct_type'      => $deduct_type,
         ];
 
-        if ($bookedByWallet) {
+        Log::info('isWalletPayment:' . $isWalletPayment);
+        if ($isWalletPayment) {
+            Log::info('isWalletPayment:' . $isWalletPayment);
             $data['pay_by_account'] = true;
             // Process booking with wallet balance
             TopUpBalance::create([
@@ -888,7 +890,7 @@ class BookingController extends Controller
                 'online_payment' => number_format((float)$payment_amount, 2, '.', ''),
             ];
 
-            if ($bookedByWallet) {
+            if ($isWalletPayment) {
                 // Paid from topup balance
                 $data['transaction_type'] = 'topup_balance';
             }
