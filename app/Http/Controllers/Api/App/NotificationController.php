@@ -181,7 +181,7 @@ class NotificationController extends Controller
             ->values();
 
         $chats = Message::where(function ($query) use ($user_id) {
-            $query->where('sender', $user_id)->orWhere('receiver', $user_id);
+            $query->where('receiver', $user_id);
         })
             ->orderByDesc('created_at')
             ->get()

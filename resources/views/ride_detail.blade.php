@@ -2,8 +2,7 @@
 
 @section('style')
     <style>
-         /* Match ride_detail: body text in Roboto, sizes from Tailwind (text-xl, text-sm) */
-        
+        /* Match ride_detail: body text in Roboto, sizes from Tailwind (text-xl, text-sm) */
     </style>
 
     <!-- Scripts -->
@@ -35,10 +34,10 @@
                             <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                 <div class="sm:flex sm:items-start justify-center">
                                     <!-- <div class="mx-auto flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-red-500 p-1">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-12 text-white">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                                                    </svg>
-                                                </div> -->
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-12 text-white">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                                        </svg>
+                                                    </div> -->
                                 </div>
                                 <div class="mt-3 text-center">
                                     <div class="mt-2">
@@ -94,11 +93,11 @@
                             <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                 <div class="sm:flex sm:items-start justify-center">
                                     <!-- <div class="mx-auto h-16 w-16">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                        stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                                    </svg>
-                                                </div> -->
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                            stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                        </svg>
+                                                    </div> -->
                                 </div>
                                 <div class="w-full">
                                     <p class="text-center can-exp-p">{!! session('success') !!}</p>
@@ -132,10 +131,10 @@
                             <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                 <div class="sm:flex sm:items-start justify-center">
                                     <!-- <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                            </svg>
-                                        </div> -->
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                                </svg>
+                                            </div> -->
                                 </div>
                                 <div class="text-center">
 
@@ -226,7 +225,7 @@
                         <div class="bg-white px-4 mt-10 sm:mt-1 pb-4 pt-16 sm:p-6 sm:pb-4 sm:pt-16">
                             <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                                 <div class="">
-                                    
+
                                 </div>
                                 <div class="mt-2 w-full">
                                     <p class="can-exp-p text-center">
@@ -396,10 +395,7 @@
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-y-4 lg:gap-4">
                 <div class="col-span-2">
-                    <x-px.ride-detail-info
-                        :ride="$ride"
-                        :rideDetailPage="$rideDetailPage"
-                    />
+                    <x-px.ride-detail-info :ride="$ride" :rideDetailPage="$rideDetailPage" />
                 </div>
                 <div class="col-span-1">
                     <div class="space-y-4">
@@ -410,9 +406,7 @@
                                 @endisset
                             </h3>
                             <div class="flex items-start space-x-4 p-4 w-full">
-                                @if (auth()->user() &&
-                                        $ride->bookings &&
-                                        $ride->hasNonRejectedBookingForUser(auth()->user()))
+                                @if (auth()->user() && $ride->bookings && $ride->hasNonRejectedBookingForUser(auth()->user()))
                                     <div>
                                         <div class="w-20 h-20 rounded-full overflow-hidden">
                                             <img class="w-full h-full object-cover" src="{{ $ride->car_image }}"
@@ -483,24 +477,18 @@
                                         ->exists();
                                 $showReviewLink = $passengerBookingUuid && $rideIsPast && !$alreadyReviewedDriver;
 
-                                $isAvailableShowInfo = (auth()->user() && $ride->hasNonRejectedBookingForUser(auth()->user()));
+                                $isAvailableShowInfo =
+                                    auth()->user() && $ride->hasNonRejectedBookingForUser(auth()->user());
                             @endphp
                             <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl">
                                 @if ($showReviewLink && $passengerBookingUuid && $isAvailableShowInfo)
-                                {{-- left review to driver --}}
-                                    <a href="{{ route('review_driver', ['lang' => app()->getLocale(), 'id' => $booking->uuid]) }}"
-                                        class="w-full text-2xl xl:text-3xl text-white hover:text-red-400 no-underline cursor-pointer">
-                                        @isset($rideDetailPage->review_driver_info_label)
-                                            {{ $rideDetailPage->review_driver_info_label }}
-                                        @endisset
-                                    </a>
+                                    @isset($rideDetailPage->review_driver_info_label)
+                                        {{ $rideDetailPage->review_driver_info_label }}
+                                    @endisset
                                 @elseif ($ride->added_by && $isAvailableShowInfo)
-                                    <a href="{{ route('driver_info', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->added_by]) }}"
-                                        class="w-full text-white text-2xl xl:text-3xl hover:text-red-400 no-underline cursor-pointer">
-                                        @isset($rideDetailPage->driver_info_label)
-                                            {{ $rideDetailPage->driver_info_label }}
-                                        @endisset
-                                    </a>
+                                    @isset($rideDetailPage->driver_info_label)
+                                        {{ $rideDetailPage->driver_info_label }}
+                                    @endisset
                                 @else
                                     @if ($ride_cancelled)
                                         @isset($rideDetailPage->review_driver_info_label)
@@ -515,9 +503,7 @@
                             </h3>
                             <div class="flex items-center justify-between p-4 w-full">
                                 <div class="flex items-center space-x-4">
-                                    @if (auth()->user() &&
-                                            $ride->bookings &&
-                                            $ride->hasNonRejectedBookingForUser(auth()->user()))
+                                    @if (auth()->user() && $ride->bookings && $ride->hasNonRejectedBookingForUser(auth()->user()))
                                         <div class="w-20 h-20 rounded-full overflow-hidden">
                                             @php
                                                 $hasBookedRide = $ride->bookings
@@ -525,24 +511,24 @@
                                                     ->where('status', 1)
                                                     ->isNotEmpty();
 
-                                                $driverImage = $hasBookedRide
+                                                $driverImage = !$hasBookedRide
                                                     ? asset('home_page_icons/1746188912-new-5-driver-female.png')
                                                     : $ride->driver?->profile_image;
                                             @endphp
 
                                             @if ($driverImage)
-                                                <img class="w-full h-full object-cover"
-                                                    src="{{ $driverImage }}" alt="">
+                                                <img class="w-full h-full object-cover" src="{{ $driverImage }}"
+                                                    alt="">
                                             @endif
                                         </div>
                                     @endif
                                     <div class="text-center">
-                                        @if(!$isAvailableShowInfo)
-                                        <div class="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                                            <p class="text-yellow-800 text-sm w-full">
-                                                {{ $rideDetailPage->driver_info_show_label ?? 'Driver details are shared after booking confirmation.' }}
-                                            </p>
-                                        </div>
+                                        @if (!$isAvailableShowInfo)
+                                            <div class="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                                <p class="text-yellow-800 text-sm w-full">
+                                                    {{ $rideDetailPage->driver_info_show_label ?? 'Driver details are shared after booking confirmation.' }}
+                                                </p>
+                                            </div>
                                         @endif
                                         <div class="flex items-baseline gap-2">
                                             <label class="text-xl">
@@ -552,7 +538,7 @@
                                                 {{ $ride->driver?->getDisplayName() }}
                                             </span>
                                         </div>
-                                        
+
                                         <div class="flex items-baseline gap-2">
                                             <label class="text-xl">
                                                 {{ $rideDetailPage->passengers_driven_label ?? 'Passengers Driven' }}:
@@ -560,13 +546,30 @@
                                             <span class="text-primary">
                                                 @php
                                                     $drivenNum = $ride->driver
-                                                    ?->rides()->where('status', '!=', 2)->where(function ($query) {
-                                                        $query->whereDate('rides.date', '<', now()->toDateString())->orWhere(function ($query) {
-                                                            $query->whereDate('rides.date', '=', now()->toDateString())->whereTime('rides.time', '<=', now()->toTimeString());
-                                                        });
-                                                    })->get()->flatMap(function ($ride) {
-                                                        return $ride->bookings()->pluck('seats');
-                                                    })->sum();
+                                                        ?->rides()
+                                                        ->where('status', '!=', 2)
+                                                        ->where(function ($query) {
+                                                            $query
+                                                                ->whereDate('rides.date', '<', now()->toDateString())
+                                                                ->orWhere(function ($query) {
+                                                                    $query
+                                                                        ->whereDate(
+                                                                            'rides.date',
+                                                                            '=',
+                                                                            now()->toDateString(),
+                                                                        )
+                                                                        ->whereTime(
+                                                                            'rides.time',
+                                                                            '<=',
+                                                                            now()->toTimeString(),
+                                                                        );
+                                                                });
+                                                        })
+                                                        ->get()
+                                                        ->flatMap(function ($ride) {
+                                                            return $ride->bookings()->pluck('seats');
+                                                        })
+                                                        ->sum();
                                                 @endphp
                                                 {{ $drivenNum > 100 ? '99+' : $drivenNum }}
                                             </span>
@@ -647,8 +650,8 @@
                                             $ride->bookings->where('user_id', auth()->user()->id)->where('status', 1)->isNotEmpty())
                                         @php
                                             // Calculate the difference in days between today and the ride's date
-                                            $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
-                                            // Add the leave review days to the ride's DateTime
+$rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
+// Add the leave review days to the ride's DateTime
                                             $reviewDateTime = clone $rideDateTime;
                                             $reviewDateTime->add(
                                                 new DateInterval('P' . $setting->leave_review_days . 'D'),
@@ -733,7 +736,7 @@
                                     <div class="flex justify-center mt-4">
                                         @if (Auth::check())
                                             @if ($ride->driver?->id)
-                                                <a href="{{ route('chat', ['lang' => app()->getLocale(), 'departure' => $ride->detail->departure ?? 'unknown', 'destination' => $ride->detail->destination ?? 'unknown', 'id' => $ride->id, 'passenger' => $ride->driver->id,'redirectUrl' => url()->full()]) }}"
+                                                <a href="{{ route('chat', ['lang' => app()->getLocale(), 'departure' => $ride->detail->departure ?? 'unknown', 'destination' => $ride->detail->destination ?? 'unknown', 'id' => $ride->id, 'passenger' => $ride->driver->id, 'redirectUrl' => url()->full()]) }}"
                                                     class="bg-greenXS hover:bg-greenXS text-white text-base md:text-lg rounded font-FuturaMdCnBT hover:font-FuturaMdCnBT px-5 py-2 border border-greenXS hover:border-greenXS hover:text-white text-center focus:bg-greenXS focus:text-white active:text-white active:bg-greenXS w-36">
                                                     @isset($rideDetailPage->driver_chat_button_label)
                                                         {{ $rideDetailPage->driver_chat_button_label }}
@@ -754,8 +757,9 @@
                             </div>
                         @endif
 
-                    <div class="bg-white rounded-lg shadow-3xl overflow-hidden {{ isset($ride->booking_type->name) && $ride->booking_type->name == 'Firm cancellation' ? 'border-4 border-red-500' : '' }}">
-                            <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl relative" >
+                        <div
+                            class="bg-white rounded-lg shadow-3xl overflow-hidden {{ isset($ride->booking_type->name) && $ride->booking_type->name == 'Firm cancellation' ? 'border-4 border-red-500' : '' }}">
+                            <h3 class="bg-primary text-white py-2 px-4 text-2xl xl:text-3xl relative">
                                 {{ $rideDetailPage->cancellation_policy ?? 'Cancellation Policy' }}
                             </h3>
                             <div class=" p-4 w-full">
@@ -766,32 +770,35 @@
                                         if ($ride->isStandardCancellation()) {
                                             $route = route('cancellation_policy', [
                                                 'lang' => $selectedLanguage->abbreviation,
-                                                'type' => 'standard'
+                                                'type' => 'standard',
                                             ]);
-                                            $ride_cancellation_type_label = $rideFeatureOptions['cancellation']['standard']->name;
+                                            $ride_cancellation_type_label =
+                                                $rideFeatureOptions['cancellation']['standard']->name;
                                         } elseif ($ride->isFirmCancellation()) {
                                             $route = route('firm_cancellation_policy', [
                                                 'lang' => $selectedLanguage->abbreviation,
-                                                'type' => 'firm'
+                                                'type' => 'firm',
                                             ]);
-                                            $ride_cancellation_type_label = $rideFeatureOptions['cancellation']['firm']->name;
+                                            $ride_cancellation_type_label =
+                                                $rideFeatureOptions['cancellation']['firm']->name;
                                         }
 
-                                        $tooltip = $rideDetailPage->view_cancellation_tooltip  ?? 'View our full Cancellation Policy';
+                                        $tooltip =
+                                            $rideDetailPage->view_cancellation_tooltip ??
+                                            'View our full Cancellation Policy';
                                     @endphp
 
                                     @if ($route)
-                                        <a href="{{ $route }}" class="font-bold text-black no-underline hover:no-underline" target="_blank">
+                                        <a href="{{ $route }}"
+                                            class="font-bold text-black no-underline hover:no-underline" target="_blank">
                                             {{ $ride_cancellation_type_label }}
                                         </a>
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                            width="16"
-                                            height="16"
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                             fill="currentColor"
                                             class="bi bi-exclamation-circle-fill text-black cursor-help inline-block"
-                                            data-tippy-content="{{ $tooltip }}"
-                                            viewBox="0 0 16 16">
-                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>
+                                            data-tippy-content="{{ $tooltip }}" viewBox="0 0 16 16">
+                                            <path
+                                                d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
                                         </svg>
                                     @else
                                         {{ $ride_cancellation_type_label ?? 'N/A' }}
@@ -800,9 +807,7 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-2 w-full justify-center lg:justify-center">
-                            @if (auth()->user() &&
-                                    $ride->bookings &&
-                                    $ride->hasNonRejectedBookingForUser(auth()->user()))
+                            @if (auth()->user() && $ride->bookings && $ride->hasNonRejectedBookingForUser(auth()->user()))
                                 @php
                                     $userBookingForEdit = $ride->bookings
                                         ->where('status', '<>', 3)
@@ -820,7 +825,7 @@
                                                     })->sum('seats') !=
                                                 0)
                                             <div class="flex items-center justify-end">
-                                                <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'from_stop_id'=>$from_stop_id, 'to_stop_id'=>$to_stop_id]) }}"
+                                                <a href="{{ route('booking', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id, 'from_stop_id' => $from_stop_id, 'to_stop_id' => $to_stop_id]) }}"
                                                     class="button-exp-fill whitespace-nowrap me-1 text-xl">
                                                     @isset($rideDetailPage->edit_button_actions_label)
                                                         {{ $rideDetailPage->edit_button_actions_label }}
@@ -874,41 +879,44 @@
                                                 : asset('home_page_icons/' . $booking_methods['manual']->icon);
 
                                             $label = $isInstant
-                                                ? ($rideDetailPage->instant_booking_btn_label ?? 'Instant Book')
-                                                : ($rideDetailPage->request_booing_btn_label ?? 'Request to Book');
+                                                ? $rideDetailPage->instant_booking_btn_label ?? 'Instant Book'
+                                                : $rideDetailPage->request_booing_btn_label ?? 'Request to Book';
 
                                             $action = null;
 
                                             if ($needsPhoneOnFileForRegularRide) {
-                                                $action = "showPhoneOnFileRequiredModal()";
+                                                $action = 'showPhoneOnFileRequiredModal()';
                                             } elseif ($needsVerifiedPhoneForPinkExtra) {
-                                                $action = "showVerifiedPhoneForPinkExtraModal()";
+                                                $action = 'showVerifiedPhoneForPinkExtraModal()';
                                             } elseif ($needsPhoneVerification) {
-                                                $action = "showPhoneVerificationModal()";
+                                                $action = 'showPhoneVerificationModal()';
                                             } elseif ($showPhotoIdRequiredForBooking) {
-                                                $action = "showPhotoIdRequiredModal()";
+                                                $action = 'showPhotoIdRequiredModal()';
                                             } elseif (!$isAuthenticated) {
-                                                $action = "togglePopupModal1()";
+                                                $action = 'togglePopupModal1()';
                                             }
 
                                         @endphp
 
                                         @if ($action)
-                                            <button type="button"
-                                                    onclick="{{ $action }}"
-                                                    class="inline-flex items-center justify-center space-x-3 w-fit pr-8 button-exp-fill rounded cursor-pointer">
-                                                <img class="w-10 h-10 rounded-full" src="{{ $icon }}" alt="">
+                                            <button type="button" onclick="{{ $action }}"
+                                                class="inline-flex items-center justify-center space-x-3 w-fit pr-8 button-exp-fill rounded cursor-pointer">
+                                                <img class="w-10 h-10 rounded-full" src="{{ $icon }}"
+                                                    alt="">
                                                 <span class="font-medium text-xl">{{ $label }}</span>
                                             </button>
                                         @else
-                                            <a href="{{ route('booking', [
+                                            <a
+                                                href="{{ route('booking', [
                                                     'lang' => $selectedLanguage->abbreviation,
                                                     'id' => $ride->id,
                                                     'from_stop_id' => $from_stop_id,
-                                                    'to_stop_id' => $to_stop_id
+                                                    'to_stop_id' => $to_stop_id,
                                                 ]) }}">
-                                                <label class="inline-flex items-center justify-center space-x-3 w-fit pr-8 button-exp-fill rounded cursor-pointer hover:border-2 hover:border-blue-500">
-                                                    <img class="w-10 h-10 rounded-full" src="{{ $icon }}" alt="">
+                                                <label
+                                                    class="inline-flex items-center justify-center space-x-3 w-fit pr-8 button-exp-fill rounded cursor-pointer hover:border-2 hover:border-blue-500">
+                                                    <img class="w-10 h-10 rounded-full" src="{{ $icon }}"
+                                                        alt="">
                                                     <span class="font-medium text-xl">{{ $label }}</span>
                                                 </label>
                                             </a>
@@ -1046,8 +1054,8 @@
                                         <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none"
                                             xmlns="http://www.w3.org/2000/svg" stroke="#ff0000">
                                             <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
-                                                stroke-linejoin="round"></g>
+                                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
+                                            </g>
                                             <g id="SVGRepo_iconCarrier">
                                                 <path d="M12 10V13" stroke="#db0000" stroke-width="2"
                                                     stroke-linecap="round"></path>
@@ -1082,7 +1090,7 @@
                 </div>
             </div>
         </div>
-        
+
 
         <div class="hidden overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none justify-center items-center"
             id="chat-modal">
@@ -1269,13 +1277,13 @@
                     <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                         <div class="sm:flex sm:items-start justify-center">
                             <!-- <div
-                                            class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                                class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                <path
-                                                    d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0" />
-                                            </svg>
-                                        </div> -->
+                                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                                    class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0" />
+                                                </svg>
+                                            </div> -->
                         </div>
                         <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                             <div class="">
