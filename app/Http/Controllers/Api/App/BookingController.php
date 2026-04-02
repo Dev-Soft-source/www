@@ -582,8 +582,8 @@ class BookingController extends Controller
             $adjustedBookingCredit = $this->validateStudentBookingFee($user, $request->booking_credit);
             $booking_fee = $adjustedBookingCredit;
         }
-        $seats_amount = $request->seats_amount;
-        $payment_amount = $request->seats_amount;
+        $seats_amount = $request->total;
+        $payment_amount = $request->total;
         if ($ride->isCashPayment()) {
             $payment_amount = $booking_fee;
         }
