@@ -7,8 +7,10 @@ use App\Models\ChatsPageSettingDetail;
 use App\Models\FeaturesSettingDetail;
 use App\Models\FindRidePageSettingDetail;
 use App\Models\Language;
+use App\Models\Booking;
 use App\Models\Notification;
 use App\Models\Message;
+use App\Models\Ride;
 use App\Models\Step1PageSettingDetail;
 use App\Models\SuccessMessagesSettingDetail;
 use App\Models\User;
@@ -17,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\NotificationsPageSettingDetail;
 use App\Models\NotificationsPageSetting;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Log;
 
@@ -58,35 +61,35 @@ class NotificationController extends Controller
                 });
             });
         } else {
-            $notifications = $notifications->where(function ($query) use ($user_id, $bookingType, $paymentMethod) {
-                $query->where(function ($query) use ($user_id, $bookingType, $paymentMethod) {
-                    $query->where('type', '1')
-                        ->whereHas('ride', function ($query) use ($user_id, $bookingType, $paymentMethod) {
-                            $query->where('added_by', $user_id);
-                            if ($bookingType != "") {
-                                $query->where('booking_method', $bookingType);
-                            }
-                            if ($paymentMethod != "") {
-                                $query->where('payment_method', $paymentMethod);
-                            }
-                        });
-                })->orWhere(function ($query) use ($user_id, $bookingType, $paymentMethod) {
-                    $query->where('type', '2')
-                        ->whereHas('booking', function ($query) use ($user_id, $bookingType, $paymentMethod) {
-                            $query->where('user_id', $user_id);
-                            if ($bookingType != "") {
-                                $query->whereHas('ride', function ($q) use ($bookingType) {
-                                    $q->where('booking_method', $bookingType);
-                                });
-                            }
-                            if ($paymentMethod != "") {
-                                $query->whereHas('ride', function ($q) use ($paymentMethod) {
-                                    $q->where('payment_method', $paymentMethod);
-                                });
-                            }
-                        });
-                });
-            });
+            // $notifications = $notifications->where(function ($query) use ($user_id, $bookingType, $paymentMethod) {
+            //     $query->where(function ($query) use ($user_id, $bookingType, $paymentMethod) {
+            //         $query->where('type', '1')
+            //             ->whereHas('ride', function ($query) use ($user_id, $bookingType, $paymentMethod) {
+            //                 $query->where('added_by', $user_id);
+            //                 if ($bookingType != "") {
+            //                     $query->where('booking_method', $bookingType);
+            //                 }
+            //                 if ($paymentMethod != "") {
+            //                     $query->where('payment_method', $paymentMethod);
+            //                 }
+            //             });
+            //     })->orWhere(function ($query) use ($user_id, $bookingType, $paymentMethod) {
+            //         $query->where('type', '2')
+            //             ->whereHas('booking', function ($query) use ($user_id, $bookingType, $paymentMethod) {
+            //                 $query->where('user_id', $user_id);
+            //                 if ($bookingType != "") {
+            //                     $query->whereHas('ride', function ($q) use ($bookingType) {
+            //                         $q->where('booking_method', $bookingType);
+            //                     });
+            //                 }
+            //                 if ($paymentMethod != "") {
+            //                     $query->whereHas('ride', function ($q) use ($paymentMethod) {
+            //                         $q->where('payment_method', $paymentMethod);
+            //                     });
+            //                 }
+            //             });
+            //     });
+            // });
         }
 
 
@@ -99,14 +102,12 @@ class NotificationController extends Controller
             ->get();
 
         
-        if ($request->lang_id && $request->lang_id != 0) {
-            $genderLabel = Step1PageSettingDetail::where('language_id', $request->lang_id)->select('male_option_label', 'female_option_label', 'prefer_option_label')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $genderLabel = Step1PageSettingDetail::where('language_id', $selectedLanguage->id)->select('male_option_label', 'female_option_label', 'prefer_option_label')->first();
-            }
-        }
+        $genderLabel = Step1PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $genderLabelsByValue = [
+            'male' => $genderLabel?->male_option_label ?? null,
+            'female' => $genderLabel?->female_option_label ?? null,
+            'prefer not to say' => $genderLabel?->prefer_option_label ?? null,
+        ];
 
         foreach ($notifications as $notification) {
             if ($notification->from && $notification->from->gender) {

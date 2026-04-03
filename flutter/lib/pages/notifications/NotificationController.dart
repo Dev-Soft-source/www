@@ -65,8 +65,8 @@ class NotificationController extends GetxController {
       // Load all initial data
       await _getNotifications();
       await _getLabelTextDetail();
-      await _getPaymentOptions();
-      await _getBookingOption();
+      // await _getPaymentOptions();
+      // await _getBookingOption();
 
       errorStateManager.setSuccess();
       isLoading(false);
@@ -462,6 +462,7 @@ class NotificationController extends GetxController {
       if (resp['status'] != null && resp['status'] == "Success") {
         if (resp['data'] != null && resp['data']['chatsPage'] != null) {
           labelTextDetail.addAll(resp['data']['chatsPage']);
+          labelTextDetail.refresh();
         }
 
         var getLanguage = serviceController.languages.firstWhereOrNull(

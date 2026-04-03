@@ -413,18 +413,8 @@ class MyChatsController extends Controller
 
     public function chatsIndex(Request $request)
     {
-        $chatsPage = null;
-        if ($request->lang_id && $request->lang_id != 0) {
-            // Retrieve the chatsPageSettingDetail associated with the selected language
-            $chatsPage = ChatsPageSettingDetail::where('language_id', $request->lang_id)->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $request->lang_id)->select('url_not_allowed_message', 'email_not_allowed_message', 'phone_number_not_allowed_message', 'popup_close_btn_text')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $chatsPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('url_not_allowed_message', 'email_not_allowed_message', 'phone_number_not_allowed_message', 'popup_close_btn_text')->first();
-            }
-        }
+        $chatsPage = ChatsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $messages = $this->successMessage;
 
         $data = ['chatsPage' => $chatsPage, 'messages' => $messages];
         return $this->successResponse($data, 'Chats page get successfully');

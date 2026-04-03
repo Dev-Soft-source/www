@@ -23,10 +23,24 @@ class NotificationPage extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
-          title: Obx(() => secondAppBarWidget(
-              title:
-                  "${controller.labelTextDetail['notification_page_main_heading'] ?? 'Notifications'}",
-              context: context)),
+          title: Obx(() {
+            String title = "";
+
+            final heading =
+                controller.labelTextDetail['notification_page_main_heading'];
+            if (heading != null && heading.toString().trim().isNotEmpty) {
+              title = heading.toString();
+            } else if (!controller.isLoading.value &&
+                !controller.errorStateManager.isLoading.value &&
+                !controller.errorStateManager.hasError.value) {
+              title = 'Notifications';
+            }
+
+            return secondAppBarWidget(
+              title: title,
+              context: context,
+            );
+          }),
           leading: safeBackButton(context),
         ),
         body: SafeArea(
