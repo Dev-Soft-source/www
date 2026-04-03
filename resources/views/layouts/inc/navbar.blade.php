@@ -309,9 +309,10 @@
                                                             @endif
                                                         </div>
                                                         <div class="flex-1 min-w-0">
-                                                            <p
+                                                            <p 
                                                                 class="text-sm {{ $notification->is_read == 0 ? 'font-semibold text-primary' : 'font-medium text-gray-800' }}">
-                                                                {{ $notification->message }}</p>
+                                                                {!! nl2br(e(str_replace('\n', "\n", $notification->message))) !!}
+                                                            </p>
                                                             <p class="text-xs text-gray-400 mt-2 flex items-center">
                                                                 <svg xmlns="http://www.w3.org/2000/svg"
                                                                     class="h-3.5 w-3.5 mr-1" fill="none"

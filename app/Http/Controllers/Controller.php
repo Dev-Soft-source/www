@@ -50,6 +50,8 @@ class Controller extends BaseController
     public function __construct()
     {
 
+        if (Route::currentRouteName() == 'fcmToken') return;
+
         $this->defaultLang = getDefaultLanguage();
 
         // Initialize language-dependent data per request so POST/PUT routes
@@ -66,24 +68,17 @@ class Controller extends BaseController
 
                 if (!$lang && $langId) {
                     $lang = Language::whereKey($langId)->value('abbreviation');
-                } elseif ($lang && !$langId) {
+                } elseif ($lang && !$langId && is_numeric($lang)) {
                     $lang = Language::whereKey($lang)->value('abbreviation');
-                } elseif (!$lang && $langId && auth('sanctum')->check()) {
+                } elseif (!$lang && !$langId && auth('sanctum')->check()) {
                     $lang = Language::whereKey(auth('sanctum')->user()->lang_id)->value('abbreviation');
                 }
-                \Log::info('api route', [Route::currentRouteName(), $lang]);
-                \Log::info('payload', $request->all());
-
             } else {
                 $lang = $request->route('lang') ?? $request->query('lang');
 
                 if (!$lang) {
                     $lang = session('selectedLanguage');
                 }
-
-                // if (!$lang && auth('web')->check() && auth('web')->user()->lang) {
-                //     $lang = auth('web')->user()->lang;
-                // }
             }
 
             if (!$lang) {
@@ -100,6 +95,9 @@ class Controller extends BaseController
                 session(['selectedLanguage' => $this->defaultLang->abbreviation]);
             }
 
+            // Log::info('api route', [Route::currentRouteName(), $lang]);
+            // Log::info('payload', $request->all());
+
             $languages = Language::getAllCached();
             $rideFeatureOptions = $this->getRideFeatureOptionGroups();
 
@@ -114,7 +112,7 @@ class Controller extends BaseController
                 'successMessage' => $this->successMessage,
             ]);
 
-            if (auth()->check()) {
+            if (auth()->check() && !$request->ajax()) {
                 $user = auth()->user();
                 $user_id = $user->id;
                 $lang = $this->selectedLanguage->abbreviation;

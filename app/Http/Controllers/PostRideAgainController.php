@@ -53,7 +53,7 @@ class PostRideAgainController extends Controller
             ->orderBy('id', 'desc')
             ->paginate(6);
         
-        $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id, ['video_id' => $video->id]);
+        $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         return view('post_ride_again', [
             'rides' => $rides,
