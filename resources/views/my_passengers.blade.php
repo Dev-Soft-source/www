@@ -47,7 +47,7 @@
                             </div>
                             <div class="flex justify-between items-center space-x-2 w-full border-b">
                                 <p>{{ $myPassengerPage->my_fare_label ?? 'My fare' }}</p>
-                                <p>${{ number_format(floor($booking->fare), 2) }}</p>
+                                <p>${{ number_format($booking->fare, 2) }}</p>
                             </div>
                             <div class="flex justify-between items-center space-x-2 w-full border-b">
                                 <p>{{ $myPassengerPage->booking_fee_label ?? 'Booking fee' }}</p>

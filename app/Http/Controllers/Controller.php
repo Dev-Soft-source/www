@@ -73,6 +73,8 @@ class Controller extends BaseController
                 } elseif (!$lang && !$langId && auth('sanctum')->check()) {
                     $lang = Language::whereKey(auth('sanctum')->user()->lang_id)->value('abbreviation');
                 }
+                            Log::info('api route', [Route::currentRouteName(), $lang]);
+            Log::info('payload', $request->all());
             } else {
                 $lang = $request->route('lang') ?? $request->query('lang');
 
@@ -95,8 +97,7 @@ class Controller extends BaseController
                 session(['selectedLanguage' => $this->defaultLang->abbreviation]);
             }
 
-            // Log::info('api route', [Route::currentRouteName(), $lang]);
-            // Log::info('payload', $request->all());
+
 
             $languages = Language::getAllCached();
             $rideFeatureOptions = $this->getRideFeatureOptionGroups();
