@@ -80,36 +80,78 @@ class RemovePassengerPage extends StatelessWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              SizedBox(
-                                height: 25,
-                                width: 25,
-                                child: radioButtonWidget(
-                                  value: "0",
-                                  groupValue: controller.removePassengerType.value,
-                                  onChanged: (value) async{
-                                    controller.removePassengerType.value = value!;
-                                  }
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () {
+                                    controller.removePassengerType.value = "0";
+                                    // Clear block type and days when switching back to single-ride removal
+                                    controller.removePassenger.value = "";
+                                    controller.blockDaysTextEditingController.clear();
+                                  },
+                                  child: Row(
+                                    children: [
+                                      SizedBox(
+                                        height: 25,
+                                        width: 25,
+                                        child: radioButtonWidget(
+                                            value: "0",
+                                            groupValue: controller
+                                                .removePassengerType.value,
+                                            onChanged: (value) async {
+                                              controller.removePassengerType
+                                                  .value = value!;
+                                            }),
+                                      ),
+                                      8.widthBox,
+                                      Expanded(
+                                          child: txt16Size(
+                                              context: context,
+                                              title:
+                                                  "${controller.labelTextTripDetail['remove_from_this_ride_message'] ?? "Remove passenger from this ride"}",
+                                              fontFamily: bold)),
+                                    ],
+                                  ),
                                 ),
                               ),
-                              Expanded(child: txt16Size(context: context, title: "${controller.labelTextTripDetail['remove_from_this_ride_message'] ?? "Remove passenger from this ride"}", fontFamily: bold))
                             ],
                           ),
+                          10.heightBox,
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              SizedBox(
-                                height: 25,
-                                width: 25,
-                                child: radioButtonWidget(
-                                  value: "1",
-                                  groupValue: controller.removePassengerType.value,
-                                  onChanged: (value) async{
-                                    controller.removePassengerType.value = value!;
-                                  }
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () {
+                                    controller.removePassengerType.value = "1";
+                                  },
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(
+                                        height: 25,
+                                        width: 25,
+                                        child: radioButtonWidget(
+                                            value: "1",
+                                            groupValue: controller
+                                                .removePassengerType.value,
+                                            onChanged: (value) async {
+                                              controller.removePassengerType
+                                                  .value = value!;
+                                            }),
+                                      ),
+                                      8.widthBox,
+                                      Expanded(
+                                          child: txt16Size(
+                                              context: context,
+                                              title:
+                                                  "${controller.labelTextTripDetail['remove_passenger_and_block_message'] ?? "Remove this passenger from this and prevent him from booking on any of my ride in future"}",
+                                              fontFamily: bold)),
+                                    ],
+                                  ),
                                 ),
                               ),
-                              Expanded(child: txt16Size(context: context, title: "${controller.labelTextTripDetail['remove_passenger_and_block_message'] ?? "Remove this passenger from this and prevent him from booking on any of my ride in future"}", fontFamily: bold))
                             ],
                           ),
                           if(controller.removePassengerType.value == "1")...[
@@ -146,7 +188,7 @@ class RemovePassengerPage extends StatelessWidget {
                             //   toolTip(tip: error.firstWhere((error) => error['title'] == "middle_seats"))
                             // ],
                           ],
-                          if(controller.removePassenger.value == "temporarily")...[
+                          if(controller.removePassengerType.value == "1" && controller.removePassenger.value == "temporarily")...[
                             10.heightBox,
                             fieldsWidget(
                               textController: controller.blockDaysTextEditingController,
@@ -214,8 +256,8 @@ class RemovePassengerPage extends StatelessWidget {
                     child: elevatedButtonWidget(
                         textWidget: txt28Size(title: "${controller.labelTextTripDetail['passenger_cancel_ride_btn_label'] ?? "Cancel ride"}", context: context, textColor: Colors.white),
                         onPressed: controller.removePassengerType.value != "" &&
-                            controller.reviewTextEditingController.text != "" &&
-                            controller.tripCancelTextEditingController.text != "" &&
+                            controller.removePassengerAdminReason.value.isNotEmpty &&
+                            controller.removePassengerPassengerReason.value.isNotEmpty &&
                             ((controller.removePassengerType.value == "1" && controller.removePassenger.value != "") || controller.removePassengerType.value == "0") &&
                             ((controller.removePassenger.value == "temporarily" && controller.blockDaysTextEditingController.text != "") || controller.removePassenger.value == "permanently" || controller.removePassenger.value == "") ?
                             () async{

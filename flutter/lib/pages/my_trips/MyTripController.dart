@@ -42,6 +42,9 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
   var errorList = List.empty(growable: true).obs;
   var errors = [].obs;
   var removePassengerType = "0".obs;
+  // Reactive copies of text field contents so UI can react to changes
+  var removePassengerAdminReason = "".obs;
+  var removePassengerPassengerReason = "".obs;
   var reviewPassengerImage = "".obs;
   var reviewPassengerName = "".obs;
   var passengerBookingId = "".obs;
@@ -136,6 +139,15 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
     reviewTextEditingController = TextEditingController();
     tripCancelTextEditingController = TextEditingController();
     blockDaysTextEditingController = TextEditingController();
+
+    // Keep reactive values in sync with text fields so Obx can rebuild
+    reviewTextEditingController.addListener(() {
+      removePassengerAdminReason.value = reviewTextEditingController.text;
+    });
+    tripCancelTextEditingController.addListener(() {
+      removePassengerPassengerReason.value =
+          tripCancelTextEditingController.text;
+    });
 
     // Initialize connectivity service
     try {

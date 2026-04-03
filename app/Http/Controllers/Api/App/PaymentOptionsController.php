@@ -261,7 +261,7 @@ class PaymentOptionsController extends Controller
                     $emailData = [
                         'first_name' => $user->first_name,
                     ];
-                    Mail::to($user->email)->send(new CardRemovedEmail($emailData));
+                    Mail::to($user->email)->queue(new CardRemovedEmail($emailData));
                 }
 
                 $notification = Notification::create([

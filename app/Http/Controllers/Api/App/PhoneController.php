@@ -125,7 +125,7 @@ class PhoneController extends Controller
                 'first_name' => $user->first_name,
             ];
             if (isset($user->email_notification) && $user->email_notification == 1) {
-                Mail::to($user->email)->send(new PhoneNumberAddedMail($emailData));
+                Mail::to($user->email)->queue(new PhoneNumberAddedMail($emailData));
             }
         }
 
@@ -289,7 +289,7 @@ class PhoneController extends Controller
             'first_name' => $user->first_name,
         ];
         if (isset($user->email_notification) && $user->email_notification == 1) {
-            Mail::to($user->email)->send(new PhoneNumberAddedMail($emailData));
+            Mail::to($user->email)->queue(new PhoneNumberAddedMail($emailData));
         }
 
         $verificationCode = rand(1000, 9999);
@@ -455,7 +455,7 @@ class PhoneController extends Controller
                 'first_name' => $user->first_name,
             ];
             if (isset($user->email_notification) && $user->email_notification == 1) {
-                Mail::to($user->email)->send(new PhoneNumberDeleted($emailData));
+                Mail::to($user->email)->queue(new PhoneNumberDeleted($emailData));
             }
 
             $notification = Notification::create([

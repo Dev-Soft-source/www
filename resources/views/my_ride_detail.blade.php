@@ -146,7 +146,7 @@
                                                                 {{ $booking->passenger->last_name }}</p>
                                                             @if($isMultiStopsRide && $booking->from_stop_id)
                                                             <span class="text-gray-700 text-sm">{{$booking->fromStop->label}} → {{$booking->toStop->label}}</span>
-                                                            @else
+                                                            @elseif($isMultiStopsRide)
                                                             <span class="text-gray-700 text-sm">FULL</span>
                                                             @endif
                                                             <div class="flex flex-row items-center text-sm text-gray-600">

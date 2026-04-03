@@ -49,6 +49,8 @@ use App\Models\SuccessMessagesSettingDetail;
 use App\Models\TopUpBalance;
 use App\Services\DriverRideCancellationService;
 use App\Services\FCMService;
+use App\Services\PassengerRemovalService;
+use App\Jobs\NotifyPassengerRemovedJob;
 use Srmklive\PayPal\Services\PayPal as PayPalClient;
 use Illuminate\Support\Facades\View;
 
@@ -171,7 +173,7 @@ class MyRideController extends Controller
 
         $setting = ReviewSetting::getCached();
         $cancelSetting = CancelRideSetting::getCached();
-       
+
 
 
         $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
@@ -605,7 +607,7 @@ class MyRideController extends Controller
     public function MyPassengers(Request $request, $lang = null, $ride_id)
     {
 
-        $ride = Ride::where('id', $ride_id)->with(['rideDetail','bookings'])->first();
+        $ride = Ride::where('id', $ride_id)->with(['rideDetail', 'bookings'])->first();
 
         /**
          * todo
@@ -615,7 +617,7 @@ class MyRideController extends Controller
 
         $setting = ReviewSetting::getCached();
         $cancelSetting = CancelRideSetting::getCached();
-            
+
         $myPassengerPage = MyPassengerSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $genderLabel = Step1PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $messages = $this->successMessage;
@@ -892,7 +894,6 @@ class MyRideController extends Controller
 
             return response()->json(['success' => true, 'message' => 'Ride canceled successfully.']);
         } else {
-            \Log::error("Cannot cancel ride with booked seats.");
             return response()->json(['success' => false, 'message' => 'Cannot cancel ride with booked seats.']);
         }
     }
@@ -930,375 +931,52 @@ class MyRideController extends Controller
         $cancellationCount = CancellationHistory::where('user_id', $user_id)
             ->where('created_at', '>=', $monthsAgo)
             ->where('type', 'driver')
-
             ->count();
-        $messages = null;
 
-        $niceNames = [];
+        $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $limitExceed = BookingPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $tripsPage = TripsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $limitExceed = BookingPageSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_cancellation_limit_exceed')->first();
-                $niceNames = [
-                    'block_day' => isset($tripsPage->remove_day_error) ? $tripsPage->remove_day_error : '',
-                    'admin_message' => isset($tripsPage->driver_remove_reason_error) ? $tripsPage->driver_remove_reason_error : '',
-                    'passenger_message' => isset($tripsPage->passenger_remove_reason_error) ? $tripsPage->passenger_remove_reason_error : '',
-                ];
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $tripsPage = TripsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $limitExceed = BookingPageSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_cancellation_limit_exceed')->first();
 
-                $niceNames = [
-                    'block_day' => isset($tripsPage->remove_day_error) ? $tripsPage->remove_day_error : '',
-                    'admin_message' => isset($tripsPage->driver_remove_reason_error) ? $tripsPage->driver_remove_reason_error : '',
-                    'passenger_message' => isset($tripsPage->passenger_remove_reason_error) ? $tripsPage->passenger_remove_reason_error : '',
-                ];
-            }
-        }
         if ($cancellationCount >= $setting->booking_cancel_limit) {
             return redirect()->back()->with(['failure' => $limitExceed->booking_cancellation_limit_exceed ?? "Booking cancellation limit exceeded"]);
-
-            // return response()->json(['error' => true, 'message' => $limitExceed->booking_cancellation_limit_exceed ?? "Booking cancellation limit exceeded"]);
         }
-        $removed_permanently = $request->filled('removed_permanently') ? $request->removed_permanently : 0;
-
+        $removed_permanently = $request->filled('removed_permanently') ? (int) $request->removed_permanently : 0;
         $remove_type = $request->filled('remove_type') ? $request->remove_type : null;
 
         $request->validate([
             'admin_message' => 'required',
             'passenger_message' => 'required',
-            'remove_type' => $removed_permanently == "1" ? 'required' : 'nullable',
-            'block_day' => $remove_type == "temporarily" ? 'required' : 'nullable',
-        ], [
-            'admin_message.required' => 'The admin message is required',
-            'passenger_message.required' => 'The passenger message is required',
-            'remove_type.required' => 'The remove type is required',
-            'block_day.required' => 'The block day is required',
-        ], $niceNames);
-
-        $blockDay = "";
-        $blockDateTime = "";
-        if ($removed_permanently == "1" && isset($remove_type) && $remove_type == "temporarily") {
-            $blockDay = $request->block_day;
-            $currentDate = date('Y-m-d H:i:s');
-            $getDate = date('Y-m-d H:i:s', strtotime($currentDate . "+ " . $blockDay . " days"));
-            $blockDateTime = $getDate;
-        } else if ($removed_permanently == "1" && isset($remove_type) && $remove_type == "permanently") {
-            $blockDay = 1000;
-            $currentDate = date('Y-m-d H:i:s');
-            $getDate = date('Y-m-d H:i:s', strtotime($currentDate . "+ " . $blockDay . " days"));
-            $blockDateTime = $getDate;
-        }
-
-        $transactions = Transaction::where('booking_id', $booking->id)->where('type', '1')->get();
-        foreach ($transactions as $transaction) {
-            if ($transaction) {
-                $refundId = "";
-
-                $checkPrice = 0.0;
-                $getRefundEntryPrice = Transaction::where('parent_id', $transaction->id)->sum('price');
-
-                if (isset($transaction->coffee_from_wall) && $transaction->coffee_from_wall == 1) {
-                    $getRefundEntryPrice = (float)$getRefundEntryPrice + (float)$transaction->booking_fee;
-                }
-
-                $checkPrice = (float)$transaction->price;
-
-                if (isset($getRefundEntryPrice) && !is_null($getRefundEntryPrice) && $getRefundEntryPrice == $checkPrice) {
-                    if (isset($transaction->coffee_from_wall) && $transaction->coffee_from_wall == 1) {
-                        $coffeeWallet = CoffeeWallet::create([
-                            'booking_id' => $booking->id,
-                            'ride_id' => $ride->id,
-                            'user_id' => $booking->user_id,
-                            'dr_amount' => $transaction->booking_fee,
-                        ]);
-
-                        $newTransaction = Transaction::create([
-                            'booking_id' => $transaction->booking_id,
-                            'ride_id' => $booking->ride_id,
-                            'parent_id' => $transaction->id,
-                            'type' => '3',
-                            'price' => $transaction->booking_fee,
-                            'paypal_id' => NULL,
-                            'stripe_id' => NULL
-                        ]);
-                    }
-                } else {
-
-                    $transactionAmt = $checkPrice - $getRefundEntryPrice;
-
-                    if (isset($transaction->coffee_from_wall) && $transaction->coffee_from_wall == 1) {
-                        $transactionAmt = (float)$transactionAmt - (float)$transaction->booking_fee;
-                    }
-
-                    if ($transaction->pay_by_account == 0) {
-                        if ($transaction->paypal_id) {
-                            $paypal = new PayPalClient;
-                            $paypal->setApiCredentials(config('paypal'));
-                            $token = $paypal->getAccessToken();
-                            $paypal->setAccessToken($token);
-                            $response = $paypal->refundCapturedPayment(
-                                $transaction->paypal_id,
-                                'Invoice-' . $transaction->paypal_id,
-                                $transactionAmt,
-                                'Refund issued.'
-                            );
-                            $refundId = isset($response['id']) ? $response['id'] : "";
-                        } elseif ($transaction->stripe_id) {
-                            // Set your Stripe API key
-                            Stripe::setApiKey(env('STRIPE_SECRET'));
-
-                            try {
-                                // Create a refund using the payment intent ID
-                                $refund = Refund::create([
-                                    'payment_intent' => $transaction->stripe_id,
-                                    'amount' => $transactionAmt * 100, // Refund amount in cents
-                                ]);
-
-                                $refundId = $refund->id;
-                            } catch (\Stripe\Exception\ApiErrorException $e) {
-                                // Handle error
-                                Log::info($e->getMessage());
-                                // return $this->apiErrorResponse($e->getMessage(), 200);
-                            }
-                        }
-                    } else {
-                        $topUpBalance = TopUpBalance::create([
-                            'booking_id' => $transaction->booking_id,
-                            'user_id' => $booking->user_id,
-                            'dr_amount' => $transactionAmt,
-                            'added_date' => date('Y-m-d'),
-                        ]);
-                    }
-
-                    if (isset($transaction->coffee_from_wall) && $transaction->coffee_from_wall == 1) {
-                        $coffeeWallet = CoffeeWallet::create([
-                            'booking_id' => $booking->id,
-                            'ride_id' => $ride->id,
-                            'user_id' => $booking->user_id,
-                            'dr_amount' => $transaction->booking_fee,
-                        ]);
-                    }
-
-                    $newTransaction = Transaction::create([
-                        'booking_id' => $transaction->booking_id,
-                        'ride_id' => $booking->ride_id,
-                        'parent_id' => $transaction->id,
-                        'type' => '3',
-                        'price' => $transactionAmt,
-                        'paypal_id' => isset($transaction->paypal_id) ? $refundId : NULL,
-                        'stripe_id' => isset($transaction->stripe_id) ? $refundId : NULL
-                    ]);
-                }
-            }
-        }
-
-        $booking->update([
-            'status' => '4',
-            'remove_type' => isset($remove_type) ? $remove_type : NULL,
-            'removed_permanently' => $removed_permanently,
-            'block_days' => isset($blockDay) && $blockDay != "" ? $blockDay : NULL,
-            'block_date_time' => isset($blockDateTime) && $blockDateTime != "" ? $blockDateTime : NULL,
+            'remove_type' => $removed_permanently === 1 ? 'required' : 'nullable',
+            'block_day' => $remove_type === "temporarily" ? 'required' : 'nullable',
         ]);
 
-
-
-        $getSeatDetails = SeatDetail::where('booking_id', $booking->id)->get();
-        if (isset($getSeatDetails) && !empty($getSeatDetails)) {
-            foreach ($getSeatDetails as $key => $getSeatDetail) {
-                $getSeatDetail->status = 'pending';
-                $getSeatDetail->booking_id = NULL;
-                $getSeatDetail->user_id = NULL;
-                $getSeatDetail->save();
-            }
+        $blockDay = null;
+        if ($removed_permanently === 1 && $remove_type === 'temporarily') {
+            $blockDay = (int) $request->block_day;
         }
 
-        CancellationHistory::create([
-            'ride_id' => $booking->ride_id,
-            'booking_id' => $booking->id,
-            'user_id' => $ride->added_by,
-        ]);
+        $service = app(PassengerRemovalService::class);
+        $result = $service->remove($ride, $booking, $removed_permanently, $remove_type, $blockDay);
 
-        // Revoke Extra Care eligibility when driver cancels a passenger booking
-        User::where('id', $ride->added_by)->whereIn('folks_ride', ['1', ''])->update(['folks_ride' => '0']);
-
-        if (isset($booking->passenger->email_notification) && $booking->passenger->email_notification == 1) {
-
-            $data = ['passenger_name' => $booking->passenger->first_name, 'driver_name' => $booking->ride->driver->first_name, 'message' => $request->passenger_message, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($booking->ride->date)->format('F d, Y'), 'time' => $booking->ride->time, 'seats' => $booking->seats, 'total_price' => $booking->fare];
-            // Send email to passenger
-            Mail::to($booking->passenger->email)->queue(new CancelPassengerMail($data));
+        if (!$result['ok']) {
+            return redirect()->back()->with(['failure' => $result['error']]);
         }
-        $admin = Admin::first();
-        $data = [
-            'admin_username' => $admin->username,
-            'driver_name' => $booking->ride->driver->first_name,
-            'passenger_name' => $booking->passenger->first_name,
+
+        $booking = $result['booking'];
+        $ride = $result['ride'];
+
+        NotifyPassengerRemovedJob::dispatch(
+            $booking->id,
+            $ride->added_by,
+            (string) $request->admin_message,
+            (string) $request->passenger_message
+        );
+
+
+        return redirect()->route('my_ride_detail', [
             'departure' => $booking->departure,
             'destination' => $booking->destination,
-            'date' => $ride->date,
-            'message' => $request->admin_message
-        ];
-        // Send email to admin
-        Mail::to($admin->admin_email)->queue(new CancelPassengerAdminMail($data));
-        $notification = Notification::create([
-            'type' => 2,
-            'ride_id' => $booking->ride_id,
-            'posted_to' => $booking->id,
-            'posted_by' => $booking->ride->added_by,
-            'message' =>  'Driver cancelled your booking',
-            'status' => 'cancelled',
-            'notification_type' => 'upcoming',
-            'ride_detail_id' => $booking->ride_detail_id,
-            'departure' => $booking->departure,
-            'destination' => $booking->destination
-        ]);
-        $message = Message::create([
-            'ride_id' => $booking->ride_id,
-            'receiver' => $booking->user_id,
-            'sender' => $ride->added_by,
-            'message' => $request->admin_message,
-            'ride_detail_id' => $booking->ride_detail_id != "" ? $booking->ride_detail_id : NULL
-        ]);
-        $fcmService = new FCMService();
-        $fcm_tokens = FCMToken::where('user_id', $booking->user_id)->get();
-        $body = $notification->message;
-
-        $fcmToken = $booking->passenger->mobile_fcm_token;
-        if ($fcmToken) {
-            $fcmService->sendNotification($fcmToken, $body);
-        }
-
-        foreach ($fcm_tokens as $fcm_token) {
-            try {
-                $fcmService->sendNotification($fcm_token->token, $body);
-            } catch (\Exception $e) {
-                Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
-            }
-        }
-
-        $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)->where('verified', '1')->where('default', '1')->first();
-
-        if (!$phoneNumber) {
-            $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)->where('verified', '1')->first();
-        }
-
-        if ($phoneNumber && env('APP_ENV') != 'local' && isset($booking->passenger->sms_notification) && $booking->passenger->sms_notification == 1) {
-            $sid = env('TWILIO_ACCOUNT_SID');
-            $token = env('TWILIO_AUTH_TOKEN');
-            $from = env('TWILIO_PHONE_NUMBER');
-
-            $twilio = new Client($sid, $token);
-            $to = $phoneNumber->phone;
-
-            $title = "";
-            $currentHour = date('H');
-            if ($currentHour >= 0 && $currentHour < 12) {
-                $title = "Good morning " . $booking->passenger->first_name . ",";
-            } elseif ($currentHour >= 12 && $currentHour < 17) {
-                $title = "Good afternoon " . $booking->passenger->first_name . ",";
-            } else {
-                $title = "Good evening " . $booking->passenger->first_name . ",";
-            }
-
-            // $depatureDate = date('d F, Y H:i:s', strtotime('' . $ride->date . ' ' . $ride->time . ''));
-            $departureTime = date('H:i:s', strtotime($ride->time));
-            $departureDate = date('d F, Y', strtotime($ride->date));
-            $seatWords = numberToWords($booking->seats);
-
-            // $message = "" . $title . "\nDriver remove your seat from this ride\nTrip detail\nOrigin: " . $booking->departure . "\nDestination: " . $booking->destination . "\nDeparture date: " . $depatureDate . "\nDriver name: " . $ride->driver->first_name . "\nDriver phone number: " . $ride->driver->phone . "";
-            $message = $title . "\n" . "From ProximaRide: We are sorry to inform you that your driver has cancelled your booking\n" .
-                "Ride from " . $booking->departure .
-                " to " . $booking->destination .
-                " on " . $departureDate .
-                " at " . $departureTime .
-                "\nNumber of seats: " . $seatWords .
-                "\nAll payments that you have made to book on this ride will be refunded to you immediately";
-
-            try {
-                $res = $twilio->messages->create(
-                    $to,
-                    [
-                        'from' => $from,
-                        'body' => $message,
-                    ]
-                );
-            } catch (\Exception  $e) {
-                Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
-            }
-        }
-
-
-        $ride_time = strtotime($ride->time);
-        $current_time = time();
-        $current_date = date('Y-m-d');
-        $time_left = $ride_time - $current_time;
-        if ($current_date == date('Y-m-d', strtotime($ride->data)) && $time_left <= 3600) {
-            $getBookings = Booking::with('passenger')
-                ->where('ride_id', $ride->id)
-                ->where('status', '!=', '3')
-                ->where('status', '!=', '0')
-                ->where('status', '!=', '4')
-                ->get();
-            $messageContent = "";
-            if (isset($getBookings) && count($getBookings) > 0) {
-                foreach ($getBookings as $key => $getBooking) {
-                    if ($messageContent == "") {
-                        $messageContent = "" . $getBooking->passenger->first_name . "(" . $getBooking->passenger->phone . ")";
-                    } else {
-                        $messageContent .= "\n" . $getBooking->passenger->first_name . "(" . $getBooking->passenger->phone . ")";
-                    }
-                }
-                $phoneNumber = PhoneNumber::where('user_id', $ride->added_by)->where('verified', '1')->where('default', '1')->first();
-
-                if (!$phoneNumber) {
-                    $phoneNumber = PhoneNumber::where('user_id', $ride->added_by)->where('verified', '1')->first();
-                }
-
-                if ($phoneNumber && env('APP_ENV') != 'local') {
-                    $sid = env('TWILIO_ACCOUNT_SID');
-                    $token = env('TWILIO_AUTH_TOKEN');
-                    $from = env('TWILIO_PHONE_NUMBER');
-
-                    $twilio = new Client($sid, $token);
-                    $to = $phoneNumber->phone;
-
-                    $title = "";
-                    $currentHour = date('H');
-                    if ($currentHour >= 0 && $currentHour < 12) {
-                        $title = "Good morning " . $ride->driver->first_name . "";
-                    } elseif ($currentHour >= 12 && $currentHour < 17) {
-                        $title = "Good afternoon " . $ride->driver->first_name . "";
-                    } else {
-                        $title = "Good evening " . $ride->driver->first_name . "";
-                    }
-
-                    $depatureDate = date('d F, Y H:i:s', strtotime('' . $ride->date . ' ' . $ride->time . ''));
-
-                    $message = "" . $title . "\nTrip detail\nOrigin: " . $booking->departure . "\nDestination: " . $booking->destination . "\nDeparture date: " . $depatureDate . "\nHere is your passengers’ list\n" . $messageContent . "";
-
-                    try {
-                        $res = $twilio->messages->create(
-                            $to,
-                            [
-                                'from' => $from,
-                                'body' => $message,
-                            ]
-                        );
-                    } catch (\Exception  $e) {
-                        Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
-                    }
-                }
-            }
-        }
-
-
-        return redirect()->route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $ride->id])->with(['success' => "The passenger has been removed from your ride"]);
+            'id' => $ride->id
+        ])->with(['success' => "The passenger has been removed from your ride"]);
     }
 }
