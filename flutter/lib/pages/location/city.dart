@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/pages/location/LocationController.dart';
+import 'package:proximaride_app/pages/post_ride/PostRideController.dart';
 import 'package:proximaride_app/pages/widgets/drop_down_item_widget.dart';
 import 'package:proximaride_app/pages/widgets/fields_widget.dart';
 import 'package:proximaride_app/pages/widgets/progress_circular_widget.dart';
@@ -90,6 +91,7 @@ class CityPage extends StatelessWidget {
                                   return dropDownItemWidget(
                                       context: context,
                                       onTap: () async {
+                                        var deferPostRideCitiesDistance = false;
                                         final label =
                                             "${controller.searchCities[index]['name']}, ${controller.searchCities[index]['state']['abrv']}, ${controller.searchCities[index]['state']['country']['name']}";
 
@@ -227,12 +229,24 @@ class CityPage extends StatelessWidget {
                                                         error['title'] == "to");
                                               }
                                             }
-                                            controller.tempController
-                                                .getCitiesDistance();
+                                            deferPostRideCitiesDistance = true;
                                           }
                                         }
 
                                         Get.back();
+                                        if (deferPostRideCitiesDistance &&
+                                            Get.isRegistered<
+                                                PostRideController>()) {
+                                          WidgetsBinding.instance
+                                              .addPostFrameCallback((_) {
+                                            if (!Get.isRegistered<
+                                                PostRideController>()) {
+                                              return;
+                                            }
+                                            Get.find<PostRideController>()
+                                                .getCitiesDistance();
+                                          });
+                                        }
                                       },
                                       name:
                                           "${controller.searchCities[index]['name']}, ${controller.searchCities[index]['state']['abrv']}, ${controller.searchCities[index]['state']['country']['name']}",

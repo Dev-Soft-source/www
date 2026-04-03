@@ -71,8 +71,8 @@ class Controller extends BaseController
                 } elseif (!$lang && $langId && auth('sanctum')->check()) {
                     $lang = Language::whereKey(auth('sanctum')->user()->lang_id)->value('abbreviation');
                 }
-                // \Log::info('api route', [Route::currentRouteName(), $lang]);
-                // \Log::info('payload', $request->all());
+                \Log::info('api route', [Route::currentRouteName(), $lang]);
+                \Log::info('payload', $request->all());
 
             } else {
                 $lang = $request->route('lang') ?? $request->query('lang');
@@ -1134,6 +1134,38 @@ class Controller extends BaseController
     protected function notifyBookingRequestApprovedWebFlow(Booking $booking, User $driver, bool $statusAlreadyBooked = false): void
     {
         app(BookingWebNotificationController::class)->dispatchBookingRequestApprovedNotifications($booking, $driver, $statusAlreadyBooked);
+    }
+
+    /**
+     * @see BookingWebNotificationController::dispatchBookingRequestRejectedNotifications()
+     *
+     * @param  string  $channel  {@code web} or {@code api} — controls email/SMS parity in the queued passenger notifications.
+     */
+    protected function notifyBookingRequestRejectedWebFlow(Booking $booking, User $driver, string $channel = 'web'): void
+    {
+        app(BookingWebNotificationController::class)->dispatchBookingRequestRejectedNotifications($booking->id, $driver->id, $channel);
+    }
+
+    /**
+     * @see BookingWebNotificationController::dispatchDriverRideCancelledPassengerNotifications()
+     *
+     * @param  list<int>  $bookingIds
+     * @param  string  $channel  {@code web} or {@code api}
+     */
+    protected function dispatchDriverRideCancelledPassengerWebFlow(
+        Ride $ride,
+        User $driver,
+        array $bookingIds,
+        string $cancellationMessage,
+        string $channel = 'web'
+    ): void {
+        app(BookingWebNotificationController::class)->dispatchDriverRideCancelledPassengerNotifications(
+            $ride->id,
+            $driver->id,
+            $bookingIds,
+            $cancellationMessage,
+            $channel
+        );
     }
     /**
      * Helper method to validate and apply student booking fee waiver

@@ -386,6 +386,24 @@ class PostRideController extends GetxController {
     }
   }
 
+  /// When "existing vehicle" is selected, default [vehicleId] from primary or first list item if still empty.
+  void ensureExistingVehicleIdSelected() {
+    if (!alreadyAdded.value ||
+        skipNow.value ||
+        addNewVehicle.value ||
+        vehicleList.isEmpty) {
+      return;
+    }
+    if (vehicleId.value.trim().isNotEmpty) {
+      return;
+    }
+    final selectedVehicle = vehicleList.firstWhereOrNull(
+          (element) => element['primary_vehicle'].toString() == '1',
+        ) ??
+        vehicleList.first;
+    vehicleId.value = selectedVehicle['id'].toString();
+  }
+
   String formatSpotTimeValue(dynamic value) {
     if (value == null || value.toString().isEmpty) {
       return "";
@@ -832,6 +850,16 @@ class PostRideController extends GetxController {
   }
 
   Future<bool> validateAllPricesBeforeSubmit() async {
+    if (getOrderedRouteLabels().length >= 2 && routeDistanceLoading.value) {
+      serviceController.showDialogue(
+        (labelTextDetail['route_distance_loading_message'] ??
+                'Route distance is still loading. Please wait a moment.')
+            .toString(),
+        type: 'info',
+      );
+      return false;
+    }
+
     if (hasRoutePriceEntries) {
       Map<String, dynamic>? firstWarning;
 
@@ -1529,7 +1557,7 @@ class PostRideController extends GetxController {
           if (resp['data'] != null && resp['data']['vehicles'] != null) {
             vehicleList.addAll(resp['data']['vehicles']);
             var res = vehicleList.firstWhereOrNull(
-                (element) => element['primary_vehicle'] == '1');
+                (element) => element['primary_vehicle'].toString() == '1');
             if (res != null) {
               vehicleId.value = res['id'].toString();
               alreadyAdded.value = true;
@@ -1845,7 +1873,7 @@ class PostRideController extends GetxController {
             if (data['userVehicles']['vehicles'] != null) {
               vehicleList.addAll(data['userVehicles']['vehicles']);
               var res = vehicleList.firstWhereOrNull(
-                  (element) => element['primary_vehicle'] == '1');
+                  (element) => element['primary_vehicle'].toString() == '1');
               if (res != null) {
                 vehicleId.value = res['id'].toString();
                 alreadyAdded.value = true;
@@ -2298,10 +2326,15 @@ class PostRideController extends GetxController {
                         resp['data']['vehicles'] != null) {
                       vehicleList.addAll(resp['data']['vehicles']);
                       var res = vehicleList.firstWhereOrNull(
-                          (element) => element['primary_vehicle'] == '1');
+                          (element) =>
+                              element['primary_vehicle'].toString() == '1');
                       if (res != null) {
                         vehicleId.value = res['id'].toString();
-                        alreadyAdded.value = false;
+                        alreadyAdded.value = true;
+                      } else if (vehicleList.isNotEmpty &&
+                          vehicleList.length == 1) {
+                        vehicleId.value = vehicleList[0]['id'].toString();
+                        alreadyAdded.value = true;
                       }
                     }
                   }
@@ -2461,9 +2494,7 @@ class PostRideController extends GetxController {
         }
       }
 
-      if (alreadyAdded.value) {
-        if (vehicleId.value == "") {}
-      }
+      ensureExistingVehicleIdSelected();
 
       var fromSpots = [];
       var toSpots = [];
@@ -2612,14 +2643,17 @@ class PostRideController extends GetxController {
           .then((resp) async {
         errorList.clear();
         errors.clear();
-        if (resp['status'] != null && resp['status'] == "Error") {
-          serviceController.showDialogue(resp['message'].toString(),
-              type: "error");
-        } else if (resp['errors'] != null) {
+        final dynamic validationErrorsRaw = resp['errors'] ??
+            (resp['data'] is Map ? (resp['data'] as Map)['errors'] : null);
+        final Map<String, dynamic>? validationErrorsMap =
+            validationErrorsRaw is Map
+                ? Map<String, dynamic>.from(validationErrorsRaw as Map)
+                : null;
+        if (validationErrorsMap != null) {
           var positionValue = 1;
 
-          if (resp['errors']['from'] != null) {
-            var err = {'title': "from", 'eList': resp['errors']['from']};
+          if (validationErrorsMap['from'] != null) {
+            var err = {'title': "from", 'eList': validationErrorsMap['from']};
             errors.add(err);
             if (scrollField == false) {
               scrollError(context, positionValue, screenHeight);
@@ -2628,8 +2662,8 @@ class PostRideController extends GetxController {
           } else {
             positionValue += 1;
           }
-          if (resp['errors']['to'] != null) {
-            var err = {'title': "to", 'eList': resp['errors']['to']};
+          if (validationErrorsMap['to'] != null) {
+            var err = {'title': "to", 'eList': validationErrorsMap['to']};
             errors.add(err);
             if (scrollField == false) {
               scrollError(context, positionValue, screenHeight);
@@ -2638,8 +2672,8 @@ class PostRideController extends GetxController {
           } else {
             positionValue += 1;
           }
-          if (resp['errors']['pickup'] != null) {
-            var err = {'title': "pickup", 'eList': resp['errors']['pickup']};
+          if (validationErrorsMap['pickup'] != null) {
+            var err = {'title': "pickup", 'eList': validationErrorsMap['pickup']};
             errors.add(err);
             if (scrollField == false) {
               scrollError(context, positionValue, screenHeight);
@@ -2648,8 +2682,8 @@ class PostRideController extends GetxController {
           } else {
             positionValue += 1;
           }
-          if (resp['errors']['dropoff'] != null) {
-            var err = {'title': "dropoff", 'eList': resp['errors']['dropoff']};
+          if (validationErrorsMap['dropoff'] != null) {
+            var err = {'title': "dropoff", 'eList': validationErrorsMap['dropoff']};
             errors.add(err);
             if (scrollField == false) {
               scrollError(context, positionValue, screenHeight);
@@ -2658,8 +2692,8 @@ class PostRideController extends GetxController {
           } else {
             positionValue += 1;
           }
-          if (resp['errors']['date'] != null) {
-            var err = {'title': "date", 'eList': resp['errors']['date']};
+          if (validationErrorsMap['date'] != null) {
+            var err = {'title': "date", 'eList': validationErrorsMap['date']};
             errors.add(err);
             if (scrollField == false) {
               scrollError(context, positionValue, screenHeight);
@@ -2668,8 +2702,8 @@ class PostRideController extends GetxController {
           } else {
             positionValue += 1;
           }
-          if (resp['errors']['time'] != null) {
-            var err = {'title': "time", 'eList': resp['errors']['time']};
+          if (validationErrorsMap['time'] != null) {
+            var err = {'title': "time", 'eList': validationErrorsMap['time']};
             errors.add(err);
             if (scrollField == false) {
               scrollError(context, positionValue, screenHeight);
@@ -2678,10 +2712,10 @@ class PostRideController extends GetxController {
           } else {
             positionValue += 1;
           }
-          if (resp['errors']['recurring_type'] != null) {
+          if (validationErrorsMap['recurring_type'] != null) {
             var err = {
               'title': "recurring_type",
-              'eList': resp['errors']['recurring_type']
+              'eList': validationErrorsMap['recurring_type']
             };
             errors.add(err);
             if (scrollField == false) {
@@ -2691,10 +2725,10 @@ class PostRideController extends GetxController {
           } else {
             recurring.value == false ? positionValue : positionValue += 1;
           }
-          if (resp['errors']['recurring_trips'] != null) {
+          if (validationErrorsMap['recurring_trips'] != null) {
             var err = {
               'title': "recurring_trips",
-              'eList': resp['errors']['recurring_trips']
+              'eList': validationErrorsMap['recurring_trips']
             };
             errors.add(err);
             if (scrollField == false) {
@@ -2704,8 +2738,8 @@ class PostRideController extends GetxController {
           } else {
             recurring.value == false ? positionValue : positionValue += 1;
           }
-          if (resp['errors']['details'] != null) {
-            var err = {'title': "details", 'eList': resp['errors']['details']};
+          if (validationErrorsMap['details'] != null) {
+            var err = {'title': "details", 'eList': validationErrorsMap['details']};
             errors.add(err);
             if (scrollField == false) {
               scrollError(context, positionValue, screenHeight);
@@ -2714,8 +2748,8 @@ class PostRideController extends GetxController {
           } else {
             positionValue += 1;
           }
-          if (resp['errors']['seats'] != null) {
-            var err = {'title': "seats", 'eList': resp['errors']['seats']};
+          if (validationErrorsMap['seats'] != null) {
+            var err = {'title': "seats", 'eList': validationErrorsMap['seats']};
             errors.add(err);
             if (scrollField == false) {
               scrollError(context, positionValue, screenHeight);
@@ -2724,10 +2758,10 @@ class PostRideController extends GetxController {
           } else {
             positionValue += 1;
           }
-          if (resp['errors']['middle_seats'] != null) {
+          if (validationErrorsMap['middle_seats'] != null) {
             var err = {
               'title': "middle_seats",
-              'eList': resp['errors']['middle_seats']
+              'eList': validationErrorsMap['middle_seats']
             };
             errors.add(err);
             if (scrollField == false) {
@@ -2737,10 +2771,10 @@ class PostRideController extends GetxController {
           } else {
             positionValue += 1;
           }
-          if (resp['errors']['back_seats'] != null) {
+          if (validationErrorsMap['back_seats'] != null) {
             var err = {
               'title': "back_seats",
-              'eList': resp['errors']['back_seats']
+              'eList': validationErrorsMap['back_seats']
             };
             errors.add(err);
             if (scrollField == false) {
@@ -2757,10 +2791,10 @@ class PostRideController extends GetxController {
             addNewVehicle.value = true;
           }
 
-          if (resp['errors']['vehicle_id'] != null) {
+          if (validationErrorsMap['vehicle_id'] != null) {
             var err = {
               'title': "vehicle_id",
-              'eList': resp['errors']['vehicle_id']
+              'eList': validationErrorsMap['vehicle_id']
             };
             errors.add(err);
             if (scrollField == false) {
@@ -2770,8 +2804,8 @@ class PostRideController extends GetxController {
           } else {
             positionValue += 1;
           }
-          if (resp['errors']['make'] != null) {
-            var err = {'title': "make", 'eList': resp['errors']['make']};
+          if (validationErrorsMap['make'] != null) {
+            var err = {'title': "make", 'eList': validationErrorsMap['make']};
             errors.add(err);
             if (scrollField == false) {
               scrollError(context, positionValue, screenHeight);
@@ -2780,8 +2814,8 @@ class PostRideController extends GetxController {
           } else {
             addNewVehicle.value == true ? positionValue += 1 : positionValue;
           }
-          if (resp['errors']['model'] != null) {
-            var err = {'title': "model", 'eList': resp['errors']['model']};
+          if (validationErrorsMap['model'] != null) {
+            var err = {'title': "model", 'eList': validationErrorsMap['model']};
             errors.add(err);
             if (scrollField == false) {
               scrollError(context, positionValue, screenHeight);
@@ -2790,10 +2824,10 @@ class PostRideController extends GetxController {
           } else {
             addNewVehicle.value == true ? positionValue += 1 : positionValue;
           }
-          if (resp['errors']['license_no'] != null) {
+          if (validationErrorsMap['license_no'] != null) {
             var err = {
               'title': "license_no",
-              'eList': resp['errors']['license_no']
+              'eList': validationErrorsMap['license_no']
             };
             errors.add(err);
             if (scrollField == false) {
@@ -2803,8 +2837,8 @@ class PostRideController extends GetxController {
           } else {
             addNewVehicle.value == true ? positionValue += 1 : positionValue;
           }
-          if (resp['errors']['color'] != null) {
-            var err = {'title': "color", 'eList': resp['errors']['color']};
+          if (validationErrorsMap['color'] != null) {
+            var err = {'title': "color", 'eList': validationErrorsMap['color']};
             errors.add(err);
             if (scrollField == false) {
               scrollError(context, positionValue, screenHeight);
@@ -2813,8 +2847,8 @@ class PostRideController extends GetxController {
           } else {
             addNewVehicle.value == true ? positionValue += 1 : positionValue;
           }
-          if (resp['errors']['year'] != null) {
-            var err = {'title': "year", 'eList': resp['errors']['year']};
+          if (validationErrorsMap['year'] != null) {
+            var err = {'title': "year", 'eList': validationErrorsMap['year']};
             errors.add(err);
             if (scrollField == false) {
               scrollError(context, positionValue, screenHeight);
@@ -2823,10 +2857,10 @@ class PostRideController extends GetxController {
           } else {
             addNewVehicle.value == true ? positionValue += 1 : positionValue;
           }
-          if (resp['errors']['vehicle_type'] != null) {
+          if (validationErrorsMap['vehicle_type'] != null) {
             var err = {
               'title': "vehicle_type",
-              'eList': resp['errors']['vehicle_type']
+              'eList': validationErrorsMap['vehicle_type']
             };
             errors.add(err);
             if (scrollField == false) {
@@ -2836,10 +2870,10 @@ class PostRideController extends GetxController {
           } else {
             addNewVehicle.value == true ? positionValue += 1 : positionValue;
           }
-          if (resp['errors']['car_type'] != null) {
+          if (validationErrorsMap['car_type'] != null) {
             var err = {
               'title': "car_type",
-              'eList': resp['errors']['car_type']
+              'eList': validationErrorsMap['car_type']
             };
             errors.add(err);
             if (scrollField == false) {
@@ -2849,8 +2883,8 @@ class PostRideController extends GetxController {
           } else {
             addNewVehicle.value == true ? positionValue += 1 : positionValue;
           }
-          if (resp['errors']['image'] != null) {
-            var err = {'title': "image", 'eList': resp['errors']['image']};
+          if (validationErrorsMap['image'] != null) {
+            var err = {'title': "image", 'eList': validationErrorsMap['image']};
             errors.add(err);
             if (scrollField == false) {
               scrollError(context, positionValue, screenHeight);
@@ -2859,8 +2893,8 @@ class PostRideController extends GetxController {
           } else {
             addNewVehicle.value == true ? positionValue += 1 : positionValue;
           }
-          if (resp['errors']['smoke'] != null) {
-            var err = {'title': "smoke", 'eList': resp['errors']['smoke']};
+          if (validationErrorsMap['smoke'] != null) {
+            var err = {'title': "smoke", 'eList': validationErrorsMap['smoke']};
             if (scrollField == false) {
               scrollError(context, positionValue, screenHeight);
               scrollField = true;
@@ -2869,10 +2903,10 @@ class PostRideController extends GetxController {
           } else {
             positionValue += 1;
           }
-          if (resp['errors']['animal_friendly'] != null) {
+          if (validationErrorsMap['animal_friendly'] != null) {
             var err = {
               'title': "animal_friendly",
-              'eList': resp['errors']['animal_friendly']
+              'eList': validationErrorsMap['animal_friendly']
             };
             errors.add(err);
             if (scrollField == false) {
@@ -2883,10 +2917,10 @@ class PostRideController extends GetxController {
             positionValue += 1;
           }
 
-          if (resp['errors']['features'] != null) {
+          if (validationErrorsMap['features'] != null) {
             var err = {
               'title': "features",
-              'eList': resp['errors']['features']
+              'eList': validationErrorsMap['features']
             };
             errors.add(err);
             if (scrollField == false) {
@@ -2896,10 +2930,10 @@ class PostRideController extends GetxController {
           } else {
             positionValue += 1;
           }
-          if (resp['errors']['booking_method'] != null) {
+          if (validationErrorsMap['booking_method'] != null) {
             var err = {
               'title': "booking_method",
-              'eList': resp['errors']['booking_method']
+              'eList': validationErrorsMap['booking_method']
             };
             errors.add(err);
             if (scrollField == false) {
@@ -2909,8 +2943,8 @@ class PostRideController extends GetxController {
           } else {
             positionValue += 1;
           }
-          if (resp['errors']['luggage'] != null) {
-            var err = {'title': "luggage", 'eList': resp['errors']['luggage']};
+          if (validationErrorsMap['luggage'] != null) {
+            var err = {'title': "luggage", 'eList': validationErrorsMap['luggage']};
             errors.add(err);
             if (scrollField == false) {
               scrollError(context, positionValue * 1.8, screenHeight);
@@ -2919,8 +2953,8 @@ class PostRideController extends GetxController {
           } else {
             positionValue += 1;
           }
-          if (resp['errors']['price'] != null) {
-            var err = {'title': "price", 'eList': resp['errors']['price']};
+          if (validationErrorsMap['price'] != null) {
+            var err = {'title': "price", 'eList': validationErrorsMap['price']};
             errors.add(err);
             if (scrollField == false) {
               scrollError(context, positionValue * 1.8, screenHeight);
@@ -2929,10 +2963,10 @@ class PostRideController extends GetxController {
           } else {
             positionValue += 1;
           }
-          if (resp['errors']['payment_method'] != null) {
+          if (validationErrorsMap['payment_method'] != null) {
             var err = {
               'title': "payment_method",
-              'eList': resp['errors']['payment_method']
+              'eList': validationErrorsMap['payment_method']
             };
             errors.add(err);
             if (scrollField == false) {
@@ -2942,10 +2976,10 @@ class PostRideController extends GetxController {
           } else {
             positionValue += 1;
           }
-          if (resp['errors']['booking_type'] != null) {
+          if (validationErrorsMap['booking_type'] != null) {
             var err = {
               'title': "booking_type",
-              'eList': resp['errors']['booking_type']
+              'eList': validationErrorsMap['booking_type']
             };
             errors.add(err);
             if (scrollField == false) {
@@ -2955,17 +2989,20 @@ class PostRideController extends GetxController {
           } else {
             positionValue += 1;
           }
-          if (resp['errors']['notes'] != null) {
-            var err = {'title': "notes", 'eList': resp['errors']['notes']};
+          if (validationErrorsMap['notes'] != null) {
+            var err = {'title': "notes", 'eList': validationErrorsMap['notes']};
             errors.add(err);
           }
-          if (resp['errors']['agree_terms'] != null) {
+          if (validationErrorsMap['agree_terms'] != null) {
             var err = {
               'title': "agree_terms",
-              'eList': resp['errors']['agree_terms']
+              'eList': validationErrorsMap['agree_terms']
             };
             errors.add(err);
           }
+        } else if (resp['status'] != null && resp['status'] == "Error") {
+          serviceController.showDialogue(resp['message'].toString(),
+              type: "error");
         } else if (resp['status'] != null && resp['status'] == "Success") {
           serviceController.navigationIndex.value = 0;
           await Get.defaultDialog(
@@ -3156,13 +3193,14 @@ class PostRideController extends GetxController {
     }
   }
 
+  /// Fetches suggested price-per-km from the API in the background (no full-screen overlay).
+  /// Route segment distances use [routeDistanceLoading] + hints under the price fields instead.
   getCitiesDistance() async {
     if (fromTextEditingController.text == "" &&
         toTextEditingController.text == "") {
       return;
     }
     try {
-      isOverlayLoading(true);
       await PostRideProvider()
           .getCitiesDistance(serviceController.token, serviceController.langId,
               fromTextEditingController.text, toTextEditingController.text)
@@ -3194,13 +3232,10 @@ class PostRideController extends GetxController {
             }
           }
         }
-        isOverlayLoading(false);
       }, onError: (err) {
-        isOverlayLoading(false);
         serviceController.showDialogue(err.toString(), type: "error");
       });
     } catch (exception) {
-      isOverlayLoading(false);
       serviceController.showDialogue(exception.toString(), type: "error");
     }
   }
@@ -3211,7 +3246,6 @@ class PostRideController extends GetxController {
       return;
     }
     try {
-      isOverlayLoading(true);
       await PostRideProvider()
           .getCitiesDistance(serviceController.token, serviceController.langId,
               fromSpotControllers[index].text, toSpotControllers[index].text)
@@ -3222,13 +3256,10 @@ class PostRideController extends GetxController {
                 resp['data']['pricePerKm'].toString();
           }
         }
-        isOverlayLoading(false);
       }, onError: (err) {
-        isOverlayLoading(false);
         serviceController.showDialogue(err.toString(), type: "error");
       });
     } catch (exception) {
-      isOverlayLoading(false);
       serviceController.showDialogue(exception.toString(), type: "error");
     }
   }

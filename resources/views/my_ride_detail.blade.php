@@ -549,8 +549,8 @@
                             </div>
                         </div>
                     </div>
-                    @if (strtotime($ride->date) > strtotime('today') ||
-                            (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) > strtotime('now')))
+                    @if (strtotime($ride->completed_date) > strtotime('today') ||
+                            (strtotime($ride->completed_date) == strtotime('today') && strtotime($ride->completed_time) > strtotime('now')))
                         @if (!$ride->isCancelled())
                             <div class="flex w-full gap-4">
                                 <a href="{{ route('edit_ride', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id]) }}"
@@ -969,66 +969,66 @@
 
             cancelRideBtn.addEventListener('click', function(event) {
                 event.preventDefault();
-                const bookedSeats =
-                    {{ $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') }};
+                // const bookedSeats = {{ $ride->bookings()->where('status', '<>', 3)->where('status', '<>', 4)->whereHas('passenger', function ($query) {$query->whereNull('deleted_at');})->sum('seats') }};
 
-                if (bookedSeats === 0) {
+                // if (bookedSeats === 0) {
                     const confirmModal = document.getElementById('cancelRideConfirmModal');
                     if (confirmModal) {
                         confirmModal.classList.remove('hidden');
                         confirmModal.style.display = 'block';
                     }
-                } else {
-                    window.location.href =
-                        "{{ route('ride.cancel', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id]) }}";
-                }
+                // } else {
+                //     window.location.href =
+                //         "{{ route('ride.cancel', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id]) }}";
+                // }
             });
 
             const cancelRideConfirmYes = document.getElementById('cancelRideConfirmYes');
             if (cancelRideConfirmYes) {
                 cancelRideConfirmYes.addEventListener('click', function() {
                     closeBookingModal('cancelRideConfirmModal');
+                    window.location.href =
+                        "{{ route('ride.cancel', ['lang' => $selectedLanguage->abbreviation, 'id' => $ride->id]) }}";
+                    // fetch("{{ route('update_cancel_ride', $ride->id) }}", {
+                    //         method: 'POST',
+                    //         headers: {
+                    //             'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    //             'Content-Type': 'application/json',
+                    //             'X-HTTP-Method-Override': 'PUT'
+                    //         },
+                    //         body: JSON.stringify({})
+                    //     })
+                    //     .then(response => response.json())
+                    //     .then(data => {
+                    //         const resultModal = document.getElementById('cancelRideResultModal');
+                    //         const resultMessage = document.getElementById('cancelRideResultMessage');
+                    //         const resultCloseBtn = document.getElementById('cancelRideResultClose');
+                    //         if (!resultModal || !resultMessage) return;
 
-                    fetch("{{ route('update_cancel_ride', $ride->id) }}", {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Content-Type': 'application/json',
-                                'X-HTTP-Method-Override': 'PUT'
-                            },
-                            body: JSON.stringify({})
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            const resultModal = document.getElementById('cancelRideResultModal');
-                            const resultMessage = document.getElementById('cancelRideResultMessage');
-                            const resultCloseBtn = document.getElementById('cancelRideResultClose');
-                            if (!resultModal || !resultMessage) return;
-
-                            if (data.success) {
-                                resultMessage.textContent = 'This ride has been cancelled';
-                                resultCloseBtn.onclick = function() { closeCancelRideResultModal(true); };
-                            } else if (data.error && data.message) {
-                                resultMessage.textContent = data.message;
-                                resultCloseBtn.onclick = function() { closeCancelRideResultModal(false); };
-                            } else {
-                                resultMessage.textContent = 'Failed to cancel the ride.';
-                                resultCloseBtn.onclick = function() { closeCancelRideResultModal(false); };
-                            }
-                            resultModal.classList.remove('hidden');
-                            resultModal.style.display = 'block';
-                        })
-                        .catch(function() {
-                            const resultModal = document.getElementById('cancelRideResultModal');
-                            const resultMessage = document.getElementById('cancelRideResultMessage');
-                            const resultCloseBtn = document.getElementById('cancelRideResultClose');
-                            if (resultModal && resultMessage) {
-                                resultMessage.textContent = 'An error occurred while cancelling the ride.';
-                                resultCloseBtn.onclick = function() { closeCancelRideResultModal(false); };
-                                resultModal.classList.remove('hidden');
-                                resultModal.style.display = 'block';
-                            }
-                        });
+                    //         if (data.success) {
+                    //             resultMessage.textContent = 'This ride has been cancelled';
+                    //             resultCloseBtn.onclick = function() { closeCancelRideResultModal(true); };
+                    //         } else if (data.error && data.message) {
+                    //             resultMessage.textContent = data.message;
+                    //             resultCloseBtn.onclick = function() { closeCancelRideResultModal(false); };
+                    //         } else {
+                    //             resultMessage.textContent = 'Failed to cancel the ride.';
+                    //             resultCloseBtn.onclick = function() { closeCancelRideResultModal(false); };
+                    //         }
+                    //         resultModal.classList.remove('hidden');
+                    //         resultModal.style.display = 'block';
+                    //     })
+                    //     .catch(function() {
+                    //         const resultModal = document.getElementById('cancelRideResultModal');
+                    //         const resultMessage = document.getElementById('cancelRideResultMessage');
+                    //         const resultCloseBtn = document.getElementById('cancelRideResultClose');
+                    //         if (resultModal && resultMessage) {
+                    //             resultMessage.textContent = 'An error occurred while cancelling the ride.';
+                    //             resultCloseBtn.onclick = function() { closeCancelRideResultModal(false); };
+                    //             resultModal.classList.remove('hidden');
+                    //             resultModal.style.display = 'block';
+                    //         }
+                    //     });
                 });
             }
         });

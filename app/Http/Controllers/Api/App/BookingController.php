@@ -8,7 +8,6 @@ use App\Mail\BookingRequestMail;
 use App\Mail\DriverDetailsMail;
 use App\Mail\PassengerDetailsMail;
 use App\Mail\PaymentInvoiceMail;
-use App\Mail\RejectBookingRequestMail;
 use App\Models\Booking;
 use App\Models\BookingPageSettingDetail;
 use App\Models\Card;
@@ -44,6 +43,7 @@ use Stripe\PaymentMethod;
 use Stripe\Refund;
 use Stripe\Stripe;
 use Twilio\Rest\Client;
+use App\Services\BookingRequestRejectService;
 use App\Services\SeatHoldService;
 use App\Mail\SecuredCashPaymentCodeMail;
 use App\Models\FeaturesSettingDetail;
@@ -3913,243 +3913,59 @@ class BookingController extends Controller
         return $this->apiErrorResponse(strip_tags($message->request_expired_message ?? 'Request expired'), 200);
     }
 
+    /**
+     * Decline a pending booking request: persist refunds/seats via {@see BookingRequestRejectService},
+     * then queue passenger notifications ({@see \App\Jobs\NotifyBookingRequestRejectedJob}).
+     */
     public function RejectBookingRequest(Request $request)
     {
+        $message = $this->successMessage;
 
-        $selectedLanguage = app()->getLocale() ?? 'en';
-        $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-        $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('request_expired_message')->first();
+        $booking = Booking::with(['ride.driver', 'passenger'])->whereId($request->booking_id)->first();
 
-        $booking = Booking::with('ride')->whereId($request->booking_id)->first();
-        $getPaymentMethodId = FeaturesSetting::where('slug', 'cash')->value('id');
-
-
+        if (!$booking || !$booking->ride) {
+            return $this->apiErrorResponse('Booking request not found', 200);
+        }
 
         $user = Auth::guard('sanctum')->user();
-
         if ($booking->ride->added_by != $user->id) {
             return $this->apiErrorResponse('Booking request not found', 200);
         }
 
-
-
-        if ($booking && $booking->status === '0') {
-            $booking->update([
-                'status' => '3',
-                'expires_at' => null,
-            ]);
-
-
-            // Release seats linked to this booking
-            $getSeatDetails = SeatDetail::where('booking_id', $booking->id)->get();
-            if (isset($getSeatDetails) && !empty($getSeatDetails)) {
-                foreach ($getSeatDetails as $key => $getSeatDetail) {
-                    $getSeatDetail->status = 'pending';
-                    $getSeatDetail->booking_id = NULL;
-                    $getSeatDetail->user_id = NULL;
-                    $getSeatDetail->save();
-                }
-            }
-
-            // Also release any orphaned hold seats (held by this passenger for this ride but never linked to booking_id)
-            $orphanedHoldSeats = SeatDetail::where('ride_id', $booking->ride_id)
-                ->where('user_id', $booking->user_id)
-                ->where('status', 'hold')
-                ->get();
-            if ($orphanedHoldSeats->isNotEmpty()) {
-                foreach ($orphanedHoldSeats as $seat) {
-                    $seat->status = 'pending';
-                    $seat->booking_id = NULL;
-                    $seat->user_id = NULL;
-                    $seat->save();
-                }
-            }
-
-            $getTranscationsSum = Transaction::where('booking_id', $booking->id)->where('type', '3')->sum('price');
-
-            $getTranscationsSum = $getTranscationsSum == null ? 0 : $getTranscationsSum;
-
-            $transactions = Transaction::where('booking_id', $booking->id)->where('type', '1')->get();
-            foreach ($transactions as $transaction) {
-                if ($transaction) {
-
-                    $transactionAmt = 0.0;
-                    if (isset($transaction->coffee_from_wall) && $transaction->coffee_from_wall == 1) {
-                        $transactionAmt = ((float)$transaction->price - $getTranscationsSum) - (float)$transaction->booking_fee;
-                    } else {
-                        $transactionAmt = (float)$transaction->price - $getTranscationsSum;
-                    }
-
-                    $refundId = "";
-                    if ($transaction->pay_by_account == 0) {
-                        if ($transaction->paypal_id) {
-                            $uniqueId = strtotime(date('Y-m-d H:i:s'));
-                            $paypal = new PayPalClient;
-                            $paypal->setApiCredentials(config('paypal'));
-                            $token = $paypal->getAccessToken();
-                            $paypal->setAccessToken($token);
-                            $response = $paypal->refundCapturedPayment(
-                                $transaction->paypal_id,
-                                'Invoice-' . $uniqueId,
-                                $booking->ride->payment_method != $getPaymentMethodId ? $transactionAmt : $transaction->booking_fee,
-                                'Refund issued.'
-                            );
-                            $refundId = isset($response['id']) ? $response['id'] : "";
-                        } elseif ($transaction->stripe_id) {
-                            // Set your Stripe API key
-                            Stripe::setApiKey(env('STRIPE_SECRET'));
-
-                            try {
-                                // Create a refund using the payment intent ID
-                                $refund = Refund::create([
-                                    'payment_intent' => $transaction->stripe_id,
-                                    'amount' => $booking->ride->payment_method != $getPaymentMethodId ? $transactionAmt * 100 : $transaction->booking_fee * 100, // Refund amount in cents
-                                ]);
-                                $refundId = $refund->id;
-                            } catch (\Stripe\Exception\ApiErrorException $e) {
-                                // Handle error
-                                return $this->apiErrorResponse($e->getMessage(), 200);
-                            }
-                        }
-                    } else {
-                        $topUpBalance = TopUpBalance::create([
-                            'booking_id' => $transaction->booking_id,
-                            'user_id' => $booking->user_id,
-                            'dr_amount' => $booking->ride->payment_method != $getPaymentMethodId ? $transactionAmt : $transaction->booking_fee,
-                            'added_date' => date('Y-m-d'),
-                        ]);
-                    }
-
-                    if (isset($transaction->coffee_from_wall) && $transaction->coffee_from_wall == 1) {
-                        $coffeeWallet = CoffeeWallet::create([
-                            'booking_id' => $booking->id,
-                            'ride_id' => $booking->ride_id,
-                            'user_id' => $booking->user_id,
-                            'dr_amount' => $transaction->booking_fee,
-                        ]);
-                    }
-
-
-                    $newTransaction = Transaction::create([
-                        'booking_id' => $transaction->booking_id,
-                        'ride_id' => $booking->ride_id,
-                        'parent_id' => $transaction->id,
-                        'type' => '3',
-                        'price' => $booking->ride->payment_method != $getPaymentMethodId ? $transaction->price : 0,
-                        'booking_fee' => $booking->ride->payment_method == $getPaymentMethodId ? $transaction->booking_fee : 0,
-                        'paypal_id' => isset($transaction->paypal_id) ? $refundId : NULL,
-                        'stripe_id' => isset($transaction->stripe_id) ? $refundId : NULL
-                    ]);
-                }
-            }
-        } else {
+        if (!$booking->isRequested()) {
             return $this->apiErrorResponse(strip_tags($message->request_expired_message ?? 'Request expired'), 200);
         }
 
-        $notification = Notification::create([
-            'type' => \App\Models\Notification::TYPE_RIDE_DETAIL,
-            'ride_id' => $booking->ride_id,
-            'posted_to' => $booking->id,
-            'posted_by' => $booking->ride->added_by,
-            'message' => getNotificationMessageText(
-                'booking_request_declined',
-                $booking->passenger,
-                [],
-                'Booking request declined'
-            ),
-            'status' => 'reject',
-            'notification_type' => 'upcoming',
-            'ride_detail_id' => $booking->ride_detail_id,
-            'departure' => $booking->departure,
-            'destination' => $booking->destination
-        ]);
-
-        $user = User::whereId($booking->user_id)->first();
-        // Assuming $user and $fcmToken are defined
-        $fcmToken = $user->mobile_fcm_token;
-        $body = $notification->message;
-
-        if ($fcmToken) {
-            $fcmService = new FCMService();
-            // Send the booking notification
-            $fcmService->sendNotification($fcmToken, $body);
+        $reject = app(BookingRequestRejectService::class)->rejectApi($booking);
+        if (!$reject['ok']) {
+            return $this->apiErrorResponse($reject['api_error'], 200);
         }
 
-        $data = ['first_name' => $booking->passenger->first_name, 'seats' => $booking->seats, 'price' => $booking->fare, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => $booking->ride->date, 'time' => $booking->ride->time];
+        $this->notifyBookingRequestRejectedWebFlow($booking, $user, 'api');
 
-        // Send booking request email
-        Mail::to($booking->passenger->email)->queue(new RejectBookingRequestMail($data));
-
-        $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)->where('verified', '1')->where('default', '1')->first();
-
-        if (!$phoneNumber) {
-            $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)->where('verified', '1')->first();
-        }
-
-        if ($phoneNumber && env('APP_ENV') != 'local') {
-            // Send the secured cash code via Twilio
-            $sid = env('TWILIO_ACCOUNT_SID');
-            $token = env('TWILIO_AUTH_TOKEN');
-            $from = env('TWILIO_PHONE_NUMBER');
-
-            $twilio = new Client($sid, $token);
-            $to = $phoneNumber->phone;
-
-            $title = "";
-            $currentHour = date('H');
-            if ($currentHour >= 0 && $currentHour < 12) {
-                $title = "Good morning " . $booking->passenger->first_name . "";
-            } elseif ($currentHour >= 12 && $currentHour < 17) {
-                $title = "Good afternoon " . $booking->passenger->first_name . "";
-            } else {
-                $title = "Good evening " . $booking->passenger->first_name . "";
-            }
-
-            $depatureDate = date('d F, Y H:i:s', strtotime('' . $booking->ride->date . ' ' . $booking->ride->time . ''));
-
-            $message = "" . $title . "\nDriver reject your booking request from this ride\nTrip detail\nOrigin: " . $booking->departure . "\nDestination: " . $booking->destination . "\nDeparture date: " . $depatureDate . "\nDriver name: " . $booking->ride->driver->first_name . "\nDriver phone number: " . $booking->ride->driver->phone . "";
-
-            try {
-                $res = $twilio->messages->create(
-                    $to,
-                    [
-                        'from' => $from,
-                        'body' => $message,
-                    ]
-                );
-            } catch (\Exception  $e) {
-                Log::info('can not send text to ' . $to . ' and message is ' . $message . ' because ' . $e->getMessage());
-
-                // return $this->errorResponse('Can not send text to ' . $phoneNumber->phone . ' because unable to create record: Authenticate');
-            }
-        }
-
-        $selectedLanguage = app()->getLocale();
+        $selectedLanguageAbbr = app()->getLocale();
         $messages = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-
-            if ($selectedLanguage) {
-                // Retrieve the HomePageSettingDetail associated with the selected language
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('reject_booking_message', 'general_error_message')->first();
+        if ($selectedLanguageAbbr) {
+            $langRow = Language::where('abbreviation', $selectedLanguageAbbr)->first();
+            if ($langRow) {
+                $messages = SuccessMessagesSettingDetail::where('language_id', $langRow->id)->select('reject_booking_message', 'general_error_message')->first();
             }
         } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('reject_booking_message', 'general_error_message')->first();
+            $langRow = Language::where('is_default', 1)->first();
+            if ($langRow) {
+                $messages = SuccessMessagesSettingDetail::where('language_id', $langRow->id)->select('reject_booking_message', 'general_error_message')->first();
             }
         }
 
         $bookings = Booking::where('ride_id', $booking->ride_id)->where('status', '1')
             ->with(['passenger' => function ($query) {
-                // Select specific columns from passenger
                 $query->select('id', 'first_name', 'last_name', 'gender', 'profile_image', 'dob');
             }])
             ->get();
 
         $data = ['booking' => $booking, 'bookings' => $bookings];
-        return $this->successResponse($data, $messages->reject_booking_message ?? null);
+
+        return $this->successResponse($data, $messages?->reject_booking_message ?? null);
     }
 
 

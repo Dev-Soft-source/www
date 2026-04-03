@@ -47,6 +47,7 @@ use App\Models\SeatDetail;
 use Carbon\Carbon;
 use App\Models\SuccessMessagesSettingDetail;
 use App\Models\TopUpBalance;
+use App\Services\DriverRideCancellationService;
 use App\Services\FCMService;
 use Srmklive\PayPal\Services\PayPal as PayPalClient;
 use Illuminate\Support\Facades\View;
@@ -682,308 +683,65 @@ class MyRideController extends Controller
         return view('cancel_ride', ['ride' => $ride, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'setting' => $setting, 'tripsPage' => $tripsPage]);
     }
 
+    /**
+     * Driver cancels ride: limits + persistence in {@see DriverRideCancellationService};
+     * passenger FCM/email/SMS via queued {@see NotifyDriverCancelledRidePassengersJob}.
+     */
     public function updateCancelRide($id, Request $request)
     {
+        $request->validate([
+            'message' => 'required',
+            'reason' => 'required',
+        ]);
+
         $ride = Ride::where('id', $id)->first();
+        if (!$ride) {
+            return redirect()->back()->with(['failure' => __('Ride not found')]);
+        }
+
         $user_id = auth()->user()->id;
         $setting = SiteSetting::getCached();
-        $monthsAgo = Carbon::now()->subMonths($setting->booking_cancel_duration)->setTimezone('UTC');;
+        $monthsAgo = Carbon::now()->subMonths($setting->booking_cancel_duration)->setTimezone('UTC');
 
         $cancellationCount = CancellationHistory::where('user_id', $user_id)
             ->where('created_at', '>=', $monthsAgo)
             ->where('type', 'driver')
-
             ->count();
-        $messages = null;
-        $selectedLanguageAbbreviation = session('selectedLanguage');
 
-        if ($selectedLanguageAbbreviation) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguageAbbreviation)->first();
-            if ($selectedLanguage) {
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('ride_cancel_message')->first();
-                $limitExceed = BookingPageSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_cancellation_limit_exceed')->first();
-            }
-        } else {
-            // Use the default language
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('ride_cancel_message')->first();
-                $limitExceed = BookingPageSettingDetail::where('language_id', $selectedLanguage->id)->select('booking_cancellation_limit_exceed')->first();
-            }
-            $selectedLanguageAbbreviation = $selectedLanguage->abbreviation;
-        }
-        // dd($limitExceed);
+        $messages = $this->successMessage;
+        $limitExceed = BookingPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+
         if ($cancellationCount >= $setting->booking_cancel_limit) {
-            return redirect()->back()->with(['failure' => $limitExceed->booking_cancellation_limit_exceed ?? "Booking cancellation limit exceeded"]);
-
-            // return response()->json(['error' => true, 'message' => $limitExceed->booking_cancellation_limit_exceed ?? "Booking cancellation limit exceeded"]);
+            return redirect()->back()->with(['failure' => $limitExceed->booking_cancellation_limit_exceed ?? 'Booking cancellation limit exceeded']);
         }
 
-        // Check if there are any active bookings
-        $bookedSeats = $ride->bookings()
-            ->where('status', '!=', '0') // Exclude pending bookings
-            ->where('status', '!=', '3') // Exclude canceled bookings
-            ->where('status', '!=', '4') // Exclude completed bookings
-            ->sum('seats');
-        if ($bookedSeats == 0) {
-            $ride->update(['status' => '2']);
+        $cancellation = app(DriverRideCancellationService::class);
+        $bookings = $cancellation->bookingsForWebCancel((int) $id);
 
-            // Add cancellation history
-            CancellationHistory::create([
-                'ride_id' => $ride->id,
-                'user_id' => $ride->added_by,
-                'type' => 'driver',
-            ]);
-
-            // Revoke Extra Care eligibility when driver cancels ride
-            User::where('id', $ride->added_by)->whereIn('folks_ride', ['1', ''])->update(['folks_ride' => '0']);
-
-            $selectedLanguageAbbreviation = session('selectedLanguage');
-
-            if (!$selectedLanguageAbbreviation) {
-                $defaultLanguage = Language::where('is_default', 1)->first();
-                $selectedLanguageAbbreviation = $defaultLanguage->abbreviation;
-            }
-            return response()->json(['success' => true, 'message' => 'Ride canceled successfully.']);
+        if ($bookings->isEmpty()) {
+            $cancellation->markRideCancelledEmpty($ride, true);
+        } else {
+            $bookingIds = $cancellation->cancelByDriverWeb($ride, $bookings);
+            $this->dispatchDriverRideCancelledPassengerWebFlow(
+                $ride->fresh(),
+                auth()->user(),
+                $bookingIds,
+                (string) $request->message,
+                'web'
+            );
         }
 
-        $request->validate([
-            'message' => 'required',
-            'reason' => 'required'
-        ], [
-            'message.required' => 'The message is required',
-            'reason.required' => 'The reason is required',
-        ]);
-
-        $bookings = Booking::where('ride_id', $id)
-            ->where('status', '!=', '0') // Exclude pending bookings
-            ->where('status', '!=', '3') // Exclude canceled bookings
-            ->where('status', '!=', '4') // Exclude completed bookings
-            ->get();
-
-        foreach ($bookings as $booking) {
-            $transactions = Transaction::where('booking_id', $booking->id)->where('type', '1')->get();
-            foreach ($transactions as $transaction) {
-                if ($transaction) {
-                    $refundId = "";
-
-                    $checkPrice = 0.0;
-                    $getRefundEntryPrice = Transaction::where('parent_id', $transaction->id)->sum('price');
-                    if (isset($transaction->coffee_from_wall) && $transaction->coffee_from_wall == 1) {
-                        $getRefundEntryPrice = (float)$getRefundEntryPrice + (float)$transaction->booking_fee;
-                    }
-                    $checkPrice = (float)$transaction->price;
-
-                    if (isset($getRefundEntryPrice) && !is_null($getRefundEntryPrice) && $getRefundEntryPrice == $checkPrice) {
-                        if (isset($transaction->coffee_from_wall) && $transaction->coffee_from_wall == 1) {
-                            $coffeeWallet = CoffeeWallet::create([
-                                'booking_id' => $booking->id,
-                                'ride_id' => $ride->id,
-                                'user_id' => $booking->user_id,
-                                'dr_amount' => $transaction->booking_fee,
-                            ]);
-
-                            $newTransaction = Transaction::create([
-                                'booking_id' => $transaction->booking_id,
-                                'ride_id' => $booking->ride_id,
-                                'parent_id' => $transaction->id,
-                                'type' => '3',
-                                'price' => $transaction->booking_fee,
-                                'paypal_id' => NULL,
-                                'stripe_id' => NULL
-                            ]);
-                        }
-                    } else {
-                        $transactionAmt = $checkPrice - $getRefundEntryPrice;
-
-                        if (isset($transaction->coffee_from_wall) && $transaction->coffee_from_wall == 1) {
-                            $transactionAmt = $transactionAmt - $transaction->booking_fee;
-                        }
-
-                        if ($transaction->pay_by_account == 0) {
-                            if ($transaction->paypal_id) {
-                                $paypal = new PayPalClient;
-                                $paypal->setApiCredentials(config('paypal'));
-                                $token = $paypal->getAccessToken();
-                                $paypal->setAccessToken($token);
-                                $response = $paypal->refundCapturedPayment(
-                                    $transaction->paypal_id,
-                                    'Invoice-' . $transaction->paypal_id,
-                                    $transactionAmt,
-                                    'Refund issued.'
-                                );
-
-                                $refundId = isset($response['id']) ? $response['id'] : "";
-                            } elseif ($transaction->stripe_id) {
-                                // Set your Stripe API key
-                                Stripe::setApiKey(env('STRIPE_SECRET'));
-
-                                try {
-                                    // Create a refund using the payment intent ID
-                                    $refund = Refund::create([
-                                        'payment_intent' => $transaction->stripe_id,
-                                        'amount' => $transactionAmt * 100, // Refund amount in cents
-                                    ]);
-
-                                    $refundId = $refund->id;
-                                } catch (\Stripe\Exception\ApiErrorException $e) {
-                                    // Handle error
-                                    Log::info($e->getMessage());
-                                    // return $this->apiErrorResponse($e->getMessage(), 200);
-                                }
-                            }
-                        } else {
-                            $topUpBalance = TopUpBalance::create([
-                                'booking_id' => $transaction->booking_id,
-                                'user_id' => $booking->user_id,
-                                'dr_amount' => $transactionAmt,
-                                'added_date' => date('Y-m-d'),
-                            ]);
-                        }
-
-                        if (isset($transaction->coffee_from_wall) && $transaction->coffee_from_wall == 1) {
-                            $coffeeWallet = CoffeeWallet::create([
-                                'booking_id' => $booking->id,
-                                'ride_id' => $ride->id,
-                                'user_id' => $booking->user_id,
-                                'dr_amount' => $transaction->booking_fee,
-                            ]);
-                        }
-
-                        $newTransaction = Transaction::create([
-                            'booking_id' => $transaction->booking_id,
-                            'ride_id' => $booking->ride_id,
-                            'parent_id' => $transaction->id,
-                            'type' => '3',
-                            'price' => $transactionAmt,
-                            'paypal_id' => isset($transaction->paypal_id) ? $refundId : NULL,
-                            'stripe_id' => isset($transaction->stripe_id) ? $refundId : NULL
-                        ]);
-                    }
-                }
-            }
-
-            $booking->update([
-                'status' => '4',
-            ]);
-
-            CancellationHistory::create([
-                'ride_id' => $booking->ride_id,
-                'booking_id' => $booking->id,
-                'user_id' => $ride->added_by,
-            ]);
-
-            // Revoke Extra Care eligibility when driver cancels a booking
-            User::where('id', $ride->added_by)->whereIn('folks_ride', ['1', ''])->update(['folks_ride' => '0']);
-
-            $notification = Notification::create([
-                'type' => 2,
-                'ride_id' => $ride->id,
-                'posted_to' => $booking->id,
-                'posted_by' => $ride->added_by,
-                'message' =>  'Your ride has been cancelled',
-                'status' => 'completed',
-                'notification_type' => 'upcoming',
-                'ride_detail_id' => $booking->ride_detail_id,
-                'departure' => $booking->departure,
-                'destination' => $booking->destination
-            ]);
-
-            $fcmService = new FCMService();
-            $fcm_tokens = FCMToken::where('user_id', $booking->user_id)->get();
-            $body = $notification->message;
-
-            $fcmToken = $booking->passenger->mobile_fcm_token;
-            if ($fcmToken) {
-                $fcmService->sendNotification($fcmToken, $body);
-            }
-
-            foreach ($fcm_tokens as $fcm_token) {
-                try {
-                    $fcmService->sendNotification($fcm_token->token, $body);
-                } catch (\Exception $e) {
-                    Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
-                }
-            }
-
-            if (isset($booking->passenger->email_notification) && $booking->passenger->email_notification == 1) {
-                $data = ['driver_name' => $ride->driver->first_name, 'passenger_name' => $booking->passenger->first_name, 'from' => $booking->departure, 'to' => $booking->destination, 'date' => Carbon::parse($ride->date)->format('F d, Y'), 'time' => $ride->time, 'seats' => $booking->seats, 'total_price' => $booking->fare, 'cancellation_reason' => $request->message];
-
-                Mail::to($booking->passenger->email)->queue(new DriverCancelRideMail($data));
-                Mail::to($booking->passenger->email)->queue(new DriverCancelRideWithReasonMail($data));
-            }
-
-            $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)
-                ->where('verified', '1')
-                ->where('default', '1')
-                ->first();
-
-            if (!$phoneNumber) {
-                $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)->where('verified', '1')->first();
-            }
-
-            if ($phoneNumber && env('APP_ENV') != 'local' && isset($booking->passenger->sms_notification) && $booking->passenger->sms_notification == 1) {
-                $sid = env('TWILIO_ACCOUNT_SID');
-                $token = env('TWILIO_AUTH_TOKEN');
-                $from = env('TWILIO_PHONE_NUMBER');
-
-                $twilio = new Client($sid, $token);
-                $to = $phoneNumber->phone;
-
-                $title = "";
-                $currentHour = date('H');
-                if ($currentHour >= 0 && $currentHour < 12) {
-                    $title = "Good morning " . $booking->passenger->first_name . ",";
-                } elseif ($currentHour >= 12 && $currentHour < 17) {
-                    $title = "Good afternoon " . $booking->passenger->first_name . ",";
-                } else {
-                    $title = "Good evening " . $booking->passenger->first_name . ",";
-                }
-
-                // $depatureDate = date('d F, Y H:i:s', strtotime('' . $ride->date . ' ' . $ride->time . ''));
-                $departureTime = date('H:i', strtotime($ride->time));
-                $departureDate = date('d F, Y', strtotime($ride->date));
-
-                // $message = "" . $title . "\nDriver cancelled this ride\nTrip detail\nOrigin: " . $booking->departure . "\nDestination: " . $booking->destination . "\nDeparture date: " . $depatureDate . "\nDriver name: " . $ride->driver->first_name . "\nDriver phone number: " . $ride->driver->phone . "";
-                $message = $title . "\n" .
-                    "From ProximaRide: we are sorry to inform you that your ride from " . $booking->departure .
-                    " to " . $booking->destination .
-                    " on " . $departureDate .
-                    " at " . $departureTime . " has been cancelled by the driver.\n" .
-                    "All amounts that you have made for this booking will be refunded to you immediately.";
-
-                try {
-                    $twilio->messages->create(
-                        $to,
-                        [
-                            'from' => $from,
-                            'body' => $message,
-                        ]
-                    );
-                } catch (\Exception $e) {
-                    \Log::error("Failed to send SMS to {$to}: " . $e->getMessage());
-                }
-            }
-        }
-
-        $ride->update([
-            'status' => '2',
-        ]);
-
-        return redirect()->route('home', ['lang' => $selectedLanguageAbbreviation])
+        return redirect()->route('home', ['lang' => app()->getLocale()])
             ->with(['success' => $messages->ride_cancel_message]);
     }
 
     public function cancelRide($id, Request $request)
     {
-        \Log::info("Attempting to cancel ride with ID: {$id}");
 
         // Find the ride by ID
         $ride = Ride::find($id);
 
         if (!$ride) {
-            \Log::error("Ride not found with ID: {$id}");
             return response()->json(['success' => false, 'message' => 'Ride not found.'], 404);
         }
 
@@ -994,13 +752,11 @@ class MyRideController extends Controller
             ->withActivePassenger()
             ->sum('seats');
 
-        \Log::info("Booked seats count: {$bookedSeats}");
 
         // If there are no active bookings, cancel the ride
         if ($bookedSeats == 0) {
             // Update the ride status to 'cancelled'
             $ride->update(['status' => 'cancelled']);
-            \Log::info("Ride status updated to cancelled for ID: {$id}");
 
             // Add cancellation history
             CancellationHistory::create([

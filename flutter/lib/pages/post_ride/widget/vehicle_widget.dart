@@ -210,6 +210,10 @@ Widget vehicleWidget(
                                               .clear();
                                           controller.vehicleType.value = "";
                                           controller.carImageName.value = "";
+                                          if (controller.alreadyAdded.value) {
+                                            controller
+                                                .ensureExistingVehicleIdSelected();
+                                          }
                                         }),
                             ),
                             5.widthBox,
@@ -236,6 +240,10 @@ Widget vehicleWidget(
                                           .clear();
                                       controller.vehicleType.value = "";
                                       controller.carImageName.value = "";
+                                      if (controller.alreadyAdded.value) {
+                                        controller
+                                            .ensureExistingVehicleIdSelected();
+                                      }
                                     },
                               child: txt20Size(
                                   title: controller.vehicleList.isNotEmpty

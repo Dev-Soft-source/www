@@ -356,8 +356,7 @@ class _PostRideScaffold extends StatelessWidget {
                               // color: Colors.grey.shade100,
                               width: context.screenWidth,
                               child: elevatedButtonWidget(
-                                  enabled: controller.disclaimer.value &&
-                                      !controller.routeDistanceLoading.value,
+                                  enabled: controller.disclaimer.value,
                                   textWidget: txt22Size(
                                       title: controller.rideType.value ==
                                               'update'

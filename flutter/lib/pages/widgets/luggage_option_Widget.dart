@@ -13,9 +13,9 @@ Widget luggageOptionWidget({ controller, context, bool bookingCheck = false}){
           checkBoxSelectionWidget(
               context: context,
               title: "${controller.luggageListLabel[i]}",
-              showToolTipBottom: i == 4 ? true : false,
-              tooltipMessage: i == 4 ? "${controller.luggageListToolTip[i]}" : "",
-              extraChargesToolTip: "${controller.labelTextDetail['luggage_option5_label'] ?? ""}",
+              showToolTipBottom: false, // i == 4 ? true : false,
+              tooltipMessage: "", //i == 4 ? "${controller.luggageListToolTip[i]}" : "",
+              extraChargesToolTip: "",//"${controller.labelTextDetail['luggage_option5_label'] ?? ""}",
               value: controller.luggage.value == "${controller.luggageList[i]}" ? true : false,
               onChanged: bookingCheck == true ? null :  (value) async{
                 if (value == true) {

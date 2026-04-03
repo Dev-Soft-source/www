@@ -24,6 +24,18 @@ class PostRideProvider extends GetConnect {
     return (amount * 100).round().toString();
   }
 
+  /// Normalizes app vehicle id for multipart fields (avoids empty / literal "null").
+  String _sanitizeVehicleIdField(dynamic raw) {
+    if (raw == null) {
+      return '';
+    }
+    final s = raw.toString().trim();
+    if (s.isEmpty || s.toLowerCase() == 'null') {
+      return '';
+    }
+    return s;
+  }
+
   Future getLabelTextDetail(langId) async {
     try {
       var url = "$baseUrl/$postRidePage";
@@ -803,7 +815,6 @@ class PostRideProvider extends GetConnect {
         addNewVehicle = "0";
         skipNow = "0";
         alreadyAdded = "1";
-        data.fields.add(MapEntry("vehicle_id", vehicleId.toString()));
       }
       data.fields.add(MapEntry("skip_vehicle", skipNow.toString()));
       data.fields.add(MapEntry("add_vehicle", addNewVehicle.toString()));
@@ -815,7 +826,8 @@ class PostRideProvider extends GetConnect {
         data.fields.add(MapEntry(
             "recurring_trips", recurringTripsTextEditingController.toString()));
       }
-      data.fields.add(MapEntry("vehicle_id", vehicleId.toString()));
+      data.fields.add(
+          MapEntry("vehicle_id", _sanitizeVehicleIdField(vehicleId)));
       if (carImageName != "") {
         data.files.add(MapEntry("image",
             MultipartFile(File(carImagePath), filename: "$carImageName")));

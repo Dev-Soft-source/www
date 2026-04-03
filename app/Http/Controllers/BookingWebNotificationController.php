@@ -4,13 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Jobs\CompleteBookingNotificationsJob;
 use App\Jobs\NotifyBookingRequestApprovedJob;
+use App\Jobs\NotifyBookingRequestRejectedJob;
+use App\Jobs\NotifyDriverCancelledRidePassengersJob;
 use App\Jobs\NotifyDriverPassengerCancelledJob;
 use App\Mail\AcceptBookingRequestMail;
+use App\Mail\DriverCancelRideMail;
+use App\Mail\DriverCancelRideWithReasonMail;
 use App\Mail\DriverDetailsMail;
 use App\Mail\PassengerCancelBookingMail;
 use App\Mail\PassengerDetailsMail;
 use App\Mail\PassengerListMail;
 use App\Mail\PaymentInvoiceMail;
+use App\Mail\RejectBookingRequestMail;
 use App\Mail\RideApprovalEmail;
 use App\Mail\SecuredCashPaymentCodeMail;
 use App\Models\Booking;
@@ -23,12 +28,14 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Twilio\Rest\Client;
 
 /**
  * Queued / heavy booking notification side effects (FCM, SMS, Mail::queue, DB notifications).
  *
  * Dispatch helpers are called from {@see Controller}; synchronous implementations run inside:
  * {@see CompleteBookingNotificationsJob}, {@see NotifyBookingRequestApprovedJob},
+ * {@see NotifyBookingRequestRejectedJob}, {@see NotifyDriverCancelledRidePassengersJob},
  * {@see NotifyDriverPassengerCancelledJob}.
  */
 class BookingWebNotificationController extends Controller
@@ -700,5 +707,325 @@ class BookingWebNotificationController extends Controller
             'destination' => $booking->destination,
         ]);
         $this->sendFCM($driverSelfNotification->message, $driver);
+    }
+
+    /**
+     * Queue passenger notifications after a driver rejects a pending booking request ({@see NotifyBookingRequestRejectedJob}).
+     *
+     * @param  string  $channel  {@see notifyBookingRequestRejectedWebFlowSync()} — {@code web} or {@code api}.
+     */
+    public function dispatchBookingRequestRejectedNotifications(int $bookingId, int $driverId, string $channel = 'web'): void
+    {
+        dispatch(new NotifyBookingRequestRejectedJob($bookingId, $driverId, $channel));
+    }
+
+    /**
+     * Worker entrypoint: in-app notification, FCM to passenger, optional reject email, optional SMS.
+     *
+     * @param  string  $channel  {@code web} matches legacy web (email/SMS gated by passenger prefs); {@code api} matches legacy API behaviour.
+     */
+    public function notifyBookingRequestRejectedWebFlowSync(Booking $booking, User $driver, string $channel = 'web'): void
+    {
+        $booking->loadMissing(['passenger', 'ride.driver']);
+        $ride = $booking->ride;
+        $passenger = $booking->passenger;
+        if (!$ride || !$passenger) {
+            return;
+        }
+
+        $notification = Notification::create([
+            'type' => 2,
+            'ride_id' => $booking->ride_id,
+            'posted_to' => $booking->id,
+            'posted_by' => $ride->added_by,
+            'message' => getNotificationMessageText(
+                'booking_request_declined',
+                $passenger,
+                [],
+                'Booking request declined'
+            ),
+            'status' => 'reject',
+            'notification_type' => 'upcoming',
+            'ride_detail_id' => $booking->ride_detail_id,
+            'departure' => $booking->departure,
+            'destination' => $booking->destination,
+        ]);
+
+        $this->sendFCM($notification->message, $passenger);
+
+        $sendEmail = $channel === 'api'
+            || (isset($passenger->email_notification) && (int) $passenger->email_notification === 1);
+
+        if ($sendEmail && !empty($passenger->email)) {
+            $data = [
+                'first_name' => $passenger->first_name,
+                'seats' => $booking->seats,
+                'price' => $booking->fare,
+                'from' => $booking->departure,
+                'to' => $booking->destination,
+                'date' => $ride->date,
+                'time' => $ride->time,
+            ];
+            Mail::to($passenger->email)->queue(new RejectBookingRequestMail($data));
+        }
+
+        $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)
+            ->where('verified', '1')
+            ->where('default', '1')
+            ->first();
+        if (!$phoneNumber) {
+            $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)
+                ->where('verified', '1')
+                ->first();
+        }
+
+        if (!$phoneNumber || env('APP_ENV') === 'local') {
+            return;
+        }
+
+        $allowSms = $channel === 'api'
+            || (isset($passenger->sms_notification) && (int) $passenger->sms_notification === 1);
+        if (!$allowSms) {
+            return;
+        }
+
+        $sid = env('TWILIO_ACCOUNT_SID');
+        $token = env('TWILIO_AUTH_TOKEN');
+        $from = env('TWILIO_PHONE_NUMBER');
+        $twilio = new Client($sid, $token);
+        $to = $phoneNumber->phone;
+
+        if ($channel === 'web') {
+            $title = '';
+            $currentHour = date('H');
+            if ($currentHour >= 0 && $currentHour < 12) {
+                $title = 'Good morning ' . $passenger->first_name . ',';
+            } elseif ($currentHour >= 12 && $currentHour < 17) {
+                $title = 'Good afternoon ' . $passenger->first_name . ',';
+            } else {
+                $title = 'Good evening ' . $passenger->first_name . ',';
+            }
+            $departureTime = date('H:i:s', strtotime((string) $ride->time));
+            $depatureDate = date('d F, Y', strtotime((string) $ride->date));
+            $smsBody = $title . "\n" . 'From ProximaRide: We are sorry to inform you that your booking request has been declined by the driver.' . "\n"
+                . 'Ride from ' . $booking->departure . ' to ' . $booking->destination . ' on ' . $depatureDate . ' at ' . $departureTime . "\n"
+                . 'All payments that you have made will be refunded to you immediately';
+        } else {
+            $title = '';
+            $currentHour = date('H');
+            if ($currentHour >= 0 && $currentHour < 12) {
+                $title = 'Good morning ' . $passenger->first_name . '';
+            } elseif ($currentHour >= 12 && $currentHour < 17) {
+                $title = 'Good afternoon ' . $passenger->first_name . '';
+            } else {
+                $title = 'Good evening ' . $passenger->first_name . '';
+            }
+            $depatureDate = date('d F, Y H:i:s', strtotime((string) $ride->date . ' ' . (string) $ride->time));
+            $driverUser = $ride->driver;
+            $driverPhone = $driverUser->phone ?? '';
+            $smsBody = $title . "\nDriver reject your booking request from this ride\nTrip detail\nOrigin: " . $booking->departure
+                . "\nDestination: " . $booking->destination . "\nDeparture date: " . $depatureDate
+                . "\nDriver name: " . ($driverUser->first_name ?? '') . "\nDriver phone number: " . $driverPhone;
+        }
+
+        try {
+            $twilio->messages->create($to, [
+                'from' => $from,
+                'body' => $smsBody,
+            ]);
+        } catch (\Throwable $e) {
+            $msgPreview = strlen($smsBody) > 80 ? substr($smsBody, 0, 80) . '...' : $smsBody;
+            Log::info('Reject booking SMS failed to ' . $to . '. Message: ' . $msgPreview . ' because ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Queue passenger notifications after the driver cancels a ride with active bookings ({@see NotifyDriverCancelledRidePassengersJob}).
+     *
+     * @param  list<int>  $bookingIds
+     * @param  string  $channel  {@code web} or {@code api} — see {@see notifyDriverCancelledRidePassengerWebFlowSync()}.
+     */
+    public function dispatchDriverRideCancelledPassengerNotifications(
+        int $rideId,
+        int $driverUserId,
+        array $bookingIds,
+        string $cancellationMessage,
+        string $channel = 'web'
+    ): void {
+        $bookingIds = array_values(array_filter(array_map('intval', $bookingIds)));
+        if ($bookingIds === []) {
+            return;
+        }
+
+        dispatch(new NotifyDriverCancelledRidePassengersJob(
+            $rideId,
+            $driverUserId,
+            $bookingIds,
+            $cancellationMessage,
+            $channel
+        ));
+    }
+
+    /**
+     * Per-booking: in-app notification, FCM, optional emails, optional SMS (web vs API legacy parity).
+     */
+    public function notifyDriverCancelledRidePassengerWebFlowSync(
+        Booking $booking,
+        Ride $ride,
+        User $driver,
+        string $cancellationMessage,
+        string $channel = 'web'
+    ): void {
+        if ((int) $driver->id !== (int) $ride->added_by) {
+            return;
+        }
+
+        $booking->loadMissing(['passenger', 'ride.driver']);
+        $passenger = $booking->passenger;
+        if (!$passenger) {
+            return;
+        }
+
+        $ride->loadMissing('driver');
+
+        if ($channel === 'web') {
+            $notification = Notification::create([
+                'type' => 2,
+                'ride_id' => $ride->id,
+                'posted_to' => $booking->id,
+                'posted_by' => $ride->added_by,
+                'message' => 'Your ride has been cancelled',
+                'status' => 'completed',
+                'notification_type' => 'upcoming',
+                'ride_detail_id' => $booking->ride_detail_id,
+                'departure' => $booking->departure,
+                'destination' => $booking->destination,
+            ]);
+        } else {
+            $notification = Notification::create([
+                'type' => 2,
+                'ride_id' => $ride->id,
+                'posted_to' => $booking->id,
+                'posted_by' => $ride->added_by,
+                'message' => getNotificationMessageText(
+                    'your_ride_has_been_cancelled',
+                    $passenger,
+                    [],
+                    'Your ride has been cancelled'
+                ),
+                'status' => 'completed',
+                'notification_type' => 'upcoming',
+                'ride_detail_id' => $booking->ride_detail_id,
+                'departure' => $booking->departure,
+                'destination' => $booking->destination,
+            ]);
+        }
+
+        $this->sendFCM($notification->message, $passenger);
+
+        if ($channel === 'web') {
+            if (isset($passenger->email_notification) && (int) $passenger->email_notification === 1 && !empty($passenger->email)) {
+                $driverUser = $ride->driver;
+                $data = [
+                    'driver_name' => $driverUser->first_name ?? '',
+                    'passenger_name' => $passenger->first_name,
+                    'from' => $booking->departure,
+                    'to' => $booking->destination,
+                    'date' => Carbon::parse($ride->date)->format('F d, Y'),
+                    'time' => $ride->time,
+                    'seats' => $booking->seats,
+                    'total_price' => $booking->fare,
+                    'cancellation_reason' => $cancellationMessage,
+                ];
+                Mail::to($passenger->email)->queue(new DriverCancelRideMail($data));
+                Mail::to($passenger->email)->queue(new DriverCancelRideWithReasonMail($data));
+            }
+        } elseif (!empty($passenger->email)) {
+            $driverUser = $ride->driver;
+            $data = [
+                'driver_name' => $driverUser->first_name ?? '',
+                'passenger_name' => $passenger->first_name,
+                'from' => $booking->departure,
+                'to' => $booking->destination,
+                'date' => Carbon::parse($ride->date)->format('F d, Y'),
+                'time' => $ride->time,
+                'seats' => $booking->seats,
+                'total_price' => $booking->fare,
+            ];
+            Mail::to($passenger->email)->queue(new DriverCancelRideMail($data));
+        }
+
+        $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)
+            ->where('verified', '1')
+            ->where('default', '1')
+            ->first();
+        if (!$phoneNumber) {
+            $phoneNumber = PhoneNumber::where('user_id', $booking->user_id)
+                ->where('verified', '1')
+                ->first();
+        }
+
+        if (!$phoneNumber || env('APP_ENV') === 'local') {
+            return;
+        }
+
+        if ($channel === 'web' && (!isset($passenger->sms_notification) || (int) $passenger->sms_notification !== 1)) {
+            return;
+        }
+
+        $sid = env('TWILIO_ACCOUNT_SID');
+        $token = env('TWILIO_AUTH_TOKEN');
+        $from = env('TWILIO_PHONE_NUMBER');
+        $twilio = new Client($sid, $token);
+        $to = $phoneNumber->phone;
+
+        if ($channel === 'web') {
+            $title = '';
+            $currentHour = date('H');
+            if ($currentHour >= 0 && $currentHour < 12) {
+                $title = 'Good morning ' . $passenger->first_name . ',';
+            } elseif ($currentHour >= 12 && $currentHour < 17) {
+                $title = 'Good afternoon ' . $passenger->first_name . ',';
+            } else {
+                $title = 'Good evening ' . $passenger->first_name . ',';
+            }
+            $departureTime = date('H:i', strtotime((string) $ride->time));
+            $departureDate = date('d F, Y', strtotime((string) $ride->date));
+            $smsBody = $title . "\n"
+                . 'From ProximaRide: we are sorry to inform you that your ride from ' . $booking->departure
+                . ' to ' . $booking->destination
+                . ' on ' . $departureDate
+                . ' at ' . $departureTime . " has been cancelled by the driver.\n"
+                . 'All amounts that you have made for this booking will be refunded to you immediately.';
+        } else {
+            $title = '';
+            $currentHour = date('H');
+            if ($currentHour >= 0 && $currentHour < 12) {
+                $title = 'Good morning ' . $passenger->first_name . '';
+            } elseif ($currentHour >= 12 && $currentHour < 17) {
+                $title = 'Good afternoon ' . $passenger->first_name . '';
+            } else {
+                $title = 'Good evening ' . $passenger->first_name . '';
+            }
+            $depatureDate = date('d F, Y H:i:s', strtotime((string) $ride->date . ' ' . (string) $ride->time));
+            $driverUser = $ride->driver;
+            $driverPhone = $driverUser->phone ?? '';
+            $smsBody = $title . "\nDriver cancelled this ride\nTrip detail\nOrigin: " . $booking->departure
+                . "\nDestination: " . $booking->destination . "\nDeparture date: " . $depatureDate
+                . "\nDriver name: " . ($driverUser->first_name ?? '') . "\nDriver phone number: " . $driverPhone;
+        }
+
+        try {
+            $twilio->messages->create($to, [
+                'from' => $from,
+                'body' => $smsBody,
+            ]);
+        } catch (\Throwable $e) {
+            if ($channel === 'web') {
+                Log::error("Failed to send SMS to {$to}: " . $e->getMessage());
+            } else {
+                Log::info('can not send text to ' . $to . ' and message is ' . $smsBody . ' because ' . $e->getMessage());
+            }
+        }
     }
 }

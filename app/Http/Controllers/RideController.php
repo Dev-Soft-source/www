@@ -2,10 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\ExtraCareRideMail;
-use App\Mail\PinkExtraCareRideMail;
-use App\Mail\PinkRideMail;
-use App\Mail\RidePostedMail;
 use App\Models\Booking;
 use App\Models\BookingPageSettingDetail;
 use App\Models\CancellationHistory;
@@ -14,7 +10,6 @@ use App\Models\FeaturesSettingDetail;
 use App\Models\FindRidePageSettingDetail;
 use App\Models\FolkRideSetting;
 use App\Models\Language;
-use App\Models\Notification;
 use App\Models\PinkRideSetting;
 use App\Models\PostRidePageSettingDetail;
 use App\Models\PostRidePageSettingSubDetail;
@@ -38,6 +33,7 @@ use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\SeatDetail;
 use App\Services\FCMService;
+use App\Services\RidePostService;
 use Illuminate\Support\Facades\View;
 use Carbon\Carbon;
 use Illuminate\Contracts\Validation\Rule;
@@ -46,7 +42,6 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class RideController extends Controller
@@ -450,7 +445,7 @@ class RideController extends Controller
     }
 
 
-    protected function normalizePostRideRequest(Request $request, ?Ride $ride = null): void
+    public function normalizePostRideRequest(Request $request, ?Ride $ride = null): void
     {
         $merge = [];
 
@@ -459,7 +454,14 @@ class RideController extends Controller
         }
 
         if (!$request->filled('vehicle_mode')) {
-            $merge['vehicle_mode'] = $ride && $ride->vehicle_id ? 'existing' : 'skip';
+            // App multipart sends skip_vehicle / add_vehicle / added_vehicle instead of vehicle_mode;
+            // do not pre-fill from DB or normalizeAppPostRideRequest cannot apply the user's choice.
+            $hasAppVehicleFlags = $request->has('skip_vehicle')
+                || $request->has('add_vehicle')
+                || $request->has('added_vehicle');
+            if (!$hasAppVehicleFlags) {
+                $merge['vehicle_mode'] = $ride && $ride->vehicle_id ? 'existing' : 'skip';
+            }
         }
 
         if (!$request->has('origin') && $request->filled('from')) {
@@ -491,7 +493,7 @@ class RideController extends Controller
 
 
 
-    protected function syncRideSeatDetails(Ride $ride, int $seatCount): void
+    public function syncRideSeatDetails(Ride $ride, int $seatCount): void
     {
         $seatCount = max(1, $seatCount);
 
@@ -541,7 +543,7 @@ class RideController extends Controller
         }
     }
 
-    protected function syncRideStopsAndSegments(
+    public function syncRideStopsAndSegments(
         Ride $ride,
         Request $request,
         string $originLabel,
@@ -679,7 +681,7 @@ class RideController extends Controller
         }
     }
 
-    protected function syncRecurringRideFromTemplate(
+    public function syncRecurringRideFromTemplate(
         Ride $ride,
         Ride $templateRide,
         RideDetail $sourceRideDetail,
@@ -824,7 +826,7 @@ class RideController extends Controller
         }
     }
 
-    protected function deleteRideCascade(Ride $ride): void
+    public function deleteRideCascade(Ride $ride): void
     {
         RideStopSegment::where('ride_id', $ride->id)->delete();
         RideStop::where('ride_id', $ride->id)->delete();
@@ -840,18 +842,19 @@ class RideController extends Controller
     {
 
         if ($ride_id) {
-            $ride = Ride::where('id', $ride_id)->where('added_by', auth()->id())->first();
-            if (!$ride) {
+            $existingRide = Ride::where('id', $ride_id)->where('added_by', auth()->id())->with('detail')->first();
+            if (!$existingRide) {
                 abort(404);
             }
-            $this->normalizePostRideRequest($request, $ride);
+            $this->normalizePostRideRequest($request, $existingRide);
         } else {
+            $existingRide = null;
             $this->normalizePostRideRequest($request);
         }
 
 
         // form validation
-        $validator = $this->buildPostRideStoreValidator($request);
+        $validator = $this->buildPostRideStoreValidator($request, (int) $ride_id);
         $this->appendStopDepartureAtValidation($request, $validator);
         $validatorFailureResponse = $this->handlePostRideValidationFailure($validator);
         if ($validatorFailureResponse) {
@@ -872,843 +875,56 @@ class RideController extends Controller
         if ($featureValidationResponse) {
             return $featureValidationResponse;
         }
-        $origin = $request->origin['label'];
-        $originCityId = $request->origin['city_id'];
-        $destination = $request->destination['label'];
-        $destinationCityId = $request->destination['city_id'];
+        $persist = app(RidePostService::class)->persist(
+            $request,
+            $user,
+            (int) $ride_id,
+            $existingRide,
+            $message,
+            $this
+        );
 
-        // when update a ride, check if seats & price is valid
-        if ($ride_id) {
-            $lockedSeatCount = SeatDetail::where('ride_id', $ride_id)
-                ->whereIn('status', ['booked', 'hold'])
-                ->count();
-
-            if ((int) $request->input('seats_total') < $lockedSeatCount) {
-                return back()
-                    ->with('error', 'You cannot reduce seats below the number already reserved for this ride.')
-                    ->with('heading', 'Seats Update Not Allowed')
-                    ->withInput();
+        if (!$persist->ok) {
+            $response = back()->with('error', $persist->errorMessage);
+            if ($persist->errorHeading) {
+                $response = $response->with('heading', $persist->errorHeading);
             }
-
-            $hasBookings = Booking::where('ride_id', $ride_id)
-                ->bookedOrCompleted()
-                ->withActivePassenger()
-                ->exists();
-
-            $ride = Ride::with('detail')->find($ride_id);
-            $currentPrice = $ride->detail->price ?? null;
-            $newPrice = (int) $request->input('price_minor');
-            if ($hasBookings && $currentPrice !== null && (int) $currentPrice !== $newPrice) {
-                return back()
-                    ->with('error', 'You cannot change the price once passengers have booked this ride.')
-                    ->with('heading', 'Price Change Not Allowed')
-                    ->withInput();
+            if ($persist->withFullRequestInput) {
+                $response = $response->withInput($request->all());
             }
+            if ($persist->uploadedImage !== null) {
+                $response = $response->with('uploaded_image', $persist->uploadedImage);
+            }
+            return $response;
         }
 
-        $formattedDate = Carbon::parse($request->date)->format('Y-m-d');
-        $formattedTime = strlen($request->time) <= 5
-            ? Carbon::createFromFormat('H:i', $request->time)->format('H:i')
-            : Carbon::parse($request->time)->format('H:i');
-
-        $rideDateTime = Carbon::parse($formattedDate . ' ' . $formattedTime);
-        if ($rideDateTime->lte(Carbon::now()->addMinutes($adminSetting->ride_post_dead_time ?? 0))) {
-            return redirect()->back()
-                ->with('error', $message->ride_dead_time_text ?? 'The ride time you selected is too close. Please select a time that is more than 15 minutes in the future')
-                ->withInput();
-        }
-
-        // validate if ride is duplicated
-        $rides = Ride::where('added_by', $user_id)
-            ->when($ride_id != 0, fn($q) => $q->where('id', '!=', $ride_id))
-            ->get();
-        $duplicateRideResponse = $this->validatePostRideDuplicateDateTime($rides, $formattedDate, $formattedTime, $message, $request);
-        if ($duplicateRideResponse) {
-            return $duplicateRideResponse;
-        }
-
-        $adminSetting = SiteSetting::getCached();
-
-        // 
-        $distance = (int) $request->input('distance_meters', 0);
-        $distance = round(($distance / 1000), 2);
-        $duration = (int) $request->input('duration', 0);
-
-        // check if the ride is overlapped. refer to destination hours
-        $totalHours = $duration / 3600;
-        $fullHours = floor($totalHours);
-        $minutes = round(($totalHours - $fullHours) * 60);
-        $rideDateTime->addHours(($adminSetting->destination_hours ?? 0) + $fullHours)->addMinutes($minutes);
-        $destinationReachedDate = $rideDateTime->toDateString();
-        $destinationReachedTime = $rideDateTime->toTimeString();
-
-        $rideDateTime->addHours($adminSetting->ride_completed_hours ?? 0);
-        $destinationCompletedDate = $rideDateTime->toDateString();
-        $destinationCompletedTime = $rideDateTime->toTimeString();
-
-
-        $duration += $adminSetting->destination_hours * 3600 ?? 0;
-        $duration += $adminSetting->ride_completed_hours * 3600 ?? 0;
-
-        $statDateTime = Carbon::parse("$request->date $request->time");
-        $endDateTime = Carbon::parse("$destinationReachedDate $destinationReachedTime");
-
-        $overred_ride = Ride::NotCancelled()
-            ->when($ride_id != 0, fn($q) => $q->where('id', '!=', $ride_id))
-            ->where('added_by', $user_id)
-            ->whereRaw("CONCAT(date, ' ', time) < ?", [$endDateTime])
-            ->whereRaw("CONCAT(destination_reached_date, ' ', destination_reached_time) > ?", [$statDateTime])
-            ->first();
-
-        if (isset($overred_ride) && !empty($overred_ride)) {
-            $oldInput = $request->all();
-            return back()->with('error', $message->overlap_ride_message ?? 'This ride overlaps with an existing ride you already have')->with('heading', $message->overlap_ride_title ?? 'Ride already schedule')->withInput($oldInput)->with('uploaded_image', $filename ?? null);
-        }
-
-
-        // process of vehicle 
-        if ($request->hasFile('vehicle_image')) {
-            $file = $request->file('vehicle_image');
-            $filename = $file->getClientOriginalName();
-            $destination_path = public_path('car_images');
-            $file->move($destination_path, $filename);
-        } elseif ($request->has('existing_image')) {
-            $filename = $request->input('existing_image');
-        } else {
-            $filename = '';
-        }
-
-        $vehiclePayload = [
-            'vehicle_mode' => $request->vehicle_mode,
-            'filename' => $filename ?? '',
-            'make' => '',
-            'model' => '',
-            'vehicle_type' => '',
-            'year' => '',
-            'color' => '',
-            'license_no' => '',
-            'power_type' => '',
-            'vehicle_id' => null,
-            'skip_vehicle' => 0,
-            'add_vehicle' => 0,
-            'added_vehicle' => 0,
-        ];
-        $this->processPostRideVehicleMode($request, $vehiclePayload);
-        extract($vehiclePayload, EXTR_OVERWRITE);
-
-        // process of recurring
-        $recurring = $request->filled('recurring') ? $request->recurring : 0;
-        if ($recurring == 0) {
-            $recurring_type = '';
-            $recurring_trips = '';
-        } else {
-            $recurring_type = $request->recurring_type;
-            $recurring_trips = $request->recurring_trips;
-        }
-
-        // Join the selected checkboxes with semicolons.
-        $features = implode('=', $request->input('features', []));
-        $max_back_seats = $request->filled('max_back_seats') ? $request->max_back_seats : 0;
-        $accept_more_luggage = $request->filled('accept_more_luggage') ? $request->accept_more_luggage : 0;
-        $open_customized = $request->filled('open_customized') ? $request->open_customized : 0;
-
-        $data = array_filter([
-            // Departure
-            'departure' => $request->origin['label'],
-            'departure_lat' => $request->departure_lat,
-            'departure_lng' => $request->departure_lng,
-            'departure_place' => $request->departure_place,
-            'departure_route' => $request->departure_route,
-            'departure_zipcode' => $request->departure_zipcode,
-            'departure_city' => $request->departure_city,
-            'departure_state' => $request->departure_state,
-            'departure_state_short' => $request->departure_state_short,
-            'departure_country' => $request->departure_country,
-
-            // Destination
-            'destination' => $request->destination['label'],
-            'destination_lat' => $request->destination_lat,
-            'destination_lng' => $request->destination_lng,
-            'destination_place' => $request->destination_place,
-            'destination_route' => $request->destination_route,
-            'destination_zipcode' => $request->destination_zipcode,
-            'destination_city' => $request->destination_city,
-            'destination_state' => $request->destination_state,
-            'destination_state_short' => $request->destination_state_short,
-            'destination_country' => $request->destination_country,
-
-            // Trip info
-            'total_distance' => $request->total_distance,
-            'total_time' => $request->total_time,
-            'date' => $formattedDate,
-            'time' => $formattedTime,
-
-            // Recurring
-            'recurring' => $recurring,
-            'recurring_type' => $recurring_type,
-            'recurring_trips' => $recurring_trips,
-
-            // Details
-            'details' => $request->details,
-            'seats' => $request->seats,
-
-            // Vehicle
-            'vehicle_mode' => $vehicle_mode ?? $request->vehicle_mode ?? 'skip',
-            'vehicle_id' => $vehicle_id,
-            'make' => $make,
-            'model' => $model,
-            'vehicle_type' => Ride::normalizeRideVehicleTypeId($vehicle_type),
-            'year' => $year,
-            'color' => $color,
-            'license_no' => $license_no,
-            'car_type' => $power_type,
-            'car_image' => $filename,
-            'car_image_original' => $filename,
-
-            // Preferences
-            'smoke' => $request->smoke,
-            'animal_friendly' => $request->animal_friendly,
-            'features' => $features,
-            'luggage' => $request->luggage,
-            'accept_more_luggage' => $accept_more_luggage,
-            'max_back_seats' => $max_back_seats,
-            'open_customized' => $open_customized,
-
-            // Booking
-            'booking_method' => $request->booking_method,
-            'booking_type' => $request->booking_type,
-
-            // Payment
-            'price' => $request->price_minor,
-            'payment_method' => $request->payment_method,
-
-            // Extra
-            'notes' => $request->notes,
-            'added_by' => $user_id,
-            'until_date' => $request->until_date,
-            'until_limit' => $request->until_limit,
-
-            'pickup' => $request->pickup,
-            'dropoff' => $request->dropoff,
-
-            'middle_seats' => $request->middle_seats,
-            'back_seats' => $request->back_seats,
-
-            'added_on' => now(),
-
-            'destination_reached_date' => $destinationReachedDate,
-            'destination_reached_time' => $destinationReachedTime,
-            'completed_date' => $destinationCompletedDate,
-            'completed_time' => $destinationCompletedTime,
-
-        ], fn($value) => !is_null($value) && $value !== '');
-
-
-        $initialRide = $ride_id
-            ? Ride::with(['detail', 'rideStops', 'rideStopSegments'])->find($ride_id)
-            : Ride::create($data);
+        $initialRide = $persist->ride;
 
         if ($ride_id) {
-            $initialRide->update($data);
-            $initialRide->refresh();
+            return redirect()
+                ->route('my_rides', ['lang' => $this->selectedLanguage->abbreviation])
+                ->with([
+                    'message' => $this->successMessage->post_ride_update_message ?? 'Ride updated successfully',
+                    'id' => (int) $ride_id,
+                ]);
         }
 
-        $rideDetail = $initialRide->detail ?? new RideDetail();
-
-        // add or update seats
-        DB::transaction(function () use ($ride_id, $initialRide) {
-            $lockedNumbers = [];
-
-            if ($ride_id) {
-                // Get locked seats
-                $lockedNumbers = SeatDetail::where('ride_id', $ride_id)
-                    ->where('status', '!=', 'pending')
-                    ->pluck('seat_number')
-                    ->all();
-
-                // Remove old pending seats
-                SeatDetail::where('ride_id', $ride_id)
-                    ->where('status', 'pending')
-                    ->delete();
-            }
-
-            // Prepare new seat records
-            $seatDetails = [];
-
-            for ($i = 1; $i <= $initialRide->seats; $i++) {
-                if (in_array($i, $lockedNumbers, true)) continue;
-
-                $seatDetails[] = [
-                    'ride_id' => $initialRide->id,
-                    'seat_number' => $i,
-                    'status' => 'pending',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-            }
-
-            // Bulk insert (much faster)
-            SeatDetail::insert($seatDetails);
-        });
-
-
-        //Add or Update Ride Detail
-        $rideDetail->ride_id = $initialRide->id;
-        $rideDetail->departure = $origin;
-        $rideDetail->origin_city_id = $originCityId;
-        $rideDetail->destination = $destination;
-        $rideDetail->destination_city_id = $destinationCityId;
-        $rideDetail->pickup = $request->pickup ?? null;
-        $rideDetail->dropoff = $request->dropoff ?? null;
-        $rideDetail->default_ride = 1;
-        $rideDetail->total_distance = $distance;
-        $rideDetail->total_duration = $duration;
-        $rideDetail->price = $request->price_minor;
-        $rideDetail->date = $formattedDate;
-        $rideDetail->time = $formattedTime;
-        $rideDetail->destination_time = $destinationReachedTime;
-        $rideDetail->destination_date = $destinationReachedDate;
-        $rideDetail->completed_time = $destinationCompletedTime;
-        $rideDetail->completed_date = $destinationCompletedDate;
-        $rideDetail->save();
-
-
-
-        // process of multi stops
-        $requestStops = is_array($request->input('stops')) ? $request->input('stops') : [];
-        // available routes by stops
-        $stopsFrom = is_array($request->input('stop_from')) ? $request->input('stop_from') : [];
-        $stopsTo = is_array($request->input('stop_to')) ? $request->input('stop_to') : [];
-        $stopsPriceMinor = is_array($request->input('stop_price_minor')) ? $request->input('stop_price_minor') : [];
-
-        $originLabel = $request->origin['label'];
-        $destinationLabel = $request->destination['label'];
-        $originCityId = $request->origin['city_id'];
-        $destinationCityId = $request->destination['city_id'];
-        $destinationPriceDeltaMinor = 0;
-        $lastLegFromLabel = !empty($requestStops)
-            ? trim((string) ($requestStops[count($requestStops) - 1]['label'] ?? ''))
-            : $originLabel;
-
-        foreach ($stopsFrom as $idx => $fromLabel) {
-            if (
-                trim((string) $fromLabel) === $lastLegFromLabel &&
-                trim((string) ($stopsTo[$idx] ?? '')) === $destinationLabel
-            ) {
-                $destinationPriceDeltaMinor = (int) ($stopsPriceMinor[$idx] ?? 0);
-                break;
-            }
-        }
-
-        $stopRecords = [
+        app(RideWebNotificationController::class)->dispatchPostRidePostedNotifications(
+            $initialRide->id,
+            $user->id,
             [
-                'stop_order' => 1,
-                'city_id' => $originCityId,
-                'label' => $originLabel,
-                'departure_at' => $statDateTime,
-                'pickup_dropoff_location' => $request->pickup ?? null,
-                'eta_at' => null,
-                'price_delta_minor' => 0,
-                'seats_available' => $initialRide->seats,
-                'is_pickup' => true,
-                'is_dropoff' => false,
-            ],
-        ];
+                'my_rides_lang_abbr' => $this->selectedLanguage->abbreviation,
+                'posted_date' => $request->input('date'),
+                'posted_time' => $request->input('time'),
+                'seats' => $request->input('seats', $request->input('seats_total')),
+                'price_minor' => (int) $request->input('price_minor'),
+            ]
+        );
 
-        foreach ($requestStops as $index => $stop) {
-            $label = trim((string) ($stop['label'] ?? ''));
-            if ($label === '') {
-                continue;
-            }
-
-            $stopRecords[] = [
-                'stop_order' => count($stopRecords) + 1,
-                'city_id' => !empty($stop['city_id']) ? (int) $stop['city_id'] : null,
-                'label' => $label,
-                'departure_at' => !empty($stop['departure_at']) ? Carbon::parse($stop['departure_at']) : null,
-                'pickup_dropoff_location' => $stop['pickup_dropoff_location'],
-                'eta_at' => null,
-                'price_delta_minor' => (int) ($stop['price_delta_minor'] ?? 0),
-                'seats_available' => $initialRide->seats,
-                'is_pickup' => isset($stop['is_pickup']) ? (bool) $stop['is_pickup'] : true,
-                'is_dropoff' => isset($stop['is_dropoff']) ? (bool) $stop['is_dropoff'] : true,
-            ];
-        }
-
-        $stopRecords[] = [
-            'stop_order' => count($stopRecords) + 1,
-            'city_id' => $destinationCityId,
-            'label' => $destinationLabel,
-            'departure_at' => null,
-            'pickup_dropoff_location' => $request->dropoff ?? null,
-            'eta_at' => $endDateTime,
-            'price_delta_minor' => $destinationPriceDeltaMinor,
-            'seats_available' => $initialRide->seats,
-            'is_pickup' => false,
-            'is_dropoff' => true,
-        ];
-
-        if ($ride_id) {
-            RideStopSegment::where('ride_id', $initialRide->id)->delete();
-            RideStop::where('ride_id', $initialRide->id)->delete();
-        }
-
-        $stopIdByLabel = [];
-        // $previousStopRecord = null;
-        foreach ($stopRecords as $stopRecord) {
-            // if (
-            //     $previousStopRecord &&
-            //     empty($stopRecord['eta_at']) &&
-            //     !empty($previousStopRecord['departure_at'])
-            // ) {
-            //     $googleApiData = $this->getDataFromGoogleApi($previousStopRecord['label'], $stopRecord['label']);
-            //     $elementStatus = $googleApiData['rows'][0]['elements'][0]['status'] ?? null;
-            //     $durationSeconds = (int) ($googleApiData['rows'][0]['elements'][0]['duration']['value'] ?? 0);
-
-            //     if ($elementStatus === 'OK' && $durationSeconds > 0) {
-            //         $stopRecord['eta_at'] = Carbon::parse($previousStopRecord['departure_at'])->addSeconds($durationSeconds);
-            //     }
-            // }
-
-            $savedStop = RideStop::create([
-                'ride_id' => $initialRide->id,
-                'stop_order' => $stopRecord['stop_order'],
-                'city_id' => $stopRecord['city_id'],
-                'label' => $stopRecord['label'],
-                'departure_at' => $stopRecord['departure_at'],
-                'pickup_dropoff_location' => $stopRecord['pickup_dropoff_location'],
-                'eta_at' => $stopRecord['eta_at'],
-                'price_delta_minor' => $stopRecord['price_delta_minor'],
-                'seats_available' => $stopRecord['seats_available'],
-                'is_pickup' => $stopRecord['is_pickup'],
-                'is_dropoff' => $stopRecord['is_dropoff'],
-            ]);
-
-            $normalizedLabel = mb_strtolower(trim((string) $savedStop->label));
-            if ($normalizedLabel !== '' && !isset($stopIdByLabel[$normalizedLabel])) {
-                $stopIdByLabel[$normalizedLabel] = $savedStop->id;
-            }
-
-            // $previousStopRecord = $stopRecord;
-        }
-
-        foreach ($stopsFrom as $idx => $fromLabel) {
-            $fromLabel = trim((string) $fromLabel);
-            $toLabel = trim((string) ($stopsTo[$idx] ?? ''));
-            if ($fromLabel === '' || $toLabel === '') {
-                continue;
-            }
-
-            $fromStopId = $stopIdByLabel[mb_strtolower($fromLabel)] ?? null;
-            $toStopId = $stopIdByLabel[mb_strtolower($toLabel)] ?? null;
-
-            if (!$fromStopId || !$toStopId || $fromStopId === $toStopId) {
-                continue;
-            }
-
-            RideStopSegment::create([
-                'ride_id' => $initialRide->id,
-                'from_stop_id' => $fromStopId,
-                'to_stop_id' => $toStopId,
-                'price_minor' => (int) ($stopsPriceMinor[$idx] ?? 0),
-            ]);
-        }
-
-        // Check if the ride is recurring
-        if ($recurring !== 0) {
-
-            if (!$ride_id) {
-                // new ride 
-                $recurring_id = $initialRide->id;
-                // Determine the frequency and number of recurring trips
-                $frequency = $request->input('recurring_type');
-                $numRecurringTrips = $request->input('recurring_trips');
-                $templateRide = $initialRide;
-                $sourceRideDetail = RideDetail::where('ride_id', $recurring_id)->first();
-                $sourceRideStops = RideStop::where('ride_id', $recurring_id)->orderBy('stop_order')->get();
-                $sourceRideSegments = RideStopSegment::where('ride_id', $recurring_id)->get();
-                $offsetDays = $frequency === 'Daily' ? 1 : 7;
-
-                // vaidate by total duration and recurring info
-                if (($offsetDays == 1 && $duration > 24 * 3600) || ($offsetDays == 7 && $duration > 7 * 24 * 3600)) {
-                    return back()->with('error', 'This ride\'s recurring overlaps with current ride. Total duration is greater than a ' . $frequency)
-                        ->with('heading', 'Recurring info is overlapped');
-                }
-
-                // validate if old ride is in the recurring range
-                $endDateTime->addHours($offsetDays * $numRecurringTrips * 24);
-                $overred_ride = Ride::NotCancelled()
-                    ->where('added_by', $user_id)
-                    ->whereRaw("CONCAT(date, ' ', time) < ?", [$endDateTime])
-                    ->whereRaw("CONCAT(destination_reached_date, ' ', destination_reached_time) > ?", [$statDateTime])
-                    ->first();
-                if (isset($overred_ride) && !empty($overred_ride)) {
-                    $oldInput = $request->all();
-                    return back()->with('error', $message->overlap_ride_message ?? 'This ride\'s recurring overlaps with an existing ride you already have')->with('heading', $message->overlap_ride_title ?? 'Ride already schedule')->withInput($oldInput)->with('uploaded_image', $filename ?? null);
-                }
-
-                // Create additional rides based on the recurring settings
-                DB::transaction(function () use (
-                    $numRecurringTrips,
-                    $templateRide,
-                    $offsetDays,
-                    $request,
-                    $recurring,
-                    $recurring_id,
-                    $skip_vehicle,
-                    $add_vehicle,
-                    $added_vehicle,
-                    $vehicle_id,
-                    $make,
-                    $model,
-                    $vehicle_type,
-                    $year,
-                    $color,
-                    $license_no,
-                    $power_type,
-                    $filename,
-                    $features,
-                    $max_back_seats,
-                    $accept_more_luggage,
-                    $open_customized,
-                    $user_id,
-                    $sourceRideDetail,
-                    $sourceRideStops,
-                    $sourceRideSegments
-                ) {
-
-                    for ($i = 1; $i <= $numRecurringTrips; $i++) {
-
-                        // =========================
-                        // Dates
-                        // =========================
-                        $nextDate = Carbon::parse($templateRide->date)->addDays($offsetDays * $i);
-
-                        $nextCompletedDate = $templateRide->completed_date
-                            ? Carbon::parse($templateRide->completed_date)->addDays($offsetDays * $i)
-                            : null;
-
-                        $nextDestinationReachedDate = $templateRide->destination_reached_date
-                            ? Carbon::parse($templateRide->destination_reached_date)->addDays($offsetDays * $i)
-                            : null;
-
-                        // =========================
-                        // Create Ride
-                        // =========================
-                        $ride = Ride::create([
-                            'date' => $nextDate->format('Y-m-d'),
-                            'time' => $request->time,
-                            'completed_date' => optional($nextCompletedDate)->format('Y-m-d'),
-                            'completed_time' => $templateRide->completed_time,
-                            'destination_reached_date' => optional($nextDestinationReachedDate)->format('Y-m-d'),
-                            'destination_reached_time' => $templateRide->destination_reached_time,
-
-                            'recurring' => $recurring,
-                            'recurring_id' => $recurring_id,
-                            'details' => $request->details,
-                            'seats' => $request->seats,
-
-                            'skip_vehicle' => $skip_vehicle,
-                            'add_vehicle' => $add_vehicle,
-                            'added_vehicle' => $added_vehicle,
-                            'vehicle_id' => $vehicle_id,
-                            'make' => $make,
-                            'model' => $model,
-                            'vehicle_type' => Ride::normalizeRideVehicleTypeId($vehicle_type),
-                            'year' => $year,
-                            'color' => $color,
-                            'license_no' => $license_no,
-                            'car_type' => $power_type,
-                            'car_image' => $filename,
-                            'car_image_original' => $filename,
-
-                            'smoke' => $request->smoke,
-                            'animal_friendly' => $request->animal_friendly,
-                            'features' => $features,
-
-                            'booking_method' => $request->booking_method,
-                            'booking_type' => $request->booking_type,
-                            'max_back_seats' => $max_back_seats,
-                            'luggage' => $request->luggage,
-                            'accept_more_luggage' => $accept_more_luggage,
-                            'open_customized' => $open_customized,
-
-                            'payment_method' => $request->payment_method,
-                            'notes' => $request->notes,
-                            'added_by' => $user_id,
-
-                            'pickup' => $request->pickup,
-                            'dropoff' => $request->dropoff,
-                            'middle_seats' => $request->middle_seats,
-                            'back_seats' => $request->back_seats,
-
-                            'added_on' => now(),
-                        ]);
-
-                        // =========================
-                        // Seats (bulk)
-                        // =========================
-                        $seatData = [];
-                        for ($j = 1; $j <= $ride->seats; $j++) {
-                            $seatData[] = [
-                                'ride_id' => $ride->id,
-                                'seat_number' => $j,
-                                'status' => 'pending',
-                                'created_at' => now(),
-                                'updated_at' => now(),
-                            ];
-                        }
-                        SeatDetail::insert($seatData);
-
-                        // =========================
-                        // Ride Detail (single)
-                        // =========================
-                        RideDetail::create([
-                            'ride_id' => $ride->id,
-                            'departure' => $sourceRideDetail->departure,
-                            'origin_city_id' => $sourceRideDetail->origin_city_id,
-                            'destination' => $sourceRideDetail->destination,
-                            'destination_city_id' => $sourceRideDetail->destination_city_id,
-                            'pickup' => $sourceRideDetail->pickup,
-                            'dropoff' => $sourceRideDetail->dropoff,
-                            'default_ride' => $sourceRideDetail->default_ride,
-                            'total_distance' => $sourceRideDetail->total_distance,
-                            'total_duration' => $sourceRideDetail->total_duration,
-                            'price' => $sourceRideDetail->price,
-                            'time' => $sourceRideDetail->time,
-                            'date' => $nextDate->format('Y-m-d'),
-                            'destination_time' => $ride->destination_reached_time,
-                            'destination_date' => $ride->destination_reached_date,
-                            'completed_time' => $ride->completed_time,
-                            'completed_date' => $ride->completed_date,
-                        ]);
-
-                        // =========================
-                        // Stops (keep create for ID map)
-                        // =========================
-                        $stopMap = [];
-
-                        foreach ($sourceRideStops as $s) {
-
-                            $departureAt = $s->departure_at
-                                ? Carbon::parse($s->departure_at)->addDays($offsetDays * $i)
-                                : null;
-
-                            $etaAt = $s->eta_at
-                                ? Carbon::parse($s->eta_at)->addDays($offsetDays * $i)
-                                : null;
-
-                            $newStop = RideStop::create([
-                                'ride_id' => $ride->id,
-                                'stop_order' => $s->stop_order,
-                                'city_id' => $s->city_id,
-                                'label' => $s->label,
-                                'lat' => $s->lat,
-                                'lng' => $s->lng,
-                                'departure_at' => $departureAt,
-                                'eta_at' => $etaAt,
-                                'pickup_dropoff_location' => $s->pickup_dropoff_location,
-                                'price_delta_minor' => $s->price_delta_minor,
-                                'seats_available' => $s->seats_available,
-                                'is_pickup' => $s->is_pickup,
-                                'is_dropoff' => $s->is_dropoff,
-                            ]);
-
-                            $stopMap[$s->id] = $newStop->id;
-                        }
-
-                        // =========================
-                        // Segments (bulk)
-                        // =========================
-                        $segmentData = [];
-
-                        foreach ($sourceRideSegments as $seg) {
-                            if (!isset($stopMap[$seg->from_stop_id], $stopMap[$seg->to_stop_id])) {
-                                continue;
-                            }
-
-                            $segmentData[] = [
-                                'ride_id' => $ride->id,
-                                'from_stop_id' => $stopMap[$seg->from_stop_id],
-                                'to_stop_id' => $stopMap[$seg->to_stop_id],
-                                'price_minor' => $seg->price_minor,
-                                'distance_meters' => $seg->distance_meters,
-                                'duration_seconds' => $seg->duration_seconds,
-                                'created_at' => now(),
-                                'updated_at' => now(),
-                            ];
-                        }
-
-                        if (!empty($segmentData)) {
-                            RideStopSegment::insert($segmentData);
-                        }
-                    }
-                });
-            } else {
-                $frequency = $request->input('recurring_type');
-                $numRecurringTrips = (int) $request->input('recurring_trips');
-                $offsetDays = $frequency === 'Daily' ? 1 : 7;
-
-                if (($offsetDays === 1 && $duration > 24 * 3600) || ($offsetDays === 7 && $duration > 7 * 24 * 3600)) {
-                    return back()->with('error', 'This ride\'s recurring overlaps with current ride. Total duration is greater than a ' . $frequency)
-                        ->with('heading', 'Recurring info is overlapped')
-                        ->withInput();
-                }
-
-                $existingRecurringRides = Ride::where('recurring_id', $initialRide->id)
-                    ->orderBy('date')
-                    ->orderBy('time')
-                    ->get();
-
-                $seriesRideIds = array_merge([$initialRide->id], $existingRecurringRides->pluck('id')->all());
-                $recurringEndDateTime = (clone $endDateTime)->addDays($offsetDays * $numRecurringTrips);
-
-                $overredRide = Ride::NotCancelled()
-                    ->where('added_by', $user_id)
-                    ->whereNotIn('id', $seriesRideIds)
-                    ->whereRaw("CONCAT(date, ' ', time) < ?", [$recurringEndDateTime])
-                    ->whereRaw("CONCAT(destination_reached_date, ' ', destination_reached_time) > ?", [$statDateTime])
-                    ->first();
-
-                if (isset($overredRide) && !empty($overredRide)) {
-                    return back()->with('error', $message->overlap_ride_message ?? 'This ride\'s recurring overlaps with an existing ride you already have')
-                        ->with('heading', $message->overlap_ride_title ?? 'Ride already schedule')
-                        ->withInput();
-                }
-
-                $templateRide = $initialRide->fresh(['detail', 'rideStops', 'rideStopSegments']);
-                $sourceRideDetail = $templateRide->detail;
-                $sourceRideStops = $templateRide->rideStops->sortBy('stop_order')->values();
-                $sourceRideSegments = $templateRide->rideStopSegments;
-
-                DB::transaction(function () use (
-                    $existingRecurringRides,
-                    $numRecurringTrips,
-                    $templateRide,
-                    $sourceRideDetail,
-                    $sourceRideStops,
-                    $sourceRideSegments,
-                    $offsetDays,
-                    $user_id
-                ) {
-                    for ($i = 1; $i <= $numRecurringTrips; $i++) {
-                        $recurringRide = $existingRecurringRides[$i - 1] ?? new Ride([
-                            'added_by' => $user_id,
-                            'recurring_id' => $templateRide->id,
-                        ]);
-
-                        $this->syncRecurringRideFromTemplate(
-                            $recurringRide,
-                            $templateRide,
-                            $sourceRideDetail,
-                            $sourceRideStops,
-                            $sourceRideSegments,
-                            $offsetDays * $i
-                        );
-                    }
-
-                    for ($i = $numRecurringTrips; $i < $existingRecurringRides->count(); $i++) {
-                        $this->deleteRideCascade($existingRecurringRides[$i]);
-                    }
-                });
-            }
-        }
-
-        if ($ride_id && $recurring === 0) {
-            Ride::where('recurring_id', $initialRide->id)
-                ->orderBy('date')
-                ->orderBy('time')
-                ->get()
-                ->each(function (Ride $recurringRide) {
-                    $this->deleteRideCascade($recurringRide);
-                });
-        }
-
-        // return in case of update
-        if ($ride_id) return redirect()
-            ->route('my_rides', ['lang' => $this->selectedLanguage->abbreviation])
-            ->with([
-                'message' => $this->successMessage->post_ride_update_message ?? 'Ride updated successfully',
-                'id' => $ride->id,
-            ]);
-
-
-        // process for new ride
-        if (isset($user->email_notification) && $user->email_notification == 1) {
-            $features = explode('=', $initialRide->features);
-
-            $data = [
-                'username' => $user->first_name,
-                'from' => $origin,
-                'to' => $destination,
-                'on' => $request->date,
-                'at' => $request->time,
-                'seats' => $request->seats,
-                'price' => number_format($request->price_minor / 100, 2, '.', ''),
-                'redirect' => route('my_rides', ['lang' => $this->selectedLanguage->abbreviation]),
-            ];
-
-            if ($initialRide->isPinkRide() && $initialRide->isExtraCareRide()) {
-                // Both Pink and Extra+
-                Mail::to($user->email)->queue(new PinkExtraCareRideMail($data));
-            } elseif ($initialRide->isPinkRide()) {
-                // Only Pink Ride
-                Mail::to($user->email)->queue(new PinkRideMail($data));
-            } elseif ($initialRide->isExtraCareRide()) {
-                // Only Extra+ Ride
-                Mail::to($user->email)->queue(new ExtraCareRideMail($data));
-            } else {
-                // Regular ride (existing email)
-                Mail::to($user->email)->queue(new RidePostedMail($data));
-            }
-        }
-
-        // Determine ride type
-        if ($initialRide->isPinkRide() && $initialRide->isExtraCareRide()) {
-            $type = 'pink_extra_care';
-        } elseif ($initialRide->isPinkRide()) {
-            $type = 'pink';
-        } elseif ($initialRide->isExtraCareRide()) {
-            $type = 'extra_care';
-        } else {
-            $type = 'standard';
-        }
-
-        // Notification
-        // Message config
-        $messageConfig = [
-            'standard' => 'ride_live_standard',
-            'pink' => 'ride_live_pink',
-            'extra_care' => 'ride_live_extra_care',
-            'pink_extra_care' => 'ride_live_pink_extra_care'
-        ];
-
-        $hasVehicle = !empty($initialRide->vehicle_id);
-        $slug = $hasVehicle ? $messageConfig[$type] : 'ride_live_requires_vehicle';
-        $message = getNotificationMessageText($slug, $user, [], 'Add your vehicle to make your ride live');
-
-        // Create notification
-        Notification::create([
-            'ride_id' => $initialRide->id,
-            'posted_by' => $user->id,
-            'message' => $message,
-            'status' => 'upcoming',
-            'notification_type' => 'upcoming',
-            'ride_detail_id' => $rideDetail->id,
-            'departure' => $rideDetail->departure,
-            'destination' => $rideDetail->destination
-        ]);
-
-        // Send push notification
-        $this->sendFCM($message, $user);
-
-        // Prepare redirect data
-        $redirectData = [
+        return redirect()->route('my_rides', ['lang' => $this->selectedLanguage->abbreviation])->with([
             'message' => $this->successMessage->ride_post_message,
-            'id' => $initialRide->id
-        ];
-
-        return redirect()->route('my_rides', ['lang' => $this->selectedLanguage->abbreviation])->with($redirectData)->withInput();
+            'id' => $initialRide->id,
+        ])->withInput();
     }
 
     public function PostRideUpdate($lang, $ride_id, Request $request)
@@ -1768,8 +984,9 @@ class RideController extends Controller
         return null;
     }
 
-    protected function buildPostRideStoreValidator(Request $request)
+    public function buildPostRideStoreValidator(Request $request, int $rideId = 0)
     {
+        $isRideUpdate = $rideId > 0;
 
         $vehicle_mode = $request->filled('vehicle_mode') ? $request->vehicle_mode : 'skip';
 
@@ -1801,7 +1018,7 @@ class RideController extends Controller
             'notes' => 'nullable|string|max:300',
             'middle_seats' => 'required',
             'back_seats' => 'required',
-            'agree_terms' => 'accepted',
+            'agree_terms' => $isRideUpdate ? 'nullable' : 'accepted',
             'price_minor' => 'required|numeric|gt:0',
 
 
@@ -1820,13 +1037,13 @@ class RideController extends Controller
 
             'stops' => ['nullable', 'array', 'max:20'],
             'stops.*.label' => ['required_with:stops', 'string', 'max:160'],
-            'stops.*.departure_at' => ['required_with:stops', 'date_format:Y-m-d H:i'],
-            'stops.*.pickup_dropoff_location' => ['required_with:stops', 'string', 'max:500'],
+            'stops.*.departure_at' => ['nullable', 'date_format:Y-m-d H:i'],
+            'stops.*.pickup_dropoff_location' => ['nullable', 'string', 'max:500'],
             'stops.*.price' => ['nullable', 'integer', 'min:0'],
         ], [], []);
     }
 
-    protected function appendStopDepartureAtValidation(Request $request, $validator): void
+    public function appendStopDepartureAtValidation(Request $request, $validator): void
     {
         $validator->after(function ($validator) use ($request) {
             $stops = is_array($request->input('stops')) ? $request->input('stops') : [];
@@ -1962,21 +1179,7 @@ class RideController extends Controller
         // ->with('uploaded_image', $filename);
     }
 
-    protected function validatePostRideDuplicateDateTime($rides, string $formattedDate, string $formattedTime, $message, Request $request)
-    {
-        foreach ($rides as $existingRide) {
-            if ($existingRide->date == $formattedDate && $existingRide->time == $formattedTime) {
-                return back()
-                    ->with('error', $message->ride_schedule_message)
-                    ->with('heading', $message->overlap_ride_title ?? 'Ride already schedule')
-                    ->withInput($request->all());
-            }
-        }
-
-        return null;
-    }
-
-    protected function processPostRideVehicleMode(Request $request, array &$payload): void
+    public function processPostRideVehicleMode(Request $request, array &$payload): void
     {
         // $payload['skip_vehicle'] = $payload['vehicle_mode'] == 'skip' ? 1 : 0;
         // $payload['add_vehicle'] = $payload['vehicle_mode'] == 'add_new' ? 1 : 0;
