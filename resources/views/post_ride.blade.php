@@ -1031,13 +1031,16 @@
                                     @enderror
                                 </div>
                                 <div>
+                                    @php
+                                    $vehicleTypes = $rideFeatureOptions['vehicle_type'];
+                                    @endphp
                                     <label
                                         class="block text-sm mb-2 required">{{ $vehiclePage->vehicle_type_label }}</label>
                                     <select name="vehicle_type" class="w-full rounded border-gray-300">
                                         <option value="">{{ $vehiclePage->vehicle_type_placeholder }}</option>
-                                        @foreach ($vehicleTypes ?? collect() as $vehicleType)
-                                            <option value="{{ $vehicleType['id'] }}" @selected(old('vehicle_type') == $vehicleType['id'])>
-                                                {{ $vehicleType['label'] }}
+                                        @foreach ($vehicleTypes as $vehicleType)
+                                            <option value="{{ $vehicleType->id }}" @selected(old('vehicle_type') == $vehicleType->id)>
+                                                {{ $vehicleType->name }}
                                             </option>
                                         @endforeach
                                     </select>

@@ -1280,7 +1280,7 @@ class RideController extends WebRideController
 
     public function _PostRide()
     {
-        \Log::info('dddddddd');
+
         $user = Auth::guard('sanctum')->user();
         $user_id = $user->id;
         $vehicles = Vehicle::where('user_id', $user_id)->get();

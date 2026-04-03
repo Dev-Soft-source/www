@@ -234,7 +234,6 @@ class RideController extends Controller
 
         $vehicles = Vehicle::where('user_id', $user_id)->get();
         $vehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        $vehicleTypes = $this->getVehicleTypesByLanguage();
 
         $isEditMode = true;
         $isCopyMode = false;
@@ -249,7 +248,6 @@ class RideController extends Controller
             'ride' => $ride,
             'user' => $user,
             'vehicles' => $vehicles,
-            'vehicleTypes' => $vehicleTypes,
             'vehiclePage' => $vehiclePage,
             'routeType' => $routeType,
             'isEditMode' => $isEditMode,
@@ -390,7 +388,6 @@ class RideController extends Controller
             ->count();
 
         $vehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        $vehicleTypes = $this->getVehicleTypesByLanguage();
 
         return view('post_ride', [
             'postRideSubDetailPage' => $postRideSubDetailPage,
@@ -402,7 +399,6 @@ class RideController extends Controller
             'user' => $user,
             'vehicles' => $vehicles,
             'pinkRideSetting' => $pinkRideSetting,
-            'vehicleTypes' => $vehicleTypes,
             'vehiclePage' => $vehiclePage,
             'setting' => $setting,
             'overallRating' => $overallRating,
@@ -440,7 +436,6 @@ class RideController extends Controller
 
         $vehicles = Vehicle::where('user_id', $user_id)->get();
         $vehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        $vehicleTypes = $this->getVehicleTypesByLanguage();
 
         return view('post_ride', [
             'postRidePage' => $postRidePage,
@@ -449,63 +444,11 @@ class RideController extends Controller
             'ride' => $ride,
             'user' => $user,
             'vehicles' => $vehicles,
-            'vehicleTypes' => $vehicleTypes,
             'vehiclePage' => $vehiclePage,
             'routeType' => 'create'
         ] + $postRideStats);
     }
 
-    /**
-     * Process vehicle mode and handle vehicle creation if needed
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param array &$payload Reference to payload array to modify
-     * @return void
-     */
-    protected function processVehicleMode(Request $request, array &$payload): void
-    {
-        $vehicleMode = (string) ($payload['vehicle_mode'] ?? '');
-
-        if ($vehicleMode === 'skip') {
-            $payload['vehicle_id'] = null;
-            return;
-        }
-
-        if ($vehicleMode === 'add_new') {
-            $newVehicle = (array) ($payload['new_vehicle'] ?? []);
-            $primaryVehicle = (string) ($newVehicle['primary_vehicle'] ?? '0');
-            $vehicleImageFilename = '';
-
-            if ($request->hasFile('new_vehicle_image')) {
-                $file = $request->file('new_vehicle_image');
-                $vehicleImageFilename = time() . '_' . $file->getClientOriginalName();
-                $file->move(public_path('/car_images'), $vehicleImageFilename);
-            }
-
-            if ($primaryVehicle === '1') {
-                Vehicle::query()
-                    ->where('user_id', auth()->id())
-                    ->update(['primary_vehicle' => 0]);
-            }
-
-            $createdVehicle = Vehicle::query()->create([
-                'user_id' => auth()->id(),
-                'make' => (string) ($newVehicle['make'] ?? ''),
-                'model' => (string) ($newVehicle['model'] ?? ''),
-                'type' => (string) ($newVehicle['type'] ?? ''),
-                'license_no' => (string) ($newVehicle['license_no'] ?? ''),
-                'color' => (string) ($newVehicle['color'] ?? ''),
-                'year' => (string) ($newVehicle['year'] ?? ''),
-                'car_type' => (string) ($newVehicle['car_type'] ?? ''),
-                'primary_vehicle' => $primaryVehicle,
-                'image' => $vehicleImageFilename,
-                'original_image' => $vehicleImageFilename !== '' ? $vehicleImageFilename : null,
-                'remove_image' => '0',
-            ]);
-
-            $payload['vehicle_id'] = $createdVehicle->id;
-        }
-    }
 
     protected function normalizePostRideRequest(Request $request, ?Ride $ride = null): void
     {
@@ -547,105 +490,6 @@ class RideController extends Controller
     }
 
 
-
-    protected function persistUpdatedRide(
-        Ride $ride,
-        Request $request,
-        array $payload,
-        callable $syncStops
-    ): void {
-        DB::transaction(function () use ($ride, $request, $payload, $syncStops) {
-            $ride->update([
-                'departure' => '',
-                'departure_lat' => '',
-                'departure_lng' => '',
-                'departure_place' => '',
-                'departure_route' => '',
-                'departure_zipcode' => '',
-                'departure_city' => '',
-                'departure_state' => '',
-                'departure_state_short' => '',
-                'departure_country' => '',
-                'destination' => '',
-                'destination_lat' => '',
-                'destination_lng' => '',
-                'destination_place' => '',
-                'destination_route' => '',
-                'destination_zipcode' => '',
-                'destination_city' => '',
-                'destination_state' => '',
-                'destination_state_short' => '',
-                'destination_country' => '',
-                'total_distance' => '',
-                'total_time' => '',
-                'date' => $payload['formattedDate'],
-                'time' => $payload['formattedTime'],
-                'completed_date' => $payload['completedDate'],
-                'completed_time' => $payload['completedTime'],
-                'destination_reached_date' => $payload['destinationReachedDate'],
-                'destination_reached_time' => $payload['destinationReachedTime'],
-                'recurring' => $payload['recurring'],
-                'recurring_type' => $payload['recurring_type'],
-                'recurring_trips' => $payload['recurring_trips'],
-                'details' => $request->details,
-                'seats' => $request->seats,
-                'vehicle_mode' => $payload['vehicle_mode'] ?? ($request->vehicle_mode ?? 'skip'),
-                'vehicle_id' => $payload['vehicle_id'] ?? null,
-                'make' => $payload['make'],
-                'model' => $payload['model'],
-                'vehicle_type' => Ride::normalizeRideVehicleTypeId($payload['vehicle_type']),
-                'year' => $payload['year'],
-                'color' => $payload['color'],
-                'license_no' => $payload['license_no'],
-                'car_type' => $payload['power_type'],
-                'car_image' => $payload['filename'],
-                'car_image_original' => $payload['filename'],
-                'smoke' => $request->smoke,
-                'animal_friendly' => $request->animal_friendly,
-                'features' => $payload['features'],
-                'booking_method' => $request->booking_method,
-                'booking_type' => $request->booking_type,
-                'max_back_seats' => $payload['max_back_seats'],
-                'luggage' => $request->luggage,
-                'accept_more_luggage' => $payload['accept_more_luggage'],
-                'open_customized' => $payload['open_customized'],
-                'price' => '',
-                'payment_method' => $request->payment_method,
-                'notes' => $request->notes,
-                'added_by' => $payload['user_id'],
-                'until_date' => null,
-                'until_limit' => '',
-                'pickup' => $request->pickup,
-                'dropoff' => $request->dropoff,
-                'middle_seats' => $request->middle_seats,
-                'back_seats' => $request->back_seats,
-            ]);
-
-            $this->syncRideSeatDetails($ride, (int) $request->seats);
-
-            $rideDetail = RideDetail::where('ride_id', $ride->id)->first() ?: new RideDetail();
-            $rideDetail->ride_id = $ride->id;
-            $rideDetail->departure = $payload['origin'];
-            $rideDetail->origin_city_id = $payload['originCityId'];
-            $rideDetail->destination = $payload['destination'];
-            $rideDetail->destination_city_id = $payload['destinationCityId'];
-            $rideDetail->pickup = $request->pickup ?? null;
-            $rideDetail->dropoff = $request->dropoff ?? null;
-            $rideDetail->default_ride = 1;
-            $rideDetail->total_distance = $payload['distanceKm'];
-            $rideDetail->total_duration = $payload['duration'];
-            $rideDetail->price = $payload['newPrice'];
-            $rideDetail->time = $payload['formattedTime'];
-            $rideDetail->date = $payload['formattedDate'];
-            $rideDetail->destination_time = $payload['destinationReachedTime'];
-            $rideDetail->destination_date = $payload['destinationReachedDate'];
-            $rideDetail->completed_time = $payload['completedTime'];
-            $rideDetail->completed_date = $payload['completedDate'];
-            $rideDetail->save();
-
-            $syncStops($ride, $request, $payload);
-        });
-    }
 
     protected function syncRideSeatDetails(Ride $ride, int $seatCount): void
     {
@@ -1841,7 +1685,7 @@ class RideController extends Controller
 
         $hasVehicle = !empty($initialRide->vehicle_id);
         $slug = $hasVehicle ? $messageConfig[$type] : 'ride_live_requires_vehicle';
-        $message = $this->getNotificationMessage($slug, [], 'Add your vehicle to make your ride live');
+        $message = getNotificationMessageText($slug, $user, [], 'Add your vehicle to make your ride live');
 
         // Create notification
         Notification::create([

@@ -93,10 +93,13 @@
                                 <option value="" {{ old('type') === '' ? 'selected' : '' }}>
                                     {{ $step3Page->vehicle_type_placeholder ?? 'Select' }}
                                 </option>
-                                @foreach ($vehicleTypes ?? collect() as $vehicleType)
-                                    <option value="{{ $vehicleType['id'] }}"
-                                        {{ (string) old('type', '') === (string) $vehicleType['id'] ? 'selected' : '' }}>
-                                        {{ $vehicleType['label'] }}
+                                @php
+                                    $vehicleTypes = $rideFeatureOptions['vehicle_type'];
+                                @endphp
+                                @foreach ($vehicleTypes as $vehicleType)
+                                    <option value="{{ $vehicleType->id }}"
+                                        {{ (string) old('type', '') === (string) $vehicleType->id ? 'selected' : '' }}>
+                                        {{ $vehicleType->name }}
                                     </option>
                                 @endforeach
                             </select>

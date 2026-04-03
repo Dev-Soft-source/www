@@ -37,7 +37,7 @@
 {!! $wrapperStart !!}
 <div class="{{ $wrapperClass }} {{ $classes }}">
     <div class="rounded-lg shadow-3xl border-[3px] border-solid border-gray-100"
-        onclick="goToRideDetail('{{ route($detailRoute, ['lang' => app()->getLocale(), 'id' => $booking->ride->id]) }}')">
+        onclick="goToRideDetail('{{ route($detailRoute, ['lang' => app()->getLocale(), 'id' => $booking->ride_id, 'from_stop_id' => $booking->from_stop_id, 'to_stop_id' => $booking->to_stop_id]) }}')">
         <div class="flex flex-col sm:flex-col lg:flex-row  justify-between gap-4 p-4">
             <div class="route-info">
                 <x-px.route-info :ride="$booking->ride" />
@@ -107,7 +107,7 @@
             <div class="border-t border-gray-300 grid grid-cols-2 divide-x divide-gray-300">
                 <div class="p-4">
                     <p class="text-center">
-                        {{ $user->getPassengerSeatsCount($booking->ride->id) }}
+                        {{ $user->getPassengerSeatsCount($booking) }}
                         {{ $rideDetailPage->trips_card_section_seat_booked ?? 'Seat(s) Booked' }}
                     </p>
                 </div>

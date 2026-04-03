@@ -20,16 +20,22 @@ use App\Models\NotificationMessageDetail;
 use App\Models\SiteTextDetail;
 use App\Models\City;
 use App\Models\User;
-use App\Models\VideoDetail;
+use App\Models\SeatDetail;
+use App\Models\TopUpBalance;
+use App\Models\Transaction;
+use App\Models\CoffeeWallet;
 use App\Http\Controllers\ProfileStepRedirectController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 use App\Services\FCMService;
 use App\Models\FCMToken;
 use Twilio\Rest\Client;
+use App\Models\PhoneNumber;
 
 class Controller extends BaseController
 {
@@ -65,8 +71,8 @@ class Controller extends BaseController
                 } elseif (!$lang && $langId && auth('sanctum')->check()) {
                     $lang = Language::whereKey(auth('sanctum')->user()->lang_id)->value('abbreviation');
                 }
-                \Log::info('api route', [Route::currentRouteName(), $lang]);
-                \Log::info('payload', $request->all());
+                // \Log::info('api route', [Route::currentRouteName(), $lang]);
+                // \Log::info('payload', $request->all());
 
             } else {
                 $lang = $request->route('lang') ?? $request->query('lang');
@@ -176,7 +182,7 @@ class Controller extends BaseController
     {
         if (
             !$phoneNumber ||
-            env('APP_ENV') === 'local' ||
+            env('APP_ENV') === 'development' ||
             !isset($user->sms_notification) ||
             (int) $user->sms_notification !== 1
         ) {
@@ -215,44 +221,9 @@ class Controller extends BaseController
         }
     }
 
-    protected function getVehicleTypesByLanguage()
-    {
-        return $this->getVehicleTypesForLanguage($this->selectedLanguage->id, $this->defaultLang->id);
-    }
-
     protected function getFeatureOptionsByLanguage()
     {
         return $this->getFeaturesForLanguage($this->selectedLanguage->id, $this->defaultLang->id);
-    }
-
-    protected function getVehicleTypesForLanguage(?int $languageId = null, ?int $fallbackLanguageId = null)
-    {
-        $languageId = $languageId ?: $this->selectedLanguage?->id ?: $this->defaultLang?->id;
-        $fallbackLanguageId = $fallbackLanguageId ?: $this->defaultLang?->id ?: $languageId;
-        $vehicleTypeMap = collect($this->getVehicleTypeFeatureMap());
-        $featureIds = $vehicleTypeMap->pluck('id');
-
-        $details = FeaturesSettingDetail::whereIn('features_setting_id', $featureIds)
-            ->whereIn('language_id', array_unique(array_filter([$languageId, $fallbackLanguageId])))
-            ->get()
-            ->groupBy('features_setting_id');
-
-        return $vehicleTypeMap->map(function ($vehicleType) use ($details, $languageId, $fallbackLanguageId) {
-            $featureId = $vehicleType['id'];
-            $localized = $details->get($featureId, collect())
-                ->firstWhere('language_id', $languageId);
-
-            $fallback = $details->get($featureId, collect())
-                ->firstWhere('language_id', $fallbackLanguageId);
-
-            $detail = $localized ?: $fallback;
-
-            return [
-                'id' => $featureId,
-                'slug' => $vehicleType['slug'],
-                'label' => $detail?->name ?? $fallback?->name,
-            ];
-        })->filter(fn($type) => !empty($type['id']) && !empty($type['label']))->values();
     }
 
     protected function getFeaturesForLanguage(?int $languageId = null, ?int $fallbackLanguageId = null)
@@ -286,21 +257,6 @@ class Controller extends BaseController
                 'tooltip' => $detail?->display_tooltip ?? $fallback?->display_tooltip,
             ];
         })->filter(fn($feature) => !empty($feature['id']) && !empty($feature['label']))->values();
-    }
-
-    protected function getVehicleTypeFeatureMap(): array
-    {
-        return [
-            ['slug' => 'convertible', 'id' => 38],
-            ['slug' => 'hatchback', 'id' => 39],
-            ['slug' => 'coupe', 'id' => 40],
-            ['slug' => 'minivan', 'id' => 41],
-            ['slug' => 'sedan', 'id' => 42],
-            ['slug' => 'station_wagon', 'id' => 43],
-            ['slug' => 'suv', 'id' => 44],
-            ['slug' => 'truck', 'id' => 45],
-            ['slug' => 'van', 'id' => 46],
-        ];
     }
 
     protected function getFeatureOptionIds(): array
@@ -411,76 +367,25 @@ class Controller extends BaseController
         });
     }
 
-    // will be removed in future
-    protected function getSearchOptionGroups(?int $selectedLangId = null, ?int $defaultLangId = null)
+
+
+    /**
+     * Selected language id for API responses and shared lookups (e.g. getByLanguageWithFallback).
+     * Works after middleware sets selectedLanguage; falls back when unset (e.g. tests or edge routes).
+     */
+    protected function getSelectedLanguageId(): int
     {
-        $selectedLangId = $selectedLangId ?: $this->selectedLanguage?->id ?: $this->defaultLang?->id;
-        $defaultLangId = $defaultLangId ?: $this->defaultLang?->id ?: $selectedLangId;
+        $id = $this->selectedLanguage?->id ?? $this->defaultLang?->id;
 
-        $groupFeatureIds = [
-            'features' => FeaturesSetting::rideFeaturesSettingIds(),
-            'luggage_size' => range(26, 30),
-            'smoking_allowed' => [21, 22],
-            'pets_allowed' => range(23, 25),
-            'booking_method' => range(31, 32),
-            'payment_method' => range(33, 35),
-            'vehicle_type' => range(38, 46),
-        ];
-
-        $featureIds = collect($groupFeatureIds)->flatten()->unique()->values()->all();
-
-        $featureSlugs = FeaturesSetting::query()
-            ->whereIn('id', $featureIds)
-            ->pluck('slug', 'id');
-
-        $details = FeaturesSettingDetail::query()
-            ->whereIn('features_setting_id', $featureIds)
-            ->whereIn('language_id', array_unique(array_filter([$selectedLangId, $defaultLangId])))
-            ->get()
-            ->groupBy('features_setting_id');
-
-        $groups = collect($groupFeatureIds)->map(function ($ids, $code) use ($details, $featureSlugs, $selectedLangId, $defaultLangId) {
-            $options = collect($ids)
-                ->map(function ($id) use ($details, $featureSlugs, $selectedLangId, $defaultLangId) {
-                    $selected = $details->get($id, collect())
-                        ->firstWhere('language_id', $selectedLangId);
-                    $fallback = $details->get($id, collect())
-                        ->firstWhere('language_id', $defaultLangId);
-                    $detail = $selected ?: $fallback;
-
-                    if (!$detail) {
-                        return null;
-                    }
-
-                    return (object) [
-                        'id' => $id,
-                        'features_setting_id' => $id,
-                        'code' => $featureSlugs->get($id) ?: (string) $id,
-                        'slug' => $featureSlugs->get($id),
-                        'icon' => $detail->icon ?? $fallback?->icon,
-                        'label' => $detail->label ?? $fallback?->label,
-                        'display_label' => $detail->name ?? $fallback?->name ?? $featureSlugs->get($id) ?? (string) $id,
-                        'display_description' => $detail->display_tooltip ?? $fallback?->display_tooltip,
-                    ];
-                })
-                ->filter()
-                ->values();
-
-            return (object) [
-                'code' => $code,
-                'options' => $options,
-            ];
-        })->keyBy('code');
-
-        if ($groups->has('payment_method')) {
-            $groups->put('booking_method', $groups->get('payment_method'));
+        if ($id !== null && (int) $id > 0) {
+            return (int) $id;
         }
 
-        if ($groups->has('features')) {
-            $groups->put('preference', $groups->get('features'));
-        }
+        $fallback = Language::where('is_default', 1)->value('id')
+            ?? Language::query()->orderBy('id')->value('id')
+            ?? 1;
 
-        return $groups;
+        return (int) $fallback;
     }
 
     protected function resolveApiLanguage($langId = null): ?Language
@@ -939,8 +844,11 @@ class Controller extends BaseController
     }
 
 
-    protected function sendFCM($message = '', User $user)
+    protected function sendFCM($message = '', ?User $user = null)
     {
+        if (!$user) {
+            return;
+        }
         $fcmService = new FCMService();
         $tokens = collect([$user->mobile_fcm_token])
             ->merge(
@@ -959,20 +867,275 @@ class Controller extends BaseController
         }
     }
 
-    public function getNotificationMessage(string $slug, array $replacements = [], string $default = ''): string
+    protected function resolveSmsPhoneNumberObject(?User $user)
     {
-        $notificationMessage = NotificationMessageDetail::getByLanguageKeyedBySlug($this->selectedLanguage->id, $this->defaultLang->id);
-
-        $text = $notificationMessage[$slug] ?? $default;
-
-        foreach ($replacements as $key => $value) {
-            $text = str_replace('{' . $key . '}', (string) $value, $text);
+        if (!$user) {
+            return null;
         }
 
-        return $text;
+        if (isset($user->primaryPhone) && $user->primaryPhone) {
+            return $user->primaryPhone;
+        }
+
+        $fallback = $user->phone ?? null;
+        if (!$fallback) {
+            return null;
+        }
+
+        return (object) ['phone' => $fallback];
     }
 
-        /**
+    /**
+     * @see BookingWebNotificationController::dispatchDriverPassengerCancelledNotifications()
+     */
+    protected function notifyDriverPassengerCancelledWebFlow(
+        Booking $booking,
+        Ride $ride,
+        User $actor,
+        string $cancellationMessage,
+        int $originalSeats,
+        int $cancelSeats,
+        float $payoutAmt
+    ): void {
+        app(BookingWebNotificationController::class)->dispatchDriverPassengerCancelledNotifications(
+            $booking->id,
+            $actor->id,
+            $cancellationMessage,
+            $originalSeats,
+            $cancelSeats,
+            $payoutAmt
+        );
+    }
+
+    /**
+     * Shared "complete booking" flow used by both web and API controllers.
+     *
+     * Handles:
+     * - ride loading + segment details
+     * - booking fee/tax adjustments (student waiver / < $15 rule)
+     * - booking upsert
+     * - seat detail updates
+     * - transaction creation (stripe vs wallet) + coffee wall
+     * - notifications/emails/FCM/SMS (queued via {@see BookingWebNotificationController})
+     *
+     * Returns core values needed by the caller response.
+     */
+    protected function completeBookingUnifiedFlow(int $rideId, int $userId, $stripId, Request $request): array
+    {
+        $ride = Ride::with([
+            'rideStops' => fn($query) => $query->orderBy('stop_order'),
+            'rideStopSegments',
+            'detail',
+        ])->where('id', $rideId)->first();
+
+        $from_stop_id = $request->input('from_stop_id', 0);
+        $to_stop_id = $request->input('to_stop_id', 0);
+
+        $ride = $this->makeDetailOfRide($ride, $from_stop_id, $to_stop_id);
+
+        $user = User::where('id', $userId)->with('primaryPhone')->first();
+
+        // if booking method is manual : request book
+        $expiryTime = null;
+        if ($ride->isRequestBooking()) {
+            $currentTime = now();
+            $rideDateTime = Carbon::parse($ride->date . ' ' . $ride->time);
+
+            // Use signed difference
+            $difference = $currentTime->diffInHours($rideDateTime, false);
+
+            if ($difference > 48) {
+                $expiryTime = $currentTime->copy()->addHours(12);
+            } elseif ($difference >= 24) {
+                $expiryTime = $currentTime->copy()->addHours(6);
+            } elseif ($difference >= 6) {
+                $expiryTime = $currentTime->copy()->addHours(2);
+            } else {
+                $expiryTime = $currentTime->copy()->addMinutes(30);
+            }
+        }
+
+        $tax_amount = $request->input('tax_amount', 0);
+
+        if ((int) $ride->price_minor < 1500) {
+            // ProximaLocal: no booking fee on rides under $15 per seat
+            $booking_fee = 0;
+            $tax_amount = 0;
+        } else {
+            // Student booking fee waiver: Validate and apply waiver with card expiration check
+            $booking_fee = $this->validateStudentBookingFee($user, $request->booking_credit);
+            $tax_amount = $this->validateStudentBookingFee($user, $tax_amount);
+        }
+
+        $seats_amount = (float) $request->seats_amount;
+        $payment_amount = $seats_amount + (float) $booking_fee + (float) $tax_amount;
+
+        if ($ride->isCashPayment()) {
+            $payment_amount = (float) $booking_fee + (float) $tax_amount;
+        }
+
+        $secured_cash = null;
+        $secured_cash_code = null;
+        if ($ride->isSecureCashPayment() && $ride->isInstantBooking()) {
+            // send sms for only instant booking
+            $secured_cash = '1';
+            $secured_cash_code = rand(1000, 9999);
+        }
+
+        $seat_ids = $this->normalizeSeatIds($request);
+
+        $seats_number = (int) $request->seats;
+        $booking_type = $request->booking_type;
+
+        $total = $request->input('total', 0);
+        $tax_percentage = $request->input('tax_percentage', 0);
+        $tax_type = $request->input('tax_type');
+        $deduct_type = $request->input('deduct_tax');
+        $driver_message = (string) ($request->input('driver_message', ''));
+
+        $bookedByWalletRaw = $request->input('booked_by_wallet');
+        $bookedByWallet = in_array((string) $bookedByWalletRaw, ['1', 'true', 'True'], true) || (int) $bookedByWalletRaw === 1;
+
+        $isCoffeeWall = (int) $request->input('coffee_wall');
+        $payment_method = $request->input('card_id', 'paypal');
+
+        $booking = Booking::where('ride_id', $rideId)
+            ->waiting()
+            ->where('from_stop_id', $from_stop_id)
+            ->where('to_stop_id', $to_stop_id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (isset($booking)) {
+            $seats_amount += (float) $booking->fare;
+            $seats_number += (int) $booking->seats;
+            $tax_amount = (float) $booking->tax_amount + (float) $tax_amount;
+            $booking_fee += (float) $booking->booking_credit;
+
+            $booking->update([
+                'seats' => $seats_number,
+                'fare' => $seats_amount,
+                'secured_cash' => $secured_cash,
+                'secured_cash_code' => $secured_cash_code,
+                'booked_on' => now(),
+                'expires_at' => $expiryTime,
+                'tax_amount' => $tax_amount,
+                'booking_credit' => $booking_fee,
+                'status' => $ride->isRequestBooking() ? '0' : '1',
+            ]);
+
+            $total += (float) $booking->fare + (float) $booking->booking_credit + (float) $tax_amount;
+        } else {
+            $booking = Booking::create([
+                'user_id' => $user->id,
+                'ride_id' => $ride->id,
+                'from_stop_id' => $from_stop_id,
+                'to_stop_id' => $to_stop_id,
+                'status' => $ride->isRequestBooking() ? '0' : '1',
+                'seats' => $seats_number,
+                'type' => $booking_type,
+                'booked_on' => now(),
+                'booking_credit' => $booking_fee,
+                'fare' => $seats_amount,
+                'tax_amount' => $tax_amount,
+                'secured_cash' => $secured_cash,
+                'secured_cash_code' => $secured_cash_code,
+                'expires_at' => $expiryTime,
+                'departure' => $ride->departure,
+                'destination' => $ride->destination,
+                'price' => $ride->price_minor,
+            ]);
+        }
+
+        // update seats in seats table to booked for the selected seats
+        if (!empty($seat_ids)) {
+            SeatDetail::whereIn('id', $seat_ids)->update([
+                'status' => 'booked',
+                'booking_id' => $booking->id,
+                'user_id' => $user->id,
+            ]);
+        }
+
+        // Transaction record creation based on payment method
+        $txnData = [
+            'booking_id' => $booking->id,
+            'type' => '1',
+            'booking_fee' => $booking_fee,
+            'price' => $payment_amount,
+            'coffee_from_wall' => $isCoffeeWall,
+            'tax_amount' => $tax_amount,
+            'tax_percentage' => $tax_percentage,
+            'tax_type' => $tax_type,
+            'deduct_type' => $deduct_type,
+        ];
+
+        if ($bookedByWallet) {
+            $txnData['pay_by_account'] = true;
+            TopUpBalance::create([
+                'booking_id' => $booking->id,
+                'user_id' => $user->id,
+                'cr_amount' => $payment_amount,
+                'added_date' => now()->format('Y-m-d'),
+            ]);
+        } else {
+            $txnData['stripe_id'] = $stripId;
+        }
+
+        $transaction = Transaction::create($txnData);
+        $transcationId = $transaction->random_id;
+
+        if ($isCoffeeWall) {
+            $transaction = Transaction::create([
+                ...$txnData,
+                'price' => $booking_fee,
+                'coffee_from_wall' => true,
+            ]);
+            $transcationId = $transaction->random_id;
+
+            CoffeeWallet::create([
+                'booking_id' => $booking->id,
+                'ride_id' => $ride->id,
+                'user_id' => $user->id,
+                'cr_amount' => $booking_fee,
+            ]);
+        }
+
+        app(BookingWebNotificationController::class)->dispatchCompleteBookingNotifications($booking->id, [
+            'transaction_random_id' => $transcationId,
+            'seats_amount' => $seats_amount,
+            'payment_amount' => $payment_amount,
+            'booked_by_wallet' => $bookedByWallet,
+            'payment_method' => $payment_method,
+            'invoice_form' => [
+                'card_type' => $request->input('card_type', ''),
+                'cardholder_name' => $request->input('cardholder_name', ''),
+                'last_four_digits' => $request->input('last_four_digits', '****'),
+                'expiration_date' => $request->input('expiration_date', ''),
+                'paypal_email' => $request->input('paypal_email', $user->email ?? 'N/A'),
+                'card_id' => $request->input('card_id'),
+            ],
+            'driver_message' => $driver_message,
+            'selected_language_abbr' => $this->selectedLanguage?->abbreviation
+                ?? getDefaultLanguage()?->abbreviation
+                ?? 'en',
+        ]);
+
+        return [
+            'booking' => $booking,
+            'seats_number' => $seats_number,
+            'transcationId' => $transcationId,
+            'payment_amount' => $payment_amount,
+        ];
+    }
+
+    /**
+     * @see BookingWebNotificationController::dispatchBookingRequestApprovedNotifications()
+     */
+    protected function notifyBookingRequestApprovedWebFlow(Booking $booking, User $driver, bool $statusAlreadyBooked = false): void
+    {
+        app(BookingWebNotificationController::class)->dispatchBookingRequestApprovedNotifications($booking, $driver, $statusAlreadyBooked);
+    }
+    /**
      * Helper method to validate and apply student booking fee waiver
      * Checks both charge_booking field and student card expiration date
      * 

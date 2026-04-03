@@ -32,6 +32,11 @@ class Booking extends Model
     {
         return (int) $this->status === self::STATUS_COMPLETED;
     }
+    
+    public function isRequested(): bool
+    {
+        return (int) $this->status === self::STATUS_REQUESTED;
+    }
 
     public function isCancelled(): bool
     {

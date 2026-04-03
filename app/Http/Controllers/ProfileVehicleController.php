@@ -58,7 +58,6 @@ class ProfileVehicleController extends Controller
         $myVehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         // $myVehiclePage = $this->mapVehicleTypeFields($myVehiclePage, $postRidePage);
-        $vehicleTypes = $this->getVehicleTypesByLanguage();
         $userVehicleCount = 0;
         if (auth()->user()) {
             $user_id = auth()->user()->id;
@@ -71,7 +70,6 @@ class ProfileVehicleController extends Controller
             'ProfileSetting' => $ProfileSetting,
             'myVehiclePage' => $myVehiclePage,
             'userVehicleCount' => $userVehicleCount,
-            'vehicleTypes' => $vehicleTypes,
         ]);
     }
 
@@ -203,8 +201,6 @@ class ProfileVehicleController extends Controller
 
         // $myVehiclePage = $this->mapVehicleTypeFields($myVehiclePage, $postRidePage);
 
-        $vehicleTypes = $this->getVehicleTypesByLanguage();
-
         $vehicle = Vehicle::findOrFail($id);
 
         return view('edit_vehicle', [
@@ -212,7 +208,6 @@ class ProfileVehicleController extends Controller
             'ProfilePage' => $ProfilePage,
             'ProfileSetting' => $ProfileSetting,
             'vehicle' => $vehicle,
-            'vehicleTypes' => $vehicleTypes,
             'myVehiclePage' => $myVehiclePage,
         ]);
     }

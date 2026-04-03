@@ -26,7 +26,7 @@ class NotificationMessageDetail extends Model
 
     public function notificationMessage(): BelongsTo
     {
-        return $this->belongsTo(NotificationMessage::class, 'slug_id');
+        return $this->belongsTo(NotificationMessage::class, 'notification_message_id');
     }
 
 
@@ -39,7 +39,7 @@ class NotificationMessageDetail extends Model
     public static function getByLanguageKeyedBySlug(int $languageId, int $defaultLanguageId): array
     {
         $cacheKey = implode(':', [
-            'notification-text-detail:keyed-by-slug',
+            'notification-text-detail:keyed-by-slug-v2',
             'v' . static::getCacheVersion(),
             'language-' . $languageId,
             'default-' . $defaultLanguageId,
@@ -51,7 +51,7 @@ class NotificationMessageDetail extends Model
             $details = static::whereIn('language_id', [$languageId, $defaultLanguageId])
                 ->with('notificationMessage')
                 ->get()
-                ->groupBy('slug_id');
+                ->groupBy('notification_message_id');
 
             $result = [];
             foreach ($messages as $message) {

@@ -838,12 +838,17 @@ class User extends Authenticatable
         );
     }
 
-    public function getPassengerSeatsCount($ride_id): int
+    public function getPassengerSeatsCount($booking): int
     {
+        $ride_id = $booking->ride_id;
+        $from_stop_id = $booking->from_stop_id;
+        $to_stop_id = $booking->to_stop_id;
         return (int) Booking::query()
             ->join('rides', 'rides.id', '=', 'bookings.ride_id')
             ->where('bookings.user_id', $this->id)
             ->where('bookings.ride_id', $ride_id)
+            ->where('bookings.from_stop_id', $from_stop_id)
+            ->where('bookings.to_stop_id', $to_stop_id)
             ->where('bookings.status', '<>', Booking::STATUS_CANCELLED)
             ->where('bookings.status', '<>', Booking::STATUS_DECLINED)
             ->where('rides.added_by', '!=', $this->id)

@@ -8,6 +8,13 @@ use App\Models\SiteText;
 use App\Models\SiteTextDetail;
 use Illuminate\Support\Facades\Session;
 
+if (!function_exists('getDateFormatedString')) {
+    function getDateFormatedString($date_time)
+    {
+        return \Carbon\Carbon::parse($date_time)->format('F d, Y H:i');
+    }
+}
+
 if (!function_exists('getAllLanguages')) {
     function getAllLanguages()
     {

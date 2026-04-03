@@ -145,9 +145,9 @@
                 @csrf
 
                 <input type="hidden" name="from_stop_id"
-                    value="{{ $ride->from_stop_id ?? 0 }}">
+                    value="{{ $from_stop_id ?? 0 }}">
                 <input type="hidden" name="to_stop_id"
-                    value="{{ $ride->to_stop_id ?? 0 }}">
+                    value="{{ $to_stop_id ?? 0 }}">
                 <input type="hidden" name="booking_type" value="{{ $ride->booking_type }}">
                 <input type="hidden" name="id" value="{{ $ride->id }}">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-y-4 md:gap-4">

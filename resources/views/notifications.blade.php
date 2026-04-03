@@ -83,11 +83,12 @@
 
     <div class="container mx-auto p-4">
         @php
-            $unreadNotificationsOnly = isset($inboxFull) && $inboxFull
-                ? $inboxFull->filter(function ($n) {
-                    return data_get($n, 'kind') === 'notification' && data_get($n, 'is_read') == 0;
-                })
-                : collect();
+            $unreadNotificationsOnly =
+                isset($inboxFull) && $inboxFull
+                    ? $inboxFull->filter(function ($n) {
+                        return data_get($n, 'kind') === 'notification' && data_get($n, 'is_read') == 0;
+                    })
+                    : collect();
         @endphp
         <div class="flex items-center justify-between">
             <h1 class="font-FuturaMdCnBT text-primary mt-6">{{ $siteText['all_notifications_heading'] }}</h1>
@@ -176,7 +177,10 @@
                                     $defaultImageChat = asset('assets/image-placeholder.png');
                                     $myId = (int) $user_id;
                                     $senderUserId = (int) data_get($notification, 'sender.id');
-                                    $otherId = $senderUserId === $myId ? (int) data_get($notification, 'receiver.id') : $senderUserId;
+                                    $otherId =
+                                        $senderUserId === $myId
+                                            ? (int) data_get($notification, 'receiver.id')
+                                            : $senderUserId;
                                     $counterpart =
                                         $senderUserId === $myId
                                             ? data_get($notification, 'receiver')
@@ -193,8 +197,7 @@
                                             ? 'bg-white'
                                             : 'bg-gray-50');
                                     $imageSrcChat =
-                                        $counterpart &&
-                                        !empty(trim(data_get($counterpart, 'profile_image', '') ?? ''))
+                                        $counterpart && !empty(trim(data_get($counterpart, 'profile_image', '') ?? ''))
                                             ? data_get($counterpart, 'profile_image')
                                             : $defaultImageChat;
                                 @endphp
@@ -229,8 +232,7 @@
                                                     class="font-medium text-gray-900 {{ $hasUnreadChat ? 'font-semibold' : '' }}">
                                                     {{ data_get($counterpart, 'first_name', '') }}
                                                     {{ data_get($counterpart, 'last_name', '') }}</p>
-                                                <p
-                                                    class="text-gray-600 mt-1 {{ $hasUnreadChat ? 'text-gray-800' : '' }}">
+                                                <p class="text-gray-600 mt-1 {{ $hasUnreadChat ? 'text-gray-800' : '' }}">
                                                     {{ data_get($notification, 'message') }}</p>
                                                 <p class="text-sm text-gray-400 mt-2 flex items-center">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
@@ -239,7 +241,7 @@
                                                             stroke-width="2"
                                                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     </svg>
-                                                    {{ data_get($notification, 'created_at') ? \Carbon\Carbon::parse(data_get($notification, 'created_at'))->locale(app()->getLocale())->translatedFormat('M d, Y h:i A') : '' }}
+                                                    {{ data_get($notification, 'created_at')? \Carbon\Carbon::parse(data_get($notification, 'created_at'))->locale(app()->getLocale())->translatedFormat('M d, Y h:i A'): '' }}
                                                 </p>
                                             </div>
                                         </div>
@@ -262,54 +264,55 @@
                                     </button>
                                     @php
                                         // 1. Ride details: type 1 = my ride, type 2 = other's ride
-                                        // $rowCategoryIcon: ride | inbox | system (matches icons in notifications-info-bar-content)
-                                        if (
-                                            data_get($notification, 'type') == '1' &&
-                                            data_get($notification, 'departure') &&
-                                            data_get($notification, 'destination')
-                                        ) {
-                                            $targetUrl = route('my_ride_detail', [
-                                                'lang' => optional($selectedLanguage)->abbreviation,
-                                                'departure' => data_get($notification, 'departure'),
-                                                'destination' => data_get($notification, 'destination'),
-                                                'id' => data_get($notification, 'ride_id'),
-                                            ]);
-                                            $isGeneralUpdate = false;
-                                            $rowCategoryIcon = 'ride';
-                                        } elseif (
-                                            data_get($notification, 'type') == '2' &&
-                                            data_get($notification, 'departure') &&
-                                            data_get($notification, 'destination')
-                                        ) {
-                                            $rideDetailParams = [
-                                                'lang' => optional($selectedLanguage)->abbreviation,
-                                                'id' => data_get($notification, 'ride_id', 0),
-                                            ];
-                                            $fromStopId = data_get($notification, 'from_stop_id');
-                                            $toStopId = data_get($notification, 'to_stop_id');
-                                            if (
-                                                $fromStopId !== null &&
-                                                $fromStopId !== '' &&
-                                                $toStopId !== null &&
-                                                $toStopId !== ''
-                                            ) {
-                                                $rideDetailParams['from_stop_id'] = $fromStopId;
-                                                $rideDetailParams['to_stop_id'] = $toStopId;
-                                            }
-                                            $targetUrl = route('ride_detail', $rideDetailParams);
-                                            $isGeneralUpdate = false;
-                                            $rowCategoryIcon = 'ride';
-                                        } elseif (
-                                            data_get($notification, 'category') == 'system' &&
-                                            data_get($notification, 'notification_type') == 'welcome'
-                                        ) {
-                                            $targetUrl = route('welcome_message', [
-                                                'lang' => optional($selectedLanguage)->abbreviation,
-                                            ]);
-                                            $isGeneralUpdate = false;
-                                            $rowCategoryIcon = 'system';
-                                        } else {
-                                            // continue; // Skip notifications that don't fit the above criteria (e.g., system notifications without welcome type and without chat target)
+// $rowCategoryIcon: ride | inbox | system (matches icons in notifications-info-bar-content)
+if (
+    data_get($notification, 'type') == \App\Models\Notification::TYPE_MY_RIDE &&
+    data_get($notification, 'departure') &&
+    data_get($notification, 'destination')
+) {
+    $targetUrl = route('my_ride_detail', [
+        'lang' => optional($selectedLanguage)->abbreviation,
+        'departure' => data_get($notification, 'departure'),
+        'destination' => data_get($notification, 'destination'),
+        'id' => data_get($notification, 'ride_id'),
+    ]);
+    $isGeneralUpdate = false;
+    $rowCategoryIcon = 'ride';
+} elseif (
+    data_get($notification, 'type') ==
+        \App\Models\Notification::TYPE_RIDE_DETAIL &&
+    data_get($notification, 'departure') &&
+    data_get($notification, 'destination')
+) {
+    $rideDetailParams = [
+        'lang' => optional($selectedLanguage)->abbreviation,
+        'id' => data_get($notification, 'ride_id', 0),
+    ];
+    $fromStopId = data_get($notification, 'from_stop_id');
+    $toStopId = data_get($notification, 'to_stop_id');
+    if (
+        $fromStopId !== null &&
+        $fromStopId !== '' &&
+        $toStopId !== null &&
+        $toStopId !== ''
+    ) {
+        $rideDetailParams['from_stop_id'] = $fromStopId;
+        $rideDetailParams['to_stop_id'] = $toStopId;
+    }
+    $targetUrl = route('ride_detail', $rideDetailParams);
+    $isGeneralUpdate = false;
+    $rowCategoryIcon = 'ride';
+} elseif (
+    data_get($notification, 'category') == 'system' &&
+    data_get($notification, 'notification_type') == 'welcome'
+) {
+    $targetUrl = route('welcome_message', [
+        'lang' => optional($selectedLanguage)->abbreviation,
+    ]);
+    $isGeneralUpdate = false;
+    $rowCategoryIcon = 'system';
+} else {
+    // continue; // Skip notifications that don't fit the above criteria (e.g., system notifications without welcome type and without chat target)
                                             $hasChatTarget =
                                                 !empty(data_get($notification, 'ride_id')) &&
                                                 !empty(data_get($notification, 'posted_by'));
@@ -347,7 +350,11 @@
                                                             data_get($notification, 'sender') &&
                                                             !empty(
                                                                 trim(
-                                                                    data_get($notification, 'sender.profile_image', '') ?? '',
+                                                                    data_get(
+                                                                        $notification,
+                                                                        'sender.profile_image',
+                                                                        '',
+                                                                    ) ?? '',
                                                                 )
                                                             )
                                                         ) {
@@ -422,7 +429,7 @@
                                                             stroke-width="2"
                                                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     </svg>
-                                                    {{ data_get($notification, 'created_at') ? \Carbon\Carbon::parse(data_get($notification, 'created_at'))->locale(app()->getLocale())->translatedFormat('M d, Y h:i A') : '' }}
+                                                    {{ data_get($notification, 'created_at')? \Carbon\Carbon::parse(data_get($notification, 'created_at'))->locale(app()->getLocale())->translatedFormat('M d, Y h:i A'): '' }}
                                                 </p>
                                             </div>
                                         </div>

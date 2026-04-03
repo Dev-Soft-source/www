@@ -17,7 +17,9 @@ class CancelBookingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var controller = Get.find<MyTripController>();
+    final controller = Get.isRegistered<MyTripController>()
+        ? Get.find<MyTripController>()
+        : Get.put(MyTripController());
 
     return Scaffold(
       appBar: AppBar(
@@ -206,8 +208,16 @@ class CancelBookingPage extends StatelessWidget {
                               fontFamily: regular,
                               onChanged: (data){
                                 if(data != ""){
-                                  if(controller.errors.firstWhereOrNull((element) => element['title'] == "review") != null) {
-                                    controller.errors.remove(controller.errors.firstWhereOrNull((element) => element['title'] == "review"));
+                                  final reviewErr = controller.errors
+                                      .firstWhereOrNull((element) => element['title'] == "review");
+                                  if (reviewErr != null) {
+                                    controller.errors.remove(reviewErr);
+                                  }
+
+                                  final messageErr = controller.errors
+                                      .firstWhereOrNull((element) => element['title'] == "message");
+                                  if (messageErr != null) {
+                                    controller.errors.remove(messageErr);
                                   }
                                 }
                               },
@@ -216,6 +226,9 @@ class CancelBookingPage extends StatelessWidget {
                               "${controller.labelTextTripDetail['cancel_ride_placeholder'] ?? "Provide as many details as you want as to why you want to cancel this ride\nYour passengers will receive a copy of this message ProximaRide will investigate each cancellation"}"),
                           if(controller.errors.firstWhereOrNull((element) => element['title'] == "review") != null) ...[
                             toolTip(tip: controller.errors.firstWhereOrNull((element) => element['title'] == "review"))
+                          ],
+                          if(controller.errors.firstWhereOrNull((element) => element['title'] == "message") != null) ...[
+                            toolTip(tip: controller.errors.firstWhereOrNull((element) => element['title'] == "message"))
                           ],
                           10.heightBox,
                           if(controller.pageType == "ride")...[

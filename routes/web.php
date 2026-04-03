@@ -419,7 +419,7 @@ Route::delete('{lang?}/delete/notifications', [NotificationController::class, 'd
 
 Route::get('/subscription/success', [HomeController::class, 'paypalSuccessResponse'])->name('paypal.subscription.success');
 Route::post('{lang?}/coffee-on-the-wall', [HomeController::class, 'coffeeOnWallStore']);
-Route::post('seat-on-hold', [BookingController::class, 'seatOnHold'])->name('seat_on_hold');
+
 Route::post('no-show-driver', [BookingController::class, 'noShowDriver'])->name('no_show_driver');
 Route::post('revert-no-show-driver', [BookingController::class, 'revertNoShowDriver'])->name('revert_no_show_driver');
 Route::post('no-show-passenger', [BookingController::class, 'noShowPassenger'])->name('no_show_passenger');
@@ -475,6 +475,7 @@ Route::get('cancel-transaction', [BookingController::class, 'cancelTransaction']
 
 Route::post('booking-store/{id}', [BookingController::class, 'bookingStore'])->middleware('auth')->name('booking_store');
 Route::get('booking-success-transaction/{id}/{user_id}', [BookingController::class, 'paypalSuccess'])->name('paypal.success.booking');
+Route::post('seat-on-hold', [BookingController::class, 'seatOnHold'])->name('seat_on_hold');
 Route::put('update-cancel-booking/{id}', [BookingController::class, 'updateCancelBooking'])->middleware('auth')->name('update_cancel_booking');
 
 

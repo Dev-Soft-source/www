@@ -960,25 +960,7 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
             serviceController.showDialogue(resp['message'].toString(),
                 path: '/navigation', off: 1);
 
-            // var getCancelTrip = upComingTripList.firstWhereOrNull((element) => element['id'] == bookingId);
-            // if(getCancelTrip != null){
-            //   logger.info(resp['data']['booking']['status'] );
-            //   if(tripCancelTextEditingController.text == getCancelTrip['seats'] && resp['data']['booking']['status'] == "4"){
-            //     upComingTripList.removeWhere((element) => element['id'] == bookingId);
-            //     logger.info(upComingTripList);
-            //     if(cancelledTripList.isNotEmpty){
-            //       cancelledTripList.add(getCancelTrip);
-            //     }
-            //   }else{
-            //     var index = int.parse(upComingTripList.indexWhere((element) => element['id'] == bookingId).toString());
-            //     upComingTripList[index] = resp['data']['booking'];
-            //   }
-            // }
-            // cancelledTripList.refresh();
-            // upComingTripList.refresh();
-            //
-            // Get.back();
-            // Get.back();
+
           }
 
           if (pageType == "ride") {
@@ -986,18 +968,7 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
             serviceController.showDialogue(resp['message'].toString(),
                 path: '/navigation', off: 1);
             serviceController.showDialogue(resp['message'].toString());
-            // var getCancelTrip = upComingRideList.firstWhereOrNull((element) => element['id'] == bookingId);
-            // if(getCancelTrip != null){
-            //   upComingRideList.removeWhere((element) => element['id'] == bookingId);
-            //   if(cancelledRideList.isNotEmpty){
-            //     cancelledRideList.add(getCancelTrip);
-            //   }
-            // }
-            // cancelledRideList.refresh();
-            // upComingRideList.refresh();
-            //
-            // Get.back();
-            // Get.back();
+
           }
 
           tripCancelTextEditingController.clear();

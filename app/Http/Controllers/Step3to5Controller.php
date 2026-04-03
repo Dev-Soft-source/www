@@ -36,12 +36,9 @@ class Step3to5Controller extends Controller
             ]);
         }
 
-        $vehicleTypes = $this->getVehicleTypesByLanguage();
-
         return view('step3to5', [
             'step3Page' => $step3Page,
             'user' => $user,
-            'vehicleTypes' => $vehicleTypes,
         ]);
     }
 

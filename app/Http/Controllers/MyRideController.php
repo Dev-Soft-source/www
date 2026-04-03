@@ -170,10 +170,7 @@ class MyRideController extends Controller
 
         $setting = ReviewSetting::getCached();
         $cancelSetting = CancelRideSetting::getCached();
-        $languages = Language::getAllCached();
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
+       
 
 
         $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
@@ -189,7 +186,7 @@ class MyRideController extends Controller
 
         $ride = $this->getRideDetail($ride);
 
-        $ratings = Rating::all();
+        // $ratings = Rating::all();
         $ride_cancelled = false;
         $completed_date_time = Carbon::parse($ride->completed_date . ' ' . $ride->completed_time);
         if (($completed_date_time < Carbon::now() || $ride->status == '2' || $ride->status == '3')) {
@@ -207,7 +204,7 @@ class MyRideController extends Controller
             'siteSetting' => $siteSetting,
             'ride_cancelled' => $ride_cancelled,
             'setting' => $setting,
-            'ratings' => $ratings,
+            // 'ratings' => $ratings,
             'findRidePage' => $findRidePage,
             'cancelSetting' => $cancelSetting,
             'tripsPage' => $tripsPage,

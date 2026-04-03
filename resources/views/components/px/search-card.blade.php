@@ -94,7 +94,7 @@
                                 {{ $rideDetailPage->instant_booking_btn_label ?? 'Instant booking' }}
                             </a>
                         @else
-                            <a href="{{ route('ride_detail', ['lang' => app()->getLocale(), 'id' => $ride->id]) }}"
+                            <a href="{{ route('ride_detail', ['lang' => app()->getLocale(), 'id' => $ride->id, 'from_stop_id'=>$ride->from_stop_id, 'to_stop_id'=>$ride->to_stop_id]) }}"
                                 class="button-exp-sky-fill flex justify-center w-full"
                                 data-tippy-content="{{ $rideFeatureOptions['booking_method']['manual']->tooltip }}">
                                 <img class="w-8 h-8 mr-2"

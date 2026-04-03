@@ -124,6 +124,13 @@ Route::group(['prefix' => 'app/v1'], function () {
 });
 
 Route::group(['prefix' => 'app/v1', 'middleware' => ['auth:sanctum']], function () {
+
+    //////////////////////////////////////////////////
+    // unused routes
+    Route::put('update-instant-booking', [BookingController::class, 'updateInstantBooking'])->name('app.auth.update_instant_booking');
+    Route::post('instant-booking', [BookingController::class, 'instantBooking'])->name('app.auth.instant_booking');
+
+    ///////////////////////////////////////////////////
     Route::get('user', [AuthController::class, 'show'])->name('app.auth.show');
     Route::post('update-user-language', [AuthController::class, 'updateUserLanguage'])->name('app.auth.show');
     Route::get('check-status', [AuthController::class, 'checkStatus'])->name('app.auth.check_status');
@@ -133,17 +140,22 @@ Route::group(['prefix' => 'app/v1', 'middleware' => ['auth:sanctum']], function 
     Route::get('search-ride', [RideController::class, 'SearchRide'])->name('app.auth.search_ride');
     Route::get('check-booking', [RideController::class, 'checkBooking'])->name('app.auth.check_booking');
     Route::get('secured/booking-number-check', [BookingController::class, 'bookingNumberCheck'])->name('app.auth.booking-number-check');
-    Route::post('instant-booking', [BookingController::class, 'instantBooking'])->name('app.auth.instant_booking');
-    Route::post('seat-on-hold', [BookingController::class, 'seatOnHold'])->name('app.auth.seat_on_hold');
     Route::post('create-payment-intent', [BookingController::class, 'createPaymentIntent'])->name('app.auth.create_payment_intent');
-    Route::put('update-instant-booking', [BookingController::class, 'updateInstantBooking'])->name('app.auth.update_instant_booking');
     
+    //////////////////////////////////////////////////
+    // Make a booking                               //
+    //////////////////////////////////////////////////
     Route::get('booking', [BookingController::class, 'create'])->name('app.auth.booking');
     Route::post('booking-store', [BookingController::class, 'bookingStore'])->name('app.auth.booking_store');
+    Route::post('seat-on-hold', [BookingController::class, 'seatOnHold'])->name('app.auth.seat_on_hold');
+        
+    // to cancell booking
+    Route::put('cancel-booking', [MyTripController::class, 'cancelBooking'])->name('app.auth.cancel_booking');
+    ///////////////////////////////////////////////
     
     Route::post('booking-request', [BookingController::class, 'bookingRequest'])->name('app.auth.booking_request');
-    Route::put('update-booking-request', [BookingController::class, 'updateBookingRequest'])->name('app.auth.update_booking_request');
     Route::get('accept-booking-request', [BookingController::class, 'AcceptBookingRequest'])->name('app.auth.accept_booking_request');
+    Route::put('update-booking-request', [BookingController::class, 'updateBookingRequest'])->name('app.auth.update_booking_request');
     Route::get('reject-booking-request', [BookingController::class, 'RejectBookingRequest'])->name('app.auth.reject_booking_request');
     Route::post('no-show', [RideController::class, 'noShow'])->name('app.auth.no_show');
     Route::post('segment-distance-estimates', [RideController::class, 'segmentDistanceEstimates'])->name('app.auth.segment-distance-estimates');
@@ -208,8 +220,8 @@ Route::group(['prefix' => 'app/v1', 'middleware' => ['auth:sanctum']], function 
     Route::get('upcoming-trips', [MyTripController::class, 'CurrentTrips'])->name('app.auth.my_trips');
     Route::get('completed-trips', [MyTripController::class, 'PastTrips'])->name('app.auth.past_trips');
     Route::get('cancelled-trips', [MyTripController::class, 'CancelledTrips'])->name('app.auth.cancelled_trips');
-    
-    Route::put('cancel-booking', [MyTripController::class, 'cancelBooking'])->name('app.auth.cancel_booking');
+
+
     Route::get('upcoming-rides', [MyRideController::class, 'CurrentRides'])->name('app.auth.my_rides');
     Route::get('completed-rides', [MyRideController::class, 'PastRides'])->name('app.auth.past_rides');
     Route::get('cancelled-rides', [MyRideController::class, 'CancelledRides'])->name('app.auth.cancelled_rides');

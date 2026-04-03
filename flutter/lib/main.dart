@@ -41,6 +41,7 @@ import 'package:proximaride_app/pages/my_phone_number/my_phone_number.dart';
 import 'package:proximaride_app/pages/my_phone_number/phone_number_verification.dart';
 import 'package:proximaride_app/pages/my_reviews/my_reviews.dart';
 import 'package:proximaride_app/pages/my_trips/cancel_booking.dart';
+import 'package:proximaride_app/pages/my_trips/MyTripController.dart';
 import 'package:proximaride_app/pages/my_trips/remove_passenger.dart';
 import 'package:proximaride_app/pages/my_trips/review_passenger.dart';
 import 'package:proximaride_app/pages/my_vehicle/MyVehicleController.dart';
@@ -657,6 +658,11 @@ class MyAppState extends State<MyApp> {
         GetPage(
           name: '/cancel_booking/:pageType',
           page: () => const CancelBookingPage(),
+          binding: BindingsBuilder(() {
+            if (!Get.isRegistered<MyTripController>()) {
+              Get.lazyPut<MyTripController>(() => MyTripController());
+            }
+          }),
         ),
         GetPage(
           name: '/my_passenger/:rideId',

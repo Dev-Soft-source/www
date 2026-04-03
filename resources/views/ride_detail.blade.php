@@ -839,6 +839,8 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                                     $userBooking = $ride->bookings
                                         ->where('status', '<>', 3)
                                         ->where('status', '<>', 4)
+                                        ->where('from_stop_id', $from_stop_id)
+                                        ->where('to_stop_id', $to_stop_id)
                                         ->where('user_id', auth()->user()->id)
                                         ->first();
                                 @endphp
