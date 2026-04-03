@@ -685,8 +685,8 @@ class User extends Authenticatable
 
     public function getPassengerAverageRating(): float
     {
-        return (float) Rating::where('status', 1)
-            ->where('type', '2')
+        return (float) Rating::where('type', '2')
+            // ->where('status', 1)
             ->whereHas('booking', function ($query) {
                 $query->where('user_id', $this->id);
             })
@@ -695,8 +695,8 @@ class User extends Authenticatable
 
     public function hasPassengerRatings(): bool
     {
-        return Rating::where('status', 1)
-            ->where('type', '2')
+        return Rating::where('type', '2')
+            // ->where('status', 1)
             ->whereHas('booking', function ($query) {
                 $query->where('user_id', $this->id);
             })
@@ -855,12 +855,10 @@ class User extends Authenticatable
             ->sum('bookings.seats');
     }
 
-    public function hasBookingRating($ride_id): bool
+    public function hasRatedToDriver($booking_id): bool
     {
-        return Rating::query()
-            ->join('bookings', 'bookings.id', '=', 'ratings.posted_to')
-            ->where('bookings.user_id', $this->id)
-            ->where('bookings.ride_id', $ride_id)
+        return Rating::where('posted_to', $booking_id)
+            ->where('posted_by', $this->id)
             ->exists();
     }
 

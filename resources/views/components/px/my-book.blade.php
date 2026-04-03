@@ -66,40 +66,56 @@
                 @endif
 
                 <div class="flex items-center gap-2 text-primary justify-end">
-                    <p class="text-xl font-semibold text-primary">
-                        ${{ number_format(floatval($booking->price / 100), 2) }}
-                        <small>
-                            {{ $rideDetailPage->card_section_per_seat ?? 'per seat' }}
-                        </small>
-                    </p>
+                    @php
+                        $seatPrice = $booking->price / 100;
+                    @endphp
+                    @if (isset($firm_cancellation_discount) && $firm_cancellation_discount != '' && $booking->ride->isFirmCancellation())
+                        <span class="line-through">
+                            ${{ number_format((float) $seatPrice, 2) }}
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+                        </svg>
+                        <span>
+                            ${{ number_format($seatPrice - ($seatPrice * $firm_cancellation_discount) / 100, 2) }}
+                        </span>
+                    @else
+                        ${{ number_format((float) $seatPrice, 2) }}
+                    @endif
+                    <small>
+                        {{ $rideDetailPage->card_section_per_seat ?? 'per seat' }}
+                    </small>
+                    @if (isset($firm_cancellation_discount) && $firm_cancellation_discount != '' && $booking->ride->isFirmCancellation())
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-info-circle-fill text-black" viewBox="0 0 16 16"
+                            data-tippy-content="{!! nl2br($rideFeatureOptions['cancellation']['firm']->tooltip) ??
+                                'This ride has the Firm cancellation policy, so its booking price is reduced by 10%' !!}">
+                            <path
+                                d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                        </svg>
+                    @endif
                 </div>
 
                 @php
                     $user = auth()->user();
                 @endphp
 
-                
+
                 @if ($booking->isCompleted())
-                @php
-                    $hasRating = $user->hasBookingRating($booking->ride_id);
-
-                    $reviewUrl = $hasRating
-                        ? route('review_passenger.index', [
-                            'lang' => app()->getLocale(),
-                            'id' => $booking->getPassengerRatingId(),
-                        ])
-                        : route('review_driver', [
-                            'lang' => app()->getLocale(),
-                            'id' => $booking->uuid ?? 0,
-                        ]);
-
-                    $reviewText = $rideDetailPage->card_section_review ?? 'Review';
-                @endphp
-                <div class="mt-4">
-                    <a href="{{ $reviewUrl }}" class="button-exp-fill me-1">
-                        {{ $reviewText }}
-                    </a>
-                </div>
+                    {{-- To leave review to driver --}}
+                    @if (!$user->hasRatedToDriver($booking->id))
+                        <div class="mt-4">
+                            <a href="{{ route('review_driver', [
+                                'lang' => app()->getLocale(),
+                                'id' => $booking->uuid ?? 0,
+                            ]) }}"
+                                class="button-exp-fill me-1">
+                                {{ $rideDetailPage->card_section_review ?? 'Review' }}
+                            </a>
+                        </div>
+                    @endif
                 @endif
             </div>
         </div>
@@ -151,8 +167,12 @@
                             {{ $booking->ride->driver->getPassengersDrivenCount() }}
                         </p>
                         <p class="mb-0 text-sm font-medium">
-                            {{ $rideDetailPage->card_section_review ?? 'Review' }}:
-                            {{ number_format((float) ($booking->ride->getDriverAverageRating() ?? 0), 1) }}
+                            @if ($booking->ride->getDriverAverageRating())
+                                {{ $rideDetailPage->review_label ?? 'Review' }}:
+                                <span>{{ number_format($booking->ride->getDriverAverageRating(), 1) }}</span>
+                            @else
+                                {{ $rideDetailPage->no_reviews_label ?? 'No Reviews' }}
+                            @endif
                         </p>
                     </div>
                 </div>

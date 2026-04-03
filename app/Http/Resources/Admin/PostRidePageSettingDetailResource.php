@@ -157,6 +157,8 @@ class PostRidePageSettingDetailResource extends JsonResource
             'luggage_option4_tooltip' => $this->luggage_option4_tooltip,
             'luggage_option5_tooltip' => $this->luggage_option5_tooltip,
             'luggage_option5_label' => $this->luggage_option5_label,
+            'luggage_checkbox_label1' => $this->luggage_checkbox_label1,
+            'luggage_checkbox_label1_tooltip' => $this->luggage_checkbox_label1_tooltip,
             'luggage_checkbox_label2' => $this->luggage_checkbox_label2,
             'luggage_checkbox_label2_tooltip' => $this->luggage_checkbox_label2_tooltip,
             'price_payment_heading' => $this->price_payment_heading,

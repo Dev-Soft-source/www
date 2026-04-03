@@ -58,7 +58,7 @@
                                     d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
                             </svg>
                             <span>
-                                ${{ $seatPrice - ($seatPrice * $firm_cancellation_discount) / 100 }}
+                                ${{ number_format($seatPrice - ($seatPrice * $firm_cancellation_discount) / 100, 2) }}
                             </span>
                         @else
                             ${{ number_format((float) $seatPrice, 2) }}

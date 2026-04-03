@@ -197,21 +197,21 @@
                         <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
                             {{ $rideDetailPage->mobile_seat_fare_label ?? 'Fare' }}: </h4>
                         <p class="text-primary ">
-                            ${{ number_format($ride->getMobileSeatFareTotal(), 2) }}
+                            ${{ number_format($ride->getBookedFare(), 2) }}
                         </p>
                     </div>
                     <div class="flex items-center justify-between">
                         <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
                             {{ $rideDetailPage->mobile_seat_booking_fee_label ?? 'Booking fee' }}: </h4>
                         <p class="text-primary ">
-                            ${{ number_format($ride->getMobileSeatBookingFeeTotal(), 2) }}
+                            ${{ number_format($ride->getBookedFee(), 2) }}
                         </p>
                     </div>
                     <div class="flex items-center justify-between">
                         <h4 class="text-black text-xl xl:text-2xl font-FuturaMdCnBT">
                             {{ $rideDetailPage->mobile_seat_total_amount_label ?? 'Total amount' }}: </h4>
                         <p class="text-primary ">
-                            ${{ number_format($ride->getMobileSeatTotalAmount(), 2) }}
+                            ${{ number_format(($ride->getBookedFare() + $ride->getBookedFee()), 2) }}
                         </p>
                     </div>
                 </div>

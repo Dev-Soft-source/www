@@ -14,6 +14,7 @@ class CityAutocomplete extends Component
     private const SUGGESTIONS_CACHE_TTL_SECONDS = 300;
 
     public string $field;
+    public string $icon;
     public ?string $class = '';
     public string $placeholder;
     public string $query = '';
@@ -25,6 +26,7 @@ class CityAutocomplete extends Component
 
     public function mount(
         string $field,
+        string $icon = 'default',
         string $class = '',
         string $placeholder = 'City, station, or address',
         ?string $initialLabel = null,
@@ -33,6 +35,7 @@ class CityAutocomplete extends Component
     ): void
     {
         $this->field = $field;
+        $this->icon = $icon;
         $this->class = $class;
         $this->placeholder = $placeholder;
         $this->cityId = is_numeric($initialCityId) ? (int) $initialCityId : null;

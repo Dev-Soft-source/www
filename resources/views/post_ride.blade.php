@@ -434,6 +434,7 @@
                                         'placeholder' => $postRidePage->from_placeholder,
                                         'initialLabel' => $oldOriginLabel ?? old('origin.label'),
                                         'initialCityId' => $oldOriginCityId ?? old('origin.city_id'),
+                                        'icon' => 'pick',
                                     ],
                                     key('px-origin-city-autocomplete')
                                 )
@@ -1192,9 +1193,7 @@
                                     class="form-check-input mt-1">
                                 <label for="heating" class="ml-2 font-normal text-gray-900 flex space-x-1">
                                     <span class="">
-                                        @isset($postRidePage->luggage_checkbox_label1)
-                                            {{ $postRidePage->luggage_checkbox_label1 }}
-                                        @endisset
+                                        {{ $postRidePage->luggage_checkbox_label1 ?? 'I accept more luggage for extra charge' }}
                                     </span>
                                 </label>
                             </div>

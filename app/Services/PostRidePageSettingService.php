@@ -186,6 +186,8 @@ class PostRidePageSettingService
             'booking_label' => $this->data($request, $language, 'booking_label'),
             'max_back_seats_label' => $this->data($request, $language, 'max_back_seats_label'),
             'luggage_label' => $this->data($request, $language, 'luggage_label'),
+            'luggage_checkbox_label1' => $this->data($request, $language, 'luggage_checkbox_label1'),
+            'luggage_checkbox_label1_tooltip' => $this->data($request, $language, 'luggage_checkbox_label1_tooltip'),
             'price_payment_heading' => $this->data($request, $language, 'price_payment_heading'),
             'price_per_seat_label' => $this->data($request, $language, 'price_per_seat_label'),
             'payment_methods_label' => $this->data($request, $language, 'payment_methods_label'),

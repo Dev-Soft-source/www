@@ -140,91 +140,36 @@ class ReviewController extends Controller
         ]);
     }
 
+    /**
+     * To leave review to passenger by Driver
+     * @param id : booking id
+     */
     public function ReviewPassenger($lang, $id)
     {
         $booking = Booking::where('id', $id)->first();
         if ($booking) {
-            $languages = Language::getAllCached();
-            // Store the selected language in the session
-            if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-                session(['selectedLanguage' => $lang]);
-            }
-            $selectedLanguage = session('selectedLanguage');
-            if ($selectedLanguage) {
-                // Find the language by abbreviation
-                $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            } else {
-                $selectedLanguage = Language::where('is_default', 1)->first();
-            }
-
-            $notifications = null;
-            if (auth()->user()) {
-                $user_id = auth()->user()->id;
-                $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
-                    // Ratings where type is 1 and ride_id belongs to the user
-                    $query->where('type', '1')
-                        ->whereHas('ride', function ($query) use ($user_id) {
-                            $query->where('added_by', $user_id);
-                        });
-                })
-                    ->orWhere(function ($query) use ($user_id) {
-                        // Ratings where type is 2 and booking_id belongs to the user
-                        $query->where('type', '2')
-                            ->whereHas('booking', function ($query) use ($user_id) {
-                                $query->where('user_id', $user_id);
-                            });
-                    })
-                    ->orWhere(function ($query) use ($user_id) {
-                        // Ratings where type is null and receiver_id belongs to the user
-                        $query->where('type', null)
-                            ->whereHas('receiver', function ($query) use ($user_id) {
-                                $query->where('id', $user_id);
-                            });
-                    })
-                    ->orderBy('id', 'desc')
-                    ->get();
-            }
-
             $reviewPage = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
             $existingRating = Rating::where('type', 2)->where('posted_to', $booking->id)->where('posted_by', $booking->ride->driver->id)->first();
             if ($existingRating) {
-                return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $reviewPage->already_reviewed_label ?? 'Already reviewed']);
+                return redirect()->back()->with(['success' => $reviewPage->already_reviewed_label ?? 'Already reviewed']);
             }
-
 
             return view('review_passenger', [
                 'booking' => $booking,
                 'reviewPage' => $reviewPage,
-                'notifications' => $notifications,
-                'languages' => $languages,
-                'selectedLanguage' => $selectedLanguage
             ]);
         }
+
         $errorPage = \App\View\Composers\ErrorPageComposer::getErrorPage();
         return view('errors/404', ['errorPage' => $errorPage]);
     }
 
     public function StoreReviewPassenger($id, Request $request)
     {
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('reviewed_passenger_message', 'general_error_message', 'block_review_rating_message')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('reviewed_passenger_message', 'general_error_message', 'block_review_rating_message')->first();
-        }
-
+            
+        $message = $this->successMessage;
         $user = auth()->user();
-
-        if ($user->block_review_rating == '1') {
-            return $this->apiErrorResponse($message->block_review_rating_message ?? null, 200);
-        }
-
-        $booking = Booking::whereId($id)->first();
-        $setting = ReviewSetting::getCached();
 
         $customMessages = [
             'required_without_all' => 'At least one of the ratings must be filled',
@@ -240,6 +185,14 @@ class ReviewController extends Controller
             'review.max_words' => 'The review may not be greater than 500 words',
             'conscious.required_without_all' => 'At least one of the ratings must be filled',
         ]);
+
+        if ($user->block_review_rating == '1') {
+            return redirect()->back()->with(['error'=> $message->block_review_rating_message ?? '']);
+        }
+
+        $booking = Booking::whereId($id)->first();
+        $setting = ReviewSetting::getCached();
+
 
         // Initialize variables to store sum and count of non-null values
         $sum = 0;
@@ -411,9 +364,9 @@ class ReviewController extends Controller
         }
 
         if (auth()->user()) {
-            return redirect()->route('my_ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id]);
+            return redirect()->route('my_ride_detail', ['lang' => app()->getLocale(), 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $booking->ride->id]);
         }
-        return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation])->with(['success' => 'Reviewed successfully']);
+        return redirect()->route('home', ['lang' => app()->getLocale()])->with(['success' => 'Reviewed successfully']);
     }
 
     public function ReviewDriver($lang, $id)
@@ -424,61 +377,17 @@ class ReviewController extends Controller
         if ($booking) {
             $ride = Ride::whereId($booking->ride_id)->first();
 
-            $languages = Language::getAllCached();
-            // Store the selected language in the session
-            if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-                session(['selectedLanguage' => $lang]);
-            }
-            $selectedLanguage = session('selectedLanguage');
-            if ($selectedLanguage) {
-                // Find the language by abbreviation
-                $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            } else {
-                $selectedLanguage = Language::where('is_default', 1)->first();
-            }
-
-            $notifications = null;
-            if (auth()->user()) {
-                $user_id = auth()->user()->id;
-                $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
-                    // Ratings where type is 1 and ride_id belongs to the user
-                    $query->where('type', '1')
-                        ->whereHas('ride', function ($query) use ($user_id) {
-                            $query->where('added_by', $user_id);
-                        });
-                })
-                    ->orWhere(function ($query) use ($user_id) {
-                        // Ratings where type is 2 and booking_id belongs to the user
-                        $query->where('type', '2')
-                            ->whereHas('booking', function ($query) use ($user_id) {
-                                $query->where('user_id', $user_id);
-                            });
-                    })
-                    ->orWhere(function ($query) use ($user_id) {
-                        // Ratings where type is null and receiver_id belongs to the user
-                        $query->where('type', null)
-                            ->whereHas('receiver', function ($query) use ($user_id) {
-                                $query->where('id', $user_id);
-                            });
-                    })
-                    ->orderBy('id', 'desc')
-                    ->get();
-            }
-
             $reviewPage = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
             $existingRating = Rating::where('ride_id', $booking->ride_id)->where('type', 1)->where('posted_by', $booking->user_id)->first();
             if ($existingRating) {
-                return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation])->with(['success' => $reviewPage->already_reviewed_label ?? 'Already reviewed']);
+                return redirect()->back()->with(['success' => $reviewPage->already_reviewed_label ?? 'Already reviewed']);
             }
 
             return view('review_driver', [
                 'booking' => $booking,
                 'ride' => $ride,
                 'reviewPage' => $reviewPage,
-                'notifications' => $notifications,
-                'languages' => $languages,
-                'selectedLanguage' => $selectedLanguage
             ]);
         }
         $errorPage = \App\View\Composers\ErrorPageComposer::getErrorPage();
@@ -582,14 +491,6 @@ class ReviewController extends Controller
             ]);
         }
 
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-        }
-
         $data = ['first_name' => $booking->passenger->first_name];
         Mail::to($booking->passenger->email)->queue(new ReviewLeftMail($data));
 
@@ -662,9 +563,9 @@ class ReviewController extends Controller
         }
 
         if (auth()->user()) {
-            return redirect()->route('ride_detail', ['lang' => $selectedLanguage->abbreviation, 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $ride->id]);
+            return redirect()->route('ride_detail', ['lang' => app()->getLocale(), 'departure' => $booking->departure, 'destination' => $booking->destination, 'id' => $ride->id]);
         }
-        return redirect()->route('home', ['lang' => $selectedLanguage->abbreviation])->with(['success' => 'Reviewed successfully']);
+        return redirect()->route('home', ['lang' => app()->getLocale()])->with(['success' => 'Reviewed successfully']);
     }
 
     public function ReviewReply($lang, $id)

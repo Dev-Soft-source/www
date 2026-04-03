@@ -1009,6 +1009,50 @@
                                                     class="flex justify-between"
                                                 >
                                                     <label
+                                                        :for="`ride_cancellation_limit_exceed_${activeLanguageId}`"
+                                                        >Ride cancellation limit exceeded message</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`ride_cancellation_limit_exceed_${activeLanguageId}`"
+                                                    :id="`ride_cancellation_limit_exceed_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'ride_cancellation_limit_exceed'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'ride_cancellation_limit_exceed'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `ride_cancellation_limit_exceed.ride_cancellation_limit_exceed_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `ride_cancellation_limit_exceed.ride_cancellation_limit_exceed_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
                                                         :for="`dropoff_at_label_${activeLanguageId}`"
                                                         >Drop-off at label</label
                                                     >
@@ -4926,6 +4970,7 @@ export default {
                             this.handleInput("", language, "ride_completed_text");
                             this.handleInput("", language, "ride_completed_label");
                             this.handleInput("", language, "ride_cancelled_label");
+                            this.handleInput("", language, "ride_cancellation_limit_exceed");
                             this.handleInput("", language, "book_seat_btn_label");
                             this.handleInput("", language, "seat_available_label");
                             this.handleInput("", language, "no_seat_available_label");
@@ -5189,6 +5234,11 @@ this.handleInput("", language, "cancellation_policy_tooltip_url");
                                 setting?.ride_cancelled_label,
                                 setting?.language,
                                 "ride_cancelled_label"
+                            );
+                            this.handleInput(
+                                setting?.ride_cancellation_limit_exceed,
+                                setting?.language,
+                                "ride_cancellation_limit_exceed"
                             );
                             this.handleInput(
                                 setting?.book_seat_btn_label,
@@ -5687,6 +5737,9 @@ this.handleInput(
                 ) ||
                 validationErros.has(
                     `ride_cancelled_label.ride_cancelled_label_${language.id}`
+                ) ||
+                validationErros.has(
+                    `ride_cancellation_limit_exceed.ride_cancellation_limit_exceed_${language.id}`
                 ) ||
                 validationErros.has(
                     `book_seat_btn_label.book_seat_btn_label_${language.id}`

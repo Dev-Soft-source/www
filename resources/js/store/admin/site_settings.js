@@ -49,7 +49,8 @@ const settings = {
         meanu_icon_close_your_account:null,
             tax: null,
             booking_fee_give_to_driver: 0,
-            booking_fee_give_to_student: 0
+            booking_fee_give_to_student: 0,
+            ride_cancel_limit: null,
         },
         settings: null,
         loading: false,

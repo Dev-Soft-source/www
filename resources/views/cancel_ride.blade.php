@@ -133,7 +133,7 @@
                             </div>
                             <div class="flex justify-center items-center mt-4">
                                 <button id="cancelRideBtn" class="button-exp-fill" type="submit">
-                                    {{ $tripsPage->booking_cancel_btn_label ?? 'Cancel ride' }}
+                                    {{ $rideDetailPage->cancel_ride_btn_label ?? 'Cancel ride' }}
                                 </button>
                             </div>
                         </div>

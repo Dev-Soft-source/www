@@ -229,6 +229,17 @@
                     </div>
 
                     <div class="relative z-0 w-full group">
+                        <label for="ride_cancel_limit" class="">Ride cancellation limit</label>
+                        <input type="number" step="1" min="0" name="ride_cancel_limit" id="ride_cancel_limit"
+                            class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" "
+                            :value="form.ride_cancel_limit" @input="
+                                updateForm('ride_cancel_limit', $event.target.value)
+                                " tabindex="-1" />
+                        <p class="mt-2 text-sm text-red-400" v-if="validationErros.has('ride_cancel_limit')"
+                            v-text="validationErros.get('ride_cancel_limit')"></p>
+                    </div>
+
+                    <div class="relative z-0 w-full group">
                         <label for="booking_cancel_duration" class="">Booking cancellation duration (Months)</label>
                         <input type="number" step="any" name="booking_cancel_duration" id="booking_cancel_duration"
                             class="can-exp-input w-full block border border-gray-300 rounded" placeholder=" "

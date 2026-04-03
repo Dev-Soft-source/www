@@ -34,10 +34,10 @@
                             <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                 <div class="sm:flex sm:items-start justify-center">
                                     <!-- <div class="mx-auto flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-red-500 p-1">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-12 text-white">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                                                        </svg>
-                                                    </div> -->
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-12 text-white">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                                            </svg>
+                                                        </div> -->
                                 </div>
                                 <div class="mt-3 text-center">
                                     <div class="mt-2">
@@ -93,11 +93,11 @@
                             <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                 <div class="sm:flex sm:items-start justify-center">
                                     <!-- <div class="mx-auto h-16 w-16">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                                            stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                                                        </svg>
-                                                    </div> -->
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                                                stroke-width="4" stroke="currentColor" class="w-12 h-12 text-greenXS">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                            </svg>
+                                                        </div> -->
                                 </div>
                                 <div class="w-full">
                                     <p class="text-center can-exp-p">{!! session('success') !!}</p>
@@ -131,10 +131,10 @@
                             <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                                 <div class="sm:flex sm:items-start justify-center">
                                     <!-- <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                    <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                                </svg>
-                                            </div> -->
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                                    </svg>
+                                                </div> -->
                                 </div>
                                 <div class="text-center">
 
@@ -302,6 +302,13 @@
                         {{ $rideDetailPage->main_heading }}
                     @endisset
                 </h1>
+                @if ($ride->isCancelled())
+                    <div class="mt-4 p-4 bg-pink-200 border-l-4 border-pink-500 rounded">
+                        <p class="text-gray-900 font-medium">
+                            <strong>Note: </strong> Sorry! This ride is cancelled by driver.
+                        </p>
+                    </div>
+                @endif
 
                 @php
                     $user = auth()->user();
@@ -508,7 +515,7 @@
                                             @php
                                                 $hasBookedRide = $ride->bookings
                                                     ->where('user_id', auth()->user()->id)
-                                                    ->where('status', 1)
+                                                    ->where('status', '!=', 0)
                                                     ->isNotEmpty();
 
                                                 $driverImage = !$hasBookedRide
@@ -577,21 +584,9 @@
 
                                         <div class="flex items-center gap-4 w-full">
                                             <div class="flex items-center gap-1 w-auto">
-                                                @php
-                                                    $filteredRatings = $ratings
-                                                        ->where('status', 1)
-                                                        ->where('type', '1')
-                                                        ->filter(function ($rating) use ($ride) {
-                                                            return $rating->ride &&
-                                                                $rating->ride->added_by === $ride->added_by;
-                                                        });
-
-                                                    $totalAverage = $filteredRatings->avg('average_rating') ?? 0;
-                                                    $driverHasReviews = $filteredRatings->isNotEmpty();
-                                                @endphp
-                                                @if ($driverHasReviews)
+                                                @if ($ride->getDriverAverageRating())
                                                     <p class="font-medium text-black">
-                                                        {{ number_format($totalAverage, 1) }}</p>
+                                                        {{ number_format($ride->getDriverAverageRating(), 1) }}</p>
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                                                         fill="currentColor" class="w-6 h-6 text-yellow-500">
                                                         <path fill-rule="evenodd"
@@ -600,7 +595,7 @@
                                                     </svg>
                                                 @else
                                                     <p class="text-sm text-black">
-                                                        {{ $rideDetailPage->no_reviews_label ?? ($siteText['no_reviews_label'] ?? 'No Reviews') }}
+                                                        {{ $rideDetailPage->no_reviews_label ?? 'No Reviews' }}
                                                     </p>
                                                 @endif
                                             </div>
@@ -852,7 +847,7 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                                                 onclick="toggleModalCard('card-modal', '{{ $userBooking->id }}', '{{ $selectedLanguage->abbreviation }}')"
                                             @else
                                                 href="{{ route('booking.cancel', ['lang' => $selectedLanguage->abbreviation, 'id' => $userBooking->id]) }}" @endif
-                                                class="button-exp-fill text-xl">
+                                                class="button-exp-red-fill text-xl">
 
                                                 @if ((string) $userBooking->status === '0' || (int) $userBooking->status === 0)
                                                     {{ $rideDetailPage->cancel_booking_request_btn_label }}
@@ -1279,13 +1274,13 @@ $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
                     <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                         <div class="sm:flex sm:items-start justify-center">
                             <!-- <div
-                                                class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                                                    class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                                    <path
-                                                        d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0" />
-                                                </svg>
-                                            </div> -->
+                                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-red-500">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                                        class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                                        <path
+                                                            d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0" />
+                                                    </svg>
+                                                </div> -->
                         </div>
                         <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                             <div class="">

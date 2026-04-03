@@ -65,6 +65,8 @@ class RideDetailPageSettingService
                 $errorMessages = array_merge($errorMessages, ['ride_completed_label.ride_completed_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['ride_cancelled_label.ride_cancelled_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['ride_cancelled_label.ride_cancelled_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $validationRule = array_merge($validationRule, ['ride_cancellation_limit_exceed.ride_cancellation_limit_exceed_' . $language->id => ['required', 'string']]);
+                $errorMessages = array_merge($errorMessages, ['ride_cancellation_limit_exceed.ride_cancellation_limit_exceed_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 
                 $validationRule = array_merge($validationRule, ['book_seat_btn_label.book_seat_btn_label_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['book_seat_btn_label.book_seat_btn_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
@@ -279,6 +281,7 @@ class RideDetailPageSettingService
             'ride_completed_text' => $this->data($request, $language, 'ride_completed_text'),
             'ride_completed_label' => $this->data($request, $language, 'ride_completed_label'),
             'ride_cancelled_label' => $this->data($request, $language, 'ride_cancelled_label'),
+            'ride_cancellation_limit_exceed' => $this->data($request, $language, 'ride_cancellation_limit_exceed'),
             'book_seat_btn_label' => $this->data($request, $language, 'book_seat_btn_label'),
             'seat_available_label' => $this->data($request, $language, 'seat_available_label'),
             'no_seat_available_label' => $this->data($request, $language, 'no_seat_available_label'),

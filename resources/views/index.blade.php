@@ -183,6 +183,7 @@
                                     'px.city-autocomplete',
                                     [
                                         'field' => 'origin',
+                                        'icon' => 'pick',
                                         'placeholder' => $findRidePage->search_section_from_placeholder ?? 'Origin',
                                         'initialLabel' => $oldOriginLabel,
                                         'initialCityId' => $oldOriginCityId,

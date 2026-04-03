@@ -150,8 +150,6 @@ class MyRideController extends Controller
     {
         $siteSetting = SiteSetting::getCached();
 
-        $from = (string) ($request->departure ?? '');
-        $to = (string) ($request->destination ?? '');
         $ride = Ride::where('id', $request->id)
             ->with([
                 'rideDetail' => function ($q) {
@@ -185,6 +183,7 @@ class MyRideController extends Controller
             $this->selectedLanguage->id,
             $this->defaultLang->id
         );
+        $myPassengerPage = MyPassengerSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $messages = $this->successMessage;
 
         $ride = $this->getRideDetail($ride);
@@ -208,6 +207,7 @@ class MyRideController extends Controller
             'ride_cancelled' => $ride_cancelled,
             'setting' => $setting,
             // 'ratings' => $ratings,
+            'myPassengerPage' => $myPassengerPage,
             'findRidePage' => $findRidePage,
             'cancelSetting' => $cancelSetting,
             'tripsPage' => $tripsPage,
@@ -638,51 +638,16 @@ class MyRideController extends Controller
     {
         $ride = Ride::where('id', $id)->first();
         $setting = SiteSetting::getCached();
-        $languages = Language::getAllCached();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $tripsPage = null;
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            $tripsPage = TripsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            $tripsPage = TripsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-        }
 
-        $notifications = null;
-        if (auth()->user()) {
+        $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
-                // Ratings where type is 1 and ride_id belongs to the user
-                $query->where('type', '1')
-                    ->whereHas('ride', function ($query) use ($user_id) {
-                        $query->where('added_by', $user_id);
-                    });
-            })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is 2 and booking_id belongs to the user
-                    $query->where('type', '2')
-                        ->whereHas('booking', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-                })
-                ->orWhere(function ($query) use ($user_id) {
-                    // Ratings where type is null and receiver_id belongs to the user
-                    $query->where('type', null)
-                        ->whereHas('receiver', function ($query) use ($user_id) {
-                            $query->where('id', $user_id);
-                        });
-                })
-                ->orderBy('id', 'desc')
-                ->get();
-        }
-        return view('cancel_ride', ['ride' => $ride, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'setting' => $setting, 'tripsPage' => $tripsPage]);
+        return view('cancel_ride', [
+            'ride' => $ride,
+            'setting' => $setting,
+            'rideDetailPage' => $rideDetailPage,
+            'tripsPage' => $tripsPage
+        ]);
     }
 
     /**
@@ -713,8 +678,8 @@ class MyRideController extends Controller
         $messages = $this->successMessage;
         $limitExceed = BookingPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-        if ($cancellationCount >= $setting->booking_cancel_limit) {
-            return redirect()->back()->with(['failure' => $limitExceed->booking_cancellation_limit_exceed ?? 'Booking cancellation limit exceeded']);
+        if ($cancellationCount >= $setting->ride_cancel_limit) {
+            return redirect()->back()->with(['failure' => $limitExceed->ride_cancellation_limit_exceed ?? 'Ride cancellation limit exceeded']);
         }
 
         $cancellation = app(DriverRideCancellationService::class);

@@ -25,6 +25,9 @@ class SiteSettingController extends Controller
 
     public function update(Request $request, SiteSetting $setting)
     {
+        if ($request->has('ride_cancel_limit') && $request->input('ride_cancel_limit') === '') {
+            $request->merge(['ride_cancel_limit' => null]);
+        }
 
         $tax_type = $request->filled('tax_type') ? $request->tax_type : null;
 
@@ -71,10 +74,9 @@ class SiteSettingController extends Controller
             // 'top_menu_search' => ['required'],
             'booking_cancel_duration' => ['required'],
             'booking_cancel_limit' => ['required'],
+            'ride_cancel_limit' => ['nullable', 'integer', 'min:0'],
             'user_per_day_limit' => ['required'],
-            'booking_cancel_duration' => ['required'],
             'ride_post_dead_time' => ['required'],
-            'booking_cancel_limit' => ['required'],
             'tax' => $tax_type == "flat_tax" ? 'required' : 'nullable'
         ];
         $this->validate($request, $rules);
@@ -108,6 +110,7 @@ class SiteSettingController extends Controller
                 'booking_cancel_duration' => $request->booking_cancel_duration,
                 'ride_post_dead_time' => $request->ride_post_dead_time,
                 'booking_cancel_limit' => $request->booking_cancel_limit,
+                'ride_cancel_limit' => $request->ride_cancel_limit,
                 'top_menu_notification' => $request->top_menu_notification,
                 'profile_setting_profile_photo' => $request->profile_setting_profile_photo,
                 'profile_setting_my_vehicle' => $request->profile_setting_my_vehicle,
@@ -159,6 +162,7 @@ class SiteSettingController extends Controller
             'booking_cancel_duration' => $request->booking_cancel_duration,
             'ride_post_dead_time' => $request->ride_post_dead_time,
             'booking_cancel_limit' => $request->booking_cancel_limit,
+            'ride_cancel_limit' => $request->ride_cancel_limit,
             'top_menu_notification' => $request->top_menu_notification,
             'profile_setting_profile_photo' => $request->profile_setting_profile_photo,
             'profile_setting_my_vehicle' => $request->profile_setting_my_vehicle,

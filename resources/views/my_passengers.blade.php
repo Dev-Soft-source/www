@@ -14,15 +14,24 @@
                     <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                         <div class="bg-primary text-white py-2 px-4">
                             <div class="flex justify-between items-center">
-                                <div>
-                                    <h3>{{ $booking->passenger->first_name }}</h3>
-                                    <div class="flex">
-                                        <p class="text-white leading-4 mt-2 mr-4 text-base">
-                                            {{ $myPassengerPage->age ?? 'Age' }}: <span>{{ $booking->passenger->getAge() }}</span></p>
-                                        <p class="text-white leading-4 mt-2 ml-4 text-base">
-                                            {{ $myPassengerPage->gender ?? 'Gender' }}: <span>
-                                                {{ ucfirst($booking->passenger->gender) }}
-                                            </span></p>
+                                <div class="flex flex-row items-center">
+                                    <div class="mr-4">
+                                        @include('partials.passenger_avatar', [
+                                            'user' => $booking->passenger,
+                                            'iconClass' => 'w-16 h-16'
+                                        ])
+                                    </div>
+                                    <div>
+                                        <h3>{{ $booking->passenger->first_name }}</h3>
+                                        <div class="flex">
+                                            <p class="text-white leading-4 mt-2 mr-4 text-base">
+                                                {{ $myPassengerPage->age ?? 'Age' }}:
+                                                <span>{{ $booking->passenger->getAge() }}</span></p>
+                                            <p class="text-white leading-4 mt-2 ml-4 text-base">
+                                                {{ $myPassengerPage->gender ?? 'Gender' }}: <span>
+                                                    {{ ucfirst($booking->passenger->gender) }}
+                                                </span></p>
+                                        </div>
                                     </div>
                                 </div>
                                 <a href="{{ route('profile_info', ['lang' => $selectedLanguage->abbreviation, 'id' => $booking->passenger->id]) }}"
@@ -38,15 +47,16 @@
                             </div>
                             <div class="flex justify-between items-center space-x-2 w-full border-b">
                                 <p>{{ $myPassengerPage->my_fare_label ?? 'My fare' }}</p>
-                                <p>${{ number_format(floor($booking->seats * $booking->price / 100), 2) }}</p>
+                                <p>${{ number_format(floor($booking->fare), 2) }}</p>
                             </div>
                             <div class="flex justify-between items-center space-x-2 w-full border-b">
                                 <p>{{ $myPassengerPage->booking_fee_label ?? 'Booking fee' }}</p>
                                 <p>${{ number_format($booking->booking_credit, 2) }}</p>
                             </div>
                             <div class="flex justify-between items-center space-x-2 w-full border-b">
-                                <p>{{ $myPassengerPage->total_amount_label ?? 'My Total' }}</p>
-                                <p>${{ number_format(floor($booking->seats * $booking->price / 100) + $booking->booking_credit + $booking->tax_amount, 2) }}</p>
+                                <p>{{ $myPassengerPage->total_amount_label ?? 'Total' }}</p>
+                                <p>${{ number_format($booking->fare + $booking->booking_credit + $booking->tax_amount, 2) }}
+                                </p>
                             </div>
                             <div class="flex items-center justify-between pt-4">
                                 @if (strtotime($ride->date) > strtotime('today') ||
@@ -63,7 +73,6 @@
                                             {{ $myPassengerPage->remove_ride_btn_label ?? 'Remove from this ride' }}
                                         </a>
                                     </div>
-
                                 @endif
                                 @if (auth()->user())
                                     @php
@@ -87,33 +96,33 @@
                                 @endif
                                 <!-- @if (strtotime($ride->date) < strtotime('today') ||
                                         (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) < strtotime('now')))
-                                    @if (strtotime($ride->completed_date) > strtotime('today') ||
-                                            (strtotime($ride->completed_date) == strtotime('today') && strtotime($ride->completed_time) > strtotime('now')))
-                                        @if (!isset($exist))
-                                            <div>
-                                                <a href="javascript:void(0)" id="noShowDriverButton"
-                                                    data-booking-id="{{ $booking->id }}" class="button-exp-fill me-1">
-                                                    {{--  Review your driver  --}}
-                                                    {{ $myPassengerPage->no_show_passenger_label ?? 'No show passenger' }}
-                                                </a>
-                                            </div>
-                                        @else
-                                            <div>
-                                                <a href="javascript:void(0)" id="revertNoShowDriverButton"
-                                                    data-booking-id="{{ $booking->id }}" class="button-exp-fill me-1">
-                                                    {{--  Review your driver  --}}
-                                                    {{ $myPassengerPage->revert_no_show_passenger_label ?? 'Revert' }}
-                                                </a>
-                                            </div>
-                                        @endif
-                                    @endif
-                                @endif -->
+    @if (strtotime($ride->completed_date) > strtotime('today') ||
+            (strtotime($ride->completed_date) == strtotime('today') && strtotime($ride->completed_time) > strtotime('now')))
+    @if (!isset($exist))
+    <div>
+                                                    <a href="javascript:void(0)" id="noShowDriverButton"
+                                                        data-booking-id="{{ $booking->id }}" class="button-exp-fill me-1">
+                                                        {{--  Review your driver  --}}
+                                                        {{ $myPassengerPage->no_show_passenger_label ?? 'No show passenger' }}
+                                                    </a>
+                                                </div>
+@else
+    <div>
+                                                    <a href="javascript:void(0)" id="revertNoShowDriverButton"
+                                                        data-booking-id="{{ $booking->id }}" class="button-exp-fill me-1">
+                                                        {{--  Review your driver  --}}
+                                                        {{ $myPassengerPage->revert_no_show_passenger_label ?? 'Revert' }}
+                                                    </a>
+                                                </div>
+    @endif
+    @endif
+    @endif -->
                                 @if (strtotime($ride->date) < strtotime('today') ||
                                         (strtotime($ride->date) == strtotime('today') && strtotime($ride->time) < strtotime('now')))
                                     @php
                                         // Calculate the difference in days between today and the ride's date
-                                        $rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
-                                        // Add the leave review days to the ride's DateTime
+$rideDateTime = new DateTime($ride->date . ' ' . $ride->time);
+// Add the leave review days to the ride's DateTime
                                         $reviewDateTime = clone $rideDateTime;
                                         $reviewDateTime->add(new DateInterval('P' . $setting->leave_review_days . 'D'));
 
@@ -146,7 +155,7 @@
                                         @endphp
                                         <td class="border border-slate-300 px-4 py-2 text-center">
                                             <div class="flex">
-                                                <p class="mr-1">
+                                                <p class="mr-1 hidden">
                                                     {{ $myPassengerPage->web_i_reviewed_label ?? 'I Reviewed' }}</p>
                                                 <img src="{{ asset('assets/11-review-full-star.png') }}"
                                                     class="w-4 h-4 mt-1" alt="">
@@ -190,11 +199,11 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div
-                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-blue-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                    </svg>
-                                </div> -->
+                                        class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-blue-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                            <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                        </svg>
+                                    </div> -->
                             </div>
                             <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                                 <div class="">
@@ -234,11 +243,11 @@
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start justify-center">
                                 <!-- <div
-                                    class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-blue-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
-                                        <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
-                                    </svg>
-                                </div> -->
+                                        class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10 bg-blue-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-lg text-white w-8 h-8" viewBox="0 0 16 16">
+                                            <path d="M7.005 3.1a1 1 0 1 1 1.99 0l-.388 6.35a.61.61 0 0 1-1.214 0zM7 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0"/>
+                                        </svg>
+                                    </div> -->
                             </div>
                             <div class="text-center sm:ml-4 sm:mt-0 sm:text-left">
                                 <div class="mt-2">
@@ -291,7 +300,7 @@
                                 '#bookingModal .text-sm.text-gray-500');
                             if (modalMessageElement) {
                                 modalMessageElement.textContent = response
-                                .message; // Assuming 'message' is part of the response
+                                    .message; // Assuming 'message' is part of the response
                             }
                             const modal = document.getElementById('bookingModal');
                             modal.classList.remove('hidden');
@@ -324,7 +333,8 @@
 
         // Step 2: Handle click on "Yes" (confirm) button via delegation so it always works
         document.addEventListener('click', function(e) {
-            var confirmBtn = e.target.id === 'confirm-revert-modal' ? e.target : (e.target.closest && e.target.closest('#confirm-revert-modal'));
+            var confirmBtn = e.target.id === 'confirm-revert-modal' ? e.target : (e.target.closest && e.target
+                .closest('#confirm-revert-modal'));
             if (!confirmBtn) return;
             if (!selectedRevertBookingId) return;
 
@@ -344,7 +354,8 @@
                 },
                 error: function(xhr, status, error) {
                     console.error('Error:', error);
-                    alert(xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Something went wrong. Please try again.');
+                    alert(xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message :
+                        'Something went wrong. Please try again.');
                 }
             });
         });

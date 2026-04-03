@@ -257,6 +257,30 @@ class Ride extends Model
         
         return max(0, $bookedSeats);
     }
+    
+    public function getBookedFare(): float
+    {
+        $bookedFare = (float) $this->bookings()
+            ->notRejected()
+            ->whereHas('passenger', function ($query) {
+                $query->whereNull('deleted_at');
+            })
+            ->sum('fare');
+        
+        return max(0, $bookedFare);
+    }
+    
+    public function getBookedFee(): float
+    {
+        $bookedFee = (float) $this->bookings()
+            ->notRejected()
+            ->whereHas('passenger', function ($query) {
+                $query->whereNull('deleted_at');
+            })
+            ->sum('booking_credit');
+        
+        return max(0, $bookedFee);
+    }
 
     /**
      * Fare amount used in the mobile ride details section:

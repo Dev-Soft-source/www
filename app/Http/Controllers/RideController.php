@@ -94,6 +94,12 @@ class RideController extends Controller
 
         $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
+        $firm_cancellation_discount = SiteSetting::value('frim_discount');
+        View::share([
+            'rideDetailPage' => $rideDetailPage,
+            'firm_cancellation_discount' => $firm_cancellation_discount,
+        ]);
+
         $booking = Booking::where('ride_id', $id)
             ->where('from_stop_id', $from_stop_id)
             ->where('to_stop_id', $to_stop_id)
@@ -109,7 +115,6 @@ class RideController extends Controller
             'fromLabel' => $from ?? null,
             'toLabel' => $to ?? null,
             'ride_cancelled' => $ride_cancelled,
-            'rideDetailPage' => $rideDetailPage,
             'ride' => $ride,
             'setting' => $setting,
             'cancelSetting' => $cancelSetting,
@@ -1356,7 +1361,7 @@ class RideController extends Controller
         $apiKey = env('GOOGLE_API_KEY');
         $ch = curl_init();
 
-        Log::info('Google Maps API Key: ' . $apiKey);
+        // Log::info('Google Maps API Key: ' . $apiKey);
         // URL encode the addresses to properly handle spaces and special characters
         // This ensures city names like "Montreal, QC" and "Ottawa, ON" work correctly
         $fromEncoded = urlencode($from);
@@ -1364,13 +1369,13 @@ class RideController extends Controller
 
         $apiUrl = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" . $fromEncoded . "&destinations=" . $toEncoded . "&units=imperial&key=" . $apiKey . "";
 
-        Log::info('Google Maps API Request', [
-            'from' => $from,
-            'to' => $to,
-            'from_encoded' => $fromEncoded,
-            'to_encoded' => $toEncoded,
-            'url' => str_replace($apiKey, 'HIDDEN_KEY', $apiUrl)
-        ]);
+        // Log::info('Google Maps API Request', [
+        //     'from' => $from,
+        //     'to' => $to,
+        //     'from_encoded' => $fromEncoded,
+        //     'to_encoded' => $toEncoded,
+        //     'url' => str_replace($apiKey, 'HIDDEN_KEY', $apiUrl)
+        // ]);
 
         curl_setopt($ch, CURLOPT_URL, $apiUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

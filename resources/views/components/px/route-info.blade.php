@@ -188,7 +188,7 @@
                 </h4>
             <div class="flex gap-2 items-end md:mb-4">
                 <h3 class="text-primary text-xl md:text-2xl ">
-                    {{ $ride->destination }}.
+                    {{ $ride->destination }}
                 </h3>
                 @if ($ride->dropoff)
                 <div class="flex itmes-end text-gray-700 gap-1">

@@ -53,6 +53,7 @@ class RideDetailPageSettingDetailResource extends JsonResource
             'ride_completed_text' => $this->ride_completed_text,
             'ride_completed_label' => $this->ride_completed_label,
             'ride_cancelled_label' => $this->ride_cancelled_label,
+            'ride_cancellation_limit_exceed' => $this->ride_cancellation_limit_exceed,
             'book_seat_btn_label' => $this->book_seat_btn_label,
             'seat_available_label' => $this->seat_available_label,
             'no_seat_available_label' => $this->no_seat_available_label,

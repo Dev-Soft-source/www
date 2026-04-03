@@ -58,6 +58,7 @@ class SiteSettingResource extends JsonResource
             'booking_cancel_duration' => $this->booking_cancel_duration,
             'ride_post_dead_time' => $this->ride_post_dead_time,
             'booking_cancel_limit' => $this->booking_cancel_limit,
+            'ride_cancel_limit' => $this->ride_cancel_limit,
 
         ];
     }

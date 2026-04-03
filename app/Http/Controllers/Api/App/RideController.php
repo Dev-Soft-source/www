@@ -1821,13 +1821,13 @@ class RideController extends Controller
 
         $apiUrl = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" . $fromEncoded . "&destinations=" . $toEncoded . "&units=imperial&key=" . $apiKey . "";
 
-        Log::info('Google Maps API Request (API)', [
-            'from' => $from,
-            'to' => $to,
-            'from_encoded' => $fromEncoded,
-            'to_encoded' => $toEncoded,
-            'url' => str_replace($apiKey, 'HIDDEN_KEY', $apiUrl)
-        ]);
+        // Log::info('Google Maps API Request (API)', [
+        //     'from' => $from,
+        //     'to' => $to,
+        //     'from_encoded' => $fromEncoded,
+        //     'to_encoded' => $toEncoded,
+        //     'url' => str_replace($apiKey, 'HIDDEN_KEY', $apiUrl)
+        // ]);
 
         curl_setopt($ch, CURLOPT_URL, $apiUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

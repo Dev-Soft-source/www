@@ -26,11 +26,7 @@
                             class="block p-2.5 w-full text-gray-900 bg-white rounded border border-gray-300 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 mt-2"
                             placeholder="{{ optional($reviewPage)->passenger_review_placeholder ?? 'In the \'Passenger Remarks\' section, you can include specific feedback, comments, or compliments about the passenger\'s behavior during the ride' }}">{{ old('review') }}</textarea>
                         @error('review')
-                          <div class="relative tooltip -bottom-4 group-hover:flex">
-                            <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded" >
-                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                            </div>
-                          </div>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </div>
                 </div>
@@ -177,13 +173,7 @@
                             </div>
                         </li>
                         @error('conscious')
-                            <li>
-                                <div class="relative tooltip -bottom-4 group-hover:flex">
-                                    <div role="tooltip" class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full rounded" >
-                                        <p class="text-white leading-none text-sm lg:text-base">{{ $message }}</p>
-                                    </div>
-                                </div>
-                            </li>
+                            <div class="tooltip-error shadow-lg">{{ $message }}</div>
                         @enderror
                     </ul>
                 </div>
