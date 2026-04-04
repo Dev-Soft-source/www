@@ -11,8 +11,16 @@ import 'package:proximaride_app/pages/login/LoginProvider.dart';
 import 'package:proximaride_app/pages/stages/StageProvider.dart';
 import 'package:proximaride_app/services/logger_service.dart';
 import 'package:proximaride_app/services/service.dart';
+import 'package:intl/intl.dart';
 
 class StageController extends GetxController {
+  /// Minimum age for Stage One (date of birth).
+  static const int minimumProfileAgeYears = 18;
+
+  static DateTime latestBirthDateForMinimumAge(int minYears) {
+    final n = DateTime.now();
+    return DateTime(n.year - minYears, n.month, n.day);
+  }
   var isOverlayLoading = false.obs;
   var isLoading = false.obs;
   final serviceController = Get.find<Service>();
@@ -50,6 +58,9 @@ class StageController extends GetxController {
 
   /// Controls whether the "Next" button on Stage One is enabled.
   final isStageOneValid = false.obs;
+
+  /// True when DOB is filled but under [minimumProfileAgeYears] (for inline hint).
+  final dobFailsMinimumAge = false.obs;
 
   @override
   void onInit() async {
@@ -176,13 +187,34 @@ class StageController extends GetxController {
     miniBioTextEditingController.dispose();
   }
 
+  /// Parses DOB from the Stage One field (`MMMM dd, y` from the date picker).
+  DateTime? _tryParseStageOneDob(String raw) {
+    final s = raw.trim();
+    if (s.isEmpty) return null;
+    try {
+      return DateFormat('MMMM dd, y').parseStrict(s);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  bool _isDobUnderMinimumAge(DateTime dob) {
+    final cutoff = latestBirthDateForMinimumAge(minimumProfileAgeYears);
+    return dob.isAfter(cutoff);
+  }
+
   /// Simple client‑side validation for all required Stage One fields.
   /// Keeps `isStageOneValid` in sync so the button can enable/disable reactively.
   void validateStageOneFields() {
     final hasFirstName = firstNameTextEditingController.text.trim().isNotEmpty;
     final hasLastName = lastNameTextEditingController.text.trim().isNotEmpty;
     final hasGender = gender.value.trim().isNotEmpty;
-    final hasDob = dobTextEditingController.text.trim().isNotEmpty;
+    final dobRaw = dobTextEditingController.text.trim();
+    final hasDob = dobRaw.isNotEmpty;
+    final parsedDob = hasDob ? _tryParseStageOneDob(dobRaw) : null;
+    final dobMeetsAge = parsedDob != null && !_isDobUnderMinimumAge(parsedDob);
+    dobFailsMinimumAge.value =
+        hasDob && (parsedDob == null || _isDobUnderMinimumAge(parsedDob));
     final hasCountry = countryName.value.trim().isNotEmpty;
     final hasState = stateName.value.trim().isNotEmpty;
     final hasCity = cityName.value.trim().isNotEmpty;
@@ -194,6 +226,7 @@ class StageController extends GetxController {
         hasLastName &&
         hasGender &&
         hasDob &&
+        dobMeetsAge &&
         hasCountry &&
         hasState &&
         hasCity &&
@@ -321,10 +354,17 @@ class StageController extends GetxController {
     countryCode = CountryCodeFinder.findCode(countryName.toString());
 
     try {
+      final dobTrim = dobTextEditingController.text.trim();
+      final dobParsed = dobTrim.isEmpty ? null : _tryParseStageOneDob(dobTrim);
+      final dobEmpty = dobTrim.isEmpty;
+      final dobInvalidOrUnderage = !dobEmpty &&
+          (dobParsed == null || _isDobUnderMinimumAge(dobParsed));
+
       if (firstNameTextEditingController.text.isEmpty ||
           lastNameTextEditingController.text.isEmpty ||
           gender.value.isEmpty ||
-          dobTextEditingController.text.isEmpty ||
+          dobEmpty ||
+          dobInvalidOrUnderage ||
           countryName.isEmpty ||
           stateName.isEmpty ||
           cityName.isEmpty ||
@@ -363,7 +403,7 @@ class StageController extends GetxController {
           errors.add(err);
         }
 
-        if (dobTextEditingController.text.isEmpty) {
+        if (dobEmpty) {
           var message = validationMessageDetail['required'];
           message = message.replaceAll(
               ":Attribute", labelTextDetail['dob_error'] ?? 'Date');
@@ -372,6 +412,18 @@ class StageController extends GetxController {
             'eList': [message ?? 'Date is required']
           };
           errors.add(err);
+        } else if (dobParsed == null) {
+          errors.add({
+            'title': "dob",
+            'eList': ['Please enter a valid date of birth.']
+          });
+        } else if (_isDobUnderMinimumAge(dobParsed)) {
+          errors.add({
+            'title': "dob",
+            'eList': [
+              'You must be at least $minimumProfileAgeYears years old.'
+            ]
+          });
         }
 
         if (countryName.isEmpty) {

@@ -862,7 +862,6 @@ class LoginController extends GetxController {
         // Navigate based on user step
         final step = serviceController.loginUserDetail['step'];
         if (step == "1") {
-          // If token wasn't persisted yet (deep link), the dialog proceed button will store it
           serviceController.showWelcomeDialogue(token);
         } else if (step == "2") {
           Get.offAllNamed('/stage_two');

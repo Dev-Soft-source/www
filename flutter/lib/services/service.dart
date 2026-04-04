@@ -862,14 +862,24 @@ class Service extends GetxService {
     productLayout.refresh();
   }
 
-  datePicker(context, {allowPast = true}) async {
+  datePicker(context,
+      {bool allowPast = true, DateTime? firstDate, DateTime? lastDate}) async {
     final now = DateTime.now();
+    final effectiveFirst = firstDate ?? (allowPast ? DateTime(1900) : now);
+    final effectiveLast = lastDate ?? DateTime(2100);
+    DateTime initial = now;
+    if (initial.isAfter(effectiveLast)) {
+      initial = effectiveLast;
+    }
+    if (initial.isBefore(effectiveFirst)) {
+      initial = effectiveFirst;
+    }
     return showDatePicker(
         context: context,
-        initialDate: now,
+        initialDate: initial,
         initialEntryMode: DatePickerEntryMode.calendarOnly,
-        firstDate: allowPast ? DateTime(1900) : now,
-        lastDate: DateTime(2100),
+        firstDate: effectiveFirst,
+        lastDate: effectiveLast,
         builder: (context, child) {
           return Theme(
             data: ThemeData.dark().copyWith(

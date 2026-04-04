@@ -28,11 +28,13 @@ class StepController extends Controller
     {
         $user_id = Auth::guard('sanctum')->user()->id;
 
+        $minimumAgeCutoff = Carbon::now()->subYears(18)->format('Y-m-d');
+
         $request->validate([
             'first_name' => 'required|string|max:25|regex:/^[a-zA-Z\s\-]+$/',
             'last_name' => 'required|string|max:25|regex:/^[a-zA-Z\s\-]+$/',
             'gender' => 'required',
-            'dob' => 'required|date',
+            'dob' => ['required', 'date', 'before_or_equal:' . $minimumAgeCutoff],
             'country' => 'required',
             'state' => 'nullable',
             'city' => 'nullable',

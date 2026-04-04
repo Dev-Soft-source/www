@@ -11,6 +11,9 @@ class DeepLinkController extends GetxController {
   bool _isHandlingDeepLink = false;
   String _pendingDeepLinkToken = "";
 
+  /// True after [getInitialLink] has been consumed (or resolved to null) so Splash can proceed.
+  bool initialAppLinkHandled = false;
+
   bool get isHandlingDeepLink => _isHandlingDeepLink;
 
   String get pendingDeepLinkToken => _pendingDeepLinkToken;
@@ -31,12 +34,7 @@ class DeepLinkController extends GetxController {
 
   void _initDeepLinks() async {
     _appLinks = AppLinks();
-    final initialUri = await _appLinks.getInitialLink();
-    if (initialUri != null) {
-      logger.info(
-          'DeepLinkController: Received initial URI on app start: $initialUri');
-      _handleDeepLink(initialUri);
-    }
+    // Subscribe before getInitialLink so stream-delivered intents are not dropped.
     logger.info('DeepLinkController: Setting up uriLinkStream listener');
     _appLinks.uriLinkStream.listen(
       (Uri? uri) {
@@ -49,9 +47,19 @@ class DeepLinkController extends GetxController {
         logger.info('Error receiving deep link: $err');
       },
     );
+    try {
+      final initialUri = await _appLinks.getInitialLink();
+      if (initialUri != null) {
+        logger.info(
+            'DeepLinkController: Received initial URI on app start: $initialUri');
+        await _handleDeepLink(initialUri);
+      }
+    } finally {
+      initialAppLinkHandled = true;
+    }
   }
 
-  void _handleDeepLink(Uri uri) async {
+  Future<void> _handleDeepLink(Uri uri) async {
     if (_isHandlingDeepLink) {
       logger.warning(
         'DeepLinkController: ⚠️ SKIPPING - Already handling a deep link: $uri',
@@ -101,7 +109,8 @@ class DeepLinkController extends GetxController {
           }
 
           await Future.delayed(const Duration(milliseconds: 500));
-          await loginController.loginWithToken(token, persistToken: false);
+          // Persist token so Splash does not send user to /login after the 2s timer.
+          await loginController.loginWithToken(token, persistToken: true);
         } else {
           await Future.delayed(const Duration(milliseconds: 300));
           serviceController.showDialogue(
@@ -143,7 +152,7 @@ class DeepLinkController extends GetxController {
           await Future.delayed(const Duration(milliseconds: 500));
 
           // Perform auto-login with token
-          await loginController.loginWithToken(token, persistToken: false);
+          await loginController.loginWithToken(token, persistToken: true);
         } else {
           // No token provided, navigate to login page
           logger.info('No token provided, navigating to login page');
@@ -176,8 +185,7 @@ class DeepLinkController extends GetxController {
           // Wait a bit for the controller to initialize
           await Future.delayed(const Duration(milliseconds: 500));
 
-          // Show welcome dialog
-          await loginController.loginWithToken(token, persistToken: false);
+          await loginController.loginWithToken(token, persistToken: true);
         }
       } // Handle email already verified (no token)
       else if ((uri.scheme == 'https' || uri.scheme == 'http') &&

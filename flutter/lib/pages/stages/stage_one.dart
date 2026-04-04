@@ -372,9 +372,16 @@ class _StageOneState extends State<StageOne> {
                                           .firstWhereOrNull((element) =>
                                               element['title'] == "dob"));
                                     }
+                                    final lastBirthDate =
+                                        StageController.latestBirthDateForMinimumAge(
+                                            StageController
+                                                .minimumProfileAgeYears);
                                     DateTime? dobDate = await controller
                                         .serviceController
-                                        .datePicker(context);
+                                        .datePicker(
+                                      context,
+                                      lastDate: lastBirthDate,
+                                    );
                                     if (dobDate == null) return;
                                     DateFormat dateFormat =
                                         DateFormat('MMMM dd, y');
@@ -391,12 +398,14 @@ class _StageOneState extends State<StageOne> {
                               ),
                             ],
                           ),
-                          if (controller.errors.firstWhereOrNull(
+                          if (controller.dobFailsMinimumAge.value) ...[
+                            toolTip(
+                                tip:
+                                    "You must be at least ${StageController.minimumProfileAgeYears} years old.",
+                                type: 'string')
+                          ] else if (controller.errors.firstWhereOrNull(
                                   (element) => element['title'] == "dob") !=
                               null) ...[
-                            // toolTip(
-                            //     tip: controller.errors.firstWhereOrNull(
-                            //         (element) => element['title'] == "dob"))
                             toolTip(
                                 tip: "Date of Birth is required",
                                 type: 'string')

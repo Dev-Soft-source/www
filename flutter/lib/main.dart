@@ -175,6 +175,10 @@ Future<void> bootstrapCoreAppState() async {
   logger.info("Resolved app URL: $url");
   logger.info("Resolved API URL: $baseUrl");
   await initService();
+  // Before first frame so email-verify / cold-start links run before Splash navigates.
+  if (!Get.isRegistered<DeepLinkController>()) {
+    Get.put(DeepLinkController());
+  }
 }
 
 Future<void> bootstrapDeferredServices() async {
@@ -221,10 +225,6 @@ Future<void> bootstrapDeferredServices() async {
   await _initializeStripe(
     publishableKey: dotenv.env['STRIPE_KEY'],
   );
-
-  if (!Get.isRegistered<DeepLinkController>()) {
-    Get.put(DeepLinkController());
-  }
 }
 
 Future<void> initService() async {
