@@ -1005,11 +1005,12 @@ class Controller extends BaseController
             ->where('user_id', $user->id)
             ->first();
 
+
         if (isset($booking)) {
             $seats_amount += (float) $booking->fare;
             $seats_number += (int) $booking->seats;
-            $tax_amount = (float) $booking->tax_amount + (float) $tax_amount;
-            $booking_fee += (float) $booking->booking_credit;
+            $_tax_amount = (float) $booking->tax_amount + (float) $tax_amount;
+            $_booking_fee = (float) $booking->booking_credit + (float)$booking_fee;
 
             $booking->update([
                 'seats' => $seats_number,
@@ -1018,8 +1019,8 @@ class Controller extends BaseController
                 'secured_cash_code' => $secured_cash_code,
                 'booked_on' => now(),
                 'expires_at' => $expiryTime,
-                'tax_amount' => $tax_amount,
-                'booking_credit' => $booking_fee,
+                'tax_amount' => $_tax_amount,
+                'booking_credit' => $_booking_fee,
                 'status' => $ride->isRequestBooking() ? '0' : '1',
             ]);
 

@@ -70,17 +70,17 @@ class FCMService
             $message = $messageBuilder;
 
             // Log the notification details
-            Log::info('FCM Notification Sending', [
-                'token' => substr($userFcmToken, 0, 20) . '...',
-                'title' => $title,
-                'body' => $body,
-                'data' => $data
-            ]);
+            // Log::info('FCM Notification Sending', [
+            //     'token' => substr($userFcmToken, 0, 20) . '...',
+            //     'title' => $title,
+            //     'body' => $body,
+            //     'data' => $data
+            // ]);
 
             // Send the message
             $response = $this->messaging->send($message);
 
-            Log::info('FCM Notification Sent Successfully', ['response' => $response]);
+            // Log::info('FCM Notification Sent Successfully', ['response' => $response]);
 
             return [
                 'success' => true,

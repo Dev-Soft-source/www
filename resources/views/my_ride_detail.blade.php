@@ -617,17 +617,17 @@
                                 <path d="M13 7H7v6h6V7z" />
                             </svg>
                         </div> --}}
-                            <div class=" text-center sm:mt-0 sm:text-left w-full md:w-3/4">
+                            <div class=" text-center sm:mt-0 sm:text-left w-full">
                                 <h3 class="text-primary font-FuturaMdCnBT" id="modal-title">
                                     {{ $rideDetailPage->enter_code_label ?? 'Enter the Secured-cash payment code' }}
                                 </h3>
                                 <div class="mt-2">
                                     <input type="hidden" name="booking_id" id="booking-id"
-                                        value="{{ old('booking_id') }}">
+                                        value="{{ old('booking_id') }}" />
                                     <input type="text" name="code"
                                         placeholder="{{ $rideDetailPage->enter_secured_placeholder ?? 'Enter secured-cash payment code' }}"
                                         class="mt-2 p-2 border border-gray-300 rounded w-full"
-                                        value="{{ old('code') }}">
+                                        value="{{ old('code') }}" />
                                     @error('code')
                                         <div class="relative tooltip -bottom-4 group-hover:flex">
                                             <div role="tooltip"
@@ -912,6 +912,7 @@
                 modal.classList.add('hidden');
                 modal.style.display = 'none';
             }
+            location.reload();
         }
 
         document.addEventListener('DOMContentLoaded', function() {

@@ -6,8 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Mail\CancelPassengerAdminMail;
 use App\Mail\CancelPassengerMail;
 use App\Mail\DriverCancelRideMail;
-use App\Mail\SecuredCashDriverMail;
-use App\Mail\SecuredCashPassengerMail;
 use App\Models\Admin;
 use App\Models\Booking;
 use App\Models\CancellationHistory;
@@ -20,33 +18,25 @@ use App\Models\RideDetailPageSettingDetail;
 use App\Models\Rating;
 use App\Models\ReviewSetting;
 use App\Models\Ride;
-use App\Models\Transaction;
 use App\Models\User;
 use App\Models\SiteSetting;
-use App\Models\PhoneNumber;
 use App\Models\Step1PageSettingDetail;
 use App\Models\SuccessMessagesSettingDetail;
-use App\Models\TopUpBalance;
 use App\Models\BookingPageSettingDetail;
 use App\Models\MyPassengerSettingDetail;
 use App\Models\SeatDetail;
 use App\Models\CoffeeWallet;
 use App\Models\FeaturesSettingDetail;
 use App\Models\Message;
-use App\Models\Notification;
 use App\Services\DriverRideCancellationService;
-use App\Services\FCMService;
 use App\Services\PassengerRemovalService;
+use App\Services\SecuredCashEnterCodeService;
 use App\Jobs\NotifyPassengerRemovedJob;
 use App\Traits\StatusResponser;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use Srmklive\PayPal\Services\PayPal as PayPalClient;
-use Stripe\Refund;
-use Stripe\Stripe;
 use Twilio\Rest\Client;
 
 class MyRideController extends Controller
@@ -482,208 +472,49 @@ class MyRideController extends Controller
         return $this->apiErrorResponse(strip_tags($message->general_error_message ?? "Booking not found"), 404);
     }
 
+    /**
+     * Secured-cash release: persistence in {@see SecuredCashEnterCodeService};
+     * notifications via queued {@see NotifySecuredCashCodeSuccessJob}.
+     */
     public function enterCode(Request $request)
     {
         $booking = Booking::where('id', $request->booking_id)->first();
 
         $siteSetting = SiteSetting::getCached();
 
-        $message = null;
-        $selectedLanguage = app()->getLocale();
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-
-            if ($selectedLanguage) {
-                // Retrieve the HomePageSettingDetail associated with the selected language
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('incorrect_code_message', 'general_error_message', 'too_many_secured_cash_attempt_message', 'secured_cash_success_message')->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('incorrect_code_message', 'general_error_message', 'too_many_secured_cash_attempt_message', 'secured_cash_success_message')->first();
-            }
-        }
+        $message = $this->successMessage;
 
         if ($booking) {
             $request->validate([
                 'code' => 'required|max:4',
             ]);
 
-            $messageData = "";
+            $messageData = '';
 
             if ($request->code === $booking->secured_cash_code) {
-                $booking->update([
-                    'secured_cash' => null,
-                    'secured_cash_code' => null,
-                ]);
+                $service = app(SecuredCashEnterCodeService::class);
+                $result = $service->applySuccessfulCode($booking, true);
 
-                $transactions = Transaction::where('booking_id', $booking->id)->where('type', '1')->get();
-                foreach ($transactions as $transaction) {
-                    if ($transaction) {
-                        $refundId = "";
-                        if ($transaction->pay_by_account == 0) {
-                            if ($transaction->paypal_id) {
-                                $paypal = new PayPalClient;
-                                $paypal->setApiCredentials(config('paypal'));
-                                $token = $paypal->getAccessToken();
-                                $paypal->setAccessToken($token);
-                                $response = $paypal->refundCapturedPayment(
-                                    $transaction->paypal_id,
-                                    'USD',
-                                    $transaction->price - $transaction->booking_fee,
-                                    'Invoice-' . $transaction->paypal_id
-                                );
-                                $refundId = isset($response['id']) ? $response['id'] : "";
-                            } elseif ($transaction->stripe_id) {
-                                // Set your Stripe API key
-                                Stripe::setApiKey(env('STRIPE_SECRET'));
-
-                                try {
-                                    // Create a refund using the payment intent ID
-                                    $refund = Refund::create([
-                                        'payment_intent' => $transaction->stripe_id,
-                                        'amount' => ($transaction->price - $transaction->booking_fee) * 100, // Refund amount in cents
-                                    ]);
-                                    $refundId = $refund->id;
-                                } catch (\Stripe\Exception\ApiErrorException $e) {
-                                    // Handle error
-                                    return $this->apiErrorResponse($e->getMessage(), 200);
-                                }
-                            }
-                        } else {
-                            $topUpBalance = TopUpBalance::create([
-                                'booking_id' => $transaction->booking_id,
-                                'user_id' => $booking->user_id,
-                                'dr_amount' => $transaction->price - $transaction->booking_fee,
-                                'added_date' => date('Y-m-d'),
-                            ]);
-                        }
-
-                        $newTransaction = Transaction::create([
-                            'booking_id' => $transaction->booking_id,
-                            'ride_id' => $booking->ride_id,
-                            'parent_id' => $transaction->id,
-                            'type' => '3',
-                            'price' => $transaction->price,
-                            'paypal_id' => isset($transaction->paypal_id) ? $refundId : NULL,
-                            'stripe_id' => isset($transaction->stripe_id) ? $refundId : NULL
-                        ]);
-                    }
-                }
-
-                $notification = Notification::create([
-                    'ride_id' => $booking->ride_id,
-                    'posted_by' => $booking->user_id,
-                    'message' => getNotificationMessageText(
-                        'secured_cash_payment_code_successful',
-                        $booking->ride->driver,
-                        [],
-                        'Secured-cash payment code successful'
-                    ),
-                    'status' => 'upcoming',
-                    'notification_type' => 'upcoming',
-                    'ride_detail_id' => $booking->ride_detail_id,
-                    'departure' => $booking->departure,
-                    'destination' => $booking->destination
-                ]);
-
-                $fcmToken = $booking->ride->driver->mobile_fcm_token;
-                $body = $notification->message;
-                $fcmService = new FCMService();
-
-                if ($fcmToken) {
-                    // Send the booking notification
-                    $fcmService->sendNotification($fcmToken, $body);
-                }
-
-                $notification = Notification::create([
-                    'type' => 2,
-                    'ride_id' => $booking->ride_id,
-                    'posted_to' => $booking->id,
-                    'posted_by' => $booking->ride->added_by,
-                    'message' => getNotificationMessageText(
-                        'secured_cash_payment_code_successful',
-                        $booking->passenger,
-                        [],
-                        'Secured-cash payment code successful'
-                    ),
-                    'status' => 'upcoming',
-                    'notification_type' => 'upcoming',
-                    'ride_detail_id' => $booking->ride_detail_id,
-                    'departure' => $booking->departure,
-                    'destination' => $booking->destination
-                ]);
-
-                $fcmToken = $booking->passenger->mobile_fcm_token;
-                $body = $notification->message;
-                $fcmService = new FCMService();
-
-                if ($fcmToken) {
-                    // Send the booking notification
-                    $fcmService->sendNotification($fcmToken, $body);
-                }
-
-                $driverPhoneNumber = PhoneNumber::where('user_id', $booking->ride->driver->id)
-                    ->where('default', '1')
-                    ->first();
-                $driverPhoneToUse = $driverPhoneNumber ? $driverPhoneNumber->phone : $booking->ride->driver->phone;
-
-                $passengerPhoneNumber = PhoneNumber::where('user_id', $booking->passenger->id)
-                    ->where('default', '1')
-                    ->first();
-                $passengerPhoneToUse = $passengerPhoneNumber ? $passengerPhoneNumber->phone : $booking->passenger->phone;
-
-                $passengerData = [
-                    'passenger_first_name' => $booking->passenger->first_name,
-                    'seats_booked' => $booking->seats,
-                    'booking_price' => $booking->price,
-                    'from' => $booking->departure,
-                    'to' => $booking->destination,
-                    'on' => $booking->ride->date,
-                    'at' => $booking->ride->time,
-                    'driver_first_name' => $booking->ride->driver->first_name,
-                    'driver_phone' => $driverPhoneToUse,
-                    'passenger_email' => $booking->ride->driver->email,
-                ];
-                if (isset($booking->passenger->email_notification) && $booking->passenger->email_notification == 1) {
-                    Mail::to($booking->passenger->email)->queue(new SecuredCashPassengerMail($passengerData));
-                }
-
-                // Send email to driver
-                $driverData = [
-                    'driver_first_name' => $booking->ride->driver->first_name,
-                    'seats_booked' => $booking->seats,
-                    'booking_price' => $booking->price,
-                    'from' => $booking->departure,
-                    'to' => $booking->destination,
-                    'on' => $booking->ride->date,
-                    'at' => $booking->ride->time,
-                    'passenger_first_name' => $booking->passenger->first_name,
-                    'passenger_phone' => $passengerPhoneToUse,
-                    'passenger_email' => $booking->passenger->email,
-                ];
-                if (isset($booking->ride->driver->email_notification) && $booking->ride->driver->email_notification == 1) {
-                    Mail::to($booking->ride->driver->email)->queue(new SecuredCashDriverMail($driverData));
+                if (!$result['ok']) {
+                    return $this->apiErrorResponse($result['error'], 200);
                 }
 
                 return $this->successResponse('', strip_tags($message->secured_cash_success_message ?? "Code submitted and the booking price has been released back to the passenger. Now, get your payment in cash from them"));
-            } else {
-                if ($booking->secured_cash_attempt_count < $siteSetting->secured_cash_attempt) {
-                    $count = isset($booking->secured_cash_attempt_count) ? $booking->secured_cash_attempt_count : 0;
-                    $count = $count + 1;
-                    $booking->secured_cash_attempt_count = $count;
-                    $booking->save();
-                    $messageData = strip_tags($message->incorrect_code_message);
-                } else {
-                    $messageData = strip_tags($message->too_many_secured_cash_attempt_message);
-                }
             }
 
-
+            if ($booking->secured_cash_attempt_count < $siteSetting->secured_cash_attempt) {
+                $count = isset($booking->secured_cash_attempt_count) ? $booking->secured_cash_attempt_count : 0;
+                $count = $count + 1;
+                $booking->secured_cash_attempt_count = $count;
+                $booking->save();
+                $messageData = strip_tags($message->incorrect_code_message);
+            } else {
+                $messageData = strip_tags($message->too_many_secured_cash_attempt_message);
+            }
 
             return $this->apiErrorResponse($messageData, 200, $booking->secured_cash_attempt_count);
         }
+
         return $this->apiErrorResponse(strip_tags($message->general_error_message ?? "Booking not found"), 404);
     }
 
