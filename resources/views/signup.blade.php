@@ -359,7 +359,7 @@
                             </g>
                         </svg>
                     </a>
-                    <a href="{{ route('signup.redirectToProvider', ['lang' => $selectedLanguage->abbreviation, 'provider' => 'linkedin-openid', 'intent' => 'signup']) }}"
+                    <a href="{{ route('signup.redirectToProvider', ['lang' => $selectedLanguage->abbreviation, 'provider' => 'linkedin', 'intent' => 'signup']) }}"
                         class="w-12 md:w-14 h-12 md:h-14 rounded border flex justify-center items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" x="0px" y="0px" width="100"
                             height="100" viewBox="0 0 48 48">

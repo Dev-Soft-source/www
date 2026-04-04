@@ -1367,7 +1367,7 @@ class LoginPage extends StatelessWidget {
                                   clientId: '${dotenv.env['clientId']}',
                                   clientSecret: '${dotenv.env['clientSecret']}',
                                   redirectUrl:
-                                      '$url/en/signup/linkedin-openid/callback',
+                                      '$url/en/signup/linkedin/callback',
                                   scope: ['openid', 'profile', 'email'],
                                 );
 
