@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\NotificationsPageSettingDetail;
 use App\Models\NotificationsPageSetting;
+use App\Models\RideDetailPageSettingDetail;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Log;
@@ -119,6 +120,12 @@ class NotificationController extends Controller
                     $notification->from->gender_label = $genderLabel->prefer_option_label ?? null;
                 }
             }
+        }
+
+        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $localeAbbrev = $this->selectedLanguage->abbreviation ?? null;
+        foreach ($notifications as $notification) {
+            $this->appendNotificationAddedOnDisplayForApi($notification, $rideDetailPage, $localeAbbrev);
         }
 
         $data = ['notifications' => $notifications];

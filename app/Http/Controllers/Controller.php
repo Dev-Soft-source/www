@@ -659,6 +659,87 @@ class Controller extends BaseController
         return $ride;
     }
 
+    /**
+     * Localized departure date/time for mobile JSON (language locale + ride detail noon/midnight labels).
+     */
+    protected function appendRideDepartureDisplayForApi(Ride $ride, $rideDetailPage, ?string $localeAbbrev): void
+    {
+        if (empty($ride->date) || $ride->time === null || (string) $ride->time === '') {
+            return;
+        }
+
+        $locale = $localeAbbrev !== null && $localeAbbrev !== ''
+            ? strtolower(str_replace('_', '-', trim($localeAbbrev)))
+            : 'en';
+
+        $noonLabel = optional($rideDetailPage)->noon_label ?? 'noon';
+        $midnightLabel = optional($rideDetailPage)->midnight_label ?? 'midnight';
+
+        try {
+            Carbon::setLocale($locale);
+        } catch (\Throwable $e) {
+            Carbon::setLocale('en');
+        }
+
+        try {
+            $dateCarbon = Carbon::parse($ride->date);
+            $ride->setAttribute('departure_date_display', $dateCarbon->translatedFormat('F j, Y'));
+
+            $timeStr = is_string($ride->time) ? $ride->time : (string) $ride->time;
+            $dt = Carbon::parse(trim($ride->date . ' ' . $timeStr));
+
+            if ($dt->hour === 12 && $dt->minute === 0) {
+                $ride->setAttribute('departure_time_display', $dt->format('g:i') . ' ' . $noonLabel);
+            } elseif ($dt->hour === 0 && $dt->minute === 0) {
+                $ride->setAttribute('departure_time_display', $dt->format('g:i') . ' ' . $midnightLabel);
+            } else {
+                $ride->setAttribute('departure_time_display', $dt->translatedFormat('g:i a'));
+            }
+        } catch (\Throwable $e) {
+            // Raw date/time still available on the model
+        }
+    }
+
+    /**
+     * Localized date/time for notification list rows (`added_on`) in API JSON.
+     * Uses the same month/day/year and noon/midnight rules as ride departure display.
+     */
+    protected function appendNotificationAddedOnDisplayForApi($notification, $rideDetailPage, ?string $localeAbbrev): void
+    {
+        $addedOn = $notification->added_on ?? null;
+        if ($addedOn === null || $addedOn === '') {
+            return;
+        }
+
+        $locale = $localeAbbrev !== null && $localeAbbrev !== ''
+            ? strtolower(str_replace('_', '-', trim($localeAbbrev)))
+            : 'en';
+
+        $noonLabel = optional($rideDetailPage)->noon_label ?? 'noon';
+        $midnightLabel = optional($rideDetailPage)->midnight_label ?? 'midnight';
+
+        try {
+            Carbon::setLocale($locale);
+        } catch (\Throwable $e) {
+            Carbon::setLocale('en');
+        }
+
+        try {
+            $dt = Carbon::parse($addedOn);
+            $notification->setAttribute('added_on_date_display', $dt->translatedFormat('F j, Y'));
+
+            if ($dt->hour === 12 && $dt->minute === 0) {
+                $notification->setAttribute('added_on_time_display', $dt->format('g:i') . ' ' . $noonLabel);
+            } elseif ($dt->hour === 0 && $dt->minute === 0) {
+                $notification->setAttribute('added_on_time_display', $dt->format('g:i') . ' ' . $midnightLabel);
+            } else {
+                $notification->setAttribute('added_on_time_display', $dt->translatedFormat('g:i a'));
+            }
+        } catch (\Throwable $e) {
+            // Raw added_on still on the model
+        }
+    }
+
     // search
     protected function getPxSearchFilters(Request $request): array
     {

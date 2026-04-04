@@ -348,7 +348,7 @@ class Service extends GetxService {
   Future<bool> showConfirmationDialog(message,
       {String cancelYesBtn = "",
       String cancelNoBtn = "",
-      String title = "Confirm!"}) async {
+      String title = ""}) async {
     return await Get.dialog(
       Dialog(
         shape: RoundedRectangleBorder(
@@ -379,16 +379,16 @@ class Service extends GetxService {
               ),
               const SizedBox(height: 20),
               // Title
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: textColor,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
+              // Text(
+              //   title,
+              //   style: const TextStyle(
+              //     fontSize: 26,
+              //     fontWeight: FontWeight.bold,
+              //     color: textColor,
+              //   ),
+              //   textAlign: TextAlign.center,
+              // ),
+              // const SizedBox(height: 12),
               // Message
               Text(
                 message,

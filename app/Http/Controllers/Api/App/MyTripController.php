@@ -345,9 +345,28 @@ class MyTripController extends Controller
             }
         }
 
+        $localeAbbrev = 'en';
+        if ($request->lang_id && (int) $request->lang_id !== 0) {
+            $localeAbbrev = optional(Language::find($request->lang_id))->abbreviation ?? 'en';
+        } else {
+            $localeAbbrev = optional(Language::where('is_default', 1)->first())->abbreviation ?? 'en';
+        }
+
+        foreach ($bookings as $booking) {
+            if ($booking->ride) {
+                $this->appendRideDepartureDisplayForApi($booking->ride, $rideDetailPage, $localeAbbrev);
+            }
+        }
+
         $setting = ReviewSetting::getCached();
 
-        $data = ['bookings' => $bookings, 'setting' => $setting, 'tripsPage' => $tripsPage, 'rideDetailPage' => $rideDetailPage];
+        $data = [
+            'bookings' => $bookings,
+            'setting' => $setting,
+            'tripsPage' => $tripsPage,
+            'rideDetailPage' => $rideDetailPage,
+            'findRidePage' => $findRidePage,
+        ];
         return $this->successResponse($data, 'Get my ' . $kind . ' trips');
     }
 
@@ -441,7 +460,14 @@ class MyTripController extends Controller
             }
         }
 
-        $data = ['tripsPage' => $tripsPage, 'rideDetailPage' => $rideDetailPage];
+        $selectedLanguageForFind = $this->resolveApiLanguage($request->lang_id);
+        $findRidePageForIndex = $this->getApiFindRidePage($selectedLanguageForFind);
+
+        $data = [
+            'tripsPage' => $tripsPage,
+            'rideDetailPage' => $rideDetailPage,
+            'findRidePage' => $findRidePageForIndex,
+        ];
         return $this->successResponse($data, 'My trips page get successfully');
     }
 }

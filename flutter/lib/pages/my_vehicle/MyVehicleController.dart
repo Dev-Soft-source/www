@@ -279,6 +279,9 @@ class MyVehicleController extends GetxController {
             vehicleTypeOptions: resp['data']['vehicleTypeOptions'],
           );
         }
+        if (resp['data'] != null && resp['data']['siteText'] != null) {
+          labelTextDetail.addAll(resp['data']['siteText']);
+        }
 
         if (resp['data'] != null &&
             resp['data']['validationMessages'] != null) {
@@ -693,8 +696,10 @@ class MyVehicleController extends GetxController {
     }
 
     bool isConfirmed = await serviceController.showConfirmationDialog(
-        cancelYesBtn: "Yes, delete it!",
-        "${popupTextDetail['delete_vehicle_message'] ?? "Are you sure you want to delete this vehicle"}");
+        cancelYesBtn: '${labelTextDetail['btn_delete_it_text'] ?? 'Yes, delete it!'}',
+        "${popupTextDetail['delete_vehicle_message'] ?? "Are you sure you want to delete this vehicle"}",
+        cancelNoBtn:
+            '${labelTextDetail['btn_take_me_back_text'] ?? "No, take me back!"}');
     if (isConfirmed) {
       try {
         isOverlayLoading(true);

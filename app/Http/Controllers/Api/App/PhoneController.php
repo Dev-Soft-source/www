@@ -9,6 +9,7 @@ use App\Models\PhoneNumber;
 use App\Models\User;
 use App\Models\MyPhoneSettingDetail;
 use App\Models\Language;
+use App\Models\SiteTextDetail;
 use App\Models\Notification;
 use App\Models\Step1PageSettingDetail;
 use App\Models\SuccessMessagesSettingDetail;
@@ -46,7 +47,14 @@ class PhoneController extends Controller
             'unique' => trans('validation.unique'),
         ];
 
-        $data = ['phone_numbers' => $phone_numbers, 'phoneSettingPage' => $phoneSettingPage, 'validationMessages' => $validationMessages];
+        $siteText = SiteTextDetail::getByLanguageKeyedBySlug($this->selectedLanguage->id, $this->defaultLang->id);
+
+        $data = [
+            'phone_numbers' => $phone_numbers,
+            'phoneSettingPage' => $phoneSettingPage,
+            'siteText' => $siteText,
+            'validationMessages' => $validationMessages,
+        ];
         return $this->successResponse($data, 'Get phone numbers successfully');
     }
 

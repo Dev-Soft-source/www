@@ -10,10 +10,14 @@ Widget pickupDropoffInfoWidget(
     String dropoff = "",
     String description = "",
     double screenWidth = 0.0,
-    String pickUpHeading = "Pick-up & Drop-off Info",
-    String pickupLabel = "Pick up",
-    String dropOffLabel = "Drop off",
-    String descriptionLabel = "Description"}) {
+    Map<dynamic, dynamic>? rideDetailPageLabels}) {
+  final labels = rideDetailPageLabels ?? const {};
+  final pickUpHeading =
+      "${labels['pickup_dropoff_info_heading'] ?? "Pick-up & Drop-off Info"}";
+  final pickupLabel = "${labels['pickup_at_label'] ?? "Pick-up at"}";
+  final dropOffLabel = "${labels['dropoff_at_label'] ?? "Drop-off at"}";
+  final descriptionLabel =
+      "${labels['description_label'] ?? "Description"}";
   Widget infoRow({
     required String label,
     required String value,

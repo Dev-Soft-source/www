@@ -79,6 +79,14 @@ class AppHtmlText extends StatelessWidget {
           fontWeight: fontWeight,
           lineHeight: LineHeight(lineHeight),
         ),
+        // Overrides generic `span` so required markers stay visibly red (inline styles are ignored).
+        "span.pr-required-star": Style(
+          color: Colors.red,
+          fontSize: FontSize(fontSize),
+          fontFamily: fontFamily,
+          fontWeight: fontWeight,
+          lineHeight: LineHeight(lineHeight),
+        ),
         "strong": Style(
           fontWeight: FontWeight.bold,
           fontFamily: fontFamily,

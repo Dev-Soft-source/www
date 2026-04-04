@@ -86,85 +86,7 @@ class NotificationPage extends StatelessWidget {
                           child: Column(
                             children: [
                               10.heightBox,
-                              // Padding(
-                              //   padding:
-                              //       const EdgeInsets.symmetric(horizontal: 15.0),
-                              //   child: Align(
-                              //     alignment: Alignment.topRight,
-                              //     child: GestureDetector(
-                              //       onTap: () {
-                              //         SideSheet.right(
-                              //           body: filterNotificationSideWidget(
-                              //             context: context,
-                              //             controller: controller,
-                              //             screenWidth: context.screenWidth,
-                              //             screenHeight: context.screenHeight,
-                              //           ),
-                              //           context: context,
-                              //           width: context.screenWidth - 50,
-                              //         );
-                              //       },
-                              //       child: Container(
-                              //         height: 50,
-                              //         padding: const EdgeInsets.symmetric(
-                              //             horizontal: 16.0),
-                              //         decoration: BoxDecoration(
-                              //           color: btnPrimaryColor,
-                              //           borderRadius: BorderRadius.circular(5.0),
-                              //           boxShadow: [
-                              //             BoxShadow(
-                              //               color:
-                              //                   btnPrimaryColor.withOpacity(0.2),
-                              //               blurRadius: 5,
-                              //               offset: const Offset(0, 2),
-                              //             ),
-                              //           ],
-                              //         ),
-                              //         child: Row(
-                              //           crossAxisAlignment:
-                              //               CrossAxisAlignment.center,
-                              //           children: [
-                              //             Image.asset(
-                              //               filterImage,
-                              //               height: getValueForScreenType<double>(
-                              //                 context: context,
-                              //                 mobile: 20.0,
-                              //                 tablet: 22.0,
-                              //               ),
-                              //               width: getValueForScreenType<double>(
-                              //                 context: context,
-                              //                 mobile: 20.0,
-                              //                 tablet: 22.0,
-                              //               ),
-                              //               color: Colors.white,
-                              //             ),
-                              //             const SizedBox(width: 8),
-                              //             Expanded(
-                              //               child: Text(
-                              //                 controller.labelTextDetail[
-                              //                         'notification_filter_btn_label'] ??
-                              //                     "Search filters",
-                              //                 style: TextStyle(
-                              //                   fontSize:
-                              //                       getValueForScreenType<double>(
-                              //                     context: context,
-                              //                     mobile: 18.0,
-                              //                     tablet: 20.0,
-                              //                   ),
-                              //                   fontWeight: FontWeight.w600,
-                              //                   color: Colors.white,
-                              //                 ),
-                              //                 softWrap: true,
-                              //                 overflow: TextOverflow.visible,
-                              //                 maxLines: 2,
-                              //               ),
-                              //             ),
-                              //           ],
-                              //         ),
-                              //       ),
-                              //     ),
-                              //   ),
-                              // ),
+                             
 
                               GestureDetector(
                                 onTap: () {
@@ -193,7 +115,7 @@ class NotificationPage extends StatelessWidget {
                                         children: [
                                           Expanded(
                                             child: Text(
-                                              'Stay connected – your chats live here',
+                                              '${controller.labelTextDetail['info_bar_title'] ?? 'Stay connected – your chats live here'}',
                                               style: const TextStyle(
                                                 fontSize: 22,
                                                 fontWeight: FontWeight.w600,
@@ -239,7 +161,7 @@ class NotificationPage extends StatelessWidget {
                                                 const SizedBox(width: 8),
                                                 Expanded(
                                                   child: Text(
-                                                    'If the message is about a ride, tapping it will take you straight to that ride\'s details page.',
+                                                    '${controller.labelTextDetail['info_paragraph_ride'] ?? 'If the message is about a ride, tapping it will take you straight to that ride\'s details page.'}',
                                                     style: const TextStyle(
                                                         fontSize: 20,
                                                         color: Colors.white),
@@ -264,7 +186,7 @@ class NotificationPage extends StatelessWidget {
                                                 const SizedBox(width: 8),
                                                 Expanded(
                                                   child: Text(
-                                                    'If it\'s from another member, you\'ll be directed to your Inbox.',
+                                                    '${controller.labelTextDetail['info_paragraph_inbox'] ?? 'If it\'s from another member, you\'ll be directed to your Inbox.'}',
                                                     style: const TextStyle(
                                                         fontSize: 20,
                                                         color: Colors.white),
@@ -290,7 +212,7 @@ class NotificationPage extends StatelessWidget {
                                                 const SizedBox(width: 8),
                                                 Expanded(
                                                   child: Text(
-                                                    'If it\'s a general update from ProximaRide, it will open right here for you to read.',
+                                                    '${controller.labelTextDetail['info_paragraph_general'] ?? 'If it\'s a general update from ProximaRide, it will open right here for you to read.'}',
                                                     style: const TextStyle(
                                                         fontSize: 20,
                                                         color: Colors.white),
@@ -418,12 +340,18 @@ class NotificationPage extends StatelessWidget {
                                         controller: controller,
                                         notification:
                                             "${controller.notificationsList[index]['message']}",
-                                        date:
-                                            controller.notificationsList[index]
+                                        dateDisplay: controller
+                                                .notificationsList[index]
+                                                    ['added_on_date_display']
+                                                ?.toString(),
+                                        timeDisplay: controller
+                                                .notificationsList[index]
+                                                    ['added_on_time_display']
+                                                ?.toString(),
+                                        date: controller.notificationsList[index]
                                                 ['added_on'],
-                                        time:
-                                            controller.notificationsList[index]
-                                                ['added_on'],
+                                        time: controller.notificationsList[index]
+                                            ['added_on'],
                                         // userType:
                                         //     controller.notificationsList[
                                         //                 index]['type'] ==
@@ -515,12 +443,12 @@ class NotificationPage extends StatelessWidget {
                                               .serviceController
                                               .showConfirmationDialog(
                                                   controller.labelTextDetail[
-                                                          'notification_confirm_message'] ??
+                                                          'notification_delete_text'] ??
                                                       "Are you sure you want to delete this notification",
                                                   cancelNoBtn:
-                                                      "No, take me back!",
+                                                      '${controller.labelTextDetail['btn_take_me_back_text'] ?? "No, take me back!"}',
                                                   cancelYesBtn:
-                                                      'Yes, delete it!');
+                                                      '${controller.labelTextDetail['btn_delete_it_text'] ?? 'Yes, delete it!'}');
                                           if (isConfirmed == false) {
                                           } else {
                                             await controller.deleteNotification(

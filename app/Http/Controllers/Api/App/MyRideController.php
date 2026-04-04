@@ -100,6 +100,26 @@ class MyRideController extends Controller
             ->first();
     }
 
+    protected function getApiFindRidePage(?Language $language)
+    {
+        if (!$language) {
+            return null;
+        }
+
+        $defaultLangId = $this->defaultLang?->id ?: $language->id;
+        $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($language->id, $defaultLangId);
+
+        if ($findRidePage) {
+            $findRidePage->mapMultipleOptionColumnsToDetails(
+                ['ride_features', 'smoking', 'pets_allowed', 'payment_methods', 'animals', 'luggage', 'cancellation_policy'],
+                $language->id,
+                $defaultLangId
+            );
+        }
+
+        return $findRidePage;
+    }
+
     public function CurrentRides(Request $request, $kind = 'upcoming')
     {
         $user = Auth::guard('sanctum')->user();
@@ -316,8 +336,19 @@ class MyRideController extends Controller
         
         $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $findRidePage = $this->getApiFindRidePage($this->selectedLanguage);
 
-        $data = ['rides' => $rides, 'rideDetailPage' => $rideDetailPage, 'tripsPage' => $tripsPage];
+        $localeAbbrev = $this->selectedLanguage?->abbreviation ?? 'en';
+        foreach ($rides->getCollection() as $ride) {
+            $this->appendRideDepartureDisplayForApi($ride, $rideDetailPage, $localeAbbrev);
+        }
+
+        $data = [
+            'rides' => $rides,
+            'rideDetailPage' => $rideDetailPage,
+            'tripsPage' => $tripsPage,
+            'findRidePage' => $findRidePage,
+        ];
         return $this->successResponse($data, 'Get my ' . $kind . ' rides');
     }
 

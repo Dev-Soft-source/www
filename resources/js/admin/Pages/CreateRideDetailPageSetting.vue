@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <AppLayout>
                 <div class="relative shadow-md sm:rounded-lg bg-white py-4">
                     <header class="pt-4">
@@ -4121,6 +4121,96 @@
                                                         `ride_main_heading.ride_main_heading_${activeLanguageId}`
                                                     )
                                                 "
+                                                ></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`my_ride_page_heading_label_${activeLanguageId}`"
+                                                        >My ride page heading
+                                                        (App)</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`my_ride_page_heading_label_${activeLanguageId}`"
+                                                    :id="`my_ride_page_heading_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'my_ride_page_heading_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'my_ride_page_heading_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `my_ride_page_heading_label.my_ride_page_heading_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `my_ride_page_heading_label.my_ride_page_heading_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                            ></p>
+                                        </div>
+                                        <div class="relative z-0 w-full group">
+                                            <div>
+                                                <div
+                                                    class="flex justify-between"
+                                                >
+                                                    <label
+                                                        :for="`my_trip_page_heading_label_${activeLanguageId}`"
+                                                        >My trip page heading
+                                                        (App)</label
+                                                    >
+                                                </div>
+                                                <input
+                                                    type="text"
+                                                    :name="`my_trip_page_heading_label_${activeLanguageId}`"
+                                                    :id="`my_trip_page_heading_label_${activeLanguageId}`"
+                                                    class="can-exp-input w-full block border border-gray-300 rounded"
+                                                    placeholder=" "
+                                                    :value="
+                                                        getCurrentValue(
+                                                            'my_trip_page_heading_label'
+                                                        )
+                                                    "
+                                                    @input="
+                                                        handleInput(
+                                                            $event.target.value,
+                                                            language,
+                                                            'my_trip_page_heading_label'
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <p
+                                                class="mt-2 text-sm text-red-400"
+                                                v-if="
+                                                    validationErros.has(
+                                                        `my_trip_page_heading_label.my_trip_page_heading_label_${activeLanguageId}`
+                                                    )
+                                                "
+                                                v-text="
+                                                    validationErros.get(
+                                                        `my_trip_page_heading_label.my_trip_page_heading_label_${activeLanguageId}`
+                                                    )
+                                                "
                                             ></p>
                                         </div>
                                         <div class="relative z-0 w-full group">
@@ -5025,6 +5115,8 @@ this.handleInput("", language, "request_booking_label");
                             this.handleInput("", language, "noon_label");
                             this.handleInput("", language, "ride_main_heading");
                             this.handleInput("", language, "trip_main_heading");
+                            this.handleInput("", language, "my_ride_page_heading_label");
+                            this.handleInput("", language, "my_trip_page_heading_label");
                             this.handleInput("", language, "discount_label");
                             this.handleInput("", language, "booking_request_main_heading");
                             this.handleInput("", language, "passenger_age_label");
@@ -5514,6 +5606,16 @@ this.handleInput(
                                 setting?.ride_main_heading,
                                 setting?.language,
                                 "ride_main_heading"
+                            );
+                            this.handleInput(
+                                setting?.my_ride_page_heading_label,
+                                setting?.language,
+                                "my_ride_page_heading_label"
+                            );
+                            this.handleInput(
+                                setting?.my_trip_page_heading_label,
+                                setting?.language,
+                                "my_trip_page_heading_label"
                             );
                             this.handleInput(
                                 setting?.midnight_label,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
+import 'package:proximaride_app/helpers/ride_departure_display.dart';
 import 'package:proximaride_app/pages/trip_detail/TripDetailController.dart';
 import 'package:proximaride_app/pages/trip_detail/widget/booking_type_widget.dart';
 import 'package:proximaride_app/pages/trip_detail/widget/cancelation_policy_widget.dart';
@@ -78,9 +79,8 @@ class TripDetailPage extends StatelessWidget {
             return Center(child: progressCircularWidget(context));
           } else {
             if (controller.ride.isNotEmpty) {
-              DateTime parsedDate = DateTime.parse(controller.ride['date']);
-              DateFormat outputFormat = DateFormat('MMMM d, yyyy');
-              String tripDate = outputFormat.format(parsedDate);
+              String tripDate =
+                  rideDepartureDateDisplay(controller.ride);
               final rideDriver = controller.ride['driver'] is Map
                   ? Map<String, dynamic>.from(controller.ride['driver'])
                   : <String, dynamic>{};
@@ -90,23 +90,8 @@ class TripDetailPage extends StatelessWidget {
               
               final rideData = controller.ride;
 
-              String tripTime = "";
-              if (controller.ride['time'] != null) {
-                DateTime parsedTime =
-                    DateFormat("HH:mm:ss").parse(controller.ride['time']);
-                if (parsedTime.hour == 12 && parsedTime.minute == 0) {
-                  DateFormat outputTimeFormat = DateFormat("h:mm");
-                  tripTime =
-                      "${outputTimeFormat.format(parsedTime)} ${controller.labelTextDetail['noon_label'] ?? "noon"}";
-                } else if (parsedTime.hour == 0 && parsedTime.minute == 0) {
-                  DateFormat outputTimeFormat = DateFormat("h:mm");
-                  tripTime =
-                      "${outputTimeFormat.format(parsedTime)} ${controller.labelTextDetail['midnight_label'] ?? "midnight"}";
-                } else {
-                  DateFormat outputTimeFormat = DateFormat("h:mm a");
-                  tripTime = outputTimeFormat.format(parsedTime);
-                }
-              }
+              String tripTime = rideDepartureTimeDisplay(
+                  controller.ride, controller.labelTextDetail);
 
               var cancelHours = 0;
               if (controller.type == "ride") {
@@ -141,11 +126,9 @@ class TripDetailPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             txt20Size(
-                                title: controller.serviceController
-                                            .loginUserDetail['driver'] ==
-                                        "1"
-                                    ? "This is your ride page. You can review and edit your ride details here."
-                                    : "This is your trip page. You can review and edit your trip details here.",
+                                title: controller.type == "ride"
+                                    ? "${controller.labelTextDetail['my_ride_page_heading_label'] ?? "This is your ride page. You can review and edit your ride details here."}"
+                                    : "${controller.labelTextDetail['my_trip_page_heading_label'] ?? "This is your trip page. You can review and edit your trip details here."}",
                                 context: context,
                                 fontFamily: bold),
                             10.heightBox,
@@ -209,14 +192,7 @@ class TripDetailPage extends StatelessWidget {
                                 pickup: controller.ride['pickup'],
                                 dropoff: controller.ride['dropoff'],
                                 description: controller.ride['details'],
-                                pickUpHeading:
-                                    "${controller.labelTextDetail['pickup_dropoff_info_heading'] ?? "Pick-up & Drop-off Info"}",
-                                pickupLabel:
-                                    "${controller.labelTextDetail['pickup_label'] ?? "Pick up"}",
-                                dropOffLabel:
-                                    "${controller.labelTextDetail['dropoff_label'] ?? "Drop off"}",
-                                descriptionLabel:
-                                    "${controller.labelTextDetail['description_label'] ?? "Description"}"),
+                                rideDetailPageLabels: controller.labelTextDetail),
                             10.heightBox,
                             if (controller.ride['payment_method_slug'] ==
                                     "secured" &&
@@ -272,8 +248,6 @@ class TripDetailPage extends StatelessWidget {
                                       "${controller.labelTextDetail['trip_co_passenger_heading'] ?? "My co-passenger(s)"}",
                                   rideCoPassengerHeading:
                                       "${controller.labelTextDetail['ride_co_passenger_heading'] ?? "My passengers"}",
-                                  age:
-                                      "${controller.labelTextDetail['driver_age_label'] ?? "Age"}",
                                   review:
                                       "${controller.labelTextDetail['review_label'] ?? "Review"}"),
                               10.heightBox,

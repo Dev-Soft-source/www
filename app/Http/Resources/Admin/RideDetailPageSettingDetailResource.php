@@ -107,6 +107,8 @@ class RideDetailPageSettingDetailResource extends JsonResource
             'midnight_label' => $this->midnight_label,
             'driver_note_label' => $this->driver_note_label,
             'ride_main_heading' => $this->ride_main_heading,
+            'my_ride_page_heading_label' => $this->my_ride_page_heading_label,
+            'my_trip_page_heading_label' => $this->my_trip_page_heading_label,
             'trip_main_heading' => $this->trip_main_heading,
             'discount_label' => $this->discount_label,
             'booking_request_main_heading' => $this->booking_request_main_heading,

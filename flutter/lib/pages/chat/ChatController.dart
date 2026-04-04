@@ -155,6 +155,9 @@ class ChatController extends GetxController {
           serviceController.imagePreviewLabel.value =
               labelTextDetail['image_preview'] ?? 'Image Preview';
         }
+        if (resp['data'] != null && resp['data']['siteText'] != null) {
+          labelTextDetail.addAll(resp['data']['siteText']);
+        }
 
         serviceController.navigationChatLabel.value =
             labelTextDetail['navigation_chat_label'] ?? "Chats";
@@ -183,8 +186,8 @@ class ChatController extends GetxController {
     bool isConfirmed = await serviceController.showConfirmationDialog(
         labelTextDetail['delete_messages_label'] ??
             "Are you sure you want to delete this chat?",
-        cancelYesBtn: "Yes,Delete it",
-        cancelNoBtn: "No,Take me back");
+        cancelYesBtn: '${labelTextDetail['btn_delete_it_text'] ?? 'Yes, delete it!'}',
+        cancelNoBtn: '${labelTextDetail['btn_take_me_back_text'] ?? "No, take me back!"}');
     if (isConfirmed == false) {
       return;
     }

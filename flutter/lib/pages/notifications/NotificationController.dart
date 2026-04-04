@@ -462,8 +462,15 @@ class NotificationController extends GetxController {
       if (resp['status'] != null && resp['status'] == "Success") {
         if (resp['data'] != null && resp['data']['chatsPage'] != null) {
           labelTextDetail.addAll(resp['data']['chatsPage']);
-          labelTextDetail.refresh();
         }
+        if (resp['data'] != null &&
+            resp['data']['notificationsPageSetting'] != null) {
+          labelTextDetail.addAll(resp['data']['notificationsPageSetting']);
+        }
+        if (resp['data'] != null && resp['data']['siteText'] != null) {
+          labelTextDetail.addAll(resp['data']['siteText']);
+        }
+        labelTextDetail.refresh();
 
         var getLanguage = serviceController.languages.firstWhereOrNull(
             (element) => element['id'] == serviceController.langId.value);

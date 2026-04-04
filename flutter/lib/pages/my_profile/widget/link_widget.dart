@@ -10,7 +10,11 @@ Widget linkWidget(
     context,
     int index = 0,
     onTap,
-    Color textColor = textColor}) {
+    Color textColor = textColor,
+    Color? backgroundColor,
+    Color? iconColor}) {
+  final borderColor =
+      backgroundColor ?? primaryColor;
   return InkWell(
     onTap: onTap,
     child: Ink(
@@ -20,8 +24,9 @@ Widget linkWidget(
           tablet: 8.0,
         )),
         decoration: BoxDecoration(
+            color: backgroundColor,
             border: Border.all(
-                color: primaryColor, width: 1, style: BorderStyle.solid),
+                color: borderColor, width: 1, style: BorderStyle.solid),
             borderRadius: BorderRadius.circular(10.0)),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -64,19 +69,37 @@ Widget linkWidget(
                           ),
                         ),
                       )
-                    : Image.asset(
-                        imagePath,
-                        height: getValueForScreenType<double>(
-                          context: context,
-                          mobile: 26.0,
-                          tablet: 26.0,
-                        ),
-                        width: getValueForScreenType<double>(
-                          context: context,
-                          mobile: 26.0,
-                          tablet: 26.0,
-                        ),
-                      ),
+                    : iconColor != null
+                        ? ColorFiltered(
+                            colorFilter: ColorFilter.mode(
+                                iconColor, BlendMode.srcIn),
+                            child: Image.asset(
+                              imagePath,
+                              height: getValueForScreenType<double>(
+                                context: context,
+                                mobile: 26.0,
+                                tablet: 26.0,
+                              ),
+                              width: getValueForScreenType<double>(
+                                context: context,
+                                mobile: 26.0,
+                                tablet: 26.0,
+                              ),
+                            ),
+                          )
+                        : Image.asset(
+                            imagePath,
+                            height: getValueForScreenType<double>(
+                              context: context,
+                              mobile: 26.0,
+                              tablet: 26.0,
+                            ),
+                            width: getValueForScreenType<double>(
+                              context: context,
+                              mobile: 26.0,
+                              tablet: 26.0,
+                            ),
+                          ),
                 10.widthBox,
                 index == 0
                     ? txt22SizeCapitalized(
@@ -91,17 +114,33 @@ Widget linkWidget(
                         context: context),
               ],
             ),
-            Image.asset(rightArrowImage,
-                height: getValueForScreenType<double>(
-                  context: context,
-                  mobile: 15.0,
-                  tablet: 15.0,
-                ),
-                width: getValueForScreenType<double>(
-                  context: context,
-                  mobile: 15.0,
-                  tablet: 15.0,
-                ))
+            iconColor != null
+                ? ColorFiltered(
+                    colorFilter:
+                        ColorFilter.mode(iconColor, BlendMode.srcIn),
+                    child: Image.asset(rightArrowImage,
+                        height: getValueForScreenType<double>(
+                          context: context,
+                          mobile: 15.0,
+                          tablet: 15.0,
+                        ),
+                        width: getValueForScreenType<double>(
+                          context: context,
+                          mobile: 15.0,
+                          tablet: 15.0,
+                        )),
+                  )
+                : Image.asset(rightArrowImage,
+                    height: getValueForScreenType<double>(
+                      context: context,
+                      mobile: 15.0,
+                      tablet: 15.0,
+                    ),
+                    width: getValueForScreenType<double>(
+                      context: context,
+                      mobile: 15.0,
+                      tablet: 15.0,
+                    ))
           ],
         )),
   );

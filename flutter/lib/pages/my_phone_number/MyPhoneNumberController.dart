@@ -180,6 +180,9 @@ class MyPhoneNumberController extends GetxController {
           logger.info('labelTextDetail: ${resp['data']['phoneSettingPage']}');
           labelTextDetail.addAll(resp['data']['phoneSettingPage']);
         }
+        if (resp['data'] != null && resp['data']['siteText'] != null) {
+          labelTextDetail.addAll(resp['data']['siteText']);
+        }
 
         if (resp['data'] != null &&
             resp['data']['validationMessages'] != null) {
@@ -330,8 +333,10 @@ class MyPhoneNumberController extends GetxController {
 
   deletePhoneNumber(phoneId, index) async {
     bool isConfirmed = await serviceController.showConfirmationDialog(
-        cancelYesBtn: "Yes, delete it!",
-        "Are you sure you want to delete this phone number?");
+        cancelYesBtn: '${labelTextDetail['btn_delete_it_text'] ?? 'Yes, delete it!'}',
+        "${labelTextDetail['phone_delete_message'] ?? "Are you sure you want to delete this phone number"}",
+        cancelNoBtn:
+            '${labelTextDetail['btn_take_me_back_text'] ?? "No, take me back!"}');
 
     if (!isConfirmed) {
       return;

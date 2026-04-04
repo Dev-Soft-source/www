@@ -23,6 +23,26 @@ import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import 'package:proximaride_app/services/logger_service.dart';
 import '../widgets/tool_tip.dart';
 
+const String _kAgreeTermsFallbackHtml =
+    'I will abide by ProximaRide rules and I have read and agree to ProximaRide <a href="/term_condition">Terms of services</a>, <a href="/term_of_use">Term of use</a>, <a href="/privacy_policy">Privacy policy</a> and all associated rules and policies.';
+
+/// Inserts the required-field star inside the last block (before `</p>` / `</div>`)
+/// so [flutter_html] does not render it as a separate block on the next line.
+String _agreeTermsHtmlWithRequiredStar(String? raw) {
+  final base =
+      (raw == null || raw.trim().isEmpty) ? _kAgreeTermsFallbackHtml : raw.trim();
+  final star = '<span class="pr-required-star">*</span>';
+
+  final lower = base.toLowerCase();
+  for (final tag in ['</p>', '</div>']) {
+    final idx = lower.lastIndexOf(tag);
+    if (idx != -1) {
+      return '${base.substring(0, idx)}\u00A0$star${base.substring(idx)}';
+    }
+  }
+  return '$base\u00A0$star';
+}
+
 class PostRidePage extends StatefulWidget {
   const PostRidePage({super.key});
 
@@ -305,36 +325,21 @@ class _PostRideScaffold extends StatelessWidget {
                                   Expanded(
                                     child: Padding(
                                       padding: const EdgeInsets.only(top: 5.0),
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Expanded(
-                                            child: AppHtmlText(
-                                              data: controller.labelTextDetail[
-                                                      'agree_terms_label'] ??
-                                                  'I will abide by ProximaRide rules and I have read and agree to ProximaRide <a href="/term_condition">Terms of services</a>, <a href="/term_of_use">Term of use</a>, <a href="/privacy_policy">Privacy policy</a> and all associated rules and policies.',
-                                              fontSize: 20,
-                                              fontFamily: bold,
-                                              fontWeight: FontWeight.w400,
-                                              textColor: textColor,
-                                              linkColor: primaryColor,
-                                              lineHeight: 1.4,
-                                              openLinksExternally: false,
-                                              onLinkTapCallback:
-                                                  _handleAgreementLinkTap,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            '*',
-                                            style: TextStyle(
-                                              color: Colors.red,
-                                              fontSize: 20,
-                                              fontFamily: bold,
-                                            ),
-                                          ),
-                                        ],
+                                      child: AppHtmlText(
+                                        data: _agreeTermsHtmlWithRequiredStar(
+                                          controller.labelTextDetail[
+                                                  'agree_terms_label']
+                                              ?.toString(),
+                                        ),
+                                        fontSize: 20,
+                                        fontFamily: bold,
+                                        fontWeight: FontWeight.w400,
+                                        textColor: textColor,
+                                        linkColor: primaryColor,
+                                        lineHeight: 1.4,
+                                        openLinksExternally: false,
+                                        onLinkTapCallback:
+                                            _handleAgreementLinkTap,
                                       ),
                                     ),
                                   ),

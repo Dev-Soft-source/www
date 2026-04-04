@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
+import 'package:proximaride_app/helpers/ride_departure_display.dart';
 import 'package:proximaride_app/pages/widgets/circle_icon_widget.dart';
 import 'package:proximaride_app/pages/widgets/circle_image_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
@@ -23,31 +23,17 @@ Widget tripCardWidget(
   bool showReviewButton = true;
   String tripDate = "";
   if (tripDetail['date'] != null) {
-    DateTime parsedDate = DateTime.parse(tripDetail['date']);
-    DateFormat outputFormat = DateFormat('MMMM d, yyyy');
-    tripDate = outputFormat.format(parsedDate);
-
-    DateTime futureDate = parsedDate.add(Duration(days: leaveReviewDays));
-    DateTime currentDate = DateTime.now();
+    tripDate = rideDepartureDateDisplay(tripDetail);
+    final parsedDate = DateTime.parse(tripDetail['date'].toString());
+    final futureDate = parsedDate.add(Duration(days: leaveReviewDays));
+    final currentDate = DateTime.now();
     if (currentDate.isAfter(futureDate)) {
       showReviewButton = false;
     }
   }
 
-  String tripTime = "";
-  if (tripDetail['time'] != null) {
-    DateTime parsedTime = DateFormat("HH:mm:ss").parse(tripDetail['time']);
-    if (parsedTime.hour == 12 && parsedTime.minute == 0) {
-      DateFormat outputTimeFormat = DateFormat("h:mm");
-      tripTime = "${outputTimeFormat.format(parsedTime)} noon";
-    } else if (parsedTime.hour == 0 && parsedTime.minute == 0) {
-      DateFormat outputTimeFormat = DateFormat("h:mm");
-      tripTime = "${outputTimeFormat.format(parsedTime)} midnight";
-    } else {
-      DateFormat outputTimeFormat = DateFormat("h:mm a");
-      tripTime = outputTimeFormat.format(parsedTime);
-    }
-  }
+  final String tripTime =
+      rideDepartureTimeDisplay(tripDetail, controller.labelTextDetail);
 
   final hasDriverReview = tripDetail['driver'] != null &&
       tripDetail['driver']['average_rating'] != null;
@@ -332,7 +318,7 @@ Widget tripCardWidget(
                           txt20Size(
                               title: hasDriverReview
                                   ? "${controller.labelTextDetail['card_section_review'] ?? "Review"}: ${tripDetail['driver']['average_rating'].toStringAsFixed(1)}"
-                                  : "${controller.labelTextDetail['no_review_yet_label'] ?? "No review yet"}",
+                                  : "${controller.labelTextDetail['no_reviews_label'] ?? "No review yet"}",
                               context: context),
                           5.widthBox,
                         ],

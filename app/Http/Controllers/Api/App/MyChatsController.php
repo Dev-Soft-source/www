@@ -6,6 +6,7 @@ use App\Events\MessageSentEvent;
 use App\Http\Controllers\Controller;
 use App\Mail\ReceiveChatMessageMail;
 use App\Models\ChatsPageSettingDetail;
+use App\Models\NotificationsPageSettingDetail;
 use App\Models\Message;
 use App\Models\Notification;
 use App\Models\FCMToken;
@@ -15,6 +16,7 @@ use App\Models\SiteSetting;
 use App\Models\UserMessageCount;
 use App\Models\Language;
 use App\Models\Booking;
+use App\Models\SiteTextDetail;
 use App\Models\SuccessMessagesSettingDetail;
 use App\Services\FCMService;
 use App\Traits\StatusResponser;
@@ -414,9 +416,16 @@ class MyChatsController extends Controller
     public function chatsIndex(Request $request)
     {
         $chatsPage = ChatsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $notificationsPageSetting = NotificationsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $siteText = SiteTextDetail::getByLanguageKeyedBySlug($this->selectedLanguage->id, $this->defaultLang->id);
         $messages = $this->successMessage;
 
-        $data = ['chatsPage' => $chatsPage, 'messages' => $messages];
+        $data = [
+            'chatsPage' => $chatsPage,
+            'notificationsPageSetting' => $notificationsPageSetting,
+            'siteText' => $siteText,
+            'messages' => $messages,
+        ];
         return $this->successResponse($data, 'Chats page get successfully');
     }
 

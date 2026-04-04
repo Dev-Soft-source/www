@@ -1206,6 +1206,21 @@ class RideController extends Controller
             }
         }
 
+        if ($ride) {
+            $languageForDisplay = null;
+            if ($request->lang_id && (int) $request->lang_id !== 0) {
+                $languageForDisplay = Language::find($request->lang_id);
+            }
+            if (!$languageForDisplay) {
+                $languageForDisplay = Language::where('is_default', 1)->first();
+            }
+            $this->appendRideDepartureDisplayForApi(
+                $ride,
+                $rideDetailPage,
+                $languageForDisplay?->abbreviation
+            );
+        }
+
         $data = ['ride' => $ride, 'cancelRideSetting' => $cancelRideSetting, 'reviewSetting' => $reviewSetting, 'siteSetting' => $siteSetting, 'rideDetailPage' => $rideDetailPage, 'tripsPage' => $tripsPage];
         return $this->successResponse($data, 'Success');
     }

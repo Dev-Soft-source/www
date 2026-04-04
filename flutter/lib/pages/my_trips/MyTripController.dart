@@ -338,10 +338,13 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
                 labelTextTripDetail.isEmpty) {
               labelTextTripDetail.addAll(resp['data']['tripsPage']);
             }
-            if (resp['data'] != null &&
-                resp['data']['rideDetailPage'] != null &&
-                labelTextDetail.isEmpty) {
-              labelTextDetail.addAll(resp['data']['rideDetailPage']);
+            if (resp['data'] != null && labelTextDetail.isEmpty) {
+              if (resp['data']['rideDetailPage'] != null) {
+                labelTextDetail.addAll(resp['data']['rideDetailPage']);
+              }
+              if (resp['data']['findRidePage'] != null) {
+                labelTextDetail.addAll(resp['data']['findRidePage']);
+              }
             }
           } else if (tripType.value == "completed") {
             completedTripList.addAll(resp['data']['bookings']['data']);
@@ -552,9 +555,13 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
               labelTextTripDetail.addAll(responseData!['tripsPage']);
             }
 
-            if (responseData?['rideDetailPage'] != null &&
-                labelTextDetail.isEmpty) {
-              labelTextDetail.addAll(responseData!['rideDetailPage']);
+            if (labelTextDetail.isEmpty) {
+              if (responseData?['rideDetailPage'] != null) {
+                labelTextDetail.addAll(responseData!['rideDetailPage']);
+              }
+              if (responseData?['findRidePage'] != null) {
+                labelTextDetail.addAll(responseData!['findRidePage']);
+              }
             }
           } else if (rideType.value == "completed") {
             completedRideList.addAll(ridesData);

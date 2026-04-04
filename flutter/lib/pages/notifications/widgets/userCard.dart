@@ -17,6 +17,8 @@ Widget userCard(
     notification = "",
     date = "12-5-24",
     time = "12:00:00",
+    String? dateDisplay,
+    String? timeDisplay,
     userType = "",
     onTap,
     onLongPress,
@@ -29,25 +31,34 @@ Widget userCard(
       .trim();
 
   String tripDate = "";
-  if (date != null) {
-    DateTime parsedDate = DateTime.parse(date);
-    DateFormat outputFormat = DateFormat('MMMM d, yyyy');
-    tripDate = outputFormat.format(parsedDate);
+  final dateDisp = dateDisplay?.trim();
+  if (dateDisp != null && dateDisp.isNotEmpty) {
+    tripDate = dateDisp;
+  } else if (date != null && date.toString().trim().isNotEmpty) {
+    try {
+      final parsedDate = DateTime.parse(date.toString());
+      tripDate = DateFormat('MMMM d, yyyy').format(parsedDate);
+    } catch (_) {
+      tripDate = date.toString();
+    }
   }
 
   String tripTime = "";
-  if (time != null) {
-    DateTime parsedTime = DateTime.parse(date);
-
-    if (parsedTime.hour == 12 && parsedTime.minute == 0) {
-      DateFormat outputTimeFormat = DateFormat("h:mm");
-      tripTime = "${outputTimeFormat.format(parsedTime)} noon";
-    } else if (parsedTime.hour == 0 && parsedTime.minute == 0) {
-      DateFormat outputTimeFormat = DateFormat("h:mm");
-      tripTime = "${outputTimeFormat.format(parsedTime)} midnight";
-    } else {
-      DateFormat outputTimeFormat = DateFormat("h:mma");
-      tripTime = outputTimeFormat.format(parsedTime);
+  final timeDisp = timeDisplay?.trim();
+  if (timeDisp != null && timeDisp.isNotEmpty) {
+    tripTime = timeDisp;
+  } else if (date != null && date.toString().trim().isNotEmpty) {
+    try {
+      final parsedTime = DateTime.parse(date.toString());
+      if (parsedTime.hour == 12 && parsedTime.minute == 0) {
+        tripTime = "${DateFormat("h:mm").format(parsedTime)} noon";
+      } else if (parsedTime.hour == 0 && parsedTime.minute == 0) {
+        tripTime = "${DateFormat("h:mm").format(parsedTime)} midnight";
+      } else {
+        tripTime = DateFormat("h:mma").format(parsedTime);
+      }
+    } catch (_) {
+      tripTime = time?.toString() ?? "";
     }
   }
 

@@ -423,7 +423,7 @@
                     <h3 class="text-2xl bg-primary text-white py-2 px-4">
                         {{ $postRidePage->ride_info_heading ?? 'Ride Info' }}
                     </h3>
-                    <div class="bg-white p-4 space-y-3">
+                    <div class="bg-white p-4 ">
                         <div class="flex flex-col md:flex-row justify-between items-start">
                             <div class="w-full md:w-[45%] ">
                                 <label class="block text-sm mb-4 required">{{ $postRidePage->from_label }}</label>
@@ -465,7 +465,7 @@
                             </div>
                         </div>
 
-                        <div class="flex flex-col md:flex-row justify-between mt-4">
+                        <div class="flex flex-col md:flex-row justify-between mt-6">
                             <div class="w-full md:w-[45%]">
                                 <label class="block text-sm mb-4 required">{{ $postRidePage->pick_up_label }}</label>
                                 <textarea name="pickup" rows="4" class="w-full rounded border-gray-300" autocomplete="off"
@@ -484,7 +484,7 @@
                             </div>
                         </div>
 
-                        <div>
+                        <div class="mt-6">
                             <label for="date_time" class="block text-gray-900 required">
                                 {{ $postRidePage->date_time_label ?? 'Date and Time' }}
                             </label>

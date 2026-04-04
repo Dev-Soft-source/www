@@ -182,7 +182,7 @@ class _RideFeatureWidgetState extends State<RideFeatureWidget> {
                       5.heightBox,
                     ]
                   ],
-                  if (widget.rideDetail['smoke'] != null) ...[
+                  if (widget.rideDetail['smoking_label'] != null) ...[
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,7 +195,7 @@ class _RideFeatureWidgetState extends State<RideFeatureWidget> {
                         10.widthBox,
                         Expanded(
                             child: txt18Size(
-                                title: widget.rideDetail['smoke'], context: widget.context))
+                                title: widget.rideDetail['smoking_label'], context: widget.context))
                       ],
                     ),
                     5.heightBox,
@@ -272,7 +272,7 @@ class _RideFeatureWidgetState extends State<RideFeatureWidget> {
                     ),
                     5.heightBox,
                   ],
-                  if (widget.rideDetail['animal_friendly'] != null) ...[
+                  if (widget.rideDetail['pets_label'] != null) ...[
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,7 +286,7 @@ class _RideFeatureWidgetState extends State<RideFeatureWidget> {
                         10.widthBox,
                         Expanded(
                             child: txt18Size(
-                                title: widget.rideDetail['animal_friendly'],
+                                title: widget.rideDetail['pets_label'],
                                 context: widget.context))
                       ],
                     ),

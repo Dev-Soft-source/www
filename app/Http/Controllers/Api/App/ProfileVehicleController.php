@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\MyVehicleSettingDetail;
 use App\Models\Notification;
+use App\Models\SiteTextDetail;
 use App\Models\SuccessMessagesSettingDetail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -36,6 +37,7 @@ class ProfileVehicleController extends Controller
             $this->defaultLang->id
         )->get('vehicle_type', collect())->values();
         $messages = $this->successMessage;
+        $siteText = SiteTextDetail::getByLanguageKeyedBySlug($this->selectedLanguage->id, $this->defaultLang->id);
 
         $validationMessages = [
             'required' => trans('validation.required'),
@@ -49,6 +51,7 @@ class ProfileVehicleController extends Controller
             'vehicleSettingPage' => $vehicleSettingPage,
             'vehicleTypeOptions' => $vehicleTypeOptions,
             'messages' => $messages,
+            'siteText' => $siteText,
             'validationMessages' => $validationMessages,
         ];
         return $this->successResponse($data, 'Get vehicles successfully');

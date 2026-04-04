@@ -6,7 +6,9 @@ import 'package:proximaride_app/pages/post_ride/widget/post_ride_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
 Widget myCoPassengerWidget({context, coPassengerList, controller, String tripId = "", double screenWidth = 0.0, String type = "trip",
-  String tripCoPassengerHeading = "My co-passenger(s)", String rideCoPassengerHeading = "My passengers", String age = "Age", String review = "Review"}){
+  String tripCoPassengerHeading = "My co-passenger(s)", String rideCoPassengerHeading = "My passengers", String review = "Review"}){
+  final ageLabel =
+      "${controller.labelTextDetail['passenger_age_label'] ?? "Age"}";
   return InkWell(
     onTap: (){
       if(type == "trip"){
@@ -61,7 +63,7 @@ Widget myCoPassengerWidget({context, coPassengerList, controller, String tripId 
                               circleImageWidget(width: 36, height: 36, imageType: "network", imagePath: "${coPassengerList[i]['passenger']['profile_image']}", context: context),
                               10.widthBox,
                               txt20Size(
-                                  title: "${coPassengerList[i]['passenger']['first_name']} | $age: ${coPassengerList[i]['passenger']['age']} | ${coPassengerList[i]['passenger']['gender_label']} | ${(coPassengerList[i]['passenger_average_rating'] == null || "${coPassengerList[i]['passenger_average_rating']}".isEmpty) ? "${controller.labelTextDetail['no_review_label'] ?? "No review yet"}" : "$review: ${coPassengerList[i]['passenger_average_rating']}"}",
+                                  title: "${coPassengerList[i]['passenger']['first_name']} | $ageLabel: ${coPassengerList[i]['passenger']['age']} | ${coPassengerList[i]['passenger']['gender_label']} | ${(coPassengerList[i]['passenger_average_rating'] == null || "${coPassengerList[i]['passenger_average_rating']}".isEmpty) ? "${controller.labelTextDetail['no_reviews_label'] ?? "No review yet"}" : "$review: ${coPassengerList[i]['passenger_average_rating']}"}",
                                   context: context,
                                   fontFamily: bold)
                             ],

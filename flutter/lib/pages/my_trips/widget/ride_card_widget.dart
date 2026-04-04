@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
+import 'package:proximaride_app/helpers/ride_departure_display.dart';
 import 'package:proximaride_app/helpers/currency_formatter.dart';
 import 'package:proximaride_app/pages/my_trips/widget/ride_price_info_widget.dart';
 import 'package:proximaride_app/pages/widgets/circle_icon_widget.dart';
@@ -38,25 +38,11 @@ Widget rideCardWidget(
   final rideDetailMap = getRideDetailMap(tripDetail);
   String tripDate = "";
   if (tripDetail['date'] != null) {
-    DateTime parsedDate = DateTime.parse(tripDetail['date']);
-    DateFormat outputFormat = DateFormat('MMMM d, yyyy');
-    tripDate = outputFormat.format(parsedDate);
+    tripDate = rideDepartureDateDisplay(tripDetail);
   }
 
-  String tripTime = "";
-  if (tripDetail['time'] != null) {
-    DateTime parsedTime = DateFormat("HH:mm:ss").parse(tripDetail['time']);
-    if (parsedTime.hour == 12 && parsedTime.minute == 0) {
-      DateFormat outputTimeFormat = DateFormat("h:mm");
-      tripTime = "${outputTimeFormat.format(parsedTime)} noon";
-    } else if (parsedTime.hour == 0 && parsedTime.minute == 0) {
-      DateFormat outputTimeFormat = DateFormat("h:mm");
-      tripTime = "${outputTimeFormat.format(parsedTime)} midnight";
-    } else {
-      DateFormat outputTimeFormat = DateFormat("h:mm a");
-      tripTime = outputTimeFormat.format(parsedTime);
-    }
-  }
+  final String tripTime =
+      rideDepartureTimeDisplay(tripDetail, controller.labelTextDetail);
 
   var requestCount = tripDetail['booking_requests'] != null
       ? tripDetail['booking_requests'].length

@@ -86,6 +86,9 @@ class MyProfilePage extends StatelessWidget {
                                   "${controller.labelTextDetail['profile_setting_label'] ?? "Profile settings"}",
                               context: context,
                               index: 1,
+                              backgroundColor: primaryColor,
+                              textColor: Colors.white,
+                              iconColor: Colors.white,
                               onTap: () {
                                 Get.toNamed("/profile_setting");
                               }),
@@ -134,42 +137,42 @@ class MyProfilePage extends StatelessWidget {
                                 Get.toNamed("/my_reviews");
                               }),
                           10.heightBox,
-                          linkWidget(
-                              controller: controller,
-                              imagePath: termAndConditionImage,
-                              title:
-                                  "${controller.labelTextDetail['terms_condition_label'] ?? "Terms and conditions"}",
-                              context: context,
-                              index: 1,
-                              onTap: () {
-                                Get.toNamed("/term_condition", arguments: {
-                                  "title":
-                                      "${controller.labelTextDetail['terms_condition_label'] ?? "Terms and conditions"}"
-                                });
-                              }),
-                          10.heightBox,
-                          linkWidget(
-                              controller: controller,
-                              imagePath: privacyPolicyImage,
-                              title:
-                                  "${controller.labelTextDetail['privacy_policy_label'] ?? "Privacy policy"}",
-                              context: context,
-                              index: 1,
-                              onTap: () {
-                                Get.toNamed("/privacy_policy");
-                              }),
-                          10.heightBox,
-                          linkWidget(
-                              controller: controller,
-                              imagePath: termOfUseIcon,
-                              title:
-                                  "${controller.labelTextDetail['terms_of_use_label'] ?? "Terms of use"}",
-                              context: context,
-                              index: 1,
-                              onTap: () {
-                                Get.toNamed("/term_of_use");
-                              }),
-                          10.heightBox,
+                          // linkWidget(
+                          //     controller: controller,
+                          //     imagePath: termAndConditionImage,
+                          //     title:
+                          //         "${controller.labelTextDetail['terms_condition_label'] ?? "Terms and conditions"}",
+                          //     context: context,
+                          //     index: 1,
+                          //     onTap: () {
+                          //       Get.toNamed("/term_condition", arguments: {
+                          //         "title":
+                          //             "${controller.labelTextDetail['terms_condition_label'] ?? "Terms and conditions"}"
+                          //       });
+                          //     }),
+                          // 10.heightBox,
+                          // linkWidget(
+                          //     controller: controller,
+                          //     imagePath: privacyPolicyImage,
+                          //     title:
+                          //         "${controller.labelTextDetail['privacy_policy_label'] ?? "Privacy policy"}",
+                          //     context: context,
+                          //     index: 1,
+                          //     onTap: () {
+                          //       Get.toNamed("/privacy_policy");
+                          //     }),
+                          // 10.heightBox,
+                          // linkWidget(
+                          //     controller: controller,
+                          //     imagePath: termOfUseIcon,
+                          //     title:
+                          //         "${controller.labelTextDetail['terms_of_use_label'] ?? "Terms of use"}",
+                          //     context: context,
+                          //     index: 1,
+                          //     onTap: () {
+                          //       Get.toNamed("/term_of_use");
+                          //     }),
+                          // 10.heightBox,
                           // linkWidget(
                           //     imagePath: refundPolicyIcon,
                           //     title: "${controller.labelTextDetail['refund_policy_label'] ?? "Refund policy"}",
@@ -191,17 +194,17 @@ class MyProfilePage extends StatelessWidget {
                                 Get.toNamed("/cancellation_policy");
                               }),
                           10.heightBox,
-                          linkWidget(
-                              controller: controller,
-                              imagePath: disputePolicyIcon,
-                              title:
-                                  "${controller.labelTextDetail['dispute_policy_label'] ?? "Dispute policy"}",
-                              context: context,
-                              index: 1,
-                              onTap: () {
-                                Get.toNamed("/dispute_policy");
-                              }),
-                          10.heightBox,
+                          // linkWidget(
+                          //     controller: controller,
+                          //     imagePath: disputePolicyIcon,
+                          //     title:
+                          //         "${controller.labelTextDetail['dispute_policy_label'] ?? "Dispute policy"}",
+                          //     context: context,
+                          //     index: 1,
+                          //     onTap: () {
+                          //       Get.toNamed("/dispute_policy");
+                          //     }),
+                          // 10.heightBox,
                           linkWidget(
                               controller: controller,
                               imagePath: contactUsImage,

@@ -336,6 +336,8 @@ class RideDetailPageSettingService
             'driver_note_label' => $this->data($request, $language, 'driver_note_label'),
             'trip_main_heading' => $this->data($request, $language, 'trip_main_heading'),
             'ride_main_heading' => $this->data($request, $language, 'ride_main_heading'),
+            'my_ride_page_heading_label' => $this->data($request, $language, 'my_ride_page_heading_label'),
+            'my_trip_page_heading_label' => $this->data($request, $language, 'my_trip_page_heading_label'),
             'discount_label' => $this->data($request, $language, 'discount_label'),
             'booking_request_main_heading' => $this->data($request, $language, 'booking_request_main_heading'),
             'passenger_age_label' => $this->data($request, $language, 'passenger_age_label'),
