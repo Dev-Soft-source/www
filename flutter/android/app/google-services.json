@@ -41,6 +41,43 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:320350283658:android:de57fe0d12b39668a04a73",
+        "android_client_info": {
+          "package_name": "com.jose.proximaride"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "320350283658-77dok2i4rf4p2ajeqphj8vc3dbg3kpao.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jose.proximaride",
+            "certificate_hash": "1a1d712286a5847c1913fe0092821861219789b4"
+          }
+        },
+        {
+          "client_id": "320350283658-m32nu2ffdrauef6ira2qb7qkqjkd2al7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5YWvqTaEJwypF3MZD6sfC4FswvPGfT8s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "320350283658-m32nu2ffdrauef6ira2qb7qkqjkd2al7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"

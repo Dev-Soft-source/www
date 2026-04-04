@@ -27,7 +27,7 @@ I've **already started** implementing Option 1 for you. Choose which one to comp
 ## 📦 **OPTION 1: Change Package Name** ⭐ RECOMMENDED (Already 70% Done!)
 
 ### What I've Already Done For You:
-- ✅ Updated `android/app/build.gradle` - Changed to `com.devop360.proximaride`
+- ✅ Updated `android/app/build.gradle` - Changed to `com.jose.proximaride`
 - ✅ Updated `MainActivity.kt` - Changed package declaration
 - ✅ Updated `AndroidManifest.xml` - Changed package attribute
 
@@ -63,7 +63,7 @@ rmdir com/example/proxima_ride
 
 1. Go to Firebase Console: https://console.firebase.google.com/project/proxima-ride-app-devop/settings/general
 2. Click **"Add app"** → Select **Android**
-3. **Package name:** `com.devop360.proximaride` (NEW package name)
+3. **Package name:** `com.jose.proximaride` (NEW package name)
 4. **App nickname:** Proxima Ride
 5. Click **"Register app"**
 6. **Download the new `google-services.json`**
@@ -71,7 +71,7 @@ rmdir com/example/proxima_ride
 
 #### Step 3: Add SHA Fingerprints to NEW App
 
-1. In Firebase Console, scroll to your NEW Android app (`com.devop360.proximaride`)
+1. In Firebase Console, scroll to your NEW Android app (`com.jose.proximaride`)
 2. Click **"Add fingerprint"**
 3. Add SHA-1: `0A:F5:59:08:DD:EF:D2:D3:DD:E4:8C:29:98:6B:91:17:22:AF:88:B8`
 4. Click **"Add fingerprint"** again
@@ -85,8 +85,8 @@ Since package name changed, update Facebook:
 
 1. Go to: https://developers.facebook.com/apps/2600571723639621/settings/basic/
 2. Find **Android Platform**
-3. Update **Package Name** to: `com.devop360.proximaride`
-4. Keep **Class Name** as: `com.devop360.proximaride.MainActivity`
+3. Update **Package Name** to: `com.jose.proximaride`
+4. Keep **Class Name** as: `com.jose.proximaride.MainActivity`
 5. Save
 
 #### Step 5: Clean & Rebuild
@@ -214,7 +214,7 @@ After completing either option:
 ### If Google Sign-In still fails after Option 1:
 
 **Check:**
-1. Did you download the NEW `google-services.json` for package `com.devop360.proximaride`?
+1. Did you download the NEW `google-services.json` for package `com.jose.proximaride`?
 2. Did you add SHA fingerprints to the NEW app in Firebase?
 3. Did you move `MainActivity.kt` to the correct new folder?
 4. Did you run `flutter clean`?
@@ -225,7 +225,7 @@ After completing either option:
 - **Fix:** Make sure `MainActivity.kt` is in `android/app/src/main/kotlin/com/devop360/proximaride/`
 
 **Error:** "Package name mismatch"
-- **Fix:** Make sure `google-services.json` has package name `com.devop360.proximaride`
+- **Fix:** Make sure `google-services.json` has package name `com.jose.proximaride`
 
 ---
 

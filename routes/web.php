@@ -91,7 +91,7 @@ Route::get('/.well-known/assetlinks.json', function () {
             "relation" => ["delegate_permission/common.handle_all_urls"],
             "target" => [
                 "namespace" => "android_app",
-                "package_name" => "com.devop360.proximaride",
+                "package_name" => "com.jose.proximaride",
                 "sha256_cert_fingerprints" => [
                     "5EAEF3972B908B855AB851965F46B1F80376FA95CB0C22AFFD956DDEC3CCE9C8"
                 ]

@@ -113,7 +113,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.devop360.proximaride"
+    namespace "com.jose.proximaride"
     compileSdk 36
     ndkVersion = "27.0.12077973"
 
@@ -133,7 +133,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.devop360.proximaride"
+        applicationId "com.jose.proximaride"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion flutter.minSdkVersion

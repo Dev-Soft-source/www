@@ -79,35 +79,23 @@
             </div>
             
             <script>
-                // For app deep linking - try to redirect back to app after 2 seconds
-                setTimeout(function() {
-                    // Try to open the app with custom URL scheme
-                    try {
-                        var deepLinkUrl = 'proximaride://email-verified?status={{ $status }}';
-                        @if($token)
-                            deepLinkUrl += '&token={{ $token }}';
-                        @endif
-                        window.location.href = deepLinkUrl;
-                    } catch (e) {
-                        // Fallback - close window if opened in popup
-                        try {
-                            window.close();
-                        } catch (closeError) {
-                            // Can't close, just display message
-                        }
+                (function () {
+                    // Single handoff only. Two attempts (immediate + delayed) caused two
+                    // "Allow this page to open …?" prompts on mobile browsers.
+                    var status = @json($status);
+                    var token = @json($token ?? null);
+                    var deepLinkUrl = 'proximaride://email-verified?status=' + encodeURIComponent(status);
+                    if (token) {
+                        deepLinkUrl += '&token=' + encodeURIComponent(token);
                     }
-                }, 2000);
-                
-                // Also try immediate redirect for better UX
-                try {
-                    var deepLinkUrl = 'proximaride://email-verified?status={{ $status }}';
-                    @if($token)
-                        deepLinkUrl += '&token={{ $token }}';
-                    @endif
-                    window.location.href = deepLinkUrl;
-                } catch (e) {
-                    // App not installed or can't handle, show web message
-                }
+                    function openAppOnce() {
+                        try {
+                            window.location.href = deepLinkUrl;
+                        } catch (e) { /* stay on page; user can return to app manually */ }
+                    }
+                    // Brief delay lets Gmail / in-app browsers finish redirect before we invoke the custom scheme once.
+                    setTimeout(openAppOnce, 400);
+                })();
             </script>
         @else
             <div class="app-info">

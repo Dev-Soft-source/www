@@ -1,4 +1,4 @@
-package com.devop360.proximaride_app
+package com.jose.proximaride_app
 
 import io.flutter.embedding.android.FlutterActivity
 
