@@ -20,7 +20,7 @@ class DriverMessageMail extends Mailable
 
     public function build()
     {
-        return $this->markdown('mails.driver_message')
+        return $this->markdown('mails/driver_message')
             ->subject("New message received from ".$this->data['driver_first_name'])
             ->with("data", $this->data);
     }
