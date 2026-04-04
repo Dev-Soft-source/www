@@ -144,7 +144,14 @@ class PaymentOptionsController extends Controller
             $data = ['card' => $card];
             return $this->successResponse($data, strip_tags($message->card_add_message));
         } catch (\Exception $e) {
-            return $this->apiErrorResponse($messages->general_error_message ?? "An error occurred while processing your card. Please try again", 200);
+            Log::error('PaymentOptionsController store card failed', ['exception' => $e->getMessage()]);
+
+            $errText = 'An error occurred while processing your card. Please try again';
+            if (isset($message) && is_object($message) && ! empty($message->general_error_message)) {
+                $errText = strip_tags($message->general_error_message);
+            }
+
+            return $this->apiErrorResponse($errText, 200);
         }
     }
 

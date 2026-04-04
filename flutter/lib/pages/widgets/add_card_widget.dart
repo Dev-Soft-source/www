@@ -1,5 +1,6 @@
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:flutter/material.dart';
+import 'package:proximaride_app/pages/add_card/card_number_input_formatter.dart';
 import 'package:proximaride_app/pages/widgets/check_box_widget.dart';
 import 'package:proximaride_app/pages/widgets/drop_down_date_widget.dart';
 import 'package:proximaride_app/pages/widgets/fields_widget.dart';
@@ -70,7 +71,13 @@ Widget addCardWidget({context, controller}){
                 fieldType: "number",
                 readonly: false,
                 fontFamily: regular,
-                fontSize: 18.0),
+                fontSize: 18.0,
+                maxLength: maxPanDigitsForCardType(controller.cardType.value),
+                inputFormatters: [
+                  CardDigitsOnlyFormatter(
+                      maxDigits:
+                          maxPanDigitsForCardType(controller.cardType.value)),
+                ]),
             // if(controller.errors.firstWhereOrNull((element) => element['title'] == "card_number") != null) ...[
             //   toolTip(tip: controller.errors.firstWhereOrNull((element) => element['title'] == "card_number"))
             // ],

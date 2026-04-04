@@ -6,6 +6,7 @@ import 'package:flutter_paypal_pay/flutter_paypal_pay.dart';
 import 'package:get/get.dart';
 import 'package:pay/pay.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
+import 'package:proximaride_app/helpers/ride_feature_ids.dart';
 import 'package:proximaride_app/consts/payment_config.dart';
 import 'package:proximaride_app/pages/book_seat/BookSeatProvider.dart';
 import 'package:proximaride_app/pages/edit_profile/EditProfileProvider.dart';
@@ -414,9 +415,8 @@ class BookSeatController extends GetxController {
               firmAgreeTerms.value = false;
               firmCancellationUnderstandChecked.value = false;
             }
-            var features = [];
-            var dataFeature = ride['feature_ids']?.toString() ?? "";
-            features.addAll(dataFeature.split('='));
+            final features = parseRideFeatureIdsFromRide(
+                Map<String, dynamic>.from(ride));
             if (features.contains('1')) {
               showPinkCheckBox.value = true;
               pinkAgreeTerms.value = false;

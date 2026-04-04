@@ -1042,6 +1042,10 @@ class RideController extends Controller
             $ride->fare = round($ride->bookings->sum('fare'), 1);
             $ride->total_amount = $ride->booking_fee + $ride->fare;
 
+            $ride->isPink = $ride->isPinkRide();
+            $ride->isExtraCare = $ride->isExtraCareRide();
+            $ride->isPinkExtraCare = $ride->isPinkExtraCareRide();
+
             $features = [];
             $rideFeatures = collect($ride->features)
                 ->when(is_string($ride->features), fn($c) => collect(explode('=', $ride->features)))
@@ -1166,58 +1170,23 @@ class RideController extends Controller
         $reviewSetting = ReviewSetting::select('id', 'leave_review_days')->first();
         $siteSetting = SiteSetting::getCached();
 
-        $rideDetailPage = null;
-        if ($request->lang_id && $request->lang_id != 0) {
-            $rideDetailPage = RideDetailPageSettingDetail::where('language_id', $request->lang_id)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $rideDetailPage = RideDetailPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        }
+        
+        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         if ($rideDetailPage) {
-            $language = null;
-
-            if ($request->lang_id && $request->lang_id != 0) {
-                $language = Language::find($request->lang_id);
-            }
-
-            if (!$language) {
-                $language = Language::where('is_default', 1)->first();
-            }
-
-            if ($language) {
-                $rideDetailPage->cancellation_policy_tooltip_url = route('firm_cancellation_policy', [
-                    'lang' => $language->abbreviation,
-                    'type' => 'firm',
-                ]);
-            }
+            $rideDetailPage->cancellation_policy_tooltip_url = route('firm_cancellation_policy', [
+                'lang' => app()->getLocale(),
+                'type' => 'firm',
+            ]);
         }
 
-        $tripsPage = null;
-        if ($request->lang_id && $request->lang_id != 0) {
-            // Retrieve the tripsPageSettingDetail associated with the selected language
-            $tripsPage = TripsPageSettingDetail::where('language_id', $request->lang_id)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $tripsPage = TripsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        }
+        $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         if ($ride) {
-            $languageForDisplay = null;
-            if ($request->lang_id && (int) $request->lang_id !== 0) {
-                $languageForDisplay = Language::find($request->lang_id);
-            }
-            if (!$languageForDisplay) {
-                $languageForDisplay = Language::where('is_default', 1)->first();
-            }
             $this->appendRideDepartureDisplayForApi(
                 $ride,
                 $rideDetailPage,
-                $languageForDisplay?->abbreviation
+                $this->selectedLanguage?->abbreviation
             );
         }
 

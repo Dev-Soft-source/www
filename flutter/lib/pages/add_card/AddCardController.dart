@@ -11,6 +11,7 @@ import 'package:proximaride_app/services/service.dart';
 
 import '../payment_options/PaymentOptionsController.dart';
 import 'AddCardProvider.dart';
+import 'card_number_input_formatter.dart';
 
 class AddCardController extends GetxController {
   final serviceController = Get.find<Service>();
@@ -44,7 +45,7 @@ class AddCardController extends GetxController {
 
   var addEditType = "";
   var totalYear = 10;
-  var startYear = 2025;
+  var startYear = 0;
   var editCardId = 0;
 
   String pageTypeFrom = "";
@@ -61,6 +62,8 @@ class AddCardController extends GetxController {
       Get.put(PaymentOptionController());
     }
     paymentOptionController = Get.find<PaymentOptionController>();
+
+    startYear = DateTime.now().year;
 
     isLoading(true);
     await getLabelTextDetail();
@@ -94,7 +97,7 @@ class AddCardController extends GetxController {
             validateField(
               'Card number',
               'card_number',
-              cardNumberController.text,
+              cardNumberDigits,
               type: 'numeric',
             );
           } else if (i == 3) {
@@ -156,7 +159,19 @@ class AddCardController extends GetxController {
     cityController.dispose();
     provinceController.dispose();
     countryController.dispose();
-    postalCodeController;
+    postalCodeController.dispose();
+  }
+
+  /// PAN digits only (spaces / non-digits removed) for Stripe and validation.
+  String get cardNumberDigits =>
+      cardNumberController.text.replaceAll(RegExp(r'\D'), '');
+
+  /// Max digits allowed in the number field for the selected card type.
+  int get cardNumberMaxDigits => maxPanDigitsForCardType(cardType.value);
+
+  /// Trims the field if the user changes card type to one with a shorter max length.
+  void clampCardNumberToMaxLength() {
+    clampCardNumberField(cardNumberController, cardType.value);
   }
 
   Future<void> getLabelTextDetail() async {
@@ -335,7 +350,7 @@ class AddCardController extends GetxController {
       var tokenId = "";
 
       if (cardNameController.text.isEmpty ||
-          cardNumberController.text.isEmpty ||
+          cardNumberDigits.isEmpty ||
           cardType.value == "" ||
           month.value == "" ||
           year.value == "" ||
@@ -361,7 +376,7 @@ class AddCardController extends GetxController {
             scrollField = true;
           }
         }
-        if (cardNumberController.text == "") {
+        if (cardNumberDigits.isEmpty) {
           var message = validationMessageDetail['required'];
           message = message.replaceAll(
             ":Attribute",
@@ -513,7 +528,7 @@ class AddCardController extends GetxController {
       }
       errors.clear();
 
-      if (cardType.value == "Visa" && cardNumberController.text.length != 16) {
+      if (cardType.value == "Visa" && cardNumberDigits.length != 16) {
         var err = {
           'title': "card_number",
           'eList': ['Please enter a valid card number'],
@@ -526,7 +541,7 @@ class AddCardController extends GetxController {
         return;
       }
       if (cardType.value == "MasterCard" &&
-          cardNumberController.text.length != 16) {
+          cardNumberDigits.length != 16) {
         var err = {
           'title': "card_number",
           'eList': ['Please enter a valid card number'],
@@ -538,7 +553,7 @@ class AddCardController extends GetxController {
         }
         return;
       }
-      if (cardType.value == "AmEx" && cardNumberController.text.length != 15) {
+      if (cardType.value == "AmEx" && cardNumberDigits.length != 15) {
         var err = {
           'title': "card_number",
           'eList': ['Please enter a valid card number'],
@@ -550,7 +565,7 @@ class AddCardController extends GetxController {
         }
         return;
       }
-      if (cardType.value == "Dis" && cardNumberController.text.length != 16) {
+      if (cardType.value == "Dis" && cardNumberDigits.length != 16) {
         var err = {
           'title': "card_number",
           'eList': ['Please enter a valid card number'],
@@ -563,8 +578,8 @@ class AddCardController extends GetxController {
         return;
       }
       if (cardType.value == "CUP" &&
-          !(cardNumberController.text.length == 16 ||
-              cardNumberController.text.length == 19)) {
+          !(cardNumberDigits.length == 16 ||
+              cardNumberDigits.length == 19)) {
         var err = {
           'title': "card_number",
           'eList': ['Please enter a valid card number'],
@@ -577,8 +592,8 @@ class AddCardController extends GetxController {
         return;
       }
       if (cardType.value == "JC" &&
-          !(cardNumberController.text.length == 16 ||
-              cardNumberController.text.length == 19)) {
+          !(cardNumberDigits.length == 16 ||
+              cardNumberDigits.length == 19)) {
         var err = {
           'title': "card_number",
           'eList': ['Please enter a valid card number'],
@@ -591,8 +606,8 @@ class AddCardController extends GetxController {
         return;
       }
       if (cardType.value == "DiC" &&
-          !(cardNumberController.text.length == 14 ||
-              cardNumberController.text.length == 16)) {
+          !(cardNumberDigits.length == 14 ||
+              cardNumberDigits.length == 16)) {
         var err = {
           'title': "card_number",
           'eList': ['Please enter a valid card number'],
@@ -612,8 +627,8 @@ class AddCardController extends GetxController {
       );
       await Stripe.instance.dangerouslyUpdateCardDetails(
         CardDetails(
-          number: cardNumberController.text,
-          cvc: cvvCodeController.text,
+          number: cardNumberDigits,
+          cvc: cvvCodeController.text.trim(),
           expirationMonth: int.parse(month.value.toString()),
           expirationYear: int.parse(year.value.toString()),
         ),
@@ -628,12 +643,17 @@ class AddCardController extends GetxController {
         isOverlayLoading(false);
         serviceController.showDialogue(e.error.message?.replaceAll('.', ' '),
             type: "error");
+      } catch (e) {
+        isOverlayLoading(false);
+        serviceController.showDialogue(
+            e.toString().replaceAll(RegExp(r'^Exception:\s*'), ''),
+            type: "error");
       }
 
-      // if (tokenId == "") {
-      //   serviceController.showDialogue('Please try later');
-      //   return;
-      // }
+      if (tokenId.isEmpty) {
+        isOverlayLoading(false);
+        return;
+      }
 
       var address =
           "${streetController.text},${houseApartmentController.text},${cityController.text},${provinceController.text},${countryController.text},${postalCodeController.text}";
@@ -646,7 +666,7 @@ class AddCardController extends GetxController {
           .addCard(
         serviceController.token,
         cardNameController.text,
-        cardNumberController.text,
+        cardNumberDigits,
         cardType.value.toString(),
         month.value.toString(),
         year.value.toString(),

@@ -11,6 +11,7 @@ import '../widgets/drop_down_date_widget.dart';
 import '../widgets/fields_widget.dart';
 import '../widgets/tool_tip.dart';
 import 'AddCardController.dart';
+import 'card_number_input_formatter.dart';
 
 class AddCard extends StatelessWidget {
   const AddCard({super.key});
@@ -20,7 +21,6 @@ class AddCard extends StatelessWidget {
     final AddCardController controller = Get.isRegistered<AddCardController>()
         ? Get.find<AddCardController>()
         : Get.put(AddCardController());
-    controller.getType();
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -146,13 +146,14 @@ class AddCard extends StatelessWidget {
                         5.heightBox,
                         fieldsWidget(
                           textController: controller.cardNumberController,
-                          fieldType: "phone",
+                          fieldType: "number",
                           readonly: false,
                           fontFamily: regular,
                           fontSize: 18.0,
-                          maxLength: 19,
+                          maxLength: controller.cardNumberMaxDigits,
                           inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
+                            CardDigitsOnlyFormatter(
+                                maxDigits: controller.cardNumberMaxDigits),
                           ],
                           onChanged: (value) {
                             if (controller.errors.firstWhereOrNull((element) =>
@@ -289,7 +290,7 @@ class AddCard extends StatelessWidget {
                         fieldsWidget(
                           maxLength: 4,
                           textController: controller.cvvCodeController,
-                          fieldType: "phone",
+                          fieldType: "number",
                           readonly: false,
                           fontFamily: regular,
                           fontSize: 18.0,

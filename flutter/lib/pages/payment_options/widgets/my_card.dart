@@ -3,6 +3,24 @@ import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/pages/widgets/button_Widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
+/// 16-digit style mask (4×4 groups). Only [last4] is stored/shown (PCI); the rest is placeholder.
+String maskedCardNumberLine(String last4) {
+  final d = last4.trim();
+  if (d.isEmpty) {
+    return '•••• •••• •••• ••••';
+  }
+  return '•••• •••• •••• $d';
+}
+
+String formatCardExpiryDisplay(dynamic monthRaw, dynamic yearRaw) {
+  final mStr = monthRaw?.toString().trim() ?? '';
+  final yStr = yearRaw?.toString().trim() ?? '';
+  if (mStr.isEmpty || yStr.isEmpty) return '';
+  final m = int.tryParse(mStr);
+  final monthPart = m == null ? mStr.padLeft(2, '0') : m.toString().padLeft(2, '0');
+  return '$monthPart / $yStr';
+}
+
 Widget myCard(
     {cardDetail,
     context,
@@ -12,7 +30,7 @@ Widget myCard(
     onSetPrimary,
     onDelete}) {
   final String cardType = cardDetail['card_type']?.toString() ?? "";
-  final String cardNumber = cardDetail['card_number']?.toString() ?? "";
+  final String cardLast4 = cardDetail['card_number']?.toString() ?? "";
   final String expMonth = cardDetail['exp_month']?.toString() ?? "";
   final String expYear = cardDetail['exp_year']?.toString() ?? "";
 
@@ -86,9 +104,7 @@ Widget myCard(
               Expanded(
                 flex: 10,
                 child: txt20Size(
-                  title: cardNumber.isEmpty
-                      ? "XXXX XXXX XXXX"
-                      : "XXXX XXXX XXXX $cardNumber",
+                  title: maskedCardNumberLine(cardLast4),
                   textColor: textColor,
                   fontFamily: bold,
                   context: context,
@@ -113,11 +129,7 @@ Widget myCard(
               Expanded(
                 flex: 10,
                 child: txt20Size(
-                  title: expMonth.isEmpty || expYear.isEmpty
-                      ? ""
-                      : expMonth.length == 1
-                          ? "0$expMonth-$expYear"
-                          : "$expMonth-$expYear",
+                  title: formatCardExpiryDisplay(expMonth, expYear),
                   textColor: textColor,
                   fontFamily: bold,
                   context: context,

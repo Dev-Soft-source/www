@@ -1,5 +1,6 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:proximaride_app/pages/add_card/card_number_input_formatter.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import '../../consts/constFileLink.dart';
 
@@ -429,6 +430,7 @@ Widget dropdownCardTypeWidget(
     ],
     onChanged: (data) {
       controller.cardType.value = data!;
+      clampCardNumberField(controller.cardNumberController, controller.cardType.value);
       controller.errors.removeWhere((error) => error['title'] == "card_type");
     },
     dropdownStyleData: DropdownStyleData(

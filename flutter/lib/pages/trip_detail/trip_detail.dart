@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/helpers/ride_departure_display.dart';
+import 'package:proximaride_app/helpers/ride_feature_ids.dart';
 import 'package:proximaride_app/pages/trip_detail/TripDetailController.dart';
 import 'package:proximaride_app/pages/trip_detail/widget/booking_type_widget.dart';
 import 'package:proximaride_app/pages/trip_detail/widget/cancelation_policy_widget.dart';
@@ -55,6 +56,27 @@ class TripDetailPage extends StatelessWidget {
     }
 
     return "\$${parsed.toStringAsFixed(2)}";
+  }
+
+  /// Intro line: pink / extra-care variants, else API labels for ride vs trip.
+  String _tripDetailIntroHeading(
+      TripDetailController controller, Map<String, dynamic> ride) {
+    final pink = ride['isPink'] == true;
+    final extraCare = ride['isExtraCare'] == true;
+
+    if (pink && extraCare) {
+      return "This is a Pink and an Extra-Care Ride";
+    }
+    if (pink) {
+      return "This is a Pink Ride";
+    }
+    if (extraCare) {
+      return "This is an Extra-Care Ride";
+    }
+
+    return controller.type == "ride"
+        ? "${controller.labelTextDetail['my_ride_page_heading_label'] ?? "This is your ride page. You can review and edit your ride details here."}"
+        : "${controller.labelTextDetail['my_trip_page_heading_label'] ?? "This is your trip page. You can review and edit your trip details here."}";
   }
 
   @override
@@ -111,7 +133,7 @@ class TripDetailPage extends StatelessWidget {
                   dateTime.add(Duration(hours: cancelHours));
               DateTime currentDateTime = DateTime.now();
 
-              logger.info('controller.ride ${controller.ride['vehicle']}');
+              logger.info('controller.ride ${controller.ride['features']}');
 
               return Stack(
                 children: [
@@ -126,9 +148,10 @@ class TripDetailPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             txt20Size(
-                                title: controller.type == "ride"
-                                    ? "${controller.labelTextDetail['my_ride_page_heading_label'] ?? "This is your ride page. You can review and edit your ride details here."}"
-                                    : "${controller.labelTextDetail['my_trip_page_heading_label'] ?? "This is your trip page. You can review and edit your trip details here."}",
+                                title: _tripDetailIntroHeading(
+                                    controller,
+                                    Map<String, dynamic>.from(
+                                        controller.ride)),
                                 context: context,
                                 fontFamily: bold),
                             10.heightBox,

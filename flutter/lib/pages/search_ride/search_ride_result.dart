@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
+import 'package:proximaride_app/helpers/ride_feature_ids.dart';
 import 'package:proximaride_app/pages/search_ride/SearchRideController.dart';
 import 'package:proximaride_app/pages/search_ride/widget/filter_side_widget.dart';
 import 'package:proximaride_app/pages/widgets/button_Widget.dart';
@@ -198,13 +199,8 @@ class SearchRideResultPage extends StatelessWidget {
                                   bookings is List && bookings.isNotEmpty;
 
                               final statusBorderColors = <Color>[];
-                              final features = <String>[];
-                              final dataFeature =
-                                  ride['feature_ids']?.toString().trim();
-                              if (dataFeature != null &&
-                                  dataFeature.isNotEmpty) {
-                                features.addAll(dataFeature.split('='));
-                              }
+                              final features = parseRideFeatureIdsFromRide(
+                                  Map<String, dynamic>.from(ride));
                               if (features.contains('1')) {
                                 // pink ride
                                 statusBorderColors.add(Color(0XFFE91E63));
