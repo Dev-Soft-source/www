@@ -26,10 +26,22 @@ class SearchRidePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
-        title: Obx(() => secondAppBarWidget(
+        title: Obx(() {
+          String title = "";
+
+          if (controller.labelTextDetail['main_heading'] != null &&
+              controller.labelTextDetail['main_heading']
+                  .toString()
+                  .trim()
+                  .isNotEmpty) {
+            title = controller.labelTextDetail['main_heading'].toString();
+          }
+
+          return secondAppBarWidget(
+            title: title,
             context: context,
-            title:
-                "${controller.labelTextDetail['main_heading'] ?? "Search ride"}")),
+          );
+        }),
         leading: IconButton(
           onPressed: controller.handleBackNavigation,
           icon: const Icon(Icons.arrow_back, color: Colors.white),

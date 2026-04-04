@@ -185,6 +185,7 @@ const paymentOptionsAddCard = "payment-option/store";
 const paymentOptionsEditCard = "update-card";
 const setAsPrimaryCard = "payment-option/set-primary";
 const searchRideDetail = "search-ride";
+const searchRideBootstrap = "search-ride-bootstrap";
 const checkIsAlreadyBooked = "check-booking";
 const findRideFeatureOptions = "find-ride-features-options";
 const rideDetail = "ride-detail";

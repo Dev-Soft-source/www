@@ -34,6 +34,7 @@ use App\Services\FCMService;
 use App\Services\RidePostService;
 use App\Traits\StatusResponser;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
@@ -55,9 +56,11 @@ class RideController extends Controller
         return app(WebRideController::class);
     }
 
-    public function SearchRide(Request $request)
+    /**
+     * @return array<string, mixed>|RedirectResponse
+     */
+    protected function buildSearchRideApiData(Request $request)
     {
-
         $per_page = 6;
         $user = Auth::guard('sanctum')->user();
         $excludedDriverIds = $user ? $this->getTemporarilyBlockedDriverIds($user->id) : [];
@@ -156,14 +159,16 @@ class RideController extends Controller
             $ride = $this->getRideDetail($ride, $originLabel, $destinationLabel, $originCityId, $destinationCityId, $hasLocationSearch);
         }
 
-        $recentSearches = RecentSearch::query()
-            ->where('user_id', $user->id)
-            ->where('from', '!=', '')
-            ->where('to', '!=', '')
-            ->orderByDesc('updated_at')
-            ->limit(3)
-            ->get()
-            ->values();
+        $recentSearches = $user
+            ? RecentSearch::query()
+                ->where('user_id', $user->id)
+                ->where('from', '!=', '')
+                ->where('to', '!=', '')
+                ->orderByDesc('updated_at')
+                ->limit(3)
+                ->get()
+                ->values()
+            : collect();
 
         $rideFeatureOptionGroups = $this->getRideFeatureOptionGroups($this->selectedLanguage?->id, $this->defaultLang?->id);
         $bookingMethodAssets = $this->buildRideFeatureAssetMaps($rideFeatureOptionGroups, 'booking_method');
@@ -248,14 +253,46 @@ class RideController extends Controller
         }
 
         $firm_cancellation_discount = SiteSetting::value('frim_discount');
-        $data = [
+
+        return [
             'rides' => $rides,
             'recentSearches' => $recentSearches,
             'firm_cancellation_discount' => $firm_cancellation_discount,
         ];
-        return $this->successResponse($data, 'Success');
     }
 
+    public function SearchRide(Request $request)
+    {
+        $result = $this->buildSearchRideApiData($request);
+        if ($result instanceof RedirectResponse) {
+            return $result;
+        }
+
+        return $this->successResponse($result, 'Success');
+    }
+
+    /**
+     * Single payload for search ride screen: find-ride labels + first search page + filter option lists.
+     */
+    public function searchRideBootstrap(Request $request)
+    {
+        $findRidePayload = $this->buildFindRidePageApiPayload();
+        $searchResult = $this->buildSearchRideApiData($request);
+        if ($searchResult instanceof RedirectResponse) {
+            return $this->apiErrorResponse(
+                'Your account has been suspended by the admin',
+                403
+            );
+        }
+
+        return $this->successResponse(array_merge(
+            $findRidePayload,
+            [
+                'searchRide' => $searchResult,
+                'searchInit' => $this->buildSearchRideInitPreferencePayload(),
+            ]
+        ), 'Success');
+    }
 
     public function SearchRide1(Request $request)
     {
@@ -1697,9 +1734,11 @@ class RideController extends Controller
         return $this->successResponse($data, 'Post ride page get successfully');
     }
 
-    public function findRideIndex(Request $request)
+    /**
+     * @return array{findRidePage: mixed, vehicleTypeOptions: \Illuminate\Support\Collection, messages: mixed, validationMessages: array<string, string>}
+     */
+    protected function buildFindRidePageApiPayload(): array
     {
-
         $messages = $this->getApiSuccessMessageFields([
             'female_user_message',
             'star5_passenger_message',
@@ -1711,7 +1750,6 @@ class RideController extends Controller
 
         $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-
         $validationMessages = [
             'required' => trans('validation.required'),
         ];
@@ -1721,13 +1759,20 @@ class RideController extends Controller
             $this->defaultLang?->id
         )->get('vehicle_type', collect())->values();
 
-        $data = [
+        return [
             'findRidePage' => $findRidePage,
             'vehicleTypeOptions' => $vehicleTypeOptions,
             'messages' => $messages,
-            'validationMessages' => $validationMessages
+            'validationMessages' => $validationMessages,
         ];
-        return $this->successResponse($data, 'Search ride page get successfully');
+    }
+
+    public function findRideIndex(Request $request)
+    {
+        return $this->successResponse(
+            $this->buildFindRidePageApiPayload(),
+            'Search ride page get successfully'
+        );
     }
 
     public function segmentDistanceEstimates(Request $request, $lang = null)

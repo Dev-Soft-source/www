@@ -243,7 +243,7 @@
 
                                     @if ($booking->passenger)
                                         <div class="flex items-center justify-between w-full no-scrollbar overflow-x-auto">
-                                            <div class="flex items-center space-x-2">
+                                            <div class="flex items-center space-x-2 py-2">
                                                 <div>
                                                     @include('partials.passenger_avatar', [
                                                         'user' => $booking->passenger,
@@ -264,7 +264,6 @@
                                                             |</p>
                                                         <p
                                                             class="text-gray-700 leading-4 md:mt-2 text-base whitespace-nowrap">
-                                                            {{ $rideDetailPage->web_gender_label ?? 'Gender' }}:
                                                             <span>{{ ucfirst($booking->passenger->gender) }}</span>
                                                         </p>
                                                         <p
@@ -292,7 +291,6 @@
                                                         {{ $rideDetailPage->enter_code_label ?? 'Enter payment code' }}
                                                     </button>
                                                 @endif
-
                                             </div>
                                         </div>
                                     @endif
@@ -629,13 +627,7 @@
                                         class="mt-2 p-2 border border-gray-300 rounded w-full"
                                         value="{{ old('code') }}" />
                                     @error('code')
-                                        <div class="relative tooltip -bottom-4 group-hover:flex">
-                                            <div role="tooltip"
-                                                class="relative tooltiptext -top-2 z-10 leading-none transition duration-150 ease-in-out shadow-lg p-2 flex bg-red-500 text-gray-600 w-full md:w-1/2 rounded">
-                                                <p class="text-white leading-none text-sm lg:text-base">{{ $message }}
-                                                </p>
-                                            </div>
-                                        </div>
+                                        <div class="tooltip-error shadow-lg mt-1">{{ $message }}</div>
                                     @enderror
                                 </div>
                             </div>
