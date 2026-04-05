@@ -318,11 +318,11 @@
                                     </div>
                                 </div>
 
-                                <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
                                     <div id="credit-card-div"
-                                        class="hidden mt-4 p-4 bg-white border border-b-4 border-gray-400 rounded">
+                                        class="hidden mb-4 p-4 bg-white border border-b-4 border-gray-400 rounded">
                                         <div>
-                                            <label
+                                            <label style="color: #30313d;font-size: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;"
                                                 for="name_on_card">{{ $paymentSettingDetail->name_on_card_label ?? 'Cardholder’s name' }}</label>
                                             <input type="text" id="name_on_card" name="name_on_card"
                                                 value="{{ old('name_on_card') }}"
@@ -333,19 +333,19 @@
                                             @enderror
 
                                         </div>
-                                        <div class="mt-4">
-                                            <label class="font-normal text-gray-700">
-                                                {{ $paymentSettingDetail->card_number_label ?? 'Card details' }}
-                                            </label>
-                                            <div id="card-element" name="card_element"
-                                                class="block mt-1 border p-2.5 w-full rounded text-base md:text-lg border-gray-300">
+                                        <div id="coffee-wall-stripe-loading" class="text-center py-8 hidden">
+                                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600">
                                             </div>
-
+                                            <p class="mt-2 text-sm text-gray-600">Loading payment form...</p>
+                                        </div>
+                                        <div id="coffee-wall-payment-element-wrap" class="hidden mt-4">
+                                            <div id="coffee-wall-payment-element" class="w-full">
+                                            </div>
+                                            <div id="coffee-wall-payment-element-errors" class="text-red-500 text-sm mt-2">
+                                            </div>
                                             @error('card_element')
                                                 <div class="tooltip-error shadow-lg">{{ $message }}</div>
                                             @enderror
- 
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -525,6 +525,10 @@
 label p {
     font-family: FuturaMdCnBT, cursive;
 }
+
+#coffee-wall-payment-element .StripeElement {
+    min-height: 1.5rem;
+}
 </style>
 @endsection
 @section('script')
@@ -571,8 +575,13 @@ label p {
             const notifyCheckbox = document.getElementById('notify_coffee_used');
             const nameInput = document.getElementById('name');
             const emailInput = document.getElementById('email');
-            let stripe = null;
-            let cardElement = null;
+            const stripe = Stripe(@json(config('stripe.key') ?: $stripeKey));
+            let coffeeWallStripeElements = null;
+            let coffeeWallPaymentElement = null;
+            let coffeeWallSetupIntentClientSecret = null;
+            let coffeeWallStripeInitialized = false;
+            let coffeeWallSubmittingAfterStripe = false;
+            const coffeeWallSetupIntentUrl = @json(route('coffee_on_wall.setup_intent', ['lang' => $selectedLanguage->abbreviation ?? 'en']));
 
             function toggleClasses(element, active, activeClasses, inactiveClasses) {
                 if (!element) {
@@ -721,21 +730,206 @@ label p {
                 }
             }
 
-            function ensureStripe() {
-                if (cardElement || !creditCardDiv) {
+            function resetCoffeeWallStripePaymentElement() {
+                if (coffeeWallPaymentElement) {
+                    try {
+                        coffeeWallPaymentElement.unmount();
+                    } catch (e) {
+                        /* already unmounted */
+                    }
+                    coffeeWallPaymentElement = null;
+                }
+                coffeeWallStripeElements = null;
+                coffeeWallSetupIntentClientSecret = null;
+                coffeeWallStripeInitialized = false;
+                window.coffeeWallStripeFormShown = false;
+            }
+
+            function showCoffeeWallCardStripeSection() {
+                const paymentFormFields = document.getElementById('coffee-wall-payment-element-wrap');
+                const loadingEl = document.getElementById('coffee-wall-stripe-loading');
+                if (paymentFormFields) {
+                    paymentFormFields.classList.add('hidden');
+                }
+                if (loadingEl) {
+                    loadingEl.classList.remove('hidden');
+                }
+                window.coffeeWallStripeFormShown = false;
+                setTimeout(function() {
+                    initializeCoffeeWallStripePaymentElement();
+                }, 150);
+            }
+
+            async function initializeCoffeeWallStripePaymentElement() {
+                const loadingEl = document.getElementById('coffee-wall-stripe-loading');
+                const fieldWrap = document.getElementById('coffee-wall-payment-element-wrap');
+                const errEl = document.getElementById('coffee-wall-payment-element-errors');
+
+                if (coffeeWallStripeInitialized && coffeeWallPaymentElement) {
+                    if (loadingEl) {
+                        loadingEl.classList.add('hidden');
+                    }
+                    if (fieldWrap) {
+                        fieldWrap.classList.remove('hidden');
+                    }
+                    try {
+                        if (!document.querySelector('#coffee-wall-payment-element > div')) {
+                            coffeeWallPaymentElement.mount('#coffee-wall-payment-element');
+                        }
+                    } catch (e) {
+                        /* mount noop */
+                    }
                     return;
                 }
 
-                stripe = Stripe('{{ $stripeKey }}');
-                const elements = stripe.elements();
-                cardElement = elements.create('card', {
-                    style: {
-                        base: {
-                            fontStyle: 'italic'
-                        }
+                try {
+                    const response = await fetch(coffeeWallSetupIntentUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        credentials: 'same-origin',
+                    });
+                    const raw = await response.text();
+                    let data = {};
+                    try {
+                        data = raw ? JSON.parse(raw) : {};
+                    } catch (parseErr) {
+                        throw new Error(response.status === 419 ?
+                            'Session expired. Please refresh the page and try again.' :
+                            'Invalid response from server.');
                     }
-                });
-                cardElement.mount('#card-element');
+                    if (!response.ok || !data.clientSecret) {
+                        throw new Error(data.error || data.message || 'Failed to create setup intent');
+                    }
+                    coffeeWallSetupIntentClientSecret = data.clientSecret;
+
+                    coffeeWallStripeElements = stripe.elements({
+                        clientSecret: coffeeWallSetupIntentClientSecret,
+                        locale: @json($stripeElementsLocale ?? 'en'),
+                        appearance: {
+                            theme: 'stripe',
+                            variables: {
+                                colorPrimary: '#0570de',
+                            },
+                        },
+                    });
+
+                    coffeeWallPaymentElement = coffeeWallStripeElements.create('payment', {
+                        defaultValues: {
+                            billingDetails: {
+                                address: {
+                                    country: @json(config('stripe.account_country')),
+                                },
+                            },
+                        },
+                        wallets: {
+                            applePay: 'auto',
+                            googlePay: 'auto',
+                            link: 'never',
+                        },
+                        terms: {
+                            card: 'never',
+                        },
+                        layout: 'tabs',
+                    });
+
+                    const mountTarget = document.getElementById('coffee-wall-payment-element');
+                    if (!mountTarget) {
+                        throw new Error('Payment element container not found');
+                    }
+
+                    if (fieldWrap) {
+                        fieldWrap.classList.remove('hidden');
+                        fieldWrap.style.visibility = '';
+                        fieldWrap.style.opacity = '';
+                        fieldWrap.style.display = '';
+                    }
+                    mountTarget.style.display = 'block';
+                    // mountTarget.style.minHeight = '200px';
+                    mountTarget.style.width = '100%';
+
+                    setTimeout(function() {
+                        try {
+                            coffeeWallPaymentElement.mount('#coffee-wall-payment-element');
+                        } catch (mountErr) {
+                            if (errEl) {
+                                errEl.textContent = 'Error loading payment form. Please try again.';
+                            }
+                            if (loadingEl) {
+                                loadingEl.classList.add('hidden');
+                            }
+                        }
+                    }, 50);
+
+                    const showCoffeeWallPaymentFields = function() {
+                        if (window.coffeeWallStripeFormShown) {
+                            return;
+                        }
+                        window.coffeeWallStripeFormShown = true;
+                        const curLoad = document.getElementById('coffee-wall-stripe-loading');
+                        const curWrap = document.getElementById('coffee-wall-payment-element-wrap');
+                        if (curLoad) {
+                            curLoad.classList.add('hidden');
+                        }
+                        if (curWrap) {
+                            curWrap.classList.remove('hidden');
+                            curWrap.style.visibility = '';
+                            curWrap.style.opacity = '';
+                            curWrap.style.display = '';
+                        }
+                    };
+
+                    const fallbackTimeout = setTimeout(function() {
+                        showCoffeeWallPaymentFields();
+                    }, 2000);
+
+                    coffeeWallPaymentElement.on('ready', function() {
+                        clearTimeout(fallbackTimeout);
+                        showCoffeeWallPaymentFields();
+                    });
+
+                    coffeeWallPaymentElement.on('loaderror', function() {
+                        clearTimeout(fallbackTimeout);
+                        showCoffeeWallPaymentFields();
+                    });
+
+                    setTimeout(function() {
+                        if (document.querySelector('#coffee-wall-payment-element > div')) {
+                            clearTimeout(fallbackTimeout);
+                            showCoffeeWallPaymentFields();
+                        }
+                    }, 100);
+
+                    coffeeWallPaymentElement.on('change', function(event) {
+                        const displayError = document.getElementById('coffee-wall-payment-element-errors');
+                        if (!displayError) {
+                            return;
+                        }
+                        if (event.error) {
+                            displayError.textContent = event.error.message;
+                        } else {
+                            displayError.textContent = '';
+                        }
+                    });
+
+                    coffeeWallStripeInitialized = true;
+                } catch (error) {
+                    console.error('Coffee wall Payment Element:', error);
+                    if (loadingEl) {
+                        loadingEl.classList.add('hidden');
+                    }
+                    if (fieldWrap) {
+                        fieldWrap.classList.remove('hidden');
+                    }
+                    if (errEl) {
+                        errEl.textContent =
+                            'Failed to initialize payment form. Please refresh and try again.';
+                    }
+                }
             }
 
             function togglePaymentSection() {
@@ -747,13 +941,15 @@ label p {
                 creditCardDiv.classList.toggle('hidden', !useStripe);
 
                 if (useStripe) {
-                    ensureStripe();
+                    resetCoffeeWallStripePaymentElement();
+                    showCoffeeWallCardStripeSection();
                     return;
                 }
 
-                const cardErrors = document.getElementById('card-errors');
-                if (cardErrors) {
-                    cardErrors.classList.add('hidden');
+                resetCoffeeWallStripePaymentElement();
+                const payErr = document.getElementById('coffee-wall-payment-element-errors');
+                if (payErr) {
+                    payErr.textContent = '';
                 }
             }
 
@@ -827,88 +1023,123 @@ label p {
 
 
 
-            // On submit, create Stripe token when paying by card
             if (form) {
-                form.addEventListener('submit', function(event) {
+                form.addEventListener('submit', async function(event) {
                     const selectedPaymentMethod = document.querySelector(
                         'input[name="payment_method"]:checked')?.value;
 
-                    // For PayPal (or no method), let the form submit normally
                     if (selectedPaymentMethod !== 'stripe') {
                         return;
                     }
 
-                    event.preventDefault();
-                    ensureStripe();
-
-                    const nameOnCardInput = document.getElementById('name_on_card');
-                    const cardContainer = creditCardDiv || document;
-
-                    // Clear previous tooltip errors inside the card section
-                    cardContainer.querySelectorAll('.tooltip-error').forEach(function(el) {
-                        el.classList.add('hidden');
-                    });
-
-                    // Validate cardholder name before calling Stripe
-                    if (!nameOnCardInput || nameOnCardInput.value.trim() === '') {
-                        let nameErrorTooltip = nameOnCardInput.parentElement.querySelector('.tooltip-error');
-                        if (!nameErrorTooltip) {
-                            nameErrorTooltip = document.createElement('div');
-                            nameErrorTooltip.className = 'tooltip-error shadow-lg mt-2';
-                            const p = document.createElement('p');
-                            p.className = 'text-white leading-none text-sm lg:text-base';
-                            nameErrorTooltip.appendChild(p);
-                            nameOnCardInput.parentElement.appendChild(nameErrorTooltip);
-                        }
-                        nameErrorTooltip.classList.remove('hidden');
-                        nameErrorTooltip.textContent = @json(__('validation.custom.name_on_card.required_if'));
-                        nameErrorTooltip.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'center'
-                        });
+                    if (coffeeWallSubmittingAfterStripe) {
                         return;
                     }
 
-                    stripe.createToken(cardElement, {
-                        name: nameOnCardInput.value
-                    }).then(function(result) {
-                        if (result.error) {
-                            // Show or create tooltip under card element
-                            const cardElementWrapper = document.getElementById('card-element')
-                                ?.parentElement || cardContainer;
-                            let cardErrorTooltip = cardElementWrapper.querySelector('.tooltip-error');
-                            if (!cardErrorTooltip) {
-                                cardErrorTooltip = document.createElement('div');
-                                cardErrorTooltip.className = 'tooltip-error shadow-lg mt-2';
+                    event.preventDefault();
+
+                    const nameOnCardInput = document.getElementById('name_on_card');
+                    const cardContainer = creditCardDiv || document;
+                    const payErr = document.getElementById('coffee-wall-payment-element-errors');
+
+                    cardContainer.querySelectorAll('.tooltip-error').forEach(function(el) {
+                        el.classList.add('hidden');
+                    });
+                    if (payErr) {
+                        payErr.textContent = '';
+                    }
+
+                    if (!nameOnCardInput || nameOnCardInput.value.trim() === '') {
+                        const nameParent = nameOnCardInput?.parentElement;
+                        if (nameParent) {
+                            let nameErrorTooltip = nameParent.querySelector('.tooltip-error');
+                            if (!nameErrorTooltip) {
+                                nameErrorTooltip = document.createElement('div');
+                                nameErrorTooltip.className = 'tooltip-error shadow-lg mt-2';
                                 const p = document.createElement('p');
                                 p.className = 'text-white leading-none text-sm lg:text-base';
-                                cardErrorTooltip.appendChild(p);
-                                cardElementWrapper.appendChild(cardErrorTooltip);
+                                nameErrorTooltip.appendChild(p);
+                                nameParent.appendChild(nameErrorTooltip);
                             }
-                            cardErrorTooltip.classList.remove('hidden');
-                            cardErrorTooltip.textContent = result.error.message;
-                            cardErrorTooltip.scrollIntoView({
+                            nameErrorTooltip.classList.remove('hidden');
+                            nameErrorTooltip.textContent = @json(__('validation.custom.name_on_card.required_if'));
+                            nameErrorTooltip.scrollIntoView({
                                 behavior: 'smooth',
                                 block: 'center'
                             });
-                            return;
                         }
+                        return;
+                    }
 
-                        // Inject stripeToken and a dummy card_element value for backend validation
-                        const tokenInput = document.createElement('input');
-                        tokenInput.type = 'hidden';
-                        tokenInput.name = 'stripeToken';
-                        tokenInput.value = result.token.id;
-                        form.appendChild(tokenInput);
+                    if (!coffeeWallStripeElements || !coffeeWallSetupIntentClientSecret) {
+                        if (payErr) {
+                            payErr.textContent = 'Payment form is still loading. Please wait a moment.';
+                        }
+                        return;
+                    }
 
-                        const cardElementInput = document.createElement('input');
-                        cardElementInput.type = 'hidden';
-                        cardElementInput.name = 'card_element';
-                        cardElementInput.value = 'card_provided';
-                        form.appendChild(cardElementInput);
+                    const {
+                        error: submitError
+                    } = await coffeeWallStripeElements.submit();
+                    if (submitError) {
+                        if (payErr) {
+                            payErr.textContent = submitError.message;
+                        }
+                        return;
+                    }
 
-                        form.submit();
+                    const {
+                        setupIntent,
+                        error
+                    } = await stripe.confirmSetup({
+                        elements: coffeeWallStripeElements,
+                        clientSecret: coffeeWallSetupIntentClientSecret,
+                        confirmParams: {
+                            return_url: window.location.href,
+                        },
+                        redirect: 'if_required',
                     });
+
+                    if (error) {
+                        if (payErr) {
+                            payErr.textContent = error.message;
+                        }
+                        return;
+                    }
+
+                    const paymentMethodId = setupIntent && setupIntent.payment_method ?
+                        (typeof setupIntent.payment_method === 'string' ?
+                            setupIntent.payment_method :
+                            setupIntent.payment_method.id) :
+                        null;
+                    if (!paymentMethodId) {
+                        if (payErr) {
+                            payErr.textContent = 'Could not confirm card. Please try again.';
+                        }
+                        return;
+                    }
+
+                    form.querySelectorAll('input[name="stripeToken"]').forEach(function(el) {
+                        el.remove();
+                    });
+                    form.querySelectorAll('input[name="card_element"]').forEach(function(el) {
+                        el.remove();
+                    });
+
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = 'stripeToken';
+                    tokenInput.value = paymentMethodId;
+                    form.appendChild(tokenInput);
+
+                    const cardElementInput = document.createElement('input');
+                    cardElementInput.type = 'hidden';
+                    cardElementInput.name = 'card_element';
+                    cardElementInput.value = 'card_provided';
+                    form.appendChild(cardElementInput);
+
+                    coffeeWallSubmittingAfterStripe = true;
+                    form.submit();
                 });
             }
 

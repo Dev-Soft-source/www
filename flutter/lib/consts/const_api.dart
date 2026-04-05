@@ -182,6 +182,7 @@ const getPostRideCancelledList = "post-ride-again-cancelled";
 const editRide = "edit-ride";
 const profilePaymentOptions = "profile-payment-options";
 const paymentOptionsAddCard = "payment-option/store";
+const paymentOptionSetupIntent = "payment-option/setup-intent";
 const paymentOptionsEditCard = "update-card";
 const setAsPrimaryCard = "payment-option/set-primary";
 const searchRideDetail = "search-ride";

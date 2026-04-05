@@ -1,61 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/consts/const_api.dart';
+import 'package:proximaride_app/consts/strings.dart';
+import 'package:proximaride_app/helpers/stripe_payment_sheet_native_params.dart';
 import 'package:proximaride_app/pages/book_seat/BookSeatController.dart';
 import 'package:proximaride_app/pages/my_wallet/MyWalletController.dart';
 import 'package:proximaride_app/pages/stages/StageProvider.dart';
-import 'package:proximaride_app/services/logger_service.dart';
 import 'package:proximaride_app/services/service.dart';
 
 import '../payment_options/PaymentOptionsController.dart';
 import 'AddCardProvider.dart';
-import 'card_number_input_formatter.dart';
 
 class AddCardController extends GetxController {
   final serviceController = Get.find<Service>();
   late PaymentOptionController paymentOptionController;
   BookSeatController? bookSeatController;
   MyWalletController? myWalletController;
-  var errorList = List.empty(growable: true).obs;
   var isLoading = false.obs;
   var isOverlayLoading = false.obs;
-  var isScrollLoading = false.obs;
   final errors = [].obs;
-  var scrollField = false;
 
   ScrollController scrollController = ScrollController();
-  late TextEditingController cardNameController,
-      cardNumberController,
-      cvvCodeController,
-      streetController,
-      houseApartmentController,
-      cityController,
-      provinceController,
-      countryController,
-      postalCodeController;
+  late TextEditingController cardNameController;
 
   final Map<String, FocusNode> focusNodes = {};
 
-  var cardType = "".obs;
-  var month = "".obs;
-  var year = "".obs;
   var makePrimaryCard = false.obs;
 
   var addEditType = "";
-  var totalYear = 10;
-  var startYear = 0;
-  var editCardId = 0;
-
-  String pageTypeFrom = "";
 
   var labelTextDetail = {}.obs;
   var validationMessageDetail = {}.obs;
 
+  String pageTypeFrom = "";
+
   @override
   void onInit() async {
-    // TODO: implement onInit
     super.onInit();
 
     if (!Get.isRegistered<PaymentOptionController>()) {
@@ -63,84 +46,34 @@ class AddCardController extends GetxController {
     }
     paymentOptionController = Get.find<PaymentOptionController>();
 
-    startYear = DateTime.now().year;
-
     isLoading(true);
     await getLabelTextDetail();
     isLoading(false);
 
     cardNameController = TextEditingController();
-    cardNumberController = TextEditingController();
-    cvvCodeController = TextEditingController();
-    streetController = TextEditingController();
-    houseApartmentController = TextEditingController();
-    cityController = TextEditingController();
-    provinceController = TextEditingController();
-    countryController = TextEditingController();
-    postalCodeController = TextEditingController();
 
-    countryController.text = "Canada";
-
-    for (int i = 1; i <= 9; i++) {
-      focusNodes[i.toString()] = FocusNode();
-      // Attach the onFocusChange listener
-      focusNodes[i.toString()]?.addListener(() {
-        if (!focusNodes[i.toString()]!.hasFocus) {
-          // Field has lost focus, trigger validation
-          if (i == 1) {
-            validateField(
-              'Name on card',
-              'name_on_card',
-              cardNameController.text,
-            );
-          } else if (i == 2) {
-            validateField(
-              'Card number',
-              'card_number',
-              cardNumberDigits,
-              type: 'numeric',
-            );
-          } else if (i == 3) {
-            validateField(
-              'CVV',
-              'cvv',
-              cvvCodeController.text,
-              type: 'numeric',
-            );
-          } else if (i == 4) {
-            validateField('Street', 'street', streetController.text);
-          } else if (i == 5) {
-            validateField('City', 'city', cityController.text);
-          } else if (i == 6) {
-            validateField('Province', 'province', provinceController.text);
-          } else if (i == 7) {
-            validateField('Country', 'country', countryController.text);
-          } else if (i == 8) {
-            validateField(
-              'Postal code',
-              'postal_code',
-              postalCodeController.text,
-            );
-          }
-        }
-      });
-    }
+    focusNodes['1'] = FocusNode();
+    focusNodes['1']?.addListener(() {
+      if (focusNodes['1']!.hasFocus == false) {
+        validateField(
+          'Name on card',
+          'name_on_card',
+          cardNameController.text,
+        );
+      }
+    });
 
     getType();
-    bool isRegistered = Get.isRegistered<PaymentOptionController>();
-    if (isRegistered) {
+    pageTypeFrom = '';
+    if (Get.isRegistered<PaymentOptionController>()) {
       paymentOptionController = Get.find<PaymentOptionController>();
       pageTypeFrom = 'paymentOptions';
     }
-
-    isRegistered = Get.isRegistered<BookSeatController>();
-    if (isRegistered) {
+    if (Get.isRegistered<BookSeatController>()) {
       bookSeatController = Get.find<BookSeatController>();
       pageTypeFrom = 'bookSeat';
     }
-
-    isRegistered = Get.isRegistered<MyWalletController>();
-    if (isRegistered) {
+    if (Get.isRegistered<MyWalletController>()) {
       myWalletController = Get.find<MyWalletController>();
       pageTypeFrom = 'myWallet';
     }
@@ -148,30 +81,12 @@ class AddCardController extends GetxController {
 
   @override
   void onClose() {
-    // TODO: implement onClose
     super.onClose();
     scrollController.dispose();
     cardNameController.dispose();
-    cardNumberController.dispose();
-    cvvCodeController.dispose();
-    streetController.dispose();
-    houseApartmentController.dispose();
-    cityController.dispose();
-    provinceController.dispose();
-    countryController.dispose();
-    postalCodeController.dispose();
-  }
-
-  /// PAN digits only (spaces / non-digits removed) for Stripe and validation.
-  String get cardNumberDigits =>
-      cardNumberController.text.replaceAll(RegExp(r'\D'), '');
-
-  /// Max digits allowed in the number field for the selected card type.
-  int get cardNumberMaxDigits => maxPanDigitsForCardType(cardType.value);
-
-  /// Trims the field if the user changes card type to one with a shorter max length.
-  void clampCardNumberToMaxLength() {
-    clampCardNumberField(cardNumberController, cardType.value);
+    for (final n in focusNodes.values) {
+      n.dispose();
+    }
   }
 
   Future<void> getLabelTextDetail() async {
@@ -241,7 +156,6 @@ class AddCardController extends GetxController {
     String fieldValue, {
     String type = 'string',
     bool isRequired = true,
-    int wordsLimit = 50,
   }) {
     errors.removeWhere((element) => element['title'] == fieldName);
     List<String> errorList = [];
@@ -253,84 +167,10 @@ class AddCardController extends GetxController {
           ":Attribute",
           labelTextDetail['card_name_error'] ?? fieldData,
         );
-      } else if (fieldName == "card_number") {
-        message = message.replaceAll(
-          ":Attribute",
-          labelTextDetail['card_number_error'] ?? fieldData,
-        );
-      } else if (fieldName == "cvv") {
-        message = message.replaceAll(
-          ":Attribute",
-          labelTextDetail['cvv_error'] ?? fieldData,
-        );
-      } else if (fieldName == "street") {
-        message = message.replaceAll(
-          ":Attribute",
-          labelTextDetail['address_error'] ?? fieldData,
-        );
-      } else if (fieldName == "city") {
-        message = message.replaceAll(
-          ":Attribute",
-          labelTextDetail['city_error'] ?? fieldData,
-        );
-      } else if (fieldName == "province") {
-        message = message.replaceAll(
-          ":Attribute",
-          labelTextDetail['province_error'] ?? fieldData,
-        );
-      } else if (fieldName == "country") {
-        message = message.replaceAll(
-          ":Attribute",
-          labelTextDetail['country_error'] ?? fieldData,
-        );
-      } else if (fieldName == "postal_code") {
-        message = message.replaceAll(
-          ":Attribute",
-          labelTextDetail['postal_code_error'] ?? fieldData,
-        );
       }
       errorList.add(message ?? '$fieldData field is required');
       errors.add({'title': fieldName, 'eList': errorList});
       return;
-    }
-
-    switch (type) {
-      case 'numeric':
-        if (fieldValue.isNotEmpty && double.tryParse(fieldValue) == null) {
-          var message = validationMessageDetail['numeric'];
-          if (fieldName == "card_number") {
-            message = message.replaceAll(
-              ":attribute",
-              labelTextDetail['card_number_error'] ?? fieldData,
-            );
-          } else if (fieldName == "cvv") {
-            message = message.replaceAll(
-              ":attribute",
-              labelTextDetail['cvv_error'] ?? fieldData,
-            );
-          }
-          errorList.add(message ?? '$fieldName must be a number');
-        }
-        break;
-      case 'date':
-        if (fieldValue.isNotEmpty && DateTime.tryParse(fieldValue) == null) {
-          errorList.add('$fieldName must be a valid date');
-        }
-        break;
-      case 'time':
-        if (fieldValue.isNotEmpty &&
-            !RegExp(r'^\d{2}:\d{2}$').hasMatch(fieldValue)) {
-          errorList.add('$fieldName must be in the format HH:MM');
-        }
-        break;
-      case 'max_words':
-        if (fieldValue.isNotEmpty &&
-            fieldValue.split(' ').length > wordsLimit) {
-          errorList.add('$fieldName must have at most $wordsLimit words');
-        }
-        break;
-      default:
-        break;
     }
 
     if (errorList.isNotEmpty) {
@@ -343,433 +183,202 @@ class AddCardController extends GetxController {
     addEditType = Get.parameters['type'] ?? "";
   }
 
-  addCard(context, screenHeight) async {
+  void _mergeNewCardIntoList(RxList<dynamic> cards, Map<String, dynamic> newCard) {
+    if (cards.isEmpty) {
+      cards.add(newCard);
+    } else if (newCard['primary_card'] == "1") {
+      cards[0]['primary_card'] = "0";
+      final previousPrimary = cards[0];
+      cards[0] = newCard;
+      cards.add(previousPrimary);
+    } else {
+      cards.add(newCard);
+    }
+    cards.refresh();
+  }
+
+  Future<void> addCard(BuildContext context, double screenHeight) async {
     errors.clear();
-    scrollField = false;
-    try {
-      var tokenId = "";
-
-      if (cardNameController.text.isEmpty ||
-          cardNumberDigits.isEmpty ||
-          cardType.value == "" ||
-          month.value == "" ||
-          year.value == "" ||
-          cvvCodeController.text.isEmpty ||
-          streetController.text.isEmpty ||
-          cityController.text.isEmpty ||
-          provinceController.text.isEmpty ||
-          countryController.text.isEmpty ||
-          postalCodeController.text.isEmpty) {
-        if (cardNameController.text == "") {
-          var message = validationMessageDetail['required'];
-          message = message.replaceAll(
-            ":Attribute",
-            labelTextDetail['card_name_error'] ?? 'Card name',
-          );
-          var err = {
-            'title': "name_on_card",
-            'eList': [message ?? 'Card name field is required'],
-          };
-          errors.add(err);
-          if (scrollField == false) {
-            scrollError(context, 1, screenHeight);
-            scrollField = true;
-          }
-        }
-        if (cardNumberDigits.isEmpty) {
-          var message = validationMessageDetail['required'];
-          message = message.replaceAll(
-            ":Attribute",
-            labelTextDetail['card_number_error'] ?? 'Card number',
-          );
-          var err = {
-            'title': "card_number",
-            'eList': [message ?? 'Card number field is required'],
-          };
-          errors.add(err);
-          if (scrollField == false) {
-            scrollError(context, 2, screenHeight);
-            scrollField = true;
-          }
-        }
-        if (cardType.value == "") {
-          var message = validationMessageDetail['required'];
-          message = message.replaceAll(
-            ":Attribute",
-            labelTextDetail['card_type_error'] ?? 'Card type',
-          );
-          var err = {
-            'title': "card_type",
-            'eList': [message ?? 'Card type field is required'],
-          };
-          errors.add(err);
-          if (scrollField == false) {
-            scrollError(context, 3, screenHeight);
-            scrollField = true;
-          }
-        }
-        if (month.value == "") {
-          var message = validationMessageDetail['required'];
-          message = message.replaceAll(
-            ":Attribute",
-            labelTextDetail['month_error'] ?? 'Month',
-          );
-          var err = {
-            'title': "month",
-            'eList': [message ?? 'Month is required'],
-          };
-          errors.add(err);
-          if (scrollField == false) {
-            scrollError(context, 4, screenHeight);
-            scrollField = true;
-          }
-        }
-        if (year.value == "") {
-          var message = validationMessageDetail['required'];
-          message = message.replaceAll(
-            ":Attribute",
-            labelTextDetail['year_error'] ?? 'Year',
-          );
-          var err = {
-            'title': "year",
-            'eList': [message ?? 'Year is required'],
-          };
-          errors.add(err);
-          if (scrollField == false) {
-            scrollError(context, 4, screenHeight);
-            scrollField = true;
-          }
-        }
-        if (cvvCodeController.text == "") {
-          var message = validationMessageDetail['required'];
-          message = message.replaceAll(
-            ":Attribute",
-            labelTextDetail['cvv_error'] ?? 'CVV code',
-          );
-          var err = {
-            'title': "cvv",
-            'eList': [message ?? 'CVV code field is required'],
-          };
-          errors.add(err);
-          if (scrollField == false) {
-            scrollError(context, 5, screenHeight);
-            scrollField = true;
-          }
-        }
-        if (streetController.text == "") {
-          var message = validationMessageDetail['required'];
-          message = message.replaceAll(
-            ":Attribute",
-            labelTextDetail['address_error'] ?? 'Street',
-          );
-          var err = {
-            'title': "street",
-            'eList': [message ?? 'Street field is required'],
-          };
-          errors.add(err);
-          if (scrollField == false) {
-            scrollError(context, 6, screenHeight);
-            scrollField = true;
-          }
-        }
-        if (cityController.text == "") {
-          var message = validationMessageDetail['required'];
-          message = message.replaceAll(
-            ":Attribute",
-            labelTextDetail['city_error'] ?? 'City',
-          );
-          var err = {
-            'title': "city",
-            'eList': [message ?? 'City field is required'],
-          };
-          errors.add(err);
-          if (scrollField == false) {
-            scrollError(context, 7, screenHeight);
-            scrollField = true;
-          }
-        }
-        if (provinceController.text == "") {
-          var message = validationMessageDetail['required'];
-          message = message.replaceAll(
-            ":Attribute",
-            labelTextDetail['province_error'] ?? 'Province',
-          );
-          var err = {
-            'title': "province",
-            'eList': [message ?? 'Province field is required'],
-          };
-          errors.add(err);
-        }
-        if (countryController.text == "") {
-          var message = validationMessageDetail['required'];
-          message = message.replaceAll(
-            ":Attribute",
-            labelTextDetail['country_error'] ?? 'Country',
-          );
-          var err = {
-            'title': "country",
-            'eList': [message ?? 'Country field is required'],
-          };
-          errors.add(err);
-        }
-        if (postalCodeController.text == "") {
-          var message = validationMessageDetail['required'];
-          message = message.replaceAll(
-            ":Attribute",
-            labelTextDetail['postal_code_error'] ?? 'Postal code',
-          );
-          var err = {
-            'title': "postal_code",
-            'eList': [message ?? 'Postal code field is required'],
-          };
-          errors.add(err);
-        }
-        return;
-      }
-      errors.clear();
-
-      if (cardType.value == "Visa" && cardNumberDigits.length != 16) {
-        var err = {
-          'title': "card_number",
-          'eList': ['Please enter a valid card number'],
-        };
-        errors.add(err);
-        if (scrollField == false) {
-          scrollError(context, 2, screenHeight);
-          scrollField = true;
-        }
-        return;
-      }
-      if (cardType.value == "MasterCard" &&
-          cardNumberDigits.length != 16) {
-        var err = {
-          'title': "card_number",
-          'eList': ['Please enter a valid card number'],
-        };
-        errors.add(err);
-        if (scrollField == false) {
-          scrollError(context, 2, screenHeight);
-          scrollField = true;
-        }
-        return;
-      }
-      if (cardType.value == "AmEx" && cardNumberDigits.length != 15) {
-        var err = {
-          'title': "card_number",
-          'eList': ['Please enter a valid card number'],
-        };
-        errors.add(err);
-        if (scrollField == false) {
-          scrollError(context, 2, screenHeight);
-          scrollField = true;
-        }
-        return;
-      }
-      if (cardType.value == "Dis" && cardNumberDigits.length != 16) {
-        var err = {
-          'title': "card_number",
-          'eList': ['Please enter a valid card number'],
-        };
-        errors.add(err);
-        if (scrollField == false) {
-          scrollError(context, 2, screenHeight);
-          scrollField = true;
-        }
-        return;
-      }
-      if (cardType.value == "CUP" &&
-          !(cardNumberDigits.length == 16 ||
-              cardNumberDigits.length == 19)) {
-        var err = {
-          'title': "card_number",
-          'eList': ['Please enter a valid card number'],
-        };
-        errors.add(err);
-        if (scrollField == false) {
-          scrollError(context, 2, screenHeight);
-          scrollField = true;
-        }
-        return;
-      }
-      if (cardType.value == "JC" &&
-          !(cardNumberDigits.length == 16 ||
-              cardNumberDigits.length == 19)) {
-        var err = {
-          'title': "card_number",
-          'eList': ['Please enter a valid card number'],
-        };
-        errors.add(err);
-        if (scrollField == false) {
-          scrollError(context, 2, screenHeight);
-          scrollField = true;
-        }
-        return;
-      }
-      if (cardType.value == "DiC" &&
-          !(cardNumberDigits.length == 14 ||
-              cardNumberDigits.length == 16)) {
-        var err = {
-          'title': "card_number",
-          'eList': ['Please enter a valid card number'],
-        };
-        errors.add(err);
-        if (scrollField == false) {
-          scrollError(context, 2, screenHeight);
-          scrollField = true;
-        }
-        return;
-      }
-      isOverlayLoading(true);
-
-      CardTokenParams cardParams = CardTokenParams(
-        type: TokenType.Card,
-        name: cardNameController.text,
+    if (cardNameController.text.trim().isEmpty) {
+      var message = validationMessageDetail['required'];
+      message = message.replaceAll(
+        ":Attribute",
+        labelTextDetail['card_name_error'] ?? 'Card name',
       );
-      await Stripe.instance.dangerouslyUpdateCardDetails(
-        CardDetails(
-          number: cardNumberDigits,
-          cvc: cvvCodeController.text.trim(),
-          expirationMonth: int.parse(month.value.toString()),
-          expirationYear: int.parse(year.value.toString()),
+      errors.add({
+        'title': "name_on_card",
+        'eList': [message ?? 'Card name field is required'],
+      });
+      scrollError(MediaQuery.of(context).viewInsets.bottom, 1, screenHeight);
+      return;
+    }
+    errors.clear();
+
+    final keyboardBottom = MediaQuery.of(context).viewInsets.bottom;
+    isOverlayLoading(true);
+    try {
+      final intentResp = await AddCardProvider()
+          .createSetupIntent(serviceController.token);
+      if (intentResp is Map &&
+          intentResp['status'] != null &&
+          intentResp['status'] == 'Error') {
+        isOverlayLoading(false);
+        serviceController.showDialogue(
+          intentResp['message']?.toString() ??
+              'Could not start card setup. Please try again.',
+          type: "error",
+        );
+        return;
+      }
+      if (intentResp is! Map || intentResp['data'] == null) {
+        isOverlayLoading(false);
+        serviceController.showDialogue(
+            'Could not start card setup. Please try again.',
+            type: "error");
+        return;
+      }
+      final data = intentResp['data'] as Map;
+      final clientSecret = data['clientSecret']?.toString();
+      final setupIntentId = data['setupIntentId']?.toString();
+      final stripeCfg = data['stripeConfig'];
+      if (clientSecret == null ||
+          clientSecret.isEmpty ||
+          setupIntentId == null ||
+          setupIntentId.isEmpty) {
+        isOverlayLoading(false);
+        serviceController.showDialogue(
+            'Could not start card setup. Please try again.',
+            type: "error");
+        return;
+      }
+
+      String country = 'CA';
+      if (stripeCfg is Map) {
+        final c = stripeCfg['country']?.toString().trim().toUpperCase();
+        if (c != null && c.length == 2) {
+          country = c;
+        }
+      }
+
+      var publishableKey = data['publishableKey']?.toString().trim() ?? '';
+      if (publishableKey.isEmpty) {
+        publishableKey = dotenv.env['STRIPE_KEY']?.trim() ?? '';
+      }
+      if (publishableKey.isEmpty || !publishableKey.startsWith('pk_')) {
+        isOverlayLoading(false);
+        serviceController.showDialogue(
+          'Payment could not start: Stripe publishable key is missing. '
+          'Set STRIPE_KEY in the server .env (and rebuild), or STRIPE_KEY in assets/.env for the app.',
+          type: "error",
+        );
+        return;
+      }
+      Stripe.publishableKey = publishableKey;
+      await Stripe.instance.applySettings();
+
+      // Native plugins expect `link`/`display` and map-shaped `termsDisplay`;
+      // SetupPaymentSheetParameters.toJson() uses different keys — see helper.
+      await initPaymentSheetNativeJson(
+        SetupPaymentSheetParameters(
+          setupIntentClientSecret: clientSecret,
+          merchantDisplayName: appName,
+          linkDisplayParams: const LinkDisplayParams(
+            linkDisplay: LinkDisplay.never,
+          ),
+          paymentMethodOrder: const ['card'],
+          billingDetails: BillingDetails(
+            name: cardNameController.text.trim(),
+            address: Address(
+              city: null,
+              country: country,
+              line1: null,
+              line2: null,
+              postalCode: null,
+              state: null,
+            ),
+          ),
+          billingDetailsCollectionConfiguration:
+              const BillingDetailsCollectionConfiguration(
+            name: CollectionMode.never,
+            email: CollectionMode.never,
+            phone: CollectionMode.never,
+            address: AddressCollectionMode.never,
+            attachDefaultsToPaymentMethod: true,
+          ),
+          termsDisplay: TermsDisplay.never,
         ),
       );
 
       try {
-        TokenData token = await Stripe.instance.createToken(
-          CreateTokenParams.card(params: cardParams),
-        );
-        tokenId = token.id.toString();
+        await Stripe.instance.presentPaymentSheet();
       } on StripeException catch (e) {
         isOverlayLoading(false);
-        serviceController.showDialogue(e.error.message?.replaceAll('.', ' '),
-            type: "error");
-      } catch (e) {
-        isOverlayLoading(false);
+        if (e.error.code == FailureCode.Canceled) {
+          return;
+        }
         serviceController.showDialogue(
-            e.toString().replaceAll(RegExp(r'^Exception:\s*'), ''),
-            type: "error");
-      }
-
-      if (tokenId.isEmpty) {
-        isOverlayLoading(false);
+          (e.error.localizedMessage ?? e.error.message ?? 'Payment failed')
+              .trim()
+              .isEmpty
+              ? 'Could not complete card setup'
+              : (e.error.localizedMessage ?? e.error.message ?? '')
+                  .replaceAll('.', ' ')
+                  .trim(),
+          type: "error",
+        );
         return;
       }
 
-      var address =
-          "${streetController.text},${houseApartmentController.text},${cityController.text},${provinceController.text},${countryController.text},${postalCodeController.text}";
-
-      logger.info(
-        "Primary card: ${paymentOptionController.cards.isNotEmpty ? makePrimaryCard.value ? 1.toString() : 0.toString() : 1.toString()}",
-      );
+      final primaryStr = paymentOptionController.cards.isNotEmpty
+          ? (makePrimaryCard.value ? '1' : '0')
+          : '1';
 
       AddCardProvider()
-          .addCard(
+          .addCardWithSetupIntent(
         serviceController.token,
-        cardNameController.text,
-        cardNumberDigits,
-        cardType.value.toString(),
-        month.value.toString(),
-        year.value.toString(),
-        cvvCodeController.text,
-        address,
-        paymentOptionController.cards.isNotEmpty
-            ? makePrimaryCard.value
-                ? 1.toString()
-                : 0.toString()
-            : 1.toString(),
-        tokenId,
+        cardNameController.text.trim(),
+        setupIntentId,
+        primaryStr,
       )
           .then(
         (resp) async {
-          errorList.clear();
+          if (resp is! Map) {
+            isOverlayLoading(false);
+            return;
+          }
           if (resp['status'] != null && resp['status'] == "Error") {
             serviceController.showDialogue(resp['message'], type: "error");
           } else if (resp['errors'] != null) {
             if (resp['errors']['name_on_card'] != null) {
-              var err = {
+              errors.add({
                 'title': "name_on_card",
                 'eList': resp['errors']['name_on_card'],
-              };
-              errors.add(err);
-              if (scrollField == false) {
-                scrollError(context, 1, screenHeight);
-                scrollField = true;
-              }
-            }
-            if (resp['errors']['address'] != null) {
-              var err = {
-                'title': "address",
-                'eList': resp['errors']['address'],
-              };
-              errors.add(err);
+              });
+              scrollError(keyboardBottom, 1, screenHeight);
             }
           } else if (resp['status'] != null && resp['status'] == "Success") {
-            if (resp['data']['card'] != null) {
+            final rawCard = resp['data'] != null ? resp['data']['card'] : null;
+            if (rawCard is Map) {
+              final newCard = Map<String, dynamic>.from(rawCard);
               if (pageTypeFrom == 'paymentOptions') {
-                var cards = paymentOptionController.cards;
-                var newCard = resp['data']['card'];
-                if (cards.isEmpty) {
-                  cards.add(newCard);
-                } else if (newCard['primary_card'] == "1") {
-                  cards[0]['primary_card'] = "0";
-                  var previousPrimary = cards[0];
-                  cards[0] = newCard;
-                  cards.add(previousPrimary);
-                } else {
-                  cards.add(newCard);
-                }
-                cards.refresh();
+                _mergeNewCardIntoList(paymentOptionController.cards, newCard);
               }
               if (pageTypeFrom == 'bookSeat') {
-                var cards = bookSeatController!.cards;
-                var newCard = resp['data']['card'];
-                if (cards.isEmpty) {
-                  cards.add(newCard);
-                } else if (newCard['primary_card'] == "1") {
-                  cards[0]['primary_card'] = "0";
-                  var previousPrimary = cards[0];
-                  cards[0] = newCard;
-                  cards.add(previousPrimary);
-                } else {
-                  cards.add(newCard);
-                }
-                cards.refresh();
+                _mergeNewCardIntoList(bookSeatController!.cards, newCard);
               }
-
               if (pageTypeFrom == 'myWallet') {
-                var cards = myWalletController!.cards;
-                var newCard = resp['data']['card'];
-                if (cards.isEmpty) {
-                  cards.add(newCard);
-                } else if (newCard['primary_card'] == "1") {
-                  cards[0]['primary_card'] = "0";
-                  var previousPrimary = cards[0];
-                  cards[0] = newCard;
-                  cards.add(previousPrimary);
-                } else {
-                  cards.add(newCard);
-                }
-                cards.refresh();
+                _mergeNewCardIntoList(myWalletController!.cards, newCard);
               }
             }
             Get.back();
             serviceController.showDialogue(resp['message'], type: "success");
-
             cardNameController.clear();
-            cardNumberController.clear();
-            cardType.value = "";
-            month.value = "";
-            year.value = "";
-            cvvCodeController.clear();
-
             makePrimaryCard.value = false;
           }
           isOverlayLoading(false);
         },
         onError: (err) {
           isOverlayLoading(false);
-          isLoading(false);
-          isOverlayLoading.refresh();
           if (err is Map &&
               err.containsKey('type') &&
               err.containsKey('message')) {
@@ -785,9 +394,16 @@ class AddCardController extends GetxController {
           }
         },
       );
+    } on StripeConfigException catch (e) {
+      isOverlayLoading(false);
+      serviceController.showDialogue(
+        e.message.isNotEmpty
+            ? e.message
+            : 'Stripe is not configured. Add STRIPE_KEY to assets/.env or update the app.',
+        type: "error",
+      );
     } catch (exception) {
       isOverlayLoading(false);
-      isLoading(false);
       if (exception is Map &&
           exception.containsKey('type') &&
           exception.containsKey('message')) {
@@ -804,17 +420,14 @@ class AddCardController extends GetxController {
     }
   }
 
-  scrollError(context, position, screenHeight) {
-    position = position * 100.0;
-    if (MediaQuery.of(context).viewInsets.bottom > 0) {
-      // Keyboard is visible, adjust the scroll to avoid the keyboard
-      position -= 100.0; // Adjust as per your requirement
+  void scrollError(double keyboardBottomInset, int position, double screenHeight) {
+    var pos = position * 100.0;
+    if (keyboardBottomInset > 0) {
+      pos -= 100.0;
     }
-
-    // Scroll to the calculated position with some margin
     scrollController.animateTo(
-      position - screenHeight / 4, // This adjusts the position dynamically
-      duration: Duration(milliseconds: 300),
+      pos - screenHeight / 4,
+      duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
   }

@@ -446,7 +446,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
 
-        var stripePk = '{{ env('STRIPE_KEY') ?? '' }}';
+        var stripePk = '{{ config('stripe.key') ?? env('STRIPE_KEY') ?? '' }}';
         if (stripePk && stripePk.length >= 10) {
             const stripe = Stripe(stripePk);
 
@@ -456,7 +456,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 if (inlineCardElement) {
                     return;
                 }
-                const elements = stripe.elements();
+                const elements = stripe.elements({
+                    locale: @json($stripeElementsLocale ?? 'en'),
+                });
                 inlineCardElement = elements.create('card', {
                     style: {
                         base: {

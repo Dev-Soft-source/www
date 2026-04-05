@@ -105,12 +105,23 @@ class Controller extends BaseController
             $this->successMessage = SuccessMessagesSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
             $siteText = SiteTextDetail::getByLanguageKeyedBySlug($this->selectedLanguage->id, $this->defaultLang->id);
 
+            $stripeElementsLocale = config('stripe.elements_locale');
+            if (! is_string($stripeElementsLocale) || trim($stripeElementsLocale) === '') {
+                $abbr = strtolower((string) ($this->selectedLanguage->abbreviation ?? 'en'));
+                $stripeElementsLocale = $abbr === 'fr' ? 'fr-CA' : 'en';
+            }
+
             View::share([
                 'selectedLanguage' => $this->selectedLanguage,
                 'languages' => $languages,
                 'rideFeatureOptions' => $rideFeatureOptions,
                 'siteText' => $siteText,
                 'successMessage' => $this->successMessage,
+                'stripeConfig' => [
+                    'country' => config('stripe.account_country'),
+                    'currency' => config('stripe.account_currency'),
+                ],
+                'stripeElementsLocale' => $stripeElementsLocale,
             ]);
 
             if (auth()->check() && !$request->ajax()) {

@@ -7,11 +7,9 @@ import 'package:proximaride_app/pages/widgets/second_appbar_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import '../widgets/button_Widget.dart';
 import '../widgets/check_box_widget.dart';
-import '../widgets/drop_down_date_widget.dart';
 import '../widgets/fields_widget.dart';
 import '../widgets/tool_tip.dart';
 import 'AddCardController.dart';
-import 'card_number_input_formatter.dart';
 
 class AddCard extends StatelessWidget {
   const AddCard({super.key});
@@ -34,54 +32,41 @@ class AddCard extends StatelessWidget {
       body: Obx(() {
         if (controller.isLoading.value == true) {
           return Center(child: progressCircularWidget(context));
-        } else {
-          return Stack(
-            children: [
-              Container(
-                padding: EdgeInsets.all(getValueForScreenType<double>(
-                  context: context,
-                  mobile: 15.0,
-                  tablet: 15.0,
-                )),
-                child: Obx(() => SingleChildScrollView(
+        }
+        return Stack(
+          children: [
+            Container(
+              padding: EdgeInsets.all(getValueForScreenType<double>(
+                context: context,
+                mobile: 15.0,
+                tablet: 15.0,
+              )),
+              child: Obx(() => SingleChildScrollView(
                     controller: controller.scrollController,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         5.heightBox,
-                        // Red required-fields note should be 18px
                         txt18Size(
                             context: context,
                             textColor: Colors.red,
                             title:
                                 "${controller.labelTextDetail['mobile_indicate_required_field_label'] ?? '* Indicates required fields'}"),
                         5.heightBox,
-
-                        // if(controller.errorList.isNotEmpty)...[
-                        //   ListView.builder(
-                        //     shrinkWrap: true,
-                        //     physics: const NeverScrollableScrollPhysics(),
-                        //     itemCount: controller.errorList.length,
-                        //     itemBuilder: (context, index){
-                        //       return Column(
-                        //         crossAxisAlignment: CrossAxisAlignment.start,
-                        //         children: [
-                        //           Row(
-                        //             crossAxisAlignment: CrossAxisAlignment.center,
-                        //             mainAxisAlignment: MainAxisAlignment.center,
-                        //             children: [
-                        //               const Icon(Icons.circle, size: 10, color: Colors.red),
-                        //               10.widthBox,
-                        //               Expanded(child: txt14Size(title: "${controller.errorList[index]}", fontFamily: regular, textColor: Colors.red, context: context))
-                        //             ],
-                        //           ),
-                        //           5.heightBox,
-                        //         ],
-                        //       );
-                        //     },
-                        //   ),
-                        //   10.heightBox,
-                        // ],
+                        Text(
+                          'Card number, expiry, and security code are entered on the next screen in Stripe’s secure payment sheet.',
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontFamily: regular,
+                            fontSize: getValueForScreenType<double>(
+                              context: context,
+                              mobile: 15.0,
+                              tablet: 15.0,
+                            ),
+                            height: 1.35,
+                          ),
+                        ),
+                        20.heightBox,
                         Row(
                           children: [
                             txt20Size(
@@ -90,7 +75,6 @@ class AddCard extends StatelessWidget {
                               fontFamily: regular,
                               context: context,
                             ),
-                            // Asterisk slightly smaller: 18px
                             txt18Size(
                                 title: "*",
                                 fontFamily: regular,
@@ -118,7 +102,7 @@ class AddCard extends StatelessWidget {
                                       element['title'] == "name_on_card"));
                             }
                           },
-                          focusNode: controller.focusNodes[1.toString()],
+                          focusNode: controller.focusNodes['1'],
                         ),
                         if (controller.errors.firstWhereOrNull((element) =>
                                 element['title'] == "name_on_card") !=
@@ -128,424 +112,9 @@ class AddCard extends StatelessWidget {
                                   (element) =>
                                       element['title'] == "name_on_card"))
                         ],
-                        10.heightBox,
-                        Row(
-                          children: [
-                            txt20Size(
-                                title:
-                                    "${controller.labelTextDetail['card_number_label'] ?? "Card number"}",
-                                fontFamily: regular,
-                                context: context),
-                            txt18Size(
-                                title: "*",
-                                fontFamily: regular,
-                                context: context,
-                                textColor: Colors.red),
-                          ],
-                        ),
-                        5.heightBox,
-                        fieldsWidget(
-                          textController: controller.cardNumberController,
-                          fieldType: "number",
-                          readonly: false,
-                          fontFamily: regular,
-                          fontSize: 18.0,
-                          maxLength: controller.cardNumberMaxDigits,
-                          inputFormatters: [
-                            CardDigitsOnlyFormatter(
-                                maxDigits: controller.cardNumberMaxDigits),
-                          ],
-                          onChanged: (value) {
-                            if (controller.errors.firstWhereOrNull((element) =>
-                                    element['title'] == "card_number") !=
-                                null) {
-                              controller.errors.remove(controller.errors
-                                  .firstWhereOrNull((element) =>
-                                      element['title'] == "card_number"));
-                            }
-                          },
-                          focusNode: controller.focusNodes[2.toString()],
-                        ),
-                        if (controller.errors.firstWhereOrNull((element) =>
-                                element['title'] == "card_number") !=
-                            null) ...[
-                          toolTip(
-                              tip: controller.errors.firstWhereOrNull(
-                                  (element) =>
-                                      element['title'] == "card_number"))
-                        ],
-                        10.heightBox,
-                        Row(
-                          children: [
-                            txt20Size(
-                                title:
-                                    "${controller.labelTextDetail['mobile_card_type_label'] ?? "Card type"}",
-                                fontFamily: regular,
-                                context: context),
-                            txt18Size(
-                                title: "*",
-                                fontFamily: regular,
-                                context: context,
-                                textColor: Colors.red),
-                          ],
-                        ),
-                        5.heightBox,
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                  child: dropdownCardTypeWidget(
-                                      context: context,
-                                      controller: controller,
-                                      screenWidth: context.screenWidth,
-                                      screenHeight: context.screenHeight)),
-                            ),
-                          ],
-                        ),
-                        if (controller.errors.firstWhereOrNull(
-                                (element) => element['title'] == "card_type") !=
-                            null) ...[
-                          toolTip(
-                              tip: controller.errors.firstWhereOrNull(
-                                  (element) => element['title'] == "card_type"))
-                        ],
-
-                        10.heightBox,
-                        Row(
-                          children: [
-                            txt20Size(
-                                title:
-                                    "${controller.labelTextDetail['mobile_expiry_date_label'] ?? "Expiry date"}",
-                                fontFamily: regular,
-                                context: context),
-                            txt18Size(
-                                title: "*",
-                                fontFamily: regular,
-                                context: context,
-                                textColor: Colors.red),
-                          ],
-                        ),
-                        5.heightBox,
-                        Row(
-                          children: [
-                            Expanded(
-                                flex: 10,
-                                child: Container(
-                                    child: dropdownMonthWidget(
-                                        controller: controller,
-                                        context: context,
-                                        screenHeight: context.screenHeight,
-                                        screenWidth: context.screenWidth,
-                                        monthPlaceholder:
-                                            "${controller.labelTextDetail['mobile_month_placeholder'] ?? "Month"}"))),
-                            const Spacer(flex: 1),
-                            Expanded(
-                                flex: 10,
-                                child: Container(
-                                    child: dropdownYearWidget(
-                                        controller: controller,
-                                        context: context,
-                                        screenHeight: context.screenHeight,
-                                        screenWidth: context.screenWidth,
-                                        yearPlaceholder:
-                                            "${controller.labelTextDetail['mobile_year_placeholder'] ?? "Year"}"))),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            if (controller.errors.firstWhereOrNull(
-                                    (element) => element['title'] == "month") !=
-                                null) ...[
-                              toolTip(
-                                  tip: controller.errors.firstWhereOrNull(
-                                      (element) => element['title'] == "month"))
-                            ],
-                            if (controller.errors.firstWhereOrNull(
-                                    (element) => element['title'] == "year") !=
-                                null) ...[
-                              toolTip(
-                                  tip: controller.errors.firstWhereOrNull(
-                                      (element) => element['title'] == "year"))
-                            ],
-                          ],
-                        ),
-
-                        10.heightBox,
-                        Row(
-                          children: [
-                            txt20Size(
-                                title:
-                                    "${controller.labelTextDetail['security_code_label'] ?? "Security code (CVV)"}",
-                                fontFamily: regular,
-                                context: context),
-                            txt18Size(
-                                title: "*",
-                                fontFamily: regular,
-                                context: context,
-                                textColor: Colors.red),
-                          ],
-                        ),
-                        5.heightBox,
-                        fieldsWidget(
-                          maxLength: 4,
-                          textController: controller.cvvCodeController,
-                          fieldType: "number",
-                          readonly: false,
-                          fontFamily: regular,
-                          fontSize: 18.0,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                          ],
-                          onChanged: (value) {
-                            if (controller.errors.firstWhereOrNull(
-                                    (element) => element['title'] == "cvv") !=
-                                null) {
-                              controller.errors.remove(controller.errors
-                                  .firstWhereOrNull(
-                                      (element) => element['title'] == "cvv"));
-                            }
-                          },
-                          focusNode: controller.focusNodes[3.toString()],
-                        ),
-                        if (controller.errors.firstWhereOrNull(
-                                (element) => element['title'] == "cvv") !=
-                            null) ...[
-                          toolTip(
-                              tip: controller.errors.firstWhereOrNull(
-                                  (element) => element['title'] == "cvv"))
-                        ],
-                        25.heightBox,
-                        txt20Size(
-                            title:
-                                "${controller.labelTextDetail['mobile_billing_address_label'] ?? "Billing Address"}",
-                            fontFamily: regular,
-                            context: context),
-                        10.heightBox,
-                        Row(
-                          children: [
-                            txt20Size(
-                                title:
-                                    "${controller.labelTextDetail['mobile_street_name_label'] ?? "Street number/name"}",
-                                fontFamily: regular,
-                                context: context),
-                            txt18Size(
-                                title: "*",
-                                fontFamily: regular,
-                                context: context,
-                                textColor: Colors.red),
-                          ],
-                        ),
-                        5.heightBox,
-                        fieldsWidget(
-                          textController: controller.streetController,
-                          fieldType: "text",
-                          readonly: false,
-                          fontFamily: regular,
-                          fontSize: 18.0,
-                          onChanged: (value) {
-                            if (controller.errors.firstWhereOrNull((element) =>
-                                    element['title'] == "street") !=
-                                null) {
-                              controller.errors.remove(controller.errors
-                                  .firstWhereOrNull((element) =>
-                                      element['title'] == "street"));
-                            }
-                          },
-                          focusNode: controller.focusNodes[4.toString()],
-                        ),
-                        if (controller.errors.firstWhereOrNull(
-                                (element) => element['title'] == "street") !=
-                            null) ...[
-                          toolTip(
-                              tip: controller.errors.firstWhereOrNull(
-                                  (element) => element['title'] == "street"))
-                        ],
-
-                        10.heightBox,
-                        txt20Size(
-                            title:
-                                "${controller.labelTextDetail['mobile_house_number_label'] ?? "House/apartment number (optional)"}",
-                            fontFamily: regular,
-                            context: context),
-                        5.heightBox,
-                        fieldsWidget(
-                            textController: controller.houseApartmentController,
-                            fieldType: "text",
-                            readonly: false,
-                            fontFamily: regular,
-                            fontSize: 18.0),
-
-                        10.heightBox,
-                        Row(
-                          children: [
-                            txt20Size(
-                                title:
-                                    "${controller.labelTextDetail['mobile_city_label'] ?? "City"}",
-                                fontFamily: regular,
-                                context: context),
-                            txt18Size(
-                                title: "*",
-                                fontFamily: regular,
-                                context: context,
-                                textColor: Colors.red),
-                          ],
-                        ),
-                        5.heightBox,
-                        fieldsWidget(
-                          textController: controller.cityController,
-                          fieldType: "text",
-                          readonly: false,
-                          fontFamily: regular,
-                          fontSize: 18.0,
-                          onChanged: (value) {
-                            if (controller.errors.firstWhereOrNull(
-                                    (element) => element['title'] == "city") !=
-                                null) {
-                              controller.errors.remove(controller.errors
-                                  .firstWhereOrNull(
-                                      (element) => element['title'] == "city"));
-                            }
-                          },
-                          focusNode: controller.focusNodes[5.toString()],
-                        ),
-                        if (controller.errors.firstWhereOrNull(
-                                (element) => element['title'] == "city") !=
-                            null) ...[
-                          toolTip(
-                              tip: controller.errors.firstWhereOrNull(
-                                  (element) => element['title'] == "city"))
-                        ],
-
-                        10.heightBox,
-                        Row(
-                          children: [
-                            txt20Size(
-                                title:
-                                    "${controller.labelTextDetail['mobile_province_label'] ?? "Province"}",
-                                fontFamily: regular,
-                                context: context),
-                            txt20Size(
-                                title: "*",
-                                fontFamily: regular,
-                                context: context,
-                                textColor: Colors.red),
-                          ],
-                        ),
-                        5.heightBox,
-                        fieldsWidget(
-                          textController: controller.provinceController,
-                          fieldType: "text",
-                          readonly: false,
-                          fontFamily: regular,
-                          fontSize: 18.0,
-                          onChanged: (value) {
-                            if (controller.errors.firstWhereOrNull((element) =>
-                                    element['title'] == "province") !=
-                                null) {
-                              controller.errors.remove(controller.errors
-                                  .firstWhereOrNull((element) =>
-                                      element['title'] == "province"));
-                            }
-                          },
-                          focusNode: controller.focusNodes[6.toString()],
-                        ),
-                        if (controller.errors.firstWhereOrNull(
-                                (element) => element['title'] == "province") !=
-                            null) ...[
-                          toolTip(
-                              tip: controller.errors.firstWhereOrNull(
-                                  (element) => element['title'] == "province"))
-                        ],
-
-                        10.heightBox,
-                        Row(
-                          children: [
-                            txt20Size(
-                                title:
-                                    "${controller.labelTextDetail['mobile_country_label'] ?? "Country"}",
-                                fontFamily: regular,
-                                context: context),
-                            txt20Size(
-                                title: "*",
-                                fontFamily: regular,
-                                context: context,
-                                textColor: Colors.red),
-                          ],
-                        ),
-                        5.heightBox,
-                        fieldsWidget(
-                          textController: controller.countryController,
-                          fieldType: "text",
-                          readonly: false,
-                          fontFamily: regular,
-                          fontSize: 18.0,
-                          onChanged: (value) {
-                            if (controller.errors.firstWhereOrNull((element) =>
-                                    element['title'] == "country") !=
-                                null) {
-                              controller.errors.remove(controller.errors
-                                  .firstWhereOrNull((element) =>
-                                      element['title'] == "country"));
-                            }
-                          },
-                          focusNode: controller.focusNodes[7.toString()],
-                        ),
-                        if (controller.errors.firstWhereOrNull(
-                                (element) => element['title'] == "country") !=
-                            null) ...[
-                          toolTip(
-                              tip: controller.errors.firstWhereOrNull(
-                                  (element) => element['title'] == "country"))
-                        ],
-
-                        10.heightBox,
-                        Row(
-                          children: [
-                            txt20Size(
-                                title:
-                                    "${controller.labelTextDetail['mobile_postal_code_label'] ?? "Postal code"}",
-                                fontFamily: regular,
-                                context: context),
-                            txt20Size(
-                                title: "*",
-                                fontFamily: regular,
-                                context: context,
-                                textColor: Colors.red),
-                          ],
-                        ),
-                        5.heightBox,
-                        fieldsWidget(
-                          textController: controller.postalCodeController,
-                          fieldType: "text",
-                          maxLength: 7,
-                          readonly: false,
-                          fontFamily: regular,
-                          fontSize: 18.0,
-                          onChanged: (value) {
-                            if (controller.errors.firstWhereOrNull((element) =>
-                                    element['title'] == "postal_code") !=
-                                null) {
-                              controller.errors.remove(controller.errors
-                                  .firstWhereOrNull((element) =>
-                                      element['title'] == "postal_code"));
-                            }
-                          },
-                          focusNode: controller.focusNodes[8.toString()],
-                        ),
-                        if (controller.errors.firstWhereOrNull((element) =>
-                                element['title'] == "postal_code") !=
-                            null) ...[
-                          toolTip(
-                              tip: controller.errors.firstWhereOrNull(
-                                  (element) =>
-                                      element['title'] == "postal_code"))
-                        ],
-
-                        // Only show "Primary card" option if user has existing cards
                         if (controller
                             .paymentOptionController.cards.isNotEmpty) ...[
-                          20.heightBox,
+                          24.heightBox,
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
@@ -563,7 +132,8 @@ class AddCard extends StatelessWidget {
                                 child: checkBoxWidget(
                                     value: controller.makePrimaryCard.value,
                                     onChanged: (value) async {
-                                      controller.makePrimaryCard.value = value!;
+                                      controller.makePrimaryCard.value =
+                                          value!;
                                     }),
                               ),
                               5.widthBox,
@@ -585,20 +155,19 @@ class AddCard extends StatelessWidget {
                         ],
                         100.heightBox
                       ],
-                    ))),
-              ),
-              if (controller.isOverlayLoading.value == true) ...[
-                overlayWidget(context)
-              ]
-            ],
-          );
-        }
+                    ),
+                  )),
+            ),
+            if (controller.isOverlayLoading.value == true) ...[
+              overlayWidget(context)
+            ]
+          ],
+        );
       }),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(15.0),
         width: context.screenWidth,
-        height:
-            80, //added this height after the persisting argument from the QA that the height of this button is not similar to the rest of the buttons in the app
+        height: 80,
         color: Colors.grey.shade100,
         child: elevatedButtonWidget(
           enabled: true,
@@ -610,13 +179,10 @@ class AddCard extends StatelessWidget {
               context: context,
               fontFamily: regular),
           onPressed: () async {
-            controller.addCard(context, context.screenHeight);
+            await controller.addCard(context, context.screenHeight);
           },
         ),
       ),
     );
   }
 }
-
-
-

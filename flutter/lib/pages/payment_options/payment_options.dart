@@ -9,6 +9,12 @@ import 'package:proximaride_app/pages/widgets/progress_circular_widget.dart';
 import 'package:proximaride_app/pages/widgets/second_appbar_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
+String _stripeRegionLine(Map<String, dynamic> cfg) {
+  final country = cfg['country']?.toString().toUpperCase() ?? 'CA';
+  final currency = cfg['currency']?.toString().toUpperCase() ?? 'CAD';
+  return 'Secured with Stripe · $country · $currency';
+}
+
 class PaymentOptions extends StatelessWidget {
   const PaymentOptions({super.key});
 
@@ -43,61 +49,108 @@ class PaymentOptions extends StatelessWidget {
           } else if (controller.isLoading.value == true) {
             return Center(child: progressCircularWidget(context));
           } else {
+            final minBodyHeight = MediaQuery.of(context).size.height -
+                MediaQuery.of(context).padding.vertical -
+                kToolbarHeight -
+                80;
             return Stack(
               children: [
                 Container(
                   padding: const EdgeInsets.all(15.0),
                   child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (controller.cards.isNotEmpty) ...[
-                          for (var i = 0; i < controller.cards.length; i++) ...[
-                            myCard(
-                                cardBgColor: i % 2 == 0
-                                    ? Colors.white
-                                    : Colors.grey.shade100,
-                                context: context,
-                                controller: controller,
-                                cardDetail: controller.cards[i],
-                                onDelete: () async {
-                                  await controller
-                                      .deleteCard(controller.cards[i]['id']);
-                                },
-                                onSetPrimary: () {
-                                  controller.setPrimaryCard(
-                                      controller.cards[i]['id'].toString(), i);
-                                  // controller.serviceController.showDialogue('The card has been set as your primary card');
-                                }),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: minBodyHeight),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisAlignment: controller.cards.isEmpty
+                            ? MainAxisAlignment.center
+                            : MainAxisAlignment.start,
+                        children: [
+                          if (controller.stripeConfig.isNotEmpty) ...[
+                            Center(
+                              child: Text(
+                                _stripeRegionLine(controller.stripeConfig),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.grey.shade700,
+                                  fontFamily: regular,
+                                  fontSize: getValueForScreenType<double>(
+                                    context: context,
+                                    mobile: 13.0,
+                                    tablet: 13.0,
+                                  ),
+                                ),
+                              ),
+                            ),
                             20.heightBox,
                           ],
+                          if (controller.cards.isNotEmpty) ...[
+                            for (var i = 0; i < controller.cards.length; i++) ...[
+                              myCard(
+                                  cardBgColor: i % 2 == 0
+                                      ? Colors.white
+                                      : Colors.grey.shade100,
+                                  context: context,
+                                  controller: controller,
+                                  cardDetail: controller.cards[i],
+                                  onDelete: () async {
+                                    await controller
+                                        .deleteCard(controller.cards[i]['id']);
+                                  },
+                                  onSetPrimary: () {
+                                    controller.setPrimaryCard(
+                                        controller.cards[i]['id'].toString(), i);
+                                  }),
+                              20.heightBox,
+                            ],
+                            24.heightBox,
+                          ],
+                          if (controller.cards.isEmpty) ...[
+                            Icon(
+                              Icons.credit_card_outlined,
+                              size: 56,
+                              color: Colors.grey.shade400,
+                            ),
+                            20.heightBox,
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12.0),
+                              child: Text(
+                                "${controller.labelTextDetail['no_payment_message'] ?? 'No payment options found yet'}",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: textColor,
+                                  fontFamily: regular,
+                                  fontSize: getValueForScreenType<double>(
+                                    context: context,
+                                    mobile: 18.0,
+                                    tablet: 18.0,
+                                  ),
+                                  height: 1.35,
+                                ),
+                              ),
+                            ),
+                            12.heightBox,
+                            Text(
+                              'Tap the button below to add a card securely with Stripe.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.grey.shade700,
+                                fontFamily: regular,
+                                fontSize: getValueForScreenType<double>(
+                                  context: context,
+                                  mobile: 14.0,
+                                  tablet: 14.0,
+                                ),
+                                height: 1.35,
+                              ),
+                            ),
+                          ],
                         ],
-                        50.heightBox,
-                      ],
-                    ),
-                  ),
-                ),
-                if (controller.cards.isEmpty) ...[
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Center(
-                      child: Text(
-                        "${controller.labelTextDetail['no_payment_message'] ?? 'No payment options found yet'}",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: textColor,
-                          fontFamily: regular,
-                          fontSize: getValueForScreenType<double>(
-                            context: context,
-                            mobile: 20.0,
-                            tablet: 20.0,
-                          ),
-                        ),
                       ),
                     ),
                   ),
-                ],
+                ),
 
                 // Align(
                 //   alignment: Alignment.bottomCenter,

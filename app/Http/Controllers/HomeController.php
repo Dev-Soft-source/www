@@ -37,6 +37,7 @@ use Stripe\Customer;
 use Stripe\PaymentMethod;
 use Stripe\Price;
 use Stripe\Product;
+use Stripe\SetupIntent;
 use Stripe\Stripe;
 use Stripe\Subscription;
 use Illuminate\Support\Facades\View;
@@ -330,6 +331,28 @@ class HomeController extends Controller
         ]);
     }
 
+    /**
+     * Guest SetupIntent for Coffee on the Wall — powers Stripe Payment Element (same flow as my_cards).
+     */
+    public function coffeeOnWallCreateSetupIntent(Request $request)
+    {
+        Stripe::setApiKey(config('stripe.secret') ?: env('STRIPE_SECRET'));
+
+        try {
+            $setupIntent = SetupIntent::create([
+                'payment_method_types' => ['card'],
+            ]);
+
+            return response()->json([
+                'clientSecret' => $setupIntent->client_secret,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Coffee wall SetupIntent error: '.$e->getMessage());
+
+            return response()->json(['error' => 'Failed to create setup intent'], 500);
+        }
+    }
+
     public function coffeeOnWallStore(Request $request)
     {
         // Validate the form data
@@ -510,17 +533,27 @@ class HomeController extends Controller
                     $interval = 'year';
                 }
 
-                // Create a PaymentMethod with Stripe using the token
-                $paymentMethods = PaymentMethod::create([
-                    'type' => 'card',
-                    'card' => ['token' => $request->stripeToken],
-                    'billing_details' => [
-                        'name' => $request->name_on_card,
-                        'address' => [
-                            'line1' => $request->address,
+                // Payment Element returns pm_…; legacy flow used tok_…
+                $stripeCredential = (string) $request->stripeToken;
+                if (str_starts_with($stripeCredential, 'pm_')) {
+                    if ($request->filled('name_on_card')) {
+                        PaymentMethod::update($stripeCredential, [
+                            'billing_details' => ['name' => $request->name_on_card],
+                        ]);
+                    }
+                    $paymentMethods = PaymentMethod::retrieve($stripeCredential);
+                } else {
+                    $paymentMethods = PaymentMethod::create([
+                        'type' => 'card',
+                        'card' => ['token' => $stripeCredential],
+                        'billing_details' => [
+                            'name' => $request->name_on_card,
+                            'address' => [
+                                'line1' => $request->address,
+                            ],
                         ],
-                    ],
-                ]);
+                    ]);
+                }
 
                 $stripeCustomer = Customer::create([
                     'name' => $displayName ? ($request->name ?? 'Anonymous Donor') : 'Anonymous Donor',
@@ -533,10 +566,9 @@ class HomeController extends Controller
                 $paymentMethods->attach(['customer' => $stripe_customer_id]);
 
                 // Set the attached payment method as the default for the customer
-                $stripeCustomer->update(
-                    $stripe_customer_id,
-                    ['invoice_settings' => ['default_payment_method' => $paymentMethods->id]]
-                );
+                Customer::update($stripe_customer_id, [
+                    'invoice_settings' => ['default_payment_method' => $paymentMethods->id],
+                ]);
 
                 $subscription_items = [
                     ['price' => $package->stripe_price_id],

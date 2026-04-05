@@ -40,6 +40,9 @@ class PaymentOptionController extends GetxController {
 
   var cards = List<dynamic>.empty(growable: true).obs;
 
+  /// From API (`stripeConfig`): e.g. country CA, currency cad — Stripe account region.
+  var stripeConfig = <String, dynamic>{}.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -164,6 +167,11 @@ class PaymentOptionController extends GetxController {
         }
         if (resp['data'] != null && resp['data']['messages'] != null) {
           popupTextDetail.addAll(resp['data']['messages']);
+        }
+        if (resp['data'] != null && resp['data']['stripeConfig'] != null) {
+          stripeConfig.value = Map<String, dynamic>.from(
+            resp['data']['stripeConfig'] as Map,
+          );
         }
       }
     }, onError: (err) {

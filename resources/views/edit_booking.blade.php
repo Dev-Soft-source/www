@@ -1101,11 +1101,11 @@ inputs.forEach((input, index) => {
 
 
 <script>
-    const stripe = Stripe('{{ env('STRIPE_KEY') }}'); // Your public key from Stripe
+    const stripe = Stripe('{{ config('stripe.key') ?? env('STRIPE_KEY') }}'); // Your public key from Stripe
 
         const paymentRequest = stripe.paymentRequest({
-        country: 'CA',
-        currency: 'cad',
+        country: @json($stripeConfig['country'] ?? 'CA'),
+        currency: @json($stripeConfig['currency'] ?? 'cad'),
         total: {
             label: 'Total',
             amount: 100,
@@ -1121,7 +1121,9 @@ inputs.forEach((input, index) => {
 
         if (result && result.googlePay) {
             // Google Pay is available, enable the button
-            const elements = stripe.elements();
+            const elements = stripe.elements({
+                locale: @json($stripeElementsLocale ?? 'en'),
+            });
             const prButton = elements.create('paymentRequestButton', {
             paymentRequest: paymentRequest,
             });
@@ -1133,7 +1135,9 @@ inputs.forEach((input, index) => {
 
         } else if (result && result.applePay) {
             // Apple Pay is available (on Safari for Apple devices), enable the button
-            const elements = stripe.elements();
+            const elements = stripe.elements({
+                locale: @json($stripeElementsLocale ?? 'en'),
+            });
             const prButton = elements.create('paymentRequestButton', {
             paymentRequest: paymentRequest,
             });

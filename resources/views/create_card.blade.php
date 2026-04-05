@@ -83,6 +83,11 @@
         <div class="bg-white border rounded p-4 border-gray-200 w-full col-span-12 lg:col-span-9 shadow">
             <div class="pt-4 pb-2">
                 <h1 class="mb-0">{{ $paymentSettingDetail->main_heading ?? 'Add a New Card' }}</h1>
+                @isset($stripeConfig)
+                    <p class="text-sm text-gray-600 mt-2">
+                        Secured with Stripe · {{ $stripeConfig['country'] }} · {{ strtoupper($stripeConfig['currency']) }}
+                    </p>
+                @endisset
             </div>
 
 
@@ -287,7 +292,7 @@
 
                     <div>
                         <label for="country">{{ $paymentSettingDetail->mobile_country_label ?? 'Country' }}</label>
-                        <input type="text" id="country" name="country" value="{{ old('country') }}"
+                        <input type="text" id="country" name="country" value="{{ old('country', isset($stripeConfig) && ($stripeConfig['country'] ?? '') === 'CA' ? 'Canada' : '') }}"
                             class="block mt-1 border p-1.5 w-full rounded text-base md:text-lg border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600"
                             aria-required="true">
                         @error('country')
@@ -353,8 +358,10 @@
 @section('script')
     <script src="https://js.stripe.com/v3/"></script>
     <script>
-        var stripe = Stripe('{{ env('STRIPE_KEY') }}');
-        var elements = stripe.elements();
+        var stripe = Stripe('{{ config('stripe.key') ?? env('STRIPE_KEY') }}');
+        var elements = stripe.elements({
+            locale: @json($stripeElementsLocale ?? 'en'),
+        });
 
         var stripePlaceholders = {
             cardNumber: @json(optional($paymentSettingDetail)->card_number_placeholder ?? 'Card number'),

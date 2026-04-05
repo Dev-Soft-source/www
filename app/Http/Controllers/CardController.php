@@ -78,7 +78,10 @@ class CardController extends Controller
         if (!$user->stripe_customer_id) {
             $customer = Customer::create([
                 'email' => $user->email,
-                'name' => $user->first_name,
+                'name' => trim($user->first_name.' '.$user->last_name) ?: $user->first_name,
+                'address' => [
+                    'country' => config('stripe.account_country'),
+                ],
             ]);
             $user->stripe_customer_id = $customer->id;
             $user->save();

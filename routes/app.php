@@ -206,6 +206,7 @@ Route::group(['prefix' => 'app/v1', 'middleware' => ['auth:sanctum']], function 
     Route::get('wallet-passenger-ride', [MyWalletController::class, 'passengerRide'])->name('app.auth.wallet_passenger_ride');
     Route::get('profile-payment-options', [PaymentOptionsController::class, 'index'])->name('app.auth.profile-payment-options');
     Route::post('payment-option/store', [PaymentOptionsController::class, 'store'])->name('app.auth.payment-option.store');
+    Route::post('payment-option/setup-intent', [PaymentOptionsController::class, 'createSetupIntent'])->name('app.auth.payment-option.setup-intent');
     Route::get('edit-card', [PaymentOptionsController::class, 'edit'])->name('app.auth.edit-card');
     Route::put('update-card', [PaymentOptionsController::class, 'update'])->name('app.auth.update-card');
     Route::delete('delete-card', [PaymentOptionsController::class, 'destroy'])->name('app.auth.delete-card');

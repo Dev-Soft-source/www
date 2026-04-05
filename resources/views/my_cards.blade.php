@@ -31,8 +31,15 @@
             </div>
         </div>
 
-        <div class="my-4 pb-2 flex justify-between items-center">
-            <h1 class="mb-0">{{$paymentSettingDetail->main_heading ?? "Payment List"}}</h1>
+        <div class="my-4 pb-2 flex justify-between items-center flex-wrap gap-2">
+            <div>
+                <h1 class="mb-0">{{$paymentSettingDetail->main_heading ?? "Payment List"}}</h1>
+                @isset($stripeConfig)
+                    <p class="text-sm text-gray-600 mt-1">
+                        Secured with Stripe · {{ $stripeConfig['country'] }} · {{ strtoupper($stripeConfig['currency']) }}
+                    </p>
+                @endisset
+            </div>
         </div>
 
         <div class="">
@@ -373,7 +380,7 @@
 
 <script>
     var processingText = {!! json_encode(getTranslatedText('processing_text', isset($selectedLanguage) ? $selectedLanguage : getDefaultLanguage(true), [], 'Processing...')) !!};
-    const stripe = Stripe('{{ env('STRIPE_KEY') }}');
+    const stripe = Stripe('{{ config('stripe.key') ?? env('STRIPE_KEY') }}');
     let elements;
     let paymentElement;
     let isAppleDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -631,6 +638,7 @@
             
             elements = stripe.elements({
                 clientSecret: setupIntentClientSecret,
+                locale: @json($stripeElementsLocale ?? 'en'),
                 appearance: {
                     theme: 'stripe',
                     variables: {
@@ -640,9 +648,20 @@
             });
             
             paymentElement = elements.create('payment', {
+                defaultValues: {
+                    billingDetails: {
+                        address: {
+                            country: @json(config('stripe.account_country')),
+                        },
+                    },
+                },
                 wallets: {
                     applePay: 'auto',
-                    googlePay: 'auto'
+                    googlePay: 'auto',
+                    link: 'never',
+                },
+                terms: {
+                    card: 'never',
                 },
                 layout: 'tabs'
             });

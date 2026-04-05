@@ -266,6 +266,7 @@ Route::get('/show-ride', function () {
 Route::get('/{lang?}', [HomeController::class, 'index'])->name('home')->where('lang', '[a-zA-Z]{2}');
 Route::get('{lang?}/coffee-on-the-wall/story', [HomeController::class, 'coffeeOnWallStory'])->name('coffee_on_wall_story');
 Route::get('{lang?}/coffee-on-the-wall', [HomeController::class, 'coffeeOnWall'])->name('coffee_on_wall');
+Route::post('{lang?}/coffee-on-the-wall/setup-intent', [HomeController::class, 'coffeeOnWallCreateSetupIntent'])->name('coffee_on_wall.setup_intent');
 Route::get('{lang?}/signup', [SignupController::class, 'create'])->middleware('guest')->name('signup');
 Route::get('{lang?}/signup/{provider}', [SignupController::class, 'redirectToProvider'])->name('signup.redirectToProvider');
 Route::get('{lang?}/signup/{provider}/callback', [SignupController::class, 'handleProviderCallback'])->name('signup.handleProviderCallback');

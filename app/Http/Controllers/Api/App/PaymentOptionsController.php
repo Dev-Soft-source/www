@@ -20,7 +20,10 @@ use Stripe\Customer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Stripe\PaymentMethod;
+use Stripe\SetupIntent;
 use Stripe\Stripe;
 
 class PaymentOptionsController extends Controller
@@ -37,8 +40,62 @@ class PaymentOptionsController extends Controller
         $paymentOptionPage = PaymentSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $messages = $this->successMessage;
 
-        $data = ['cards' => $cards, 'paymentOptionPage' => $paymentOptionPage, 'messages' => $messages];
+        $data = [
+            'cards' => $cards,
+            'paymentOptionPage' => $paymentOptionPage,
+            'messages' => $messages,
+            'stripeConfig' => [
+                'country' => config('stripe.account_country'),
+                'currency' => config('stripe.account_currency'),
+            ],
+        ];
         return $this->successResponse($data, 'Get cards successfully');
+    }
+
+    public function createSetupIntent(Request $request)
+    {
+        $user = Auth::guard('sanctum')->user();
+        Stripe::setApiKey(env('STRIPE_SECRET'));
+
+        try {
+            if (! $user->stripe_customer_id) {
+                $customer = Customer::create([
+                    'email' => $user->email,
+                    'name' => trim($user->first_name.' '.$user->last_name) ?: $user->first_name,
+                    'address' => [
+                        'country' => config('stripe.account_country'),
+                    ],
+                ]);
+
+                User::whereId($user->id)->update([
+                    'stripe_customer_id' => $customer->id,
+                ]);
+
+                $user = User::whereId($user->id)->first();
+            }
+
+            $setupIntent = SetupIntent::create([
+                'customer' => $user->stripe_customer_id,
+                'payment_method_types' => ['card'],
+            ]);
+
+            $publishableKey = (string) config('stripe.key', '');
+
+            return $this->successResponse([
+                'clientSecret' => $setupIntent->client_secret,
+                'setupIntentId' => $setupIntent->id,
+                /** Matches server account; safe for authenticated clients (same as Stripe.js). */
+                'publishableKey' => $publishableKey,
+                'stripeConfig' => [
+                    'country' => config('stripe.account_country'),
+                    'currency' => config('stripe.account_currency'),
+                ],
+            ], 'Setup intent created');
+        } catch (\Exception $e) {
+            Log::error('PaymentOptionsController createSetupIntent failed', ['exception' => $e->getMessage()]);
+
+            return $this->apiErrorResponse('Could not start card setup. Please try again.', 200);
+        }
     }
 
     public function store(Request $request)
@@ -46,24 +103,41 @@ class PaymentOptionsController extends Controller
         $user = Auth::guard('sanctum')->user();
         $user_id = $user->id;
 
-        // Validate the form data
         $request->validate([
             'name_on_card' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s\-]+$/'],
-            'address' => 'required',
-            'stripeToken' => 'required',
+            'address' => ['required_without:setup_intent_id', 'nullable', 'string', 'max:2000'],
+            'setup_intent_id' => ['nullable', 'string', 'regex:/^seti_[a-zA-Z0-9]+$/'],
+            'payment_method_id' => ['nullable', 'string', 'regex:/^pm_[a-zA-Z0-9]+$/'],
+            'stripeToken' => ['nullable', 'string'],
+            'billing_line1' => ['nullable', 'string', 'max:255'],
+            'billing_line2' => ['nullable', 'string', 'max:255'],
+            'billing_city' => ['nullable', 'string', 'max:255'],
+            'billing_state' => ['nullable', 'string', 'max:255'],
+            'billing_postal_code' => ['nullable', 'string', 'max:32'],
+            'billing_country' => ['nullable', 'string', 'size:2'],
         ], [
             'name_on_card.regex' => 'Cardholder name can only contain letters, spaces, and hyphens',
         ]);
 
+        if (! $request->filled('payment_method_id') && ! $request->filled('stripeToken') && ! $request->filled('setup_intent_id')) {
+            throw ValidationException::withMessages([
+                'payment_method_id' => ['A valid card is required. Please try again.'],
+            ]);
+        }
+
         // Set Stripe API key
         Stripe::setApiKey(env('STRIPE_SECRET'));
 
+        $message = null;
+
         try {
-            if (!$user->stripe_customer_id) {
-                // Create a new Stripe customer
+            if (! $user->stripe_customer_id) {
                 $customer = Customer::create([
                     'email' => $user->email,
-                    'name' => $user->first_name,
+                    'name' => trim($user->first_name.' '.$user->last_name) ?: $user->first_name,
+                    'address' => [
+                        'country' => config('stripe.account_country'),
+                    ],
                 ]);
 
                 User::whereId($user_id)->update([
@@ -73,19 +147,66 @@ class PaymentOptionsController extends Controller
                 $user = User::whereId($user_id)->first();
             }
 
-            // Create a PaymentMethod with Stripe using the token
-            $paymentMethod = PaymentMethod::create([
-                'type' => 'card',
-                'card' => ['token' => $request->stripeToken],
-                'billing_details' => [
-                    'name' => $request->name_on_card,
-                    'address' => [
-                        'line1' => $request->address,
-                    ],
-                ],
-            ]);
+            $addressForDb = trim((string) $request->input('address', ''));
 
-            $message = null;
+            if ($request->filled('setup_intent_id')) {
+                $setupIntent = SetupIntent::retrieve($request->setup_intent_id);
+                if (($setupIntent->customer ?? '') !== $user->stripe_customer_id) {
+                    return $this->apiErrorResponse('Invalid card setup session.', 200);
+                }
+                if ($setupIntent->status !== 'succeeded') {
+                    return $this->apiErrorResponse('Card setup was not completed. Please try again.', 200);
+                }
+                $pmId = $setupIntent->payment_method;
+                if (is_object($pmId) && isset($pmId->id)) {
+                    $pmId = $pmId->id;
+                }
+                if (! is_string($pmId) || $pmId === '') {
+                    return $this->apiErrorResponse('No payment method on setup.', 200);
+                }
+                $paymentMethod = PaymentMethod::retrieve($pmId);
+                if ($paymentMethod->type !== 'card') {
+                    throw new \InvalidArgumentException('Invalid payment method type');
+                }
+                $mergedBilling = $this->mergedBillingDetailsForPaymentMethod($paymentMethod, $request->name_on_card);
+                PaymentMethod::update($paymentMethod->id, [
+                    'billing_details' => $mergedBilling,
+                ]);
+                $paymentMethod = PaymentMethod::retrieve($paymentMethod->id);
+                $fromPm = $this->addressLineFromPaymentMethod($paymentMethod);
+                $addressForDb = $fromPm !== '' ? $fromPm : $addressForDb;
+            } elseif ($request->filled('payment_method_id')) {
+                $billingDetails = $this->stripeBillingDetailsFromRequest($request);
+                $paymentMethod = PaymentMethod::retrieve($request->payment_method_id);
+                if ($paymentMethod->type !== 'card') {
+                    throw new \InvalidArgumentException('Invalid payment method type');
+                }
+                if ($paymentMethod->customer && $paymentMethod->customer !== $user->stripe_customer_id) {
+                    return $this->apiErrorResponse('This card is already linked to another account.', 200);
+                }
+                if (! $paymentMethod->customer) {
+                    $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
+                }
+                PaymentMethod::update($paymentMethod->id, [
+                    'billing_details' => $billingDetails,
+                ]);
+                $paymentMethod = PaymentMethod::retrieve($paymentMethod->id);
+            } else {
+                $billingDetails = $this->stripeBillingDetailsFromRequest($request);
+                $paymentMethod = PaymentMethod::create([
+                    'type' => 'card',
+                    'card' => ['token' => $request->stripeToken],
+                    'billing_details' => $billingDetails,
+                ]);
+                if (! $paymentMethod->customer) {
+                    $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
+                }
+                PaymentMethod::update($paymentMethod->id, [
+                    'billing_details' => $billingDetails,
+                ]);
+                $paymentMethod = PaymentMethod::retrieve($paymentMethod->id);
+            }
+
             $selectedLanguage = app()->getLocale();
             if ($selectedLanguage) {
                 // Find the language by abbreviation
@@ -105,7 +226,11 @@ class PaymentOptionsController extends Controller
             // Check if the card already exists for the user
             $existingCard = Card::where('user_id', $user_id)->where('fingerprint', $paymentMethod->card->fingerprint)->first();
             if ($existingCard) {
-                return $this->apiErrorResponse(strip_tags($message->already_added_card_message), 200);
+                $dupMsg = (isset($message) && is_object($message) && ! empty($message->already_added_card_message))
+                    ? strip_tags($message->already_added_card_message)
+                    : 'This card is already saved.';
+
+                return $this->apiErrorResponse($dupMsg, 200);
             }
 
             // Handle primary card setting
@@ -128,7 +253,7 @@ class PaymentOptionsController extends Controller
                 'card_type' => $paymentMethod->card->brand,
                 'exp_month' => $paymentMethod->card->exp_month,
                 'exp_year' => $paymentMethod->card->exp_year,
-                'address' => $request->address,
+                'address' => $addressForDb !== '' ? $addressForDb : '—',
                 'primary_card' => $primary_card,
                 'fingerprint' => $paymentMethod->card->fingerprint,
                 'stripe_payment_method_id' => $paymentMethod->id,
@@ -142,7 +267,11 @@ class PaymentOptionsController extends Controller
             }
 
             $data = ['card' => $card];
-            return $this->successResponse($data, strip_tags($message->card_add_message));
+            $okMsg = (isset($message) && is_object($message) && ! empty($message->card_add_message))
+                ? strip_tags($message->card_add_message)
+                : 'Card added successfully';
+
+            return $this->successResponse($data, $okMsg);
         } catch (\Exception $e) {
             Log::error('PaymentOptionsController store card failed', ['exception' => $e->getMessage()]);
 
@@ -324,11 +453,18 @@ class PaymentOptionsController extends Controller
 
                 return $this->successResponse('', strip_tags($message->card_delete_message));
             } catch (\Exception $e) {
-                return $this->apiErrorResponse($messages->general_error_message ?? "An error occurred while deleting your card. Please try again", 200);
+                Log::error('PaymentOptionsController destroy card failed', ['exception' => $e->getMessage()]);
+
+                $errText = 'An error occurred while deleting your card. Please try again';
+                if (isset($message) && is_object($message) && ! empty($message->general_error_message)) {
+                    $errText = strip_tags($message->general_error_message);
+                }
+
+                return $this->apiErrorResponse($errText, 200);
             }
         }
 
-        return $this->apiErrorResponse($messages->general_error_message ?? "Card not found", 404);
+        return $this->apiErrorResponse('Card not found', 404);
     }
 
     public function setCardPrimary(Request $request)
@@ -362,9 +498,118 @@ class PaymentOptionsController extends Controller
             return $this->successResponse($data, strip_tags($message->card_primary_message));
         }
 
-        return $this->apiErrorResponse($messages->general_error_message ?? "Card not found", 404);
+        $fail = null;
+        $selectedLanguage = app()->getLocale();
+        if ($selectedLanguage) {
+            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
+            if ($selectedLanguage) {
+                $fail = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('general_error_message')->first();
+            }
+        } else {
+            $selectedLanguage = Language::where('is_default', 1)->first();
+            if ($selectedLanguage) {
+                $fail = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('general_error_message')->first();
+            }
+        }
+        $failMsg = (isset($fail) && is_object($fail) && ! empty($fail->general_error_message))
+            ? strip_tags($fail->general_error_message)
+            : 'Card not found';
+
+        return $this->apiErrorResponse($failMsg, 404);
     }
 
+    /**
+     * Billing details for Stripe (Canada-friendly: postal_code, province, country).
+     */
+    private function stripeBillingDetailsFromRequest(Request $request): array
+    {
+        $defaultCountry = config('stripe.account_country');
+        $country = strtoupper((string) $request->input('billing_country', $defaultCountry));
+        if (strlen($country) !== 2) {
+            $country = $defaultCountry;
+        }
 
+        $line1 = trim((string) $request->input('billing_line1', ''));
+        $line2 = trim((string) $request->input('billing_line2', ''));
+        $city = trim((string) $request->input('billing_city', ''));
+        $state = trim((string) $request->input('billing_state', ''));
+        $postal = trim((string) $request->input('billing_postal_code', ''));
 
+        if ($line1 === '') {
+            $line1 = trim((string) $request->input('address', ''));
+        }
+
+        if ($line1 === '') {
+            $line1 = Str::limit(trim(preg_replace('/\s+/', ' ', (string) $request->input('address', ''))), 255, '');
+        }
+
+        $address = array_filter([
+            'line1' => $line1 !== '' ? $line1 : null,
+            'line2' => $line2 !== '' ? $line2 : null,
+            'city' => $city !== '' ? $city : null,
+            'state' => $state !== '' ? $state : null,
+            'postal_code' => $postal !== '' ? $postal : null,
+        ], fn ($v) => $v !== null && $v !== '');
+        $address['country'] = $country;
+
+        return [
+            'name' => $request->name_on_card,
+            'address' => $address,
+        ];
+    }
+
+    /**
+     * Single-line address for cards table from a Stripe PaymentMethod.
+     */
+    private function addressLineFromPaymentMethod(PaymentMethod $paymentMethod): string
+    {
+        $addr = $paymentMethod->billing_details->address ?? null;
+        if (! $addr) {
+            return '';
+        }
+        $parts = array_filter([
+            $addr->line1 ?? '',
+            $addr->line2 ?? '',
+            $addr->city ?? '',
+            $addr->state ?? '',
+            $addr->country ?? '',
+            $addr->postal_code ?? '',
+        ], fn ($v) => $v !== '' && $v !== null);
+
+        return implode(', ', $parts);
+    }
+
+    /**
+     * Merge app cardholder name into existing Stripe billing details (keeps PM address from Payment Sheet).
+     */
+    private function mergedBillingDetailsForPaymentMethod(PaymentMethod $paymentMethod, string $nameOnCard): array
+    {
+        $bd = $paymentMethod->billing_details;
+        $out = [
+            'name' => $nameOnCard,
+        ];
+        if (! empty($bd->email)) {
+            $out['email'] = $bd->email;
+        }
+        if (! empty($bd->phone)) {
+            $out['phone'] = $bd->phone;
+        }
+        $addr = $bd->address ?? null;
+        $address = [];
+        if ($addr) {
+            foreach (['line1', 'line2', 'city', 'state', 'postal_code', 'country'] as $k) {
+                if (! empty($addr->{$k})) {
+                    $address[$k] = $addr->{$k};
+                }
+            }
+        }
+        if ($address === []) {
+            $address['country'] = config('stripe.account_country');
+        } elseif (empty($address['country'])) {
+            $address['country'] = config('stripe.account_country');
+        }
+        $out['address'] = $address;
+
+        return $out;
+    }
 }

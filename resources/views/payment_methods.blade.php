@@ -705,13 +705,13 @@
             try {
                 // Initialize Stripe if not already done
                 if (!stripe) {
-                    stripe = Stripe('{{ env('STRIPE_KEY') }}');
+                    stripe = Stripe('{{ config('stripe.key') ?? env('STRIPE_KEY') }}');
                 }
 
                 // Create a test Payment Request to check Google Pay availability
                 const paymentRequest = stripe.paymentRequest({
-                    country: 'US',
-                    currency: 'usd',
+                    country: @json($stripeConfig['country'] ?? 'CA'),
+                    currency: @json($stripeConfig['currency'] ?? 'cad'),
                     total: {
                         label: 'Test',
                         amount: 0,
@@ -830,9 +830,10 @@
             }
 
             // Initialize Stripe
-            stripe = Stripe('{{ env('STRIPE_KEY') }}');
+            stripe = Stripe('{{ config('stripe.key') ?? env('STRIPE_KEY') }}');
             const options = {
                 clientSecret: "{{ $clientSecret }}",
+                locale: @json($stripeElementsLocale ?? 'en'),
                 appearance: {
                     variables: {
                         colorPrimary: '#0570de',
@@ -842,9 +843,20 @@
 
             elements = stripe.elements(options);
             window.paymentElement = elements.create("payment", {
+                defaultValues: {
+                    billingDetails: {
+                        address: {
+                            country: @json(config('stripe.account_country')),
+                        },
+                    },
+                },
                 wallets: {
                     applePay: 'auto',
-                    googlePay: 'auto'
+                    googlePay: 'auto',
+                    link: 'never',
+                },
+                terms: {
+                    card: 'never',
                 },
                 layout: 'tabs'
             });
