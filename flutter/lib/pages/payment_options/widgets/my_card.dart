@@ -29,7 +29,7 @@ Widget myCard(
     Color cardBgColor = Colors.white,
     onSetPrimary,
     onDelete}) {
-  final String cardType = cardDetail['card_type']?.toString() ?? "";
+  final String cardType = cardDetail['name_on_card']?.toString() ?? "";
   final String cardLast4 = cardDetail['card_number']?.toString() ?? "";
   final String expMonth = cardDetail['exp_month']?.toString() ?? "";
   final String expYear = cardDetail['exp_year']?.toString() ?? "";
@@ -138,44 +138,39 @@ Widget myCard(
             ],
           ),
           const Divider(),
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                flex: 10,
-                  child: elevatedButtonWidget(
-                    context: context,
-                    btnColor: Colors.red,
-                    btnRadius: 2.0,
-                    onPressed: onDelete,
-                    textWidget: txt22Size(
-                      context: context,
-                      fontFamily: regular,
-                      title:
-                          "${controller.labelTextDetail['delete_card_button_text'] ?? 'Delete card'}",
-                      textColor: Colors.white,
-                    ),
-                  ),
+              elevatedButtonWidget(
+                context: context,
+                btnColor: Colors.red,
+                btnRadius: 2.0,
+                onPressed: onDelete,
+                textWidget: txt22Size(
+                  context: context,
+                  fontFamily: regular,
+                  title:
+                      "${controller.labelTextDetail['delete_card_button_text'] ?? 'Delete card'}",
+                  textColor: Colors.white,
+                ),
               ),
-              5.widthBox,
               if (cardDetail['primary_card'] != "1") ...[
-                Expanded(
-                  flex: 10,
-                  child: elevatedButtonWidget(
+                8.heightBox,
+                elevatedButtonWidget(
+                  context: context,
+                  btnRadius: 2.0,
+                  onPressed: onSetPrimary,
+                  textWidget: txt22Size(
                     context: context,
-                    btnRadius: 2.0,
-                    onPressed: onSetPrimary,
-                    textWidget: txt22Size(
-                      context: context,
-                      fontFamily: regular,
-                      title:
-                          "${controller.labelTextDetail['set_primary_card_label'] ?? 'Set primary'}",
-                      textColor: Colors.white,
-                    ),
+                    fontFamily: regular,
+                    title:
+                        "${controller.labelTextDetail['set_primary_card_label'] ?? 'Set primary'}",
+                    textColor: Colors.white,
                   ),
                 ),
-              ]
+              ],
             ],
-          )
+          ),
         ],
       ),
     ),

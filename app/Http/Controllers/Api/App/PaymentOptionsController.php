@@ -169,6 +169,10 @@ class PaymentOptionsController extends Controller
                     throw new \InvalidArgumentException('Invalid payment method type');
                 }
                 $mergedBilling = $this->mergedBillingDetailsForPaymentMethod($paymentMethod, $request->name_on_card);
+                $postal = trim((string) $request->input('billing_postal_code', ''));
+                if ($postal !== '') {
+                    $mergedBilling['address']['postal_code'] = Str::limit($postal, 32, '');
+                }
                 PaymentMethod::update($paymentMethod->id, [
                     'billing_details' => $mergedBilling,
                 ]);

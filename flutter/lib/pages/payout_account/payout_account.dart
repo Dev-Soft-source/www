@@ -1,4 +1,3 @@
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
@@ -93,6 +92,9 @@ class PayoutAccountPage extends StatelessWidget {
                                   labelPadding: const EdgeInsets.all(5.0),
                                   tabs: [
                                     Text(
+                                        "${controller.labelTextDetail['web_interac_transfer_description'] ?? "Interac e-Transfer"}",
+                                        textAlign: TextAlign.center),
+                                    Text(
                                         "${controller.labelTextDetail['bank_detail_heading'] ?? "Bank detail"}",
                                         textAlign: TextAlign.center),
                                     Text(
@@ -108,720 +110,415 @@ class PayoutAccountPage extends StatelessWidget {
                                 children: [
                                   SingleChildScrollView(
                                     child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        // txt22Size(
-                                        //     title:
-                                        //         "${controller.labelTextDetail['bank_account_heading'] ?? "Bank account"}",
-                                        //     fontFamily: regular,
-                                        //     textColor: textColor,
-                                        //     context: context),
-                                        // 10.heightBox,
-                                        // Red required-fields note: 18px
-                                        txt18Size(
-                                            title:
-                                                "${controller.labelTextDetail['mobile_indicate_required_field_label'] ?? "* Indicates required fields"}",
-                                            fontFamily: regular,
-                                            context: context,
-                                            textColor: Colors.red),
+                                        txt20Size(
+                                          title: "${controller.labelTextDetail['interac_detail_heading'] ?? 'Interac e-Transfer Details:'}",
+                                          fontFamily: regular,
+                                          textColor: textColor,
+                                          context: context,
+                                        ),
                                         10.heightBox,
-                                        Row(
-                                          children: [
-                                            // Field label: 20px, asterisk 18px
-                                            txt20Size(
-                                                title:
-                                                    "${controller.labelTextDetail['bank_name_label'] ?? "Bank name"}",
-                                                fontFamily: regular,
-                                                context: context),
-                                            txt18Size(
-                                                title: "*",
-                                                fontFamily: regular,
-                                                context: context,
-                                                textColor: Colors.red),
-                                          ],
+                                        txt18Size(
+                                          title: "${controller.labelTextDetail['interac_autodeposit_info_paragraph'] ?? 'Please ensure the email matches the one registered for Autodeposit at your bank.'}",
+                                          fontFamily: regular,
+                                          context: context,
+                                          textColor: textColor,
+                                        ),
+                                        10.heightBox,
+                                        txt18Size(
+                                          title: "${controller.labelTextDetail['mobile_indicate_required_field_label'] ?? '* Indicates required fields'}",
+                                          fontFamily: regular,
+                                          context: context,
+                                          textColor: Colors.red,
+                                        ),
+                                        10.heightBox,
+                                        formLabelRequired(
+                                          title:
+                                              "${controller.labelTextDetail['interac_email_label'] ?? 'Email Address'}",
+                                          context: context,
+                                          fontFamily: regular,
+                                          labelColor: textColor,
                                         ),
                                         5.heightBox,
-                                        DropdownButtonFormField2(
-                                          isExpanded: true,
-                                          decoration: InputDecoration(
-                                            enabledBorder: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(5.0),
-                                              borderSide: BorderSide(
-                                                color: controller.errors
-                                                            .firstWhereOrNull(
-                                                                (element) =>
-                                                                    element[
-                                                                        'title'] ==
-                                                                    "type") !=
-                                                        null
-                                                    ? primaryColor
-                                                    : Colors.grey.shade400,
-                                                style: BorderStyle.solid,
-                                                width: 1,
+                                        Obx(() => fieldsWidget(
+                                              textController: controller.interacEmailTextEditingController,
+                                              fieldType: "email",
+                                              readonly: controller.interacEmailReadOnly.value,
+                                              fontFamily: regular,
+                                              fontSize: 18.0,
+                                              placeHolder: "${controller.labelTextDetail['interac_email_placeholder'] ?? 'e.g. name@email.com'}",
+                                              focusNode: controller.focusNodes['interac_email'],
+                                              onChanged: (_) {
+                                                controller.errors.removeWhere((e) => e['title'] == 'interac_email');
+                                                controller.validateInteracFormFields();
+                                              },
+                                            )),
+                                        if (controller.errors.firstWhereOrNull((e) => e['title'] == 'interac_email') != null)
+                                          toolTip(
+                                            tip: controller.errors.firstWhereOrNull((e) => e['title'] == 'interac_email'),
+                                          ),
+                                        10.heightBox,
+                                        formLabelRequired(
+                                          title:
+                                              "${controller.labelTextDetail['interac_email_confirm_label'] ?? 'Confirm Email Address'}",
+                                          context: context,
+                                          fontFamily: regular,
+                                          labelColor: textColor,
+                                        ),
+                                        5.heightBox,
+                                        fieldsWidget(
+                                          textController: controller.interacEmailConfirmTextEditingController,
+                                          fieldType: "email",
+                                          readonly: false,
+                                          fontFamily: regular,
+                                          fontSize: 18.0,
+                                          placeHolder: "${controller.labelTextDetail['interac_email_confirm_placeholder'] ?? 'Re-enter your email address'}",
+                                          focusNode: controller.focusNodes['interac_email_confirm'],
+                                          onChanged: (_) {
+                                            controller.errors.removeWhere((e) => e['title'] == 'interac_email_confirm');
+                                            controller.validateInteracFormFields();
+                                          },
+                                        ),
+                                        if (controller.errors.firstWhereOrNull((e) => e['title'] == 'interac_email_confirm') != null)
+                                          toolTip(
+                                            tip: controller.errors.firstWhereOrNull((e) => e['title'] == 'interac_email_confirm'),
+                                          ),
+                                        10.heightBox,
+                                        Obx(
+                                          () => Row(
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: [
+                                              checkBoxWidget(
+                                                compact: true,
+                                                value: controller.interacAutodepositChecked.value,
+                                                onChanged: (v) {
+                                                  controller.interacAutodepositChecked.value = v == true;
+                                                  controller.errors.removeWhere((e) => e['title'] == 'interac_autodeposit');
+                                                  controller.validateInteracFormFields();
+                                                },
+                                              ),
+                                              8.widthBox,
+                                              Expanded(
+                                                child: txt18Size(
+                                                  title:
+                                                      "${controller.labelTextDetail['interac_autodeposit_text_before'] ?? 'I have enabled Interac'} ${controller.labelTextDetail['interac_autodeposit_highlight'] ?? 'Autodeposit'} ${controller.labelTextDetail['interac_autodeposit_text_after'] ?? 'for this email address.'}",
+                                                  fontFamily: regular,
+                                                  context: context,
+                                                  textColor: textColor,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        if (controller.errors.firstWhereOrNull((e) => e['title'] == 'interac_autodeposit') != null)
+                                          toolTip(
+                                            tip: controller.errors.firstWhereOrNull((e) => e['title'] == 'interac_autodeposit'),
+                                          ),
+                                        10.heightBox,
+                                        txt18Size(
+                                          title: "${controller.labelTextDetail['processing_fee_text'] ?? 'Processing Fee: \$2.00 CAD per withdrawal.'}",
+                                          fontFamily: regular,
+                                          context: context,
+                                          textColor: textColor,
+                                        ),
+                                        10.heightBox,
+                                        Row(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            checkBoxWidget(
+                                              compact: true,
+                                              value: controller.setDefault.value == 'interac',
+                                              onChanged: (value) async {
+                                                controller.setDefault.value = value == false ? '' : 'interac';
+                                                controller.validateInteracFormFields();
+                                              },
+                                            ),
+                                            8.widthBox,
+                                            Expanded(
+                                              child: InkWell(
+                                                onTap: () {
+                                                  controller.setDefault.value =
+                                                      controller.setDefault.value == 'interac' ? '' : 'interac';
+                                                  controller.validateInteracFormFields();
+                                                },
+                                                child: txt18Size(
+                                                  title: "${controller.labelTextDetail['set_default_checkbox_label'] ?? 'Set as default'}",
+                                                  fontFamily: regular,
+                                                  context: context,
+                                                  textColor: textColor,
+                                                ),
                                               ),
                                             ),
-                                            focusedBorder: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(5.0),
-                                              borderSide: const BorderSide(
-                                                  color: primaryColor),
-                                            ),
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                    vertical: 0.0,
-                                                    horizontal: 8.0),
-                                            fillColor: inputColor,
-                                          ),
-                                          value: controller.banks.isEmpty
-                                              ? null
-                                              : (controller.bankId.value.isEmpty
-                                                  ? null
-                                                  : controller.bankId.value),
-                                          hint: Align(
-                                            alignment: Alignment.centerLeft,
-                                            child: txt18Size(
-                                                title:
-                                                    "${controller.labelTextDetail['select_bank_label'] ?? "Select bank"}",
+                                          ],
+                                        ),
+                                        10.heightBox,
+                                        Obx(
+                                          () => SizedBox(
+                                            width: context.screenWidth,
+                                            child: elevatedButtonWidget(
+                                              enabled: controller.isInteracFormValid.value,
+                                              textWidget: txt22Size(
+                                                title: controller.interacBtnText.value == 1
+                                                    ? "${controller.labelTextDetail['update_btn_label'] ?? 'Update'}"
+                                                    : "${controller.labelTextDetail['save_payout_method_btn'] ?? controller.labelTextDetail['save_btn_label'] ?? 'Save'}",
+                                                fontFamily: regular,
+                                                textColor: Colors.white,
                                                 context: context,
-                                                fontFamily: bold),
-                                          ),
-                                          items: controller.banks.isEmpty
-                                              ? [
-                                                  DropdownMenuItem(
-                                                    value: null,
-                                                    enabled: false,
-                                                    child: txt18Size(
-                                                        title:
-                                                            "Loading banks...",
-                                                        context: context,
-                                                        fontFamily: bold),
-                                                  )
-                                                ]
-                                              : [
-                                                  for (var i = 0;
-                                                      i <
-                                                          controller
-                                                              .banks.length;
-                                                      i++) ...[
-                                                    DropdownMenuItem(
-                                                      value:
-                                                          "${controller.banks[i]['id']}",
-                                                      child: controller.bankId
-                                                                  .value ==
-                                                              "${controller.banks[i]['id']}"
-                                                          ? Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceBetween,
-                                                              children: [
-                                                                txt18Size(
-                                                                    title:
-                                                                        "${controller.banks[i]['name']}",
-                                                                    context:
-                                                                        context,
-                                                                    fontFamily:
-                                                                        bold),
-                                                                Icon(
-                                                                    Icons.check,
-                                                                    color:
-                                                                        btnPrimaryColor,
-                                                                    size: 20)
-                                                              ],
-                                                            )
-                                                          : txt18Size(
-                                                              title:
-                                                                  "${controller.banks[i]['name']}",
-                                                              context: context,
-                                                              fontFamily: bold),
-                                                    ),
-                                                  ]
-                                                ],
-                                          onChanged: (data) {
-                                            controller.bankId.value =
-                                                data ?? "";
-                                            if (controller.errors
-                                                    .firstWhereOrNull(
-                                                        (element) =>
-                                                            element['title'] ==
-                                                            "bank_name") !=
-                                                null) {
-                                              controller.errors.remove(
-                                                  controller.errors
-                                                      .firstWhereOrNull(
-                                                          (element) =>
-                                                              element[
-                                                                  'title'] ==
-                                                              "bank_name"));
-                                            }
-                                            controller.validateBankFormFields();
-                                          },
-                                          alignment:
-                                              AlignmentDirectional.topCenter,
-                                          dropdownStyleData: DropdownStyleData(
-                                            maxHeight:
-                                                context.screenHeight * 0.45,
-                                            width: context.screenWidth - 30,
-                                            // padding: EdgeInsets.only(bottom: 100),
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  width: 2,
-                                                  color: primaryColor),
-                                              borderRadius:
-                                                  const BorderRadius.only(
-                                                      bottomLeft:
-                                                          Radius.circular(10.0),
-                                                      bottomRight:
-                                                          Radius.circular(
-                                                              10.0)),
+                                              ),
+                                              onPressed: () async {
+                                                await controller.updateInteracDetail();
+                                              },
+                                              context: context,
+                                              btnRadius: 5.0,
                                             ),
                                           ),
                                         ),
-                                        if (controller.errors.firstWhereOrNull(
-                                                (element) =>
-                                                    element['title'] ==
-                                                    "bank_name") !=
-                                            null) ...[
-                                          toolTip(
-                                              tip: controller.errors
-                                                  .firstWhereOrNull((element) =>
-                                                      element['title'] ==
-                                                      "bank_name"))
-                                        ],
+                                        20.heightBox,
+                                      ],
+                                    ),
+                                  ),
+                                  SingleChildScrollView(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        txt20Size(
+                                          title: "${controller.labelTextDetail['bank_detail_heading'] ?? 'Bank details'}:",
+                                          fontFamily: regular,
+                                          textColor: textColor,
+                                          context: context,
+                                        ),
                                         10.heightBox,
-                                        Row(
-                                          children: [
-                                            txt20Size(
-                                                title:
-                                                    "${controller.labelTextDetail['branch_label'] ?? "Branch Name"}",
-                                                fontFamily: regular,
-                                                textColor: textColor,
-                                                context: context),
-                                            txt18Size(
-                                                title: "*",
-                                                fontFamily: regular,
-                                                context: context,
-                                                textColor: Colors.red),
-                                          ],
+                                        txt18Size(
+                                          title: "${controller.labelTextDetail['bank_detail_info_paragraph'] ?? 'Enter your bank details to receive funds via Direct Deposit (EFT)'}",
+                                          fontFamily: regular,
+                                          context: context,
+                                          textColor: textColor,
+                                        ),
+                                        10.heightBox,
+                                        txt18Size(
+                                          title: "${controller.labelTextDetail['mobile_indicate_required_field_label'] ?? '* Indicates required fields'}",
+                                          fontFamily: regular,
+                                          context: context,
+                                          textColor: Colors.red,
+                                        ),
+                                        10.heightBox,
+                                        formLabelRequired(
+                                          title:
+                                              "${controller.labelTextDetail['bank_title_label'] ?? 'Account Holder Name'}",
+                                          context: context,
+                                          fontFamily: regular,
+                                          labelColor: textColor,
                                         ),
                                         5.heightBox,
                                         fieldsWidget(
-                                          textController: controller
-                                              .branchTextEditingController,
+                                          textController: controller.bankTitleTextEditingController,
                                           fieldType: "text",
                                           readonly: false,
                                           fontFamily: regular,
                                           fontSize: 18.0,
-                                          onChanged: (value) {
-                                            if (controller.errors
-                                                    .firstWhereOrNull(
-                                                        (element) =>
-                                                            element['title'] ==
-                                                            "branch") !=
-                                                null) {
-                                              controller.errors.remove(
-                                                  controller.errors
-                                                      .firstWhereOrNull(
-                                                          (element) =>
-                                                              element[
-                                                                  'title'] ==
-                                                              "branch"));
-                                            }
+                                          placeHolder: "${controller.labelTextDetail['bank_title_placeholder'] ?? 'As it appears on your bank statement'}",
+                                          focusNode: controller.focusNodes['account_holder_name'],
+                                          onChanged: (_) {
+                                            controller.errors.removeWhere((e) => e['title'] == 'account_holder_name');
                                             controller.validateBankFormFields();
                                           },
                                         ),
-                                        if (controller.errors.firstWhereOrNull(
-                                                (element) =>
-                                                    element['title'] ==
-                                                    "branch") !=
-                                            null) ...[
+                                        if (controller.errors.firstWhereOrNull((e) => e['title'] == 'account_holder_name') != null)
                                           toolTip(
-                                              tip: controller.errors
-                                                  .firstWhereOrNull((element) =>
-                                                      element['title'] ==
-                                                      "branch"))
-                                        ],
+                                            tip: controller.errors.firstWhereOrNull((e) => e['title'] == 'account_holder_name'),
+                                          ),
                                         10.heightBox,
-                                        Row(
-                                          children: [
-                                            txt20Size(
-                                                title:
-                                                    "${controller.labelTextDetail['institution_number_label'] ?? "Institution number"}",
-                                                fontFamily: regular,
-                                                textColor: textColor,
-                                                context: context),
-                                            txt18Size(
-                                                title: "*",
-                                                fontFamily: regular,
-                                                context: context,
-                                                textColor: Colors.red),
-                                          ],
-                                        ),
-                                        5.heightBox,
-                                        fieldsWidget(
-                                          textController: controller
-                                              .institutionNumberTextEditingController,
-                                          placeHolder:
-                                              "${controller.labelTextDetail['institution_number_placeholder'] ?? "A unique three-digit code assigned to a certain bank or financial institution"}",
-                                          fieldType: "number",
-                                          maxLength: 3,
-                                          maxLines: 1,
-                                          hintMaxLines: 10,
-                                          readonly: false,
+                                        formLabelRequired(
+                                          title:
+                                              "${controller.labelTextDetail['branch_number_label'] ?? 'Transit Number (5 digits)'}",
+                                          context: context,
                                           fontFamily: regular,
-                                          fontSize: 18.0,
-                                          inputFormatters: [
-                                            FilteringTextInputFormatter
-                                                .digitsOnly
-                                          ],
-                                          onChanged: (value) {
-                                            if (controller.errors
-                                                    .firstWhereOrNull((element) =>
-                                                        element['title'] ==
-                                                        "institution_number") !=
-                                                null) {
-                                              controller.errors.remove(controller
-                                                  .errors
-                                                  .firstWhereOrNull((element) =>
-                                                      element['title'] ==
-                                                      "institution_number"));
-                                            }
-                                            controller.validateBankFormFields();
-                                          },
-                                        ),
-                                        if (controller.errors.firstWhereOrNull(
-                                                (element) =>
-                                                    element['title'] ==
-                                                    "institution_number") !=
-                                            null) ...[
-                                          toolTip(
-                                              tip: controller.errors
-                                                  .firstWhereOrNull((element) =>
-                                                      element['title'] ==
-                                                      "institution_number"))
-                                        ],
-                                        10.heightBox,
-                                        Row(
-                                          children: [
-                                            txt20Size(
-                                                title:
-                                                    "${controller.labelTextDetail['branch_address_label'] ?? "Branch address"}",
-                                                fontFamily: regular,
-                                                textColor: textColor,
-                                                context: context),
-                                            txt18Size(
-                                                title: "*",
-                                                fontFamily: regular,
-                                                context: context,
-                                                textColor: Colors.red),
-                                          ],
+                                          labelColor: textColor,
                                         ),
                                         5.heightBox,
                                         fieldsWidget(
-                                          textController: controller
-                                              .branchAddressTextEditingController,
-                                          placeHolder:
-                                              "${controller.labelTextDetail['branch_address_placeholder'] ?? "Street name and number, City, Province/State, Postal Code/ZIP Code, Country"}",
-                                          fieldType: "text",
-                                          maxLines: 3,
-                                          hintMaxLines: 10,
-                                          readonly: false,
-                                          fontFamily: regular,
-                                          fontSize: 18.0,
-                                          onChanged: (value) {
-                                            if (controller.errors
-                                                    .firstWhereOrNull(
-                                                        (element) =>
-                                                            element['title'] ==
-                                                            "branch_address") !=
-                                                null) {
-                                              controller.errors.remove(controller
-                                                  .errors
-                                                  .firstWhereOrNull((element) =>
-                                                      element['title'] ==
-                                                      "branch_address"));
-                                            }
-                                            controller.validateBankFormFields();
-                                          },
-                                        ),
-                                        if (controller.errors.firstWhereOrNull(
-                                                (element) =>
-                                                    element['title'] ==
-                                                    "branch_address") !=
-                                            null) ...[
-                                          toolTip(
-                                              tip: controller.errors
-                                                  .firstWhereOrNull((element) =>
-                                                      element['title'] ==
-                                                      "branch_address"))
-                                        ],
-                                        10.heightBox,
-                                        Row(
-                                          children: [
-                                            txt20Size(
-                                                title:
-                                                    "${controller.labelTextDetail['branch_number_label'] ?? "Branch number"}",
-                                                fontFamily: regular,
-                                                textColor: textColor,
-                                                context: context),
-                                            txt18Size(
-                                                title: "*",
-                                                fontFamily: regular,
-                                                context: context,
-                                                textColor: Colors.red),
-                                          ],
-                                        ),
-                                        5.heightBox,
-                                        fieldsWidget(
-                                          textController: controller
-                                              .branchNumberTextEditingController,
-                                          placeHolder:
-                                              "${controller.labelTextDetail['branch_number_placeholder'] ?? "A five-digit number of the branch where your account was opened"}",
+                                          textController: controller.branchNumberTextEditingController,
                                           fieldType: "number",
                                           maxLength: 5,
-                                          maxLines: 1,
-                                          hintMaxLines: 10,
                                           readonly: false,
                                           fontFamily: regular,
                                           fontSize: 18.0,
-                                          inputFormatters: [
-                                            FilteringTextInputFormatter
-                                                .digitsOnly
-                                          ],
-                                          onChanged: (value) {
-                                            if (controller.errors
-                                                    .firstWhereOrNull(
-                                                        (element) =>
-                                                            element['title'] ==
-                                                            "branch_number") !=
-                                                null) {
-                                              controller.errors.remove(
-                                                  controller.errors
-                                                      .firstWhereOrNull(
-                                                          (element) =>
-                                                              element[
-                                                                  'title'] ==
-                                                              "branch_number"));
-                                            }
+                                          placeHolder: "${controller.labelTextDetail['branch_number_placeholder'] ?? 'The branch code'}",
+                                          focusNode: controller.focusNodes['branch_number'],
+                                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                          onChanged: (_) {
+                                            controller.errors.removeWhere((e) => e['title'] == 'branch_number');
                                             controller.validateBankFormFields();
                                           },
                                         ),
-                                        if (controller.errors.firstWhereOrNull(
-                                                (element) =>
-                                                    element['title'] ==
-                                                    "branch_number") !=
-                                            null) ...[
+                                        if (controller.errors.firstWhereOrNull((e) => e['title'] == 'branch_number') != null)
                                           toolTip(
-                                              tip: controller.errors
-                                                  .firstWhereOrNull((element) =>
-                                                      element['title'] ==
-                                                      "branch_number"))
-                                        ],
+                                            tip: controller.errors.firstWhereOrNull((e) => e['title'] == 'branch_number'),
+                                          ),
                                         10.heightBox,
-                                        Row(
-                                          children: [
-                                            txt20Size(
-                                                title:
-                                                    "${controller.labelTextDetail['bank_title_label'] ?? "Bank title"}",
-                                                fontFamily: regular,
-                                                textColor: textColor,
-                                                context: context),
-                                            txt18Size(
-                                                title: "*",
-                                                fontFamily: regular,
-                                                context: context,
-                                                textColor: Colors.red),
-                                          ],
+                                        formLabelRequired(
+                                          title:
+                                              "${controller.labelTextDetail['institution_number_label'] ?? 'Institution Number (3 digits)'}",
+                                          context: context,
+                                          fontFamily: regular,
+                                          labelColor: textColor,
                                         ),
                                         5.heightBox,
                                         fieldsWidget(
-                                          textController: controller
-                                              .bankTitleTextEditingController,
-                                          fieldType: "text",
+                                          textController: controller.institutionNumberTextEditingController,
+                                          fieldType: "number",
+                                          maxLength: 3,
                                           readonly: false,
                                           fontFamily: regular,
                                           fontSize: 18.0,
-                                          onChanged: (value) {
-                                            if (controller.errors
-                                                    .firstWhereOrNull((element) =>
-                                                        element['title'] ==
-                                                        "account_holder_name") !=
-                                                null) {
-                                              controller.errors.remove(controller
-                                                  .errors
-                                                  .firstWhereOrNull((element) =>
-                                                      element['title'] ==
-                                                      "account_holder_name"));
-                                            }
+                                          placeHolder: "${controller.labelTextDetail['institution_number_placeholder'] ?? 'e.g. 004 for TD'}",
+                                          focusNode: controller.focusNodes['institution_number'],
+                                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                          onChanged: (_) {
+                                            controller.errors.removeWhere((e) => e['title'] == 'institution_number');
                                             controller.validateBankFormFields();
                                           },
                                         ),
-                                        if (controller.errors.firstWhereOrNull(
-                                                (element) =>
-                                                    element['title'] ==
-                                                    "account_holder_name") !=
-                                            null) ...[
+                                        if (controller.errors.firstWhereOrNull((e) => e['title'] == 'institution_number') != null)
                                           toolTip(
-                                              tip: controller.errors
-                                                  .firstWhereOrNull((element) =>
-                                                      element['title'] ==
-                                                      "account_holder_name"))
-                                        ],
+                                            tip: controller.errors.firstWhereOrNull((e) => e['title'] == 'institution_number'),
+                                          ),
                                         10.heightBox,
-                                        Row(
-                                          children: [
-                                            txt20Size(
-                                                title:
-                                                    "${controller.labelTextDetail['account_number_label'] ?? "Account number"}",
-                                                fontFamily: regular,
-                                                textColor: textColor,
-                                                context: context),
-                                            txt18Size(
-                                                title: "*",
-                                                fontFamily: regular,
-                                                context: context,
-                                                textColor: Colors.red),
-                                          ],
+                                        formLabelRequired(
+                                          title:
+                                              "${controller.labelTextDetail['account_number_label'] ?? 'Account Number'}",
+                                          context: context,
+                                          fontFamily: regular,
+                                          labelColor: textColor,
                                         ),
                                         5.heightBox,
                                         fieldsWidget(
-                                          textController: controller
-                                              .accountNumberTextEditingController,
+                                          textController: controller.accountNumberTextEditingController,
                                           fieldType: "number",
                                           maxLength: 12,
                                           readonly: false,
                                           fontFamily: regular,
                                           fontSize: 18.0,
-                                          inputFormatters: [
-                                            FilteringTextInputFormatter
-                                                .digitsOnly
-                                          ],
-                                          onChanged: (value) {
-                                            if (controller.errors
-                                                    .firstWhereOrNull((element) =>
-                                                        element['title'] ==
-                                                        "account_holder_number") !=
-                                                null) {
-                                              controller.errors.remove(controller
-                                                  .errors
-                                                  .firstWhereOrNull((element) =>
-                                                      element['title'] ==
-                                                      "account_holder_number"));
-                                            }
+                                          placeHolder: "${controller.labelTextDetail['account_number_placeholder'] ?? '7–12 digits'}",
+                                          focusNode: controller.focusNodes['account_holder_number'],
+                                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                          onChanged: (_) {
+                                            controller.errors.removeWhere((e) => e['title'] == 'account_holder_number');
                                             controller.validateBankFormFields();
                                           },
                                         ),
-                                        if (controller.errors.firstWhereOrNull(
-                                                (element) =>
-                                                    element['title'] ==
-                                                    "account_holder_number") !=
-                                            null) ...[
+                                        if (controller.errors.firstWhereOrNull((e) => e['title'] == 'account_holder_number') != null)
                                           toolTip(
-                                              tip: controller.errors
-                                                  .firstWhereOrNull((element) =>
-                                                      element['title'] ==
-                                                      "account_holder_number"))
-                                        ],
+                                            tip: controller.errors.firstWhereOrNull((e) => e['title'] == 'account_holder_number'),
+                                          ),
+                                        10.heightBox,
+                                        txt18Size(
+                                          title: "${controller.labelTextDetail['processing_fee_text'] ?? 'Processing Fee: \$2.00 CAD per withdrawal.'}",
+                                          fontFamily: regular,
+                                          context: context,
+                                          textColor: textColor,
+                                        ),
+                                        10.heightBox,
+                                        txt18Size(
+                                          title: "${controller.labelTextDetail['bank_funds_note'] ?? 'Note: Funds typically arrive in 1–3 business days.'}",
+                                          fontFamily: regular,
+                                          context: context,
+                                          textColor: textColor,
+                                        ),
                                         10.heightBox,
                                         Row(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
                                           children: [
-                                            txt20Size(
-                                                title:
-                                                    "${controller.labelTextDetail['address_label'] ?? "Address"}",
-                                                fontFamily: regular,
-                                                textColor: textColor,
-                                                context: context),
-                                            txt18Size(
-                                                title: "*",
-                                                fontFamily: regular,
-                                                context: context,
-                                                textColor: Colors.red),
-                                          ],
-                                        ),
-                                        5.heightBox,
-                                        fieldsWidget(
-                                          textController: controller
-                                              .addressTextEditingController,
-                                          placeHolder:
-                                              "${controller.labelTextDetail['account_address_placeholder'] ?? "Account holder’s address, as the bank has it: Street name and number, apartment number, City, Province/State, Postal Code / ZIP Code, Country"}",
-                                          fieldType: "text",
-                                          maxLines: 3,
-                                          hintMaxLines: 10,
-                                          readonly: false,
-                                          fontFamily: regular,
-                                          fontSize: 18.0,
-                                          onChanged: (value) {
-                                            if (controller.errors
-                                                    .firstWhereOrNull((element) =>
-                                                        element['title'] ==
-                                                        "account_holder_address") !=
-                                                null) {
-                                              controller.errors.remove(controller
-                                                  .errors
-                                                  .firstWhereOrNull((element) =>
-                                                      element['title'] ==
-                                                      "account_holder_address"));
-                                            }
-                                            controller.validateBankFormFields();
-                                          },
-                                        ),
-                                        if (controller.errors.firstWhereOrNull(
-                                                (element) =>
-                                                    element['title'] ==
-                                                    "account_holder_address") !=
-                                            null) ...[
-                                          toolTip(
-                                              tip: controller.errors
-                                                  .firstWhereOrNull((element) =>
-                                                      element['title'] ==
-                                                      "account_holder_address"))
-                                        ],
-                                        10.heightBox,
-                                        if (controller.bankStatus.value ==
-                                            "admin_verify") ...[
-                                          Row(
-                                            children: [
-                                              txt20Size(
-                                                  title:
-                                                      "${controller.labelTextDetail['admin_sent_amount_placeholder'] ?? "Admin sent amount"}",
-                                                  fontFamily: regular,
-                                                  textColor: textColor,
-                                                  context: context),
-                                              txt18Size(
-                                                  title: "*",
+                                            checkBoxWidget(
+                                              compact: true,
+                                              value: controller.setDefault.value == 'bank',
+                                              onChanged: (value) async {
+                                                controller.setDefault.value = value == false ? '' : 'bank';
+                                                controller.validateBankFormFields();
+                                              },
+                                            ),
+                                            8.widthBox,
+                                            Expanded(
+                                              child: InkWell(
+                                                onTap: () {
+                                                  controller.setDefault.value =
+                                                      controller.setDefault.value == 'bank' ? '' : 'bank';
+                                                  controller.validateBankFormFields();
+                                                },
+                                                child: txt18Size(
+                                                  title: "${controller.labelTextDetail['set_default_checkbox_label'] ?? 'Set as default'}",
                                                   fontFamily: regular,
                                                   context: context,
-                                                  textColor: Colors.red),
-                                            ],
+                                                  textColor: textColor,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        10.heightBox,
+                                        if (controller.bankStatus.value == 'admin_verify') ...[
+                                          formLabelRequired(
+                                            title:
+                                                "${controller.labelTextDetail['admin_sent_amount_placeholder'] ?? 'Admin sent amount'}",
+                                            context: context,
+                                            fontFamily: regular,
+                                            labelColor: textColor,
                                           ),
                                           fieldsWidget(
-                                            textController: controller
-                                                .userVerifyAmountTextEditingController,
+                                            textController: controller.userVerifyAmountTextEditingController,
                                             fieldType: "number",
                                             readonly: false,
                                             fontFamily: regular,
                                             fontSize: 18.0,
-                                            onChanged: (value) {
-                                              if (controller.errors
-                                                      .firstWhereOrNull((element) =>
-                                                          element['title'] ==
-                                                          "user_verify_amount") !=
-                                                  null) {
-                                                controller.errors.remove(controller
-                                                    .errors
-                                                    .firstWhereOrNull((element) =>
-                                                        element['title'] ==
-                                                        "user_verify_amount"));
-                                              }
-                                              controller
-                                                  .validateBankVerifyField();
+                                            focusNode: controller.focusNodes['user_verify_amount'],
+                                            onChanged: (_) {
+                                              controller.errors.removeWhere((e) => e['title'] == 'user_verify_amount');
+                                              controller.validateBankVerifyField();
                                             },
                                           ),
-                                          if (controller.errors
-                                                  .firstWhereOrNull((element) =>
-                                                      element['title'] ==
-                                                      "user_verify_amount") !=
-                                              null) ...[
+                                          if (controller.errors.firstWhereOrNull((e) => e['title'] == 'user_verify_amount') != null)
                                             toolTip(
-                                                tip: controller.errors
-                                                    .firstWhereOrNull((element) =>
-                                                        element['title'] ==
-                                                        "user_verify_amount"))
-                                          ],
+                                              tip: controller.errors.firstWhereOrNull((e) => e['title'] == 'user_verify_amount'),
+                                            ),
                                           10.heightBox,
                                         ],
-                                        10.heightBox,
-                                        Row(
-                                          children: [
-                                            InkWell(
-                                              onTap: () {
-                                                controller.setDefault.value =
-                                                    controller.setDefault
-                                                                .value ==
-                                                            "bank"
-                                                        ? ""
-                                                        : "bank";
-                                              },
-                                              child: txt20Size(
-                                                  title:
-                                                      "${controller.labelTextDetail['set_default_checkbox_label'] ?? "Set default"}",
-                                                  fontFamily: regular,
-                                                  context: context),
-                                            ),
-                                            5.widthBox,
-                                            SizedBox(
-                                              width:
-                                                  getValueForScreenType<double>(
-                                                context: context,
-                                                mobile: 25.0,
-                                                tablet: 25.0,
-                                              ),
-                                              height:
-                                                  getValueForScreenType<double>(
-                                                context: context,
-                                                mobile: 25.0,
-                                                tablet: 25.0,
-                                              ),
-                                              child: checkBoxWidget(
-                                                value: controller
-                                                            .setDefault.value ==
-                                                        "bank"
-                                                    ? true
-                                                    : false,
-                                                onChanged: (value) async {
-                                                  controller.setDefault.value =
-                                                      value == false
-                                                          ? ""
-                                                          : "bank";
-                                                  controller
-                                                      .validateBankFormFields();
-                                                },
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        10.heightBox,
-                                        SizedBox(
-                                          width: context.screenWidth,
-                                          child: controller.bankStatus.value ==
-                                                  "admin_verify"
-                                              ? elevatedButtonWidget(
-                                                  enabled: controller
-                                                      .isBankVerifyValid.value,
-                                                  textWidget: txt22Size(
-                                                      title:
-                                                          "${controller.labelTextDetail['verify_button_text'] ?? "Verify bank"}",
+                                        Obx(
+                                          () => SizedBox(
+                                            width: context.screenWidth,
+                                            child: controller.bankStatus.value == 'admin_verify'
+                                                ? elevatedButtonWidget(
+                                                    enabled: controller.isBankVerifyValid.value,
+                                                    textWidget: txt22Size(
+                                                      title: "${controller.labelTextDetail['verify_button_text'] ?? 'Verify bank'}",
                                                       fontFamily: regular,
                                                       textColor: Colors.white,
-                                                      context: context),
-                                                  onPressed: () async {
-                                                    await controller
-                                                        .verifyBank();
-                                                  },
-                                                  context: context,
-                                                  btnRadius: 5.0)
-                                              : elevatedButtonWidget(
-                                                  enabled: controller
-                                                      .isBankFormValid.value,
-                                                  textWidget: txt22Size(
-                                                      title: controller
-                                                                  .bankBtnText
-                                                                  .value ==
-                                                              1
-                                                          ? "${controller.labelTextDetail['update_btn_label'] ?? "Update"}"
-                                                          : "${controller.labelTextDetail['save_btn_label'] ?? "Save"}",
+                                                      context: context,
+                                                    ),
+                                                    onPressed: () async {
+                                                      await controller.verifyBank();
+                                                    },
+                                                    context: context,
+                                                    btnRadius: 5.0,
+                                                  )
+                                                : elevatedButtonWidget(
+                                                    enabled: controller.isBankFormValid.value,
+                                                    textWidget: txt22Size(
+                                                      title: controller.bankBtnText.value == 1
+                                                          ? "${controller.labelTextDetail['update_btn_label'] ?? 'Update'}"
+                                                          : "${controller.labelTextDetail['save_payout_method_btn'] ?? controller.labelTextDetail['save_btn_label'] ?? 'Save'}",
                                                       fontFamily: regular,
                                                       textColor: Colors.white,
-                                                      context: context),
-                                                  onPressed: () async {
-                                                    await controller
-                                                        .updateBankDetail();
-                                                  },
-                                                  context: context,
-                                                  btnRadius: 5.0),
+                                                      context: context,
+                                                    ),
+                                                    onPressed: () async {
+                                                      await controller.updateBankDetail();
+                                                    },
+                                                    context: context,
+                                                    btnRadius: 5.0,
+                                                  ),
+                                          ),
                                         ),
                                         20.heightBox,
                                       ],
@@ -859,20 +556,12 @@ class PayoutAccountPage extends StatelessWidget {
                                             context: context,
                                             textColor: Colors.red),
                                         10.heightBox,
-                                        Row(
-                                          children: [
-                                            txt20Size(
-                                                title:
-                                                    "${controller.labelTextDetail['paypal_email_label'] ?? "Paypal email"}",
-                                                fontFamily: regular,
-                                                textColor: textColor,
-                                                context: context),
-                                            txt18Size(
-                                                title: "*",
-                                                fontFamily: regular,
-                                                context: context,
-                                                textColor: Colors.red),
-                                          ],
+                                        formLabelRequired(
+                                          title:
+                                              "${controller.labelTextDetail['paypal_email_label'] ?? "Paypal email"}",
+                                          context: context,
+                                          fontFamily: regular,
+                                          labelColor: textColor,
                                         ),
                                         5.heightBox,
                                         Obx(() => controller
@@ -889,6 +578,8 @@ class PayoutAccountPage extends StatelessWidget {
                                                     readonly: false,
                                                     fontFamily: regular,
                                                     fontSize: 18.0,
+                                                    focusNode: controller
+                                                        .focusNodes['paypal_email'],
                                                     onChanged: (value) {
                                                       if (controller.errors
                                                               .firstWhereOrNull(
@@ -991,57 +682,41 @@ class PayoutAccountPage extends StatelessWidget {
                                               )),
                                         10.heightBox,
                                         Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
                                           children: [
-                                            InkWell(
-                                              onTap: () {
+                                            checkBoxWidget(
+                                              compact: true,
+                                              value: controller.setDefault.value ==
+                                                  "paypal",
+                                              onChanged: (value) async {
                                                 controller.setDefault.value =
-                                                    controller.setDefault
-                                                                .value ==
-                                                            "paypal"
+                                                    value == false
                                                         ? ""
                                                         : "paypal";
                                                 controller
                                                     .validatePaypalFormFields();
                                               },
-                                              child: txt20Size(
-                                                  title:
-                                                      "${controller.labelTextDetail['paypal_set_default_checkbox_label'] ?? "Set default"}",
-                                                  fontFamily: regular,
-                                                  context: context),
                                             ),
-                                            // txt20Size(
-                                            //     title: "*",
-                                            //     fontFamily: regular,
-                                            //     context: context,
-                                            //     textColor: Colors.red),
-                                            5.widthBox,
-                                            SizedBox(
-                                              width:
-                                                  getValueForScreenType<double>(
-                                                context: context,
-                                                mobile: 25.0,
-                                                tablet: 25.0,
-                                              ),
-                                              height:
-                                                  getValueForScreenType<double>(
-                                                context: context,
-                                                mobile: 25.0,
-                                                tablet: 25.0,
-                                              ),
-                                              child: checkBoxWidget(
-                                                value: controller
-                                                            .setDefault.value ==
-                                                        "paypal"
-                                                    ? true
-                                                    : false,
-                                                onChanged: (value) async {
+                                            8.widthBox,
+                                            Expanded(
+                                              child: InkWell(
+                                                onTap: () {
                                                   controller.setDefault.value =
-                                                      value == false
+                                                      controller.setDefault
+                                                                  .value ==
+                                                              "paypal"
                                                           ? ""
                                                           : "paypal";
                                                   controller
                                                       .validatePaypalFormFields();
                                                 },
+                                                child: txt18Size(
+                                                    title:
+                                                        "${controller.labelTextDetail['paypal_set_default_checkbox_label'] ?? "Set default"}",
+                                                    fontFamily: regular,
+                                                    context: context,
+                                                    textColor: textColor),
                                               ),
                                             ),
                                           ],

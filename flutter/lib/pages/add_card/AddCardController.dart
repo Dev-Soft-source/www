@@ -4,8 +4,6 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/consts/const_api.dart';
-import 'package:proximaride_app/consts/strings.dart';
-import 'package:proximaride_app/helpers/stripe_payment_sheet_native_params.dart';
 import 'package:proximaride_app/pages/book_seat/BookSeatController.dart';
 import 'package:proximaride_app/pages/my_wallet/MyWalletController.dart';
 import 'package:proximaride_app/pages/stages/StageProvider.dart';
@@ -24,7 +22,8 @@ class AddCardController extends GetxController {
   final errors = [].obs;
 
   ScrollController scrollController = ScrollController();
-  late TextEditingController cardNameController;
+  /// Field initializers so the add-card UI never reads these before [onInit] runs.
+  final TextEditingController cardNameController = TextEditingController();
 
   final Map<String, FocusNode> focusNodes = {};
 
@@ -37,6 +36,28 @@ class AddCardController extends GetxController {
 
   String pageTypeFrom = "";
 
+  /// Stripe [CardField]: card number, expiry, CVC (no postal in-widget).
+  final CardEditController cardFieldController = CardEditController();
+
+  CardFieldInputDetails cardFieldDetails =
+      const CardFieldInputDetails(complete: false);
+
+  void onCardFieldChanged(CardFieldInputDetails? details) {
+    cardFieldDetails = details ?? const CardFieldInputDetails(complete: false);
+  }
+
+  /// Optional ISO-2 hint for the card widget (CVC length, etc.); from payment options when available.
+  String get defaultCardCountryCode {
+    final c = paymentOptionController.stripeConfig['country']
+        ?.toString()
+        .trim()
+        .toUpperCase();
+    if (c != null && c.length == 2) {
+      return c;
+    }
+    return 'CA';
+  }
+
   @override
   void onInit() async {
     super.onInit();
@@ -45,12 +66,6 @@ class AddCardController extends GetxController {
       Get.put(PaymentOptionController());
     }
     paymentOptionController = Get.find<PaymentOptionController>();
-
-    isLoading(true);
-    await getLabelTextDetail();
-    isLoading(false);
-
-    cardNameController = TextEditingController();
 
     focusNodes['1'] = FocusNode();
     focusNodes['1']?.addListener(() {
@@ -62,6 +77,10 @@ class AddCardController extends GetxController {
         );
       }
     });
+
+    isLoading(true);
+    await getLabelTextDetail();
+    isLoading(false);
 
     getType();
     pageTypeFrom = '';
@@ -81,12 +100,13 @@ class AddCardController extends GetxController {
 
   @override
   void onClose() {
-    super.onClose();
+    cardFieldController.dispose();
     scrollController.dispose();
     cardNameController.dispose();
     for (final n in focusNodes.values) {
       n.dispose();
     }
+    super.onClose();
   }
 
   Future<void> getLabelTextDetail() async {
@@ -180,7 +200,20 @@ class AddCardController extends GetxController {
   }
 
   void getType() {
-    addEditType = Get.parameters['type'] ?? "";
+    final p = Get.parameters['type']?.trim() ?? '';
+    if (p.isNotEmpty) {
+      addEditType = p;
+      return;
+    }
+    // Parameters can be empty on some navigations; infer from the current path.
+    final path = Get.currentRoute.split('?').first;
+    if (path.endsWith('/add')) {
+      addEditType = 'add';
+    } else if (path.endsWith('/edit')) {
+      addEditType = 'edit';
+    } else {
+      addEditType = 'add';
+    }
   }
 
   void _mergeNewCardIntoList(RxList<dynamic> cards, Map<String, dynamic> newCard) {
@@ -212,6 +245,13 @@ class AddCardController extends GetxController {
       scrollError(MediaQuery.of(context).viewInsets.bottom, 1, screenHeight);
       return;
     }
+    if (!cardFieldDetails.complete) {
+      serviceController.showDialogue(
+        'Please enter a valid card number, expiration date, and security code.',
+        type: "error",
+      );
+      return;
+    }
     errors.clear();
 
     final keyboardBottom = MediaQuery.of(context).viewInsets.bottom;
@@ -240,7 +280,6 @@ class AddCardController extends GetxController {
       final data = intentResp['data'] as Map;
       final clientSecret = data['clientSecret']?.toString();
       final setupIntentId = data['setupIntentId']?.toString();
-      final stripeCfg = data['stripeConfig'];
       if (clientSecret == null ||
           clientSecret.isEmpty ||
           setupIntentId == null ||
@@ -250,14 +289,6 @@ class AddCardController extends GetxController {
             'Could not start card setup. Please try again.',
             type: "error");
         return;
-      }
-
-      String country = 'CA';
-      if (stripeCfg is Map) {
-        final c = stripeCfg['country']?.toString().trim().toUpperCase();
-        if (c != null && c.length == 2) {
-          country = c;
-        }
       }
 
       var publishableKey = data['publishableKey']?.toString().trim() ?? '';
@@ -276,54 +307,40 @@ class AddCardController extends GetxController {
       Stripe.publishableKey = publishableKey;
       await Stripe.instance.applySettings();
 
-      // Native plugins expect `link`/`display` and map-shaped `termsDisplay`;
-      // SetupPaymentSheetParameters.toJson() uses different keys — see helper.
-      await initPaymentSheetNativeJson(
-        SetupPaymentSheetParameters(
-          setupIntentClientSecret: clientSecret,
-          merchantDisplayName: appName,
-          linkDisplayParams: const LinkDisplayParams(
-            linkDisplay: LinkDisplay.never,
-          ),
-          paymentMethodOrder: const ['card'],
-          billingDetails: BillingDetails(
-            name: cardNameController.text.trim(),
-            address: Address(
-              city: null,
-              country: country,
-              line1: null,
-              line2: null,
-              postalCode: null,
-              state: null,
+      SetupIntent si;
+      try {
+        si = await Stripe.instance.confirmSetupIntent(
+          paymentIntentClientSecret: clientSecret,
+          params: PaymentMethodParams.card(
+            paymentMethodData: PaymentMethodData(
+              billingDetails: BillingDetails(
+                name: cardNameController.text.trim(),
+              ),
             ),
           ),
-          billingDetailsCollectionConfiguration:
-              const BillingDetailsCollectionConfiguration(
-            name: CollectionMode.never,
-            email: CollectionMode.never,
-            phone: CollectionMode.never,
-            address: AddressCollectionMode.never,
-            attachDefaultsToPaymentMethod: true,
-          ),
-          termsDisplay: TermsDisplay.never,
-        ),
-      );
-
-      try {
-        await Stripe.instance.presentPaymentSheet();
+        );
       } on StripeException catch (e) {
         isOverlayLoading(false);
         if (e.error.code == FailureCode.Canceled) {
           return;
         }
+        final msg = _stripeUserMessage(e);
+        serviceController.showDialogue(msg, type: "error");
+        return;
+      }
+
+      var status = si.status.toLowerCase();
+      for (var i = 0; i < 5 && status == 'requires_action'; i++) {
+        await Stripe.instance.handleNextActionForSetupIntent(clientSecret);
+        si = await Stripe.instance.retrieveSetupIntent(clientSecret);
+        status = si.status.toLowerCase();
+      }
+
+      if (status != 'succeeded') {
+        isOverlayLoading(false);
         serviceController.showDialogue(
-          (e.error.localizedMessage ?? e.error.message ?? 'Payment failed')
-              .trim()
-              .isEmpty
-              ? 'Could not complete card setup'
-              : (e.error.localizedMessage ?? e.error.message ?? '')
-                  .replaceAll('.', ' ')
-                  .trim(),
+          si.lastSetupError?.message ??
+              'Card setup did not complete. Please try again.',
           type: "error",
         );
         return;
@@ -418,6 +435,19 @@ class AddCardController extends GetxController {
         serviceController.showDialogue(exception.toString(), type: "error");
       }
     }
+  }
+
+  String _stripeUserMessage(StripeException e) {
+    final err = e.error;
+    final localized = err.localizedMessage?.trim();
+    if (localized != null && localized.isNotEmpty) {
+      return localized;
+    }
+    final message = err.message?.trim();
+    if (message != null && message.isNotEmpty) {
+      return message;
+    }
+    return 'Could not complete card setup.';
   }
 
   void scrollError(double keyboardBottomInset, int position, double screenHeight) {

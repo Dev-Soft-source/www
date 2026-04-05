@@ -199,6 +199,50 @@ Widget txt20Size(
       .make();
 }
 
+/// Required field label: red asterisk immediately after the title (web-style), not at the row end.
+Widget formLabelRequired({
+  required String title,
+  required BuildContext context,
+  String fontFamily = regular,
+  Color labelColor = textColor,
+  double labelSize = 20.0,
+}) {
+  final fontSize = getValueForScreenType<double>(
+    context: context,
+    mobile: labelSize,
+    tablet: labelSize,
+  );
+  return Text.rich(
+    TextSpan(
+      style: TextStyle(
+        fontSize: fontSize,
+        color: labelColor,
+        fontFamily: fontFamily,
+        height: 1.2,
+      ),
+      children: [
+        TextSpan(text: title),
+        WidgetSpan(
+          alignment: PlaceholderAlignment.baseline,
+          baseline: TextBaseline.alphabetic,
+          child: Transform.translate(
+            offset: Offset(1, -fontSize * 0.12),
+            child: Text(
+              '*',
+              style: TextStyle(
+                fontSize: fontSize * 0.85,
+                color: Colors.red,
+                fontFamily: fontFamily,
+                height: 1,
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 // Widget txt20Required({context,String title="",fontFamily = regular,textColor = textColor}){
 //   return RichText(
 //     text: TextSpan(

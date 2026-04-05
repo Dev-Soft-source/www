@@ -51,21 +51,30 @@ class BankDetailController extends Controller
         Log::info('=== storeUpdateBankDetail START ===');
         Log::info('Request data received:', $request->all());
 
+        $type = (string) $request->input('type');
+
         $validated = $request->validate([
-            'type' => 'required',
-            'bank_name' => $request->type == 'bank' ? 'required' : 'nullable',
-            'account_holder_name' => $request->type == 'bank' ? 'required' : 'nullable',
-            'account_holder_number' => $request->type == 'bank' ? 'required|digits_between:7,12' : 'nullable',
-            'branch' => $request->type == 'bank' ? 'required' : 'nullable',
-            'branch_number' => $request->type == 'bank' ? 'required|digits:5' : 'nullable',
-            'branch_address' => $request->type == 'bank' ? 'required' : 'nullable',
-            'institution_number' => $request->type == 'bank' ? 'required|digits:3' : 'nullable',
-            'account_holder_address' => $request->type == 'bank' ? 'required' : 'nullable',
-            'paypal_email' => $request->type == 'paypal' ? 'required|email' : 'nullable',
+            'type' => 'required|in:bank,paypal,interac',
+
+            // Bank — same core fields as web PayoutController (direct deposit / EFT)
+            'account_holder_name' => $type === 'bank' ? 'required' : 'nullable',
+            'account_holder_number' => $type === 'bank' ? 'required|digits_between:7,12' : 'nullable',
+            'branch_number' => $type === 'bank' ? 'required|digits:5' : 'nullable',
+            'institution_number' => $type === 'bank' ? 'required|digits:3' : 'nullable',
+
+            'paypal_email' => $type === 'paypal' ? 'required|email' : 'nullable',
+
+            // Interac e-Transfer — same rules as web payout form
+            'interac_email' => $type === 'interac' ? 'required|email' : 'nullable',
+            'interac_email_confirm' => $type === 'interac' ? 'required|same:interac_email' : 'nullable',
+            'interac_autodeposit' => $type === 'interac' ? 'accepted' : 'nullable',
         ], [
             'institution_number.digits' => 'Institution number must be exactly 3 digits',
             'branch_number.digits' => 'Branch number must be exactly 5 digits',
             'account_holder_number.digits_between' => 'Account number must be between 7 and 12 digits',
+            'interac_autodeposit.accepted' => 'Please confirm Autodeposit is enabled for Interac withdrawals.',
+            'interac_email_confirm.required' => 'Please confirm your Interac email.',
+            'interac_email_confirm.same' => 'Interac emails must match.',
         ]);
 
         Log::info('Validation passed:', $validated);
@@ -95,14 +104,17 @@ class BankDetailController extends Controller
         $message = "";
 
         $getBankDetail = BankDetail::where('user_id', $user_id)->first();
-        Log::info('Existing bank detail query result:', ['found' => isset($getBankDetail) && !is_null($getBankDetail), 'bank_detail' => $getBankDetail ? $getBankDetail->toArray() : null]);
+        $existing = isset($getBankDetail) && !is_null($getBankDetail);
+        Log::info('Existing bank detail query result:', ['found' => $existing, 'bank_detail' => $getBankDetail ? $getBankDetail->toArray() : null]);
 
-        if(isset($getBankDetail) && !is_null($getBankDetail)){
+        if($existing){
             Log::info('Updating existing bank detail');
 
-            if($request->type == "paypal"){
+            if($type === "paypal"){
                 $message = $messages->paypal_update_message ?? null;
-            }else{
+            } elseif ($type === "interac") {
+                $message = $messages->bank_detail_update_message ?? 'Payout details successfully updated';
+            } else {
                 $message = $messages->bank_detail_update_message ??'Bank detail successfully updated';
             }
 
@@ -110,37 +122,34 @@ class BankDetailController extends Controller
         }else{
             Log::info('Creating new bank detail');
             $getBankDetail = new  BankDetail();
-            if($request->type == "paypal"){
-                $message = $message->paypal_saved_message ?? 'Your PayPal account is now set up for payouts';
-            }else{
+            if($type === "paypal"){
+                $message = $messages->paypal_saved_message ?? 'Your PayPal account is now set up for payouts';
+            } elseif ($type === "interac") {
+                $message = $messages->bank_save_message ?? 'Your payout details are now set up';
+            } else {
                 $message = $messages->bank_save_message;
             }
 
         }
 
 
-        if($request->type == "paypal"){
+        if($type === "paypal"){
             Log::info('Setting PayPal data:', ['paypal_email' => $request->paypal_email]);
             $getBankDetail->paypal_email = $request->paypal_email;
-        }else{
+        } elseif ($type === "interac") {
+            Log::info('Setting Interac data:', ['interac_email' => $request->interac_email]);
+            $getBankDetail->interac_email = $request->interac_email;
+        } else {
             Log::info('Setting Bank data:', [
-                'bank_id' => $request->bank_name,
                 'bank_title' => $request->account_holder_name,
                 'acc_no' => $request->account_holder_number,
-                'branch' => $request->branch,
-                'address' => $request->account_holder_address,
                 'institution_number' => $request->institution_number,
-                'branch_address' => $request->account_holder_branch_address,
-                'branch_number' => $request->account_holder_branch_number,
+                'branch_number' => $request->branch_number,
             ]);
-            $getBankDetail->bank_id = $request->bank_name;
             $getBankDetail->bank_title = $request->account_holder_name;
             $getBankDetail->acc_no = $request->account_holder_number;
-            $getBankDetail->branch = $request->branch;
-            $getBankDetail->address = $request->account_holder_address;
             $getBankDetail->institution_number = $request->institution_number;
-            $getBankDetail->branch_address = $request->account_holder_branch_address;
-            $getBankDetail->branch_number = $request->account_holder_branch_number;
+            $getBankDetail->branch_number = $request->branch_number;
         }
         $getBankDetail->user_id = $user_id;
         if(isset($getBankDetail->status) && $getBankDetail->status != "pending"){
@@ -149,7 +158,11 @@ class BankDetailController extends Controller
             $getBankDetail->status =  "pending";
         }
 
-        $getBankDetail->set_default = isset($request->set_default) ? $request->set_default : "bank";
+        if ($request->filled('set_default')) {
+            $getBankDetail->set_default = $request->input('set_default');
+        } elseif (!$existing) {
+            $getBankDetail->set_default = $type;
+        }
 
         Log::info('Bank detail before save:', $getBankDetail->toArray());
 

@@ -9,12 +9,6 @@ import 'package:proximaride_app/pages/widgets/progress_circular_widget.dart';
 import 'package:proximaride_app/pages/widgets/second_appbar_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
-String _stripeRegionLine(Map<String, dynamic> cfg) {
-  final country = cfg['country']?.toString().toUpperCase() ?? 'CA';
-  final currency = cfg['currency']?.toString().toUpperCase() ?? 'CAD';
-  return 'Secured with Stripe · $country · $currency';
-}
-
 class PaymentOptions extends StatelessWidget {
   const PaymentOptions({super.key});
 
@@ -66,24 +60,6 @@ class PaymentOptions extends StatelessWidget {
                             ? MainAxisAlignment.center
                             : MainAxisAlignment.start,
                         children: [
-                          if (controller.stripeConfig.isNotEmpty) ...[
-                            Center(
-                              child: Text(
-                                _stripeRegionLine(controller.stripeConfig),
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.grey.shade700,
-                                  fontFamily: regular,
-                                  fontSize: getValueForScreenType<double>(
-                                    context: context,
-                                    mobile: 13.0,
-                                    tablet: 13.0,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            20.heightBox,
-                          ],
                           if (controller.cards.isNotEmpty) ...[
                             for (var i = 0; i < controller.cards.length; i++) ...[
                               myCard(
@@ -130,21 +106,21 @@ class PaymentOptions extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            12.heightBox,
-                            Text(
-                              'Tap the button below to add a card securely with Stripe.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.grey.shade700,
-                                fontFamily: regular,
-                                fontSize: getValueForScreenType<double>(
-                                  context: context,
-                                  mobile: 14.0,
-                                  tablet: 14.0,
-                                ),
-                                height: 1.35,
-                              ),
-                            ),
+                            // 12.heightBox,
+                            // Text(
+                            //   'Tap the button below to add a card securely with Stripe.',
+                            //   textAlign: TextAlign.center,
+                            //   style: TextStyle(
+                            //     color: Colors.grey.shade700,
+                            //     fontFamily: regular,
+                            //     fontSize: getValueForScreenType<double>(
+                            //       context: context,
+                            //       mobile: 14.0,
+                            //       tablet: 14.0,
+                            //     ),
+                            //     height: 1.35,
+                            //   ),
+                            // ),
                           ],
                         ],
                       ),

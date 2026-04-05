@@ -31,6 +31,13 @@ class AddCardProvider extends GetConnect {
         if (response.status.code == 422) {
           return response.body;
         }
+        if (response.status.code == 404) {
+          return Future.error({
+            "type": "server",
+            "message":
+                "Card setup endpoint was not found (404). Confirm API_URL in assets/.env ends with /api/app/v1 and your server has POST payment-option/setup-intent.",
+          });
+        }
         return Future.error(response.statusText as Object);
       }
       return response.body;

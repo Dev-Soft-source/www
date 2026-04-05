@@ -276,6 +276,7 @@ class MyAppState extends State<MyApp> {
     '/close_my_account',
     '/post_ride/:id/:type',
     '/add_card/:type',
+    '/add_card/add',
     '/search_ride',
     '/post_ride_again',
     '/search_ride_result',
@@ -524,10 +525,12 @@ class MyAppState extends State<MyApp> {
       routingCallback: (routing) {
         final currentRoute = routing?.current ?? '';
         final previousRoute = routing?.previous ?? '';
+        // Match allowlist on path only so `/add_card/add?app=true` is not treated as unknown.
+        final currentPath = currentRoute.split('?').first;
         logger.info(
             'routingCallback -> current: $currentRoute, previous: $previousRoute');
 
-        if (!registeredRoutes.contains(currentRoute) &&
+        if (!registeredRoutes.contains(currentPath) &&
             (currentRoute.contains('/email-verified') ||
                 currentRoute.contains('?app=true'))) {
           logger.warning(

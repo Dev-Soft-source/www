@@ -14,14 +14,12 @@ class PayoutAccountController extends GetxController
     with GetTickerProviderStateMixin {
   late TextEditingController bankTitleTextEditingController,
       accountNumberTextEditingController,
-      ibanTextEditingController,
-      branchTextEditingController,
-      branchAddressTextEditingController,
       branchNumberTextEditingController,
       institutionNumberTextEditingController,
-      addressTextEditingController,
       userVerifyAmountTextEditingController,
-      paypalEmailTextEditingController;
+      paypalEmailTextEditingController,
+      interacEmailTextEditingController,
+      interacEmailConfirmTextEditingController;
 
   final Map<String, FocusNode> focusNodes = {};
   var banks = List<dynamic>.empty(growable: true).obs;
@@ -37,18 +35,23 @@ class PayoutAccountController extends GetxController
   var errorList = List.empty(growable: true).obs;
   final errors = [].obs;
 
-  var bankId = "".obs;
   var setDefault = "".obs;
+  /// Last `set_default` from server; used when saving without toggling a tab checkbox.
+  var loadedSetDefault = "".obs;
   var mainPageIndex = 0.obs;
 
   var bankBtnText = 0.obs;
   var paypalBtnText = 0.obs;
+  var interacBtnText = 0.obs;
   var readOnly = false.obs;
   var bankStatus = "".obs;
   var isBankFormValid = false.obs;
   var isPaypalFormValid = false.obs;
+  var isInteracFormValid = false.obs;
   var isBankVerifyValid = false.obs;
   var isPaypalEditMode = false.obs;
+  var interacEmailReadOnly = false.obs;
+  var interacAutodepositChecked = false.obs;
   late TabController tabController;
   late PageController pageController;
   var labelTextDetail = {}.obs;
@@ -75,62 +78,67 @@ class PayoutAccountController extends GetxController
 
     bankTitleTextEditingController = TextEditingController();
     accountNumberTextEditingController = TextEditingController();
-    ibanTextEditingController = TextEditingController();
-    branchTextEditingController = TextEditingController();
-    addressTextEditingController = TextEditingController();
     userVerifyAmountTextEditingController = TextEditingController();
     paypalEmailTextEditingController = TextEditingController();
-    branchAddressTextEditingController = TextEditingController();
+    interacEmailTextEditingController = TextEditingController();
+    interacEmailConfirmTextEditingController = TextEditingController();
     branchNumberTextEditingController = TextEditingController();
     institutionNumberTextEditingController = TextEditingController();
-    tabController = TabController(length: 2, vsync: this);
+    tabController = TabController(length: 3, vsync: this);
     pageController = PageController(initialPage: mainPageIndex.value);
 
-    for (int i = 1; i <= 9; i++) {
-      focusNodes[i.toString()] = FocusNode();
-      // Attach the onFocusChange listener
-      focusNodes[i.toString()]?.addListener(() {
-        if (!focusNodes[i.toString()]!.hasFocus) {
-          // Field has lost focus, trigger validation
-          if (i == 1) {
-            validateField('Branch', 'branch', branchTextEditingController.text);
-            validateBankFormFields();
-          } else if (i == 2) {
+    for (final key in [
+      'institution_number',
+      'branch_number',
+      'account_holder_name',
+      'account_holder_number',
+      'interac_email',
+      'interac_email_confirm',
+      'paypal_email',
+      'user_verify_amount',
+    ]) {
+      focusNodes[key] = FocusNode();
+      focusNodes[key]!.addListener(() {
+        if (!focusNodes[key]!.hasFocus) {
+          if (key == 'institution_number') {
             validateField('Institution number', 'institution_number',
                 institutionNumberTextEditingController.text,
-                type: "numeric");
+                type: 'numeric');
             validateBankFormFields();
-          } else if (i == 3) {
-            validateField('Branch address', 'branch_address',
-                branchAddressTextEditingController.text);
-            validateBankFormFields();
-          } else if (i == 4) {
-            validateField('Branch number', 'branch_number',
+          } else if (key == 'branch_number') {
+            validateField('Transit number', 'branch_number',
                 branchNumberTextEditingController.text,
                 type: 'numeric');
             validateBankFormFields();
-          } else if (i == 5) {
-            validateField('Bank title', 'account_holder_name',
+          } else if (key == 'account_holder_name') {
+            validateField('Account holder name', 'account_holder_name',
                 bankTitleTextEditingController.text);
             validateBankFormFields();
-          } else if (i == 6) {
-            validateField('Bank title', 'account_holder_number',
-                accountNumberTextEditingController.text);
-            validateBankFormFields();
-          } else if (i == 7) {
-            validateField('Address', 'account_holder_address',
-                addressTextEditingController.text);
-            validateBankFormFields();
-          } else if (i == 8) {
-            validateField('User verify amount', 'user_verify_amount',
-                userVerifyAmountTextEditingController.text,
+          } else if (key == 'account_holder_number') {
+            validateField('Account number', 'account_holder_number',
+                accountNumberTextEditingController.text,
                 type: 'numeric');
-            validateBankVerifyField();
-          } else if (i == 9) {
+            validateBankFormFields();
+          } else if (key == 'interac_email') {
+            validateField('Interac email', 'interac_email',
+                interacEmailTextEditingController.text,
+                type: 'email');
+            validateInteracFormFields();
+          } else if (key == 'interac_email_confirm') {
+            validateField('Confirm Interac email', 'interac_email_confirm',
+                interacEmailConfirmTextEditingController.text,
+                type: 'email');
+            validateInteracFormFields();
+          } else if (key == 'paypal_email') {
             validateField('Paypal email', 'paypal_email',
                 paypalEmailTextEditingController.text,
                 type: 'email');
             validatePaypalFormFields();
+          } else if (key == 'user_verify_amount') {
+            validateField('User verify amount', 'user_verify_amount',
+                userVerifyAmountTextEditingController.text,
+                type: 'numeric');
+            validateBankVerifyField();
           }
         }
       });
@@ -212,14 +220,15 @@ class PayoutAccountController extends GetxController
 
     bankTitleTextEditingController.dispose();
     accountNumberTextEditingController.dispose();
-    ibanTextEditingController.dispose();
-    branchTextEditingController.dispose();
-    addressTextEditingController.dispose();
     userVerifyAmountTextEditingController.dispose();
     paypalEmailTextEditingController.dispose();
-    branchAddressTextEditingController.dispose();
+    interacEmailTextEditingController.dispose();
+    interacEmailConfirmTextEditingController.dispose();
     branchNumberTextEditingController.dispose();
     institutionNumberTextEditingController.dispose();
+    for (final n in focusNodes.values) {
+      n.dispose();
+    }
   }
 
   void validateField(String fieldData, String fieldName, String fieldValue,
@@ -250,6 +259,12 @@ class PayoutAccountController extends GetxController
       } else if (fieldName == "branch_address") {
         message = message.replaceAll(
             ":Attribute", labelTextDetail['branch_address'] ?? fieldData);
+      } else if (fieldName == "interac_email") {
+        message = message.replaceAll(
+            ":Attribute", labelTextDetail['interac_email_label'] ?? fieldData);
+      } else if (fieldName == "interac_email_confirm") {
+        message = message.replaceAll(":Attribute",
+            labelTextDetail['interac_email_confirm_label'] ?? fieldData);
       }
       errorList.add(message ?? '$fieldData field is required');
       errors.add({
@@ -317,14 +332,28 @@ class PayoutAccountController extends GetxController
   }
 
   void validateBankFormFields() {
-    isBankFormValid.value = bankId.value.isNotEmpty &&
-        branchTextEditingController.text.isNotEmpty &&
-        institutionNumberTextEditingController.text.isNotEmpty &&
-        branchAddressTextEditingController.text.isNotEmpty &&
-        branchNumberTextEditingController.text.isNotEmpty &&
-        bankTitleTextEditingController.text.isNotEmpty &&
-        accountNumberTextEditingController.text.isNotEmpty &&
-        addressTextEditingController.text.isNotEmpty;
+    final acc = accountNumberTextEditingController.text;
+    final transit = branchNumberTextEditingController.text;
+    final inst = institutionNumberTextEditingController.text;
+    final digitsOk = acc.isNotEmpty &&
+        acc.length >= 7 &&
+        acc.length <= 12 &&
+        RegExp(r'^\d+$').hasMatch(acc) &&
+        transit.length == 5 &&
+        RegExp(r'^\d{5}$').hasMatch(transit) &&
+        inst.length == 3 &&
+        RegExp(r'^\d{3}$').hasMatch(inst);
+    isBankFormValid.value = bankTitleTextEditingController.text.isNotEmpty &&
+        digitsOk;
+  }
+
+  void validateInteracFormFields() {
+    final email = interacEmailTextEditingController.text.trim();
+    final confirm = interacEmailConfirmTextEditingController.text.trim();
+    final emailOk = email.isNotEmpty && isValidEmail(email);
+    final match = emailOk && confirm.isNotEmpty && email == confirm;
+    isInteracFormValid.value =
+        match && interacAutodepositChecked.value;
   }
 
   void validatePaypalFormFields() {
@@ -363,57 +392,49 @@ class PayoutAccountController extends GetxController
         }
 
         if (resp['data'] != null && resp['data']['userBankDetail'] != null) {
+          final ubd = resp['data']['userBankDetail'] as Map;
+
+          bankTitleTextEditingController.text =
+              (ubd['bank_title'] ?? "").toString();
+          accountNumberTextEditingController.text =
+              (ubd['acc_no'] ?? "").toString();
+          branchNumberTextEditingController.text =
+              (ubd['branch_number'] ?? "").toString();
+          institutionNumberTextEditingController.text =
+              (ubd['institution_number'] ?? "").toString();
+          setDefault.value = (ubd['set_default'] ?? "").toString();
+          loadedSetDefault.value = setDefault.value;
+          paypalEmailTextEditingController.text =
+              (ubd['paypal_email'] ?? "").toString();
+
+          final interacSaved = (ubd['interac_email'] ?? '').toString().trim();
+          interacEmailTextEditingController.text = interacSaved;
+          interacEmailReadOnly.value = interacSaved.isNotEmpty;
+          interacBtnText.value = interacSaved.isNotEmpty ? 1 : 0;
+
           bankBtnText.value =
-              resp['data']['userBankDetail']['bank_id'] != null &&
-                      resp['data']['userBankDetail']['bank_id'].toString() != ""
+              bankTitleTextEditingController.text.isNotEmpty &&
+                      branchNumberTextEditingController.text.isNotEmpty &&
+                      institutionNumberTextEditingController.text.isNotEmpty &&
+                      accountNumberTextEditingController.text.isNotEmpty
                   ? 1
                   : 0;
-          bankId.value = resp['data']['userBankDetail']['bank_id'] != null
-              ? resp['data']['userBankDetail']['bank_id'].toString()
-              : "";
-          bankTitleTextEditingController.text =
-              resp['data']['userBankDetail']['bank_title'] ?? "";
-          accountNumberTextEditingController.text =
-              resp['data']['userBankDetail']['acc_no'] ?? "";
-          ibanTextEditingController.text =
-              resp['data']['userBankDetail']['iban'] ?? "";
-          branchTextEditingController.text =
-              resp['data']['userBankDetail']['branch'] ?? "";
-          addressTextEditingController.text =
-              resp['data']['userBankDetail']['address'] ?? "";
-          branchNumberTextEditingController.text =
-              resp['data']['userBankDetail']['branch_number'] ?? "";
-          branchAddressTextEditingController.text =
-              resp['data']['userBankDetail']['branch_address'] ?? "";
-          institutionNumberTextEditingController.text =
-              resp['data']['userBankDetail']['institution_number'] ?? "";
-          setDefault.value =
-              resp['data']['userBankDetail']['set_default'] ?? "";
-          paypalEmailTextEditingController.text =
-              resp['data']['userBankDetail']['paypal_email'] ?? "";
-
-          // Log PayPal email details for debugging
-          logger.info(
-              "PayPal Email from backend: '${resp['data']['userBankDetail']['paypal_email']}'");
-          logger.info(
-              "PayPal Email in controller: '${paypalEmailTextEditingController.text}'");
 
           paypalBtnText.value =
-              resp['data']['userBankDetail']['paypal_email'] != null ? 1 : 0;
-          logger.info("PayPal Button Text: ${paypalBtnText.value}");
+              ubd['paypal_email'] != null &&
+                      ubd['paypal_email'].toString().trim().isNotEmpty
+                  ? 1
+                  : 0;
 
-          bankStatus.value =
-              resp['data']['userBankDetail']['status'] ?? "pending";
+          bankStatus.value = (ubd['status'] ?? "pending").toString();
 
-          // Set edit mode: true if no email (adding new), false if email exists (viewing)
-          isPaypalEditMode.value =
-              (resp['data']['userBankDetail']['paypal_email'] == null ||
-                  resp['data']['userBankDetail']['paypal_email'] == '');
-          logger.info("PayPal Edit Mode: ${isPaypalEditMode.value}");
+          isPaypalEditMode.value = ubd['paypal_email'] == null ||
+              ubd['paypal_email'].toString().trim().isEmpty;
         }
 
         // Initialize form validity based on any pre-filled data
         validateBankFormFields();
+        validateInteracFormFields();
         validatePaypalFormFields();
         validateBankVerifyField();
       }
@@ -422,31 +443,15 @@ class PayoutAccountController extends GetxController
     });
   }
 
+  String _setDefaultForApi(String fallbackMethod) {
+    if (setDefault.value.isNotEmpty) return setDefault.value;
+    if (loadedSetDefault.value.isNotEmpty) return loadedSetDefault.value;
+    return fallbackMethod;
+  }
+
   updateBankDetail() async {
     try {
       errors.clear();
-
-      if (bankId.value.isEmpty) {
-        var message = validationMessageDetail['required'];
-        message = message.replaceAll(
-            ":Attribute", labelTextDetail['bank_error'] ?? 'Bank name');
-        var err = {
-          'title': "bank_name",
-          'eList': [message ?? 'Bank field is required']
-        };
-        errors.add(err);
-      }
-
-      if (branchTextEditingController.text.isEmpty) {
-        var message = validationMessageDetail['required'];
-        message = message.replaceAll(
-            ":Attribute", labelTextDetail['branch_error'] ?? 'Branch');
-        var err = {
-          'title': "branch",
-          'eList': [message ?? 'Branch field is required']
-        };
-        errors.add(err);
-      }
 
       if (institutionNumberTextEditingController.text.isEmpty) {
         var message = validationMessageDetail['required'];
@@ -467,30 +472,19 @@ class PayoutAccountController extends GetxController
         errors.add(err);
       }
 
-      if (branchAddressTextEditingController.text.isEmpty) {
-        var message = validationMessageDetail['required'];
-        message = message.replaceAll(":Attribute",
-            labelTextDetail['branch_address'] ?? 'Branch address');
-        var err = {
-          'title': "branch_address",
-          'eList': [message ?? 'Branch address field is required']
-        };
-        errors.add(err);
-      }
-
       if (branchNumberTextEditingController.text.isEmpty) {
         var message = validationMessageDetail['required'];
         message = message.replaceAll(":Attribute",
-            labelTextDetail['branch_number_error'] ?? 'Branch number');
+            labelTextDetail['branch_number_error'] ?? 'Transit number');
         var err = {
           'title': "branch_number",
-          'eList': [message ?? 'Branch number field is required']
+          'eList': [message ?? 'Transit number is required']
         };
         errors.add(err);
       } else if (branchNumberTextEditingController.text.length != 5) {
         var err = {
           'title': "branch_number",
-          'eList': ['Branch number must be exactly 5 digits']
+          'eList': ['Transit number must be exactly 5 digits']
         };
         errors.add(err);
       }
@@ -501,7 +495,7 @@ class PayoutAccountController extends GetxController
             ":Attribute", labelTextDetail['bank_title_error'] ?? 'Bank title');
         var err = {
           'title': "account_holder_name",
-          'eList': [message ?? 'Bank title field is required']
+          'eList': [message ?? 'Account holder name is required']
         };
         errors.add(err);
       }
@@ -512,20 +506,17 @@ class PayoutAccountController extends GetxController
             ":Attribute", labelTextDetail['acc_no_error'] ?? 'Account number');
         var err = {
           'title': "account_holder_number",
-          'eList': [message ?? 'Account number field is required']
+          'eList': [message ?? 'Account number is required']
         };
         errors.add(err);
-      }
-
-      if (addressTextEditingController.text.isEmpty) {
-        var message = validationMessageDetail['required'];
-        message = message.replaceAll(
-            ":Attribute", labelTextDetail['address_error'] ?? 'Address');
-        var err = {
-          'title': "account_holder_address",
-          'eList': [message ?? 'Address field is required']
-        };
-        errors.add(err);
+      } else {
+        final acc = accountNumberTextEditingController.text;
+        if (!RegExp(r'^\d{7,12}$').hasMatch(acc)) {
+          errors.add({
+            'title': "account_holder_number",
+            'eList': ['Account number must be 7–12 digits']
+          });
+        }
       }
       if (errors.isNotEmpty) {
         return;
@@ -533,27 +524,17 @@ class PayoutAccountController extends GetxController
       isOverlayLoading(true);
       PayoutAccountProvider()
           .updateBankDetail(
-              bankId.value,
               bankTitleTextEditingController.text,
               accountNumberTextEditingController.text,
-              ibanTextEditingController.text,
-              branchTextEditingController.text,
-              addressTextEditingController.text,
-              setDefault.value,
-              serviceController.token,
-              serviceController.loginUserDetail['id'])
+              branchNumberTextEditingController.text,
+              institutionNumberTextEditingController.text,
+              _setDefaultForApi('bank'),
+              serviceController.token)
           .then((resp) async {
         errorList.clear();
         if (resp['status'] != null && resp['status'] == "Error") {
           serviceController.showDialogue(resp['message'].toString());
         } else if (resp['errors'] != null) {
-          if (resp['errors']['bank_name'] != null) {
-            var err = {
-              'title': "bank_name",
-              'eList': resp['errors']['bank_name']
-            };
-            errors.add(err);
-          }
           if (resp['errors']['account_holder_name'] != null) {
             var err = {
               'title': "account_holder_name",
@@ -568,28 +549,10 @@ class PayoutAccountController extends GetxController
             };
             errors.add(err);
           }
-          if (resp['errors']['branch'] != null) {
-            var err = {'title': "branch", 'eList': resp['errors']['branch']};
-            errors.add(err);
-          }
-          if (resp['errors']['account_holder_address'] != null) {
-            var err = {
-              'title': "account_holder_address",
-              'eList': resp['errors']['account_holder_address']
-            };
-            errors.add(err);
-          }
           if (resp['errors']['branch_number'] != null) {
             var err = {
               'title': "branch_number",
               'eList': resp['errors']['branch_number']
-            };
-            errors.add(err);
-          }
-          if (resp['errors']['branch_address'] != null) {
-            var err = {
-              'title': "branch_address",
-              'eList': resp['errors']['branch_address']
             };
             errors.add(err);
           }
@@ -601,6 +564,11 @@ class PayoutAccountController extends GetxController
             errors.add(err);
           }
         } else if (resp['status'] != null && resp['status'] == "Success") {
+          bankBtnText.value = 1;
+          final bd = resp['data']?['bankDetail'];
+          if (bd != null && bd['set_default'] != null) {
+            loadedSetDefault.value = bd['set_default'].toString();
+          }
           serviceController.showDialogue(resp['message'].toString());
         }
         isOverlayLoading(false);
@@ -618,6 +586,119 @@ class PayoutAccountController extends GetxController
       isOverlayLoading(false);
       serviceController.showDialogue(
           "Unable to update bank details. Please try again.",
+          type: "error");
+    }
+  }
+
+  updateInteracDetail() async {
+    try {
+      errors.clear();
+      final email = interacEmailTextEditingController.text.trim();
+      final confirm = interacEmailConfirmTextEditingController.text.trim();
+      if (email.isEmpty) {
+        var message = validationMessageDetail['required'];
+        message = message.replaceAll(":Attribute",
+            labelTextDetail['interac_email_label'] ?? 'Email');
+        errors.add({
+          'title': "interac_email",
+          'eList': [message ?? 'Email is required']
+        });
+      } else if (!isValidEmail(email)) {
+        errors.add({
+          'title': "interac_email",
+          'eList': ['Please use a valid email address']
+        });
+      }
+      if (confirm.isEmpty) {
+        var message = validationMessageDetail['required'];
+        message = message.replaceAll(":Attribute",
+            labelTextDetail['interac_email_confirm_label'] ?? 'Confirm email');
+        errors.add({
+          'title': "interac_email_confirm",
+          'eList': [message ?? 'Please confirm your email']
+        });
+      } else if (email != confirm) {
+        errors.add({
+          'title': "interac_email_confirm",
+          'eList': ['Interac emails must match']
+        });
+      }
+      if (!interacAutodepositChecked.value) {
+        errors.add({
+          'title': "interac_autodeposit",
+          'eList': [
+            labelTextDetail['interac_autodeposit_label'] ??
+                'Please confirm Autodeposit is enabled for this email.'
+          ]
+        });
+      }
+      if (errors.isNotEmpty) {
+        return;
+      }
+      isOverlayLoading(true);
+      PayoutAccountProvider()
+          .updateInteracDetail(
+            email,
+            confirm,
+            interacAutodepositChecked.value,
+            _setDefaultForApi('interac'),
+            serviceController.token,
+          )
+          .then((resp) async {
+        errorList.clear();
+        if (resp['status'] != null && resp['status'] == "Error") {
+          serviceController.showDialogue(resp['message'].toString());
+        } else if (resp['errors'] != null) {
+          final e = resp['errors'] as Map;
+          if (e['interac_email'] != null) {
+            errors.add({
+              'title': "interac_email",
+              'eList': e['interac_email'] is List
+                  ? List<String>.from(e['interac_email'])
+                  : [e['interac_email'].toString()]
+            });
+          }
+          if (e['interac_email_confirm'] != null) {
+            errors.add({
+              'title': "interac_email_confirm",
+              'eList': e['interac_email_confirm'] is List
+                  ? List<String>.from(e['interac_email_confirm'])
+                  : [e['interac_email_confirm'].toString()]
+            });
+          }
+          if (e['interac_autodeposit'] != null) {
+            errors.add({
+              'title': "interac_autodeposit",
+              'eList': e['interac_autodeposit'] is List
+                  ? List<String>.from(e['interac_autodeposit'])
+                  : [e['interac_autodeposit'].toString()]
+            });
+          }
+        } else if (resp['status'] != null && resp['status'] == "Success") {
+          interacBtnText.value = 1;
+          interacEmailReadOnly.value = true;
+          interacEmailConfirmTextEditingController.clear();
+          interacAutodepositChecked.value = false;
+          final bd = resp['data']?['bankDetail'];
+          if (bd != null && bd['set_default'] != null) {
+            loadedSetDefault.value = bd['set_default'].toString();
+          }
+          serviceController.showDialogue(resp['message'].toString());
+        }
+        isOverlayLoading(false);
+      }, onError: (err) {
+        isOverlayLoading(false);
+        String errorMessage =
+            "Unable to update Interac details. Please try again.";
+        if (err is Map && err.containsKey('message')) {
+          errorMessage = err['message'];
+        }
+        serviceController.showDialogue(errorMessage, type: "error");
+      });
+    } catch (exception) {
+      isOverlayLoading(false);
+      serviceController.showDialogue(
+          "Unable to update Interac details. Please try again.",
           type: "error");
     }
   }
@@ -646,7 +727,7 @@ class PayoutAccountController extends GetxController
       PayoutAccountProvider()
           .updatePaypalDetail(
               paypalEmailTextEditingController.text,
-              setDefault.value,
+              _setDefaultForApi('paypal'),
               serviceController.token,
               serviceController.loginUserDetail['id'])
           .then((resp) async {
@@ -664,6 +745,10 @@ class PayoutAccountController extends GetxController
         } else if (resp['status'] != null && resp['status'] == "Success") {
           paypalBtnText.value = 1; // Set to update mode
           isPaypalEditMode.value = false; // Exit edit mode
+          final bd = resp['data']?['bankDetail'];
+          if (bd != null && bd['set_default'] != null) {
+            loadedSetDefault.value = bd['set_default'].toString();
+          }
 
           // Show dialog and navigate back after user closes it
           await serviceController.showDialogue(resp['message'].toString());

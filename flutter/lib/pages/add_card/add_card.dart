@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/pages/widgets/overlay_widget.dart';
 import 'package:proximaride_app/pages/widgets/progress_circular_widget.dart';
@@ -54,7 +55,8 @@ class AddCard extends StatelessWidget {
                                 "${controller.labelTextDetail['mobile_indicate_required_field_label'] ?? '* Indicates required fields'}"),
                         5.heightBox,
                         Text(
-                          'Card number, expiry, and security code are entered on the next screen in Stripe’s secure payment sheet.',
+                          'Enter your card details below. Card number, expiry, and CVC are handled securely by Stripe; '
+                          'add the cardholder name on this page.',
                           style: TextStyle(
                             color: Colors.grey.shade700,
                             fontFamily: regular,
@@ -64,6 +66,33 @@ class AddCard extends StatelessWidget {
                               tablet: 15.0,
                             ),
                             height: 1.35,
+                          ),
+                        ),
+                        16.heightBox,
+                        CardField(
+                          controller: controller.cardFieldController,
+                          enablePostalCode: false,
+                          countryCode: controller.defaultCardCountryCode,
+                          onCardChanged: controller.onCardFieldChanged,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: inputColor,
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 8,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade400,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5),
+                              borderSide: const BorderSide(
+                                color: primaryColor,
+                              ),
+                            ),
                           ),
                         ),
                         20.heightBox,
@@ -172,9 +201,8 @@ class AddCard extends StatelessWidget {
         child: elevatedButtonWidget(
           enabled: true,
           textWidget: txt22Size(
-              title: controller.addEditType == 'add'
-                  ? "${controller.labelTextDetail['save_button_text'] ?? "Save"}"
-                  : "${controller.labelTextDetail['edit_card_button_text'] ?? "Edit card"}",
+              title: "${controller.labelTextDetail['save_button_text'] ?? "Save"}",
+                  
               textColor: Colors.white,
               context: context,
               fontFamily: regular),

@@ -525,7 +525,7 @@ class TripDetailPage extends StatelessWidget {
                                       cancelBookingBtn:
                                           "${controller.labelTextDetail['cancel_booking_btn_label'] ?? "Cancel booking"}",
                                       chatWithDriverBtn:
-                                          "${controller.labelTextDetail['driver_chat_button_label'] ?? "Chat with driver"}",
+                                          "${controller.labelTextDetail['driver_chat_heading'] ?? "Chat with driver"}",
                                       updateBookingBtn:
                                           "${controller.labelTextDetail['edit_button_actions_label'] ?? "Update booking"}",
                                       showBtn:
