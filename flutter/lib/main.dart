@@ -516,6 +516,17 @@ class MyAppState extends State<MyApp> {
         scaffoldBackgroundColor: Colors.white,
         appBarTheme: const AppBarTheme(backgroundColor: Colors.white),
         fontFamily: regular,
+        tooltipTheme: TooltipThemeData(
+          decoration: BoxDecoration(
+            color: tooltipBackgroundColor,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          textStyle: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         inputDecorationTheme: InputDecorationTheme(
           hintStyle: appPlaceholderTextStyle(),
         ),

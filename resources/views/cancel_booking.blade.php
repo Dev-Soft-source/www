@@ -92,7 +92,7 @@
                     <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                         <div class="bg-white p-4">
                             <div class="space-y-4 mb-4">
-                                <h1 class="text-primary text-center">{{ $tripsPage->cancel_booking_heading ?? '' }}</h1>
+                                <h1 class="text-primary text-center">{{ $tripsPage->cancel_booking_heading ?? 'Cancel Seats' }}</h1>
                                 <div class="text-base md:text-lg"><span class="text-red-500">*
                                         {{ $tripsPage->cancel_all_feilds_are_required ?? 'All fields are required' }}</span>
                                 </div>

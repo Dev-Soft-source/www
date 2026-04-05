@@ -81,43 +81,43 @@ Widget luggageWidget(
                         ),
                       ),
                       5.widthBox,
-                      Tooltip(
-                        margin: EdgeInsets.fromLTRB(
-                            getValueForScreenType<double>(
-                              context: context,
-                              mobile: 15.0,
-                              tablet: 15.0,
-                            ),
-                            getValueForScreenType<double>(
-                              context: context,
-                              mobile: 0.0,
-                              tablet: 0.0,
-                            ),
-                            getValueForScreenType<double>(
-                              context: context,
-                              mobile: 15.0,
-                              tablet: 15.0,
-                            ),
-                            getValueForScreenType<double>(
-                              context: context,
-                              mobile: 0.0,
-                              tablet: 0.0,
-                            )),
-                        triggerMode: TooltipTriggerMode.tap,
-                        message: "${controller.labelTextDetail['luggage_checkbox_label1_tooltip'] ?? 'Must be agreed upon with the driver BEFORE booking'}",
-                        textStyle: const TextStyle(fontSize: 20,color: Colors.white),
-                        showDuration: const Duration(days: 100),
-                        waitDuration: Duration.zero,
-                        child: Image.asset(infoImage,color: Colors.black, width: getValueForScreenType<double>(
-                          context: context,
-                          mobile: 20.0,
-                          tablet: 20.0,
-                        ), height: getValueForScreenType<double>(
-                          context: context,
-                          mobile: 20.0,
-                          tablet: 20.0,
-                        )),
-                      )
+                      // Tooltip(
+                      //   margin: EdgeInsets.fromLTRB(
+                      //       getValueForScreenType<double>(
+                      //         context: context,
+                      //         mobile: 15.0,
+                      //         tablet: 15.0,
+                      //       ),
+                      //       getValueForScreenType<double>(
+                      //         context: context,
+                      //         mobile: 0.0,
+                      //         tablet: 0.0,
+                      //       ),
+                      //       getValueForScreenType<double>(
+                      //         context: context,
+                      //         mobile: 15.0,
+                      //         tablet: 15.0,
+                      //       ),
+                      //       getValueForScreenType<double>(
+                      //         context: context,
+                      //         mobile: 0.0,
+                      //         tablet: 0.0,
+                      //       )),
+                      //   triggerMode: TooltipTriggerMode.tap,
+                      //   message: "${controller.labelTextDetail['luggage_checkbox_label1_tooltip'] ?? 'Must be agreed upon with the driver BEFORE booking'}",
+                      //   textStyle: const TextStyle(fontSize: 20,color: Colors.white),
+                      //   showDuration: const Duration(days: 100),
+                      //   waitDuration: Duration.zero,
+                      //   child: Image.asset(infoImage,color: Colors.black, width: getValueForScreenType<double>(
+                      //     context: context,
+                      //     mobile: 20.0,
+                      //     tablet: 20.0,
+                      //   ), height: getValueForScreenType<double>(
+                      //     context: context,
+                      //     mobile: 20.0,
+                      //     tablet: 20.0,
+                      //   )),
+                      // )
 
 
                     ],

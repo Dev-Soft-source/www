@@ -10,7 +10,9 @@ import 'package:proximaride_app/helpers/ride_feature_ids.dart';
 import 'package:proximaride_app/consts/payment_config.dart';
 import 'package:proximaride_app/pages/book_seat/BookSeatProvider.dart';
 import 'package:proximaride_app/pages/edit_profile/EditProfileProvider.dart';
+import 'package:proximaride_app/pages/my_trips/MyTripController.dart';
 import 'package:proximaride_app/pages/my_wallet/MyWalletController.dart';
+import 'package:proximaride_app/pages/navigation/NavigationController.dart';
 import 'package:proximaride_app/pages/payment_options/PaymentOptionsProvider.dart';
 import 'package:proximaride_app/pages/post_ride/PostRideProvider.dart';
 import 'package:proximaride_app/services/logger_service.dart';
@@ -1150,15 +1152,14 @@ class BookSeatController extends GetxController {
             }
           }
 
-          if (ride['booking_method_slug'] == "manual") {
-            serviceController.thankYouMessage.value = resp['message'] ??
-                "Your request has been successfully sent to the driver";
-            Get.offAllNamed("/thank_you/manualBooking");
-          } else {
-            serviceController.thankYouMessage.value = resp['message'] ??
-                "You have successfully booked seat(s) in the ride";
-            Get.offAllNamed("/thank_you/instantBooking");
+          serviceController.navigationIndex.value = 1;
+          if (Get.isRegistered<NavigationController>()) {
+            Get.find<NavigationController>().currentNavIndex.value = 1;
           }
+          if (Get.isRegistered<MyTripController>()) {
+            Get.find<MyTripController>().openDefaultTabForCurrentUser();
+          }
+          Get.offAllNamed('/navigation');
         }
         isOverlayLoading(false);
       }, onError: (error) {

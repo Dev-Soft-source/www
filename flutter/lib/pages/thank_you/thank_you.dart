@@ -10,6 +10,18 @@ import 'package:proximaride_app/pages/widgets/textWidget.dart';
 class ThankYouPage extends StatelessWidget {
   const ThankYouPage({super.key});
 
+  /// Rounded frame for success icons (green tint, radius 20).
+  Widget _thankYouIconFrame(Widget icon) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: successColor.withOpacity(0.18),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: icon,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThankYouController controller = Get.isRegistered<ThankYouController>()
@@ -62,18 +74,17 @@ class ThankYouPage extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        Image.asset(
-                          verifiedImage,
-                          width: 68,
-                          height: 68,
-                        ),
+                          Image.asset(
+                            greenTick,
+                            width: 68,
+                            height: 68,
+                          ),
                         10.heightBox,
                         Get.parameters['type'] == "instantBooking"
                             ? Center(
                                 child: txt20Size(
                                     context: context,
-                                    title: controller.serviceController
-                                        .thankYouMessage.value,
+                                    title: controller.serviceController.thankYouMessage.value,
                                     fontFamily: regular))
                             : Get.parameters['type'] == "manualBooking"
                                 ? Center(
@@ -173,11 +184,11 @@ class ThankYouPage extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 mainAxisSize: MainAxisSize.max,
                                 children: [
-                                  Image.asset(
-                                    greenTick,
-                                    width: 68,
-                                    height: 68,
-                                  ),
+                                    Image.asset(
+                                      greenTick,
+                                      width: 68,
+                                      height: 68,
+                                    ),
                                   10.heightBox,
                                   Center(
                                       child: txt20Size(
@@ -243,11 +254,11 @@ class ThankYouPage extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.max,
                             children: [
-                              Image.asset(
-                                greenTick,
-                                width: 68,
-                                height: 68,
-                              ),
+                                Image.asset(
+                                  greenTick,
+                                  width: 68,
+                                  height: 68,
+                                ),
                               10.heightBox,
                               Get.parameters['type'] == "forgot_password"
                                   ? Center(

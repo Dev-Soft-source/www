@@ -540,7 +540,8 @@ class BookingController extends Controller
         $data = ['booking' => $result['booking']];
         return $this->successResponse(
             $data,
-            $this->successMessage->book_seat_message . ' ' . $request->seats . ' ' . $this->successMessage->book_seat_message_end_part
+            $this->successMessage->book_seat_message 
+            //. ' ' . $request->seats . ' ' . $this->successMessage->book_seat_message_end_part
         );
     }
 

@@ -27,7 +27,7 @@ class ClippedTriangleWidget extends StatelessWidget {
     return ClipPath(
       clipper: TriangleClipper(),
       child: Container(
-        color: Colors.red,
+        color: tooltipBackgroundColor,
         width: 15,
         height: 10,
       ),
@@ -107,7 +107,7 @@ Widget toolTip({
       Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(5.0),
-          color: Colors.red,
+          color: tooltipBackgroundColor,
         ),
         child: Tooltip(
           triggerMode: TooltipTriggerMode.manual,
@@ -154,7 +154,7 @@ Widget toolTipPassword(context, checkList, type) {
       Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(5.0),
-          color: Colors.red,
+          color: tooltipBackgroundColor,
         ),
         child: Tooltip(
           triggerMode: TooltipTriggerMode.manual,
@@ -293,7 +293,7 @@ Widget toolTipEmptyPassword(BuildContext context) {
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(5.0),
-            color: Colors.red,
+            color: tooltipBackgroundColor,
           ),
           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
           child: Row(

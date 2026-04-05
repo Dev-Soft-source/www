@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:proximaride_app/pages/book_seat/BookSeatController.dart';
 import 'package:proximaride_app/pages/widgets/card_shadow_widget.dart';
 import 'package:proximaride_app/pages/widgets/app_html_text.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
@@ -15,12 +16,14 @@ Widget pricingWidget({context, controller, screenWidth}){
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        backgroundColor: tooltipBackgroundColor,
         contentPadding: const EdgeInsets.all(16),
         content: SingleChildScrollView(
           child: AppHtmlText(
             data: html,
             fontSize: 18,
-            linkColor: primaryColor,
+            textColor: Colors.white,
+            linkColor: Colors.white,
           ),
         ),
       ),
@@ -282,59 +285,9 @@ Widget pricingWidget({context, controller, screenWidth}){
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Flexible(
-                      child: InkWell(
-                        onTap: controller.coffeeDisable.value == false
-                            ? () {
-                                controller.showGPayBtn.value = false;
-                                controller.showGPayBtn.refresh();
-                                controller.coffeeFromWall.value =
-                                    controller.coffeeFromWall.value == true
-                                        ? false
-                                        : true;
-                                Future.delayed(
-                                    const Duration(milliseconds: 500), () {
-                                  if (controller.coffeeFromWall.value == false) {
-                                    controller.showGPayBtn.value = true;
-                                    controller.showGPayBtn.refresh();
-                                  }
-                                });
-                              }
-                            : null,
-                        child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8.0, vertical: 6.0),
-                            decoration: BoxDecoration(
-                              color: controller.coffeeFromWall.value == true
-                                  ? primaryColor.withOpacity(0.1)
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(5.0),
-                              border: Border.all(
-                                  color: controller.coffeeFromWall.value == true
-                                      ? primaryColor.withOpacity(0.1)
-                                      : Colors.grey.shade500,
-                                  style: BorderStyle.solid,
-                                  width: 1),
-                            ),
-                            child: Text(
-                              (controller.labelTextDetail[
-                                          'coffee_from_wall_label'] ??
-                                      "Coffee from the wall")
-                                  .replaceFirst(' from ', '\nfrom '),
-                              softWrap: true,
-                              maxLines: 2,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: getValueForScreenType<double>(
-                                  context: context,
-                                  mobile: 18.0,
-                                  tablet: 20.0,
-                                ),
-                                fontFamily: regular,
-                                color: controller.coffeeFromWall.value == true
-                                    ? primaryColor
-                                    : textColor,
-                              ),
-                            )),
+                      child: _coffeeWallToggle(
+                        context: context,
+                        controller: controller,
                       ),
                     ),
                     8.widthBox,
@@ -376,5 +329,71 @@ Widget pricingWidget({context, controller, screenWidth}){
         10.heightBox,
       ],
     )
+  );
+}
+
+/// Single toggle-style button: tap switches coffee-from-wall on/off.
+Widget _coffeeWallToggle({
+  required BuildContext context,
+  required BookSeatController controller,
+}) {
+  final disabled = controller.coffeeDisable.value;
+  final wallOn = controller.coffeeFromWall.value;
+  final fontSize = getValueForScreenType<double>(
+    context: context,
+    mobile: 18.0,
+    tablet: 20.0,
+  );
+
+  final label = (controller.labelTextDetail['coffee_from_wall_label'] ??
+          'Coffee from the wall');
+      // .replaceFirst(' from ', '\nfrom ');
+
+  return Material(
+    color: Colors.transparent,
+    child: InkWell(
+      onTap: disabled
+          ? null
+          : () {
+              controller.showGPayBtn.value = false;
+              controller.showGPayBtn.refresh();
+              controller.coffeeFromWall.value = !controller.coffeeFromWall.value;
+              Future.delayed(const Duration(milliseconds: 500), () {
+                if (controller.coffeeFromWall.value == false) {
+                  controller.showGPayBtn.value = true;
+                  controller.showGPayBtn.refresh();
+                }
+              });
+            },
+      borderRadius: BorderRadius.circular(8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        decoration: BoxDecoration(
+          color: wallOn ? primaryColor : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: wallOn ? primaryColor : Colors.grey.shade500,
+            width: wallOn ? 2 : 1,
+          ),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          softWrap: true,
+          style: TextStyle(
+            fontSize: fontSize,
+            fontFamily: regular,
+            fontWeight: wallOn ? FontWeight.w500 : FontWeight.w500,
+            color: wallOn ? Colors.white : textColor,
+            height: 1.2,
+          ),
+        ),
+      ),
+    ),
   );
 }

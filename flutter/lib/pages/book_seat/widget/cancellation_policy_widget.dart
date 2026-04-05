@@ -51,6 +51,10 @@ Widget cancellationPolicyWidget({context, controller, screenWidth}) {
                       Expanded(child: txt20Size(context: context,title: '${controller.cancellationOptionLabelList[i]} ${ i == 1 ? '(${controller.labelTextDetail['cancellation_policy_discount_label'] ?? "Discount"} ${controller.setting['frim_discount'].toString()}%)' : ''}',fontFamily: regular)),
                       10.widthBox,
                       Tooltip(
+                        decoration: BoxDecoration(
+                          color: tooltipBackgroundColor,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                         margin: EdgeInsets.fromLTRB(
                             getValueForScreenType<double>(
                               context: context,

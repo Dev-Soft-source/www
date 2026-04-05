@@ -11,114 +11,57 @@ class BookingPageSettingService
         $niceNames = [];
         foreach ($languages as $language) {
             if ($language->is_default == '1') {
-                $validationRule = array_merge($validationRule, ['name.name_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['name.name_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['meta_keywords.meta_keywords_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['meta_keywords.meta_keywords_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['meta_description.meta_description_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['meta_description.meta_description_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['main_heading.main_heading_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['main_heading.main_heading_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['seats_available_label.seats_available_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['seats_available_label.seats_available_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-
-                $validationRule = array_merge($validationRule, ['seats_available.seats_available_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['seats_available.seats_available_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-
-
-                $validationRule = array_merge($validationRule, ['seats_available_info_text.seats_available_info_text_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['seats_available_info_text.seats_available_info_text_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['seat_hold_alert_message.seat_hold_alert_message_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['seat_hold_alert_message.seat_hold_alert_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['seat_hold_message.seat_hold_message_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['seat_hold_message.seat_hold_message_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-
-                $validationRule = array_merge($validationRule, ['cancellation_policy_label.cancellation_policy_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['cancellation_policy_label.cancellation_policy_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['pricing_label.pricing_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['pricing_label.pricing_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['seat_label.seat_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['seat_label.seat_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['booking_fee_label.booking_fee_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['booking_fee_label.booking_fee_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['booking_label.booking_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['booking_label.booking_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['paypal_label.paypal_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['paypal_label.paypal_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['ride_features_label.ride_features_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['ride_features_label.ride_features_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['required_fields.required_fields_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['required_fields.required_fields_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['total_label.total_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['total_label.total_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['message_to_driver_label.message_to_driver_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['message_to_driver_label.message_to_driver_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['message_driver_placeholder.message_driver_placeholder_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['message_driver_placeholder.message_driver_placeholder_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['book_seat_button_label.book_seat_button_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['book_seat_button_label.book_seat_button_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['like_to_pay_label.like_to_pay_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['like_to_pay_label.like_to_pay_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['credit_card_label.credit_card_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['credit_card_label.credit_card_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['select_card_label.select_card_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['select_card_label.select_card_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['add_card_label.add_card_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['add_card_label.add_card_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['pay_label.pay_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['pay_label.pay_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['luggage_label.luggage_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['luggage_label.luggage_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['payment_method_label.payment_method_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['payment_method_label.payment_method_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['co_passenger_label.co_passenger_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['co_passenger_label.co_passenger_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-
-                $validationRule = array_merge($validationRule, ['coffee_from_wall_label.coffee_from_wall_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['coffee_from_wall_label.coffee_from_wall_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-
-                $validationRule = array_merge($validationRule, ['coffee_from_wall_tooltip.coffee_from_wall_tooltip_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['coffee_from_wall_tooltip.coffee_from_wall_tooltip_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-
-                $validationRule = array_merge($validationRule, ['payable_amount_label.payable_amount_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['payable_amount_label.payable_amount_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                
-                $validationRule = array_merge($validationRule, ['coffee_from_amount_wall_tooltip.coffee_from_amount_wall_tooltip_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['coffee_from_amount_wall_tooltip.coffee_from_amount_wall_tooltip_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-
-                $validationRule = array_merge($validationRule, ['tax_label.tax_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['tax_label.tax_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-
-                $validationRule = array_merge($validationRule, ['booking_disclaimer_on_time.booking_disclaimer_on_time_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['booking_disclaimer_on_time.booking_disclaimer_on_time_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['booking_disclaimer_pink_ride.booking_disclaimer_pink_ride_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['booking_disclaimer_pink_ride.booking_disclaimer_pink_ride_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['booking_disclaimer_extra_care_ride.booking_disclaimer_extra_care_ride_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['booking_disclaimer_extra_care_ride.booking_disclaimer_extra_care_ride_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['booking_disclaimer_firm.booking_disclaimer_firm_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['booking_disclaimer_firm.booking_disclaimer_firm_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['booking_disclaimer_firm_tooltip.booking_disclaimer_firm_tooltip_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['booking_disclaimer_firm_tooltip.booking_disclaimer_firm_tooltip_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['booking_term_agree_text.booking_term_agree_text_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['booking_term_agree_text.booking_term_agree_text_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['booking_pink_ride_term_agree_text.booking_pink_ride_term_agree_text_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['booking_pink_ride_term_agree_text.booking_pink_ride_term_agree_text_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['booking_extra_care_ride_term_agree_text.booking_extra_care_ride_term_agree_text_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['booking_extra_care_ride_term_agree_text.booking_extra_care_ride_term_agree_text_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['user_declarations_label.user_declarations_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['user_declarations_label.user_declarations_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-
-                $validationRule = array_merge($validationRule, ['firm_cancellation_label_price_section.firm_cancellation_label_price_section_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['firm_cancellation_label_price_section.firm_cancellation_label_price_section_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['firm_discount_label_price_section.firm_discount_label_price_section_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['firm_discount_label_price_section.firm_discount_label_price_section_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['firm_your_price_label_price_section.firm_your_price_label_price_section_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['firm_your_price_label_price_section.firm_your_price_label_price_section_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                
-                $validationRule = array_merge($validationRule, ['booking_cancellation_limit_exceed.booking_cancellation_limit_exceed_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['booking_cancellation_limit_exceed.booking_cancellation_limit_exceed_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
+                $stringNullable = ['nullable', 'string'];
+                $validationRule = array_merge($validationRule, ['name.name_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['meta_keywords.meta_keywords_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['meta_description.meta_description_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['main_heading.main_heading_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['seats_available_label.seats_available_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['seats_available.seats_available_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['seats_available_info_text.seats_available_info_text_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['seat_hold_alert_message.seat_hold_alert_message_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['seat_hold_message.seat_hold_message_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['cancellation_policy_label.cancellation_policy_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['pricing_label.pricing_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['seat_label.seat_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['booking_fee_label.booking_fee_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['booking_label.booking_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['paypal_label.paypal_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['ride_features_label.ride_features_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['required_fields.required_fields_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['total_label.total_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['message_to_driver_label.message_to_driver_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['message_driver_placeholder.message_driver_placeholder_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['book_seat_button_label.book_seat_button_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['like_to_pay_label.like_to_pay_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['credit_card_label.credit_card_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['select_card_label.select_card_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['add_card_label.add_card_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['pay_label.pay_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['luggage_label.luggage_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['payment_method_label.payment_method_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['co_passenger_label.co_passenger_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['coffee_from_wall_label.coffee_from_wall_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['coffee_from_wall_tooltip.coffee_from_wall_tooltip_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['payable_amount_label.payable_amount_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['coffee_from_amount_wall_tooltip.coffee_from_amount_wall_tooltip_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['tax_label.tax_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['booking_disclaimer_on_time.booking_disclaimer_on_time_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['booking_disclaimer_pink_ride.booking_disclaimer_pink_ride_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['booking_disclaimer_extra_care_ride.booking_disclaimer_extra_care_ride_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['booking_disclaimer_firm.booking_disclaimer_firm_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['booking_disclaimer_firm_tooltip.booking_disclaimer_firm_tooltip_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['booking_term_agree_text.booking_term_agree_text_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['booking_pink_ride_term_agree_text.booking_pink_ride_term_agree_text_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['booking_extra_care_ride_term_agree_text.booking_extra_care_ride_term_agree_text_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['user_declarations_label.user_declarations_label_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['firm_cancellation_label_price_section.firm_cancellation_label_price_section_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['firm_discount_label_price_section.firm_discount_label_price_section_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['firm_your_price_label_price_section.firm_your_price_label_price_section_' . $language->id => $stringNullable]);
+                $validationRule = array_merge($validationRule, ['booking_cancellation_limit_exceed.booking_cancellation_limit_exceed_' . $language->id => $stringNullable]);
             }
         }
+
         return ['validation_rules' => $validationRule, 'error_messages' => $errorMessages, 'nice_names' => $niceNames];
     }
 

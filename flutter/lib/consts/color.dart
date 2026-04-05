@@ -17,3 +17,6 @@ const Color errorColor = Color(0xFFEF4444); // Red for errors
 const Color warningColor = Color(0xFFF59E0B); // Orange/Amber for warnings
 const Color infoColor = primaryColor;         // Blue for info (default)
 
+/// Validation / info callout tooltips (custom [toolTip] widget + [TooltipThemeData]).
+const Color tooltipBackgroundColor = Color(0xFFC75B5B);
+
