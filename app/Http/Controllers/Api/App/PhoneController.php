@@ -59,6 +59,7 @@ class PhoneController extends Controller
     }
 
     public function store(Request $request){
+        
         $user = Auth::guard('sanctum')->user();
         $user_id = $user->id;
         $skip = $request->filled('skip') ? $request->skip : '0';
@@ -68,7 +69,7 @@ class PhoneController extends Controller
         if ($skip === '0' && $request->phone) {
             // For API, we expect the full international number
             $normalizedPhone = normalizePhoneNumber($request->phone);
-
+            
             if (!validatePhoneNumber($request->phone)) {
                 return $this->apiErrorResponse('Please enter a valid phone number.', 422);
             }

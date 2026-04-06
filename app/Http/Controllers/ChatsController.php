@@ -156,30 +156,26 @@ class ChatsController extends Controller
 
 
         $selectedLanguage = session('selectedLanguage');
-        $messages = null;
-        if ($selectedLanguage) {
-
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $request->lang_id)->select('message_limit_exceeded_message')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('message_limit_exceeded_message')->first();
-            }
-        }
+        
 
         $user_id = auth()->user()->id;
         $user = User::whereId($user_id)->first();
-        $contact_limit = SiteSetting::pluck('user_per_day_limit')->first();
+        $setting = SiteSetting::getCached();
+        $contact_limit = $setting->user_per_day_limit ?? 0;
 
         $contact_count = UserMessageCount::where('user_id', $user->id)
             ->whereBetween('created_at', [Carbon::today(), Carbon::tomorrow()])
             ->first();
 
         if (is_null($contact_count) || $contact_count->user_inbox_count < $contact_limit) {
+
             $ride = Ride::whereId($request->ride_id)->with(['rideDetail' => function ($q) {
                 $q->where('default_ride', '1');
             }])->first();
+
+            if($ride == null) {
+                $ride = new Ride();
+            }
 
             $rideDetailId = "";
             if (isset($ride->detail) && !empty($ride->detail)) {
@@ -204,6 +200,111 @@ class ChatsController extends Controller
                     ->where('receiver', $user->id);
             })->where('ride_id', $ride->id)->first();
 
+            
+
+            if (empty($rideFirstMessage)) {
+                $message1 = Message::create([
+                    'ride_id' => $ride->id,
+                    'receiver' => $request->input('userId'),
+                    'sender' => $user->id,
+                    'message' => $request->input('message'),
+                    'redirect' => '1',
+                    'ride_detail_id' => $rideDetailId != "" ? $rideDetailId : NULL
+                ]);
+                $message1 = Message::whereId($message1->id)->with('user', 'rideDetail')->first();
+                // Use the redirect message as the main message for first message to avoid duplicate
+                $message = $message1;
+            } else {
+                // Only create regular message if it's not the first message
+                $message = Message::create([
+                    'ride_id' => $ride->id,
+                    'receiver' => $request->input('userId'),
+                    'sender' => $user->id,
+                    'message' => $request->input('message'),
+                    'ride_detail_id' => $rideDetailId != "" ? $rideDetailId : NULL
+                ]);
+            }
+
+            $message_count = Message::where('sender', $user->id)->where('receiver', $request->input('userId'))->whereBetween('created_at', [Carbon::today(), Carbon::tomorrow()])->count();
+
+            if (isset($contact_count) && $message_count > 0) {
+
+                $contactUserId = explode(',', $contact_count->contact_user_id);
+                if (in_array($request->input('userId'), $contactUserId)) {
+                } else {
+                    $contact_count->user_inbox_count = $contact_count->user_inbox_count + 1;
+
+                    $contacted_by = $contact_count->contact_user_id;
+
+                    if (!empty($contacted_by)) {
+                        $contacted_by_array = explode(',', $contacted_by);
+                        if (!in_array($request->input('userId'), $contacted_by_array)) {
+                            $contacted_by_array[] = $request->input('userId');
+                        }
+                    } else {
+                        $contacted_by_array = [$request->input('userId')];
+                    }
+
+                    $contact_count->contact_user_id = implode(',', $contacted_by_array);
+
+                    $contact_count->save();
+                }
+            } elseif (isset($contact_count) && $message_count == 0) {
+            } else {
+                $message_count = new UserMessageCount();
+                $message_count->user_inbox_count = 1;
+                $message_count->user_id = $user->id;
+                $message_count->contact_user_id = $request->input('userId');
+                $message_count->save();
+            }
+
+            // Message is already created above (either redirect message for first message, or regular message for subsequent messages)
+            // Only create the message here if it wasn't created above
+            if (!isset($message)) {
+                $message = Message::create([
+                    'ride_id' => $ride->id,
+                    'receiver' => $request->input('userId'),
+                    'sender' => $user->id,
+                    'message' => $request->input('message'),
+                    'ride_detail_id' => $rideDetailId != "" ? $rideDetailId : NULL
+                ]);
+            }
+
+            // Make sure message has user relationship loaded before broadcasting
+            if (!$message->relationLoaded('user')) {
+                $message->load('user');
+            }
+
+            // Broadcast the event synchronously (not queued) for immediate real-time updates
+            // Note: toOthers() only works for presence channels, not regular channels
+            // Since we're using regular channels, we broadcast to both sender and receiver channels
+            try {
+                broadcast(new MessageSentEvent($ride, $user, $message));
+                Log::info('Message broadcasted', [
+                    'message_id' => $message->id,
+                    'sender' => $message->sender,
+                    'receiver' => $message->receiver,
+                    'ride_id' => $message->ride_id
+                ]);
+            } catch (\Illuminate\Broadcasting\BroadcastException $e) {
+                // Log Pusher errors (like timestamp expired) but don't crash the application
+                Log::error('Failed to broadcast message event: ' . $e->getMessage(), [
+                    'message_id' => $message->id,
+                    'sender' => $message->sender,
+                    'receiver' => $message->receiver,
+                    'ride_id' => $message->ride_id
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Unexpected error broadcasting message event: ' . $e->getMessage(), [
+                    'message_id' => $message->id,
+                    'sender' => $message->sender,
+                    'receiver' => $message->receiver,
+                    'ride_id' => $message->ride_id
+                ]);
+            }
+
+            ////////////////////////////////
+            // send notification
             if ($lastMessage) {
                 $lastMessageTime = $lastMessage->created_at;
                 $timeDifference = now()->diffInMinutes($lastMessageTime);
@@ -348,76 +449,7 @@ class ChatsController extends Controller
                 }
             }
 
-            if (empty($rideFirstMessage)) {
-                $message1 = Message::create([
-                    'ride_id' => $ride->id,
-                    'receiver' => $request->input('userId'),
-                    'sender' => $user->id,
-                    'message' => $request->input('message'),
-                    'redirect' => '1',
-                    'ride_detail_id' => $rideDetailId != "" ? $rideDetailId : NULL
-                ]);
-                $message1 = Message::whereId($message1->id)->with('user', 'rideDetail')->first();
-                // Use the redirect message as the main message for first message to avoid duplicate
-                $message = $message1;
-            } else {
-                // Only create regular message if it's not the first message
-                $message = Message::create([
-                    'ride_id' => $ride->id,
-                    'receiver' => $request->input('userId'),
-                    'sender' => $user->id,
-                    'message' => $request->input('message'),
-                    'ride_detail_id' => $rideDetailId != "" ? $rideDetailId : NULL
-                ]);
-            }
-
-            $message_count = Message::where('sender', $user->id)->where('receiver', $request->input('userId'))->whereBetween('created_at', [Carbon::today(), Carbon::tomorrow()])->count();
-
-            if (isset($contact_count) && $message_count > 0) {
-
-                $contactUserId = explode(',', $contact_count->contact_user_id);
-                if (in_array($request->input('userId'), $contactUserId)) {
-                } else {
-                    $contact_count->user_inbox_count = $contact_count->user_inbox_count + 1;
-
-                    $contacted_by = $contact_count->contact_user_id;
-
-                    if (!empty($contacted_by)) {
-                        $contacted_by_array = explode(',', $contacted_by);
-                        if (!in_array($request->input('userId'), $contacted_by_array)) {
-                            $contacted_by_array[] = $request->input('userId');
-                        }
-                    } else {
-                        $contacted_by_array = [$request->input('userId')];
-                    }
-
-                    $contact_count->contact_user_id = implode(',', $contacted_by_array);
-
-                    $contact_count->save();
-                }
-            } elseif (isset($contact_count) && $message_count == 0) {
-            } else {
-                $message_count = new UserMessageCount();
-                $message_count->user_inbox_count = 1;
-                $message_count->user_id = $user->id;
-                $message_count->contact_user_id = $request->input('userId');
-                $message_count->save();
-            }
-
-            // Message is already created above (either redirect message for first message, or regular message for subsequent messages)
-            // Only create the message here if it wasn't created above
-            if (!isset($message)) {
-                $message = Message::create([
-                    'ride_id' => $ride->id,
-                    'receiver' => $request->input('userId'),
-                    'sender' => $user->id,
-                    'message' => $request->input('message'),
-                    'ride_detail_id' => $rideDetailId != "" ? $rideDetailId : NULL
-                ]);
-            }
-
             // Assuming $user and $fcmToken are defined
-
             $receiver = User::find($request->userId);
             $fcmService = new FCMService();
             $fcm_tokens = FCMToken::where('user_id', $receiver->id)->get();
@@ -448,39 +480,7 @@ class ChatsController extends Controller
                     Log::error("FCM Notification failed for token: $fcm_token, Error: " . $e->getMessage());
                 }
             }
-
-            // Make sure message has user relationship loaded before broadcasting
-            if (!$message->relationLoaded('user')) {
-                $message->load('user');
-            }
-
-            // Broadcast the event synchronously (not queued) for immediate real-time updates
-            // Note: toOthers() only works for presence channels, not regular channels
-            // Since we're using regular channels, we broadcast to both sender and receiver channels
-            try {
-                broadcast(new MessageSentEvent($ride, $user, $message));
-                Log::info('Message broadcasted', [
-                    'message_id' => $message->id,
-                    'sender' => $message->sender,
-                    'receiver' => $message->receiver,
-                    'ride_id' => $message->ride_id
-                ]);
-            } catch (\Illuminate\Broadcasting\BroadcastException $e) {
-                // Log Pusher errors (like timestamp expired) but don't crash the application
-                Log::error('Failed to broadcast message event: ' . $e->getMessage(), [
-                    'message_id' => $message->id,
-                    'sender' => $message->sender,
-                    'receiver' => $message->receiver,
-                    'ride_id' => $message->ride_id
-                ]);
-            } catch (\Exception $e) {
-                Log::error('Unexpected error broadcasting message event: ' . $e->getMessage(), [
-                    'message_id' => $message->id,
-                    'sender' => $message->sender,
-                    'receiver' => $message->receiver,
-                    'ride_id' => $message->ride_id
-                ]);
-            }
+            /////////////////////
 
             $message = Message::whereId($message->id)->with('user')->first();
 

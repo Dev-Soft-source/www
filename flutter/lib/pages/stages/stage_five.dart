@@ -16,12 +16,19 @@ class StageFive extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final StageFiveController controller = Get.isRegistered<StageFiveController>()
-        ? Get.find<StageFiveController>()
-        : Get.put(StageFiveController());
+    final StageFiveController controller =
+        Get.isRegistered<StageFiveController>()
+            ? Get.find<StageFiveController>()
+            : Get.put(StageFiveController());
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.of(context).maybePop();
+          },
+        ),
         title: Obx(() => stepAppBarWidget(
             context: context,
             serviceController: controller.serviceController,
@@ -62,12 +69,16 @@ class StageFive extends StatelessWidget {
                                   child: txt25Size(
                                       title:
                                           "${controller.labelTextDetail['main_heading'] ?? "Step 5 of 5 - Your Phone Number"}",
+                                      textColor: primaryColor,
                                       context: context)),
-                              10.heightBox,
+                              15.heightBox,
                               txt18Size(
                                   title:
                                       "${controller.labelTextDetail['main_label'] ?? 'To be eligible to post "Pink rides" and "Extra-care rides", you must verify your phone number'}",
-                                  context: context),
+                                  context: context,
+                                  fontFamily: carlito
+                                  
+                                  ),
                               // Html(
                               //   data: controller
                               //           .labelTextDetail['main_label'] ??
@@ -342,7 +353,8 @@ class StageFive extends StatelessWidget {
                                     height: 50,
                                     child: elevatedButtonWidget(
                                       enabled:
-                                          controller.secondsRemaining.value == 0,
+                                          controller.secondsRemaining.value ==
+                                              0,
                                       textWidget: txt22Size(
                                           title:
                                               "${controller.labelTextDetail['send_button_label'] ?? "Resend code"}",
@@ -460,5 +472,3 @@ class StageFive extends StatelessWidget {
     );
   }
 }
-
-

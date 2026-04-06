@@ -28,7 +28,7 @@ class StageThree extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: primaryColor,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () {
               Navigator.of(context).maybePop();
             },
@@ -71,6 +71,7 @@ class StageThree extends StatelessWidget {
                               Center(
                                   child: txt25Size(
                                       title: controller.step3MainHeading.value,
+                                      textColor: primaryColor,
                                       context: context)),
                               5.heightBox,
                               // txt16Size(
@@ -88,9 +89,11 @@ class StageThree extends StatelessWidget {
                                       padding: HtmlPaddings.zero,
                                       margin: Margins.zero),
                                   'p': Style(
-                                    fontSize: FontSize(20),
+                                    fontSize: FontSize(18),
+                                    fontFamily: carlito,
                                     padding: HtmlPaddings.zero,
                                     margin: Margins.zero,
+                                    textAlign: TextAlign.justify
                                   ),
                                   'div': Style(
                                     fontSize: FontSize(20),
@@ -103,7 +106,7 @@ class StageThree extends StatelessWidget {
                               //     title:
                               //         "${controller.labelTextDetail['main_label'] ?? "If you are signing up as a driver, please note that to be eligible to post Pink Rides and Extra-Care Rides, you must state your vehicle details on every ride"}",
                               //     context: context),
-                              5.heightBox,
+                              15.heightBox,
                               Html(
                                 data: controller
                                         .labelTextDetail['sub_main_label'] ??
@@ -113,9 +116,11 @@ class StageThree extends StatelessWidget {
                                       padding: HtmlPaddings.zero,
                                       margin: Margins.zero),
                                   'p': Style(
-                                    fontSize: FontSize(20),
+                                    fontSize: FontSize(18),
+                                    fontFamily: carlito,
                                     padding: HtmlPaddings.zero,
                                     margin: Margins.zero,
+                                    textAlign: TextAlign.justify
                                   ),
                                   'div': Style(
                                     fontSize: FontSize(20),
@@ -135,14 +140,14 @@ class StageThree extends StatelessWidget {
                               //     title:
                               //         "${controller.labelTextDetail['sub_main_label'] ?? "If you intend to use ProximaRide as a passenger only, then this point is not applicable to you. You may 'Skip' it"}",
                               //     context: context),
-                              30.heightBox,
+                              15.heightBox,
                               txt18Size(
                                   title:
                                       "${controller.labelTextDetail['required_label'] ?? "* Indicates required fields"}",
                                   context: context,
                                   fontFamily: carlito,
                                   textColor: Colors.red),
-                              10.heightBox,
+                              5.heightBox,
 
                               // Container(
                               //   padding: EdgeInsets.all(5.0),

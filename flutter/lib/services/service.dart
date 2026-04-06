@@ -286,8 +286,7 @@ class Service extends GetxService {
           try {
             await NavigationProvider().removeFcmToken(currentToken);
           } catch (err) {
-            logger.warning(
-                "removeFcmToken failed during staged logout: $err");
+            logger.warning("removeFcmToken failed during staged logout: $err");
           }
         }
         await _clearLocalSessionAndNavigateToLogin();
@@ -808,11 +807,28 @@ class Service extends GetxService {
     return await Get.defaultDialog(
       title: '',
       titlePadding: EdgeInsets.zero,
-      content: Text(
-        formatMessage(
-            "${welcomeMessage1.isEmpty ? "Hey" : welcomeMessage1.value} ${loginUserDetail['first_name']},  ${welcomeMessage2.isEmpty ? "nice to meet you\nPlease complete your profile, it only takes a couple of minutes" : welcomeMessage2.value}"),
-        textAlign: TextAlign.justify,
-        style: const TextStyle(fontSize: 20, fontFamily: carlito),
+      content: Column(
+        children: [
+          Image.asset(
+            greenTick,
+            width: 68,
+            height: 68,
+          ),
+          5.heightBox,
+          Text(
+            formatMessage(
+                "${welcomeMessage1.isEmpty ? "Hey" : welcomeMessage1.value} ${loginUserDetail['first_name']},  "),
+            textAlign: TextAlign.justify,
+            style: const TextStyle(fontSize: 20, fontFamily: carlito),
+          ),
+          5.heightBox,
+          Text(
+            formatMessage(
+                welcomeMessage2.isEmpty ? "nice to meet you. Please complete your profile, it only takes a couple of minutes" : welcomeMessage2.value),
+            textAlign: TextAlign.justify,
+            style: const TextStyle(fontSize: 20, fontFamily: carlito),
+          ),
+        ],
       ),
       barrierDismissible: false,
       titleStyle: const TextStyle(fontSize: 24, color: primaryColor),
@@ -1000,7 +1016,8 @@ class Service extends GetxService {
   }
 
   Future<void> persistUserLanguage() async {
-    await secureStorage.write(key: "userInfo", value: jsonEncode(loginUserDetail));
+    await secureStorage.write(
+        key: "userInfo", value: jsonEncode(loginUserDetail));
   }
 
   void _deleteControllerIfRegistered<T>() {

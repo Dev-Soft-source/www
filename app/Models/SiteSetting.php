@@ -53,7 +53,8 @@ class SiteSetting extends Model
         'menu_icon_contact_proximaride',
         'menu_icon_coffee_on_the_wall',
         'menu_icon_log_out',
-        'meanu_icon_close_your_account'
+        'meanu_icon_close_your_account',
+        'user_per_day_limit',
     ];
 
     protected static function booted(): void

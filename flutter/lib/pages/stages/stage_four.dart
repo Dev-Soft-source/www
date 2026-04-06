@@ -24,6 +24,12 @@ class StageFour extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
+        leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              Navigator.of(context).maybePop();
+            },
+          ),
         title: Obx(() => stepAppBarWidget(
             context: context,
             serviceController: controller.serviceController,
@@ -62,6 +68,7 @@ class StageFour extends StatelessWidget {
                         Center(
                           child: txt25Size(
                             title: controller.step4MainHeading.value,
+                            textColor: primaryColor,
                             context: context,
                           ),
                         ),
@@ -74,9 +81,11 @@ class StageFour extends StatelessWidget {
                                 padding: HtmlPaddings.zero,
                                 margin: Margins.zero),
                             'p': Style(
-                              fontSize: FontSize(20),
+                              fontSize: FontSize(18),
+                              fontFamily: carlito,
                               padding: HtmlPaddings.zero,
                               margin: Margins.zero,
+                              textAlign: TextAlign.justify
                             ),
                             'div': Style(
                               fontSize: FontSize(20),

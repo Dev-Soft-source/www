@@ -147,11 +147,13 @@ class MessagingController extends GetxController {
     }
 
     if (data['messages'] is List) {
-      final shouldAutoScroll =
-          messagesList.isEmpty || !scrollController.hasClients || _isNearBottom();
+      final shouldAutoScroll = messagesList.isEmpty ||
+          !scrollController.hasClients ||
+          _isNearBottom();
 
       final pendingMessages = messagesList
-          .where((message) => message is Map && message['delivery_status'] == 'pending')
+          .where((message) =>
+              message is Map && message['delivery_status'] == 'pending')
           .map((message) => Map<String, dynamic>.from(message))
           .toList();
 
@@ -283,9 +285,8 @@ class MessagingController extends GetxController {
 
     for (int i = 0; i < chatController.myChats.length; i++) {
       final chat = chatController.myChats[i];
-      final senderId = chat['sender'] is Map
-          ? chat['sender']['id']?.toString() ?? ''
-          : '';
+      final senderId =
+          chat['sender'] is Map ? chat['sender']['id']?.toString() ?? '' : '';
       final receiverId = chat['receiver'] is Map
           ? chat['receiver']['id']?.toString() ?? ''
           : '';
@@ -494,13 +495,13 @@ class MessagingController extends GetxController {
           typedMessageController.text = messageText;
           serviceController.showDialogue(resp['message']);
         } else if (resp["data"] != null) {
-          final serverMessage = Map<String, dynamic>.from(resp["data"]);
-          serverMessage['delivery_status'] = 'sent';
-          _replaceMessageById(optimisticMessageId, serverMessage);
-          scrollToBottom();
-          Future.delayed(const Duration(milliseconds: 600), () {
-            refreshMessagesSilently();
-          });
+          // final serverMessage = Map<String, dynamic>.from(resp["data"]);
+          // serverMessage['delivery_status'] = 'sent';
+          // _replaceMessageById(optimisticMessageId, serverMessage);
+          // scrollToBottom();
+          // Future.delayed(const Duration(milliseconds: 600), () {
+          //   refreshMessagesSilently();
+          // });
           bool isRegistered = Get.isRegistered<ChatController>();
           if (isRegistered == true) {
             var chatController = Get.find<ChatController>();
@@ -712,14 +713,15 @@ class MessagingController extends GetxController {
         'id': userId,
         'first_name': serviceController.loginUserDetail['first_name'] ?? '',
         'last_name': serviceController.loginUserDetail['last_name'] ?? '',
-        'profile_image': serviceController.loginUserDetail['profile_image'] ?? '',
+        'profile_image':
+            serviceController.loginUserDetail['profile_image'] ?? '',
       },
       'receiver': {
         'id': chatUserId,
       },
       'redirect': '0',
       'created_at': DateTime.now().toIso8601String(),
-      'delivery_status': 'pending',
+      'delivery_status': 'sent',//'pending',
     };
   }
 

@@ -62,7 +62,8 @@ Future<void> launchStageTwoHtmlLink(String? url) async {
     href = 'https:$href';
   } else if (!RegExp(r'^[a-zA-Z][a-zA-Z\d+\-.]*:').hasMatch(href)) {
     if (href.startsWith('/')) {
-      logger.error('Unhandled relative HTML href (add in-app route or use full URL): $href');
+      logger.error(
+          'Unhandled relative HTML href (add in-app route or use full URL): $href');
       return;
     }
     href = 'https://$href';
@@ -98,6 +99,12 @@ class StageTwo extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              Navigator.of(context).maybePop();
+            },
+          ),
           title: Obx(() => stepAppBarWidget(
               context: context,
               serviceController: controller.serviceController,
@@ -138,9 +145,9 @@ class StageTwo extends StatelessWidget {
                               children: [
                                 Center(
                                     child: txt25Size(
-                                        title: "${controller.labelTextDetail['main_heading'] ??
-                                            "Step 2 of 5 - Profile Picture"}",
-
+                                        title:
+                                            "${controller.labelTextDetail['main_heading'] ?? "Step 2 of 5 - Profile Picture"}",
+                                        textColor: primaryColor,
                                         //  }",
                                         context: context)),
                                 15.heightBox,
@@ -152,7 +159,8 @@ class StageTwo extends StatelessWidget {
                                         padding: HtmlPaddings.zero,
                                         margin: Margins.zero),
                                     'p': Style(
-                                      fontSize: FontSize(20),
+                                      fontSize: FontSize(18),
+                                      fontFamily: carlito,
                                       padding: HtmlPaddings.zero,
                                       margin: Margins.zero,
                                     ),
@@ -179,12 +187,15 @@ class StageTwo extends StatelessWidget {
                                       await imageUploadBottomSheet(
                                           controller, context);
                                       logger.info("Image uploaded");
-                                      logger.info("Errors: ${controller.errors}");
+                                      logger
+                                          .info("Errors: ${controller.errors}");
                                       if (controller.errors.firstWhereOrNull(
                                               (element) =>
-                                                  element['title'] == "image") !=
+                                                  element['title'] ==
+                                                  "image") !=
                                           null) {
-                                        controller.errors.remove(controller.errors
+                                        controller.errors.remove(controller
+                                            .errors
                                             .firstWhereOrNull((element) =>
                                                 element['title'] == "image"));
                                       }
@@ -201,7 +212,8 @@ class StageTwo extends StatelessWidget {
                                             : controller.profileImagePath.value,
                                     screenWidth: context.screenWidth),
                                 if (controller.errors.firstWhereOrNull(
-                                        (element) => element['title'] == "image") !=
+                                        (element) =>
+                                            element['title'] == "image") !=
                                     null) ...[
                                   toolTip(
                                       tip: controller.errors.firstWhereOrNull(
@@ -215,52 +227,52 @@ class StageTwo extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        color: Colors.grey.shade100,
-                        padding: EdgeInsets.all(getValueForScreenType<double>(
-                          context: context,
-                          mobile: 15.0,
-                          tablet: 15.0,
-                        )),
-                        width: context.screenWidth,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 10,
-                              child: elevatedButtonWidget(
-                                  textWidget: txt22Size(
-                                      title:
-                                          "${controller.labelTextDetail['skip_button_label'] ?? "Skip"}",
-                                      fontFamily: bold,
-                                      textColor: Colors.white,
-                                      context: context),
-                                  onPressed: () async {
-                                    await controller.setStageTwo(true);
-                                  },
-                                  btnColor: primaryColor,
-                                  context: context,
-                                  btnRadius: 5.0),
-                            ),
-                            const Spacer(
-                              flex: 1,
-                            ),
-                            Expanded(
-                              flex: 10,
-                              child: elevatedButtonWidget(
-                                  enabled: controller.isStageTwoValid.value,
-                                  textWidget: txt22Size(
-                                      title:
-                                          "${controller.labelTextDetail['next_button_label'] ?? "Next"}",
-                                      fontFamily: regular,
-                                      textColor: Colors.white,
-                                      context: context),
-                                  onPressed: () async {
-                                    await controller.setStageTwo(false);
-                                  },
-                                  context: context,
-                                  btnRadius: 5.0),
-                            ),
-                          ],
-                        )),
+                          color: Colors.grey.shade100,
+                          padding: EdgeInsets.all(getValueForScreenType<double>(
+                            context: context,
+                            mobile: 15.0,
+                            tablet: 15.0,
+                          )),
+                          width: context.screenWidth,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 10,
+                                child: elevatedButtonWidget(
+                                    textWidget: txt22Size(
+                                        title:
+                                            "${controller.labelTextDetail['skip_button_label'] ?? "Skip"}",
+                                        fontFamily: bold,
+                                        textColor: Colors.white,
+                                        context: context),
+                                    onPressed: () async {
+                                      await controller.setStageTwo(true);
+                                    },
+                                    btnColor: primaryColor,
+                                    context: context,
+                                    btnRadius: 5.0),
+                              ),
+                              const Spacer(
+                                flex: 1,
+                              ),
+                              Expanded(
+                                flex: 10,
+                                child: elevatedButtonWidget(
+                                    enabled: controller.isStageTwoValid.value,
+                                    textWidget: txt22Size(
+                                        title:
+                                            "${controller.labelTextDetail['next_button_label'] ?? "Next"}",
+                                        fontFamily: regular,
+                                        textColor: Colors.white,
+                                        context: context),
+                                    onPressed: () async {
+                                      await controller.setStageTwo(false);
+                                    },
+                                    context: context,
+                                    btnRadius: 5.0),
+                              ),
+                            ],
+                          )),
                     ],
                   ),
                   if (controller.isOverlayLoading.value == true) ...[
@@ -273,6 +285,3 @@ class StageTwo extends StatelessWidget {
         }));
   }
 }
-
-
-

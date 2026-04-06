@@ -506,7 +506,8 @@ class LoginController extends GetxController {
             serviceController.langIcon.value = getLanguage['flag_icon'];
             serviceController.lang.value = getLanguage['abbreviation'];
           }
-
+serviceController.showWelcomeDialogue(resp['data']['token']);
+return;
           if (serviceController.loginUserDetail['step'] == "1") {
             serviceController.showWelcomeDialogue(resp['data']['token']);
           } else if (serviceController.loginUserDetail['step'] == "2") {

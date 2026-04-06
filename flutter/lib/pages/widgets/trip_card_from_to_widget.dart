@@ -117,12 +117,12 @@ Widget tripCardFromToWidget({String from = "", String to = "", String pickup = "
               txt24Size(
                   title: formatCurrency(price),
                   context: context,
-                  textColor: textColor),
+                  textColor: primaryColor),
               txt16Size(
                 title: " $resolvedPerSeatLabel",
                 context: context,
                 fontFamily: bold,
-                textColor: textColor,
+                textColor: primaryColor,
               ),
             ],
           ),

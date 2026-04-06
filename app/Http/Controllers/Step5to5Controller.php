@@ -77,7 +77,7 @@ class Step5to5Controller extends Controller
         }
 
         // Validate phone
-        $country = optional(Country::find($request->country))->iso_code ?: 'US';
+        $country = optional(Country::find($request->country))->iso_code ? : 'US';
         if (!validatePhoneNumber($request->phone, $country)) {
             return back()->withErrors(['phone' => $step5Page->phone_error_label])->withInput();
         }

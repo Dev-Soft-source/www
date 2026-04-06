@@ -198,18 +198,8 @@ class MyChatsController extends Controller
             'message' => 'required',
         ]);
 
-
-        $messages = null;
-        if ($request->lang_id && $request->lang_id != 0) {
-            $messages = SuccessMessagesSettingDetail::where('language_id', $request->lang_id)->select('message_limit_exceeded_message')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('message_limit_exceeded_message')->first();
-            }
-        }
-
-        $contact_limit = SiteSetting::pluck('user_per_day_limit')->first();
+        $setting = SiteSetting::getCached();
+        $contact_limit = $setting->user_per_day_limit ?? 0;
 
         $contact_count = UserMessageCount::where('user_id', $user->id)
             ->whereBetween('created_at', [Carbon::today(), Carbon::tomorrow()])
@@ -232,6 +222,9 @@ class MyChatsController extends Controller
             }
         }
 
+        if($ride == null) {
+            $ride = new Ride();
+        }
         
 
         // Check the last message between the sender and receiver
@@ -266,42 +259,6 @@ class MyChatsController extends Controller
             }
         }
         
-        $receiver = User::find($request->receiver_id);
-
-        if ($receiver) {
-            Notification::create([
-                'type' => null,
-                'ride_id' => $request->ride_id == 0 ? null : $request->ride_id,
-                'posted_by' => $user->id,
-                'receiver_id' => $receiver->id,
-                'message' => getNotificationMessageText(
-                    'chat_new_message_received',
-                    $receiver,
-                    ['first_name' => $user->first_name],
-                    'New message received from {first_name}'
-                ),
-                'status' => 'completed',
-                'notification_type' => 'chat'
-            ]);
-
-            $booking = Booking::where('ride_id', $request->ride_id)->first();
-            if (isset($booking) && !empty($booking)) {
-                $data = [
-                    'receiverFirstName' => $receiver->first_name,
-                    'senderFirstName' => $user->first_name,
-                    'senderLastName' => $user->last_name,
-                    'seats' => $booking->seats,
-                    'price' => $booking->fare,
-                    'from' => $booking->departure,
-                    'to' => $booking->destination,
-                    'date' => $booking->ride->date,
-                    'time' => $booking->ride->time,
-                ];
-
-                Mail::to($receiver->email)->queue(new ReceiveChatMessageMail($data));
-            }
-        }
-
 
         $message_count = Message::where('sender', $user->id)->where('receiver', $request->input('userId'))->whereBetween('created_at', [Carbon::today(), Carbon::tomorrow()])->count();
 
@@ -346,37 +303,6 @@ class MyChatsController extends Controller
         ]);
 
 
-
-        // Assuming $user and $fcmToken are defined
-
-        $receiver = User::find($request->receiver_id);
-        $fcmService = new FCMService();
-        $fcm_tokens = FCMToken::where('user_id', $receiver->id)->get();
-        $body = 'New message received from ' . $user->first_name;
-        $title = 'New Message';
-
-        // Extra data for deep linking to the specific chat
-        $extraData = [
-            'notification_type' => 'chat',
-            'ride_id' => $request->ride_id ?? '',
-            'sender_id' => $user->id,
-            'other_user_id' => $user->id,
-        ];
-
-        $fcmToken = $receiver->mobile_fcm_token;
-        if ($fcmToken) {
-            $fcmService->sendNotification($fcmToken, $body, 'chat', $msg->id, $title, $extraData);
-        }
-
-        foreach ($fcm_tokens as $fcm_token) {
-            try {
-                $fcmService->sendNotification($fcm_token->token, $body, 'chat', $msg->id, $title, $extraData);
-            } catch (\Exception $e) {
-                Log::error("FCM Notification failed for token: $fcm_token->token, Error: " . $e->getMessage());
-            }
-        }
-
-
         $message = Message::where('status', 'new')->whereId($msg->id)->with(['user' => function ($query) {
             $query->select('id', 'first_name', 'last_name', 'profile_image', 'online','gender'); // Specify the columns you want to select
             $query->withTrashed(); // Include soft-deleted users
@@ -410,6 +336,70 @@ class MyChatsController extends Controller
             }
         }
 
+        ////////////////////////////////
+        $receiver = User::find($request->receiver_id);
+
+        if ($receiver) {
+            Notification::create([
+                'type' => null,
+                'ride_id' => $request->ride_id == 0 ? null : $request->ride_id,
+                'posted_by' => $user->id,
+                'receiver_id' => $receiver->id,
+                'message' => getNotificationMessageText(
+                    'chat_new_message_received',
+                    $receiver,
+                    ['first_name' => $user->first_name],
+                    'New message received from {first_name}'
+                ),
+                'status' => 'completed',
+                'notification_type' => 'chat'
+            ]);
+
+            $booking = Booking::where('ride_id', $request->ride_id)->first();
+            if (isset($booking) && !empty($booking)) {
+                $data = [
+                    'receiverFirstName' => $receiver->first_name,
+                    'senderFirstName' => $user->first_name,
+                    'senderLastName' => $user->last_name,
+                    'seats' => $booking->seats,
+                    'price' => $booking->fare,
+                    'from' => $booking->departure,
+                    'to' => $booking->destination,
+                    'date' => $booking->ride->date,
+                    'time' => $booking->ride->time,
+                ];
+
+                Mail::to($receiver->email)->queue(new ReceiveChatMessageMail($data));
+            }
+        }
+
+        // Assuming $user and $fcmToken are defined
+        $fcmService = new FCMService();
+        $fcm_tokens = FCMToken::where('user_id', $receiver->id)->get();
+        $body = 'New message received from ' . $user->first_name;
+        $title = 'New Message';
+
+        // Extra data for deep linking to the specific chat
+        $extraData = [
+            'notification_type' => 'chat',
+            'ride_id' => $request->ride_id ?? '',
+            'sender_id' => $user->id,
+            'other_user_id' => $user->id,
+        ];
+
+        $fcmToken = $receiver->mobile_fcm_token;
+        if ($fcmToken) {
+            $fcmService->sendNotification($fcmToken, $body, 'chat', $msg->id, $title, $extraData);
+        }
+
+        foreach ($fcm_tokens as $fcm_token) {
+            try {
+                $fcmService->sendNotification($fcm_token->token, $body, 'chat', $msg->id, $title, $extraData);
+            } catch (\Exception $e) {
+                Log::error("FCM Notification failed for token: $fcm_token->token, Error: " . $e->getMessage());
+            }
+        }
+
         return $this->successResponse($messageArray, 'Message Sent!');
     }
 
@@ -436,9 +426,9 @@ class MyChatsController extends Controller
         $user = Auth::guard('sanctum')->user();
         $currentUserId = $user->id;
 
-        $messages = Message::where('receiver', $request->receiver['id'])
-            ->where('sender', $request->sender['id'])
-            ->where('status','new')
+        $messages = Message::where('receiver', $request->receiver['id']);
+        if(isset($request->sender['id'])) $messages = $messages->where('sender', $request->sender['id']);
+        $messages = $messages->where('status','new')
             ->get();
         
             foreach ($messages as $message) {

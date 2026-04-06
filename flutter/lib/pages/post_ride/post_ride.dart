@@ -116,6 +116,11 @@ class _PostRideScaffold extends StatelessWidget {
         path.contains('privacy-policy')) {
       Get.toNamed('/privacy_policy');
     }
+    
+    if (normalizedLink.contains('disclaimer') ||
+        path.contains('/disclaimer')) {
+      Get.toNamed('/disclaimer');
+    }
   }
 
   @override

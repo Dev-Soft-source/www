@@ -432,7 +432,7 @@ if (!function_exists('validatePhoneNumber')) {
 
         try {
             // Use Laravel-Phone to validate
-            $phone = phone($phoneNumber, $country ?: 'US');
+            $phone = phone($phoneNumber, $country ?? 'US');
             return $phone->isValid();
         } catch (\Exception $e) {
             // Fallback to basic validation

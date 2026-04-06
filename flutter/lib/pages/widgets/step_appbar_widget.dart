@@ -32,7 +32,7 @@ Widget stepAppBarWidget(
       IconButton(
         icon: const Icon(
           Icons.close,
-          color: Colors.black,
+          color: Colors.white,
           size: 28.0,
         ),
         onPressed: () async {
