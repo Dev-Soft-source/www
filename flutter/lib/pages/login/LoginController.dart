@@ -19,7 +19,6 @@ class LoginController extends GetxController {
   late TextEditingController emailTextController, passwordTextController;
   int loadedLangId = -1;
 
-  final Map<String, FocusNode> focusNodes = {};
   final formKey = GlobalKey<FormState>();
 
   var showOverly = false.obs;
@@ -52,13 +51,6 @@ class LoginController extends GetxController {
     // Initialize text controllers
     emailTextController = TextEditingController();
     passwordTextController = TextEditingController();
-
-    // Email = "1", password = "2" (wired from login.dart).
-    for (int i = 1; i <= 2; i++) {
-      focusNodes[i.toString()] = FocusNode();
-    }
-    focusNodes['1']?.addListener(_onLoginEmailFocusChanged);
-    focusNodes['2']?.addListener(_onLoginPasswordFocusChanged);
 
     // Load initial data
     await loadInitialData();
@@ -126,29 +118,11 @@ class LoginController extends GetxController {
     }
   }
 
-  void _onLoginEmailFocusChanged() {
-    if (focusNodes['1']?.hasFocus == true) {
-      errors.removeWhere((e) => e['title'] == 'email');
-      errors.refresh();
-    }
-  }
-
-  void _onLoginPasswordFocusChanged() {
-    if (focusNodes['2']?.hasFocus == true) {
-      errors.removeWhere((e) => e['title'] == 'password');
-      errors.refresh();
-    }
-  }
-
-  @override
-  void onClose() {
-    focusNodes['1']?.removeListener(_onLoginEmailFocusChanged);
-    focusNodes['2']?.removeListener(_onLoginPasswordFocusChanged);
-    for (final node in focusNodes.values) {
-      node.dispose();
-    }
-    focusNodes.clear();
-    super.onClose();
+  /// Clears inline validation for a field when the user taps into it (no FocusNode on controller:
+  /// Get.delete during language change can dispose nodes while TextFormField is still updating).
+  void clearFieldError(String title) {
+    errors.removeWhere((e) => e['title'] == title);
+    errors.refresh();
   }
 
   Future<void> getLanguages() async {

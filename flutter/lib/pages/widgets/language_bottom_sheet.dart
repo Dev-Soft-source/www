@@ -48,11 +48,18 @@ languageBottomSheet(screenWidth, serviceController, {String page = ""}) {
                     ],
                   ),
                 ),
-                onTap: () async {
-                  await serviceController.updateLanguage(
-                      serviceController.languages[index]['id'], page);
-
-                  //controller.getImage(ImageSource.camera);
+                onTap: () {
+                  final selectedId =
+                      serviceController.languages[index]['id'];
+                  // Do not call Get.back / navigation synchronously from onTap: it can re-enter
+                  // MouseTracker._deviceUpdatePhase (debug assert at mouse_tracker.dart:199).
+                  // Close sheet on the next frame, then run language + offAllNamed on the frame after.
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    Get.back();
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      serviceController.updateLanguage(selectedId, page);
+                    });
+                  });
                 },
               );
             },

@@ -127,7 +127,8 @@ class LoginPage extends StatelessWidget {
                               readonly: false,
                               fontSize: 18.0,
                               fontFamily: regular,
-                              focusNode: controller.focusNodes['1'],
+                              onTap: () =>
+                                  controller.clearFieldError('email'),
                               onChanged: (value) {
                                 // Email error behavior for Login:
                                 // - Do NOT validate on every keystroke (errors appear only on "Log in" tap).
@@ -175,7 +176,8 @@ class LoginPage extends StatelessWidget {
                             // Password Field
                             TextFormField(
                               controller: controller.passwordTextController,
-                              focusNode: controller.focusNodes['2'],
+                              onTap: () =>
+                                  controller.clearFieldError('password'),
                               onChanged: (value) {
                                 // Clear password error when user starts typing
                                 controller.errors.removeWhere((element) =>

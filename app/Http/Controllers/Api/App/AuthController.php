@@ -21,29 +21,9 @@ class AuthController extends Controller
 
     public function create(Request $request)
     {
-        $loginPage = null;
-        if ($request->lang_id && $request->lang_id != 0) {
-            $selectedLanguage = Language::whereId($request->lang_id)->first();
-            // Retrieve the LoginPageSettingDetail associated with the selected language
-            $loginPage = LoginPageSettingDetail::where('language_id', $request->lang_id)->select('continue_label', 'email_label', 'password_label', 'submit_button_label', 'forgot_password_label', 'or_label', 'no_account_label', 'signup_link_label', 'now_label', 'email_error', 'password_error', 'new_verification_email_btn_label')->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $request->lang_id)->select('hey_message', 'complete_profile_message', 'proceed_button', 'do_later_button')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $loginPage = LoginPageSettingDetail::where('language_id', $selectedLanguage->id)->select('continue_label', 'email_label', 'password_label', 'submit_button_label', 'forgot_password_label', 'or_label', 'no_account_label', 'signup_link_label', 'now_label', 'email_error', 'password_error', 'new_verification_email_btn_label')->first();
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('hey_message', 'complete_profile_message', 'proceed_button', 'do_later_button')->first();
-            }
-        }
+        $loginPage = LoginPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $messages = $this->successMessage;
 
-        if ($selectedLanguage) {
-            $locale = $selectedLanguage->abbreviation;
-        } else {
-            $locale = 'en';
-        }
-        
-        App::setLocale($locale);
-
-        // Locale is set above from lang_id; strings come from lang/*/validation.php
         $validationMessages = [
             'required' => trans('validation.required'),
             'string' => trans('validation.string'),
@@ -75,15 +55,11 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $niceNames = [
-            'email' => __('validation.attributes.email'),
-            'password' => __('validation.attributes.password'),
-        ];
-
+        
         $request->validate([
             'email' => 'required|email|string|max:255',
             'password' => 'required',
-        ], [], $niceNames);
+        ]);
 
         $credentials = $request->only('email', 'password');
 

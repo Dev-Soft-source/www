@@ -14,39 +14,76 @@ import '../widgets/image_upload_bottom_sheet.dart';
 import '../widgets/image_upload_widget.dart';
 import '../widgets/tool_tip.dart';
 
-/// Opens `<a href>` targets from stage-two HTML (handles scheme-less URLs; avoids flaky [canLaunchUrl] on Android).
+/// Opens `<a href>` from stage-two HTML: in-app routes (same as signup agreements) when possible,
+/// otherwise external browser.
 Future<void> launchStageTwoHtmlLink(String? url) async {
   if (url == null || url.isEmpty) return;
   final trimmed = url.trim();
   if (trimmed.startsWith('#')) return;
+
+  final normalizedLink = trimmed.toLowerCase();
+  final uri = Uri.tryParse(trimmed);
+  final path = (uri?.path ?? normalizedLink).toLowerCase();
+
+  if (path.contains('disclaimer') || normalizedLink.contains('disclaimer')) {
+    Get.toNamed('/disclaimer');
+    return;
+  }
+  if (normalizedLink.contains('term_condition') ||
+      path.contains('term-condition') ||
+      path.contains('terms-and-conditions')) {
+    Get.toNamed('/term_condition');
+    return;
+  }
+  if (normalizedLink.contains('term_of_use') ||
+      path.contains('term-of-use') ||
+      path.contains('terms-of-use')) {
+    Get.toNamed('/term_of_use');
+    return;
+  }
+  if (normalizedLink.contains('privacy_policy') ||
+      normalizedLink.contains('privacy-policy') ||
+      path.contains('privacy_policy') ||
+      path.contains('privacy-policy') ||
+      path.contains('privacy')) {
+    Get.toNamed('/privacy_policy');
+    return;
+  }
+  if (path.contains('profile-photo-guidelines') ||
+      path.contains('profile_photo_guidelines') ||
+      normalizedLink.contains('profile-photo-guidelines') ||
+      normalizedLink.contains('profile_photo_guidelines')) {
+    Get.toNamed('/profile_photo_guidelines');
+    return;
+  }
 
   String href = trimmed;
   if (href.startsWith('//')) {
     href = 'https:$href';
   } else if (!RegExp(r'^[a-zA-Z][a-zA-Z\d+\-.]*:').hasMatch(href)) {
     if (href.startsWith('/')) {
-      logger.error('Relative link needs a full URL in HTML href: $href');
+      logger.error('Unhandled relative HTML href (add in-app route or use full URL): $href');
       return;
     }
     href = 'https://$href';
   }
 
-  final uri = Uri.tryParse(href);
-  if (uri == null) {
+  final externalUri = Uri.tryParse(href);
+  if (externalUri == null) {
     logger.error('Invalid link URL: $url');
     return;
   }
 
   try {
     final launched = await launchUrl(
-      uri,
+      externalUri,
       mode: LaunchMode.externalApplication,
     );
     if (!launched) {
-      logger.error('launchUrl returned false for $uri');
+      logger.error('launchUrl returned false for $externalUri');
     }
   } catch (e) {
-    logger.error('Error launching URL $uri: $e');
+    logger.error('Error launching URL $externalUri: $e');
   }
 }
 
