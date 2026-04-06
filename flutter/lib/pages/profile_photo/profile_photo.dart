@@ -126,21 +126,23 @@ class ProfilePhotoPage extends StatelessWidget {
                               AppHtmlText(
                                 data:
                                     "${controller.labelTextDetail['sub_heading_text'] ?? "If you are signing up as a driver, then please note that to be eligible to post Pink Rides and Extra-Care Rides, you must upload your profile photo"}",
-                                fontSize: 20,
-                                fontFamily: regular,
+                                fontSize: 18,
+                                fontFamily: carlito,
+                                textAlign: TextAlign.justify,
                               ),
 
                               15.heightBox,
                               Row(
                                 children: [
                                   // Base text: 20px
-                                  txt20Size(title: "See ", context: context),
+                                  txt18Size(title: "See ", context: context, fontFamily: carlito),
                                   // Linked part as "rich" text: 18px
                                   InkWell(
                                     onTap: () {
                                       Get.toNamed("/profile_photo_guidelines");
                                     },
                                     child: txt18Size(
+                                      fontFamily: carlito,
                                       title:
                                           "ProximaRide Profile Photo Guidelines",
                                       context: context,

@@ -7,7 +7,8 @@ Widget textAreaWidget(
     {textController,
     readonly,
     fontSize,
-    fontFamily,
+    /// Ignored; typed and hint text always use [carlito].
+    String? fontFamily,
     placeHolder,
     maxLines,
     bool isError = false,
@@ -43,7 +44,7 @@ Widget textAreaWidget(
         context: null,
       ).copyWith(
         fontSize: fontSize ?? 19.0,
-        fontFamily: fontFamily,
+        fontFamily: carlito,
       ),
       hintMaxLines: hintMaxLines,
       filled: true,
@@ -54,7 +55,7 @@ Widget textAreaWidget(
     ),
     style: TextStyle(
       fontSize: fontSize ?? 19.0,
-      fontFamily: fontFamily,
+      fontFamily: carlito,
       color: textColor,
       height: 1.2,
     ),

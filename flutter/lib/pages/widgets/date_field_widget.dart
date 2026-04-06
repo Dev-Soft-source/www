@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../../consts/constFileLink.dart';
 
-Widget dateFieldWidget({textController, fontSize, fontFamily, onTap, prefixIcon, bool isError = false}){
+Widget dateFieldWidget(
+    {textController,
+    fontSize,
+    /// Ignored; field text always uses [carlito].
+    String? fontFamily,
+    onTap,
+    prefixIcon,
+    bool isError = false}) {
   return TextFormField(
     controller: textController,
     readOnly: true,
@@ -22,8 +29,8 @@ Widget dateFieldWidget({textController, fontSize, fontFamily, onTap, prefixIcon,
     ),
     style: TextStyle(
       fontSize: fontSize ?? 22.0,
-      fontFamily: fontFamily,
-      color: textColor
+      fontFamily: carlito,
+      color: textColor,
     ),
     onTap: onTap,
   );

@@ -22,6 +22,7 @@ Widget pricingWidget({context, controller, screenWidth}){
           child: AppHtmlText(
             data: html,
             fontSize: 18,
+            fontFamily: carlito,
             textColor: Colors.white,
             linkColor: Colors.white,
           ),

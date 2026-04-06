@@ -518,6 +518,14 @@ class MyAppState extends State<MyApp> {
         scaffoldBackgroundColor: Colors.white,
         appBarTheme: const AppBarTheme(backgroundColor: Colors.white),
         fontFamily: regular,
+        dialogTheme: DialogThemeData(
+          contentTextStyle: TextStyle(
+            fontFamily: carlito,
+            fontSize: 16,
+            height: 1.4,
+            color: textColor,
+          ),
+        ),
         tooltipTheme: TooltipThemeData(
           decoration: BoxDecoration(
             color: tooltipBackgroundColor,
@@ -527,6 +535,7 @@ class MyAppState extends State<MyApp> {
             color: Colors.white,
             fontSize: 14,
             fontWeight: FontWeight.w500,
+            fontFamily: carlito,
           ),
         ),
         inputDecorationTheme: InputDecorationTheme(

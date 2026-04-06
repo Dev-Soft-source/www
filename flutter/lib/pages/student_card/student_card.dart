@@ -75,14 +75,14 @@ class StudentCardPage extends StatelessWidget {
                               title:
                                   "${controller.labelTextDetail['mobile_indicate_required_field_label'] ?? '* Indicates required fields'}",
                               context: context,
-                              fontFamily: bold,
+                              fontFamily: carlito,
                               textColor: Colors.red),
                           10.heightBox,
                           // Description/body text: 20px
-                          txt20Size(
+                          txt18Size(
                               title:
                                   "${controller.labelTextDetail['student_card_description_text'] ?? 'To be eligible for our offers to students, your student card must be valid'}",
-                              fontFamily: regular,
+                              fontFamily: carlito,
                               textColor: textColor,
                               context: context),
                           20.heightBox,

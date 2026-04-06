@@ -32,140 +32,153 @@ class UpdateEmailAddressPage extends StatelessWidget {
             } else {
               return Stack(
                 children: [
-                  Container(
-                    padding: EdgeInsets.all(getValueForScreenType<double>(
-                      context: context,
-                      mobile: 15.0,
-                      tablet: 15.0,
-                    )),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          txt20Size(
-                              title:
-                                  "${controller.labelTextDetail['current_email_label'] ?? "Current e-mail"}",
-                              fontFamily: regular,
-                              textColor: textColor,
-                              context: context),
-                          5.heightBox,
-                          fieldsWidget(
-                            textController:
-                                controller.currentEmailTextEditingController,
-                            fieldType: "email",
-                            readonly: true,
-                            fontFamily: regular,
-                            fontSize: 18.0,
-                          ),
-                          10.heightBox,
-                          Row(
-                            children: [
-                              txt20Size(
-                                  title:
-                                      "${controller.labelTextDetail['new_email_label'] ?? "New e-mail"}",
+                  Column(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.all(getValueForScreenType<double>(
+                            context: context,
+                            mobile: 15.0,
+                            tablet: 15.0,
+                          )),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                txt20Size(
+                                    title:
+                                        "${controller.labelTextDetail['current_email_label'] ?? "Current e-mail"}",
+                                    fontFamily: regular,
+                                    textColor: textColor,
+                                    context: context),
+                                5.heightBox,
+                                fieldsWidget(
+                                  textController: controller
+                                      .currentEmailTextEditingController,
+                                  fieldType: "email",
+                                  readonly: true,
                                   fontFamily: regular,
-                                  textColor: textColor,
-                                  context: context),
-                              txt20Size(
-                                  title: "*",
+                                  fontSize: 18.0,
+                                ),
+                                10.heightBox,
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: txt20Size(
+                                          title:
+                                              "${controller.labelTextDetail['new_email_label'] ?? "New e-mail"}",
+                                          fontFamily: regular,
+                                          textColor: textColor,
+                                          context: context),
+                                    ),
+                                    txt20Size(
+                                        title: "*",
+                                        fontFamily: regular,
+                                        context: context,
+                                        textColor: Colors.red),
+                                  ],
+                                ),
+                                5.heightBox,
+                                fieldsWidget(
+                                  textController:
+                                      controller.newEmailTextEditingController,
+                                  onChanged: (value) {
+                                    controller.clearFieldError('email');
+                                  },
+                                  fieldType: "email",
+                                  readonly: false,
                                   fontFamily: regular,
-                                  context: context,
-                                  textColor: Colors.red),
-                            ],
-                          ),
-                          5.heightBox,
-                          fieldsWidget(
-                            textController:
-                                controller.newEmailTextEditingController,
-                            onChanged: (value) {
-                              controller.clearFieldError('email');
-                            },
-                            fieldType: "email",
-                            readonly: false,
-                            fontFamily: regular,
-                            fontSize: 18.0,
-                            placeHolder: "",
-                            focusNode: controller.focusNodes[1.toString()],
-                          ),
-                          if (controller.errors.firstWhereOrNull(
-                                  (element) => element['title'] == "email") !=
-                              null) ...[
-                            toolTip(
-                                tip: controller.errors.firstWhereOrNull(
-                                    (element) => element['title'] == "email"))
-                          ],
-                          10.heightBox,
-                          Row(
-                            children: [
-                              txt20Size(
-                                  title:
-                                      "${controller.labelTextDetail['confirm_email_label'] ?? "Confirm new e-mail"}",
+                                  fontSize: 18.0,
+                                  placeHolder: "",
+                                  focusNode: controller.focusNodes[1.toString()],
+                                ),
+                                if (controller.errors.firstWhereOrNull(
+                                        (element) =>
+                                            element['title'] == "email") !=
+                                    null) ...[
+                                  toolTip(
+                                      tip: controller.errors.firstWhereOrNull(
+                                          (element) =>
+                                              element['title'] == "email"))
+                                ],
+                                10.heightBox,
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: txt20Size(
+                                          title:
+                                              "${controller.labelTextDetail['confirm_email_label'] ?? "Confirm new e-mail"}",
+                                          fontFamily: regular,
+                                          textColor: textColor,
+                                          context: context),
+                                    ),
+                                    txt20Size(
+                                        title: "*",
+                                        fontFamily: regular,
+                                        context: context,
+                                        textColor: Colors.red),
+                                  ],
+                                ),
+                                5.heightBox,
+                                fieldsWidget(
+                                  textController: controller
+                                      .confirmEmailTextEditingController,
+                                  onChanged: (value) {
+                                    controller
+                                        .clearFieldError('email_confirmation');
+                                  },
+                                  fieldType: "email",
+                                  readonly: false,
                                   fontFamily: regular,
-                                  textColor: textColor,
-                                  context: context),
-                              txt20Size(
-                                  title: "*",
-                                  fontFamily: regular,
-                                  context: context,
-                                  textColor: Colors.red),
-                            ],
+                                  fontSize: 18.0,
+                                  placeHolder: "",
+                                  focusNode: controller.focusNodes[2.toString()],
+                                ),
+                                if (controller.errors.firstWhereOrNull(
+                                        (element) =>
+                                            element['title'] ==
+                                            "email_confirmation") !=
+                                    null) ...[
+                                  toolTip(
+                                      tip: controller.errors.firstWhereOrNull(
+                                          (element) =>
+                                              element['title'] ==
+                                              "email_confirmation"))
+                                ],
+                                24.heightBox,
+                              ],
+                            ),
                           ),
-                          5.heightBox,
-                          fieldsWidget(
-                            textController:
-                                controller.confirmEmailTextEditingController,
-                            onChanged: (value) {
-                              controller.clearFieldError('email_confirmation');
-                            },
-                            fieldType: "email",
-                            readonly: false,
-                            fontFamily: regular,
-                            fontSize: 18.0,
-                            placeHolder: "",
-                            focusNode: controller.focusNodes[2.toString()],
-                          ),
-                          if (controller.errors.firstWhereOrNull((element) =>
-                                  element['title'] == "email_confirmation") !=
-                              null) ...[
-                            toolTip(
-                                tip: controller.errors.firstWhereOrNull(
-                                    (element) =>
-                                        element['title'] ==
-                                        "email_confirmation"))
-                          ],
-                          100.heightBox,
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      color: Colors.grey.shade100,
-                      padding: EdgeInsets.all(getValueForScreenType<double>(
-                        context: context,
-                        mobile: 15.0,
-                        tablet: 15.0,
-                      )),
-                      width: context.screenWidth,
-                      // height: 75,
-                      child: elevatedButtonWidget(
-                          enabled: controller.isFormValid.value,
-                          textWidget: txt28Size(
-                              title:
-                                  "${controller.labelTextDetail['save_btn_label'] ?? "Save"}",
-                              fontFamily: regular,
-                              textColor: Colors.white,
-                              context: context),
-                          onPressed: () async {
-                            controller.currentEmailTextEditingController.text =
-                                "";
-                            await controller.updateEmailAddress();
-                          },
+                      Container(
+                        color: Colors.grey.shade100,
+                        padding: EdgeInsets.all(getValueForScreenType<double>(
                           context: context,
-                          btnRadius: 5.0),
-                    ),
+                          mobile: 15.0,
+                          tablet: 15.0,
+                        )),
+                        width: context.screenWidth,
+                        child: elevatedButtonWidget(
+                            enabled: controller.isFormValid.value,
+                            textWidget: txt28Size(
+                                title:
+                                    "${controller.labelTextDetail['save_btn_label'] ?? "Save"}",
+                                fontFamily: regular,
+                                textColor: Colors.white,
+                                context: context),
+                            onPressed: () async {
+                              controller.currentEmailTextEditingController.text =
+                                  "";
+                              await controller.updateEmailAddress();
+                            },
+                            context: context,
+                            btnRadius: 5.0),
+                      ),
+                    ],
                   ),
                   if (controller.isOverlayLoading.value == true) ...[
                     overlayWidget(context)

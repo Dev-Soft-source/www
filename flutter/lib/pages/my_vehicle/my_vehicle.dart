@@ -169,10 +169,10 @@ class MyVehiclePage extends StatelessWidget {
                                                 CrossAxisAlignment.center,
                                             children: [
                                               SizedBox(
-                                                height: 30,
+                                                height: 50,
                                                 width: 132,
                                                 child: elevatedButtonWidget(
-                                                    textWidget: txt22Size(
+                                                    textWidget: txt20Size(
                                                         title:
                                                             "${controller.labelTextDetail['edit_vehicle_button_text'] ?? "Edit vehicle"}",
                                                         context: context,
@@ -190,10 +190,10 @@ class MyVehiclePage extends StatelessWidget {
                                               ),
                                               5.heightBox,
                                               SizedBox(
-                                                height: 30,
+                                                height: 50,
                                                 width: 132,
                                                 child: elevatedButtonWidget(
-                                                    textWidget: txt22Size(
+                                                    textWidget: txt20Size(
                                                         title:
                                                             "${controller.labelTextDetail['remove_vehicle_button_text'] ?? "Remove vehicle"}",
                                                         context: context,

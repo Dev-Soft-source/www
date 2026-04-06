@@ -710,16 +710,24 @@ class PostRideController extends GetxController {
     await Get.dialog(
       AlertDialog(
         title: Text(heading.toString()),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(message1.toString()),
-            const SizedBox(height: 12),
-            Text(message2),
-            const SizedBox(height: 12),
-            Text(message3.toString()),
-          ],
+        content: DefaultTextStyle(
+          style: const TextStyle(
+            fontFamily: carlito,
+            fontSize: 16,
+            height: 1.4,
+            color: textColor,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(message1.toString()),
+              const SizedBox(height: 12),
+              Text(message2),
+              const SizedBox(height: 12),
+              Text(message3.toString()),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -750,22 +758,30 @@ class PostRideController extends GetxController {
                   'Recommended Contribution Limit')
               .toString(),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              (labelTextDetail['price_above_reimbursement_warning'] ??
-                      'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Quebec.')
-                  .toString(),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              (labelTextDetail['price_reduction_suggestion_message'] ??
-                      'While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.')
-                  .toString(),
-            ),
-          ],
+        content: DefaultTextStyle(
+          style: const TextStyle(
+            fontFamily: carlito,
+            fontSize: 16,
+            height: 1.4,
+            color: textColor,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                (labelTextDetail['price_above_reimbursement_warning'] ??
+                        'The price you entered is above the standard reimbursement rate recommended by the CRA and Revenu Quebec.')
+                    .toString(),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                (labelTextDetail['price_reduction_suggestion_message'] ??
+                        'While you can proceed, we suggest reducing the price per seat. This ensures your ride remains a standard carpool even if you drive long distances this year.')
+                    .toString(),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -3010,7 +3026,7 @@ class PostRideController extends GetxController {
             titlePadding: EdgeInsets.zero,
             middleText: resp['message'].toString(),
             barrierDismissible: false,
-            middleTextStyle: const TextStyle(fontSize: 20),
+            middleTextStyle: const TextStyle(fontSize: 20, fontFamily: carlito),
             actions: [
               ElevatedButton(
                 onPressed: () {

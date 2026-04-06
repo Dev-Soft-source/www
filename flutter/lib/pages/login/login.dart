@@ -1,5 +1,4 @@
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
@@ -263,7 +262,7 @@ class LoginPage extends StatelessWidget {
                               ),
                               style: const TextStyle(
                                   fontSize: 18,
-                                  fontFamily: regular,
+                                  fontFamily: carlito,
                                   color: textColor),
                               obscureText: !controller.isPasswordVisible.value,
                               keyboardType: TextInputType.visiblePassword,
@@ -588,42 +587,36 @@ class LoginPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
                         Center(
-                          child: RichText(
-                            text: TextSpan(
-                              children: [
-                                textSpan(
-                                  context: context,
-                                  textColor: textColor,
-                                  fontFamily: bold,
-                                  title: controller.labelTextDetail[
-                                          'no_account_label'] ??
-                                      "Don't have any account yet?",
-                                  // title: 'Don’t have an account yet?',
-                                  textSize: 20.0,
-                                ),
-                                textSpan(
-                                  context: context,
-                                  textColor: primaryColor,
-                                  fontFamily: bold,
+                          child: Wrap(
+                            alignment: WrapAlignment.center,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 0,
+                            runSpacing: 4,
+                            children: [
+                              txt20Size(
+                                title: controller.labelTextDetail[
+                                        'no_account_label'] ??
+                                    "Don't have any account yet?",
+                                fontFamily: bold,
+                                context: context,
+                              ),
+                              InkWell(
+                                onTap: () => Get.toNamed("/signup"),
+                                child: txt20Size(
                                   title:
                                       " ${controller.labelTextDetail['signup_link_label'] ?? "Sign up"}",
-                                  // title: " Sign up",
-                                  textSize: 20.0,
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      Get.toNamed("/signup");
-                                    },
-                                ),
-                                textSpan(
-                                  context: context,
-                                  textColor: textColor,
                                   fontFamily: bold,
-                                  title:
-                                      " ${controller.labelTextDetail['now_label'] ?? 'now'}",
-                                  textSize: 20.0,
+                                  textColor: primaryColor,
+                                  context: context,
                                 ),
-                              ],
-                            ),
+                              ),
+                              txt20Size(
+                                title:
+                                    " ${controller.labelTextDetail['now_label'] ?? 'now'}",
+                                fontFamily: bold,
+                                context: context,
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(height: 10),

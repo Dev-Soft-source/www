@@ -320,7 +320,10 @@ Widget pricePaymentOptionWidget(
                           triggerMode: TooltipTriggerMode.tap,
                           message: controller.paymentOptionToolTipList[i],
                           textStyle: const TextStyle(
-                              fontSize: 20, color: Colors.white),
+                              fontSize: 20,
+                              color: Colors.white,
+                              fontFamily: carlito,
+                            ),
                           showDuration: const Duration(days: 100),
                           waitDuration: Duration.zero,
                           child: Image.asset(infoImage,

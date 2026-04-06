@@ -51,6 +51,7 @@ class AddCard extends StatelessWidget {
                         txt18Size(
                             context: context,
                             textColor: Colors.red,
+                            fontFamily: carlito,
                             title:
                                 "${controller.labelTextDetail['mobile_indicate_required_field_label'] ?? '* Indicates required fields'}"),
                         5.heightBox,

@@ -74,42 +74,28 @@ Widget tripCardFromToWidget({String from = "", String to = "", String pickup = "
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        RichText(
-          text: TextSpan(
-            children: [
-              textSpan(
-                  title: "$resolvedFromLabel: ",
-                  context: context,
-                  textColor: textColor,
-                  textSize: 18.0),
-              textSpan(
-                  title: from,
-                  context: context,
-                  fontFamily: bold,
-                  textColor: textColor,
-                  textSize: 16.0),
-            ],
-          ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            txt18Size(title: "$resolvedFromLabel: ", context: context),
+            Expanded(
+              child: txt16Size(
+                  title: from, context: context, fontFamily: bold),
+            ),
+          ],
         ),
         2.heightBox,
         txt16Size(title: pickup, context: context, fontFamily: bold),
         20.heightBox,
-        RichText(
-          text: TextSpan(
-            children: [
-              textSpan(
-                  title: "$resolvedToLabel: ",
-                  context: context,
-                  textColor: textColor,
-                  textSize: 18.0),
-              textSpan(
-                  title: to,
-                  context: context,
-                  fontFamily: bold,
-                  textColor: textColor,
-                  textSize: 16.0),
-            ],
-          ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            txt18Size(title: "$resolvedToLabel: ", context: context),
+            Expanded(
+              child:
+                  txt16Size(title: to, context: context, fontFamily: bold),
+            ),
+          ],
         ),
         2.heightBox,
         txt16Size(title: dropOff, context: context, fontFamily: bold),
@@ -125,47 +111,42 @@ Widget tripCardFromToWidget({String from = "", String to = "", String pickup = "
           CrossAxisAlignment.end,
       children: [
         if (tripStatus != 'search') ...[
-          RichText(
-            text: TextSpan(
-              children: [
-                textSpan(
-                    title: formatCurrency(price),
-                    context: context,
-                    fontFamily: bold,
-                    textColor: textColor,
-                    textSize: 24.0),
-                textSpan(
-                    title: " $resolvedPerSeatLabel",
-                    context: context,
-                    fontFamily: bold,
-                    textColor: textColor,
-                    textSize: 16.0),
-              ],
-            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              txt24Size(
+                  title: formatCurrency(price),
+                  context: context,
+                  textColor: textColor),
+              txt16Size(
+                title: " $resolvedPerSeatLabel",
+                context: context,
+                fontFamily: bold,
+                textColor: textColor,
+              ),
+            ],
           ),
         ],
         if (tripStatus == "search") ...[
-          RichText(
-            text: TextSpan(
-              children: [
-                textSpan(
-                    title: seatsLeft,
-                    context: context,
-                    fontFamily: bold,
-                    textColor: int.parse(seatsLeft.toString()) <= 0
-                        ? Colors.red
-                        : textColor,
-                    textSize: 24.0),
-                textSpan(
-                    title: " $resolvedSeatLeftLabel",
-                    context: context,
-                    fontFamily: bold,
-                    textColor: int.parse(seatsLeft.toString()) <= 0
-                        ? Colors.red
-                        : textColor,
-                    textSize: 16.0),
-              ],
-            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              txt24Size(
+                title: seatsLeft,
+                context: context,
+                textColor: int.parse(seatsLeft.toString()) <= 0
+                    ? Colors.red
+                    : textColor,
+              ),
+              txt16Size(
+                title: " $resolvedSeatLeftLabel",
+                context: context,
+                fontFamily: bold,
+                textColor: int.parse(seatsLeft.toString()) <= 0
+                    ? Colors.red
+                    : textColor,
+              ),
+            ],
           ),
         ],
       ],
@@ -228,22 +209,19 @@ Widget tripCardFromToWidget({String from = "", String to = "", String pickup = "
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
-                              child: RichText(
-                                text: TextSpan(
-                                  children: [
-                                    textSpan(
-                                        title: "$resolvedFromLabel: ",
-                                        context: context,
-                                        textColor: textColor,
-                                        textSize: 18.0),
-                                    textSpan(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  txt18Size(
+                                      title: "$resolvedFromLabel: ",
+                                      context: context),
+                                  Expanded(
+                                    child: txt16Size(
                                         title: from,
                                         context: context,
-                                        fontFamily: bold,
-                                        textColor: textColor,
-                                        textSize: 16.0),
-                                  ],
-                                ),
+                                        fontFamily: bold),
+                                  ),
+                                ],
                               ),
                             ),
                             8.widthBox,
@@ -254,22 +232,19 @@ Widget tripCardFromToWidget({String from = "", String to = "", String pickup = "
                         txt16Size(
                             title: pickup, context: context, fontFamily: bold),
                         20.heightBox,
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              textSpan(
-                                  title: "$resolvedToLabel: ",
-                                  context: context,
-                                  textColor: textColor,
-                                  textSize: 18.0),
-                              textSpan(
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            txt18Size(
+                                title: "$resolvedToLabel: ",
+                                context: context),
+                            Expanded(
+                              child: txt16Size(
                                   title: to,
                                   context: context,
-                                  fontFamily: bold,
-                                  textColor: textColor,
-                                  textSize: 16.0),
-                            ],
-                          ),
+                                  fontFamily: bold),
+                            ),
+                          ],
                         ),
                         2.heightBox,
                         txt16Size(

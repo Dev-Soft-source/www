@@ -73,22 +73,22 @@ class DriverLicensePage extends StatelessWidget {
                             title:
                                 "${controller.labelTextDetail['mobile_indicate_required_field_label'] ?? '* Indicates required fields'}",
                             context: context,
-                            fontFamily: bold,
+                            fontFamily: carlito,
                             textColor: Colors.red),
                         10.heightBox,
                         // Description/body text: 20px
-                        txt20Size(
-                            title:
-                                "${controller.labelTextDetail['driver_license_description_text'] ?? 'To be eligible to post "Pink rides" and "Extra-care rides", you must upload your driver\'s license'}",
-                            fontFamily: regular,
-                            textColor: textColor,
-                            context: context),
-                        10.heightBox,
+                        // txt18Size(
+                        //     title:
+                        //         "${controller.labelTextDetail['driver_license_description_text'] ?? 'To be eligible to post "Pink rides" and "Extra-care rides", you must upload your driver\'s license'}",
+                        //     fontFamily: carlito,
+                        //     textColor: textColor,
+                        //     context: context),
+                        // 10.heightBox,
                         // Section label: 20px
-                        txt20Size(
+                        txt18Size(
                             title:
                                 "${controller.labelTextDetail['driver_license_label'] ?? "Your driver license"}",
-                            fontFamily: regular,
+                            fontFamily: carlito,
                             textColor: textColor,
                             context: context),
                         20.heightBox,

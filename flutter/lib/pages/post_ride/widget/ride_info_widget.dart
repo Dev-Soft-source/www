@@ -407,19 +407,28 @@ Widget rideInfoWidget(
                   ],
                 ),
                 if (error.any((error) => error['title'] == "date") ||
-                    error.any((error) => error['date'] == "time")) ...[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    error.any((error) => error['title'] == "time")) ...[
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       if (error.any((error) => error['title'] == "date")) ...[
-                        toolTip(
-                            tip: error.firstWhere(
-                                (error) => error['title'] == "date"))
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: toolTip(
+                              tip: error.firstWhere(
+                                  (error) => error['title'] == "date")),
+                        ),
                       ],
+                      if (error.any((error) => error['title'] == "date") &&
+                          error.any((error) => error['title'] == "time"))
+                        4.heightBox,
                       if (error.any((error) => error['title'] == "time")) ...[
-                        toolTip(
-                            tip: error.firstWhere(
-                                (error) => error['title'] == "time"))
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: toolTip(
+                              tip: error.firstWhere(
+                                  (error) => error['title'] == "time")),
+                        ),
                       ],
                     ],
                   )

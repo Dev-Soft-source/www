@@ -76,7 +76,11 @@ Widget checkBoxSelectionWidget({context, String title = "",  bool value = false,
                         )),
                     triggerMode: TooltipTriggerMode.tap,
                     message: infoText,
-                    textStyle: const TextStyle(fontSize: 16,color: Colors.white),
+                    textStyle: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                        fontFamily: carlito,
+                      ),
                     showDuration: const Duration(days: 100),
                     waitDuration: Duration.zero,
                     child: Image.asset(infoImage,color: Colors.black, width: getValueForScreenType<double>(
@@ -131,7 +135,11 @@ Widget checkBoxSelectionWidget({context, String title = "",  bool value = false,
                           )),
                       triggerMode: TooltipTriggerMode.tap,
                       message: tooltipMessage,
-                      textStyle: const TextStyle(fontSize: 16,color: Colors.white),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                        fontFamily: carlito,
+                      ),
                       showDuration: const Duration(days: 100),
                       waitDuration: Duration.zero,
                       child: Image.asset(infoImage,color: Colors.black, width: getValueForScreenType<double>(
@@ -220,7 +228,7 @@ Future<bool> showConfirmationToolTip(message) async {
   return await Get.defaultDialog(
     title: 'Confirm',
     middleText: message,
-    middleTextStyle: const TextStyle(fontSize: 18),
+    middleTextStyle: const TextStyle(fontSize: 18, fontFamily: carlito),
     actions: [
       ElevatedButton(
         onPressed: (){

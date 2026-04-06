@@ -118,7 +118,11 @@ Widget bookingOptionWidget(
                                   )),
                               triggerMode: TooltipTriggerMode.tap,
                               message: controller.bookingOptionToolTipList[i].toString(),
-                              textStyle: const TextStyle(fontSize: 20,color: Colors.white),
+                              textStyle: const TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                              fontFamily: carlito,
+                            ),
                               showDuration: const Duration(days: 100),
                               waitDuration: Duration.zero,
                               child: Image.asset(infoImage,color: Colors.black, width: getValueForScreenType<double>(

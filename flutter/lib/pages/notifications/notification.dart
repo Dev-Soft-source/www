@@ -747,8 +747,8 @@ class WelcomeScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Refined greeting with better typography
-                      RichText(
-                        text: TextSpan(
+                      Text.rich(
+                        TextSpan(
                           style: TextStyle(
                             fontSize: 15,
                             height: 1.7,

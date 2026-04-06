@@ -69,24 +69,38 @@ Widget tripCardDateTimeWidget({String date = "", String time = "", String seatLe
                       fontFamily: bold,
                     ),
                     6.widthBox,
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          textSpan(title: formatCurrency(firmPrice), context: context, fontFamily: bold, textColor: textColor, textSize: 24.0),
-                          textSpan(title: perSeatLabel, context: context, fontFamily: bold, textColor: textColor, textSize: 16.0),
-                        ],
-                      ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        txt24Size(
+                            title: formatCurrency(firmPrice),
+                            context: context,
+                            textColor: textColor),
+                        txt16Size(
+                          title: perSeatLabel,
+                          context: context,
+                          fontFamily: bold,
+                          textColor: textColor,
+                        ),
+                      ],
                     ),
                   ],
                 )
               ]else if(tripStatus == "search")...[
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      textSpan(title: formatCurrency(price), context: context, fontFamily: bold, textColor: textColor, textSize: 24.0),
-                      textSpan(title: perSeatLabel, context: context, fontFamily: bold, textColor: textColor, textSize: 16.0),
-                    ],
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    txt24Size(
+                        title: formatCurrency(price),
+                        context: context,
+                        textColor: textColor),
+                    txt16Size(
+                      title: perSeatLabel,
+                      context: context,
+                      fontFamily: bold,
+                      textColor: textColor,
+                    ),
+                  ],
                 ),
               ],
 

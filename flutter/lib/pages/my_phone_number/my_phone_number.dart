@@ -69,17 +69,23 @@ class MyPhoneNumberPage extends StatelessWidget {
                                 'To be eligible to post "Pink rides" and "Extra-care rides", you must verify your phone number',
                             style: {
                               "body": Style(
-                                  padding: HtmlPaddings.zero,
-                                  margin: Margins.zero),
-                              'p': Style(
-                                fontSize: FontSize(20),
                                 padding: HtmlPaddings.zero,
                                 margin: Margins.zero,
+                                textAlign: TextAlign.justify,
+                              ),
+                              'p': Style(
+                                fontSize: FontSize(18),
+                                fontFamily: carlito,
+                                padding: HtmlPaddings.zero,
+                                margin: Margins.zero,
+                                textAlign: TextAlign.justify,
                               ),
                               'div': Style(
-                                fontSize: FontSize(20),
+                                fontSize: FontSize(18),
+                                fontFamily: carlito,
                                 padding: HtmlPaddings.zero,
                                 margin: Margins.zero,
+                                textAlign: TextAlign.justify,
                               )
                             },
                           ),
@@ -99,17 +105,23 @@ class MyPhoneNumberPage extends StatelessWidget {
                                 'You can edit your phone number from here as well',
                             style: {
                               "body": Style(
-                                  padding: HtmlPaddings.zero,
-                                  margin: Margins.zero),
-                              'p': Style(
-                                fontSize: FontSize(20),
                                 padding: HtmlPaddings.zero,
                                 margin: Margins.zero,
+                                textAlign: TextAlign.justify,
+                              ),
+                              'p': Style(
+                                fontSize: FontSize(18),
+                                fontFamily: carlito,
+                                padding: HtmlPaddings.zero,
+                                margin: Margins.zero,
+                                textAlign: TextAlign.justify,
                               ),
                               'div': Style(
-                                fontSize: FontSize(20),
+                                fontSize: FontSize(18),
+                                fontFamily: carlito,
                                 padding: HtmlPaddings.zero,
                                 margin: Margins.zero,
+                                textAlign: TextAlign.justify,
                               )
                             },
                           ),
@@ -202,22 +214,24 @@ class MyPhoneNumberPage extends StatelessWidget {
                                 child: Row(
                                   children: [
                                     Expanded(
-                                      child: RichText(
-                                          text: TextSpan(children: [
-                                        textSpan(
-                                            context: context,
-                                            textColor: textColor,
-                                            fontFamily: regular,
-                                            title:
-                                                "${controller.labelTextDetail['mobile_country_code_label'] ?? "Country Code"}",
-                                            textSize: 20.0),
-                                        textSpan(
-                                            context: context,
-                                            textColor: Colors.red,
-                                            fontFamily: regular,
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: txt20Size(
+                                              title:
+                                                  "${controller.labelTextDetail['mobile_country_code_label'] ?? "Country Code"}",
+                                              context: context,
+                                              fontFamily: regular,
+                                            ),
+                                          ),
+                                          txt18Size(
                                             title: "*",
-                                            textSize: 18.0),
-                                      ])),
+                                            context: context,
+                                            fontFamily: regular,
+                                            textColor: Colors.red,
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -226,22 +240,24 @@ class MyPhoneNumberPage extends StatelessWidget {
                                 child: Row(
                                   children: [
                                     Expanded(
-                                      child: RichText(
-                                          text: TextSpan(children: [
-                                        textSpan(
-                                            context: context,
-                                            textColor: textColor,
-                                            fontFamily: regular,
-                                            title:
-                                                "${controller.labelTextDetail['mobile_phone_number_label'] ?? "Phone number"}",
-                                            textSize: 20.0),
-                                        textSpan(
-                                            context: context,
-                                            textColor: Colors.red,
-                                            fontFamily: regular,
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: txt20Size(
+                                              title:
+                                                  "${controller.labelTextDetail['mobile_phone_number_label'] ?? "Phone number"}",
+                                              context: context,
+                                              fontFamily: regular,
+                                            ),
+                                          ),
+                                          txt18Size(
                                             title: "*",
-                                            textSize: 18.0),
-                                      ])),
+                                            context: context,
+                                            fontFamily: regular,
+                                            textColor: Colors.red,
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -276,7 +292,7 @@ class MyPhoneNumberPage extends StatelessWidget {
                                   controller: controller
                                       .countryCodeTextEditingController,
                                   style: const TextStyle(
-                                      fontSize: 18, fontFamily: regular),
+                                      fontSize: 18, fontFamily: carlito),
                                   keyboardType: TextInputType.visiblePassword,
                                   textInputAction: TextInputAction.done,
                                   onChanged: (value) {
@@ -327,7 +343,7 @@ class MyPhoneNumberPage extends StatelessWidget {
                                   controller: controller
                                       .phoneNumberTextEditingController,
                                   style: const TextStyle(
-                                      fontSize: 18, fontFamily: regular),
+                                      fontSize: 18, fontFamily: carlito),
                                   keyboardType: TextInputType.visiblePassword,
                                   textInputAction: TextInputAction.done,
                                   onChanged: (value) {

@@ -58,7 +58,11 @@ Widget filterNotificationSideWidget({context, controller, double screenWidth = 0
                             )),
                         triggerMode: TooltipTriggerMode.tap,
                         message: paymentToolTip,
-                        textStyle: const TextStyle(fontSize: 16,color: Colors.white),
+                        textStyle: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontFamily: carlito,
+                        ),
                         showDuration: const Duration(days: 100),
                         waitDuration: Duration.zero,
                         child: const Icon(Icons.question_mark, size: 15,)
@@ -162,7 +166,11 @@ Widget filterNotificationSideWidget({context, controller, double screenWidth = 0
                               )),
                           triggerMode: TooltipTriggerMode.tap,
                           message: bookingToolTip,
-                          textStyle: const TextStyle(fontSize: 16,color: Colors.white),
+                          textStyle: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontFamily: carlito,
+                        ),
                           showDuration: const Duration(days: 100),
                           waitDuration: Duration.zero,
                           child: const Icon(Icons.question_mark, size: 15,)

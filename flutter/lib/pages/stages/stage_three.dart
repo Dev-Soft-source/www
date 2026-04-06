@@ -140,6 +140,7 @@ class StageThree extends StatelessWidget {
                                   title:
                                       "${controller.labelTextDetail['required_label'] ?? "* Indicates required fields"}",
                                   context: context,
+                                  fontFamily: carlito,
                                   textColor: Colors.red),
                               10.heightBox,
 

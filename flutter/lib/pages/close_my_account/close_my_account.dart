@@ -106,7 +106,7 @@ class CloseMyAccount extends StatelessWidget {
                                       title:
                                           "${controller.labelTextDetail['warning_text'] ?? 'We’ll be sad to see you go — closing your account can’t be undone. Please confirm only if you’re sure.'}",
                                       context: context,
-                                      fontFamily: bold,
+                                      fontFamily: carlito,
                                       textColor: Colors.red),
                                 ),
                               ],
@@ -118,20 +118,16 @@ class CloseMyAccount extends StatelessWidget {
                               title:
                                   "${controller.labelTextDetail['mobile_indicate_required_field_label'] ?? '* Indicates required fields'}",
                               context: context,
-                              fontFamily: bold,
+                              fontFamily: carlito,
                               textColor: Colors.red),
                           20.heightBox,
                           // Heading with primary text 20px, no extra asterisk
-                          RichText(
-                            text: TextSpan(children: [
-                              textSpan(
-                                  context: context,
-                                  textColor: primaryColor,
-                                  fontFamily: bold,
-                                  title:
-                                      "${controller.labelTextDetail['apply_reason_label'] ?? 'You are closing your account'} ${controller.labelTextDetail['reason_label'] ?? '(select all the reasons that apply)'}",
-                                  textSize: 20.0),
-                            ]),
+                          txt20Size(
+                            title:
+                                "${controller.labelTextDetail['apply_reason_label'] ?? 'You are closing your account'} ${controller.labelTextDetail['reason_label'] ?? '(select all the reasons that apply)'}",
+                            context: context,
+                            fontFamily: bold,
+                            textColor: primaryColor,
                           ),
                           10.heightBox,
                           // txt22Size(
@@ -582,22 +578,25 @@ class CloseMyAccount extends StatelessWidget {
 
                           20.heightBox,
                           // Recommendation heading: 20px, asterisk 18px
-                          RichText(
-                            text: TextSpan(children: [
-                              textSpan(
-                                  context: context,
-                                  textColor: primaryColor,
-                                  fontFamily: regular,
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: txt20Size(
                                   title:
                                       "${controller.labelTextDetail['recommend_heading'] ?? 'Would you recommend ProximaRide to your friends?'}",
-                                  textSize: 20.0),
-                              textSpan(
                                   context: context,
-                                  textColor: Colors.red,
-                                  fontFamily: bold,
-                                  title: '*',
-                                  textSize: 18.0),
-                            ]),
+                                  fontFamily: regular,
+                                  textColor: primaryColor,
+                                ),
+                              ),
+                              txt18Size(
+                                title: '*',
+                                context: context,
+                                fontFamily: bold,
+                                textColor: Colors.red,
+                              ),
+                            ],
                           ),
                           5.heightBox,
                           Container(
@@ -744,6 +743,12 @@ class CloseMyAccount extends StatelessWidget {
                           TextField(
                             maxLines: 3,
                             controller: controller.txtController2,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontFamily: carlito,
+                              color: textColor,
+                              height: 1.2,
+                            ),
                             decoration: InputDecoration(
                               // hintStyle: TextStyle(color: Colors.grey),
                               // hintText:
@@ -780,6 +785,12 @@ class CloseMyAccount extends StatelessWidget {
                           TextField(
                             maxLines: 3,
                             controller: controller.txtController1,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontFamily: carlito,
+                              color: textColor,
+                              height: 1.2,
+                            ),
                             decoration: InputDecoration(
                               // hintStyle: TextStyle(color: Colors.grey),
                               // hintText:

@@ -1736,6 +1736,8 @@ class RideController extends Controller
 
         $validationMessages = [
             'required' => trans('validation.required'),
+            'origin' => __('validation.custom.origin.message'),
+            'destination' => __('validation.custom.destination.message'),
         ];
 
         $vehicleTypeOptions = $this->getRideFeatureOptionGroups(

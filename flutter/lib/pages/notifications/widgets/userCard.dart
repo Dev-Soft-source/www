@@ -117,6 +117,7 @@ Widget userCard(
                                   ? "Message From $name"
                                   : name,
                               textColor: textColor,
+                              
                               context: context)),
                       txt20Size(title: userType, context: context)
                     ],
@@ -128,7 +129,7 @@ Widget userCard(
                       Expanded(
                           child: txt20Size(
                               title: normalizedNotification,
-                              fontFamily: bold,
+                              fontFamily: carlito,
                               textColor: Colors.blue,
                               context: context)),
                     ],

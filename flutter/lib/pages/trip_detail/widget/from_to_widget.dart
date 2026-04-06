@@ -34,14 +34,27 @@ Widget fromToWidget({context, String from = "", String to = "", String date = ""
               children: [
                 Align(
                   alignment: Alignment.centerRight,
-                  child: RichText(
-                    text: TextSpan(
-                      children: [
-                        textSpan(title: date, context: context, fontFamily: bold, textColor: textColor, textSize: 18.0),
-                        textSpan(title: " $atLabel ", context: context, fontFamily: bold, textColor: textColor, textSize: 18.0),
-                        textSpan(title: time, context: context, fontFamily: bold, textColor: textColor, textSize: 18.0),
-                      ],
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      txt18Size(
+                          title: date,
+                          context: context,
+                          fontFamily: bold,
+                          textColor: textColor),
+                      txt18Size(
+                          title: " $atLabel ",
+                          context: context,
+                          fontFamily: bold,
+                          textColor: textColor),
+                      txt18Size(
+                          title: time,
+                          context: context,
+                          fontFamily: bold,
+                          textColor: textColor),
+                    ],
                   ),
                 ),
                 8.heightBox,
@@ -209,13 +222,24 @@ Widget fromToWidget({context, String from = "", String to = "", String date = ""
               5.widthBox,
               Expanded(
                   child: Center(
-                    child: RichText(
-                      text: TextSpan(
-                        children: [
-                          textSpan(title: "\$$perSeat", context: context, fontFamily: bold, textColor: primaryColor, textSize: 20.0),
-                          textSpan(title: " $perSeatLabel", context: context, fontFamily: bold, textColor: primaryColor, textSize: 18.0,),
-                        ],
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        txt20Size(
+                          title: "\$$perSeat",
+                          context: context,
+                          fontFamily: bold,
+                          textColor: primaryColor,
+                        ),
+                        txt18Size(
+                          title: " $perSeatLabel",
+                          context: context,
+                          fontFamily: bold,
+                          textColor: primaryColor,
+                        ),
+                      ],
                     ),
                   )
               ),

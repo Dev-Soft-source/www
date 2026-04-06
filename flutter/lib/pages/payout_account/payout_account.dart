@@ -128,7 +128,7 @@ class PayoutAccountPage extends StatelessWidget {
                                         10.heightBox,
                                         txt18Size(
                                           title: "${controller.labelTextDetail['mobile_indicate_required_field_label'] ?? '* Indicates required fields'}",
-                                          fontFamily: regular,
+                                          fontFamily: carlito,
                                           context: context,
                                           textColor: Colors.red,
                                         ),
@@ -299,7 +299,7 @@ class PayoutAccountPage extends StatelessWidget {
                                         10.heightBox,
                                         txt18Size(
                                           title: "${controller.labelTextDetail['mobile_indicate_required_field_label'] ?? '* Indicates required fields'}",
-                                          fontFamily: regular,
+                                          fontFamily: carlito,
                                           context: context,
                                           textColor: Colors.red,
                                         ),
@@ -552,7 +552,7 @@ class PayoutAccountPage extends StatelessWidget {
                                         txt18Size(
                                             title:
                                                 "${controller.labelTextDetail['mobile_paypal_indicate_required_label'] ?? "* Indicates required fields"}",
-                                            fontFamily: regular,
+                                            fontFamily: carlito,
                                             context: context,
                                             textColor: Colors.red),
                                         10.heightBox,

@@ -65,7 +65,7 @@ class ContactUsPage extends StatelessWidget {
                               title:
                                   "${controller.labelTextDetail['mobile_indicate_required_field_label'] ?? '* Indicates required fields'}",
                               context: context,
-                              fontFamily: bold,
+                              fontFamily: carlito,
                               textColor: Colors.red),
                           Row(
                             children: [

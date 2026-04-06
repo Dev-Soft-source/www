@@ -179,6 +179,7 @@ class _PostRideScaffold extends StatelessWidget {
                             txt18Size(
                                 context: context,
                                 textColor: Colors.red,
+                                fontFamily: carlito,
                                 title:
                                     '* ${controller.labelTextDetail['indicates_required_field_text'] ?? "Indicates required fields"}'),
                             10.heightBox,

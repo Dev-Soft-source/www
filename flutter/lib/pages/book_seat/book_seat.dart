@@ -60,6 +60,7 @@ class BookSeatPage extends StatelessWidget {
                         txt18Size(
                             context: context,
                             textColor: Colors.red,
+                            fontFamily: carlito,
                             title:
                                 '* ${controller.labelTextDetail['required_fields'] ?? "* Indicates required fields"}'),
                         10.heightBox,

@@ -53,10 +53,10 @@ class PasswordPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          txt20Size(
+                          txt18Size(
                               title:
                                   "${controller.labelTextDetail['mobile_password_description_text'] ?? "You can update your password from here. Passwords must have at least eight characters and contain one uppercase and one lowercase.\nStrong passwords include numbers, letters, and punctuation marks"}",
-                              fontFamily: regular,
+                              fontFamily: carlito,
                               textColor: textColor,
                               context: context),
                           // Html(
@@ -92,7 +92,7 @@ class PasswordPage extends StatelessWidget {
                           txt18Size(
                               title:
                                   "${controller.labelTextDetail['mobile_indicate_required_field_label'] ?? "* Indicates required fields"}",
-                              fontFamily: regular,
+                              fontFamily: carlito,
                               context: context,
                               textColor: Colors.red),
                           10.heightBox,
@@ -154,7 +154,7 @@ class PasswordPage extends StatelessWidget {
                               ),
                             ),
                             style: const TextStyle(
-                                fontSize: 18, fontFamily: regular),
+                                fontSize: 18, fontFamily: carlito),
                             obscureText: !controller.isOldPasswordVisible.value,
                             keyboardType: TextInputType.visiblePassword,
                             textInputAction: TextInputAction.done,
@@ -225,7 +225,7 @@ class PasswordPage extends StatelessWidget {
                               ),
                             ),
                             style: const TextStyle(
-                                fontSize: 18, fontFamily: regular),
+                                fontSize: 18, fontFamily: carlito),
                             obscureText: !controller.isNewPasswordVisible.value,
                             keyboardType: TextInputType.visiblePassword,
                             textInputAction: TextInputAction.done,
@@ -299,7 +299,7 @@ class PasswordPage extends StatelessWidget {
                               ),
                             ),
                             style: const TextStyle(
-                                fontSize: 18, fontFamily: regular),
+                                fontSize: 18, fontFamily: carlito),
                             obscureText:
                                 !controller.isConfirmPasswordVisible.value,
                             keyboardType: TextInputType.visiblePassword,

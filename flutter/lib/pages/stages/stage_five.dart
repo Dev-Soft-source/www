@@ -157,7 +157,7 @@ class StageFive extends StatelessWidget {
                                           .countryCodeTextEditingController,
 
                                       style: const TextStyle(
-                                          fontSize: 18, fontFamily: regular),
+                                          fontSize: 18, fontFamily: carlito),
                                       keyboardType:
                                           TextInputType.visiblePassword,
                                       textInputAction: TextInputAction.done,
@@ -204,7 +204,7 @@ class StageFive extends StatelessWidget {
                                         hintStyle:
                                             appPlaceholderTextStyle().copyWith(
                                           fontSize: 18,
-                                          fontFamily: regular,
+                                          fontFamily: carlito,
                                         ),
                                         enabledBorder: OutlineInputBorder(
                                             borderRadius:
@@ -226,7 +226,7 @@ class StageFive extends StatelessWidget {
                                       controller: controller
                                           .phoneNumberTextEditingController,
                                       style: const TextStyle(
-                                          fontSize: 18, fontFamily: regular),
+                                          fontSize: 18, fontFamily: carlito),
                                       keyboardType: TextInputType.number,
                                       textInputAction: TextInputAction.done,
                                       onChanged: (value) {
@@ -317,6 +317,11 @@ class StageFive extends StatelessWidget {
                                   margin: const EdgeInsets.only(right: 20.0),
                                   showFieldAsBox: true,
                                   decoration: const InputDecoration(),
+                                  textStyle: const TextStyle(
+                                    fontSize: 20,
+                                    fontFamily: carlito,
+                                    color: textColor,
+                                  ),
                                   onSubmit: (var verify) {
                                     controller.updateVerificationCodeEntered(
                                         verify.toString());

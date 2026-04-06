@@ -10,9 +10,9 @@ Widget miniBioWidget({context, String miniBio = ""}){
             mobile: 15.0,
             tablet: 15.0,
           )),
-      child: txt20Size(
+      child: txt18Size(
           title: miniBio,
-          fontFamily: regular,
+          fontFamily: carlito,
           textColor: textColor,
           context: context));
 }

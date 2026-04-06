@@ -7,7 +7,8 @@ Widget fieldsWidget(
     fieldType,
     readonly,
     fontSize,
-    fontFamily,
+    /// Ignored; typed and hint text always use [carlito].
+    String? fontFamily,
     onChanged,
     String placeHolder = "",
     suffix,
@@ -62,14 +63,14 @@ Widget fieldsWidget(
           context: null,
         ).copyWith(
           fontSize: fontSize ?? 20.0,
-          fontFamily: fontFamily,
+          fontFamily: carlito,
         ),
         fillColor: inputColor,
         contentPadding:
             const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0)),
     style: TextStyle(
       fontSize: fontSize ?? 20.0,
-      fontFamily: fontFamily,
+      fontFamily: carlito,
       color: textColor,
       height: 1.2,
     ),

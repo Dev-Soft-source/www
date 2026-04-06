@@ -123,7 +123,10 @@ class _RideFeatureWidgetState extends State<RideFeatureWidget> {
                                     triggerMode: TooltipTriggerMode.manual,
                                     message: widget.featureList[i]['tooltip'],
                                     textStyle: const TextStyle(
-                                        fontSize: 20, color: Colors.white),
+                                        fontSize: 20,
+                                        color: Colors.white,
+                                        fontFamily: carlito,
+                                      ),
                                     showDuration: const Duration(days: 100),
                                     waitDuration: Duration.zero,
                                     child: Row(
@@ -226,8 +229,11 @@ class _RideFeatureWidgetState extends State<RideFeatureWidget> {
                           )),
                       triggerMode: TooltipTriggerMode.manual,
                       message: "${widget.rideDetail['luggage_tooltip']}",
-                      textStyle:
-                          const TextStyle(fontSize: 20, color: Colors.white),
+                      textStyle: const TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                        fontFamily: carlito,
+                      ),
                       showDuration: const Duration(days: 100),
                       waitDuration: Duration.zero,
                       child: Row(

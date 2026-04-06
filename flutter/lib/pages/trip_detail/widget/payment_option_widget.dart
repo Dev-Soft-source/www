@@ -72,7 +72,11 @@ class _PaymentOptionWidgetState extends State<PaymentOptionWidget> {
                   )),
               triggerMode: TooltipTriggerMode.manual,
               message: widget.toolTipMessage,
-              textStyle: const TextStyle(fontSize: 20, color: Colors.white),
+              textStyle: const TextStyle(
+                fontSize: 20,
+                color: Colors.white,
+                fontFamily: carlito,
+              ),
               showDuration: const Duration(days: 100),
               waitDuration: Duration.zero,
               child: Container(

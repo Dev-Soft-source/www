@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
@@ -189,7 +188,7 @@ class SignupPage extends StatelessWidget {
                             title:
                                 "* ${controller.labelTextDetail['required_label'] ?? "* Indicates required fields"}",
                             // "* Indicates required field",
-                            fontFamily: regular,
+                            fontFamily: carlito,
                             context: context,
                             textColor: Colors.red),
                         10.heightBox,
@@ -555,7 +554,7 @@ class SignupPage extends StatelessWidget {
                                   ),
                                   style: const TextStyle(
                                       fontSize: 16,
-                                      fontFamily: regular,
+                                      fontFamily: carlito,
                                       color: textColor),
                                   obscureText:
                                       !controller.isPasswordVisible.value,
@@ -702,7 +701,7 @@ class SignupPage extends StatelessWidget {
                             ),
                           ),
                           style: const TextStyle(
-                              fontSize: 16, fontFamily: regular),
+                              fontSize: 16, fontFamily: carlito),
                           obscureText:
                               !controller.isConfirmPasswordVisible.value,
                           keyboardType: TextInputType.visiblePassword,
@@ -1022,35 +1021,36 @@ class SignupPage extends StatelessWidget {
                         ),
                         15.heightBox,
                         Center(
-                          child: RichText(
-                              text: TextSpan(children: [
-                            textSpan(
-                                context: context,
-                                textColor: textColor,
-                                fontFamily: bold,
+                          child: Wrap(
+                            alignment: WrapAlignment.center,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 0,
+                            runSpacing: 4,
+                            children: [
+                              txt18Size(
                                 title:
                                     "${controller.labelTextDetail['no_account_label'] ?? 'Already have an account? '}",
-                                textSize: 18.0),
-                            textSpan(
-                              context: context,
-                              textColor: primaryColor,
-                              fontFamily: bold,
-                              title:
-                                  " ${controller.labelTextDetail['signin_link_label'] ?? 'Log in'}",
-                              textSize: 18.0,
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  Get.offAllNamed("/login");
-                                },
-                            ),
-                            textSpan(
-                                context: context,
-                                textColor: textColor,
                                 fontFamily: bold,
+                                context: context,
+                              ),
+                              InkWell(
+                                onTap: () => Get.offAllNamed("/login"),
+                                child: txt18Size(
+                                  title:
+                                      " ${controller.labelTextDetail['signin_link_label'] ?? 'Log in'}",
+                                  fontFamily: bold,
+                                  textColor: primaryColor,
+                                  context: context,
+                                ),
+                              ),
+                              txt18Size(
                                 title:
                                     " ${controller.labelTextDetail['now_label'] ?? ' now'}",
-                                textSize: 18.0),
-                          ])),
+                                fontFamily: bold,
+                                context: context,
+                              ),
+                            ],
+                          ),
                         ),
                         5.heightBox,
                         Align(

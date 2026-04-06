@@ -68,6 +68,11 @@ class PhoneNumberVerificationPage extends StatelessWidget {
                           margin: const EdgeInsets.only(right: 20.0),
                           showFieldAsBox: true,
                           decoration: const InputDecoration(),
+                          textStyle: const TextStyle(
+                            fontSize: 20,
+                            fontFamily: carlito,
+                            color: textColor,
+                          ),
                           onSubmit: (var verify) {
                             controller.verificationCode = verify.toString();
                           },

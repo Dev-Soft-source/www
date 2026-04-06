@@ -78,7 +78,11 @@ Widget cancellationPolicyWidget({context, controller, screenWidth}) {
                             )),
                         triggerMode: TooltipTriggerMode.tap,
                         message: '${controller.cancellationOptionToolTipList[i]}',
-                        textStyle: const TextStyle(fontSize: 16,color: Colors.white),
+                        textStyle: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontFamily: carlito,
+                        ),
                         showDuration: const Duration(days: 100),
                         waitDuration: Duration.zero,
                         child: Image.asset(infoImage,color: Colors.black, width: getValueForScreenType<double>(

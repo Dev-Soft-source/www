@@ -388,26 +388,32 @@ class SearchRideController extends GetxController {
               toTextEditingController.text == "")) {
         if (fromTextEditingController.text == "") {
           _removeFieldError('from');
-          var message = validationMessageDetail['required'];
-          message = message.replaceAll(
-              ":Attribute", labelTextDetail['from_error'] ?? 'Origin');
-          var err = {
+          final message = _stringOrFallback(
+            labelTextDetail['origin'],
+            _stringOrFallback(
+              validationMessageDetail['origin'],
+              'Origin is required.',
+            ),
+          );
+          errors.add({
             'title': "from",
-            'eList': [message ?? 'Origin field is required']
-          };
-          errors.add(err);
+            'eList': [message],
+          });
         }
 
         if (toTextEditingController.text == "") {
           _removeFieldError('to');
-          var message = validationMessageDetail['required'];
-          message = message.replaceAll(
-              ":Attribute", labelTextDetail['to_error'] ?? 'Destination');
-          var err = {
+          final message = _stringOrFallback(
+            labelTextDetail['destination'],
+            _stringOrFallback(
+              validationMessageDetail['destination'],
+              'Destination is required.',
+            ),
+          );
+          errors.add({
             'title': "to",
-            'eList': [message ?? 'Destination field is required']
-          };
-          errors.add(err);
+            'eList': [message],
+          });
         }
         return;
       }
@@ -897,6 +903,11 @@ class SearchRideController extends GetxController {
         _removeFieldError('to');
       }
     });
+  }
+
+  String _stringOrFallback(dynamic value, String fallback) {
+    final normalized = value?.toString().trim() ?? '';
+    return normalized.isNotEmpty ? normalized : fallback;
   }
 
   void _removeFieldError(String title) {

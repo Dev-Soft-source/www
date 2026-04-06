@@ -2,6 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
+/// Symmetric insets for tooltip bubbles (horizontal == vertical).
+const EdgeInsets _kTooltipBubblePadding = EdgeInsets.fromLTRB(10.0, 16.0, 10.0, 12.0);
+
+const TextHeightBehavior _kTooltipTextHeightBehavior = TextHeightBehavior(
+  applyHeightToFirstAscent: false,
+  applyHeightToLastDescent: false,
+);
+
+TextStyle _tooltipLineTextStyle(double fontSize) => TextStyle(
+      color: Colors.white,
+      fontSize: fontSize,
+      fontFamily: carlito,
+      height: 1.0,
+    );
+
 class TriangleClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
@@ -33,6 +48,40 @@ class ClippedTriangleWidget extends StatelessWidget {
       ),
     );
   }
+}
+
+bool _isGenericFieldRequiredMessage(String s) {
+  final t = s.trim().toLowerCase();
+  if (t.isEmpty) return false;
+  final noDot = t.endsWith('.') ? t.substring(0, t.length - 1) : t;
+  return noDot == 'this field is required';
+}
+
+/// Laravel often returns both [validation.required] and a custom attribute message;
+/// show only the specific lines. Also drops case-insensitive duplicates.
+List<String> normalizeTooltipEList(List<dynamic> raw) {
+  final items = raw
+      .map((e) => e.toString().trim())
+      .where((s) => s.isNotEmpty)
+      .toList();
+  if (items.isEmpty) return items;
+
+  final seenLower = <String>{};
+  final unique = <String>[];
+  for (final s in items) {
+    final key = s.toLowerCase();
+    if (seenLower.contains(key)) continue;
+    seenLower.add(key);
+    unique.add(s);
+  }
+
+  if (unique.length == 1) return unique;
+
+  final withoutGeneric = unique.where((s) => !_isGenericFieldRequiredMessage(s)).toList();
+  if (withoutGeneric.isNotEmpty) {
+    return withoutGeneric;
+  }
+  return unique;
 }
 
 // Widget toolTip(
@@ -111,28 +160,40 @@ Widget toolTip({
           color: tooltipBackgroundColor,
         ),
         child: Padding(
-          padding: const EdgeInsets.all(5.0),
+          padding: _kTooltipBubblePadding,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (tip is Map && tip['eList'] is List && type == 'normal') ...[
-                for (var list in tip['eList']) ...[
+                for (final line
+                    in normalizeTooltipEList(tip['eList'] as List<dynamic>)) ...[
                   Text(
-                    list.toString(),
-                    style: TextStyle(
-                      color: Colors.white,
+                    line,
+                    style: _tooltipLineTextStyle(fontSize),
+                    strutStyle: StrutStyle(
                       fontSize: fontSize,
+                      fontFamily: carlito,
+                      height: 1.0,
+                      leading: 0,
+                      forceStrutHeight: true,
                     ),
+                    textHeightBehavior: _kTooltipTextHeightBehavior,
+                    softWrap: true,
                   ),
                 ]
               ] else if (tip is String) ...[
                 Text(
                   capitalizeFirstLetter(tip),
-                  style: TextStyle(
-                    color: Colors.white,
+                  style: _tooltipLineTextStyle(fontSize),
+                  strutStyle: StrutStyle(
                     fontSize: fontSize,
+                    fontFamily: carlito,
+                    height: 1.0,
+                    leading: 0,
+                    forceStrutHeight: true,
                   ),
+                  textHeightBehavior: _kTooltipTextHeightBehavior,
                   softWrap: true,
                 )
               ],
@@ -156,7 +217,7 @@ Widget toolTipPassword(context, checkList, type) {
           color: tooltipBackgroundColor,
         ),
         child: Padding(
-          padding: const EdgeInsets.all(5.0),
+          padding: _kTooltipBubblePadding,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,7 +230,7 @@ Widget toolTipPassword(context, checkList, type) {
                   txt20Size(
                       context: context,
                       title: 'Include small alphabet',
-                      fontFamily: regular,
+                      fontFamily: carlito,
                       textColor: Colors.white)
                 ],
               ),
@@ -182,7 +243,7 @@ Widget toolTipPassword(context, checkList, type) {
                   txt20Size(
                       context: context,
                       title: 'Include capital alphabet',
-                      fontFamily: regular,
+                      fontFamily: carlito,
                       textColor: Colors.white)
                 ],
               ),
@@ -195,7 +256,7 @@ Widget toolTipPassword(context, checkList, type) {
                   txt20Size(
                       context: context,
                       title: 'Include number',
-                      fontFamily: regular,
+                      fontFamily: carlito,
                       textColor: Colors.white)
                 ],
               ),
@@ -208,7 +269,7 @@ Widget toolTipPassword(context, checkList, type) {
                   txt20Size(
                       context: context,
                       title: 'Include special character',
-                      fontFamily: regular,
+                      fontFamily: carlito,
                       textColor: Colors.white)
                 ],
               ),
@@ -221,7 +282,7 @@ Widget toolTipPassword(context, checkList, type) {
                   txt20Size(
                       context: context,
                       title: 'Password length should be 8 or more',
-                      fontFamily: regular,
+                      fontFamily: carlito,
                       textColor: Colors.white)
                 ],
               ),
@@ -235,7 +296,7 @@ Widget toolTipPassword(context, checkList, type) {
                     txt20Size(
                         context: context,
                         title: 'Password does not match',
-                        fontFamily: regular,
+                        fontFamily: carlito,
                         textColor: Colors.white)
                   ],
                 ),
@@ -291,14 +352,14 @@ Widget toolTipEmptyPassword(BuildContext context) {
             borderRadius: BorderRadius.circular(5.0),
             color: tooltipBackgroundColor,
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+          padding: _kTooltipBubblePadding,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               txt20Size(
                 context: context,
                 title: 'Password is required',
-                fontFamily: regular,
+                fontFamily: carlito,
                 textColor: Colors.white,
               ),
             ],

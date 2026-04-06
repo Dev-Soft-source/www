@@ -60,7 +60,7 @@ class CityPage extends StatelessWidget {
                                 controller.searchTextEditingController,
                             autoFocus: true,
                             fieldType: "text",
-                            fontFamily: regular,
+                            fontFamily: carlito,
                             fontSize: 18.0,
                             readonly: false,
                             placeHolder: controller.isCity.value == "city"
@@ -270,7 +270,7 @@ class CityPage extends StatelessWidget {
                                                 ? "${controller.labelTextDetail['no_destination_label'] ?? "No destination found!"}"
                                                 : "",
                                     context: context,
-                                    fontFamily: regular))
+                                    fontFamily: carlito))
                       ],
                     ))),
                 if (controller.isOverlayLoading.value == true) ...[

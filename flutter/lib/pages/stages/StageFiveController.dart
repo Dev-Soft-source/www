@@ -472,6 +472,7 @@ class StageFiveController extends GetxController {
               middleTextStyle: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.normal,
+                fontFamily: carlito,
               ),
               actions: [
                 ElevatedButton(
@@ -510,6 +511,7 @@ class StageFiveController extends GetxController {
             middleTextStyle: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.normal,
+              fontFamily: carlito,
             ),
             actions: [
               ElevatedButton(
@@ -641,6 +643,7 @@ class StageFiveController extends GetxController {
           middleTextStyle: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.normal,
+            fontFamily: carlito,
           ),
           actions: [
             ElevatedButton(
@@ -710,16 +713,10 @@ class _DialogBulletText extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: RichText(
-            text: TextSpan(
-              style: const TextStyle(
-                fontSize: 18,
-                color: Colors.black,
-                height: 1.35,
-                fontFamily: descriptiveFontFamily,
-              ),
-              children: spans,
-            ),
+          child: txt18DescriptiveRich(
+            context: context,
+            textColor: Colors.black,
+            children: spans,
           ),
         ),
       ],

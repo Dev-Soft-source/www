@@ -94,7 +94,7 @@ Widget chatCard(
                       Expanded(
                           child: txt20Size(
                               title: message.toString(),
-                              fontFamily: bold,
+                              fontFamily: carlito,
                               context: context)),
                       if (numberOfMessages != 0) ...[
                         Badge(

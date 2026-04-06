@@ -65,10 +65,10 @@ class EmailAddressPage extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                           // Description/body text: 20px
-                          txt20Size(
+                          txt18Size(
                               title:
                                   "${controller.labelTextDetail['email_description_text'] ?? 'To be eligible to post "Pink rides" and "Extra-care rides", you must enter a valid e-mail address'}",
-                              fontFamily: regular,
+                              fontFamily: carlito,
                               textColor: textColor,
                               context: context),
                           10.heightBox,

@@ -72,7 +72,7 @@ class AddVehiclePage extends StatelessWidget {
                           txt20Size(
                               title:
                                   "* ${controller.labelTextDetail['mobile_indicate_field_label'] ?? "* Indicates required fields"}",
-                              fontFamily: regular,
+                              fontFamily: carlito,
                               context: context,
                               textColor: Colors.red),
                           5.heightBox,

@@ -187,6 +187,7 @@ Widget txt20Size(
     {String title = "",
     String fontFamily = regular,
     Color textColor = textColor,
+    TextAlign textAlign = TextAlign.start,
     context}) {
   return title.text
       .size(getValueForScreenType<double>(
@@ -196,6 +197,7 @@ Widget txt20Size(
       ))
       .color(textColor)
       .fontFamily(fontFamily)
+      .align(textAlign)
       .make();
 }
 
@@ -279,8 +281,34 @@ Widget txt18Size(
       ))
       .color(textColor)
       .lineHeight(1.2)
+      .justify
       .fontFamily(fontFamily)
       .make();
+}
+
+/// 18px descriptive body (Carlito) with mixed inline styles via [children] [TextSpan]s.
+Widget txt18DescriptiveRich({
+  required BuildContext context,
+  required List<InlineSpan> children,
+  Color textColor = textColor,
+  double height = 1.35,
+}) {
+  final fontSize = getValueForScreenType<double>(
+    context: context,
+    mobile: 18.0,
+    tablet: 18.0,
+  );
+  return Text.rich(
+    TextSpan(
+      style: TextStyle(
+        fontSize: fontSize,
+        color: textColor,
+        height: height,
+        fontFamily: descriptiveFontFamily,
+      ),
+      children: children,
+    ),
+  );
 }
 
 Widget txt18SizeCapitalized(

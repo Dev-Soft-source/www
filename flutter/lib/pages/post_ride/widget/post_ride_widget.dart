@@ -30,24 +30,25 @@ Widget postRideWidget(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Expanded(
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    textSpan(
-                        title: title,
-                        context: context,
-                        fontFamily: regular,
-                        textColor: Colors.white,
-                        textSize: 22.0),
-                    isRequired ? textSpan(
-                      title: "*",
-                      context: context,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: txt22Size(
+                      title: title,
                       fontFamily: regular,
+                      context: context,
+                      textColor: Colors.white,
+                    ),
+                  ),
+                  if (isRequired)
+                    txt20Size(
+                      title: "*",
+                      fontFamily: regular,
+                      context: context,
                       textColor: Colors.red,
-                      textSize: 18.0,
-                    ): textSpan(title: "", context: context, textSize: 0.0),
-                  ],
-                ),
+                    ),
+                ],
               ),
             ),
             if(infoIcon != "")...[
@@ -75,7 +76,11 @@ Widget postRideWidget(
                     )),
                 triggerMode: TooltipTriggerMode.tap,
                 message: infoIcon,
-                textStyle: const TextStyle(fontSize: 20,color: Colors.white),
+                textStyle: const TextStyle(
+                  fontSize: 20,
+                  color: Colors.white,
+                  fontFamily: carlito,
+                ),
                 showDuration: const Duration(days: 100),
                 waitDuration: Duration.zero,
                 child: Image.asset(infoImage,color: Colors.white, width: getValueForScreenType<double>(

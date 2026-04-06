@@ -394,6 +394,7 @@ class Service extends GetxService {
                 message,
                 style: TextStyle(
                   fontSize: 20,
+                  fontFamily: carlito,
                   color: textColor.withOpacity(0.7),
                   height: 1.5,
                 ),
@@ -525,6 +526,7 @@ class Service extends GetxService {
                           style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
+                            fontFamily: carlito,
                             color: textColor,
                           ),
                         ),
@@ -542,31 +544,37 @@ class Service extends GetxService {
                       "body": Style(
                         padding: HtmlPaddings.zero,
                         margin: Margins.zero,
+                        fontFamily: carlito,
                       ),
                       'p': Style(
                         fontSize: FontSize(20),
+                        fontFamily: carlito,
                         padding: HtmlPaddings.symmetric(vertical: 8),
                         margin: Margins.zero,
                         lineHeight: const LineHeight(1.6),
                       ),
                       'div': Style(
                         fontSize: FontSize(20),
+                        fontFamily: carlito,
                         padding: HtmlPaddings.symmetric(vertical: 8),
                         margin: Margins.zero,
                         lineHeight: const LineHeight(1.6),
                       ),
                       'h1': Style(
                         fontSize: FontSize(28),
+                        fontFamily: carlito,
                         fontWeight: FontWeight.bold,
                         padding: HtmlPaddings.only(bottom: 12),
                       ),
                       'h2': Style(
                         fontSize: FontSize(24),
+                        fontFamily: carlito,
                         fontWeight: FontWeight.bold,
                         padding: HtmlPaddings.only(bottom: 10),
                       ),
                       'h3': Style(
                         fontSize: FontSize(22),
+                        fontFamily: carlito,
                         fontWeight: FontWeight.bold,
                         padding: HtmlPaddings.only(bottom: 8),
                       ),
@@ -678,6 +686,7 @@ class Service extends GetxService {
                       style: const TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
+                        fontFamily: carlito,
                         color: textColor,
                       ),
                       textAlign: TextAlign.center,
@@ -690,6 +699,7 @@ class Service extends GetxService {
                 message,
                 style: TextStyle(
                   fontSize: 20,
+                  fontFamily: carlito,
                   color: textColor.withOpacity(0.7),
                   height: 1.5,
                 ),
@@ -802,7 +812,7 @@ class Service extends GetxService {
         formatMessage(
             "${welcomeMessage1.isEmpty ? "Hey" : welcomeMessage1.value} ${loginUserDetail['first_name']},  ${welcomeMessage2.isEmpty ? "nice to meet you\nPlease complete your profile, it only takes a couple of minutes" : welcomeMessage2.value}"),
         textAlign: TextAlign.justify,
-        style: const TextStyle(fontSize: 20),
+        style: const TextStyle(fontSize: 20, fontFamily: carlito),
       ),
       barrierDismissible: false,
       titleStyle: const TextStyle(fontSize: 24, color: primaryColor),

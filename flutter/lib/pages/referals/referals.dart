@@ -111,8 +111,10 @@ class Referral extends StatelessWidget {
                         "body": Style(
                             padding: HtmlPaddings.zero, margin: Margins.zero),
                         'p': Style(
-                          fontSize: FontSize(20),
+                          fontSize: FontSize(18),
+                          fontFamily: carlito,
                           padding: HtmlPaddings.zero,
+                          textAlign: TextAlign.justify,
                           margin: Margins.zero,
                         ),
                         'div': Style(
@@ -141,7 +143,7 @@ class Referral extends StatelessWidget {
                           Expanded(
                               child: txt18Size(
                                   title: controller.referralLink.value,
-                                  fontFamily: regular,
+                                  fontFamily: carlito,
                                   context: context)),
                           InkWell(
                             onTap: () async {
