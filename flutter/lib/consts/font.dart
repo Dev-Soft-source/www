@@ -1,13 +1,14 @@
 const regular = "FuturaCondensedMedium";
 const bold = "FuturaCondensed";
 
-// Semantic typography tokens. Carlito is not bundled yet, so body/descriptive
-// text still falls back to the current shared app font until that asset is added.
+/// Registered in [pubspec.yaml] as family `Carlito` (Regular + Bold weight 700).
+const carlito = "Carlito";
+
 const titleFontFamily = bold;
-const bodyFontFamily = regular;
+const bodyFontFamily = carlito;
 const buttonFontFamily = bold;
-const placeholderFontFamily = regular;
-const descriptiveFontFamily = regular;
+const placeholderFontFamily = carlito;
+const descriptiveFontFamily = carlito;
 
 const buttonFontSize = 24.0;
 const buttonHeight = 48.0;

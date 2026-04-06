@@ -773,7 +773,7 @@ class Service extends GetxService {
                       foregroundColor: Colors.white,
                       elevation: 0,
                       minimumSize: const Size.fromHeight(buttonHeight),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      // padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(5),
                       ),

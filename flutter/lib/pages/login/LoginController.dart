@@ -53,17 +53,12 @@ class LoginController extends GetxController {
     emailTextController = TextEditingController();
     passwordTextController = TextEditingController();
 
-    // Setup focus node listeners
+    // Email = "1", password = "2" (wired from login.dart).
     for (int i = 1; i <= 2; i++) {
       focusNodes[i.toString()] = FocusNode();
-      focusNodes[i.toString()]?.addListener(() {
-        if (!focusNodes[i.toString()]!.hasFocus) {
-          // Field has lost focus.
-          // We intentionally do NOT validate email here anymore so that
-          // email errors only appear when the user taps the "Log in" button.
-        }
-      });
     }
+    focusNodes['1']?.addListener(_onLoginEmailFocusChanged);
+    focusNodes['2']?.addListener(_onLoginPasswordFocusChanged);
 
     // Load initial data
     await loadInitialData();
@@ -131,9 +126,28 @@ class LoginController extends GetxController {
     }
   }
 
+  void _onLoginEmailFocusChanged() {
+    if (focusNodes['1']?.hasFocus == true) {
+      errors.removeWhere((e) => e['title'] == 'email');
+      errors.refresh();
+    }
+  }
+
+  void _onLoginPasswordFocusChanged() {
+    if (focusNodes['2']?.hasFocus == true) {
+      errors.removeWhere((e) => e['title'] == 'password');
+      errors.refresh();
+    }
+  }
+
   @override
   void onClose() {
-    // TODO: implement onClose
+    focusNodes['1']?.removeListener(_onLoginEmailFocusChanged);
+    focusNodes['2']?.removeListener(_onLoginPasswordFocusChanged);
+    for (final node in focusNodes.values) {
+      node.dispose();
+    }
+    focusNodes.clear();
     super.onClose();
   }
 
@@ -179,10 +193,30 @@ class LoginController extends GetxController {
               labelTextDetail['new_verification_email_btn_label'] ??
                   "Request new verification email";
         }
-        if (resp['data'] != null &&
-            resp['data']['validationMessages'] != null) {
+        final validationRaw = resp['data'] != null
+            ? (resp['data']['validationMessages'] ??
+                resp['data']['validation_messages'])
+            : null;
+        if (validationRaw is Map) {
           validationMessageDetail.clear();
-          validationMessageDetail.addAll(resp['data']['validationMessages']);
+          validationRaw.forEach((key, value) {
+            if (key == null) return;
+            final k = key.toString();
+            if (value is Map) {
+              final inner = <String, String>{};
+              value.forEach((ik, iv) {
+                if (ik == null) return;
+                inner[ik.toString()] = iv?.toString() ?? '';
+              });
+              validationMessageDetail[k] = inner;
+            } else if (value == null) {
+              validationMessageDetail[k] = '';
+            } else if (value is String) {
+              validationMessageDetail[k] = value;
+            } else {
+              validationMessageDetail[k] = value.toString();
+            }
+          });
         }
         if (resp['data'] != null && resp['data']['messages'] != null) {
           serviceController.welcomeMessage1.value =
@@ -200,20 +234,72 @@ class LoginController extends GetxController {
     });
   }
 
+  /// Laravel uses `:attribute`; older app code used `:Attribute` — support both.
+  String _interpolateAttribute(String? template, String attributeLabel,
+      [String fallback = '']) {
+    final raw = (template != null && template.toString().trim().isNotEmpty)
+        ? template.toString()
+        : fallback;
+    return raw
+        .replaceAll(':attribute', attributeLabel)
+        .replaceAll(':Attribute', attributeLabel);
+  }
+
+  String _labelForField(String fieldName) {
+    if (fieldName == "email") {
+      return labelTextDetail['email_error']?.toString() ?? "Email";
+    }
+    if (fieldName == "password") {
+      return labelTextDetail['password_error']?.toString() ?? "Password";
+    }
+    return fieldName;
+  }
+
+  /// Login API may return nested maps, e.g. `email.required`, `email.email`.
+  String? _validationGroupRule(String groupKey, String ruleKey) {
+    final group = validationMessageDetail[groupKey];
+    if (group is Map) {
+      final v = group[ruleKey];
+      if (v != null) {
+        final s = v.toString().trim();
+        if (s.isNotEmpty) return s;
+      }
+    }
+    return null;
+  }
+
+  String _loginRequiredMessage(String fieldName) {
+    final specific = _validationGroupRule(fieldName, 'required');
+    if (specific != null) return specific;
+    final label = _labelForField(fieldName);
+    return _interpolateAttribute(
+      validationMessageDetail['required']?.toString(),
+      label,
+      'This field is required.',
+    );
+  }
+
+  String _emailFormatMessage() {
+    final label = _labelForField("email");
+    final nested = _validationGroupRule('email', 'email');
+    if (nested != null) {
+      return _interpolateAttribute(nested, label,
+          'Please enter a valid email address, such as name@example.com.');
+    }
+    return _interpolateAttribute(
+      validationMessageDetail['email']?.toString(),
+      label,
+      'The :attribute field must be a valid email address.',
+    );
+  }
+
   void validateField(String fieldName, String fieldValue,
       {String type = 'string', bool isRequired = true, int wordsLimit = 50}) {
     errors.removeWhere((element) => element['title'] == fieldName);
     List<String> errorList = [];
 
     if (isRequired && fieldValue.isEmpty) {
-      var message = validationMessageDetail['required'];
-      if (fieldName == "email") {
-        message = message.replaceAll(
-            ":Attribute", labelTextDetail['email_error'] ?? "Email");
-      } else {
-        message = message.replaceAll(
-            ":Attribute", labelTextDetail['password_error'] ?? "Password");
-      }
+      final message = _loginRequiredMessage(fieldName);
 
       errorList.add(message);
       errors.add({
@@ -226,7 +312,7 @@ class LoginController extends GetxController {
     switch (type) {
       case 'email':
         if (!isValidEmail(fieldValue)) {
-          errorList.add('Please use a valid email address');
+          errorList.add(_emailFormatMessage());
         }
         break;
       case 'numeric':
@@ -276,7 +362,7 @@ class LoginController extends GetxController {
 
     // Only validate format if email is not empty
     if (email.isNotEmpty && !isValidEmail(email)) {
-      _addError("email", ['Please enter a valid email address'], 3);
+      _addError("email", [_emailFormatMessage()], 3);
     }
   }
 
@@ -320,6 +406,7 @@ class LoginController extends GetxController {
       validatePassword();
 
       if (errors.isNotEmpty) {
+        errors.refresh();
         return;
       }
 
@@ -506,23 +593,15 @@ class LoginController extends GetxController {
     String email = emailTextController.text.trim();
 
     if (email.isEmpty) {
-      var message =
-          validationMessageDetail['required'] ?? ":Attribute is required";
-      message = message.replaceAll(
-          ":Attribute", labelTextDetail['email_error'] ?? "Email");
-      _addError("email", [message], 3);
+      _addError("email", [_loginRequiredMessage("email")], 3);
     } else if (!isValidEmail(email)) {
-      _addError("email", ['Enter a valid email e.g test@example.com'], 3);
+      _addError("email", [_emailFormatMessage()], 3);
     }
   }
 
   void validatePassword() {
     if (passwordTextController.text.trim().isEmpty) {
-      var message =
-          validationMessageDetail['required'] ?? ":Attribute is required";
-      message = message.replaceAll(
-          ":Attribute", labelTextDetail['password_error'] ?? "Password");
-      _addError("password", [message], 4);
+      _addError("password", [_loginRequiredMessage("password")], 4);
     }
   }
 

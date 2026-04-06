@@ -14,6 +14,42 @@ import '../widgets/image_upload_bottom_sheet.dart';
 import '../widgets/image_upload_widget.dart';
 import '../widgets/tool_tip.dart';
 
+/// Opens `<a href>` targets from stage-two HTML (handles scheme-less URLs; avoids flaky [canLaunchUrl] on Android).
+Future<void> launchStageTwoHtmlLink(String? url) async {
+  if (url == null || url.isEmpty) return;
+  final trimmed = url.trim();
+  if (trimmed.startsWith('#')) return;
+
+  String href = trimmed;
+  if (href.startsWith('//')) {
+    href = 'https:$href';
+  } else if (!RegExp(r'^[a-zA-Z][a-zA-Z\d+\-.]*:').hasMatch(href)) {
+    if (href.startsWith('/')) {
+      logger.error('Relative link needs a full URL in HTML href: $href');
+      return;
+    }
+    href = 'https://$href';
+  }
+
+  final uri = Uri.tryParse(href);
+  if (uri == null) {
+    logger.error('Invalid link URL: $url');
+    return;
+  }
+
+  try {
+    final launched = await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!launched) {
+      logger.error('launchUrl returned false for $uri');
+    }
+  } catch (e) {
+    logger.error('Error launching URL $uri: $e');
+  }
+}
+
 class StageTwo extends StatelessWidget {
   const StageTwo({super.key});
 
@@ -65,9 +101,8 @@ class StageTwo extends StatelessWidget {
                               children: [
                                 Center(
                                     child: txt25Size(
-                                        title:
-                                            // "${controller.labelTextDetail['main_heading'] ??
-                                            "Step 2 of 5 - Profile Picture",
+                                        title: "${controller.labelTextDetail['main_heading'] ??
+                                            "Step 2 of 5 - Profile Picture"}",
 
                                         //  }",
                                         context: context)),
@@ -94,20 +129,8 @@ class StageTwo extends StatelessWidget {
                                       textDecoration: TextDecoration.underline,
                                     )
                                   },
-                                  onLinkTap: (url, attributes, element) async {
-                                    if (url != null) {
-                                      try {
-                                        final Uri uri = Uri.parse(url);
-                                        if (await canLaunchUrl(uri)) {
-                                          await launchUrl(uri,
-                                              mode: LaunchMode.externalApplication);
-                                        } else {
-                                          logger.error('Could not launch $url');
-                                        }
-                                      } catch (e) {
-                                        logger.error('Error launching URL: $e');
-                                      }
-                                    }
+                                  onLinkTap: (url, attributes, element) {
+                                    launchStageTwoHtmlLink(url);
                                   },
                                 ),
                                 10.heightBox,

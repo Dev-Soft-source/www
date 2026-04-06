@@ -83,6 +83,7 @@ import 'package:proximaride_app/pages/stages/stage_two.dart';
 import 'package:proximaride_app/pages/student_card/student_card.dart';
 import 'package:proximaride_app/pages/term_condition/term_condition.dart';
 import 'package:proximaride_app/pages/terms_of_use/terms_of_use.dart';
+import 'package:proximaride_app/pages/disclaimer/disclaimer.dart';
 import 'package:proximaride_app/pages/thank_you/thank_you.dart';
 import 'package:proximaride_app/pages/trip_detail/trip_detail.dart';
 import 'package:proximaride_app/services/logger_service.dart';
@@ -295,6 +296,7 @@ class MyAppState extends State<MyApp> {
     '/review_passenger/:rideId',
     '/term_condition',
     '/term_of_use',
+    '/disclaimer',
     '/contact_us',
     '/thank_you/:type',
     '/forgot_password',
@@ -692,6 +694,7 @@ class MyAppState extends State<MyApp> {
         ),
         GetPage(name: '/term_condition', page: () => const TermConditionPage()),
         GetPage(name: '/term_of_use', page: () => const TermsOfUsePage()),
+        GetPage(name: '/disclaimer', page: () => const DisclaimerPage()),
         GetPage(name: '/contact_us', page: () => const ContactUsPage()),
         GetPage(name: '/thank_you/:type', page: () => const ThankYouPage()),
         GetPage(

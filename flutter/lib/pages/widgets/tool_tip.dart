@@ -95,6 +95,7 @@ Widget toolTip({
   double width = 0,
 }) {
   return Column(
+    mainAxisSize: MainAxisSize.min,
     crossAxisAlignment:
         position == 1 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
     children: [
@@ -109,36 +110,33 @@ Widget toolTip({
           borderRadius: BorderRadius.circular(5.0),
           color: tooltipBackgroundColor,
         ),
-        child: Tooltip(
-          triggerMode: TooltipTriggerMode.manual,
-          showDuration: const Duration(seconds: 1),
-          message: 'I am a Tooltip',
-          child: Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (tip is Map && tip['eList'] is List && type == 'normal') ...[
-                  for (var list in tip['eList']) ...[
-                    Text(
-                      list.toString(),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: fontSize,
-                      ),
-                    ),
-                  ]
-                ] else if (tip is String) ...[
+        child: Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (tip is Map && tip['eList'] is List && type == 'normal') ...[
+                for (var list in tip['eList']) ...[
                   Text(
-                    capitalizeFirstLetter(tip),
+                    list.toString(),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: fontSize,
                     ),
-                  )
-                ],
+                  ),
+                ]
+              ] else if (tip is String) ...[
+                Text(
+                  capitalizeFirstLetter(tip),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: fontSize,
+                  ),
+                  softWrap: true,
+                )
               ],
-            ),
+            ],
           ),
         ),
       ),
@@ -148,6 +146,7 @@ Widget toolTip({
 
 Widget toolTipPassword(context, checkList, type) {
   return Column(
+    mainAxisSize: MainAxisSize.min,
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
       const ClippedTriangleWidget(),
@@ -156,96 +155,93 @@ Widget toolTipPassword(context, checkList, type) {
           borderRadius: BorderRadius.circular(5.0),
           color: tooltipBackgroundColor,
         ),
-        child: Tooltip(
-          triggerMode: TooltipTriggerMode.manual,
-          showDuration: const Duration(seconds: 1),
-          message: 'I am a Tooltip',
-          child: Padding(
-              padding: const EdgeInsets.all(5.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      checkIcon(checkList.any((element) => element == "small")),
-                      5.widthBox,
-                      txt20Size(
-                          context: context,
-                          title: 'Include small alphabet',
-                          fontFamily: regular,
-                          textColor: Colors.white)
-                    ],
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      checkIcon(
-                          checkList.any((element) => element == "capital")),
-                      5.widthBox,
-                      txt20Size(
-                          context: context,
-                          title: 'Include capital alphabet',
-                          fontFamily: regular,
-                          textColor: Colors.white)
-                    ],
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      checkIcon(
-                          checkList.any((element) => element == "number")),
-                      5.widthBox,
-                      txt20Size(
-                          context: context,
-                          title: 'Include number',
-                          fontFamily: regular,
-                          textColor: Colors.white)
-                    ],
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      checkIcon(
-                          checkList.any((element) => element == "special")),
-                      5.widthBox,
-                      txt20Size(
-                          context: context,
-                          title: 'Include special character',
-                          fontFamily: regular,
-                          textColor: Colors.white)
-                    ],
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      checkIcon(
-                          checkList.any((element) => element == "length")),
-                      5.widthBox,
-                      txt20Size(
-                          context: context,
-                          title: 'Password length should be 8 or more',
-                          fontFamily: regular,
-                          textColor: Colors.white)
-                    ],
-                  ),
-                  if (type == 'confirm_password') ...[
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        checkIcon(
-                            checkList.any((element) => element == "match")),
-                        5.widthBox,
-                        txt20Size(
-                            context: context,
-                            title: 'Password does not match',
-                            fontFamily: regular,
-                            textColor: Colors.white)
-                      ],
-                    ),
-                  ]
+                  checkIcon(checkList.any((element) => element == "small")),
+                  5.widthBox,
+                  txt20Size(
+                      context: context,
+                      title: 'Include small alphabet',
+                      fontFamily: regular,
+                      textColor: Colors.white)
                 ],
-              )),
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  checkIcon(
+                      checkList.any((element) => element == "capital")),
+                  5.widthBox,
+                  txt20Size(
+                      context: context,
+                      title: 'Include capital alphabet',
+                      fontFamily: regular,
+                      textColor: Colors.white)
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  checkIcon(
+                      checkList.any((element) => element == "number")),
+                  5.widthBox,
+                  txt20Size(
+                      context: context,
+                      title: 'Include number',
+                      fontFamily: regular,
+                      textColor: Colors.white)
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  checkIcon(
+                      checkList.any((element) => element == "special")),
+                  5.widthBox,
+                  txt20Size(
+                      context: context,
+                      title: 'Include special character',
+                      fontFamily: regular,
+                      textColor: Colors.white)
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  checkIcon(
+                      checkList.any((element) => element == "length")),
+                  5.widthBox,
+                  txt20Size(
+                      context: context,
+                      title: 'Password length should be 8 or more',
+                      fontFamily: regular,
+                      textColor: Colors.white)
+                ],
+              ),
+              if (type == 'confirm_password') ...[
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    checkIcon(
+                        checkList.any((element) => element == "match")),
+                    5.widthBox,
+                    txt20Size(
+                        context: context,
+                        title: 'Password does not match',
+                        fontFamily: regular,
+                        textColor: Colors.white)
+                  ],
+                ),
+              ]
+            ],
+          ),
         ),
       ),
     ],

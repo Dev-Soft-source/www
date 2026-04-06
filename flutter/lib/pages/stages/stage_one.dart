@@ -130,9 +130,8 @@ class _StageOneState extends State<StageOne> {
                         children: [
                           Center(
                               child: txt25Size(
-                                  title:
-                                      // "${controller.labelTextDetail['main_heading'] ??
-                                      "Step 1 of 5 - Personal Information",
+                                  title: "${controller.labelTextDetail['main_heading'] ??
+                                      "Step 1 of 5 - Personal Information"}",
                                   context: context)),
                           20.heightBox,
                           txt18Size(

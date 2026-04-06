@@ -26,7 +26,8 @@ class SignupPage extends StatelessWidget {
     final uri = Uri.tryParse(link);
     final path = (uri?.path ?? normalizedLink).toLowerCase();
 
-    if (normalizedLink.contains('disclaimer')) {
+    // Web route: `{lang}/disclaimer` — match path segment, not only full string (e.g. https://host/en/disclaimer).
+    if (path.contains('disclaimer') || normalizedLink.contains('disclaimer')) {
       Get.toNamed('/disclaimer');
       return;
     }
@@ -346,6 +347,7 @@ class SignupPage extends StatelessWidget {
                         ],
                         10.heightBox,
                         Stack(
+                          clipBehavior: Clip.none,
                           children: [
                             Column(
                               children: [
@@ -583,7 +585,6 @@ class SignupPage extends StatelessWidget {
                               top: 30.0,
                               left: 0,
                               right: 0,
-                              bottom: 0,
                               child: controller.showToolTip.value
                                   ? toolTip(
                                       tip:
@@ -591,7 +592,7 @@ class SignupPage extends StatelessWidget {
                                       type: 'text',
                                       position: 1,
                                       width: context.screenWidth)
-                                  : const SizedBox(),
+                                  : const SizedBox.shrink(),
                             )
                           ],
                         ),

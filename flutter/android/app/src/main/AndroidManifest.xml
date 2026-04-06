@@ -2,7 +2,20 @@
 
     <queries>
         <provider android:authorities="com.facebook.katana.provider.PlatformProvider" />
-        <provider android:authorities="com.facebook.orca.provider.PlatformProvider" /> 
+        <provider android:authorities="com.facebook.orca.provider.PlatformProvider" />
+        <!-- Required for url_launcher / canLaunchUrl on API 31+ when opening links from Html -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="http" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="mailto" />
+        </intent>
     </queries>
 
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>

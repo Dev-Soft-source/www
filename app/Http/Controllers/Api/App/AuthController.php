@@ -43,11 +43,24 @@ class AuthController extends Controller
         
         App::setLocale($locale);
 
+        // Locale is set above from lang_id; strings come from lang/*/validation.php
         $validationMessages = [
             'required' => trans('validation.required'),
-            'email' => trans('validation.email'),
             'string' => trans('validation.string'),
             'max' => trans('validation.max.string'),
+            // Localized field names (for :attribute-style messages or client UI)
+            'attributes' => [
+                'email' => __('validation.attributes.email'),
+                'password' => __('validation.attributes.password'),
+            ],
+            'email' => [
+                'required' => trans('validation.custom.email.required'),
+                'email' => trans('validation.custom.email.email'),
+                'unique' => trans('validation.custom.email.unique'),
+            ],
+            'password' => [
+                'required' => trans('validation.custom.password.required'),
+            ],
         ];
 
         $data = ['loginPage' => $loginPage, 'validationMessages' => $validationMessages, 'messages' => $messages];
@@ -62,10 +75,15 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        $niceNames = [
+            'email' => __('validation.attributes.email'),
+            'password' => __('validation.attributes.password'),
+        ];
+
         $request->validate([
             'email' => 'required|email|string|max:255',
             'password' => 'required',
-        ]);
+        ], [], $niceNames);
 
         $credentials = $request->only('email', 'password');
 

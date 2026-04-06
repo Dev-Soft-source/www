@@ -126,6 +126,12 @@ flutter:
     - family: FuturaCondensed
       fonts:
         - asset: assets/fonts/FuturaCondensed.ttf
+
+    - family: Carlito
+      fonts:
+        - asset: assets/fonts/Carlito-Regular.ttf
+        - asset: assets/fonts/Carlito-Bold.ttf
+          weight: 700
   # fonts:
   #   - family: Schyler
   #     fonts:
