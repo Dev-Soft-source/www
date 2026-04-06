@@ -1103,7 +1103,7 @@ class RideController extends Controller
 
             foreach ($ride->bookings as $booking) {
                 // Calculate age
-                if ($booking->passenger->dob) {
+                if (isset($booking->passenger) && isset($booking->passenger->dob)) {
                     $dob = Carbon::parse($booking->passenger->dob);
                     $booking->passenger->age = $dob->diffInYears(Carbon::now());
                 } else {

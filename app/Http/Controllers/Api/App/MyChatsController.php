@@ -30,12 +30,13 @@ class MyChatsController extends Controller
 {
     use StatusResponser;
 
-    public function index(){
+    public function index()
+    {
         $user = Auth::guard('sanctum')->user();
         $user_id = $user->id;
 
         $messages = Message::where('status', 'new')
-            ->where(function ($query) use($user_id){
+            ->where(function ($query) use ($user_id) {
                 $query->where('sender', $user_id)->orWhere('receiver', $user_id);
             })
             ->orderByDesc('created_at')
@@ -47,48 +48,49 @@ class MyChatsController extends Controller
         $messages = $messages->map(function ($groupedMessages) use ($user_id) {
             $latestMessage = $groupedMessages->first()
                 ->load(['user' => function ($query) {
-                    $query->select('id', 'first_name', 'last_name', 'profile_image', 'dob', 'online','gender');
+                    $query->select('id', 'first_name', 'last_name', 'profile_image', 'dob', 'online', 'gender');
                     $query->withTrashed(); // Include soft-deleted users
                 }, 'receiver' => function ($query) {
-                    $query->select('id', 'first_name', 'last_name', 'profile_image', 'dob', 'online','gender');
+                    $query->select('id', 'first_name', 'last_name', 'profile_image', 'dob', 'online', 'gender');
                     $query->withTrashed(); // Include soft-deleted users
                 }]);
-                $deletedBy = $latestMessage->deleted_by ? explode(',', $latestMessage->deleted_by) : [];
-                if (in_array($user_id, $deletedBy)) {
-                    return null; // Skip this message group
-                }
+            $deletedBy = $latestMessage->deleted_by ? explode(',', $latestMessage->deleted_by) : [];
+            if (in_array($user_id, $deletedBy)) {
+                return null; // Skip this message group
+            }
 
             // Count unread messages (is_read = 0)
             $unreadCount = $groupedMessages->where('receiver', $user_id)
                 ->where('is_read', 0)
                 ->count();
 
-                $messageArray = $latestMessage->toArray();
-                $messageArray['sender'] = $messageArray['user'];
-                unset($messageArray['user']);
+            $messageArray = $latestMessage->toArray();
+            $messageArray['sender'] = $messageArray['user'];
+            unset($messageArray['user']);
 
-                // Append unread count
-                $messageArray['unread_count'] = $unreadCount;
+            // Append unread count
+            $messageArray['unread_count'] = $unreadCount;
 
-                return $messageArray;
+            return $messageArray;
         })
-        ->filter()
-        ->values();
+            ->filter()
+            ->values();
 
 
-        
+
         $languages = Language::orderBy('is_default', 'desc')->get();
-            
+
         $data = ['chats' => $messages, 'languages' => $languages];
         return $this->successResponse($data, 'Get chats successfully');
     }
 
-    public function oldChats(){
+    public function oldChats()
+    {
         $user = Auth::guard('sanctum')->user();
         $user_id = $user->id;
 
         $messages = Message::where('status', 'old')
-            ->where(function ($query) use($user_id){
+            ->where(function ($query) use ($user_id) {
                 $query->where('sender', $user_id)->orWhere('receiver', $user_id);
             })
             ->orderByDesc('created_at')
@@ -100,28 +102,29 @@ class MyChatsController extends Controller
         $messages = $messages->map(function ($groupedMessages) {
             return $groupedMessages->first()
                 ->load(['user' => function ($query) {
-                    $query->select('id', 'first_name', 'last_name', 'profile_image', 'dob', 'online','gender');
+                    $query->select('id', 'first_name', 'last_name', 'profile_image', 'dob', 'online', 'gender');
                     $query->withTrashed(); // Include soft-deleted users
                 }, 'receiver' => function ($query) {
-                    $query->select('id', 'first_name', 'last_name', 'profile_image', 'dob', 'online','gender');
+                    $query->select('id', 'first_name', 'last_name', 'profile_image', 'dob', 'online', 'gender');
                     $query->withTrashed(); // Include soft-deleted users
                 }]);
         })
-        
-        ->map(function ($message) {
-            // Rename 'user' to 'sender' in the response
-            $messageArray = $message->toArray();
-            $messageArray['sender'] = $messageArray['user'];
-            unset($messageArray['user']);
-            return $messageArray;
-        })
-        ->values();
+
+            ->map(function ($message) {
+                // Rename 'user' to 'sender' in the response
+                $messageArray = $message->toArray();
+                $messageArray['sender'] = $messageArray['user'];
+                unset($messageArray['user']);
+                return $messageArray;
+            })
+            ->values();
 
         $data = ['chats' => $messages];
         return $this->successResponse($data, 'Get chats successfully');
     }
 
-    public function chatDetail(Request $request){
+    public function chatDetail(Request $request)
+    {
         $selectedLanguage = app()->getLocale();
         if ($selectedLanguage) {
             // Find the language by abbreviation
@@ -144,9 +147,9 @@ class MyChatsController extends Controller
         $user_id = $user->id;
 
         $messages = Message::query();
-        if($request->type == "old"){
-            $messages = $messages->where('status', 'old');    
-        }else{
+        if ($request->type == "old") {
+            $messages = $messages->where('status', 'old');
+        } else {
             $messages = $messages->where('status', 'new');
         }
 
@@ -158,17 +161,17 @@ class MyChatsController extends Controller
             $query->select('id', 'first_name', 'last_name', 'profile_image', 'online', 'gender'); // Specify the columns you want to select
             $query->withTrashed(); // Include soft-deleted users
         }, 'receiver' => function ($query) {
-            $query->select('id', 'first_name', 'last_name', 'profile_image', 'dob', 'online','gender');
+            $query->select('id', 'first_name', 'last_name', 'profile_image', 'dob', 'online', 'gender');
             $query->withTrashed(); // Include soft-deleted users
-        }, 'rideDetail' ])
-        ->where(function($query) use ($user_id, $userId) {
-            $query->where(function($q) use ($user_id, $userId) {
-                $q->where('sender', $user_id)->where('receiver', $userId);
-            })->orWhere(function($q) use ($user_id, $userId) {
-                $q->where('sender', $userId)->where('receiver', $user_id);
-            });
-        })
-        ->get();
+        }, 'rideDetail'])
+            ->where(function ($query) use ($user_id, $userId) {
+                $query->where(function ($q) use ($user_id, $userId) {
+                    $q->where('sender', $user_id)->where('receiver', $userId);
+                })->orWhere(function ($q) use ($user_id, $userId) {
+                    $q->where('sender', $userId)->where('receiver', $user_id);
+                });
+            })
+            ->get();
 
         foreach ($messages as $message) {
             $message->where('receiver', $user_id)->update([
@@ -183,12 +186,13 @@ class MyChatsController extends Controller
             return $messageArray;
         });
 
-        $user = User::whereId($userId)->select('id', 'first_name', 'last_name', 'profile_image', 'online','gender')->first();
+        $user = User::whereId($userId)->select('id', 'first_name', 'last_name', 'profile_image', 'online', 'gender')->first();
         $data = ['user' => $user, 'messages' => $messages, 'messageSetting' => $messageSetting, 'chatsPage' => $chatsPage];
         return $this->successResponse($data, 'Get chats successfully');
     }
 
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         $user = Auth::guard('sanctum')->user();
 
         // Validate the form data
@@ -213,37 +217,37 @@ class MyChatsController extends Controller
         $ride = null;
         $rideDetailId = "";
         if ($request->has('ride_id') && !empty($request->ride_id)) {
-            $ride = Ride::whereId($request->ride_id)->with(['rideDetail' => function($q){
-                $q->where('default_ride','1');
+            $ride = Ride::whereId($request->ride_id)->with(['rideDetail' => function ($q) {
+                $q->where('default_ride', '1');
             }])->first();
 
-            if(isset($ride->detail) && !empty($ride->detail)){
+            if (isset($ride->detail) && !empty($ride->detail)) {
                 $rideDetailId = $ride->detail->id;
             }
         }
 
-        if($ride == null) {
+        if ($ride == null) {
             $ride = new Ride();
         }
-        
+
 
         // Check the last message between the sender and receiver
         $lastMessage = Message::where(function ($query) use ($user, $request) {
             $query->where('sender', $user->id)
-                  ->where('receiver', $request->receiver_id);
+                ->where('receiver', $request->receiver_id);
         })->orWhere(function ($query) use ($user, $request) {
             $query->where('sender', $request->receiver_id)
-                  ->where('receiver', $user->id);
+                ->where('receiver', $user->id);
         })->latest()->first();
 
-        
+
         // Check the ride first message
         $rideFirstMessage = Message::where(function ($query) use ($user, $request) {
             $query->where('sender', $user->id)
-                  ->where('receiver', $request->receiver_id);
+                ->where('receiver', $request->receiver_id);
         })->orWhere(function ($query) use ($user, $request) {
             $query->where('sender', $request->receiver_id)
-                  ->where('receiver', $user->id);
+                ->where('receiver', $user->id);
         })->where('ride_id', $request->ride_id)->first();
 
         if (!isset($rideFirstMessage) && empty($rideFirstMessage)) {
@@ -258,7 +262,7 @@ class MyChatsController extends Controller
                 ]);
             }
         }
-        
+
 
         $message_count = Message::where('sender', $user->id)->where('receiver', $request->input('userId'))->whereBetween('created_at', [Carbon::today(), Carbon::tomorrow()])->count();
 
@@ -266,12 +270,11 @@ class MyChatsController extends Controller
 
             $contactUserId = explode(',', $contact_count->contact_user_id);
             if (in_array($request->input('receiver_id'), $contactUserId)) {
-                
             } else {
                 $contact_count->user_inbox_count = $contact_count->user_inbox_count + 1;
-        
+
                 $contacted_by = $contact_count->contact_user_id;
-                
+
                 if (!empty($contacted_by)) {
                     $contacted_by_array = explode(',', $contacted_by);
                     if (!in_array($request->input('receiver_id'), $contacted_by_array)) {
@@ -280,11 +283,11 @@ class MyChatsController extends Controller
                 } else {
                     $contacted_by_array = [$request->input('receiver_id')];
                 }
-            
+
                 $contact_count->contact_user_id = implode(',', $contacted_by_array);
-            
+
                 $contact_count->save();
-                }
+            }
         } elseif (isset($contact_count) && $message_count == 0) {
         } else {
             $message_count = new UserMessageCount();
@@ -304,19 +307,19 @@ class MyChatsController extends Controller
 
 
         $message = Message::where('status', 'new')->whereId($msg->id)->with(['user' => function ($query) {
-            $query->select('id', 'first_name', 'last_name', 'profile_image', 'online','gender'); // Specify the columns you want to select
+            $query->select('id', 'first_name', 'last_name', 'profile_image', 'online', 'gender'); // Specify the columns you want to select
             $query->withTrashed(); // Include soft-deleted users
         }, 'receiver' => function ($query) {
-            $query->select('id', 'first_name', 'last_name', 'profile_image', 'dob', 'online','gender');
+            $query->select('id', 'first_name', 'last_name', 'profile_image', 'dob', 'online', 'gender');
             $query->withTrashed(); // Include soft-deleted users
         }])
-        ->first();
+            ->first();
 
         if ($message) {
             $messageArray = $message->toArray();
             $messageArray['sender'] = $messageArray['user'];
             unset($messageArray['user']);
-            
+
             // Broadcast the message to Pusher WebSocket with error handling
             try {
                 broadcast(new MessageSentEvent($ride, $user, $message))->toOthers();
@@ -422,28 +425,35 @@ class MyChatsController extends Controller
     public function deleteChat(Request $request)
     {
 
-        
+
         $user = Auth::guard('sanctum')->user();
         $currentUserId = $user->id;
 
-        $messages = Message::where('receiver', $request->receiver['id']);
-        if(isset($request->sender['id'])) $messages = $messages->where('sender', $request->sender['id']);
-        $messages = $messages->where('status','new')
-            ->get();
-        
+        $messagesQuery = Message::where('receiver', $request->receiver['id'])
+            ->where('status', 'new');
+
+        if (!empty($request->sender['id'])) {
+            $messagesQuery->where('sender', $request->sender['id']);
+        }
+
+        $messagesQuery->chunkById(100, function ($messages) use ($currentUserId) {
             foreach ($messages as $message) {
-                $deletedBy = $message->deleted_by;
-                $deletedByArray = $deletedBy ? explode(',', $deletedBy) : [];
-            
+                $deletedByArray = $message->deleted_by
+                    ? explode(',', $message->deleted_by)
+                    : [];
+
+                // avoid duplicates
                 if (!in_array($currentUserId, $deletedByArray)) {
                     $deletedByArray[] = $currentUserId;
-                    $message->deleted_by = implode(',', $deletedByArray); // save as comma-separated string
-                    $message->save();
+
+                    $message->update([
+                        'deleted_by' => implode(',', array_unique($deletedByArray)),
+                    ]);
                 }
             }
-            
-        
-            return $this->successResponse('Chats deleted successfully');
-    
+        });
+
+
+        return $this->successResponse('Chats deleted successfully');
     }
 }
