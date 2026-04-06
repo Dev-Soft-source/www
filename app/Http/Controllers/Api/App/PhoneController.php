@@ -27,10 +27,11 @@ class PhoneController extends Controller
 {
     use StatusResponser;
 
-    public function index(Request $request){
+    public function index(Request $request)
+    {
         $user = Auth::guard('sanctum')->user();
         $user_id = $user->id;
-        $phone_numbers = PhoneNumber::where('user_id',$user_id)->orderBy('id', 'desc')->get();
+        $phone_numbers = PhoneNumber::where('user_id', $user_id)->orderBy('id', 'desc')->get();
 
         $phoneSettingPage = null;
         if ($request->lang_id && $request->lang_id != 0) {
@@ -58,8 +59,9 @@ class PhoneController extends Controller
         return $this->successResponse($data, 'Get phone numbers successfully');
     }
 
-    public function store(Request $request){
-        
+    public function store(Request $request)
+    {
+
         $user = Auth::guard('sanctum')->user();
         $user_id = $user->id;
         $skip = $request->filled('skip') ? $request->skip : '0';
@@ -69,7 +71,7 @@ class PhoneController extends Controller
         if ($skip === '0' && $request->phone) {
             // For API, we expect the full international number
             $normalizedPhone = normalizePhoneNumber($request->phone);
-            
+
             if (!validatePhoneNumber($request->phone)) {
                 return $this->apiErrorResponse('Please enter a valid phone number.', 422);
             }
@@ -78,7 +80,7 @@ class PhoneController extends Controller
         // Validate uniqueness
         if ($normalizedPhone) {
             $request->validate([
-                'phone' => 'unique:phone_numbers,phone,NULL,id,user_id,'.$user_id,
+                'phone' => 'unique:phone_numbers,phone,NULL,id,user_id,' . $user_id,
             ]);
         }
 
@@ -102,7 +104,7 @@ class PhoneController extends Controller
 
         if ($skip === '0') {
 
-            $getBlockPhoneNumberUser = PhoneNumber::where('phone', $request->phone)->whereHas('user', function($q){
+            $getBlockPhoneNumberUser = PhoneNumber::where('phone', $request->phone)->whereHas('user', function ($q) {
                 $q->where('admin_deactive_account', '1');
             })->first();
 
@@ -202,7 +204,7 @@ class PhoneController extends Controller
         $selectedLanguage = app()->getLocale() ?? 'en';
         $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
 
-        $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('verfification_code_sent_message','general_error_message','suspended_account_phone_number_message')->first();
+        $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('verfification_code_sent_message', 'general_error_message', 'suspended_account_phone_number_message')->first();
 
         if ($request->id != '' && $request->id != '0') {
             $phoneNumber = PhoneNumber::find($request->id);
@@ -232,12 +234,17 @@ class PhoneController extends Controller
                 $token = env('TWILIO_AUTH_TOKEN');
                 $from = env('TWILIO_PHONE_NUMBER');
 
+                if (!$sid || !$token || !$from) {
+                    Log::warning('Twilio credentials not configured');
+                    return $this->errorResponse('SMS service is not configured');
+                }
+
                 $twilio = new Client($sid, $token);
                 $to = $phoneNumber->phone;
                 $message = "ProximaRide: Your verification code is: $verificationCode \n This code will expire in 30 minutes.";
 
                 try {
-                    if(env('APP_ENV') != 'local'){
+                    if (env('APP_ENV') != 'local') {
                         $res = $twilio->messages->create(
                             $to,
                             [
@@ -270,7 +277,7 @@ class PhoneController extends Controller
         }
 
         $request->validate([
-            'phone' => 'unique:phone_numbers,phone,NULL,id,user_id,'.$user_id,
+            'phone' => 'unique:phone_numbers,phone,NULL,id,user_id,' . $user_id,
         ]);
 
         $existingPhone = PhoneNumber::where('phone', $normalizedPhone)->first();
@@ -315,12 +322,17 @@ class PhoneController extends Controller
         $token = env('TWILIO_AUTH_TOKEN');
         $from = env('TWILIO_PHONE_NUMBER');
 
+        if (!$sid || !$token || !$from) {
+            Log::warning('Twilio credentials not configured');
+            return $this->errorResponse('SMS service is not configured');
+        }
+
         $twilio = new Client($sid, $token);
         $to = $phone_number->phone;
         $message = "ProximaRide: Your verification code is: $verificationCode \n This code will expire in 30 minutes.";
 
         try {
-            if(env('APP_ENV') != 'local'){
+            if (env('APP_ENV') != 'local') {
                 $res = $twilio->messages->create(
                     $to,
                     [
@@ -498,12 +510,12 @@ class PhoneController extends Controller
 
                 if ($selectedLanguage) {
                     // Retrieve the HomePageSettingDetail associated with the selected language
-                    $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('phone_delete_message','general_error_message')->first();
+                    $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('phone_delete_message', 'general_error_message')->first();
                 }
             } else {
                 $selectedLanguage = Language::where('is_default', 1)->first();
                 if ($selectedLanguage) {
-                    $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('phone_delete_message','general_error_message')->first();
+                    $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('phone_delete_message', 'general_error_message')->first();
                 }
             }
 

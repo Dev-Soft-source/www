@@ -11,6 +11,9 @@
 |
 */
 
+// Suppress deprecation warnings from old packages
+error_reporting(E_ALL & ~E_DEPRECATED);
+
 $app = new Illuminate\Foundation\Application(
     $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
 );
