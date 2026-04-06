@@ -161,13 +161,13 @@ class RideController extends Controller
 
         $recentSearches = $user
             ? RecentSearch::query()
-                ->where('user_id', $user->id)
-                ->where('from', '!=', '')
-                ->where('to', '!=', '')
-                ->orderByDesc('updated_at')
-                ->limit(3)
-                ->get()
-                ->values()
+            ->where('user_id', $user->id)
+            ->where('from', '!=', '')
+            ->where('to', '!=', '')
+            ->orderByDesc('updated_at')
+            ->limit(3)
+            ->get()
+            ->values()
             : collect();
 
         $rideFeatureOptionGroups = $this->getRideFeatureOptionGroups($this->selectedLanguage?->id, $this->defaultLang?->id);
@@ -1102,32 +1102,34 @@ class RideController extends Controller
             $ride->driver->average_rating = $totalAverage;
 
             foreach ($ride->bookings as $booking) {
-                // Calculate age
-                if (isset($booking->passenger) && isset($booking->passenger->dob)) {
-                    $dob = Carbon::parse($booking->passenger->dob);
-                    $booking->passenger->age = $dob->diffInYears(Carbon::now());
-                } else {
-                    $booking->passenger->age = null; // Handle case where dob is not set
-                }
-
-                if ($booking->passenger->gender) {
-                    if ($booking->passenger->gender === 'male') {
-                        $booking->passenger->gender_label = $genderLabel->male_option_label ?? null;
-                    } elseif ($booking->passenger->gender === 'female') {
-                        $booking->passenger->gender_label = $genderLabel->female_option_label ?? null;
-                    } elseif ($booking->passenger->gender === 'prefer not to say') {
-                        $booking->passenger->gender_label = $genderLabel->prefer_option_label ?? null;
+                if (isset($booking->passenger)) {
+                    // Calculate age
+                    if ($booking->passenger->dob) {
+                        $dob = Carbon::parse($booking->passenger->dob);
+                        $booking->passenger->age = $dob->diffInYears(Carbon::now());
+                    } else {
+                        $booking->passenger->age = null; // Handle case where dob is not set
                     }
+
+                    if ($booking->passenger->gender) {
+                        if ($booking->passenger->gender === 'male') {
+                            $booking->passenger->gender_label = $genderLabel->male_option_label ?? null;
+                        } elseif ($booking->passenger->gender === 'female') {
+                            $booking->passenger->gender_label = $genderLabel->female_option_label ?? null;
+                        } elseif ($booking->passenger->gender === 'prefer not to say') {
+                            $booking->passenger->gender_label = $genderLabel->prefer_option_label ?? null;
+                        }
+                    }
+
+                    $ratings = Rating::where('status', 1)->where('type', '2')->get();
+                    // Calculate average rating
+                    $filteredRatings = $ratings->filter(function ($rating) use ($booking) {
+                        return (int) optional($rating->booking)->user_id === (int) $booking->user_id;
+                    });
+
+                    $totalAverage = $filteredRatings->avg('average_rating');
+                    $booking->passenger->average_rating = $totalAverage;
                 }
-
-                $ratings = Rating::where('status', 1)->where('type', '2')->get();
-                // Calculate average rating
-                $filteredRatings = $ratings->filter(function ($rating) use ($booking) {
-                    return (int) optional($rating->booking)->user_id === (int) $booking->user_id;
-                });
-
-                $totalAverage = $filteredRatings->avg('average_rating');
-                $booking->passenger->average_rating = $totalAverage;
             }
 
             // Separate bookings based on status
@@ -1137,32 +1139,34 @@ class RideController extends Controller
                 }])->get();
 
             foreach ($ride->booking_requests as $booking_request) {
-                // Calculate age
-                if ($booking_request->passenger->dob) {
-                    $dob = Carbon::parse($booking_request->passenger->dob);
-                    $booking_request->passenger->age = $dob->diffInYears(Carbon::now());
-                } else {
-                    $booking_request->passenger->age = null; // Handle case where dob is not set
-                }
-
-                if ($booking_request->passenger->gender) {
-                    if ($booking_request->passenger->gender === 'male') {
-                        $booking_request->passenger->gender_label = $genderLabel->male_option_label ?? null;
-                    } elseif ($booking_request->passenger->gender === 'female') {
-                        $booking_request->passenger->gender_label = $genderLabel->female_option_label ?? null;
-                    } elseif ($booking_request->passenger->gender === 'prefer not to say') {
-                        $booking_request->passenger->gender_label = $genderLabel->prefer_option_label ?? null;
+                if (isset($booking_request->passenger)) {
+                    // Calculate age
+                    if ($booking_request->passenger->dob) {
+                        $dob = Carbon::parse($booking_request->passenger->dob);
+                        $booking_request->passenger->age = $dob->diffInYears(Carbon::now());
+                    } else {
+                        $booking_request->passenger->age = null; // Handle case where dob is not set
                     }
+
+                    if ($booking_request->passenger->gender) {
+                        if ($booking_request->passenger->gender === 'male') {
+                            $booking_request->passenger->gender_label = $genderLabel->male_option_label ?? null;
+                        } elseif ($booking_request->passenger->gender === 'female') {
+                            $booking_request->passenger->gender_label = $genderLabel->female_option_label ?? null;
+                        } elseif ($booking_request->passenger->gender === 'prefer not to say') {
+                            $booking_request->passenger->gender_label = $genderLabel->prefer_option_label ?? null;
+                        }
+                    }
+
+                    $ratings = Rating::where('status', 1)->where('type', '2')->get();
+                    // Calculate average rating
+                    $filteredRatings = $ratings->filter(function ($rating) use ($booking_request) {
+                        return (int) optional($rating->booking)->user_id === (int) $booking_request->user_id;
+                    });
+
+                    $totalAverage = $filteredRatings->avg('average_rating');
+                    $booking_request->passenger->average_rating = $totalAverage;
                 }
-
-                $ratings = Rating::where('status', 1)->where('type', '2')->get();
-                // Calculate average rating
-                $filteredRatings = $ratings->filter(function ($rating) use ($booking_request) {
-                    return (int) optional($rating->booking)->user_id === (int) $booking_request->user_id;
-                });
-
-                $totalAverage = $filteredRatings->avg('average_rating');
-                $booking_request->passenger->average_rating = $totalAverage;
             }
         }
 
@@ -1170,7 +1174,7 @@ class RideController extends Controller
         $reviewSetting = ReviewSetting::select('id', 'leave_review_days')->first();
         $siteSetting = SiteSetting::getCached();
 
-        
+
         $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         if ($rideDetailPage) {
@@ -1596,8 +1600,8 @@ class RideController extends Controller
     {
         $resolvedId = (int) (
             ($ride_id !== null && $ride_id !== '')
-                ? $ride_id
-                : ($request->input('ride_id') ?? $request->query('ride_id') ?? 0)
+            ? $ride_id
+            : ($request->input('ride_id') ?? $request->query('ride_id') ?? 0)
         );
 
         if ($resolvedId <= 0) {

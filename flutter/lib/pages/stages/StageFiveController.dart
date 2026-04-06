@@ -335,120 +335,186 @@ class StageFiveController extends GetxController {
           phoneNumberTextEditingController.text = "";
 
           if (skip) {
-            final shouldContinueBrowsing = await Get.defaultDialog<bool>(
-              title: "Safety & Reliability Notice",
-              titlePadding: const EdgeInsets.only(top: 25.0),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              radius: 10,
+            final shouldContinueBrowsing = await Get.dialog<bool>(
+              Builder(
+                builder: (dialogContext) {
+                  final size = MediaQuery.sizeOf(dialogContext);
+                  final dialogWidth =
+                      (size.width - 48).clamp(280.0, 420.0);
+                  return Dialog(
+                    insetPadding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 24),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: LayoutBuilder(
+                      builder: (ctx, constraints) {
+                        final viewH = MediaQuery.sizeOf(ctx).height;
+                        final maxByParent = constraints.maxHeight.isFinite
+                            ? constraints.maxHeight
+                            : viewH;
+                        final maxDialogH = (maxByParent < viewH
+                                ? maxByParent
+                                : viewH * 0.82)
+                            .clamp(240.0, viewH - 32);
+                        return ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: dialogWidth,
+                            maxHeight: maxDialogH,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  padding: const EdgeInsets.fromLTRB(
+                                      24, 20, 24, 12),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: const [
+                                      Text(
+                                        "Safety & Reliability Notice",
+                                        style: TextStyle(
+                                          fontSize: 26,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      SizedBox(height: 16),
+                                      Text(
+                                        "You are currently browsing as an unverified guest.",
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.normal,
+                                          fontFamily: descriptiveFontFamily,
+                                        ),
+                                      ),
+                                      SizedBox(height: 16),
+                                      _DialogBulletText(
+                                        spans: [
+                                          TextSpan(
+                                            text: "Communication: ",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          TextSpan(
+                                            text:
+                                                "Drivers are required to call passengers to coordinate pickups. If your number is not verified, ",
+                                          ),
+                                          TextSpan(
+                                            text:
+                                                "we will rely solely on the driver's report ",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          TextSpan(
+                                            text:
+                                                "regarding pickup attempts and no-shows.",
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 12),
+                                      _DialogBulletText(
+                                        spans: [
+                                          TextSpan(
+                                            text: "Booking Limits: ",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          TextSpan(
+                                            text: "You cannot book ",
+                                          ),
+                                          TextSpan(
+                                            text:
+                                                "Pink Rides or Extra-Care Rides",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          TextSpan(
+                                            text:
+                                                " without a verified phone number.",
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 12),
+                                      _DialogBulletText(
+                                        spans: [
+                                          TextSpan(
+                                            text: "Drivers: ",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          TextSpan(
+                                            text:
+                                                "You cannot post or list any rides until your account is verified.",
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(24, 8, 24, 16),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        Get.back(result: false);
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: btnPrimaryColor,
+                                        minimumSize: const Size.fromHeight(
+                                            buttonHeight),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                        ),
+                                      ),
+                                      child: txt20SizeWithOutContext(
+                                        title: "Verify My Number",
+                                        textColor: Colors.white,
+                                        fontFamily: buttonFontFamily,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        Get.back(result: true);
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: primaryColor,
+                                        minimumSize: const Size.fromHeight(
+                                            buttonHeight),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                        ),
+                                      ),
+                                      child: txt20SizeWithOutContext(
+                                        title: "Continue Browsing",
+                                        textColor: Colors.white,
+                                        fontFamily: buttonFontFamily,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
               barrierDismissible: false,
-              titleStyle: const TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-              ),
-              content: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: const [
-                  Text(
-                    "You are currently browsing as an unverified guest.",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.normal,
-                      fontFamily: descriptiveFontFamily,
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  _DialogBulletText(
-                    spans: [
-                      TextSpan(
-                        text: "Communication: ",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(
-                        text:
-                            "Drivers are required to call passengers to coordinate pickups. If your number is not verified, ",
-                      ),
-                      TextSpan(
-                        text: "we will rely solely on the driver's report ",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(
-                        text:
-                            "regarding pickup attempts and no-shows.",
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 12),
-                  _DialogBulletText(
-                    spans: [
-                      TextSpan(
-                        text: "Booking Limits: ",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(
-                        text: "You cannot book ",
-                      ),
-                      TextSpan(
-                        text: "Pink Rides or Extra-Care Rides",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(
-                        text: " without a verified phone number.",
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 12),
-                  _DialogBulletText(
-                    spans: [
-                      TextSpan(
-                        text: "Drivers: ",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(
-                        text:
-                            "You cannot post or list any rides until your account is verified.",
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              actions: [
-                ElevatedButton(
-                  onPressed: () {
-                    Get.back(result: false);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: btnPrimaryColor,
-                    minimumSize: const Size.fromHeight(buttonHeight),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-                  child: txt20SizeWithOutContext(
-                    title: "Verify My Number",
-                    textColor: Colors.white,
-                    fontFamily: buttonFontFamily,
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Get.back(result: true);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    minimumSize: const Size.fromHeight(buttonHeight),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-                  child: txt20SizeWithOutContext(
-                    title: "Continue Browsing",
-                    textColor: Colors.white,
-                    fontFamily: buttonFontFamily,
-                  ),
-                ),
-              ],
             );
 
             if (shouldContinueBrowsing != true) {
@@ -470,7 +536,7 @@ class StageFiveController extends GetxController {
               middleText: formatMessage(
                   "Your phone number is saved Unverified. Keep in mind that you are not permitted to use Pink Rides and Extra-Care Rides until you verify it."),
               middleTextStyle: const TextStyle(
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: FontWeight.normal,
                 fontFamily: carlito,
               ),
