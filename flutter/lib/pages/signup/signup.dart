@@ -740,6 +740,9 @@ class SignupPage extends StatelessWidget {
                           readonly: false,
                           fontSize: 16.0,
                           fontFamily: regular,
+                          onTap: () {
+                            controller.clearSignupFieldError('referral_code');
+                          },
                           onChanged: (value) {
                             // Clear any referral code errors when user types
                             if (controller.errors.firstWhereOrNull((element) =>
@@ -972,6 +975,8 @@ class SignupPage extends StatelessWidget {
                               onChanged: (value) {
                                 controller.rideshareDisclaimerValue.value =
                                     value;
+                                controller.clearSignupFieldError(
+                                    'rideshare_disclaimer');
                               },
                               activeColor: Colors.white,
                               activeTrackColor: primaryColor,

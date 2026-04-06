@@ -171,6 +171,10 @@ body {
         text-align: justify;
     }
 
+    li {
+        font-size: theme("fontSize.base");
+    }
+
     a {
         @apply text-base text-primary hover:text-secondary;
     }
@@ -193,7 +197,7 @@ body {
     }
 
     label {
-        font-family: theme("fontFamily.FuturaMdCnBT");
+        font-family: 16px;
     }
 
     /* Buttons */
@@ -356,6 +360,10 @@ body {
             text-align: justify;
         }
 
+        li {
+            font-size: theme("fontSize.base");
+        }
+
         .card-heading {
             @apply text-2xl font-FuturaMdCnBT text-secondary;
         }
@@ -498,6 +506,10 @@ body {
             font-size: theme("fontSize.lg");
             color: theme("colors.secondary");
             text-align: justify;
+        }
+
+        li {
+            font-size: theme("fontSize.lg");
         }
 
         .card-heading {

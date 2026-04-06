@@ -71,28 +71,40 @@ class RegisterController extends GetxController {
 
     // Setup focus node listeners
     for (int i = 1; i <= 5; i++) {
-      focusNodes[i.toString()] = FocusNode();
-      focusNodes[i.toString()]?.addListener(() {
-        if (!focusNodes[i.toString()]!.hasFocus) {
-          // Field has lost focus, trigger validation
-          if (i == 1) {
-            validateField('first_name', firstNameTextController.text);
-          } else if (i == 2) {
-            validateField('last_name', lastNameTextController.text);
-          } else if (i == 3) {
-            validateField('email', emailTextController.text, type: 'email');
-          } else if (i == 4) {
-            validateField('password', passwordTextController.text,
-                type: 'password');
-            isPasswordFocused.value = false;
-          } else if (i == 5) {
-            validateField(
-                'password_confirmation', confirmPasswordTextController.text,
-                type: 'confirmPassword');
+      final index = i;
+      focusNodes[index.toString()] = FocusNode();
+      focusNodes[index.toString()]!.addListener(() {
+        final node = focusNodes[index.toString()]!;
+        if (node.hasFocus) {
+          if (index == 4) {
+            isPasswordFocused.value = true;
+          }
+          // Hide validation tooltip while the user is in this field (blur re-validates).
+          const titles = <int, String>{
+            1: 'first_name',
+            2: 'last_name',
+            3: 'email',
+            4: 'password',
+            5: 'password_confirmation',
+          };
+          final title = titles[index];
+          if (title != null) {
+            clearSignupFieldError(title);
           }
         } else {
-          if (i == 4) {
-            isPasswordFocused.value = true;
+          // Re-validate on blur using the same rules as Sign up (not [validateField],
+          // which used wrong :Attribute placeholder vs Laravel's :attribute).
+          if (index == 1) {
+            validateFirstName();
+          } else if (index == 2) {
+            validateLastName();
+          } else if (index == 3) {
+            validateEmail();
+          } else if (index == 4) {
+            validatePassword();
+            isPasswordFocused.value = false;
+          } else if (index == 5) {
+            validateConfirmPassword();
           }
         }
       });
@@ -181,6 +193,13 @@ class RegisterController extends GetxController {
     // confirmPasswordTextController.dispose();
   }
 
+  void clearSignupFieldError(String title) {
+    final had = errors.any((e) => e is Map && e['title'] == title);
+    if (!had) return;
+    errors.removeWhere((e) => e is Map && e['title'] == title);
+    errors.refresh();
+  }
+
   Future<void> getLabelTextDetail() async {
     await LoginProvider()
         .getLabelTextDetail(serviceController.langId.value, signUpPage)
@@ -213,22 +232,26 @@ class RegisterController extends GetxController {
     List<String> errorList = [];
 
     if (isRequired && fieldValue.isEmpty) {
-      var message = validationMessageDetail['required'];
-      if (fieldName == "first_name") {
-        message = message.replaceAll(
-            ":Attribute", labelTextDetail['first_name_error'] ?? "First name");
-      } else if (fieldName == "last_name") {
-        message = message.replaceAll(
-            ":Attribute", labelTextDetail['last_name_error'] ?? "Last name");
-      } else if (fieldName == "email") {
-        message = message.replaceAll(
-            ":Attribute", labelTextDetail['email_error'] ?? "Email");
-      } else if (fieldName == "password") {
-        message = message.replaceAll(
-            ":Attribute", labelTextDetail['password_error'] ?? "Password");
-      } else if (fieldName == "password_confirmation") {
-        message = message.replaceAll(":Attribute",
-            labelTextDetail['confirm_password_error'] ?? "First name");
+      var message = validationMessageDetail['required']?.toString() ?? '';
+      final label = fieldName == "first_name"
+          ? (labelTextDetail['first_name_error']?.toString() ?? "First name")
+          : fieldName == "last_name"
+              ? (labelTextDetail['last_name_error']?.toString() ?? "Last name")
+              : fieldName == "email"
+                  ? (labelTextDetail['email_error']?.toString() ?? "Email")
+                  : fieldName == "password"
+                      ? (labelTextDetail['password_error']?.toString() ??
+                          "Password")
+                      : fieldName == "password_confirmation"
+                          ? (labelTextDetail['confirm_password_error']
+                                  ?.toString() ??
+                              "Confirm password")
+                          : fieldName;
+      message = message
+          .replaceAll(':attribute', label)
+          .replaceAll(':Attribute', label);
+      if (message.trim().isEmpty) {
+        message = 'This field is required.';
       }
 
       errorList.add(message);
@@ -249,11 +272,16 @@ class RegisterController extends GetxController {
 
       case 'confirmPassword':
         if (passwordTextController.text != confirmPasswordTextController.text) {
-          var message = validationMessageDetail['confirmed'];
-          message = message.replaceAll(":attribute",
-              labelTextDetail['confirm_password_error'] ?? "confirm password");
-          errorList
-              .add(message ?? 'Password and confirm password does not match');
+          final attr = labelTextDetail['confirm_password_error']?.toString() ??
+              'confirm password';
+          var message = validationMessageDetail['confirmed']?.toString() ?? '';
+          message = message
+              .replaceAll(':attribute', attr)
+              .replaceAll(':Attribute', attr);
+          if (message.trim().isEmpty) {
+            message = 'Password and confirm password does not match';
+          }
+          errorList.add(message);
         }
         break;
 
@@ -509,8 +537,10 @@ class RegisterController extends GetxController {
   }
 
   void _addError(String title, List<String> errorList, int scrollPosition) {
-    var err = {'title': title, 'eList': errorList};
-    errors.add(err);
+    errors.removeWhere(
+        (e) => e is Map && e['title'] == title);
+    errors.add({'title': title, 'eList': errorList});
+    errors.refresh();
 
     // if (scrollField == false) {
     //   scrollError(context, scrollPosition, screenHeight);
