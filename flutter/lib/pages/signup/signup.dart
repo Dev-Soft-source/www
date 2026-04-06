@@ -364,25 +364,50 @@ class SignupPage extends StatelessWidget {
                                         context: context,
                                         textColor: Colors.red),
                                     5.widthBox,
-                                    InkWell(
-                                      onTap: () {
-                                        controller.showToolTip.value =
-                                            !controller.showToolTip.value;
-                                      },
-                                      child: Image.asset(
-                                        infoImage,
-                                        color: Colors.black,
-                                        width: getValueForScreenType<double>(
-                                          context: context,
-                                          mobile: 25.0,
-                                          tablet: 25.0,
-                                        ),
-                                        height: getValueForScreenType<double>(
-                                          context: context,
-                                          mobile: 50.0,
-                                          tablet: 50.0,
-                                        ),
+                                    Tooltip(
+                                      margin: EdgeInsets.fromLTRB(
+                                          getValueForScreenType<double>(
+                                            context: context,
+                                            mobile: 15.0,
+                                            tablet: 15.0,
+                                          ),
+                                          getValueForScreenType<double>(
+                                            context: context,
+                                            mobile: 0.0,
+                                            tablet: 0.0,
+                                          ),
+                                          getValueForScreenType<double>(
+                                            context: context,
+                                            mobile: 15.0,
+                                            tablet: 15.0,
+                                          ),
+                                          getValueForScreenType<double>(
+                                            context: context,
+                                            mobile: 0.0,
+                                            tablet: 0.0,
+                                          )),
+                                      triggerMode: TooltipTriggerMode.tap,
+                                      message: controller.labelTextDetail[
+                                          'password_placeholder'],
+                                      textStyle: const TextStyle(
+                                        fontSize: 20,
+                                        color: Colors.white,
+                                        fontFamily: carlito,
                                       ),
+                                      showDuration: const Duration(days: 100),
+                                      waitDuration: Duration.zero,
+                                      child: Image.asset(infoImage,
+                                          color: Colors.black,
+                                          width: getValueForScreenType<double>(
+                                            context: context,
+                                            mobile: 20.0,
+                                            tablet: 20.0,
+                                          ),
+                                          height: getValueForScreenType<double>(
+                                            context: context,
+                                            mobile: 20.0,
+                                            tablet: 20.0,
+                                          )),
                                     )
                                   ],
                                 ),
@@ -580,19 +605,20 @@ class SignupPage extends StatelessWidget {
                                 ]
                               ],
                             ),
-                            Positioned(
-                              top: 30.0,
-                              left: 0,
-                              right: 0,
-                              child: controller.showToolTip.value
-                                  ? toolTip(
-                                      tip:
-                                          "${controller.labelTextDetail['password_placeholder'] ?? 'The password length should be at least 8 characters and must include one lower case, one uppercase, one number, and one special character'}",
-                                      type: 'text',
-                                      position: 1,
-                                      width: context.screenWidth)
-                                  : const SizedBox.shrink(),
-                            )
+
+                            // Positioned(
+                            //   top: 30.0,
+                            //   left: 0,
+                            //   right: 0,
+                            //   child: controller.showToolTip.value
+                            //       ? toolTip(
+                            //           tip:
+                            //               "${controller.labelTextDetail['password_placeholder'] ?? 'The password length should be at least 8 characters and must include one lower case, one uppercase, one number, and one special character'}",
+                            //           type: 'text',
+                            //           position: 1,
+                            //           width: context.screenWidth)
+                            //       : const SizedBox.shrink(),
+                            // )
                           ],
                         ),
                         // if (controller.errors.firstWhereOrNull(
@@ -950,8 +976,8 @@ class SignupPage extends StatelessWidget {
                             ),
                             Expanded(
                               child: AppHtmlText(
-                                data: controller.labelTextDetail[
-                                        'agree_terms_label'] ??
+                                data: controller
+                                        .labelTextDetail['agree_terms_label'] ??
                                     'I confirm that I am at least 18 years old and I have read and agree to ProximaRide <a href="/term_condition">Terms of services</a>, <a href="/term_of_use">Term of use</a>, <a href="/privacy_policy">Privacy policy</a> and all associated rules and policies.',
                                 fontSize: 18,
                                 fontFamily: regular,
@@ -984,7 +1010,7 @@ class SignupPage extends StatelessWidget {
                             Expanded(
                               child: txt18Size(
                                   title:
-                                  " ${controller.labelTextDetail['rideshare_label'] ?? 'Ride sharing cannot be used as a business dummy text, will be changed after you have provided'}",
+                                      " ${controller.labelTextDetail['rideshare_label'] ?? 'Ride sharing cannot be used as a business dummy text, will be changed after you have provided'}",
                                   fontFamily: regular,
                                   textColor: textColor,
                                   context: context),
@@ -1218,5 +1244,3 @@ class SignupPage extends StatelessWidget {
     }
   }
 }
-
-

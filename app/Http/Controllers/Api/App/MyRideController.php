@@ -306,7 +306,7 @@ class MyRideController extends Controller
                 ->sum();
 
             foreach ($ride->bookings as $booking) {
-                if ($booking->passenger->gender) {
+                if (isset($booking->passenger)) {
                     if ($booking->passenger->gender === 'male') {
                         $booking->passenger->gender_label = $genderLabel->male_option_label;
                     } elseif ($booking->passenger->gender === 'female') {

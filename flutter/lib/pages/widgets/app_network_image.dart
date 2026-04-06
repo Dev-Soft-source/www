@@ -34,11 +34,23 @@ Widget appNetworkImage({
       ? normalizedUrl.substring(embeddedAbsoluteUrlIndex)
       : normalizedUrl;
   final appBaseUri = Uri.tryParse(url);
-  final resolvedUrl = extractedUrl.startsWith('assets/')
+  var resolvedUrl = extractedUrl.startsWith('assets/')
       ? appBaseUri?.resolve(extractedUrl).toString() ?? extractedUrl
       : extractedUrl.startsWith('/assets/')
           ? appBaseUri?.resolve(extractedUrl).toString() ?? extractedUrl
           : extractedUrl;
+
+  final parsedResolvedUrl = Uri.tryParse(resolvedUrl);
+  if (parsedResolvedUrl != null && !kIsWeb) {
+    final host = parsedResolvedUrl.host.toLowerCase();
+    if (host == '127.0.0.1' || host == 'localhost') {
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        final emulatorUri = parsedResolvedUrl.replace(host: '10.0.2.2');
+        resolvedUrl = emulatorUri.toString();
+      }
+    }
+  }
+
   if (resolvedUrl.isEmpty) {
     return fallback();
   }

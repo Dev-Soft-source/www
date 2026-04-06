@@ -816,17 +816,18 @@ class Service extends GetxService {
           ),
           5.heightBox,
           Text(
-            formatMessage(
-                "${welcomeMessage1.isEmpty ? "Hey" : welcomeMessage1.value} ${loginUserDetail['first_name']},  "),
-            textAlign: TextAlign.justify,
-            style: const TextStyle(fontSize: 20, fontFamily: carlito),
+            (welcomeMessage1.isEmpty    
+    ? "Hey [:name], Great to meet you!"
+    : welcomeMessage1.value)
+    .replaceAll("[:name]", (loginUserDetail['first_name'] ?? "").toString()),
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 18, fontFamily: carlito, fontWeight: FontWeight.bold),
           ),
           5.heightBox,
           Text(
-            formatMessage(
-                welcomeMessage2.isEmpty ? "nice to meet you. Please complete your profile, it only takes a couple of minutes" : welcomeMessage2.value),
+            formatMessage(welcomeMessage2.isEmpty ? "nice to meet you\nPlease complete your profile, it only takes a couple of minutes" : welcomeMessage2.value),
             textAlign: TextAlign.justify,
-            style: const TextStyle(fontSize: 20, fontFamily: carlito),
+            style: const TextStyle(fontSize: 18, fontFamily: carlito),
           ),
         ],
       ),
