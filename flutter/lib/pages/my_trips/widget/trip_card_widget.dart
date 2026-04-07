@@ -270,59 +270,60 @@ Widget tripCardWidget(
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      5.heightBox,
                       txt20SizeCapitalize(
                           title:
-                              "${tripDetail['driver'] != null ? tripDetail['driver']['first_name'] : ""} ${tripDetail['driver'] != null ? tripDetail['driver']['last_name'] : ""}",
+                              "${tripDetail['driver'] != null ? tripDetail['driver']['first_name'] : ""}",
                           context: context),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          txt20Size(
-                              title:
-                                  "${controller.labelTextDetail['card_section_age'] ?? "Age"}:",
-                              context: context),
-                          txt20Size(
-                              title:
-                                  "${tripDetail['driver'] != null ? tripDetail['driver']['age'] : ""}",
-                              context: context),
-                          5.widthBox,
-                          SizedBox(
-                              width: 1,
-                              height: 15,
-                              child: Container(color: Colors.grey.shade400)),
-                          5.widthBox,
-                          txt20Size(
-                              title:
-                                  "${tripDetail['driver'] != null ? tripDetail['driver']['gender_label'] : ""}",
-                              context: context),
-                          5.widthBox,
-                          SizedBox(
-                              width: 1,
-                              height: 15,
-                              child: Container(color: Colors.grey.shade400)),
-                          5.widthBox,
-                          txt20Size(
-                              title:
-                                  "${controller.labelTextDetail['card_section_driven'] ?? "Driven"}:",
-                              context: context),
-                          txt20Size(
-                              title:
-                                  "${tripDetail['driver'] != null ? tripDetail['driver']['driven_rides'] : ""}",
-                              context: context),
-                          5.widthBox,
-                          SizedBox(
-                              width: 1,
-                              height: 15,
-                              child: Container(color: Colors.grey.shade400)),
-                          5.widthBox,
-                          txt20Size(
-                              title: hasDriverReview
-                                  ? "${controller.labelTextDetail['card_section_review'] ?? "Review"}: ${tripDetail['driver']['average_rating'].toStringAsFixed(1)}"
-                                  : "${controller.labelTextDetail['no_reviews_label'] ?? "No review yet"}",
-                              context: context),
-                          5.widthBox,
-                        ],
-                      ),
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.start,
+                      //   children: [
+                      //     txt20Size(
+                      //         title:
+                      //             "${controller.labelTextDetail['card_section_age'] ?? "Age"}:",
+                      //         context: context),
+                      //     txt20Size(
+                      //         title:
+                      //             "${tripDetail['driver'] != null ? tripDetail['driver']['age'] : ""}",
+                      //         context: context),
+                      //     5.widthBox,
+                      //     SizedBox(
+                      //         width: 1,
+                      //         height: 15,
+                      //         child: Container(color: Colors.grey.shade400)),
+                      //     5.widthBox,
+                      //     txt20Size(
+                      //         title:
+                      //             "${tripDetail['driver'] != null ? tripDetail['driver']['gender_label'] : ""}",
+                      //         context: context),
+                      //     5.widthBox,
+                      //     SizedBox(
+                      //         width: 1,
+                      //         height: 15,
+                      //         child: Container(color: Colors.grey.shade400)),
+                      //     5.widthBox,
+                      //     txt20Size(
+                      //         title:
+                      //             "${controller.labelTextDetail['card_section_driven'] ?? "Driven"}:",
+                      //         context: context),
+                      //     txt20Size(
+                      //         title:
+                      //             "${tripDetail['driver'] != null ? tripDetail['driver']['driven_rides'] : ""}",
+                      //         context: context),
+                      //     5.widthBox,
+                      //     SizedBox(
+                      //         width: 1,
+                      //         height: 15,
+                      //         child: Container(color: Colors.grey.shade400)),
+                      //     5.widthBox,
+                      //     txt20Size(
+                      //         title: hasDriverReview
+                      //             ? "${controller.labelTextDetail['card_section_review'] ?? "Review"}: ${tripDetail['driver']['average_rating'].toStringAsFixed(1)}"
+                      //             : "${controller.labelTextDetail['no_reviews_label'] ?? "No review yet"}",
+                      //         context: context),
+                      //     5.widthBox,
+                      //   ],
+                      // ),
                       10.heightBox,
                     ],
                   )

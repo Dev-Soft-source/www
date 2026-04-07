@@ -129,39 +129,43 @@ class _RideFeatureWidgetState extends State<RideFeatureWidget> {
                                       ),
                                     showDuration: const Duration(days: 100),
                                     waitDuration: Duration.zero,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        circleIconWidget(
-                                            width: 25,
-                                            height: 25,
-                                            imagePath: widget.featureList[i]['image'],
-                                            context: widget.context),
-                                        10.widthBox,
-                                        Expanded(
-                                            child: txt20Size(
-                                                title: widget.featureList[i]['title'],
-                                                context: widget.context)),
-                                        5.widthBox,
-                                        GestureDetector(
-                                          onTap: () => _toggleTooltip(i),
-                                          child: Image.asset(
-                                            infoImage,
-                                            color: Colors.black,
-                                            width: getValueForScreenType<double>(
-                                              context: widget.context,
-                                              mobile: 20.0,
-                                              tablet: 20.0,
-                                            ),
-                                            height: getValueForScreenType<double>(
-                                              context: widget.context,
-                                              mobile: 20.0,
-                                              tablet: 20.0,
+                                    child: GestureDetector(
+                                      behavior: HitTestBehavior.opaque,
+                                      onTap: () => _toggleTooltip(i),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          circleIconWidget(
+                                              width: 25,
+                                              height: 25,
+                                              imagePath: widget.featureList[i]['image'],
+                                              context: widget.context),
+                                          10.widthBox,
+                                          Expanded(
+                                              child: txt20Size(
+                                                  title: widget.featureList[i]['title'],
+                                                  context: widget.context)),
+                                          5.widthBox,
+                                          GestureDetector(
+                                            onTap: () => _toggleTooltip(i),
+                                            child: Image.asset(
+                                              infoImage,
+                                              color: Colors.black,
+                                              width: getValueForScreenType<double>(
+                                                context: widget.context,
+                                                mobile: 20.0,
+                                                tablet: 20.0,
+                                              ),
+                                              height: getValueForScreenType<double>(
+                                                context: widget.context,
+                                                mobile: 20.0,
+                                                tablet: 20.0,
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   );
                                 },
@@ -237,44 +241,48 @@ class _RideFeatureWidgetState extends State<RideFeatureWidget> {
                       ),
                       showDuration: const Duration(days: 100),
                       waitDuration: Duration.zero,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          circleIconWidget(
-                              width: 25,
-                              height: 25,
-                              imagePath: widget.rideDetail['luggage_image'] ?? "",
-                              context: widget.context),
-                          10.widthBox,
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                txt18Size(
-                                    title: widget.rideDetail['luggage'],
-                                    context: widget.context),
-                                GestureDetector(
-                                  onTap: _toggleLuggageTooltip,
-                                  child: Image.asset(
-                                    infoImage,
-                                    color: Colors.black,
-                                    width: getValueForScreenType<double>(
-                                      context: widget.context,
-                                      mobile: 20.0,
-                                      tablet: 20.0,
-                                    ),
-                                    height: getValueForScreenType<double>(
-                                      context: widget.context,
-                                      mobile: 20.0,
-                                      tablet: 20.0,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: _toggleLuggageTooltip,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            circleIconWidget(
+                                width: 25,
+                                height: 25,
+                                imagePath: widget.rideDetail['luggage_image'] ?? "",
+                                context: widget.context),
+                            10.widthBox,
+                            Expanded(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  txt18Size(
+                                      title: widget.rideDetail['luggage'],
+                                      context: widget.context),
+                                  GestureDetector(
+                                    onTap: _toggleLuggageTooltip,
+                                    child: Image.asset(
+                                      infoImage,
+                                      color: Colors.black,
+                                      width: getValueForScreenType<double>(
+                                        context: widget.context,
+                                        mobile: 20.0,
+                                        tablet: 20.0,
+                                      ),
+                                      height: getValueForScreenType<double>(
+                                        context: widget.context,
+                                        mobile: 20.0,
+                                        tablet: 20.0,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                     5.heightBox,

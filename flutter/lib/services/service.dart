@@ -401,10 +401,19 @@ class Service extends GetxService {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 28),
-              // Buttons
-              Row(
-                children: [
-                  Expanded(
+              // Buttons (stack on narrow widths to avoid awkward wrapping)
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isNarrow = constraints.maxWidth < 340;
+                  final noLabel = cancelNoBtn != ""
+                      ? cancelNoBtn
+                      : "${logoutLabelTextDetail['confirmation_no_label'] ?? "No"}";
+                  final yesLabel = cancelYesBtn != ""
+                      ? cancelYesBtn
+                      : "${logoutLabelTextDetail['confirmation_yes_label'] ?? "Yes"}";
+
+                  final noButton = SizedBox(
+                    width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
                         Get.back(result: false);
@@ -416,25 +425,19 @@ class Service extends GetxService {
                         minimumSize: const Size.fromHeight(buttonHeight),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: cancelNoBtn != ""
-                          ? buttonLabelText(
-                              title: cancelNoBtn,
-                              textColor: textColor,
-                              textAlign: TextAlign.center,
-                            )
-                          : buttonLabelText(
-                              title:
-                                  "${logoutLabelTextDetail['confirmation_no_label'] ?? "No"}",
-                              textColor: textColor,
-                              textAlign: TextAlign.center,
-                            ),
+                      child: buttonLabelText(
+                        title: noLabel,
+                        textColor: textColor,
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
+                  );
+
+                  final yesButton = SizedBox(
+                    width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
                         Get.back(result: true);
@@ -446,24 +449,35 @@ class Service extends GetxService {
                         minimumSize: const Size.fromHeight(buttonHeight),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: cancelYesBtn != ""
-                          ? buttonLabelText(
-                              title: cancelYesBtn,
-                              textColor: Colors.white,
-                              textAlign: TextAlign.center,
-                            )
-                          : buttonLabelText(
-                              title:
-                                  "${logoutLabelTextDetail['confirmation_yes_label'] ?? "Yes"}",
-                              textColor: Colors.white,
-                              textAlign: TextAlign.center,
-                            ),
+                      child: buttonLabelText(
+                        title: yesLabel,
+                        textColor: Colors.white,
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                  ),
-                ],
+                  );
+
+                  if (isNarrow) {
+                    return Column(
+                      children: [
+                        noButton,
+                        const SizedBox(height: 10),
+                        yesButton,
+                      ],
+                    );
+                  }
+
+                  return Row(
+                    children: [
+                      Expanded(child: noButton),
+                      const SizedBox(width: 12),
+                      Expanded(child: yesButton),
+                    ],
+                  );
+                },
               ),
             ],
           ),
@@ -621,7 +635,12 @@ class Service extends GetxService {
   }
 
   showDialogue(message,
-      {off = 0, path = "", link = "", title = "", String type = "info"}) async {
+      {off = 0,
+      path = "",
+      link = "",
+      title = "",
+      String type = "info",
+      bool showCloseIcon = false}) async {
     // Centralized icon and color management based on type
     IconData dialogIcon;
     Color dialogColor;
@@ -663,6 +682,16 @@ class Service extends GetxService {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              if (showCloseIcon)
+                Align(
+                  alignment: Alignment.topRight,
+                  child: IconButton(
+                    icon: const Icon(Icons.close, color: textColor),
+                    onPressed: () {
+                      Get.back();
+                    },
+                  ),
+                ),
               // Icon - dynamically colored based on type
               Container(
                 padding: const EdgeInsets.all(16),

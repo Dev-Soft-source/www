@@ -6,6 +6,7 @@ Widget _normalizedButtonChild({
   required dynamic textWidget,
   required BuildContext? context,
   required Color textColor,
+  double? buttonFontSize,
 }) {
   if (textWidget is String) {
     return buttonLabelText(
@@ -13,20 +14,25 @@ Widget _normalizedButtonChild({
       textColor: textColor,
       context: context,
       textAlign: TextAlign.center,
+      textSize: buttonFontSize,
     );
   }
 
   if (textWidget is Text) {
     final resolvedTitle = textWidget.data ?? textWidget.textSpan?.toPlainText() ?? "";
+    TextStyle resolvedStyle = appButtonTextStyle(
+      textColor: textColor,
+      context: context,
+    ).merge(textWidget.style);
+    if (buttonFontSize != null) {
+      resolvedStyle = resolvedStyle.copyWith(fontSize: buttonFontSize);
+    }
     return Text(
       resolvedTitle,
       textAlign: TextAlign.center,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
-      style: appButtonTextStyle(
-        textColor: textColor,
-        context: context,
-      ),
+      style: resolvedStyle,
     );
   }
 
@@ -46,7 +52,8 @@ Widget elevatedButtonWidget(
     Color btnColor = btnPrimaryColor,
     context,
     double btnRadius = 5.0,
-    bool enabled = true}) {
+    bool enabled = true,
+    double? buttonFontSize}) {
   final buttonTextColor = enabled ? Colors.white : Colors.white;
   return ElevatedButton(
     onPressed: enabled ? onPressed : null,
@@ -61,6 +68,7 @@ Widget elevatedButtonWidget(
         textWidget: textWidget,
         context: context,
         textColor: buttonTextColor,
+        buttonFontSize: buttonFontSize,
       ),
     ),
   );

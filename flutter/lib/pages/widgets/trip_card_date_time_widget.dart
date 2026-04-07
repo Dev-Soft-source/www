@@ -146,10 +146,22 @@ Widget tripCardDateTimeWidget(
                       textColor: Colors.red)
                 ],
                 if (request != "0" && request != "") ...[
-                  txt16Size(
+                  8.widthBox,
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: Colors.red.withOpacity(0.35)),
+                    ),
+                    child: txt14Size(
                       title: "$request $bookingRequestLabel",
                       context: context,
-                      textColor: Colors.red)
+                      textColor: Colors.red,
+                      fontFamily: bold,
+                    ),
+                  )
                 ],
               ]),
               if (seatLeft != "") ...[

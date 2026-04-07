@@ -485,28 +485,25 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
   updateTripPageValue(index) async {
     if (index == 0) {
       tripType.value = "upcoming";
-      if (upComingTripList.isEmpty) {
-        upComingTripPage = 1;
-        upComingTripLoadMore(false);
-        upComingTripNoMoreData(false);
-        await getAllTrips();
-      }
+      upComingTripList.clear();
+      upComingTripPage = 1;
+      upComingTripLoadMore(false);
+      upComingTripNoMoreData(false);
+      await getAllTrips();
     } else if (index == 1) {
       tripType.value = "completed";
-      if (completedTripList.isEmpty) {
-        completedTripPage = 1;
-        completedTripLoadMore(false);
-        completedTripNoMoreData(false);
-        await getAllTrips();
-      }
+      completedTripList.clear();
+      completedTripPage = 1;
+      completedTripLoadMore(false);
+      completedTripNoMoreData(false);
+      await getAllTrips();
     } else if (index == 2) {
       tripType.value = "cancelled";
-      if (cancelledTripList.isEmpty) {
-        cancelledTripPage = 1;
-        cancelledTripLoadMore(false);
-        cancelledTripNoMoreData(false);
-        await getAllTrips();
-      }
+      cancelledTripList.clear();
+      cancelledTripPage = 1;
+      cancelledTripLoadMore(false);
+      cancelledTripNoMoreData(false);
+      await getAllTrips();
     }
   }
 
@@ -715,28 +712,25 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
   updateRidePageValue(index) async {
     if (index == 0) {
       rideType.value = "upcoming";
-      if (upComingRideList.isEmpty) {
-        upComingRidePage = 1;
-        upComingRideLoadMore(false);
-        upComingRideNoMoreData(false);
-        await getAllRides();
-      }
+      upComingRideList.clear();
+      upComingRidePage = 1;
+      upComingRideLoadMore(false);
+      upComingRideNoMoreData(false);
+      await getAllRides();
     } else if (index == 1) {
       rideType.value = "completed";
-      if (completedRideList.isEmpty) {
-        completedRidePage = 1;
-        completedRideLoadMore(false);
-        completedRideNoMoreData(false);
-        await getAllRides();
-      }
+      completedRideList.clear();
+      completedRidePage = 1;
+      completedRideLoadMore(false);
+      completedRideNoMoreData(false);
+      await getAllRides();
     } else if (index == 2) {
       rideType.value = "cancelled";
-      if (cancelledRideList.isEmpty) {
-        cancelledRidePage = 1;
-        cancelledRideLoadMore(false);
-        cancelledRideNoMoreData(false);
-        await getAllRides();
-      }
+      cancelledRideList.clear();
+      cancelledRidePage = 1;
+      cancelledRideLoadMore(false);
+      cancelledRideNoMoreData(false);
+      await getAllRides();
     }
   }
 
@@ -1114,9 +1108,14 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
           }
         } else if (resp['status'] != null && resp['status'] == "Success") {
           if (resp['data']['rating'] != null) {
+            final updatedAverageRating = double.tryParse(
+                resp['data']['rating']['average_rating']?.toString() ?? '');
             for (var rideInfo in cancelRideInfo['bookings']) {
               if (rideInfo['id'] == int.parse(bookingId.toString())) {
                 rideInfo['rating'] = resp['data']['rating'];
+                if (updatedAverageRating != null) {
+                  rideInfo['passenger_average_rating'] = updatedAverageRating;
+                }
               }
             }
             cancelRideInfo.refresh();
@@ -1126,6 +1125,9 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
               for (var ride in rideData['bookings']) {
                 if (ride['id'] == bookingId) {
                   ride['rating'] = resp['data']['rating'];
+                  if (updatedAverageRating != null) {
+                    ride['passenger_average_rating'] = updatedAverageRating;
+                  }
                 }
               }
             }
@@ -1219,9 +1221,10 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
           }
 
           serviceController.navigationIndex.value = 0;
-          serviceController.showDialogue(resp['message'].toString(),
-              path: '/navigation', off: 1);
-          serviceController.showDialogue(resp['message'].toString());
+          // Single success dialog with navigation on Close — duplicate showDialogue
+          // stacked two modals and could fault the navigator after dismiss.
+          await serviceController.showDialogue(resp['message'].toString(),
+              path: '/navigation', off: 1, type: "success");
         }
         isOverlayLoading(false);
       }, onError: (err) {

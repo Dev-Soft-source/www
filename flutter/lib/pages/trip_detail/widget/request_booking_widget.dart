@@ -15,7 +15,7 @@ Widget requestBookingWidget({context, bookingRequestList, double screenWidth = 0
               }, onPressedReject: () async{
                 await controller.updateBookingStatus('reject', booking['id']);
               },
-              ageLabel: "${controller.labelTextDetail['driver_age_label'] ?? "Age"}",
+              ageLabel: "${controller.labelTextDetail['card_section_age'] ?? "Age"}",
               reviewLabel: "${controller.labelTextDetail['review_label'] ?? "Review"}",
               seatRequestLabel: "${controller.labelTextDetail['seat_requested_label'] ?? "seat requested"}",
               acceptBtnLabel: "${controller.labelTextDetail['request_accept_label'] ?? "Accept"}",

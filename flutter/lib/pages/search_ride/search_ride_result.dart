@@ -670,24 +670,9 @@ class SearchRideResultPage extends StatelessWidget {
                                                               color: Colors.grey
                                                                   .shade400)),
                                                       5.widthBox,
-                                                      if ((controller.rides[
-                                                                      index][
-                                                                  'gender_image'] ??
-                                                              "")
-                                                          .toString()
-                                                          .isNotEmpty)
-                                                        circleIconWidget(
-                                                            width: 20.0,
-                                                            height: 20.0,
-                                                            imagePath: controller
-                                                                        .rides[
-                                                                    index][
-                                                                'gender_image'],
-                                                            context: context)
-                                                      else
                                                         txt16Size(
                                                             title:
-                                                                "${controller.rides[index]['driver']['gender_label']}",
+                                                                "${controller.rides[index]['gender_label']}",
                                                             context: context),
                                                     ],
                                                   ),

@@ -79,7 +79,10 @@ class _PaymentOptionWidgetState extends State<PaymentOptionWidget> {
               ),
               showDuration: const Duration(days: 100),
               waitDuration: Duration.zero,
-              child: Container(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: _toggleTooltip,
+                child: Container(
                   padding: EdgeInsets.fromLTRB(
                       getValueForScreenType<double>(
                         context: widget.context,
@@ -124,6 +127,7 @@ class _PaymentOptionWidgetState extends State<PaymentOptionWidget> {
                       ),
                     ],
                   )),
+              ),
             ),
           ],
         ));

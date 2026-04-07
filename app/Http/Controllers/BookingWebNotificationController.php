@@ -396,7 +396,7 @@ class BookingWebNotificationController extends Controller
             'message' => $driver_message,
         ]);
 
-        $bookingPrice = $booking->price * $booking->seats;
+        $bookingPrice = number_format((float) ($booking->price / 100) * $booking->seats, 2, '.', '');
 
         if (isset($ride->driver->email_notification) && (int) $ride->driver->email_notification === 1) {
             $data = [
@@ -619,7 +619,7 @@ class BookingWebNotificationController extends Controller
                     'date' => Carbon::parse($ride->date)->format('F d, Y'),
                     'time' => $ride->time,
                     'seats' => $booking->seats,
-                    'booking_price' => $booking->price * $booking->seats,
+                    'booking_price' => number_format((float) ($booking->price / 100) * $booking->seats, 2, '.', ''),
                 ];
                 Mail::to($passenger->email)->queue(new SecuredCashPaymentCodeMail($emailData));
             }
@@ -644,7 +644,7 @@ class BookingWebNotificationController extends Controller
         ]);
         $this->sendFCM($passengerNotification->message, $passenger);
 
-        $bookingPrice = $booking->price * $booking->seats;
+        $bookingPrice = number_format((float) ($booking->price / 100) * $booking->seats, 2, '.', '');
 
         if (isset($driverUser->email_notification) && (int) $driverUser->email_notification === 1) {
             $driverMailPayload = [

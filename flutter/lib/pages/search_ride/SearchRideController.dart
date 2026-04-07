@@ -385,10 +385,14 @@ class SearchRideController extends GetxController {
   // Public method for user-triggered searches
   getSearchRide(type) async {
     try {
-      if (type == 1 &&
-          (fromTextEditingController.text == "" ||
-              toTextEditingController.text == "")) {
-        if (fromTextEditingController.text == "") {
+      final fromText = fromTextEditingController.text.trim();
+      final toText = toTextEditingController.text.trim();
+      final keywordText = keywordTextEditingController.text.trim();
+      final hasKeyword = keywordText.isNotEmpty;
+      final hasFromAndTo = fromText.isNotEmpty && toText.isNotEmpty;
+
+      if (type == 1 && !hasKeyword && !hasFromAndTo) {
+        if (fromText.isEmpty) {
           _removeFieldError('from');
           final message = _stringOrFallback(
             labelTextDetail['origin'],
@@ -403,7 +407,7 @@ class SearchRideController extends GetxController {
           });
         }
 
-        if (toTextEditingController.text == "") {
+        if (toText.isEmpty) {
           _removeFieldError('to');
           final message = _stringOrFallback(
             labelTextDetail['destination'],
@@ -904,6 +908,13 @@ class SearchRideController extends GetxController {
         toCityId.value = 0;
       }
       if (toTextEditingController.text.trim().isNotEmpty) {
+        _removeFieldError('to');
+      }
+    });
+
+    keywordTextEditingController.addListener(() {
+      if (keywordTextEditingController.text.trim().isNotEmpty) {
+        _removeFieldError('from');
         _removeFieldError('to');
       }
     });

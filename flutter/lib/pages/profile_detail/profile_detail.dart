@@ -86,9 +86,9 @@ class ProfileDetailPage extends StatelessWidget {
                                 joinedLabel:
                                     "${controller.labelTextDetail['joined_label'] ?? "Joined"}",
                                 driverName:
-                                    "${controller.ride['driver'] != null ? controller.ride['driver']['first_name'] : ""} ${controller.ride['driver'] != null ? controller.ride['driver']['last_name'] : ""}",
+                                    "${controller.ride['driver'] != null ? controller.ride['driver']['first_name'] : ""}",
                                 driven: controller.ride['driver'] != null
-                                    ? '${controller.ride['driver']['passenger_driven']} ${controller.labelTextDetail['passenger_label'] ?? "passengers"}'
+                                    ? '${controller.ride['driver']['passenger_driven']}'
                                     : '',
                                 gender:
                                     "${controller.ride['driver'] != null ? controller.ride['driver']['gender_label'] : ""}",
@@ -206,8 +206,9 @@ class ProfileDetailPage extends StatelessWidget {
                             tablet: 15.0,
                           )),
                           child: txt25Size(
-                              title:
-                                  "${controller.totalReviews} ${controller.totalReviews.value == 1 ? "Review" : "Reviews"}",
+                              title: controller.totalReviews > 0 ?
+                                  "${controller.totalReviews} ${controller.totalReviews.value == 1 ? "Review" : "Reviews"}"
+                                  : "${controller.labelTextDetail['card_section_no_review'] ?? 'No reviews'}",
                               textColor: textColor,
                               fontFamily: regular,
                               context: context),

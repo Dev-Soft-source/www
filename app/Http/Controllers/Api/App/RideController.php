@@ -142,7 +142,7 @@ class RideController extends Controller
                     if ($existingSearch) {
                         $existingSearch->touch();
                     } else {
-                        \Log::info('$originCityId', [$originCityId]);
+                        // \Log::info('$originCityId', [$originCityId]);
                         RecentSearch::create([
                             'from' => $originLabel,
                             'to' => $destinationLabel,
@@ -249,6 +249,16 @@ class RideController extends Controller
             $ride->driver_age = $ride->driver->getAge();
             $ride->driven_count = $ride->driver->getPassengersDrivenCount();
             $ride->gender_image = $ride->driver->getProfileImageAttribute();
+            if ($ride->driver->gender) {
+                $genderLabel = Step1PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage?->id, $this->defaultLang?->id);
+                if ($ride->driver->gender === 'male') {
+                    $ride->gender_label = $genderLabel->male_option_label ?? null;
+                } elseif ($ride->driver->gender === 'female') {
+                    $ride->gender_label = $genderLabel->female_option_label ?? null;
+                } elseif ($ride->driver->gender === 'prefer not to say') {
+                    $ride->gender_label = $genderLabel->prefer_option_label ?? null;
+                }
+            }
             $ride->driver_average_rating = $ride->driver->driverPostRideStats()['overallRating'];
         }
 
@@ -917,10 +927,10 @@ class RideController extends Controller
         $rideDetailPage = $this->getApiRideDetailPage($selectedLanguage);
         $genderLabel = $this->getApiGenderLabel($selectedLanguage);
 
-        $defaultLanguage = Language::where('is_default', 1)->first();
-        $defaultPostRidePage = PostRidePageSettingDetail::where('language_id', $defaultLanguage->id)->first();
+        // $defaultLanguage = Language::where('is_default', 1)->first();
+        // $defaultPostRidePage = PostRidePageSettingDetail::where('language_id', $defaultLanguage->id)->first();
 
-        $rideFeatureOptionGroups = $this->getRideFeatureOptionGroups($selectedLanguage?->id, $defaultLanguage?->id);
+        $rideFeatureOptionGroups = $this->getRideFeatureOptionGroups($this->selectedLanguage?->id, $this->defaultLang?->id);
         $bookingMethodAssets = $this->buildRideFeatureAssetMaps($rideFeatureOptionGroups, 'booking_method');
         $paymentMethodAssets = $this->buildRideFeatureAssetMaps($rideFeatureOptionGroups, 'payment_method');
         $smokingAssets = $this->buildRideFeatureAssetMaps($rideFeatureOptionGroups, 'smoking_allowed');

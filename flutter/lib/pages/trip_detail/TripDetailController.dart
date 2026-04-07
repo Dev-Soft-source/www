@@ -156,6 +156,56 @@ class TripDetailController extends GetxController {
 
   updateBookingStatus(status, bookingId) {
     try {
+      if (status == "accept") {
+        serviceController
+            .showConfirmationDialog(
+              "Are you sure you want to approve this booking request?",
+              cancelYesBtn: "Yes, approve it!",
+              cancelNoBtn: "No, take me back!",
+            )
+            .then((isConfirmed) async {
+          if (isConfirmed == true) {
+            await _updateBookingStatusApi(status, bookingId);
+          }
+        });
+        return;
+      }
+
+      if (status == "reject") {
+        serviceController
+            .showConfirmationDialog(
+              "Are you sure you want to decline this booking request? This action cannot be undone.",
+              cancelYesBtn: "Yes, decline",
+              cancelNoBtn: "No, take me back",
+            )
+            .then((isConfirmed) async {
+          if (isConfirmed == true) {
+            await _updateBookingStatusApi(status, bookingId);
+          }
+        });
+        return;
+      }
+      _updateBookingStatusApi(status, bookingId);
+    } catch (exception) {
+      isOverlayLoading(false);
+      if (exception is Map &&
+          exception.containsKey('type') &&
+          exception.containsKey('message')) {
+        serviceController.showDialogue(exception['message'], type: "error");
+      } else if (exception is Map &&
+          exception.containsKey('type') &&
+          exception['type'] == 'network') {
+        serviceController.showDialogue(
+            "No internet connection. Please check your network and try again.",
+            type: "error");
+      } else {
+        serviceController.showDialogue(exception.toString(), type: "error");
+      }
+    }
+  }
+
+  Future<void> _updateBookingStatusApi(status, bookingId) async {
+    try {
       isOverlayLoading(true);
       TripDetailProvider()
           .updateBookingStatus(bookingId, status, serviceController.token)
@@ -263,8 +313,16 @@ class TripDetailController extends GetxController {
               }
             }
           }
-          serviceController.showDialogue(resp['message'].toString(),
-              type: "success");
+          if (status == "reject") {
+            serviceController.showDialogue(
+              "You have declined the booking request. The seats are now available for other passengers to book.",
+              type: "success",
+              showCloseIcon: true,
+            );
+          } else {
+            serviceController.showDialogue(resp['message'].toString(),
+                type: "success");
+          }
         }
         ride.refresh();
         isOverlayLoading(false);

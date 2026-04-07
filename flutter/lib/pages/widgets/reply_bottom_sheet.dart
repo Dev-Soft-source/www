@@ -22,7 +22,10 @@ replyBottomSheet({controller, context, height, onSubmit, String replyHeadingLabe
         )
       : showCupertinoModalBottomSheet(
           context: context,
-          builder: (context) => getBottomSheet(controller:controller, context:context, height:height, onSubmit:onSubmit, replyPlaceholder:replyPlaceholder, replyHeadingLabel:replyHeadingLabel,replySubmitButtonLabel:replySubmitButtonLabel),
+          builder: (context) => Material(
+            type: MaterialType.transparency,
+            child: getBottomSheet(controller:controller, context:context, height:height, onSubmit:onSubmit, replyPlaceholder:replyPlaceholder, replyHeadingLabel:replyHeadingLabel,replySubmitButtonLabel:replySubmitButtonLabel),
+          ),
           shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(10.0),

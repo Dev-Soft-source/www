@@ -67,16 +67,7 @@ class ReviewController extends Controller
             ];
         }
 
-        $reviewDetailPage = null;
-        if ($request->lang_id && $request->lang_id != 0) {
-            // Retrieve the tripsPageSettingDetail associated with the selected language
-            $reviewDetailPage = TripsPageSettingDetail::where('language_id', $request->lang_id)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $reviewDetailPage = TripsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        }
+        $reviewDetailPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage?->id, $this->defaultLang?->id);
 
         $data = ['rating' => $rating, 'reviewDetailPage' => $reviewDetailPage];
         return $this->successResponse($data, 'Get review successfully');

@@ -77,14 +77,27 @@ Widget buttonLabelText(
     {String title = "",
     Color textColor = Colors.white,
     context,
-    TextAlign textAlign = TextAlign.center}) {
+    TextAlign textAlign = TextAlign.center,
+    double? textSize}) {
+  final baseStyle = appButtonTextStyle(
+    textColor: textColor,
+    context: context,
+  );
+  final resolvedStyle = textSize == null
+      ? baseStyle
+      : baseStyle.copyWith(
+          fontSize: context == null
+              ? textSize
+              : getValueForScreenType<double>(
+                  context: context,
+                  mobile: textSize,
+                  tablet: textSize,
+                ),
+        );
   return Text(
     title,
     textAlign: textAlign,
-    style: appButtonTextStyle(
-      textColor: textColor,
-      context: context,
-    ),
+    style: resolvedStyle,
   );
 }
 

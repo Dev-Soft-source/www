@@ -280,7 +280,7 @@ class TripDetailPage extends StatelessWidget {
                               driverInfoWidget(
                                   context: context,
                                   driverName:
-                                      "${rideDriver['first_name'] ?? ""} ${rideDriver['last_name'] ?? ""}",
+                                      "${rideDriver['first_name'] ?? ""}",
                                   driverRating:
                                       "${rideDriver['average_rating'] != null ? rideDriver['average_rating'].toStringAsFixed(1) : ""}",
                                   rideId: "${controller.ride['id']}",

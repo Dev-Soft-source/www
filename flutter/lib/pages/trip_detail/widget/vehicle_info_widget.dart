@@ -36,25 +36,31 @@ Widget vehicleInfoWidget({context, String vehicleDetail = "", String vehicleImag
                     mobile: 10.0,
                     tablet: 10.0,
                   )),
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                         hidePhoto == true ? circleImageWidget(width: 84, height: 84, imageType: "network", imagePath: vehicleImage, borderRadius: 50.0, context: context) : SizedBox(),
-                        15.widthBox,
-                        Column(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             txt20Size(title: vehicleDetail, context: context),
                             txt20Size(title: licenseNumber, context: context),
                             txt20Size(title: carType, context: context),
                           ],
-                        )
+                        ),
+                      ),
+                      if (hidePhoto == true) ...[
+                        10.widthBox,
+                        circleImageWidget(
+                            width: 84,
+                            height: 84,
+                            imageType: "network",
+                            imagePath: vehicleImage,
+                            borderRadius: 50.0,
+                            context: context),
                       ],
-                    ),
+                    ],
                   )
               ),
             ] else ...[

@@ -134,7 +134,7 @@ class MessagingPage extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "${controller.chatUserInfo['first_name'] ?? ""} ${controller.chatUserInfo['last_name'] ?? ""}"
+                      "${controller.chatUserInfo['first_name'] ?? ""}"
                           .trim(),
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(

@@ -16,7 +16,9 @@ class RemovePassengerPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var controller = Get.find<MyTripController>();
+    final controller = Get.isRegistered<MyTripController>()
+        ? Get.find<MyTripController>()
+        : Get.put(MyTripController());
 
     return Scaffold(
       appBar: AppBar(

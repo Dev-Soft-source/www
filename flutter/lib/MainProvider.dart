@@ -16,7 +16,7 @@ class MainProvider extends GetConnect {
         'Authorization': 'Bearer $token',
       });
 
-      logger.info("Update Status Response: ${response.body.toString()}");
+      // logger.info("Update Status Response: ${response.body.toString()}");
       if (response.status.hasError) {
         if (response.status.code == 422) {
           return response.body;

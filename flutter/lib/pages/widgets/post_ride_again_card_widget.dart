@@ -50,7 +50,7 @@ Widget postRideAgainCardWidget({context, screenWidth, String fromText = "", Stri
                   ),
                 ),
                 const SizedBox(
-                  height: 25,
+                  height: 30,
                   width: 20,
                   child: Padding(
                     padding: EdgeInsets.only(left: 4.4),
@@ -83,7 +83,7 @@ Widget postRideAgainCardWidget({context, screenWidth, String fromText = "", Stri
               mainAxisSize: MainAxisSize.min,
               children: [
                 txt20Size(title: "$fromLabel:", context: context),
-                5.heightBox,
+                10.heightBox,
                 txt20Size(title: "$toLabel:", context: context),
                 if (formattedDepartureAt.isNotEmpty) ...[
                 5.heightBox,
