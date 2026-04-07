@@ -65,6 +65,7 @@ Widget fromToWidget({context, String from = "", String to = "", String date = ""
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        5.heightBox,
                         Container(
                           width: 20,
                           height: 20,
@@ -108,7 +109,7 @@ Widget fromToWidget({context, String from = "", String to = "", String date = ""
                           children: [
                             txt20Size(title: fromLabel, context: context),
                             txt20Size(title: from, context: context, fontFamily: bold),
-                            5.heightBox,
+                            10.heightBox,
                             txt20Size(title: toLabel, context: context),
                             txt20Size(title: to, context: context, fontFamily: bold),
                           ],

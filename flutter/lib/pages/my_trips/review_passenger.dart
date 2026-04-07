@@ -36,8 +36,9 @@ class ReviewPassengerPage extends StatelessWidget {
                         color: Colors.grey.shade200
                       ),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
                         children: [
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -51,7 +52,7 @@ class ReviewPassengerPage extends StatelessWidget {
                                     controller.cancelRideInfo['bookings'][index]['passenger']['profile_image'] ?? "" : "",
                                 imageType: "network",
                                 context: context,
-                                borderRadius: 5.0
+                                borderRadius: 60.0
                               ),
                               10.widthBox,
                               Column(
@@ -66,10 +67,10 @@ class ReviewPassengerPage extends StatelessWidget {
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     children: [
-                                      Image.asset(reviewsImage, width: 12),
+                                      Image.asset(reviewsImage, width: 20),
                                       5.widthBox,
-                                      txt16Size(context: context, title: "${controller.cancelRideInfo['bookings'] != null && controller.cancelRideInfo['bookings'][index]['passenger_average_rating'] != null ?
-                                      controller.cancelRideInfo['bookings'][index]['passenger_average_rating'].toStringAsFixed(1) ?? "" : ""}"),
+                                      txt18Size(context: context, title: "${controller.cancelRideInfo['bookings'] != null && controller.cancelRideInfo['bookings'][index]['passenger_average_rating'] != null ?
+                                      controller.cancelRideInfo['bookings'][index]['passenger_average_rating'].toStringAsFixed(1) ?? "0" : "0"}"),
                                     ],
                                   )
                                 ],
@@ -92,9 +93,9 @@ class ReviewPassengerPage extends StatelessWidget {
                               ),
                             )),
                           ]else...[
-                            5.widthBox,
+                            15.widthBox,
                             Expanded(child: elevatedButtonWidget(
-                                textWidget: txt18Size(context: context, title: "${controller.labelTextTripDetail['review_passengers_review_label'] ??"Review"}", textColor: Colors.white),
+                                textWidget: txt20Size(context: context, title: "${controller.labelTextTripDetail['review_passengers_review_label'] ??"Review"}", textColor: Colors.white),
                                 context: context,
                                 onPressed: () async{
 

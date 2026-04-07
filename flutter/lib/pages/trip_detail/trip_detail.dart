@@ -89,9 +89,9 @@ class TripDetailPage extends StatelessWidget {
           backgroundColor: primaryColor,
           title: Obx(() => secondAppBarWidget(
               title: controller.type == 'ride'
-                  ? "${controller.labelTextDetail['trip_main_heading'] ?? 'Trip details'}"
+                  ? "${controller.labelTextDetail['ride_main_heading'] ?? 'Ride details'}"
                   : controller.type == 'trip'
-                      ? "${controller.labelTextDetail['ride_main_heading'] ?? 'Trip details'}"
+                      ? "${controller.labelTextDetail['trip_main_heading'] ?? 'Trip details'}"
                       : "${controller.labelTextDetail['main_heading'] ?? "Ride detail"}",
               context: context)),
           leading: safeBackButton(context),

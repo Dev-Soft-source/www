@@ -12,7 +12,9 @@ Widget ratingWidget({
 }) {
   // final roundedValue = (value).roundToDouble();
   return Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisAlignment: MainAxisAlignment.start,
+    crossAxisAlignment: CrossAxisAlignment.center,
+    mainAxisSize: MainAxisSize.max,
     children: [
       RatingBar(
         minRating: 0,

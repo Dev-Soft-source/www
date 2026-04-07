@@ -168,7 +168,8 @@ class _RideFeatureWidgetState extends State<RideFeatureWidget> {
                               )
                             : Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.max,
                                 children: [
                                   circleIconWidget(
                                       width: 25,
