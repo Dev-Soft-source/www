@@ -194,7 +194,7 @@ Widget tripCardDateTimeWidget(
                           ),
                         ],
                       )
-                    ] else ...[
+                    ] else if (tripStatus == "search") ...[
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [

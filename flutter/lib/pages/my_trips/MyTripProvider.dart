@@ -36,7 +36,7 @@ class MyTripProvider extends GetConnect {
         'Authorization': 'Bearer $token',
       });
 
-      logger.info("Get All Trips Response: ${response.body}");
+      // logger.info("Get All Trips Response: ${response.body}");
 
       if (response.status.hasError) {
         if (response.status.connectionError) {

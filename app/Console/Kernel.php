@@ -14,9 +14,13 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        Commands\RideCompleteCron::class,
         Commands\StudentCardExpiryCron::class,
         Commands\StudentAnnualRenewalCron::class,
+        Commands\DeleteOldMessagesCron::class,
+        Commands\UserBirthdayWishCron::class,
+        Commands\HolidaySeasonCron::class,
+        Commands\SendPassengerList::class,
+        Commands\RideCompleteCron::class,
         Commands\ExpireBookingsCommand::class,
     ];
 
@@ -33,11 +37,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('delete-old-messages:cron')->daily();
         $schedule->command('user-birthday-wish:cron')->daily();
         $schedule->command('holiday-season:cron')->daily();
-        $schedule->command('holiday-season:cron')->daily();
         $schedule->command('send-passenger-list:cron')->everyFifteenMinutes();
-
-        $schedule->command('ride-complete:cron')
-        ->everyThirtyMinutes();
+        $schedule->command('ride-complete:cron')->everyThirtyMinutes();
 
         // Process expired bookings every minute
         $schedule->command('bookings:expire')

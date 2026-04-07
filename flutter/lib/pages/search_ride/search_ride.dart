@@ -223,13 +223,11 @@ class SearchRidePage extends StatelessWidget {
                         ),
                         10.heightBox,
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Expanded(
                                 child: Row(
                               mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 SizedBox(
                                   width: getValueForScreenType<double>(
@@ -270,7 +268,6 @@ class SearchRidePage extends StatelessWidget {
                             Expanded(
                                 child: Row(
                               mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 SizedBox(
                                   width: getValueForScreenType<double>(
@@ -312,7 +309,7 @@ class SearchRidePage extends StatelessWidget {
                         ),
                         10.heightBox,
                         Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             SizedBox(
                               width: getValueForScreenType<double>(
