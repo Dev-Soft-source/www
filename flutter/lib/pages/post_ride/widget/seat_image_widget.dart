@@ -6,24 +6,24 @@ Widget seatImageWidget({context, onTap, bool isActive = false, bool isError = fa
     borderRadius: BorderRadius.circular(50.0),
     onTap: onTap,
     child: Ink(
-      padding: EdgeInsets.all(getValueForScreenType<double>(
-        context: context,
-        mobile: 10.0,
-        tablet: 10.0,
-      )),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(50.0),
-          border: Border.all(width: 2, color: isError ? Colors.red : Colors.grey.shade400),
-          color: seatColor
-      ),
+      // padding: EdgeInsets.all(getValueForScreenType<double>(
+      //   context: context,
+      //   mobile: 10.0,
+      //   tablet: 10.0,
+      // )),
+      // decoration: BoxDecoration(
+      //     borderRadius: BorderRadius.circular(50.0),
+      //     border: Border.all(width: 2, color: isError ? Colors.red : Colors.grey.shade400),
+      //     color: seatColor
+      // ),
       child: Image.asset(isActive == true ? seatIconFilledImage : seatImage, width: getValueForScreenType<double>(
         context: context,
-        mobile: 17.0,
-        tablet: 17.0,
+        mobile: 37.0,
+        tablet: 37.0,
       ), height: getValueForScreenType<double>(
         context: context,
-        mobile: 19.0,
-        tablet: 19.0,
+        mobile: 39.0,
+        tablet: 39.0,
       )),
     ),
   );

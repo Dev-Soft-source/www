@@ -27,19 +27,19 @@ class ProfilePageSettingController extends Controller
         
         $logoutPage = LogoutSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-        $termsAndConditionHeading = TermsAndConditionPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $termsAndConditionHeading = TermsAndConditionPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id)->main_heading;
 
-        $privacyPolicyHeading = PrivacyPolicyPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $privacyPolicyHeading = PrivacyPolicyPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id)->main_heading;
 
-        $termsofuseHeading  = TermsOfUsePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $termsofuseHeading  = TermsOfUsePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id)->main_heading;
 
-        $refundPolicyHeading = RefundPolicyPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $refundPolicyHeading = RefundPolicyPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id)->main_heading;
 
-        $cancellationPolicyHeading = CancellationPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $cancellationPolicyHeading = CancellationPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id)->main_heading;
 
-        $disputePolicyHeading = DisputePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $disputePolicyHeading = DisputePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id)->main_heading;
 
-        $coffeeOnWallHeading = CoffeeWallPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $coffeeOnWallHeading = CoffeeWallPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id)->main_heading;
 
         $data = [
             'myProfilePage' => $myProfilePage,
@@ -52,6 +52,7 @@ class ProfilePageSettingController extends Controller
             "disputePolicyHeading" => $disputePolicyHeading,
             "coffeeOnWallHeading" => $coffeeOnWallHeading
         ];
+
         return $this->successResponse($data, 'Profile page setting get successfully');
     }
 }

@@ -103,15 +103,15 @@ class MyProfileController extends GetxController {
   }
 
   Future<void> getLabelTextDetail() async {
-    logger.info(
-        "My Profile Label Text Detail: ${serviceController.langId.value}");
-    logger.info("My Profile Label Text Detail: ${serviceController.token}");
-    logger.info("My Profile Label Text Detail: ${profilePageSetting}");
+    // logger.info(
+    //     "My Profile Label Text Detail: ${serviceController.langId.value}");
+    // logger.info("My Profile Label Text Detail: ${serviceController.token}");
+    // logger.info("My Profile Label Text Detail: ${profilePageSetting}");
     await StageProvider()
         .getLabelTextDetail(serviceController.langId.value, profilePageSetting,
             serviceController.token)
         .then((resp) async {
-      logger.info("My Profile Label Text Detail: $resp");
+      // logger.info("My Profile Label Text Detail: $resp");
       if (resp['status'] != null && resp['status'] == "Success") {
         if (resp['data'] != null && resp['data']['myProfilePage'] != null) {
           labelTextDetail.addAll(resp['data']['myProfilePage']);
