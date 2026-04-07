@@ -95,7 +95,7 @@ class MyTripProvider extends GetConnect {
       });
 
       logger.info("Get All Rides URL: $url");
-      logger.info("Get All Rides Response: ${response.body}");
+      // logger.info("Get All Rides Response: ${response.body}");
       final responseBody = _asMap(response.body);
       final responseData = _asMap(responseBody?['data']);
       final rides = _asMap(responseData?['rides']);

@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/helpers/format_message.dart';
 import 'package:proximaride_app/pages/add_card/AddCardController.dart';
@@ -901,26 +902,77 @@ class Service extends GetxService {
     if (initial.isBefore(effectiveFirst)) {
       initial = effectiveFirst;
     }
-    return showDatePicker(
-        context: context,
-        initialDate: initial,
-        initialEntryMode: DatePickerEntryMode.calendarOnly,
-        firstDate: effectiveFirst,
-        lastDate: effectiveLast,
-        builder: (context, child) {
-          return Theme(
-            data: ThemeData.dark().copyWith(
-              colorScheme: const ColorScheme.dark(
-                primary: primaryColor,
-                onPrimary: Colors.white,
-                surface: Colors.white,
-                onSurface: Colors.black,
-              ),
-              dialogTheme: DialogThemeData(backgroundColor: primaryColor),
+    return showDialog<DateTime>(
+      context: context,
+      builder: (dialogContext) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: primaryColor,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
             ),
-            child: child!,
-          );
-        });
+            dialogTheme: const DialogThemeData(backgroundColor: Colors.white),
+          ),
+          child: Dialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
+            ),
+            child: SizedBox(
+              width: 360,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Select date",
+                        style: Theme.of(dialogContext)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(color: Colors.black87),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        DateFormat("EEE, MMM d").format(initial),
+                        style: Theme.of(dialogContext)
+                            .textTheme
+                            .headlineMedium
+                            ?.copyWith(color: Colors.black),
+                      ),
+                    ),
+                  ),
+                  CalendarDatePicker(
+                    initialDate: initial,
+                    firstDate: effectiveFirst,
+                    lastDate: effectiveLast,
+                    onDateChanged: (date) {
+                      Navigator.of(dialogContext).pop(date);
+                    },
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(),
+                      child: const Text("Cancel"),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   timePicker(context) async {

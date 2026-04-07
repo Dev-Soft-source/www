@@ -27,6 +27,12 @@ Widget appNetworkImage({
   }
 
   final normalizedUrl = imageUrl.trim();
+  final lowerNormalizedUrl = normalizedUrl.toLowerCase();
+  if (normalizedUrl.isEmpty ||
+      lowerNormalizedUrl == 'null' ||
+      lowerNormalizedUrl == 'undefined') {
+    return fallback();
+  }
   final absoluteUrlMatches = RegExp(r'https?://').allMatches(normalizedUrl).toList();
   final embeddedAbsoluteUrlIndex =
       absoluteUrlMatches.length > 1 ? absoluteUrlMatches.last.start : -1;
@@ -34,11 +40,18 @@ Widget appNetworkImage({
       ? normalizedUrl.substring(embeddedAbsoluteUrlIndex)
       : normalizedUrl;
   final appBaseUri = Uri.tryParse(url);
-  var resolvedUrl = extractedUrl.startsWith('assets/')
-      ? appBaseUri?.resolve(extractedUrl).toString() ?? extractedUrl
-      : extractedUrl.startsWith('/assets/')
-          ? appBaseUri?.resolve(extractedUrl).toString() ?? extractedUrl
-          : extractedUrl;
+  final parsedExtractedUrl = Uri.tryParse(extractedUrl);
+  final isAbsoluteHttpUrl = parsedExtractedUrl != null &&
+      (parsedExtractedUrl.scheme == 'http' || parsedExtractedUrl.scheme == 'https');
+  final isProtocolRelative = extractedUrl.startsWith('//');
+  var resolvedUrl = extractedUrl;
+
+  if (isProtocolRelative) {
+    final baseScheme = appBaseUri?.scheme == 'https' ? 'https' : 'http';
+    resolvedUrl = '$baseScheme:$extractedUrl';
+  } else if (!isAbsoluteHttpUrl) {
+    resolvedUrl = appBaseUri?.resolve(extractedUrl).toString() ?? extractedUrl;
+  }
 
   final parsedResolvedUrl = Uri.tryParse(resolvedUrl);
   if (parsedResolvedUrl != null && !kIsWeb) {
