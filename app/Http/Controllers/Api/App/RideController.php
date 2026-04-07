@@ -749,27 +749,6 @@ class RideController extends Controller
         return $findRidePage;
     }
 
-    protected function getApiPostRidePage(?Language $language)
-    {
-        if (!$language) {
-            return null;
-        }
-
-        $defaultLangId = $this->defaultLang?->id ?: $language->id;
-        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($language->id, $defaultLangId);
-
-        if ($postRidePage) {
-            $postRidePage->mapMultipleOptionColumnsToDetails(
-                ['smoking', 'booking', 'payment_methods', 'animals', 'luggage', 'cancellation_policy'],
-                $language->id,
-                $defaultLangId
-            );
-
-            $this->hydrateLegacyFeatureOptions($postRidePage);
-        }
-
-        return $postRidePage;
-    }
 
     protected function getApiRideDetailPage(?Language $language)
     {
@@ -934,8 +913,6 @@ class RideController extends Controller
 
 
         $selectedLanguage = $this->resolveApiLanguage($request->lang_id);
-        $findRidePage = $this->getApiFindRidePage($selectedLanguage);
-        $postRidePage = $this->getApiPostRidePage($selectedLanguage);
 
         $rideDetailPage = $this->getApiRideDetailPage($selectedLanguage);
         $genderLabel = $this->getApiGenderLabel($selectedLanguage);
@@ -1460,9 +1437,6 @@ class RideController extends Controller
             ? Language::where('abbreviation', $selectedLanguageAbbreviation)->first()
             : null;
         $selectedLanguage = $selectedLanguage ?: Language::where('is_default', 1)->first();
-
-        $findRidePage = $this->getApiFindRidePage($selectedLanguage);
-        $postRidePage = $this->getApiPostRidePage($selectedLanguage);
 
         $defaultLanguage = $this->defaultLang ?: Language::where('is_default', 1)->first();
         $rideFeatureOptionGroups = $this->getRideFeatureOptionGroups($selectedLanguage?->id, $defaultLanguage?->id);

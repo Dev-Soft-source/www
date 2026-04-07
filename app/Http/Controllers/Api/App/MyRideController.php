@@ -91,13 +91,7 @@ class MyRideController extends Controller
 
     protected function getApiGenderLabel(?Language $language)
     {
-        if (!$language) {
-            return null;
-        }
-
-        return Step1PageSettingDetail::where('language_id', $language->id)
-            ->select('male_option_label', 'female_option_label', 'prefer_option_label')
-            ->first();
+        return Step1PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
     }
 
     protected function getApiFindRidePage(?Language $language)
@@ -109,13 +103,13 @@ class MyRideController extends Controller
         $defaultLangId = $this->defaultLang?->id ?: $language->id;
         $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($language->id, $defaultLangId);
 
-        if ($findRidePage) {
-            $findRidePage->mapMultipleOptionColumnsToDetails(
-                ['ride_features', 'smoking', 'pets_allowed', 'payment_methods', 'animals', 'luggage', 'cancellation_policy'],
-                $language->id,
-                $defaultLangId
-            );
-        }
+        // if ($findRidePage) {
+        //     $findRidePage->mapMultipleOptionColumnsToDetails(
+        //         ['ride_features', 'smoking', 'pets_allowed', 'payment_methods', 'animals', 'luggage', 'cancellation_policy'],
+        //         $language->id,
+        //         $defaultLangId
+        //     );
+        // }
 
         return $findRidePage;
     }
@@ -125,9 +119,9 @@ class MyRideController extends Controller
         $user = Auth::guard('sanctum')->user();
         $user_id = $user->id;
 
-        $selectedLanguage = $this->resolveApiLanguage();
+        $selectedLanguage = $this->selectedLanguage;
         $defaultLanguage = $this->defaultLang;
-        $genderLabel = $this->getApiGenderLabel($selectedLanguage);
+        $genderLabel = Step1PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $rideFeatureOptionGroups = $this->getRideFeatureOptionGroups($selectedLanguage?->id, $defaultLanguage?->id);
         $bookingMethodAssets = $this->buildRideFeatureAssetMaps($rideFeatureOptionGroups, 'booking_method');
         $paymentMethodAssets = $this->buildRideFeatureAssetMaps($rideFeatureOptionGroups, 'payment_method');
@@ -145,12 +139,12 @@ class MyRideController extends Controller
         $petsTooltips = $petsAssets['tooltips'];
         $luggageImages = $luggageAssets['images'];
         $luggageTooltips = $luggageAssets['tooltips'];
-        $bookingMethodNames = $this->buildRideFeatureNameMap($rideFeatureOptionGroups, 'booking_method');
-        $paymentMethodNames = $this->buildRideFeatureNameMap($rideFeatureOptionGroups, 'payment_method');
-        $smokingNames = $this->buildRideFeatureNameMap($rideFeatureOptionGroups, 'smoking_allowed');
-        $petsNames = $this->buildRideFeatureNameMap($rideFeatureOptionGroups, 'pets_allowed');
-        $luggageNames = $this->buildRideFeatureNameMap($rideFeatureOptionGroups, 'luggage_size');
-        $bookingTypeNames = $this->buildRideFeatureNameMap($rideFeatureOptionGroups, 'cancellation');
+        // $bookingMethodNames = $this->buildRideFeatureNameMap($rideFeatureOptionGroups, 'booking_method');
+        // $paymentMethodNames = $this->buildRideFeatureNameMap($rideFeatureOptionGroups, 'payment_method');
+        // $smokingNames = $this->buildRideFeatureNameMap($rideFeatureOptionGroups, 'smoking_allowed');
+        // $petsNames = $this->buildRideFeatureNameMap($rideFeatureOptionGroups, 'pets_allowed');
+        // $luggageNames = $this->buildRideFeatureNameMap($rideFeatureOptionGroups, 'luggage_size');
+        // $bookingTypeNames = $this->buildRideFeatureNameMap($rideFeatureOptionGroups, 'cancellation');
         $featureResponseMap = $this->buildRideFeatureResponseMap($rideFeatureOptionGroups, 'features');
 
         $query = Ride::where('added_by', $user_id);
@@ -216,10 +210,9 @@ class MyRideController extends Controller
 
 
         foreach ($rides as $ride) {
+     
 
-        
-
-            $displayPrice = $ride->price_minor ?? number_format($ride->detail->price / 100, 2, '.', '');
+            $displayPrice = $ride->price_minor ?? number_format($ride->rideDetail->price / 100, 2, '.', '');
             $ride->price = $displayPrice;
 
             // Calculate seats left
@@ -242,8 +235,8 @@ class MyRideController extends Controller
             $ride->luggage_tooltip = $luggageTooltips[$ride->luggage] ?? null;
 
             $ride->booked_seats = $bookedSeats;
-            $ride->booking_fee = round($ride->bookings->sum('booking_credit'), 1);
-            $ride->fare = round($ride->bookings->sum('fare'), 1);
+            $ride->booking_fee = round($ride->bookings->sum('booking_credit'), 2);
+            $ride->fare = round($ride->bookings->sum('fare'), 2);
             $ride->total_amount = $ride->booking_fee + $ride->fare;
 
             // Initialize a temporary array for the features
@@ -327,12 +320,12 @@ class MyRideController extends Controller
             return $ride;
         });
 
-        Log::info('Processing rides payload', [
-            'kind' => $kind,
-            'total' => method_exists($rides, 'total') ? $rides->total() : null,
-            'count' => $rides->count(),
-            'ride_ids' => $rides->getCollection()->pluck('id')->all(),
-        ]);
+        // Log::info('Processing rides payload', [
+        //     'kind' => $kind,
+        //     'total' => method_exists($rides, 'total') ? $rides->total() : null,
+        //     'count' => $rides->count(),
+        //     'ride_ids' => $rides->getCollection()->pluck('id')->all(),
+        // ]);
         
         $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);

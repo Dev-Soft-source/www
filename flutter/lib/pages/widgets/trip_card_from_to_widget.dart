@@ -42,7 +42,7 @@ Widget tripCardFromToWidget({String from = "", String to = "", String pickup = "
               borderRadius: BorderRadius.circular(50), color: primaryColor),
         ),
         const SizedBox(
-          height: 70,
+          height: 50,
           child: Padding(
             padding: EdgeInsets.only(left: 9),
             child: DottedLine(
@@ -229,8 +229,8 @@ Widget tripCardFromToWidget({String from = "", String to = "", String pickup = "
                           ],
                         ),
                         2.heightBox,
-                        txt16Size(
-                            title: pickup, context: context, fontFamily: bold),
+                        // txt16Size(
+                        //     title: pickup, context: context, fontFamily: bold),
                         20.heightBox,
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,10 +247,10 @@ Widget tripCardFromToWidget({String from = "", String to = "", String pickup = "
                           ],
                         ),
                         2.heightBox,
-                        txt16Size(
-                            title: dropOff,
-                            context: context,
-                            fontFamily: bold),
+                        // txt16Size(
+                        //     title: dropOff,
+                        //     context: context,
+                        //     fontFamily: bold),
                       ],
                     ),
                   ),

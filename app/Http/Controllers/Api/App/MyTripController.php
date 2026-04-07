@@ -70,13 +70,13 @@ class MyTripController extends Controller
         $defaultLangId = $this->defaultLang?->id ?: $language->id;
         $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($language->id, $defaultLangId);
 
-        if ($findRidePage) {
-            $findRidePage->mapMultipleOptionColumnsToDetails(
-                ['ride_features', 'smoking', 'pets_allowed', 'payment_methods', 'animals', 'luggage', 'cancellation_policy'],
-                $language->id,
-                $defaultLangId
-            );
-        }
+        // if ($findRidePage) {
+        //     $findRidePage->mapMultipleOptionColumnsToDetails(
+        //         ['ride_features', 'smoking', 'pets_allowed', 'payment_methods', 'animals', 'luggage', 'cancellation_policy'],
+        //         $language->id,
+        //         $defaultLangId
+        //     );
+        // }
 
         return $findRidePage;
     }
@@ -133,7 +133,7 @@ class MyTripController extends Controller
 
     protected function prepareRideFeatureContext($langId = null): array
     {
-        $selectedLanguage = $this->resolveApiLanguage($langId);
+        $selectedLanguage = $this->selectedLanguage;
         $findRidePage = $this->getApiFindRidePage($selectedLanguage);
         $postRidePage = $this->getApiPostRidePage($selectedLanguage);
         $genderLabel = $this->getApiGenderLabel($selectedLanguage);
@@ -150,7 +150,7 @@ class MyTripController extends Controller
         return [
             'selectedLanguage' => $selectedLanguage,
             'findRidePage' => $findRidePage,
-            'postRidePage' => $postRidePage,
+            // 'postRidePage' => $postRidePage,
             'genderLabel' => $genderLabel,
             'bookingMethodImages' => $bookingMethodAssets['images'],
             'bookingMethodTooltips' => $bookingMethodAssets['tooltips'],
@@ -324,34 +324,10 @@ class MyTripController extends Controller
             $booking->ride->driver->driven_rides = $driverId ? ($driverDrivenRides[$driverId] ?? 0) : 0;
         }
 
-        $tripsPage = null;
-        if ($request->lang_id && $request->lang_id != 0) {
-            // Retrieve the tripsPageSettingDetail associated with the selected language
-            $tripsPage = TripsPageSettingDetail::where('language_id', $request->lang_id)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $tripsPage = TripsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        }
+        $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-        $rideDetailPage = null;
-        if ($request->lang_id && $request->lang_id != 0) {
-            $rideDetailPage = RideDetailPageSettingDetail::where('language_id', $request->lang_id)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $rideDetailPage = RideDetailPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        }
-
-        $localeAbbrev = 'en';
-        if ($request->lang_id && (int) $request->lang_id !== 0) {
-            $localeAbbrev = optional(Language::find($request->lang_id))->abbreviation ?? 'en';
-        } else {
-            $localeAbbrev = optional(Language::where('is_default', 1)->first())->abbreviation ?? 'en';
-        }
-
+        $localeAbbrev = $this->selectedLanguage?->abbreviation ?? 'en';
         foreach ($bookings as $booking) {
             if ($booking->ride) {
                 $this->appendRideDepartureDisplayForApi($booking->ride, $rideDetailPage, $localeAbbrev);

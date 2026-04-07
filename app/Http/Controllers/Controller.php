@@ -153,40 +153,7 @@ class Controller extends BaseController
         });
     }
 
-    /**
-     * Get post ride page with setting details for the selected language, with fallback to default language if not found.
-     */
-    public function getPostRidePageWithSettingDetail()
-    {
-        $postRidePage = PostRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        // if ($postRidePage) {
-        //     // Optimized: Batch load all option groups in a single query instead of 7 separate queries
-        //     $postRidePage->mapMultipleOptionColumnsToDetails(
-        //         ['smoking', 'booking', 'payment_methods', 'animals', 'luggage', 'cancellation_policy'],
-        //         $this->selectedLanguage->id,
-        //         $this->defaultLang->id
-        //     );
 
-        //     $this->hydrateLegacyFeatureOptions($postRidePage);
-        // }
-
-        return $postRidePage;
-    }
-
-    public function getFindRidePageWithSettingDetail()
-    {
-        $findRidePage = FindRidePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-        if ($findRidePage) {
-            // Optimized: Batch load all option groups in a single query instead of 7 separate queries
-            $findRidePage->mapMultipleOptionColumnsToDetails(
-                ['ride_features', 'smoking', 'pets_allowed', 'payment_methods', 'animals', 'luggage', 'cancellation_policy'],
-                $this->selectedLanguage->id,
-                $this->defaultLang->id
-            );
-        }
-
-        return $findRidePage;
-    }
 
     protected function sendSmsCode($phoneNumber, $user, $sms_message): void
     {

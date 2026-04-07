@@ -50,22 +50,8 @@ class InfoIconController extends Controller
 
     public function selectLocationSetting()
     {
-        $selectLocationSetting = null;
-        $selectedLanguage = app()->getLocale();
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-
-            if ($selectedLanguage) {
-                // Retrieve the HomePageSettingDetail associated with the selected language
-                $selectLocationSetting = SelectLocationSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $selectLocationSetting = SelectLocationSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        }
+       
+        $selectLocationSetting = SelectLocationSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         $data = ['selectLocationSetting' => $selectLocationSetting];
         return $this->successResponse($data, 'Get select location settings successfully');
