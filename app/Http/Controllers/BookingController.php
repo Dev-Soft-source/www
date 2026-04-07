@@ -92,7 +92,7 @@ class BookingController extends Controller
 
         $cards = Card::where('user_id', $user_id)->orderBy('id', 'desc')->get();
 
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe::setApiKey(config('stripe.secret'));
         // Fetch card details from Stripe
         foreach ($cards as $card) {
             if ($card->stripe_payment_method_id) {
@@ -362,7 +362,7 @@ class BookingController extends Controller
                         return $genericErrorResponse();
                     }
 
-                    Stripe::setApiKey(env('STRIPE_SECRET'));
+                    Stripe::setApiKey(config('stripe.secret'));
 
                     try {
                         $paymentIntent = PaymentIntent::create([
@@ -400,7 +400,7 @@ class BookingController extends Controller
                     } elseif ($request->card_id === 'credit_card') {
                         // New credit card entered by user
                         if (!$user->stripe_customer_id) {
-                            Stripe::setApiKey(env('STRIPE_SECRET'));
+                            Stripe::setApiKey(config('stripe.secret'));
                             $customer = Customer::create([
                                 'email' => $user->email,
                                 'name' => $user->first_name,
@@ -408,7 +408,7 @@ class BookingController extends Controller
                             $user->update(['stripe_customer_id' => $customer->id]);
                         }
 
-                        Stripe::setApiKey(env('STRIPE_SECRET'));
+                        Stripe::setApiKey(config('stripe.secret'));
                         $stripeToken = $request->stripeToken;
 
                         if (!$stripeToken) {
@@ -526,7 +526,7 @@ class BookingController extends Controller
                         }
 
                         // Attach the payment method to the customer
-                        Stripe::setApiKey(env('STRIPE_SECRET'));
+                        Stripe::setApiKey(config('stripe.secret'));
                         $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
                         $paymentMethod->attach(['customer' => $user->stripe_customer_id]);
 
@@ -2302,7 +2302,7 @@ class BookingController extends Controller
                                 ->firstOrFail();
 
                             // Set your Stripe API key.
-                            Stripe::setApiKey(env('STRIPE_SECRET'));
+                            Stripe::setApiKey(config('stripe.secret'));
 
                             $stripePay = $payable_amount;
                             // Attach the payment method to the customer
@@ -2746,7 +2746,7 @@ class BookingController extends Controller
 
     public function createPaymentIntent(Request $request)
     {
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe::setApiKey(config('stripe.secret'));
         $paymentIntent = PaymentIntent::create([
             'amount' => round((float) $request->amount * 100, 0),
             'currency' => 'cad',

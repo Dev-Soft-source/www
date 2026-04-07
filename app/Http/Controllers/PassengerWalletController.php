@@ -250,7 +250,7 @@ class PassengerWalletController extends Controller
 
         $cards = Card::where('user_id', $user_id)->orderBy('id', 'desc')->get();
 
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe::setApiKey(config('stripe.secret'));
         // Fetch card details from Stripe
         foreach ($cards as $card) {
             if ($card->stripe_payment_method_id) {
@@ -329,7 +329,7 @@ class PassengerWalletController extends Controller
                 return $genericErrorResponse();
             }
 
-            Stripe::setApiKey(env('STRIPE_SECRET'));
+            Stripe::setApiKey(config('stripe.secret'));
 
             try {
                 $paymentIntent = PaymentIntent::create([
@@ -400,7 +400,7 @@ class PassengerWalletController extends Controller
 
             if ($request->card_id === 'credit_card') {
                 if (!$user->stripe_customer_id) {
-                    Stripe::setApiKey(env('STRIPE_SECRET'));
+                    Stripe::setApiKey(config('stripe.secret'));
                     $customer = Customer::create([
                         'email' => $user->email,
                         'name' => $user->first_name,
@@ -409,7 +409,7 @@ class PassengerWalletController extends Controller
                     $user = User::whereId($user->id)->first();
                 }
 
-                Stripe::setApiKey(env('STRIPE_SECRET'));
+                Stripe::setApiKey(config('stripe.secret'));
                 $stripeToken = $request->stripeToken;
 
                 if (str_starts_with($stripeToken, 'tok_')) {

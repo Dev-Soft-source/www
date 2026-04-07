@@ -63,7 +63,7 @@ class SecuredCashBookingController extends Controller
                         $refundId = isset($response['id']) ? $response['id'] : "";
                     } elseif ($transaction->stripe_id) {
                         // Set your Stripe API key
-                        Stripe::setApiKey(env('STRIPE_SECRET'));
+                        Stripe::setApiKey(config('stripe.secret'));
 
                         try {
                             // Create a refund using the payment intent ID

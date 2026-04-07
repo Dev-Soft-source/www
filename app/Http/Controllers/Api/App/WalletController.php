@@ -265,7 +265,7 @@ class WalletController extends Controller
             $card = Card::where('id', $request->card_id)
             ->where('user_id', $user->id)
             ->firstOrFail();
-            Stripe::setApiKey(env('STRIPE_SECRET'));
+            Stripe::setApiKey(config('stripe.secret'));
 
             try {
                 $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);

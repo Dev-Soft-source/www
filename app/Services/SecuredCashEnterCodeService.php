@@ -55,7 +55,7 @@ class SecuredCashEnterCodeService
                     );
                     $refundId = isset($response['id']) ? $response['id'] : '';
                 } elseif ($transaction->stripe_id) {
-                    Stripe::setApiKey(env('STRIPE_SECRET'));
+                    Stripe::setApiKey(config('stripe.secret'));
                     $amountCents = (int) round(((float) $transaction->price - (float) $transaction->booking_fee) * 100);
 
                     try {

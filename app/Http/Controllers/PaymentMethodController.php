@@ -38,7 +38,7 @@ class PaymentMethodController extends Controller
         $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe::setApiKey(config('stripe.secret'));
 
         // Create Stripe customer if not exists
         if (!$user->stripe_customer_id) {
@@ -76,7 +76,7 @@ class PaymentMethodController extends Controller
 
         $user = auth()->user();
 
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe::setApiKey(config('stripe.secret'));
 
         // Create Stripe customer if not exists
         if (!$user->stripe_customer_id) {
@@ -217,7 +217,7 @@ class PaymentMethodController extends Controller
             ->firstOrFail();
 
         if ($method->gateway === 'stripe') {
-            Stripe::setApiKey(env('STRIPE_SECRET'));
+            Stripe::setApiKey(config('stripe.secret'));
 
             try {
                 StripePaymentMethod::retrieve($method->payment_method_id)

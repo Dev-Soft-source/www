@@ -39,7 +39,7 @@ class CardController extends Controller
         
         $cards = Card::where('user_id', $user_id)->orderByRaw('`primary_card` DESC')->orderBy('id', 'desc')->get();
 
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe::setApiKey(config('stripe.secret'));
 
         // Fetch card details from Stripe for card payment methods
         foreach ($cards as $card) {
@@ -73,7 +73,7 @@ class CardController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
         
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe::setApiKey(config('stripe.secret'));
         
         if (!$user->stripe_customer_id) {
             $customer = Customer::create([
@@ -178,7 +178,7 @@ class CardController extends Controller
             'name_on_card.regex' => 'Cardholder name can only contain letters, spaces, and hyphens',
         ]);
 
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe::setApiKey(config('stripe.secret'));
 
         if (!$user->stripe_customer_id) {
             $customer = Customer::create([
@@ -356,7 +356,7 @@ class CardController extends Controller
             throw $e;
         }
 
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe::setApiKey(config('stripe.secret'));
 
         if (!$user->stripe_customer_id) {
             $customer = Customer::create([
@@ -434,7 +434,7 @@ class CardController extends Controller
             throw $e;
         }
 
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe::setApiKey(config('stripe.secret'));
 
         if (!$user->stripe_customer_id) {
             $customer = Customer::create([
@@ -548,7 +548,7 @@ class CardController extends Controller
         try {
             // Only call Stripe for card/apple_pay/google_pay (they have stripe_payment_method_id); PayPal does not
             if (!empty($card->stripe_payment_method_id)) {
-                Stripe::setApiKey(env('STRIPE_SECRET'));
+                Stripe::setApiKey(config('stripe.secret'));
                 $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
                 if ($paymentMethod->customer) {
                     $paymentMethod->detach();

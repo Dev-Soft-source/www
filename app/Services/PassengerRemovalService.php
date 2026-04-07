@@ -96,7 +96,7 @@ class PassengerRemovalService
                         );
                         $refundId = isset($response['id']) ? $response['id'] : '';
                     } elseif ($transaction->stripe_id) {
-                        Stripe::setApiKey(env('STRIPE_SECRET'));
+                        Stripe::setApiKey(config('stripe.secret'));
 
                         try {
                             $refund = Refund::create([

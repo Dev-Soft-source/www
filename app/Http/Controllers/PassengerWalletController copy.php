@@ -305,7 +305,7 @@ class PassengerWalletController extends Controller
 
         $cards = Card::where('user_id', $user_id)->orderBy('id', 'desc')->get();
 
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe::setApiKey(config('stripe.secret'));
         // Fetch card details from Stripe
         foreach ($cards as $card) {
             if ($card->stripe_payment_method_id) {
@@ -370,7 +370,7 @@ class PassengerWalletController extends Controller
 
             $stripId = "";
             if (isset($request->gPayApplePayId) && $request->gPayApplePayId != '0') {
-                Stripe::setApiKey(env('STRIPE_SECRET'));
+                Stripe::setApiKey(config('stripe.secret'));
                 try {
                     $paymentIntent = PaymentIntent::retrieve($request->gPayApplePayId);
                     if ($paymentIntent->status !== 'succeeded') {
@@ -388,7 +388,7 @@ class PassengerWalletController extends Controller
                 $card = Card::where('id', $request->card_id)
                     ->where('user_id', $user->id)
                     ->firstOrFail();
-                Stripe::setApiKey(env('STRIPE_SECRET'));
+                Stripe::setApiKey(config('stripe.secret'));
 
                 try {
                     $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);

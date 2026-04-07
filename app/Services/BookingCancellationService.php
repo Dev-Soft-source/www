@@ -241,7 +241,7 @@ class BookingCancellationService
                         Log::error("PayPal error: " . ($errorData['message'] ?? $e->getMessage()));
                     }
                 } elseif ($transaction->stripe_id) {
-                    Stripe::setApiKey(env('STRIPE_SECRET'));
+                    Stripe::setApiKey(config('stripe.secret'));
                     try {
                         $refund = Refund::create([
                             'payment_intent' => $transaction->stripe_id,
@@ -338,7 +338,7 @@ class BookingCancellationService
                         Log::error("PayPal error: " . ($errorData['message'] ?? $e->getMessage()));
                     }
                 } elseif ($transaction->stripe_id) {
-                    Stripe::setApiKey(env('STRIPE_SECRET'));
+                    Stripe::setApiKey(config('stripe.secret'));
                     try {
                         $refund = Refund::create([
                             'payment_intent' => $transaction->stripe_id,

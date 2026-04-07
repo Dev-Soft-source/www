@@ -158,7 +158,7 @@ class HomeController extends Controller
                 $packageName = $request->name ?? env('APP_NAME');
                 $packageDescription = 'custom' ?? env('APP_NAME');
 
-                Stripe::setApiKey(env('STRIPE_SECRET'));
+                Stripe::setApiKey(config('stripe.secret'));
 
                 if ($package->stripe_product_id) {
                     $product = Product::retrieve($package->stripe_product_id);
@@ -267,7 +267,7 @@ class HomeController extends Controller
             }
         }
 
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        Stripe::setApiKey(config('stripe.secret'));
 
         $customer = Customer::create([
             'email' => $request->email ?? null,
@@ -327,7 +327,7 @@ class HomeController extends Controller
             'coffeeWallPage' => $coffeeWallPage,
             'packages' => $packages,
             'paymentSettingDetail' => $paymentSettingDetail,
-            'stripeKey' => env('STRIPE_KEY')
+            'stripeKey' => config('stripe.key')
         ]);
     }
 
@@ -336,7 +336,7 @@ class HomeController extends Controller
      */
     public function coffeeOnWallCreateSetupIntent(Request $request)
     {
-        Stripe::setApiKey(config('stripe.secret') ?: env('STRIPE_SECRET'));
+        Stripe::setApiKey(config('stripe.secret'));
 
         try {
             $setupIntent = SetupIntent::create([
@@ -393,7 +393,7 @@ class HomeController extends Controller
                 $packageName = $request->name ?? env('APP_NAME');
                 $packageDescription = 'custom' ?? env('APP_NAME');
 
-                Stripe::setApiKey(env('STRIPE_SECRET'));
+                Stripe::setApiKey(config('stripe.secret'));
 
                 if ($package->stripe_product_id) {
                     $product = Product::retrieve($package->stripe_product_id);
@@ -511,7 +511,7 @@ class HomeController extends Controller
         $package_price = $package->price;
 
         if ($request->payment_method == 'stripe') {
-            Stripe::setApiKey(env('STRIPE_SECRET'));
+            Stripe::setApiKey(config('stripe.secret'));
         }
 
         try {

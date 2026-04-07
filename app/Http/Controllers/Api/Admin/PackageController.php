@@ -112,7 +112,7 @@ class PackageController extends Controller
             $packageName = $packageDetail->name ?? env('APP_NAME');
             $packageDescription = $packageDetail->description ?? env('APP_NAME');
 
-            Stripe::setApiKey(env('STRIPE_SECRET'));
+            Stripe::setApiKey(config('stripe.secret'));
 
             if ($package->stripe_product_id) {
                 $product = Product::retrieve($package->stripe_product_id);
@@ -310,7 +310,7 @@ class PackageController extends Controller
                 $packageName = $packageDetail->name ?? env('APP_NAME');
                 $packageDescription = $packageDetail->description ?? env('APP_NAME');
     
-                Stripe::setApiKey(env('STRIPE_SECRET'));
+                Stripe::setApiKey(config('stripe.secret'));
     
                 if ($package->stripe_product_id) {
                     $product = Product::retrieve($package->stripe_product_id);
