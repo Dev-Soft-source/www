@@ -228,20 +228,6 @@ class NotificationPage extends StatelessWidget {
                                 ),
                               ),
 
-                              // elevatedButtonWidget(
-                              //   textWidget: txt22Size(
-                              //     title: "Go to Welcome Screen",
-                              //     context: context,
-                              //     textColor: Colors.white,
-                              //   ),
-                              //   onPressed: () {
-                              //     Get.to(WelcomeScreen(
-                              //       firstName: "Suheer",
-                              //     ));
-                              //   },
-                              //   context: context,
-                              // ),
-
                               10.heightBox,
                               Container(
                                 padding: EdgeInsets.only(
@@ -282,8 +268,7 @@ class NotificationPage extends StatelessWidget {
                                                         .trim() ==
                                                     controller
                                                         .serviceController
-                                                        .loginUserDetail[
-                                                            'first_name']
+                                                        .loginUserDetail['first_name']
                                                         ?.toString()
                                                         .toLowerCase()
                                                         .trim() &&
@@ -301,12 +286,6 @@ class NotificationPage extends StatelessWidget {
                                             ? "assets/icons/logo.png"
                                             : controller.notificationsList[index]
                                                 ['from']['profile_image'],
-                                        //  controller
-                                        //         .notificationsList[index]
-                                        //     ['from']['profile_image'],
-                                        // name:
-                                        //     "${controller.notificationsList[index]['from']['first_name']} ${controller.notificationsList[index]['from']['last_name']}",
-
                                         name: (controller
                                                         .notificationsList[index]
                                                             ['from']
@@ -354,89 +333,6 @@ class NotificationPage extends StatelessWidget {
                                         time:
                                             controller.notificationsList[index]
                                                 ['added_on'],
-                                        // userType:
-                                        //     controller.notificationsList[
-                                        //                 index]['type'] ==
-                                        //             "1"
-                                        //         ? 'Passenger'
-                                        //         : 'Driver',
-                                        // onTap: () {
-                                        //   if (controller.notificationsList[
-                                        //               index]
-                                        //           ['notification_type'] ==
-                                        //       "review") {
-                                        //     if (controller
-                                        //                 .notificationsList[
-                                        //             index]['type'] ==
-                                        //         "1") {
-                                        //       Get.toNamed(
-                                        //           '/notification_add_review/passenger/${controller.notificationsList[index]['ride_id']}/${controller.notificationsList[index]['posted_to']}/${controller.notificationsList[index]['id']}/${controller.notificationsList[index]['ride_detail_id']}');
-                                        //     } else {
-                                        //       Get.toNamed(
-                                        //           '/notification_add_review/driver/${controller.notificationsList[index]['ride_id']}/0/${controller.notificationsList[index]['id']}/${controller.notificationsList[index]['ride_detail_id']}');
-                                        //     }
-                                        //   } else if (controller
-                                        //                   .notificationsList[
-                                        //               index]
-                                        //           ['notification_type'] ==
-                                        //       "chat") {
-                                        //     var rideId = 0;
-                                        //     if (controller
-                                        //                 .notificationsList[
-                                        //             index]['ride_id'] !=
-                                        //         null) {
-                                        //       rideId = int.parse(controller
-                                        //           .notificationsList[index]
-                                        //               ['ride_id']
-                                        //           .toString());
-                                        //     }
-                                        //     Get.toNamed(
-                                        //         '/messaging_page/${controller.notificationsList[index]['posted_by']}/$rideId/new');
-                                        //   } else if (controller
-                                        //                   .notificationsList[
-                                        //               index]
-                                        //           ['notification_type'] ==
-                                        //       "phone") {
-                                        //     Get.toNamed('/my_phone_number');
-                                        //   } else if (controller
-                                        //                   .notificationsList[
-                                        //               index]
-                                        //           ['notification_type'] ==
-                                        //       "christmas") {
-                                        //   } else if (controller
-                                        //                   .notificationsList[
-                                        //               index]
-                                        //           ['notification_type'] ==
-                                        //       "birthday") {
-                                        //   } else if (controller
-                                        //                   .notificationsList[
-                                        //               index]
-                                        //           ['notification_type'] ==
-                                        //       "password") {
-                                        //   } else if (controller
-                                        //                   .notificationsList[
-                                        //               index]
-                                        //           ['notification_type'] ==
-                                        //       "welcome") {
-                                        //   } else if (controller
-                                        //                   .notificationsList[
-                                        //               index]
-                                        //           ['notification_type'] ==
-                                        //       "student_card") {
-                                        //     Get.toNamed('/student_card');
-                                        //   }
-                                        //    else {
-                                        //     var type =
-                                        //         controller.notificationsList[
-                                        //                         index]
-                                        //                     ['type'] ==
-                                        //                 "1"
-                                        //             ? "ride"
-                                        //             : "trip";
-                                        //     Get.toNamed(
-                                        //         '/trip_detail/${controller.notificationsList[index]['ride_id']}/$type/${controller.notificationsList[index]['notification_type']}/${controller.notificationsList[index]['ride_detail_id']}');
-                                        //   }
-                                        // },
                                         onLongPress: () async {
                                           logger.info(controller
                                               .notificationsList[index]
@@ -592,10 +488,6 @@ class NotificationPage extends StatelessWidget {
                                             // Fallback: do NOT navigate anywhere for
                                             // unhandled notification types or when
                                             // there is no concrete screen to open.
-                                            logger.info(
-                                                ">>> ENTERING FALLBACK CONDITION (NO NAVIGATION) <<<");
-                                            logger.info(
-                                                "Notification type (may be welcome/birthday/christmas/password/etc.): ${controller.notificationsList[index]['notification_type']}");
                                             logger.info(
                                                 "No navigation will be performed for this notification.");
                                             // go to profile page for empty system messages

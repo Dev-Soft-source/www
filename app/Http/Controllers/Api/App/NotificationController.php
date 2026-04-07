@@ -95,14 +95,18 @@ class NotificationController extends Controller
 
 
 
-        $notifications = $notifications->with(['from' => function ($query) {
-            $query->select('id', 'first_name', 'last_name', 'gender', 'profile_image'); // Specify the columns you want to select
-            $query->withTrashed(); // Include soft-deleted users
-        }])
+        $notifications = $notifications->whereHas('from', function ($q) {
+            $q->withTrashed()
+                ->whereNotNull('first_name'); // example "valid" rule
+        })
+            ->with(['from' => function ($query) {
+                $query->select('id', 'first_name', 'last_name', 'gender', 'profile_image')
+                    ->withTrashed();
+            }])
             ->orderBy('id', 'desc')
             ->get();
 
-        
+
         $genderLabel = Step1PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $genderLabelsByValue = [
             'male' => $genderLabel?->male_option_label ?? null,
@@ -270,7 +274,7 @@ class NotificationController extends Controller
         ));
     }
 
-    
+
 
     public function readNotification(Request $request)
     {
