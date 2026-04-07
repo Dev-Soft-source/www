@@ -34,7 +34,7 @@ class DeleteOldMessagesCron extends Command
         Message::where('status', 'old')
             ->where('updated_at', '<', $oneMonthAgo)
             ->delete();
-        
+
         return 0;
     }
 }
