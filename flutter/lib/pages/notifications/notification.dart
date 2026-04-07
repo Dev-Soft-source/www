@@ -750,7 +750,8 @@ class WelcomeScreen extends StatelessWidget {
                       Text.rich(
                         TextSpan(
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: 16,
+                            fontFamily: carlito,
                             height: 1.7,
                             color: Colors.grey[700],
                             letterSpacing: 0.2,
@@ -927,7 +928,7 @@ class WelcomeScreen extends StatelessWidget {
                 _buildModernButton(
                   context: context,
                   icon: Icons.description_outlined,
-                  label: 'Terms & Conditions',
+                  label: 'Terms of Service',
                   onPressed: () => Get.toNamed('/term_of_use'),
                 ),
                 SizedBox(height: 10),

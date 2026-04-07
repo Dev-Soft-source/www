@@ -511,37 +511,37 @@ class EditProfilePage extends StatelessWidget {
                                   context: context),
                             ),
                             5.heightBox,
-                            txt20Size(
+                            txt18Size(
                                 title:
                                     "${controller.labelTextDetail['govt_id_text'] ?? "If you intend to post or use our Pink Rides or Extra-Care Rides, you must upload this ID. It can be your driver's license, health card, passport, PR card, Indian Status card"}",
-                                fontFamily: regular,
+                                fontFamily: carlito,
                                 context: context),
-                            5.heightBox,
-                            Text.rich(
-                              TextSpan(
-                                style: TextStyle(
-                                  fontSize: getValueForScreenType<double>(
-                                    context: context,
-                                    mobile: 18.0,
-                                    tablet: 20.0,
-                                  ),
-                                  fontFamily: regular,
-                                  color: textColor,
-                                ),
-                                children: [
-                                  TextSpan(
-                                    text: "If you've already uploaded",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text:
-                                        " your driver's license, you're all set. No additional government-issued ID is required.",
-                                  ),
-                                ],
-                              ),
-                            ),
+                            // 5.heightBox,
+                            // Text.rich(
+                            //   TextSpan(
+                            //     style: TextStyle(
+                            //       fontSize: getValueForScreenType<double>(
+                            //         context: context,
+                            //         mobile: 18.0,
+                            //         tablet: 20.0,
+                            //       ),
+                            //       fontFamily: carlito,
+                            //       color: textColor,
+                            //     ),
+                            //     children: [
+                            //       TextSpan(
+                            //         text: "If you've already uploaded",
+                            //         style: TextStyle(
+                            //           fontWeight: FontWeight.bold,
+                            //         ),
+                            //       ),
+                            //       TextSpan(
+                            //         text:
+                            //             " your driver's license, you're all set. No additional government-issued ID is required.",
+                            //       ),
+                            //     ],
+                            //   ),
+                            // ),
                             5.heightBox,
                             // TODO: 
                             Stack(children: [

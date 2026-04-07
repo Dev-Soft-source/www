@@ -65,7 +65,7 @@ class _TermsOfUsePageState extends State<TermsOfUsePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: primaryColor,
-        title: secondAppBarWidget(title: "Terms of Use", context: context),
+        title: secondAppBarWidget(title: "Terms of Service", context: context),
         leading: safeBackButton(context),
       ),
       body: SafeArea(
@@ -74,7 +74,7 @@ class _TermsOfUsePageState extends State<TermsOfUsePage> {
           child: kIsWeb
               ? WebPageFallbackWidget(
                   pageUrl: pageUrl,
-                  title: "Terms of Use",
+                  title: "Terms of Service",
                 )
               : WebViewWidget(controller: controller!),
         ),

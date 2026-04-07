@@ -30,6 +30,22 @@ class PaymentOptionsController extends Controller
 {
     use StatusResponser;
 
+    /**
+     * Use config() so Stripe works when config is cached; env() alone can be null in production.
+     */
+    private function bootstrapStripe(): bool
+    {
+        $secret = trim((string) (config('stripe.secret') ?? ''));
+        if ($secret === '') {
+            Log::error('PaymentOptionsController: STRIPE_SECRET / stripe.secret is empty. Set STRIPE_SECRET in .env and run php artisan config:clear if you changed it.');
+
+            return false;
+        }
+        Stripe::setApiKey($secret);
+
+        return true;
+    }
+
     public function index(Request $request)
     {
         $user = Auth::guard('sanctum')->user();
@@ -55,7 +71,9 @@ class PaymentOptionsController extends Controller
     public function createSetupIntent(Request $request)
     {
         $user = Auth::guard('sanctum')->user();
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        if (! $this->bootstrapStripe()) {
+            return $this->apiErrorResponse('Could not start card setup. Stripe is not configured on the server.', 200);
+        }
 
         try {
             if (! $user->stripe_customer_id) {
@@ -125,8 +143,9 @@ class PaymentOptionsController extends Controller
             ]);
         }
 
-        // Set Stripe API key
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        if (! $this->bootstrapStripe()) {
+            return $this->apiErrorResponse('Could not save card. Stripe is not configured on the server.', 200);
+        }
 
         $message = null;
 
@@ -309,8 +328,9 @@ class PaymentOptionsController extends Controller
             'name_on_card.regex' => 'Cardholder name can only contain letters, spaces, and hyphens',
         ]);
 
-        // Set Stripe API key
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        if (! $this->bootstrapStripe()) {
+            return $this->apiErrorResponse('Could not update card. Stripe is not configured on the server.', 200);
+        }
 
         try {
             $card = Card::findOrFail($request->id);
@@ -368,8 +388,9 @@ class PaymentOptionsController extends Controller
         $card = Card::find($request->card_id);
 
         if ($card) {
-            
-            Stripe::setApiKey(env('STRIPE_SECRET'));
+            if (! $this->bootstrapStripe()) {
+                return $this->apiErrorResponse('Could not remove card. Stripe is not configured on the server.', 200);
+            }
 
             try {
                 $paymentMethod = PaymentMethod::retrieve($card->stripe_payment_method_id);
