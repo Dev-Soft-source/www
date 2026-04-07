@@ -114,7 +114,8 @@
                         $image = $booking->passenger?->profile_image ?? asset('images/59-booked-seat.png');
                     @endphp
                     @for ($i = 0; $i < $booking->seats; $i++)
-                        <img class="w-10 h-10 rounded-full -ml-3 first:ml-0 hover:z-10 transition"
+                        {{-- <img class="w-10 h-10 rounded-full -ml-3 first:ml-0 hover:z-10 transition" --}}
+                        <img class="w-10 h-10 rounded-full hover:z-10 transition"
                             src="{{ $image }}" alt="">
                     @endfor
                 @endforeach
