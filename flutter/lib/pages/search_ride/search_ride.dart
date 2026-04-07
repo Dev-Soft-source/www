@@ -232,8 +232,16 @@ class SearchRidePage extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 SizedBox(
-                                  width: 25,
-                                  height: 25,
+                                  width: getValueForScreenType<double>(
+                                    context: context,
+                                    mobile: 25.0,
+                                    tablet: 25.0,
+                                  ),
+                                  height: getValueForScreenType<double>(
+                                    context: context,
+                                    mobile: 25.0,
+                                    tablet: 25.0,
+                                  ),
                                   child: checkBoxWidget(
                                     value: controller.pinkRideCheck.value,
                                     onChanged: (data) {
@@ -241,21 +249,21 @@ class SearchRidePage extends StatelessWidget {
                                     },
                                   ),
                                 ),
-                                Expanded(
-                                  child: InkWell(
-                                    onTap: () {
-                                      controller.pinkRideCheck.value =
-                                          controller.pinkRideCheck.value == true
-                                              ? false
-                                              : true;
-                                    },
-                                    child: txt20Size(
-                                        title:
-                                            "${controller.labelTextDetail['search_section_pink_ride_label'] ?? "Pink rides"}",
-                                        fontFamily: regular,
-                                        context: context,
-                                        textColor: const Color.fromARGB(255, 180, 20, 9)),
-                                  ),
+                                5.widthBox,
+                                InkWell(
+                                  onTap: () {
+                                    controller.pinkRideCheck.value =
+                                        controller.pinkRideCheck.value == true
+                                            ? false
+                                            : true;
+                                  },
+                                  child: txt20Size(
+                                      title:
+                                          "${controller.labelTextDetail['search_section_pink_ride_label'] ?? "Pink rides"}",
+                                      fontFamily: bold,
+                                      context: context,
+                                      textColor: const Color.fromARGB(
+                                          255, 180, 20, 9)),
                                 ),
                               ],
                             )),
@@ -265,8 +273,16 @@ class SearchRidePage extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 SizedBox(
-                                  width: 25,
-                                  height: 25,
+                                  width: getValueForScreenType<double>(
+                                    context: context,
+                                    mobile: 25.0,
+                                    tablet: 25.0,
+                                  ),
+                                  height: getValueForScreenType<double>(
+                                    context: context,
+                                    mobile: 25.0,
+                                    tablet: 25.0,
+                                  ),
                                   child: checkBoxWidget(
                                     value: controller.extraCareCheck.value,
                                     onChanged: (data) {
@@ -274,8 +290,8 @@ class SearchRidePage extends StatelessWidget {
                                     },
                                   ),
                                 ),
-                                Expanded(
-                                    child: InkWell(
+                                5.widthBox,
+                                InkWell(
                                   onTap: () {
                                     controller.extraCareCheck.value =
                                         controller.extraCareCheck.value == true
@@ -285,12 +301,52 @@ class SearchRidePage extends StatelessWidget {
                                   child: txt20Size(
                                       title:
                                           "${controller.labelTextDetail['search_section_extra_care_label'] ?? "Extra care rides"}",
-                                      fontFamily: regular,
+                                      fontFamily: bold,
                                       context: context,
-                                      textColor: const Color.fromARGB(255, 39, 114, 42)),
-                                ))
+                                      textColor: const Color.fromARGB(
+                                          255, 39, 114, 42)),
+                                )
                               ],
                             ))
+                          ],
+                        ),
+                        10.heightBox,
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: getValueForScreenType<double>(
+                                context: context,
+                                mobile: 25.0,
+                                tablet: 25.0,
+                              ),
+                              height: getValueForScreenType<double>(
+                                context: context,
+                                mobile: 25.0,
+                                tablet: 25.0,
+                              ),
+                              child: checkBoxWidget(
+                                value: controller.hideFullRidesCheck.value,
+                                onChanged: (data) {
+                                  controller.hideFullRidesCheck.value = data!;
+                                },
+                              ),
+                            ),
+                            5.widthBox,
+                            Expanded(
+                              child: InkWell(
+                                onTap: () {
+                                  controller.hideFullRidesCheck.value =
+                                      !controller.hideFullRidesCheck.value;
+                                },
+                                child: txt20Size(
+                                  title:
+                                      "${controller.labelTextDetail['hide_full_ride_text'] ?? 'Hide Full Rides'}",
+                                  fontFamily: bold,
+                                  context: context,
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                         20.heightBox,
@@ -346,23 +402,27 @@ class SearchRidePage extends StatelessWidget {
                               Padding(
                                 padding: const EdgeInsets.all(10),
                                 child: ListView.separated(
-                                    itemCount: controller.recentSearchList.length > 2
-                                        ? 2
-                                        : controller.recentSearchList.length,
+                                    itemCount:
+                                        controller.recentSearchList.length > 2
+                                            ? 2
+                                            : controller
+                                                .recentSearchList.length,
                                     shrinkWrap: true,
-                                    physics: const NeverScrollableScrollPhysics(),
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
                                     itemBuilder: (context, index) {
                                       return postRideAgainCardWidget(
                                           context: context,
                                           screenWidth: context.screenWidth,
-                                          fromText: controller.recentSearchList[index]
-                                              ['from'],
-                                          toText: controller.recentSearchList[index]
-                                              ['to'],
+                                          fromText: controller
+                                              .recentSearchList[index]['from'],
+                                          toText: controller
+                                              .recentSearchList[index]['to'],
                                           depatureAt: "",
                                           onTap: () async {
                                             controller.applyRecentSearch(
-                                                controller.recentSearchList[index]);
+                                                controller
+                                                    .recentSearchList[index]);
                                             await controller.getSearchRide(1);
                                           },
                                           cardBgColor: index % 2 == 0

@@ -29,6 +29,7 @@ class SearchRideController extends GetxController {
   var pinkRideReadOnly = false.obs;
   var pinkRideCheck = false.obs;
   var extraCareCheck = false.obs;
+  var hideFullRidesCheck = false.obs;
 
   var vehicleTypeList = [].obs;
   var vehicleTypeLabelList = [].obs;
@@ -199,6 +200,7 @@ class SearchRideController extends GetxController {
             pet.value,
             pinkRideCheck.value,
             extraCareCheck.value,
+            hideFullRidesCheck.value,
             pageLimit,
             page,
             serviceController.token,
@@ -466,6 +468,7 @@ class SearchRideController extends GetxController {
               pet.value,
               pinkRideCheck.value,
               extraCareCheck.value,
+              hideFullRidesCheck.value,
               pageLimit,
               page,
               serviceController.token)
@@ -781,6 +784,7 @@ class SearchRideController extends GetxController {
               pet.value,
               pinkRideCheck.value,
               extraCareCheck.value,
+              hideFullRidesCheck.value,
               pageLimit,
               page,
               serviceController.token)

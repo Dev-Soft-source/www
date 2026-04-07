@@ -180,7 +180,9 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\WordCountValidationServiceProvider::class,
 
-        Laravel\Socialite\SocialiteServiceProvider::class,
+        // Manager extends Laravel Socialite and dispatches SocialiteWasCalled so
+        // socialiteproviders/* drivers (e.g. apple) register. Do not register both.
+        SocialiteProviders\Manager\ServiceProvider::class,
         Srmklive\PayPal\Providers\PayPalServiceProvider::class,
         Kreait\Laravel\Firebase\ServiceProvider::class,
     ],

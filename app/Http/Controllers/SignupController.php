@@ -26,6 +26,15 @@ use Laravel\Socialite\Facades\Socialite;
 
 class SignupController extends Controller
 {
+    /** Must match SocialiteProviders registered in EventServiceProvider. */
+    private const SOCIAL_LOGIN_PROVIDERS = [
+        'apple',
+        'facebook',
+        'google',
+        'instagram',
+        'linkedin',
+    ];
+
     public function create($lang = null)
     {
 
@@ -338,6 +347,10 @@ class SignupController extends Controller
 
     public function redirectToProvider($lang, $provider, Request $request)
     {
+        if (! in_array($provider, self::SOCIAL_LOGIN_PROVIDERS, true)) {
+            abort(404);
+        }
+
         session(['selectedLanguage' => $lang]);
         session([
             'social_auth_intent' => $request->query('intent') === 'login' ? 'login' : 'signup',
@@ -349,6 +362,10 @@ class SignupController extends Controller
 
     public function handleProviderCallback($lang, $provider)
     {
+        if (! in_array($provider, self::SOCIAL_LOGIN_PROVIDERS, true)) {
+            abort(404);
+        }
+
         $selectedLanguage = session('selectedLanguage');
         if ($selectedLanguage) {
             $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();

@@ -138,6 +138,7 @@ class SearchRideProvider extends GetConnect {
       pet,
       pinkRideCheck,
       extraCareCheck,
+      hideFullRidesCheck,
       pageLimit,
       page,
       token) async {
@@ -162,6 +163,7 @@ class SearchRideProvider extends GetConnect {
         "pet": pet.toString(),
         "pink_ride": pinkRideCheck == true ? "1" : "0",
         "extra_care": extraCareCheck == true ? "1" : "0",
+        "hide_full_rides": hideFullRidesCheck == true ? "1" : "0",
         "limit": pageLimit.toString(),
         "page": page.toString(),
       };
@@ -241,6 +243,7 @@ class SearchRideProvider extends GetConnect {
     pet,
     pinkRideCheck,
     extraCareCheck,
+    hideFullRidesCheck,
     pageLimit,
     page,
     token,
@@ -267,6 +270,7 @@ class SearchRideProvider extends GetConnect {
         "pet": pet.toString(),
         "pink_ride": pinkRideCheck == true ? "1" : "0",
         "extra_care": extraCareCheck == true ? "1" : "0",
+        "hide_full_rides": hideFullRidesCheck == true ? "1" : "0",
         "limit": pageLimit.toString(),
         "page": page.toString(),
       };
