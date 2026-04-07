@@ -9,7 +9,7 @@ import '../../consts/constFileLink.dart';
 
 
 Widget tripCardFromToWidget({String from = "", String to = "", String pickup = "", String dropOff = "", String price = "",  context,
-  String tripStatus = "", onTapReview, bool isRating = false,bool showReviewButton = true, String seatsLeft = "",
+  String tripStatus = "", String bookingMethodLabel = "", int bookingMethodId = 0, onTapReview, bool isRating = false,bool showReviewButton = true, String seatsLeft = "",
   Map? labelTextDetail,
   String fromLabel = "From", String toLabel = "To", String perSeatLabel = "per seat", String seatLeftLabel = "seats left",
   String reviewedLabel = "Reviewed", String reviewDriverLabel = "Review your driver"}){
@@ -148,6 +148,28 @@ Widget tripCardFromToWidget({String from = "", String to = "", String pickup = "
               ),
             ],
           ),
+          if (bookingMethodLabel != "" && bookingMethodLabel.isNotEmpty) ...[
+            6.heightBox,
+            (() {
+              final isInstant = bookingMethodId == 31;
+              final badgeColor = isInstant ? Colors.green : primaryColor;
+              return Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: badgeColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: badgeColor.withOpacity(0.35)),
+                ),
+                child: txt14Size(
+                  title: bookingMethodLabel,
+                  context: context,
+                  fontFamily: bold,
+                  textColor: badgeColor,
+                ),
+              );
+            })(),
+          ],
         ],
       ],
     ),
@@ -190,82 +212,6 @@ Widget tripCardFromToWidget({String from = "", String to = "", String pickup = "
         )),
     child: LayoutBuilder(
       builder: (context, constraints) {
-        final isNarrow = constraints.maxWidth < 340;
-
-        if (isNarrow) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  routeMarker(),
-                  10.widthBox,
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  txt18Size(
-                                      title: "$resolvedFromLabel: ",
-                                      context: context),
-                                  Expanded(
-                                    child: txt16Size(
-                                        title: from,
-                                        context: context,
-                                        fontFamily: bold),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            8.widthBox,
-                            Flexible(child: trailingSummary(isNarrow: false)),
-                          ],
-                        ),
-                        2.heightBox,
-                        // txt16Size(
-                        //     title: pickup, context: context, fontFamily: bold),
-                        20.heightBox,
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            txt18Size(
-                                title: "$resolvedToLabel: ",
-                                context: context),
-                            Expanded(
-                              child: txt16Size(
-                                  title: to,
-                                  context: context,
-                                  fontFamily: bold),
-                            ),
-                          ],
-                        ),
-                        2.heightBox,
-                        // txt16Size(
-                        //     title: dropOff,
-                        //     context: context,
-                        //     fontFamily: bold),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              if (tripStatus == "completed" && (isRating || showReviewButton)) ...[
-                12.heightBox,
-                Padding(
-                  padding: const EdgeInsets.only(left: 30),
-                  child: reviewAction(),
-                ),
-              ]
-            ],
-          );
-        }
 
         return Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -274,7 +220,7 @@ Widget tripCardFromToWidget({String from = "", String to = "", String pickup = "
             routeMarker(),
             10.widthBox,
             Expanded(child: routeText()),
-            10.widthBox,
+            5.widthBox,
             trailingSummary(isNarrow: false),
           ],
         );

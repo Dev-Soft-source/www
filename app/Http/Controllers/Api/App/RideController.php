@@ -121,7 +121,7 @@ class RideController extends Controller
             $user
         );
 
-        Log::info($rides->count());
+        // Log::info($rides->count());
 
         if ($shouldRunFilteredSearch) {
 

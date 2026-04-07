@@ -172,8 +172,8 @@ class _RideFeatureWidgetState extends State<RideFeatureWidget> {
                               )
                             : Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.max,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                // mainAxisSize: MainAxisSize.max,
                                 children: [
                                   circleIconWidget(
                                       width: 25,
@@ -182,9 +182,13 @@ class _RideFeatureWidgetState extends State<RideFeatureWidget> {
                                       context: widget.context),
                                   10.widthBox,
                                   Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(top: 2.0),
                                       child: txt18Size(
                                           title: widget.featureList[i]['title'],
-                                          context: widget.context)),
+                                          context: widget.context),
+                                    ),
+                                  ),
                                 ],
                               ),
                       5.heightBox,

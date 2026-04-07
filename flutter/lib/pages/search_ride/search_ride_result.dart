@@ -260,11 +260,11 @@ class SearchRideResultPage extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   surfaceTintColor: index % 2 != 0
-                                      ? Colors.grey.shade100
+                                      ? Colors.grey.shade200
                                       : Colors.white,
                                   elevation: 2,
                                   color: index % 2 != 0
-                                      ? Colors.grey.shade100
+                                      ? Colors.grey.shade200
                                       : Colors.white,
                                   child: Column(
                                     crossAxisAlignment:
@@ -302,6 +302,13 @@ class SearchRideResultPage extends StatelessWidget {
                                         seatsLeft: seatsLeft,
                                         pickup: pickup,
                                         dropOff: dropOff,
+                                        bookingMethodLabel: controller.rides[index]['booking_method'].toString(),
+                                        bookingMethodId: int.tryParse(
+                                                controller.rides[index]
+                                                        ['booking_method_id']
+                                                    ?.toString() ??
+                                                    '') ??
+                                            0,
                                         fromLabel:
                                             "${controller.labelTextDetail['card_section_from_label'] ?? 'From'}",
                                         toLabel:

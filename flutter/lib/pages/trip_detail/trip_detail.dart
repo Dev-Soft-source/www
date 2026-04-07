@@ -42,7 +42,7 @@ class TripDetailPage extends StatelessWidget {
     }
 
     final major = parsed / 100;
-    return major.toStringAsFixed(2);
+    return major.toString();
   }
 
   String _formatCurrencyDisplay(dynamic value) {
@@ -55,7 +55,7 @@ class TripDetailPage extends StatelessWidget {
       return "\$${value.toString()}";
     }
 
-    return "\$${parsed.toStringAsFixed(2)}";
+    return "\$${parsed.toString()}";
   }
 
   /// Intro line: pink / extra-care variants, else API labels for ride vs trip.
