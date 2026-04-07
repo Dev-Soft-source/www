@@ -17,9 +17,10 @@ class NotificationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final NotificationController controller = Get.isRegistered<NotificationController>()
-        ? Get.find<NotificationController>()
-        : Get.put(NotificationController());
+    final NotificationController controller =
+        Get.isRegistered<NotificationController>()
+            ? Get.find<NotificationController>()
+            : Get.put(NotificationController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: primaryColor,
@@ -86,7 +87,6 @@ class NotificationPage extends StatelessWidget {
                           child: Column(
                             children: [
                               10.heightBox,
-                             
 
                               GestureDetector(
                                 onTap: () {
@@ -341,17 +341,19 @@ class NotificationPage extends StatelessWidget {
                                         notification:
                                             "${controller.notificationsList[index]['message']}",
                                         dateDisplay: controller
-                                                .notificationsList[index]
-                                                    ['added_on_date_display']
-                                                ?.toString(),
+                                            .notificationsList[index]
+                                                ['added_on_date_display']
+                                            ?.toString(),
                                         timeDisplay: controller
-                                                .notificationsList[index]
-                                                    ['added_on_time_display']
-                                                ?.toString(),
-                                        date: controller.notificationsList[index]
+                                            .notificationsList[index]
+                                                ['added_on_time_display']
+                                            ?.toString(),
+                                        date:
+                                            controller.notificationsList[index]
                                                 ['added_on'],
-                                        time: controller.notificationsList[index]
-                                            ['added_on'],
+                                        time:
+                                            controller.notificationsList[index]
+                                                ['added_on'],
                                         // userType:
                                         //     controller.notificationsList[
                                         //                 index]['type'] ==
@@ -457,7 +459,7 @@ class NotificationPage extends StatelessWidget {
                                           }
                                         },
                                         onTap: () {
-                                                                                    // Mark notification as read when tapped
+                                          // Mark notification as read when tapped
                                           controller.readNotification(
                                             controller.notificationsList[index]
                                                 ['id'],
@@ -596,6 +598,8 @@ class NotificationPage extends StatelessWidget {
                                                 "Notification type (may be welcome/birthday/christmas/password/etc.): ${controller.notificationsList[index]['notification_type']}");
                                             logger.info(
                                                 "No navigation will be performed for this notification.");
+                                            // go to profile page for empty system messages
+                                            Get.toNamed('/profile_setting');
                                           }
 
                                           logger.info(
@@ -1016,6 +1020,3 @@ class WelcomeScreen extends StatelessWidget {
     );
   }
 }
-
-
-

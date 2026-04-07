@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../consts/constFileLink.dart';
 
+/// Velocity-X [.capitalize] / [allWordsCapitilize] splits on single spaces; runs
+/// of whitespace become empty "words" and cause RangeError on [0]. Collapse first.
+String titleForVxCapitalize(String title) {
+  return title.replaceAll(RegExp(r'\s+'), ' ').trim();
+}
+
 TextStyle appButtonTextStyle({Color textColor = Colors.white, context}) {
   return TextStyle(
     color: textColor,
@@ -167,7 +173,8 @@ Widget txt22SizeCapitalized(
     String fontFamily = regular,
     Color textColor = textColor,
     context}) {
-  final textBuilder = title.text
+  final t = titleForVxCapitalize(title);
+  final textBuilder = t.text
       .size(getValueForScreenType<double>(
         context: context,
         mobile: 22.0,
@@ -176,7 +183,7 @@ Widget txt22SizeCapitalized(
       .color(textColor)
       .fontFamily(fontFamily);
 
-  if (title.trim().isEmpty) {
+  if (t.isEmpty) {
     return textBuilder.make();
   }
 
@@ -316,16 +323,17 @@ Widget txt18SizeCapitalized(
     String fontFamily = regular,
     Color textColor = textColor,
     context}) {
-  return title.text
+  final t = titleForVxCapitalize(title);
+  final b = t.text
       .size(getValueForScreenType<double>(
         context: context,
         mobile: 18.0,
         tablet: 18.0,
       ))
       .color(textColor)
-      .fontFamily(fontFamily)
-      .capitalize
-      .make();
+      .fontFamily(fontFamily);
+  if (t.isEmpty) return b.make();
+  return b.capitalize.make();
 }
 
 Widget txt16Size(
@@ -433,16 +441,17 @@ Widget txt12SizeCapitalized(
     String fontFamily = regular,
     Color textColor = textColor,
     context}) {
-  return title.text
+  final t = titleForVxCapitalize(title);
+  final b = t.text
       .size(getValueForScreenType<double>(
         context: context,
         mobile: 12.0,
         tablet: 12.0,
       ))
       .color(textColor)
-      .fontFamily(fontFamily)
-      .capitalize
-      .make();
+      .fontFamily(fontFamily);
+  if (t.isEmpty) return b.make();
+  return b.capitalize.make();
 }
 
 Widget txt14SizeCapitalized(
@@ -450,16 +459,17 @@ Widget txt14SizeCapitalized(
     String fontFamily = regular,
     Color textColor = textColor,
     context}) {
-  return title.text
+  final t = titleForVxCapitalize(title);
+  final b = t.text
       .size(getValueForScreenType<double>(
         context: context,
         mobile: 14.0,
         tablet: 14.0,
       ))
       .color(textColor)
-      .fontFamily(fontFamily)
-      .capitalize
-      .make();
+      .fontFamily(fontFamily);
+  if (t.isEmpty) return b.make();
+  return b.capitalize.make();
 }
 
 Widget txt10Size(
@@ -668,7 +678,8 @@ Widget txt20SizeCapitalize(
     String fontFamily = regular,
     Color textColor = textColor,
     context}) {
-  final safeTitle = title.trim().isEmpty ? "N/A" : title;
+  final t = titleForVxCapitalize(title);
+  final safeTitle = t.isEmpty ? "N/A" : t;
   return safeTitle.text
       .size(getValueForScreenType<double>(
         context: context,
@@ -686,16 +697,17 @@ Widget txt25SizeCapitalize(
     String fontFamily = regular,
     Color textColor = textColor,
     context}) {
-  return title.text
+  final t = titleForVxCapitalize(title);
+  final b = t.text
       .size(getValueForScreenType<double>(
         context: context,
         mobile: 25.0,
         tablet: 25.0,
       ))
       .color(textColor)
-      .fontFamily(bold)
-      .capitalize
-      .make();
+      .fontFamily(bold);
+  if (t.isEmpty) return b.make();
+  return b.capitalize.make();
 }
 
 Widget txt18SizeCapitalize(
@@ -703,7 +715,8 @@ Widget txt18SizeCapitalize(
     String fontFamily = regular,
     Color textColor = textColor,
     context}) {
-  return title.text
+  final t = titleForVxCapitalize(title);
+  final b = t.text
       .size(getValueForScreenType<double>(
         context: context,
         mobile: 18.0,
@@ -711,9 +724,9 @@ Widget txt18SizeCapitalize(
       ))
       .color(textColor)
       .lineHeight(1.2)
-      .capitalize
-      .fontFamily(fontFamily)
-      .make();
+      .fontFamily(fontFamily);
+  if (t.isEmpty) return b.make();
+  return b.capitalize.make();
 }
 
 Widget txt16SizeCapitalize(
@@ -721,16 +734,17 @@ Widget txt16SizeCapitalize(
     String fontFamily = regular,
     Color textColor = textColor,
     context}) {
-  return title.text
+  final t = titleForVxCapitalize(title);
+  final b = t.text
       .size(getValueForScreenType<double>(
         context: context,
         mobile: 16.0,
         tablet: 16.0,
       ))
       .color(textColor)
-      .fontFamily(fontFamily)
-      .capitalize
-      .make();
+      .fontFamily(fontFamily);
+  if (t.isEmpty) return b.make();
+  return b.capitalize.make();
 }
 
 Widget txt24SizeCapitalize(
@@ -738,16 +752,17 @@ Widget txt24SizeCapitalize(
     String fontFamily = regular,
     Color textColor = textColor,
     context}) {
-  return title.text
+  final t = titleForVxCapitalize(title);
+  final b = t.text
       .size(getValueForScreenType<double>(
         context: context,
         mobile: 24.0,
         tablet: 24.0,
       ))
       .color(textColor)
-      .fontFamily(bold)
-      .capitalize
-      .make();
+      .fontFamily(bold);
+  if (t.isEmpty) return b.make();
+  return b.capitalize.make();
 }
 
 Widget txt18SizeCenter(

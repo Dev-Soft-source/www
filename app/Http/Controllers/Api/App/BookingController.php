@@ -419,7 +419,12 @@ class BookingController extends Controller
                     return $this->apiErrorResponse('Stripe customer profile is missing for this user.', 422);
                 }
 
-                Stripe::setApiKey(env('STRIPE_SECRET'));
+                if (! $this->bootstrapStripe()) {
+                    return $this->apiErrorResponse(
+                        'Could not process card payment. Stripe is not configured on the server.',
+                        422
+                    );
+                }
 
                 $paymentIntent = PaymentIntent::create([
                     'amount' => (int) round($amount * 100),
@@ -487,6 +492,21 @@ class BookingController extends Controller
         );
     }
 
+    /**
+     * Use config() so Stripe works when config is cached; env() alone can be null in production.
+     */
+    private function bootstrapStripe(): bool
+    {
+        $secret = trim((string) (config('stripe.secret') ?? ''));
+        if ($secret === '') {
+            Log::error('BookingController: STRIPE_SECRET / stripe.secret is empty. Set STRIPE_SECRET in .env and run php artisan config:clear if you changed it.');
+
+            return false;
+        }
+        Stripe::setApiKey($secret);
+
+        return true;
+    }
 
     private function getNativePayDetails(string $paymentIntentId): array
     {
@@ -494,8 +514,11 @@ class BookingController extends Controller
             return [];
         }
 
+        if (! $this->bootstrapStripe()) {
+            return [];
+        }
+
         try {
-            Stripe::setApiKey(env('STRIPE_SECRET'));
 
             $paymentIntent = PaymentIntent::retrieve($paymentIntentId);
             $paymentMethodId = is_string($paymentIntent->payment_method ?? null)
@@ -714,7 +737,11 @@ class BookingController extends Controller
             'currency' => 'required|string',
         ]);
 
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        if (! $this->bootstrapStripe()) {
+            return response()->json([
+                'error' => 'Stripe is not configured on the server.',
+            ], 503);
+        }
 
         try {
             $paymentIntent = PaymentIntent::create([

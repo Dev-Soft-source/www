@@ -939,7 +939,7 @@ class Service extends GetxService {
               ),
               dialogTheme: DialogThemeData(backgroundColor: primaryColor),
             ),
-            child: child!,
+            child: _TimePickerSelectAllOnFocus(child: child!),
           );
         });
   }
@@ -1126,5 +1126,68 @@ class Service extends GetxService {
       await Future.delayed(const Duration(seconds: 2));
       isLoading.value = false;
     }
+  }
+}
+
+/// Material [showTimePicker] input fields only auto-select all text on web; this
+/// mirrors that for desktop/mobile so typing replaces the hour/minute value.
+class _TimePickerSelectAllOnFocus extends StatefulWidget {
+  const _TimePickerSelectAllOnFocus({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_TimePickerSelectAllOnFocus> createState() =>
+      _TimePickerSelectAllOnFocusState();
+}
+
+class _TimePickerSelectAllOnFocusState extends State<_TimePickerSelectAllOnFocus> {
+  @override
+  void initState() {
+    super.initState();
+    FocusManager.instance.addListener(_handleFocusChange);
+  }
+
+  @override
+  void dispose() {
+    FocusManager.instance.removeListener(_handleFocusChange);
+    super.dispose();
+  }
+
+  void _handleFocusChange() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final focusContext = FocusManager.instance.primaryFocus?.context;
+      if (focusContext is! Element) return;
+      final focusElement = focusContext;
+
+      final scopeElement = context as Element;
+      var underScope = false;
+      focusElement.visitAncestorElements((ancestor) {
+        if (ancestor == scopeElement) {
+          underScope = true;
+          return false;
+        }
+        return true;
+      });
+      if (!underScope) return;
+
+      final editable = _findEditableTextState(focusElement);
+      editable?.selectAll(SelectionChangedCause.tap);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+
+  static EditableTextState? _findEditableTextState(Element element) {
+    if (element.widget is EditableText) {
+      return (element as StatefulElement).state as EditableTextState;
+    }
+    EditableTextState? found;
+    element.visitChildren((child) {
+      found ??= _findEditableTextState(child);
+    });
+    return found;
   }
 }

@@ -463,6 +463,19 @@ class PostRideController extends GetxController {
     return major % 1 == 0 ? major.toInt().toString() : major.toStringAsFixed(2);
   }
 
+  /// Primary price-per-seat field: show empty instead of "0".
+  String _primarySeatPriceFieldText(String text) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return '';
+    final n = num.tryParse(trimmed);
+    if (n != null && n == 0) return '';
+    return trimmed;
+  }
+
+  String _formatMinorPriceForSeatField(dynamic value) {
+    return _primarySeatPriceFieldText(formatMinorPriceForDisplay(value));
+  }
+
   String buildRoutePriceKey(String fromLabel, String toLabel) {
     return "${fromLabel.trim().toLowerCase()}__${toLabel.trim().toLowerCase()}";
   }
@@ -835,6 +848,15 @@ class PostRideController extends GetxController {
       return true;
     }
 
+    final normalized =
+        _primarySeatPriceFieldText(pricePerSeatTextEditingController.text);
+    if (pricePerSeatTextEditingController.text != normalized) {
+      pricePerSeatTextEditingController.value = TextEditingValue(
+        text: normalized,
+        selection: TextSelection.collapsed(offset: normalized.length),
+      );
+    }
+
     final key = buildRoutePriceKey(labels.first, labels.last);
     final validation = validatePriceAgainstDistance(
       priceText: pricePerSeatTextEditingController.text,
@@ -999,9 +1021,10 @@ class PostRideController extends GetxController {
   }
 
   void handleRoutePriceChanged(Map<String, dynamic> entry, String value) {
+    final normalized = _primarySeatPriceFieldText(value);
     if (entry['isDirect'] == true &&
-        pricePerSeatTextEditingController.text != value) {
-      pricePerSeatTextEditingController.text = value;
+        pricePerSeatTextEditingController.text != normalized) {
+      pricePerSeatTextEditingController.text = normalized;
     }
 
     if (errors.any((error) => error['title'] == "price")) {
@@ -1072,7 +1095,8 @@ class PostRideController extends GetxController {
     for (final entry in routePriceEntries) {
       if (entry['isDirect'] == true) {
         final controller = entry['controller'] as TextEditingController?;
-        pricePerSeatTextEditingController.text = controller?.text ?? "";
+        pricePerSeatTextEditingController.text =
+            _primarySeatPriceFieldText(controller?.text ?? "");
         break;
       }
     }
@@ -2140,8 +2164,8 @@ class PostRideController extends GetxController {
             final ridePrice = ride['price'];
             pricePerSeatTextEditingController.text =
                 (detailPrice != null && detailPrice.toString().isNotEmpty)
-                    ? formatMinorPriceForDisplay(detailPrice)
-                    : formatMinorPriceForDisplay(ridePrice);
+                    ? _formatMinorPriceForSeatField(detailPrice)
+                    : _formatMinorPriceForSeatField(ridePrice);
             anythingTextEditingController.text = ride['notes'] ?? "";
 
             final routePriceSeed = <String, String>{};
@@ -2407,7 +2431,8 @@ class PostRideController extends GetxController {
             acceptMoreLuggage.value = ride['accept_more_luggage'].toString();
             openCustomized.value = ride['open_customized'].toString();
             pricePerSeatTextEditingController.text =
-                formatMinorPriceForDisplay(rideDetail['price'] ?? ride['price']);
+                _formatMinorPriceForSeatField(
+                    rideDetail['price'] ?? ride['price']);
             anythingTextEditingController.text = ride['notes'].toString();
           }
         }
@@ -3187,7 +3212,8 @@ class PostRideController extends GetxController {
             acceptMoreLuggage.value = ride['accept_more_luggage'].toString();
             openCustomized.value = ride['open_customized'].toString();
             pricePerSeatTextEditingController.text =
-                formatMinorPriceForDisplay(rideDetail['price'] ?? ride['price']);
+                _formatMinorPriceForSeatField(
+                    rideDetail['price'] ?? ride['price']);
             anythingTextEditingController.text =
                 ride['notes']?.toString() ?? "";
 
@@ -3244,7 +3270,8 @@ class PostRideController extends GetxController {
                 }
               }
             } else {
-              pricePerSeatTextEditingController.text = updatedPrice;
+              pricePerSeatTextEditingController.text =
+                  _primarySeatPriceFieldText(updatedPrice);
             }
           }
         }
