@@ -68,7 +68,10 @@ class SearchRideResultPage extends StatelessWidget {
         child: Scaffold(
           appBar: AppBar(
             backgroundColor: primaryColor,
-            title: Obx(() => secondAppBarWidget(context: context, title: "${controller.labelTextDetail['main_heading'] ?? "Search result"}")),
+            title: Obx(() => secondAppBarWidget(
+                context: context,
+                title:
+                    "${controller.labelTextDetail['main_heading'] ?? "Search result"}")),
             leading: IconButton(
               onPressed: controller.handleBackNavigation,
               icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -102,14 +105,13 @@ class SearchRideResultPage extends StatelessWidget {
                                   onPressed: () {
                                     SideSheet.right(
                                         body: filterSideWidget(
-                                            context: context,
-                                            controller: controller,
-                                            screenWidth: context.screenWidth,
-                                            screenHeight: context.screenHeight,
+                                          context: context,
+                                          controller: controller,
+                                          screenWidth: context.screenWidth,
+                                          screenHeight: context.screenHeight,
                                         ),
                                         context: context,
-                                        width: context.screenWidth - 50
-                                    );
+                                        width: context.screenWidth - 50);
                                   },
                                   style: ElevatedButton.styleFrom(
                                       backgroundColor: btnPrimaryColor,
@@ -128,7 +130,8 @@ class SearchRideResultPage extends StatelessWidget {
                                         tablet: 15.0,
                                       )),
                                   label: txt22Size(
-                                      title: "${controller.labelTextDetail['filter_section_heading'] ?? "Search filters"}",
+                                      title:
+                                          "${controller.labelTextDetail['filter_section_heading'] ?? "Search filters"}",
                                       context: context,
                                       textColor: Colors.white)),
                             ),
@@ -141,45 +144,46 @@ class SearchRideResultPage extends StatelessWidget {
                             itemBuilder: (context, index) {
                               final ride = controller.rides[index];
                               final rideDetail = _normalizeRideDetail(ride);
-                              final ridePrice =
-                                  _formatMinorPriceForDisplay(
-                                      ride['price_minor'] ??
-                                          rideDetail['price_minor'] ??
-                                          rideDetail['price']);
-                              final departure = ride['departure']?.toString() ?? "";
-                              final destination = ride['destination']?.toString() ?? "";
-                              final fromStopId =
-                                  int.tryParse(ride['from_stop_id']?.toString() ?? '') ?? 0;
-                              final toStopId =
-                                  int.tryParse(ride['to_stop_id']?.toString() ?? '') ?? 0;
-                              final pickup =
-                                  ride['pickup']?.toString() ?? "";
-                              final dropOff =
-                                  ride['dropoff']?.toString() ?? "";
+                              final ridePrice = _formatMinorPriceForDisplay(
+                                  ride['price_minor'] ??
+                                      rideDetail['price_minor'] ??
+                                      rideDetail['price']);
+                              final departure =
+                                  ride['departure']?.toString() ?? "";
+                              final destination =
+                                  ride['destination']?.toString() ?? "";
+                              final fromStopId = int.tryParse(
+                                      ride['from_stop_id']?.toString() ?? '') ??
+                                  0;
+                              final toStopId = int.tryParse(
+                                      ride['to_stop_id']?.toString() ?? '') ??
+                                  0;
+                              final pickup = ride['pickup']?.toString() ?? "";
+                              final dropOff = ride['dropoff']?.toString() ?? "";
                               final seatsLeft =
                                   ride['seats_left']?.toString() ?? "0";
-                              final totalSeats = 
-                                  ride['seats']?.toString() ??
-                                  "0";
+                              final totalSeats =
+                                  ride['seats']?.toString() ?? "0";
 
-                              DateTime parsedDate = DateTime.parse(
-                                  ride['date']);
+                              DateTime parsedDate =
+                                  DateTime.parse(ride['date']);
                               DateFormat outputFormat =
                                   DateFormat('MMMM d, yyyy');
                               String tripDate = outputFormat.format(parsedDate);
 
-                              DateTime parsedTime = DateFormat("HH:mm:ss")
-                                  .parse(ride['time']);
-                              DateFormat outputTimeFormat =
-                                  DateFormat("HH:mm");
+                              DateTime parsedTime =
+                                  DateFormat("HH:mm:ss").parse(ride['time']);
+                              DateFormat outputTimeFormat = DateFormat("HH:mm");
                               String tripTime =
                                   outputTimeFormat.format(parsedTime);
 
                               var firmPrice = 0.0;
                               final bookingTypeId =
                                   ride['booking_type_id']?.toString() ?? "";
-                              final bookingTypeLabel =
-                                  ride['booking_type']?.toString().toLowerCase() ?? "";
+                              final bookingTypeLabel = ride['booking_type']
+                                      ?.toString()
+                                      .toLowerCase() ??
+                                  "";
                               final isFirmCancellationRide =
                                   bookingTypeId == "37" ||
                                       bookingTypeLabel.contains("firm");
@@ -187,7 +191,8 @@ class SearchRideResultPage extends StatelessWidget {
                                 final parsedRidePrice =
                                     double.tryParse(ridePrice) ?? 0.0;
                                 final parsedFirmDiscount = double.tryParse(
-                                        controller.firmDiscount.value.toString()) ??
+                                        controller.firmDiscount.value
+                                            .toString()) ??
                                     0.0;
                                 firmPrice = parsedRidePrice -
                                     ((parsedRidePrice * parsedFirmDiscount) /
@@ -225,7 +230,9 @@ class SearchRideResultPage extends StatelessWidget {
                                     decoration: BoxDecoration(
                                       color: statusBorderColors[i],
                                       borderRadius: BorderRadius.circular(
-                                        10 + ((statusBorderColors.length - i) * 3),
+                                        10 +
+                                            ((statusBorderColors.length - i) *
+                                                3),
                                       ),
                                     ),
                                     child: wrapped,
@@ -240,15 +247,12 @@ class SearchRideResultPage extends StatelessWidget {
 
                               return InkWell(
                                 onTap: () async {
-                                    final tripDetailId =
-                                        rideDetail != null &&
-                                            rideDetail.isNotEmpty
-                                            ? (rideDetail['id'] ?? 0)
-                                            : 0;
-                                    await controller.checkBooking(
-                                        ride['id'],
-                                        fromStopId,
-                                        toStopId);
+                                  final tripDetailId = rideDetail != null &&
+                                          rideDetail.isNotEmpty
+                                      ? (rideDetail['id'] ?? 0)
+                                      : 0;
+                                  await controller.checkBooking(
+                                      ride['id'], fromStopId, toStopId);
                                 },
                                 child: wrapWithStatusBorders(Card(
                                   margin: EdgeInsets.zero,
@@ -267,41 +271,51 @@ class SearchRideResultPage extends StatelessWidget {
                                         CrossAxisAlignment.start,
                                     children: [
                                       tripCardDateTimeWidget(
-                                          date: tripDate,
-                                          time: tripTime,
-                                          context: context,
-                                          price: ridePrice,
-                                          tripStatus: "search",
-                                          atLabel: "${controller.labelTextDetail['card_section_at_label'] ?? 'at'}",
-                                          seatLeftLabel: "${controller.labelTextDetail['card_section_seats_left'] ?? 'seats left'}",
-                                          perSeatLabel: "${controller.labelTextDetail['card_section_per_seat'] ?? 'per seat'}",
-                                          notLiveLabel: "${controller.labelTextDetail['card_section_not_live'] ?? 'Not live'}",
-                                          bookingRequestLabel: "${controller.labelTextDetail['card_section_booking_request'] ?? 'booking request'}",
-                                          completedStatusLabel: "${controller.labelTextDetail['card_section_completed'] ?? 'Completed'}",
-                                          cancelStatusLabel: "${controller.labelTextDetail['card_section_cancelled'] ?? 'Cancelled'}",
-                                          totalSeat: totalSeats,
-                                          firmPrice: firmPrice,
+                                        date: tripDate,
+                                        time: tripTime,
+                                        context: context,
+                                        price: ridePrice,
+                                        tripStatus: "search",
+                                        atLabel:
+                                            "${controller.labelTextDetail['card_section_at_label'] ?? 'at'}",
+                                        seatLeftLabel:
+                                            "${controller.labelTextDetail['card_section_seats_left'] ?? 'seats left'}",
+                                        perSeatLabel:
+                                            "${controller.labelTextDetail['card_section_per_seat'] ?? 'per seat'}",
+                                        notLiveLabel:
+                                            "${controller.labelTextDetail['card_section_not_live'] ?? 'Not live'}",
+                                        bookingRequestLabel:
+                                            "${controller.labelTextDetail['card_section_booking_request'] ?? 'booking request'}",
+                                        completedStatusLabel:
+                                            "${controller.labelTextDetail['card_section_completed'] ?? 'Completed'}",
+                                        cancelStatusLabel:
+                                            "${controller.labelTextDetail['card_section_cancelled'] ?? 'Cancelled'}",
+                                        totalSeat: totalSeats,
+                                        firmPrice: firmPrice,
                                       ),
                                       tripCardFromToWidget(
-                                          from: departure,
-                                          to: destination,
-                                          price: ridePrice,
-                                          context: context,
-                                          tripStatus: 'search',
-                                          seatsLeft: seatsLeft,
+                                        from: departure,
+                                        to: destination,
+                                        price: ridePrice,
+                                        context: context,
+                                        tripStatus: 'search',
+                                        seatsLeft: seatsLeft,
                                         pickup: pickup,
                                         dropOff: dropOff,
-                                        fromLabel: "${controller.labelTextDetail['card_section_from_label'] ?? 'From'}",
-                                        toLabel: "${controller.labelTextDetail['card_section_to_label'] ?? 'to'}",
-                                        seatLeftLabel: "${controller.labelTextDetail['card_section_seats_left'] ?? 'seats left'}",
-                                        perSeatLabel: "${controller.labelTextDetail['card_section_per_seat'] ?? 'per seat'}",
-                                        reviewedLabel: "${controller.labelTextDetail['trips_card_section_reviewed'] ?? 'Reviewed'}",
-                                        reviewDriverLabel: "${controller.labelTextDetail['trips_card_section_review_driver'] ?? 'Review your driver'}",
+                                        fromLabel:
+                                            "${controller.labelTextDetail['card_section_from_label'] ?? 'From'}",
+                                        toLabel:
+                                            "${controller.labelTextDetail['card_section_to_label'] ?? 'to'}",
+                                        seatLeftLabel:
+                                            "${controller.labelTextDetail['card_section_seats_left'] ?? 'seats left'}",
+                                        perSeatLabel:
+                                            "${controller.labelTextDetail['card_section_per_seat'] ?? 'per seat'}",
+                                        reviewedLabel:
+                                            "${controller.labelTextDetail['trips_card_section_reviewed'] ?? 'Reviewed'}",
+                                        reviewDriverLabel:
+                                            "${controller.labelTextDetail['trips_card_section_review_driver'] ?? 'Review your driver'}",
                                       ),
                                       const Divider(),
-
-
-
                                       Container(
                                         padding: EdgeInsets.fromLTRB(
                                             getValueForScreenType<double>(
@@ -332,58 +346,96 @@ class SearchRideResultPage extends StatelessWidget {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              if(hideDriverInfo == true && controller.rides[index]['remove_car_image'] == 0)...[
+                                              if (hideDriverInfo == true &&
+                                                  controller.rides[index][
+                                                          'remove_car_image'] ==
+                                                      0) ...[
                                                 InkWell(
-                                                  onTap: (){
-
-                                                    var make = controller.rides[index]['vehicle'] != null ? controller.rides[index]['vehicle']['make'] : controller.rides[index]['make'];
-                                                    var model = controller.rides[index]['vehicle'] != null ? controller.rides[index]['vehicle']['model'] : controller.rides[index]['model'];
-                                                    var year = controller.rides[index]['vehicle'] != null ? controller.rides[index]['vehicle']['year'] : controller.rides[index]['year'];
-                                                    var licenseNo = controller.rides[index]['vehicle'] != null ? controller.rides[index]['vehicle']['license_no'] : controller.rides[index]['license_no'];
-                                                    var carType = controller.rides[index]['vehicle'] != null ? controller.rides[index]['vehicle']['car_type'] : controller.rides[index]['car_type'];
-                                                    controller.serviceController.showDialogue("$year,$make,$model\n$licenseNo\n$carType", title: "Vehicle Info");
+                                                  onTap: () {
+                                                    var make = controller.rides[
+                                                                    index]
+                                                                ['vehicle'] !=
+                                                            null
+                                                        ? controller
+                                                                .rides[index]
+                                                            ['vehicle']['make']
+                                                        : controller
+                                                                .rides[index]
+                                                            ['make'];
+                                                    var model = controller
+                                                                        .rides[
+                                                                    index]
+                                                                ['vehicle'] !=
+                                                            null
+                                                        ? controller
+                                                                .rides[index]
+                                                            ['vehicle']['model']
+                                                        : controller
+                                                                .rides[index]
+                                                            ['model'];
+                                                    var year = controller.rides[
+                                                                    index]
+                                                                ['vehicle'] !=
+                                                            null
+                                                        ? controller
+                                                                .rides[index]
+                                                            ['vehicle']['year']
+                                                        : controller
+                                                                .rides[index]
+                                                            ['year'];
+                                                    var licenseNo = controller
+                                                                        .rides[
+                                                                    index]
+                                                                ['vehicle'] !=
+                                                            null
+                                                        ? controller.rides[
+                                                                    index]
+                                                                ['vehicle']
+                                                            ['license_no']
+                                                        : controller
+                                                                .rides[index]
+                                                            ['license_no'];
+                                                    var carType = controller
+                                                                        .rides[
+                                                                    index]
+                                                                ['vehicle'] !=
+                                                            null
+                                                        ? controller.rides[
+                                                                    index]
+                                                                ['vehicle']
+                                                            ['car_type']
+                                                        : controller
+                                                                .rides[index]
+                                                            ['car_type'];
+                                                    controller.serviceController
+                                                        .showDialogue(
+                                                            "$year,$make,$model\n$licenseNo\n$carType",
+                                                            title:
+                                                                "Vehicle Info");
                                                   },
                                                   child: circleImageWidget(
                                                       width: 30.0,
                                                       height: 30.0,
                                                       imagePath:
-                                                      "${controller.rides[index]['vehicle'] != null ? controller.rides[index]['vehicle']['image'] : controller.rides[index]['car_image']}",
+                                                          "${controller.rides[index]['vehicle'] != null ? controller.rides[index]['vehicle']['image'] : controller.rides[index]['car_image']}",
                                                       imageType: "network",
                                                       context: context),
                                                 ),
                                               ],
-                                              if (controller
-                                                  .rides[index]['features']
-                                                  .isNotEmpty) ...[
-                                                for (var i = 0;
-                                                    i <
-                                                        controller
-                                                            .rides[index]
-                                                                ['features']
-                                                            .length;
-                                                    i++) ...[
-                                                  2.widthBox,
-                                                  InkWell(
-                                                    onTap: (){
-                                                      controller.serviceController.showDialogue("${controller.rides[index]['features'][i]['tooltip']}", title: "${controller.rides[index]['features'][i]['title']}");
-                                                    },
-                                                    child: circleIconWidget(
-                                                        width: 30.0,
-                                                        height: 30.0,
-                                                        imagePath: controller.rides[index]['features'][i]['image'],
-                                                        context: context),
-                                                  ),
-                                                  2.widthBox,
-                                                ]
-                                              ] else ...[
-                                                2.widthBox,
-                                              ],
+                                              
                                               if (controller.rides[index][
                                                       'payment_method_image'] !=
                                                   null) ...[
                                                 InkWell(
-                                                  onTap: (){
-                                                    controller.serviceController.showDialogue(controller.rides[index]['payment_method_tooltip'].toString(), title: "${controller.rides[index]['payment_method']}");
+                                                  onTap: () {
+                                                    controller.serviceController
+                                                        .showDialogue(
+                                                            controller
+                                                                .rides[index][
+                                                                    'payment_method_tooltip']
+                                                                .toString(),
+                                                            title:
+                                                                "${controller.rides[index]['payment_method']}");
                                                   },
                                                   child: circleIconWidget(
                                                       width: 30.0,
@@ -399,8 +451,17 @@ class SearchRideResultPage extends StatelessWidget {
                                                       'booking_method_image'] !=
                                                   null) ...[
                                                 InkWell(
-                                                  onTap: (){
-                                                    controller.serviceController.showDialogue(controller.rides[index]['booking_method_tooltip'].toString(), title: controller.rides[index]['booking_method'].toString());
+                                                  onTap: () {
+                                                    controller.serviceController
+                                                        .showDialogue(
+                                                            controller
+                                                                .rides[index][
+                                                                    'booking_method_tooltip']
+                                                                .toString(),
+                                                            title: controller
+                                                                .rides[index][
+                                                                    'booking_method']
+                                                                .toString());
                                                   },
                                                   child: circleIconWidget(
                                                       width: 30.0,
@@ -416,8 +477,17 @@ class SearchRideResultPage extends StatelessWidget {
                                                       'animal_friendly_image'] !=
                                                   null) ...[
                                                 InkWell(
-                                                  onTap: (){
-                                                    controller.serviceController.showDialogue(controller.rides[index]['animal_friendly_tooltip'].toString(), title: controller.labelTextDetail['pets_allowed_label'].toString());
+                                                  onTap: () {
+                                                    controller.serviceController
+                                                        .showDialogue(
+                                                            controller
+                                                                .rides[index][
+                                                                    'animal_friendly_tooltip']
+                                                                .toString(),
+                                                            title: controller
+                                                                .labelTextDetail[
+                                                                    'pets_allowed_label']
+                                                                .toString());
                                                   },
                                                   child: circleIconWidget(
                                                       width: 30.0,
@@ -433,15 +503,24 @@ class SearchRideResultPage extends StatelessWidget {
                                                       ['smoke_image'] !=
                                                   null) ...[
                                                 InkWell(
-                                                  onTap: (){
-                                                    controller.serviceController.showDialogue(controller.rides[index]['smoke_tooltip'].toString(), title: controller.labelTextDetail['smoking_label'].toString());
+                                                  onTap: () {
+                                                    controller.serviceController
+                                                        .showDialogue(
+                                                            controller
+                                                                .rides[index][
+                                                                    'smoke_tooltip']
+                                                                .toString(),
+                                                            title: controller
+                                                                .labelTextDetail[
+                                                                    'smoking_label']
+                                                                .toString());
                                                   },
                                                   child: circleIconWidget(
                                                       width: 30.0,
                                                       height: 30.0,
-                                                      imagePath:
-                                                          controller.rides[index]
-                                                              ['smoke_image'],
+                                                      imagePath: controller
+                                                              .rides[index]
+                                                          ['smoke_image'],
                                                       context: context),
                                                 ),
                                                 2.widthBox,
@@ -450,20 +529,65 @@ class SearchRideResultPage extends StatelessWidget {
                                                       ['luggage_image'] !=
                                                   null) ...[
                                                 InkWell(
-                                                  onTap: (){
-                                                    controller.serviceController.showDialogue(controller.rides[index]['luggage_tooltip'].toString(), title: controller.rides[index]['luggage'].toString());
+                                                  onTap: () {
+                                                    controller.serviceController
+                                                        .showDialogue(
+                                                            controller
+                                                                .rides[index][
+                                                                    'luggage_tooltip']
+                                                                .toString(),
+                                                            title: controller
+                                                                .rides[index]
+                                                                    ['luggage']
+                                                                .toString());
                                                   },
                                                   child: circleIconWidget(
                                                       width: 30.0,
                                                       height: 30.0,
-                                                      imagePath:
-                                                          controller.rides[index]
-                                                              ['luggage_image'],
+                                                      imagePath: controller
+                                                              .rides[index]
+                                                          ['luggage_image'],
                                                       context: context),
                                                 ),
                                                 2.widthBox,
                                               ],
+                                              if (controller
+                                                  .rides[index]['features']
+                                                  .isNotEmpty) ...[
+                                                for (var i = 0;
+                                                    i <
+                                                        controller
+                                                            .rides[index]
+                                                                ['features']
+                                                            .length;
+                                                    i++) ...[
+                                                  2.widthBox,
+                                                  InkWell(
+                                                    onTap: () {
+                                                      controller
+                                                          .serviceController
+                                                          .showDialogue(
+                                                              "${controller.rides[index]['features'][i]['tooltip']}",
+                                                              title:
+                                                                  "${controller.rides[index]['features'][i]['title']}");
+                                                    },
+                                                    child: circleIconWidget(
+                                                        width: 30.0,
+                                                        height: 30.0,
+                                                        imagePath:
+                                                            controller.rides[
+                                                                        index]
+                                                                    ['features']
+                                                                [i]['image'],
+                                                        context: context),
+                                                  ),
+                                                  2.widthBox,
+                                                ]
+                                              ] else ...[
+                                                2.widthBox,
+                                              ],
                                             ],
+                                            
                                           ),
                                         ),
                                       ),
@@ -494,29 +618,33 @@ class SearchRideResultPage extends StatelessWidget {
                                           scrollDirection: Axis.horizontal,
                                           child: Row(
                                             mainAxisAlignment:
-                                            MainAxisAlignment.start,
+                                                MainAxisAlignment.start,
                                             crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                                CrossAxisAlignment.start,
                                             children: [
-                                              hideDriverInfo == true ? circleImageWidget(
-                                                  width: 40.0,
-                                                  height: 40.0,
-                                                  imagePath:
-                                                  controller.rides[index]
-                                                  ['driver']
-                                                  ['profile_image'] ?? "",
-                                                  imageType: "network",
-                                                  context: context) : SizedBox(),
+                                              hideDriverInfo == true
+                                                  ? circleImageWidget(
+                                                      width: 40.0,
+                                                      height: 40.0,
+                                                      imagePath: controller
+                                                                          .rides[
+                                                                      index]
+                                                                  ['driver'][
+                                                              'profile_image'] ??
+                                                          "",
+                                                      imageType: "network",
+                                                      context: context)
+                                                  : SizedBox(),
                                               5.widthBox,
                                               Column(
                                                 crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Row(
                                                     children: [
                                                       txt18SizeCapitalize(
                                                           title:
-                                                          "${controller.rides[index]['driver']['first_name']}",
+                                                              "${controller.rides[index]['driver']['first_name']}",
                                                           context: context),
                                                       5.widthBox,
                                                       SizedBox(
@@ -527,11 +655,12 @@ class SearchRideResultPage extends StatelessWidget {
                                                                   .shade400)),
                                                       5.widthBox,
                                                       txt16Size(
-                                                          title: "${controller.labelTextDetail['card_section_age'] ?? "Age"}: ",
+                                                          title:
+                                                              "${controller.labelTextDetail['card_section_age'] ?? "Age"}: ",
                                                           context: context),
                                                       txt16Size(
                                                           title:
-                                                          "${controller.rides[index]['driver_age']}",
+                                                              "${controller.rides[index]['driver_age']}",
                                                           context: context),
                                                       5.widthBox,
                                                       SizedBox(
@@ -541,36 +670,38 @@ class SearchRideResultPage extends StatelessWidget {
                                                               color: Colors.grey
                                                                   .shade400)),
                                                       5.widthBox,
-                                                      if ((controller.rides[index]
-                                                                      ['gender_image'] ??
-                                                                  "")
-                                                              .toString()
-                                                              .isNotEmpty)
+                                                      if ((controller.rides[
+                                                                      index][
+                                                                  'gender_image'] ??
+                                                              "")
+                                                          .toString()
+                                                          .isNotEmpty)
                                                         circleIconWidget(
                                                             width: 20.0,
                                                             height: 20.0,
-                                                            imagePath:
-                                                                controller.rides[index]
-                                                                    ['gender_image'],
+                                                            imagePath: controller
+                                                                        .rides[
+                                                                    index][
+                                                                'gender_image'],
                                                             context: context)
                                                       else
                                                         txt16Size(
                                                             title:
                                                                 "${controller.rides[index]['driver']['gender_label']}",
                                                             context: context),
-
                                                     ],
                                                   ),
                                                   Row(
                                                     mainAxisAlignment:
-                                                    MainAxisAlignment.start,
+                                                        MainAxisAlignment.start,
                                                     children: [
                                                       txt16Size(
-                                                          title: "${controller.labelTextDetail['card_section_driven'] ?? "Driven"}: ",
+                                                          title:
+                                                              "${controller.labelTextDetail['card_section_driven'] ?? "Driven"}: ",
                                                           context: context),
                                                       txt16Size(
-                                                          title:
-                                                          "${controller.rides[index]['driven_count']} ${controller.labelTextDetail['card_section_passengers'] ?? "passengers"}",
+                                                          title: "${controller.rides[index]['driven_count']}",
+                                                              // "${controller.rides[index]['driven_count']} ${controller.labelTextDetail['card_section_passengers'] ?? "passengers"}",
                                                           context: context),
                                                       5.widthBox,
                                                       SizedBox(
@@ -581,11 +712,18 @@ class SearchRideResultPage extends StatelessWidget {
                                                                   .shade400)),
                                                       5.widthBox,
                                                       txt16Size(
-                                                          title: "${controller.labelTextDetail['card_section_review'] ?? "Review"}: ",
-                                                          context: context),
-                                                      txt16Size( //
                                                           title:
-                                                          controller.rides[index]['driver_average_rating'] != null ? "${(controller.rides[index]['driver_average_rating']).toStringAsFixed(1)}" : "${controller.labelTextDetail['card_section_no_review'] ?? 'No reviews'}",
+                                                              "${controller.labelTextDetail['card_section_review'] ?? "Review"}: ",
+                                                          context: context),
+                                                      txt16Size(
+                                                          //
+                                                          title: controller.rides[
+                                                                          index]
+                                                                      [
+                                                                      'driver_average_rating'] !=
+                                                                  null
+                                                              ? "${(controller.rides[index]['driver_average_rating']).toStringAsFixed(1)}"
+                                                              : "${controller.labelTextDetail['card_section_no_review'] ?? 'No reviews'}",
                                                           context: context),
                                                       5.widthBox,
                                                     ],
@@ -597,7 +735,6 @@ class SearchRideResultPage extends StatelessWidget {
                                           ),
                                         ),
                                       ),
-
                                     ],
                                   ),
                                 )),
@@ -612,35 +749,43 @@ class SearchRideResultPage extends StatelessWidget {
                             Center(
                               child: txt20Size(
                                   context: context,
-                                  title: "${controller.labelTextDetail['search_result_no_found_message'] ?? "No ride for this location exist"}"),
+                                  title:
+                                      "${controller.labelTextDetail['search_result_no_found_message'] ?? "No ride for this location exist"}"),
                             ),
                             20.heightBox,
-                          ]
-                          else...[
+                          ] else ...[
                             if (controller.noMoreData.value) ...[
                               Center(
                                 child: txt20Size(
                                     context: context,
-                                    title: "${controller.labelTextDetail['search_result_no_more_data_message'] ?? "No more data to show"}"),
+                                    title:
+                                        "${controller.labelTextDetail['search_result_no_more_data_message'] ?? "No more data to show"}"),
                               ),
                               20.heightBox,
                             ] else ...[
                               if (controller.isScrollLoading.value) ...[
                                 Center(
-                                  child: progressCircularWidget(context, width: 50.0, height: 50.0),
+                                  child: progressCircularWidget(context,
+                                      width: 50.0, height: 50.0),
                                 ),
                                 20.heightBox,
-                              ]else...[
-                                controller.searchTotal.value > 3 ? Center(
-                                  child: elevatedButtonWidget(
-                                      textWidget: txt18Size(title: "${controller.labelTextDetail['search_result_load_more_btn'] ?? "Load more"}", context: context, fontFamily: regular, textColor: Colors.white),
-                                      context: context,
-                                      onPressed: () async{
-                                        controller.page++;
-                                        await controller.getMoreRides();
-                                      }
-                                  ),
-                                ) : SizedBox(),
+                              ] else ...[
+                                controller.searchTotal.value > 3
+                                    ? Center(
+                                        child: elevatedButtonWidget(
+                                            textWidget: txt18Size(
+                                                title:
+                                                    "${controller.labelTextDetail['search_result_load_more_btn'] ?? "Load more"}",
+                                                context: context,
+                                                fontFamily: regular,
+                                                textColor: Colors.white),
+                                            context: context,
+                                            onPressed: () async {
+                                              controller.page++;
+                                              await controller.getMoreRides();
+                                            }),
+                                      )
+                                    : SizedBox(),
                               ]
                             ]
                           ],

@@ -40,7 +40,12 @@ Widget coPassengerWidget({context, coPassengerList, String tripId = "", double s
                   children: [
                     if(coPassengerList != null && coPassengerList.isNotEmpty)...[
                       for(var i= 0; i<coPassengerList.length; i++ )...[
-                        circleImageWidget(width: 36, height: 36, imageType: "network", imagePath: "${coPassengerList[i]['passenger']['profile_image']}", context: context),
+                        circleImageWidget(
+                            width: 36,
+                            height: 36,
+                            imageType: "network",
+                            imagePath: coPassengerProfileImageUrl(coPassengerList[i]),
+                            context: context),
                         5.widthBox
                       ]
                     ]
@@ -52,4 +57,43 @@ Widget coPassengerWidget({context, coPassengerList, String tripId = "", double s
         )
     ),
   );
+}
+
+String coPassengerProfileImageUrl(dynamic booking) {
+  if (booking is! Map) {
+    return '';
+  }
+  final passenger = booking['passenger'];
+  if (passenger is! Map) {
+    return '';
+  }
+  final url = passenger['profile_image'];
+  if (url == null) {
+    return '';
+  }
+  return url.toString();
+}
+
+/// One-line summary when [booking] may have a null `passenger` (API shape).
+String myCoPassengerSummaryLine(
+  dynamic booking, {
+  required String ageLabel,
+  required String review,
+  required String noReviewsLabel,
+}) {
+  if (booking is! Map) {
+    return '';
+  }
+  final passenger = booking['passenger'];
+  final Map<String, dynamic> pm = passenger is Map
+      ? Map<String, dynamic>.from(passenger)
+      : <String, dynamic>{};
+  final firstName = (pm['first_name'] ?? '').toString();
+  final age = (pm['age'] ?? '').toString();
+  final genderLabel = (pm['gender_label'] ?? '').toString();
+  final avg = booking['passenger_average_rating'];
+  final reviewPart = (avg == null || avg.toString().isEmpty)
+      ? noReviewsLabel
+      : '$review: $avg';
+  return '$firstName | $ageLabel: $age | $genderLabel | $reviewPart';
 }

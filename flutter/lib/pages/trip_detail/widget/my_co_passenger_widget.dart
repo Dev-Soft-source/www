@@ -4,6 +4,7 @@ import 'package:proximaride_app/pages/widgets/card_shadow_widget.dart';
 import 'package:proximaride_app/pages/widgets/circle_image_widget.dart';
 import 'package:proximaride_app/pages/post_ride/widget/post_ride_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
+import 'package:proximaride_app/pages/trip_detail/widget/co_passenger_widget.dart';
 
 Widget myCoPassengerWidget({context, coPassengerList, controller, String tripId = "", double screenWidth = 0.0, String type = "trip",
   String tripCoPassengerHeading = "My co-passenger(s)", String rideCoPassengerHeading = "My passengers", String review = "Review"}){
@@ -60,10 +61,22 @@ Widget myCoPassengerWidget({context, coPassengerList, controller, String tripId 
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              circleImageWidget(width: 36, height: 36, imageType: "network", imagePath: "${coPassengerList[i]['passenger']['profile_image']}", context: context),
+                              circleImageWidget(
+                                  width: 36,
+                                  height: 36,
+                                  imageType: "network",
+                                  imagePath: coPassengerProfileImageUrl(
+                                      coPassengerList[i]),
+                                  context: context),
                               10.widthBox,
                               txt20Size(
-                                  title: "${coPassengerList[i]['passenger']['first_name']} | $ageLabel: ${coPassengerList[i]['passenger']['age']} | ${coPassengerList[i]['passenger']['gender_label']} | ${(coPassengerList[i]['passenger_average_rating'] == null || "${coPassengerList[i]['passenger_average_rating']}".isEmpty) ? "${controller.labelTextDetail['no_reviews_label'] ?? "No review yet"}" : "$review: ${coPassengerList[i]['passenger_average_rating']}"}",
+                                  title: myCoPassengerSummaryLine(
+                                    coPassengerList[i],
+                                    ageLabel: ageLabel,
+                                    review: review,
+                                    noReviewsLabel:
+                                        "${controller.labelTextDetail['no_reviews_label'] ?? "No review yet"}",
+                                  ),
                                   context: context,
                                   fontFamily: bold)
                             ],

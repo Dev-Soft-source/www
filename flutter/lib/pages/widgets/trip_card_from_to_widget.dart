@@ -42,7 +42,7 @@ Widget tripCardFromToWidget({String from = "", String to = "", String pickup = "
               borderRadius: BorderRadius.circular(50), color: primaryColor),
         ),
         const SizedBox(
-          height: 60,
+          height: 70,
           child: Padding(
             padding: EdgeInsets.only(left: 9),
             child: DottedLine(

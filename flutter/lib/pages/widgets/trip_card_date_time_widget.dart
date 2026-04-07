@@ -62,9 +62,9 @@ Widget tripCardDateTimeWidget(
               txt16Size(title: time, context: context),
             ],
           ),
-          if (seatLeft != "") ...[
-            txt16Size(title: "$seatLeft $seatLeftLabel", context: context)
-          ],
+          // if (seatLeft != "") ...[
+          //   txt16Size(title: "$seatLeft $seatLeftLabel", context: context)
+          // ],
           // if (totalSeat != "" && totalSeat != "0") ...[
           //   Column(
           //     crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,16 +153,64 @@ Widget tripCardDateTimeWidget(
                 ],
               ]),
               if (seatLeft != "") ...[
-                Row(
-                  children: [
-                txt16Size(title: "$seatLeft $seatLeftLabel", context: context)
-                  ])
+                Row(children: [
+                  txt16Size(title: "$seatLeft $seatLeftLabel", context: context)
+                ])
               ],
               if (totalSeat != "" && totalSeat != "0") ...[
                 Row(
                   children: [
-                    txt16Size(
-                        title: "Total $totalSeat $seatLabel", context: context),
+                    // txt16Size(
+                    //     title: "Total $totalSeat $seatLabel", context: context),
+                    if (firmPrice != 0.0) ...[
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(mainAxisSize: MainAxisSize.max, children: [
+                            txt16SizeLineThrough(
+                                title: formatCurrency(price), context: context),
+                            txt16Size(
+                              title: "→", // "-->"
+                              context: context,
+                              fontFamily: bold,
+                            ),
+                          ]),
+                          // 5.heightBox,
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              txt24Size(
+                                  title: formatCurrency(firmPrice),
+                                  context: context,
+                                  textColor: primaryColor),
+                                  5.widthBox,
+                              txt16Size(
+                                title: perSeatLabel,
+                                context: context,
+                                fontFamily: bold,
+                                textColor: primaryColor,
+                              ),
+                            ],
+                          ),
+                        ],
+                      )
+                    ] else ...[
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          txt24Size(
+                              title: formatCurrency(price),
+                              context: context,
+                              textColor: primaryColor),
+                          txt16Size(
+                            title: perSeatLabel,
+                            context: context,
+                            fontFamily: bold,
+                            textColor: primaryColor,
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ],
