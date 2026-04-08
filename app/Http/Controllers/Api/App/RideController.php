@@ -967,6 +967,20 @@ class RideController extends Controller
 
             // $ride->detail->price = $displayPrice;
 
+            $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+
+            if ($rideDetailPage) {
+                if($ride->isFirmCancellation()){
+                    $rideDetailPage->cancellation_policy_tooltip_url = route('firm_cancellation_policy', [
+                        'lang' => app()->getLocale(),
+                    ]);
+                }else{
+                    $rideDetailPage->cancellation_policy_tooltip_url = route('cancellation_policy', [
+                        'lang' => app()->getLocale(),
+                    ]);
+                }
+            }
+
             // Calculate seats left
             $bookedSeats = $ride->bookings()
                 ->where('status', '<>', 3)
@@ -1165,19 +1179,7 @@ class RideController extends Controller
         $siteSetting = SiteSetting::getCached();
 
 
-        $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-
-        if ($rideDetailPage) {
-            if($ride->isFirmCancellation()){
-                $rideDetailPage->cancellation_policy_tooltip_url = route('firm_cancellation_policy', [
-                    'lang' => app()->getLocale(),
-                ]);
-            }else{
-                $rideDetailPage->cancellation_policy_tooltip_url = route('cancellation_policy', [
-                    'lang' => app()->getLocale(),
-                ]);
-            }
-        }
+        
 
         $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
