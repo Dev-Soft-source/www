@@ -55,9 +55,14 @@ class MyRideController extends Controller
         $user = auth()->user();
         $user_id = $user->id;
 
-        if ($user->step1 != 1) {
-            // personal information
-            return redirect()->route('step1to5', ['lang' => $lang]);
+        if ($user->step === '1') {
+            return redirect()->route('step1to5', ['lang' => $this->selectedLanguage->abbreviation]);
+        } elseif ($user->step === '2') {
+            return redirect()->route('step2to5', ['lang' => $this->selectedLanguage->abbreviation]);
+        } elseif ($user->step === '3') {
+            return redirect()->route('step3to5', ['lang' => $this->selectedLanguage->abbreviation]);
+        } elseif ($user->step === '4') {
+            return redirect()->route('step4to5', ['lang' => $this->selectedLanguage->abbreviation]);
         }
 
         // Check if user has posted any rides (as a driver)

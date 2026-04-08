@@ -14,56 +14,22 @@ class MyChatsController extends Controller
 {
     public function index($lang = null)
     {
-        $languages = Language::getAllCached();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
 
-        $chatsPage = null;
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            $chatsPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_button', 'cancel_button')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            $chatsPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('delete_button', 'cancel_button')->first();
-        }
+        $chatsPage = ChatsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $successMessage = $this->successMessage;
 
 
-        $notifications = null;
         $user = auth()->user();
-        if ($user->step1 !== 1) {
-            // personal information
-            return redirect()->route('profile.edit', ['lang' => $lang]);
+        if ($user->step === '1') {
+            return redirect()->route('step1to5', ['lang' => $this->selectedLanguage->abbreviation]);
+        } elseif ($user->step === '2') {
+            return redirect()->route('step2to5', ['lang' => $this->selectedLanguage->abbreviation]);
+        } elseif ($user->step === '3') {
+            return redirect()->route('step3to5', ['lang' => $this->selectedLanguage->abbreviation]);
+        } elseif ($user->step === '4') {
+            return redirect()->route('step4to5', ['lang' => $this->selectedLanguage->abbreviation]);
         }
         $user_id = auth()->user()->id;
-        $notifications = Notification::where('is_delete', '0')->where(function ($query) use ($user_id) {
-            // Ratings where type is 1 and ride_id belongs to the user
-            $query->where('type', '1')
-                ->whereHas('ride', function ($query) use ($user_id) {
-                    $query->where('added_by', $user_id);
-                });
-        })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is 2 and booking_id belongs to the user
-                $query->where('type', '2')
-                    ->whereHas('booking', function ($query) use ($user_id) {
-                        $query->where('user_id', $user_id);
-                    });
-            })
-            ->orWhere(function ($query) use ($user_id) {
-                // Ratings where type is null and receiver_id belongs to the user
-                $query->where('type', null)
-                    ->whereHas('receiver', function ($query) use ($user_id) {
-                        $query->where('id', $user_id);
-                    });
-            })
-            ->orderBy('id', 'desc')
-            ->get();
 
         $chats = Message::where(function ($query) use ($user_id) {
             $query->where('sender', $user_id)->orWhere('receiver', $user_id);
@@ -122,7 +88,12 @@ class MyChatsController extends Controller
             })
             ->values();
 
-        return view('my_chats', ['successMessage' => $successMessage, 'chats' => $chats, 'user_id' => $user_id, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage, 'chatsPage' => $chatsPage]);
+        return view('my_chats', [
+            'successMessage' => $successMessage,
+            'chats' => $chats,
+            'user_id' => $user_id,
+            'chatsPage' => $chatsPage
+        ]);
     }
 
 

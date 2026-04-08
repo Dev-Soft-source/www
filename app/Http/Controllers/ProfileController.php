@@ -32,21 +32,18 @@ class ProfileController extends Controller
         if (auth()->check()) {
 
             $user = auth()->user();
-            if ($user->step1 == 0) {
+            if ($user->step == '1') {
                 // personal information
                 return redirect()->route('step1to5', ['lang' => $lang]);
-            } elseif ($user->step2 == 0) {
+            } elseif ($user->step == '2') {
                 // profile image
                 return redirect()->route('step2to5', ['lang' => $lang]);
-            } elseif ($user->step3 == 0) {
+            } elseif ($user->step == '3') {
                 // my vehicle information
                 return redirect()->route('step3to5', ['lang' => $lang]);
-            } elseif ($user->step4 == 0) {
+            } elseif ($user->step == '4') {
                 // driver license information
                 return redirect()->route('step4to5', ['lang' => $lang]);
-            } elseif ($user->step5 == 0) {
-                // phone number verification
-                return redirect()->route('step5to5', ['lang' => $lang]);
             }
             
             $editProfilePage = EditProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);

@@ -61,12 +61,12 @@ class HomeController extends Controller
             // $token = FCMToken::where('user_id', auth()->user()->id)->pluck('token')->first();
             $token = auth()->user()->createToken('auth_token')->plainTextToken;
 
-            // from step5 with skip -> update step5 to 1 (no validations)
-            if (request()->has('skip')) {
-                User::whereId(auth()->user()->id)->update([
-                    'step5' => 2
-                ]);
-            }
+            // // from step5 with skip -> update step5 to 1 (no validations)
+            // if (request()->has('skip')) {
+            //     User::whereId(auth()->user()->id)->update([
+            //         'step5' => 2
+            //     ]);
+            // }
         }
 
 

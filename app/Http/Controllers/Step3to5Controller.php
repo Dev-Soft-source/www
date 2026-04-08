@@ -30,11 +30,11 @@ class Step3to5Controller extends Controller
         $user_id = auth()->user()->id;
 
         // from step2 with skip -> update step2 to 1 and stay on step3 page (no validations)
-        if (request()->has('skip')) {
-            User::whereId($user_id)->update([
-                'step2' => 2
-            ]);
-        }
+        // if (request()->has('skip')) {
+        //     User::whereId($user_id)->update([
+        //         'step2' => 2
+        //     ]);
+        // }
 
         return view('step3to5', [
             'step3Page' => $step3Page,
@@ -88,7 +88,10 @@ class Step3to5Controller extends Controller
         ]);
 
 
-        User::whereId($id)->update(['step3' => 1, 'step' => 4]);
+        User::whereId($id)->update([
+            // 'step3' => 1,
+            'step' => 4
+        ]);
 
         session()->forget('uploaded_profile_image');
 

@@ -121,7 +121,7 @@ class VerifyDriverController extends Controller
             'driver_license_original_upload' => $filename,
             'driver_license_upload' => Carbon::now(),
             'driver' => 2, // Mark driver as pending verification
-            'step4' => 1, // Mark step 4 as completed
+            // 'step4' => 1, // Mark step 4 as completed
         ]);
 
         $user = User::whereId($id)->first();

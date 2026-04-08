@@ -110,7 +110,7 @@ class Step5to5Controller extends Controller
             return redirect()->route('phone_code_step', ['lang' => $this->selectedLanguage->abbreviation]);
         }
 
-        User::whereId($user_id)->update(['step5' => 1]);
+        User::whereId($user_id)->update(['step' => '5']);
 
         // If a post-action return URL is stored in the session, prefer that.
         // This is used to send the user back to the original page after completing step 5.

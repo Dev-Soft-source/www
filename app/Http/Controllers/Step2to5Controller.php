@@ -95,7 +95,7 @@ class Step2to5Controller extends Controller
         }
 
         User::whereId($id)->update([
-            'step2' => 1,
+            // 'step2' => 1,
             'step' => 3
         ]);
 

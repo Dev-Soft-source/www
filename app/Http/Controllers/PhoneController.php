@@ -76,7 +76,10 @@ class PhoneController extends Controller
             // Check verification using Twilio Verify API
             $verificationCheck = $twilio->verify->v2->services($verifyServiceSid)
                 ->verificationChecks
-                ->create($phoneNumber, ['code' => $code]);
+                ->create([
+                    'to' => $phoneNumber,
+                    'code' => $code,
+                ]);
 
             $status = $verificationCheck->status;
 
@@ -284,7 +287,7 @@ class PhoneController extends Controller
                 }
             }
 
-            return redirect()->route('phone_code', ['lang' => $selectedLanguage->abbreviation]);
+            return redirect()->route('phone_code', ['lang' => $this->selectedLanguage->abbreviation]);
         }
 
         $returnUrl = session('return_url_after_action');
@@ -621,9 +624,9 @@ class PhoneController extends Controller
             $phone_number->update(['verified' => '1']);
 
             // Update the step5 field in the users table for the authenticated user
-            if (auth()->check()) {
-                auth()->user()->update(['step5' => 1]);
-            }
+            // if (auth()->check()) {
+            //     auth()->user()->update(['step5' => 1]);
+            // }
 
             // Auto-mark as default if this is the first/only verified phone number
             $verifiedPhoneCount = PhoneNumber::where('user_id', auth()->user()->id)

@@ -18,11 +18,11 @@ class Step4to5Controller extends Controller
         $step4Page = Step4PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         // from step3 with skip -> update step3 to 1 and stay on step4 page (no validations)
-        if (request()->has('skip')) {
-            User::whereId($user->id)->update([
-                'step3' => 2
-            ]);
-        }
+        // if (request()->has('skip')) {
+        //     User::whereId($user->id)->update([
+        //         'step3' => 2
+        //     ]);
+        // }
 
         return view('step4to5', [
             'step4Page' => $step4Page,
@@ -67,7 +67,7 @@ class Step4to5Controller extends Controller
                     'driver_license_original_upload' => null,
                     'driver_license_upload' => null,
                     'driver' => 2,
-                    'step4' => 1,
+                    // 'step4' => 1,
                     'step' => 5
                 ]);
             } elseif ($request->hasFile('driver_liscense')) {
@@ -80,7 +80,7 @@ class Step4to5Controller extends Controller
                     'driver_license_original_upload' => $filename,
                     'driver_license_upload' => Carbon::now(),
                     'driver' => 2,
-                    'step4' => 1,
+                    // 'step4' => 1,
                     'step' => 5
                 ]);
             }

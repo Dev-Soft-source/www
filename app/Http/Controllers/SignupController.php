@@ -453,13 +453,13 @@ class SignupController extends Controller
                 $userLang = $existingUser->fresh()->lang ?: $selectedLanguage->abbreviation;
                 session(['selectedLanguage' => $userLang]);
 
-                if ($existingUser->step1 == 0) {
+                if ($existingUser->step == '1') {
                     return redirect()->route('step1to5', ['lang' => $userLang]);
-                } elseif ($existingUser->step2 == 0) {
+                } elseif ($existingUser->step == '2') {
                     return redirect()->route('step2to5', ['lang' => $userLang]);
-                } elseif ($existingUser->step3 == 0) {
+                } elseif ($existingUser->step == '3') {
                     return redirect()->route('step3to5', ['lang' => $userLang]);
-                } elseif ($existingUser->step4 == 0) {
+                } elseif ($existingUser->step == '4') {
                     return redirect()->route('step4to5', ['lang' => $userLang]);
                 }
 

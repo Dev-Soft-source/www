@@ -171,7 +171,7 @@ class Step1to5Controller extends Controller
             'zipcode' => $request->zipcode,
             'about' => $request->bio,
             'step' => 2,
-            'step1' => 1
+            // 'step1' => 1
         ]);
 
         $user = User::whereId($id)->first();

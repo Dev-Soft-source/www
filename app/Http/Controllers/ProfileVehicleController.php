@@ -149,9 +149,9 @@ class ProfileVehicleController extends Controller
             Mail::to($user->email)->queue(new NewVehicleAddedMail($emailData));
         }
 
-        User::whereId($user->id)->update([
-            'step3' => 1
-        ]);
+        // User::whereId($user->id)->update([
+        //     'step3' => 1
+        // ]);
 
         $notification = Notification::create([
             'type' => null,
