@@ -361,7 +361,7 @@ class HomeController extends Controller
             'package' => $request->custom_amount ? 'nullable' : 'required',
             'custom_amount' => $request->package == 'custom' ? 'required' : 'nullable',
             'name' => $displayName ? 'required' : 'nullable',
-            'email' => $request->notify_coffee_used ? 'required|email' : 'nullable|email',
+            'email' => 'nullable|email',
             'payment_method' => 'required|in:stripe,paypal',
             'donation_acknowledgment' => 'required',
             'terms_privacy' => 'required',
@@ -509,6 +509,13 @@ class HomeController extends Controller
         }
 
         $package_price = $package->price;
+        $payerEmail = trim((string) ($request->email ?: (auth()->user()?->email ?? '')));
+
+        if ($request->notify_coffee_used && empty($payerEmail)) {
+            return back()
+                ->withErrors(['email' => 'Email field is required'])
+                ->withInput();
+        }
 
         if ($request->payment_method == 'stripe') {
             Stripe::setApiKey(config('stripe.secret'));
@@ -614,6 +621,14 @@ class HomeController extends Controller
                 $paypal->setAccessToken($token);
 
                 $planId = $package->paypal_price_id;
+                if (empty($planId)) {
+                    Log::error('Coffee Wall PayPal plan id missing', [
+                        'package_id' => $package->id ?? null,
+                        'frequency' => $request->frequency,
+                    ]);
+                    return redirect()->route('coffee_on_wall', ['lang' => $selectedLanguage->abbreviation])
+                        ->with(['message' => 'Subscription creation failed. Error: PayPal plan is not configured for this package.']);
+                }
 
                 $interval_unit = null;
                 $interval_count = 1;
@@ -634,17 +649,10 @@ class HomeController extends Controller
 
                 $data = [
                     'plan_id' => $planId, // Replace with your actual plan ID
-                    'subscriber' => [
-                        'name' => [
-                            'given_name' => $displayName ? ($request->name ?? '') : 'Anonymous Donor',
-                            'surname' => '',
-                        ],
-                        'email_address' => $request->email ?? (auth()->user()?->email ?? ''),
-                    ],
                     'application_context' => [
                         'return_url' => route('paypal.subscription.success', [
                             'name' => $request->name,
-                            'email' => $request->email,
+                            'email' => $payerEmail,
                             'package_id' => $package->id,
                             'phone' => $request->phone ?? null,
                             // This query param means: "display name checkbox state"
@@ -658,43 +666,55 @@ class HomeController extends Controller
                         'cancel_url' => route('paypal.cancel')
                     ],
                 ];
-
-                // Attach interval and count if applicable
-                if ($interval_unit) {
-                    $data['plan'] = [
-                        'billing_cycles' => [
-                            [
-                                'frequency' => [
-                                    'interval_unit' => $interval_unit,
-                                    'interval_count' => $interval_count,
-                                ],
-                                'tenure_type' => 'REGULAR',
-                                'sequence' => 1,
-                                'total_cycles' => 0, // Ongoing subscription
-                                'pricing_scheme' => [
-                                    'fixed_price' => [
-                                        'value' => $package_price,
-                                        'currency_code' => 'USD',
-                                    ],
-                                ],
-                            ],
+                if (!empty($payerEmail)) {
+                    $data['subscriber'] = [
+                        'name' => [
+                            'given_name' => $displayName ? ($request->name ?? '') : 'Anonymous Donor',
+                            'surname' => '',
                         ],
+                        'email_address' => $payerEmail,
                     ];
                 }
 
                 $responseData = $paypal->createSubscription($data);
+                $approveUrl = null;
+                $links = data_get($responseData, 'links', []);
+                if (is_array($links)) {
+                    foreach ($links as $link) {
+                        $rel = is_array($link) ? ($link['rel'] ?? null) : data_get($link, 'rel');
+                        $href = is_array($link) ? ($link['href'] ?? null) : data_get($link, 'href');
+                        if ($rel === 'approve' && !empty($href)) {
+                            $approveUrl = $href;
+                            break;
+                        }
+                    }
+                    if (!$approveUrl) {
+                        $fallbackHref = is_array($links[0] ?? null)
+                            ? ($links[0]['href'] ?? null)
+                            : data_get($links, '0.href');
+                        if (!empty($fallbackHref)) {
+                            $approveUrl = $fallbackHref;
+                        }
+                    }
+                }
 
-                if (isset($responseData['links'][0]['href'])) {
+                if (!empty($approveUrl)) {
                     $paypalResponse = [
                         'status' => 'Success',
-                        'redirect_url' => $responseData['links'][0]['href']
+                        'redirect_url' => $approveUrl
                     ];
                 } else {
-                    if (isset($responseData->details)) {
-                        $errorMessage = $responseData->details[0]->issue;
-                    } else {
-                        $errorMessage = "An unknown error occurred.";
-                    }
+                    $errorMessage = data_get($responseData, 'details.0.description')
+                        ?? data_get($responseData, 'details.0.issue')
+                        ?? data_get($responseData, 'message')
+                        ?? "An unknown error occurred.";
+
+                    Log::error('Coffee Wall PayPal subscription creation failed', [
+                        'package_id' => $package->id ?? null,
+                        'plan_id' => $planId,
+                        'frequency' => $request->frequency,
+                        'paypal_response' => $responseData,
+                    ]);
 
                     $paypalResponse = [
                         'status' => 'Error',
@@ -703,7 +723,8 @@ class HomeController extends Controller
                 }
 
                 if ($paypalResponse['status'] == 'Error') {
-                    return $paypalResponse['message'];
+                    return redirect()->route('coffee_on_wall', ['lang' => $selectedLanguage->abbreviation])
+                        ->with(['message' => $paypalResponse['message']]);
                 } else if ($paypalResponse['status'] == 'Success') {
                     return redirect()->to($paypalResponse['redirect_url']);
                 }
@@ -719,7 +740,7 @@ class HomeController extends Controller
             $coffeeWallet =  CoffeeWallet::create([
                 'user_id' => auth()->id(),
                 'name' => $displayName ? $request->name : null,
-                'email' => $request->email,
+                'email' => $payerEmail,
                 'phone' => $request->phone,
                 // DB column means: anonymous donor
                 'anonymous' => $displayName ? 0 : 1,

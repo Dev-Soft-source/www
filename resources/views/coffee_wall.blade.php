@@ -27,6 +27,11 @@
         <div class="text-right md:mr-20 text-red-500 text-lg">
             <span class="text-red-500">*</span> {{ $coffeeWallPage->required_field_label ?? 'Indicate required field' }}
         </div>
+        @if (session('message') && str_contains((string) session('message'), 'Subscription creation failed'))
+            <div class="mb-4 rounded border border-red-300 bg-red-50 p-4 text-red-700">
+                <p class="font-FuturaMdCnBT text-lg">{{ session('message') }}</p>
+            </div>
+        @endif
         <div class="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded">
             <div class="px-4 pb-5 flex-auto">
                 <div class="tab-content tab-space">
