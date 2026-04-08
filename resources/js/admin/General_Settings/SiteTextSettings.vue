@@ -1,7 +1,5 @@
 <template>
     <AppLayout>
-        <section class="site-text-section relative md:top-16">
-            <main class="flex-1 max-h-full p-3 bg-gray-200 pb-2 min-h-60 h-full">
                 <div class="relative shadow-md sm:rounded-lg bg-white py-4">
                     <header class="pt-4">
                         <div class="max-w-full mx-auto px-4">
@@ -161,8 +159,6 @@
                         </div>
                     </div>
                 </div>
-            </main>
-        </section>
 
         <!-- Create/Edit Modal -->
         <div v-if="showModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">

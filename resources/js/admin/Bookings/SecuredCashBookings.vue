@@ -35,7 +35,7 @@
                             placeholder="Search for bookings" v-model="quickSearch" />
                     </div>
                 </div>
-                <div class="container space-y-8 mx-auto">
+                <div class="space-y-8 mx-auto">
                     <div class="space-y-2">
                         <div class="bg-white shadow-lg hover:shadow-xl rounded-md overflow-x-auto">
                             <table
@@ -135,8 +135,8 @@
                                                 for="">Payment</label>
                                             <div>Price/Seat: ${{ booking.price }} CAD<br>
                                                 Seats booked: {{ booking.seats }}<br>
-                                                Booking fee: {{ booking . booking_credit }}<br>
-                                                Total cost: {{ booking . total }}<br><br>
+                                                Booking fee: {{ booking.booking_credit }}<br>
+                                                Total cost: {{ booking.total }}<br><br>
                                                 Payment method: {{ booking.payment_method == "secured" ?
                                                     "Secured-Cash" : booking.payment_method }}
                                             </div>
@@ -337,7 +337,7 @@ export default {
                     showCloseButton: true,
                     customClass: {
                         confirmButton: 'inline-flex items-center button-exp-fill',
-                        cancelButton: 'inline-flex items-center bg-red-500 hover:bg-red-600 button-exp-fill cursor-pointer border-red-500 hover:border-red-500',
+                        cancelButton: 'inline-flex items-center button-exp-red-fill',
                     },
                     didOpen: () => {
 
@@ -361,10 +361,10 @@ export default {
                                 cancelButtonText: 'Cancel',
                                 showCloseButton: true,
                                 customClass: {
-                                        confirmButton: 'inline-flex items-center button-exp-fill',
-                                        cancelButton: 'inline-flex items-center bg-red-500 hover:bg-red-600 button-exp-fill cursor-pointer border-red-500 hover:border-red-500',
-                                        input: 'can-exp-input',
-                                    },
+                                    confirmButton: 'inline-flex items-center button-exp-fill',
+                                    cancelButton: 'inline-flex items-center button-exp-red-fill',
+                                    input: 'can-exp-input',
+                                },
                                 didOpen: () => {
                                     const input = document.getElementById('admin-password');
                                     if (input) input.focus();
@@ -406,39 +406,45 @@ export default {
 
 
                 });
-            }
+        }
 
 
 
     },
-created() {
-    this.$store.commit("bookings/setLimit", 100);
-    this.$store.commit("bookings/setSortBy", "id");
-    this.$store.commit("bookings/setSortType", "desc");
-    this.$store.commit("bookings/setSearchParam", '');
-    this.$store.dispatch("bookings/fetchSecuredCashBookings");
-},
-watch: {
-    quickSearch: function () {
-        this.quickSearchFilter();
+    created() {
+        this.$store.commit("bookings/setLimit", 100);
+        this.$store.commit("bookings/setSortBy", "id");
+        this.$store.commit("bookings/setSortType", "desc");
+        this.$store.commit("bookings/setSearchParam", '');
+        this.$store.dispatch("bookings/fetchSecuredCashBookings");
     },
-},
+    watch: {
+        quickSearch: function () {
+            this.quickSearchFilter();
+        },
+    },
 };
 </script>
 <style>
+.swal2-cancel {
+    background-color: #f87171 !important;
+    /* Red background for "Yes, cancel it!" and "Close" */
+    border-color: #f87171 !important;
+    /* Red border */
+    min-width: 60px !important;
+    width: 100% !important;
+}
 
-    .swal2-cancel {
-      background-color: #f87171 !important; /* Red background for "Yes, cancel it!" and "Close" */
-      border-color: #f87171 !important; /* Red border */
-      min-width: 60px !important;
-      width: 100% !important;
-    }
+.swal2-confirm {
+    background-color: #106BC7 !important;
+    /* Blue background for "No, take me back" */
+    border-color: #106BC7 !important;
+    /* Blue border */
+}
 
-    .swal2-confirm {
-      background-color: #106BC7 !important; /* Blue background for "No, take me back" */
-      border-color: #106BC7 !important; /* Blue border */
-    }
-    .swal2-file, .swal2-input, .swal2-textarea {
+.swal2-file,
+.swal2-input,
+.swal2-textarea {
     box-sizing: border-box;
     width: auto;
     transition: border-color .1s, box-shadow .1s;
@@ -449,10 +455,11 @@ watch: {
     color: inherit;
     font-size: 18px !important;
 }
+
 .swal2-html-container {
     z-index: 1;
     justify-content: center;
-    margin:0px !important;
+    margin: 0px !important;
     padding: 0;
     overflow: auto;
     color: inherit;
@@ -463,5 +470,4 @@ watch: {
     word-wrap: break-word;
     word-break: break-word;
 }
-
-  </style>
+</style>

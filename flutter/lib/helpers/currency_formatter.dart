@@ -13,10 +13,9 @@ String _stripTrailingFractionZeros(String s) {
 }
 
 String _formatNumNatural(num n) {
-  if (n % 1 == 0) {
-    return n.toInt().toString();
-  }
-  return _stripTrailingFractionZeros(n.toString());
+  // Avoid floating point artifacts like 128.42000000000002.
+  final normalized = n.toDouble().toStringAsFixed(2);
+  return _stripTrailingFractionZeros(normalized);
 }
 
 String formatCurrencyValue(dynamic value) {

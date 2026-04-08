@@ -39,7 +39,7 @@
                             v-model="quickSearch" />
                     </div>
                 </div>
-                <div class="container space-y-8 mx-auto">
+                <div class="space-y-8 mx-auto">
                     <div class="space-y-2">
                         <div class="bg-white shadow-lg hover:shadow-xl rounded-md overflow-x-auto">
                             <table
@@ -264,14 +264,14 @@ export default {
                 .fire({
                     title: "Are you sure?",
                     text: "You won't be able to revert this!",
-                    
+
                     showCancelButton: true,
                     confirmButtonColor: "#3085d6",
                     cancelButtonColor: "#d33",
                     confirmButtonText: "Yes, delete it!",
                     customClass: {
                         confirmButton: 'inline-flex items-center button-exp-fill',
-                        cancelButton: 'inline-flex items-center bg-red-500 hover:bg-red-600 button-exp-fill cursor-pointer border-red-500 hover:border-red-500',
+                        cancelButton: 'inline-flex items-center button-exp-red-fill',
                     },
                     didOpen: () => {
 

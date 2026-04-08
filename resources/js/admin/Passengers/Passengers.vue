@@ -34,7 +34,7 @@
                             v-model="quickSearch" />
                     </div>
                 </div>
-                <div class="container space-y-8 mx-auto">
+                <div class="space-y-8 mx-auto">
                     <div class="space-y-2">
                         <div class="bg-white shadow-lg hover:shadow-xl rounded-md overflow-x-auto">
                             <table
@@ -108,55 +108,59 @@
                                                 for="">Female</label>
                                             <div v-if="passenger.gender == 'female'">Yes</div>
                                         </td>
-                                        <td
-                                            class="p-2 md:p-3 gap-2 justify-center items-center hidden md:block space-y-2 space-x-2">
-                                            <div class="flex items-center space-x-2">
-                                                <a href="#"
-                                                    class="inline-flex items-center bg-blue-600 hover:bg-blue-500 button-exp-fill cursor-pointer border-blue-600"
+                                        <td class="p-2 md:p-3 hidden md:table-cell">
+                                            <div class="flex items-center gap-2">
+                                                <button type="button"
+                                                    class="h-10 w-10 inline-flex items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-colors"
+                                                    title="Access portal"
                                                     @click.prevent="openNewTab('/access-portal/' + passenger.email)">
-                                                    <span class="whitespace-nowrap">Access portal</span>
-                                                </a>
-                                                <!-- <router-link
-                                                    :to="{ name: 'admin.passenger.index', params: { id: passenger.id } }"
-                                                    class="inline-flex items-center button-exp-fill bg-green-500 hover:bg-green-600 cursor-pointer border-green-500">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                                                    </svg>
-                                                </router-link> -->
-                                                <a :href="$router.resolve({ name: 'admin.passenger.index', params: { id: passenger.id } }).href"
-                                                    target="_blank" rel="noopener noreferrer"
-                                                    class="inline-flex items-center button-exp-fill bg-greenXS hover:bg-greenXS cursor-pointer border-greenXS">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                         viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                        class="w-6 h-6">
+                                                        class="w-5 h-5">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
-                                                            d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                                            d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v10.5a4.5 4.5 0 009 0V13.5m3-3l-3-3m3 3h-9" />
                                                     </svg>
-                                                </a>
-
-                                            </div>
-                                            <div class="flex items-center space-x-2">
-                                                <a v-if="passenger.suspand == 0" href="#"
-                                                    class="inline-flex items-center bg-gray-100 hover:bg-gray-200 hover:border-gray-200 hover:text-black button-exp-fill cursor-pointer border-gray-100 text-black"
-                                                    @click.prevent="suspandUser(passenger)">
-                                                    Suspend
-                                                </a>
-                                                <a v-if="passenger.suspand == 1" href="#"
-                                                    class="inline-flex items-center bg-gray-100 hover:bg-gray-200 hover:border-gray-200 hover:text-black button-exp-fill cursor-pointer border-gray-100 text-black"
-                                                    @click.prevent="unSuspandUser(passenger)">
-                                                    Unsuspend
-                                                </a>
-                                                <a href="#"
-                                                    class="inline-flex items-center bg-red-500 hover:bg-red-600 button-exp-fill cursor-pointer border-red-500 hover:border-red-500"
-                                                    @click.prevent="deletePassenger(passenger)">
+                                                </button>
+                                                <a :href="$router.resolve({ name: 'admin.passenger.index', params: { id: passenger.id } }).href"
+                                                    class="h-10 w-10 inline-flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-colors"
+                                                    title="Open details">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none"
                                                         viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                        class="-ml-0.5 w-4 h-4 mr-2">
+                                                        class="w-5 h-5">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M3.75 6.75h16.5m-16.5 5.25h16.5m-16.5 5.25h16.5" />
+                                                    </svg>
+                                                </a>
+                                                <button v-if="passenger.suspand == 0" type="button"
+                                                    class="h-10 w-10 inline-flex items-center justify-center rounded-lg border border-amber-200 bg-amber-50 text-amber-600 hover:bg-amber-500 hover:text-white transition-colors"
+                                                    title="Suspend user" @click.prevent="suspandUser(passenger)">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                        class="w-5 h-5">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M18 6L6 18M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                                <button v-else type="button"
+                                                    class="h-10 w-10 inline-flex items-center justify-center rounded-lg border border-gray-300 bg-gray-100 text-gray-700 hover:bg-gray-700 hover:text-white transition-colors"
+                                                    title="Unsuspend user" @click.prevent="unSuspandUser(passenger)">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                        class="w-5 h-5">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            d="M4.5 12.75l6 6 9-13.5" />
+                                                    </svg>
+                                                </button>
+                                                <button type="button"
+                                                    class="h-10 w-10 inline-flex items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-colors"
+                                                    title="Delete user" @click.prevent="deletePassenger(passenger)">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                        class="w-5 h-5">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                             d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                                                     </svg>
-                                                    <span>Delete</span>
-                                                </a>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -314,7 +318,7 @@ export default {
                     showCloseButton: true,
                     customClass: {
                         confirmButton: 'inline-flex items-center button-exp-fill',
-                        cancelButton: 'inline-flex items-center bg-red-500 hover:bg-red-600 button-exp-fill cursor-pointer border-red-500 hover:border-red-500',
+                        cancelButton: 'inline-flex items-center button-exp-red-fill',
                     },
                     didOpen: () => {
 
@@ -343,7 +347,7 @@ export default {
                     showCloseButton: true,
                     customClass: {
                         confirmButton: 'inline-flex items-center button-exp-fill',
-                        cancelButton: 'inline-flex items-center bg-red-500 hover:bg-red-600 button-exp-fill cursor-pointer border-red-500 hover:border-red-500',
+                        cancelButton: 'inline-flex items-center button-exp-red-fill',
                     },
                     didOpen: () => {
 
@@ -372,7 +376,7 @@ export default {
                     showCloseButton: true,
                     customClass: {
                         confirmButton: 'inline-flex items-center button-exp-fill',
-                        cancelButton: 'inline-flex items-center bg-red-500 hover:bg-red-600 button-exp-fill cursor-pointer border-red-500 hover:border-red-500',
+                        cancelButton: 'inline-flex items-center button-exp-red-fill',
                     },
                     didOpen: () => {
 
@@ -436,13 +440,13 @@ export default {
 </script>
 
 <style>
-    .swal2-styled.swal2-cancel {
-        border: 0;
-        border-radius: .25em;
-        background: initial;
-        background-color: #6e7881;
-        color: #fff;
-        font-size: 1em;
-        width: fit-content !important;
-    }
+.swal2-styled.swal2-cancel {
+    border: 0;
+    border-radius: .25em;
+    background: initial;
+    background-color: #6e7881;
+    color: #fff;
+    font-size: 1em;
+    width: fit-content !important;
+}
 </style>

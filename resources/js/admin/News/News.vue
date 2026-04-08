@@ -38,7 +38,7 @@
                             placeholder="Search for articles" v-model="quickSearch" />
                     </div>
                 </div>
-                <div class="container space-y-8 mx-auto">
+                <div class="space-y-8 mx-auto">
                     <div class="space-y-2">
                         <div class="bg-white shadow-lg hover:shadow-xl rounded-md overflow-x-auto">
                             <table
@@ -69,7 +69,7 @@
                                         <td class="p-2 md:p-3 border-b md:border-none">
                                             <div class="">
                                                 {{ article?.article_detail && article?.article_detail[0] ? article?.id :
-                                                ''}}
+                                                    '' }}
                                             </div>
                                         </td>
                                         <!-- <td class="p-2 md:p-3 border-b md:border-none">
@@ -80,19 +80,19 @@
                                         <td class="p-2 md:p-3 border-b md:border-none">
                                             <div class="">
                                                 {{ article?.article_detail && article?.article_detail[0] ?
-                                                article?.article_detail[0].title : ''}}
+                                                    article?.article_detail[0].title : '' }}
                                             </div>
                                         </td>
                                         <td class="p-2 md:p-3 border-b md:border-none">
                                             <div class="">
                                                 {{ article?.article_detail && article?.article_detail[0] ?
-                                                article?.agency : ''}}
+                                                    article?.agency : '' }}
                                             </div>
                                         </td>
                                         <td class="p-2 md:p-3 border-b md:border-none">
                                             <div class="">
                                                 {{ article?.article_detail && article?.article_detail[0] ?
-                                                article?.added_on : ''}}
+                                                    article?.added_on : '' }}
                                             </div>
                                         </td>
                                         <td class="p-2 md:p-3 gap-2 justify-center items-center hidden md:flex">
@@ -114,8 +114,7 @@
                                                 <span>Edit</span>
                                             </a>
 
-                                            <a type="button"
-                                                class="inline-flex items-center bg-red-500 hover:bg-red-600 button-exp-fill cursor-pointer border-red-500 hover:border-red-500"
+                                            <a type="button" class="inline-flex items-center button-exp-red-fill"
                                                 @click.prevent="deletearticle(article)">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                     stroke-width="1.5" stroke="currentColor"

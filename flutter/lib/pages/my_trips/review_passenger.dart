@@ -40,7 +40,10 @@ class ReviewPassengerPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         leading: safeBackButton(context),
-        title: Obx(() => secondAppBarWidget(context: context, title: "${controller.labelTextTripDetail['review_passengers_heading'] ?? "Review passengers"}")),
+        title: Obx(() => secondAppBarWidget(
+            context: context,
+            title:
+                "${controller.labelTextTripDetail['review_passengers_heading'] ?? "Review passengers"}")),
         backgroundColor: primaryColor,
       ),
       body: Obx(() {
@@ -56,7 +59,11 @@ class ReviewPassengerPage extends StatelessWidget {
                 itemCount: bookings.length,
                 itemBuilder: (context, index) {
                   final booking = bookings[index];
-                  final passenger = booking is Map ? booking['passenger'] : null;
+                  final passenger =
+                      booking is Map ? booking['passenger'] : null;
+
+                  final passengerAverageRating =
+                      booking['passenger_average_rating'];
 
                   return Container(
                     padding: const EdgeInsets.all(15.0),
@@ -78,7 +85,8 @@ class ReviewPassengerPage extends StatelessWidget {
                                 width: 60.0,
                                 height: 60.0,
                                 imagePath: passenger != null
-                                    ? (passenger['profile_image'] ?? "").toString()
+                                    ? (passenger['profile_image'] ?? "")
+                                        .toString()
                                     : "",
                                 imageType: "network",
                                 context: context,
@@ -96,14 +104,26 @@ class ReviewPassengerPage extends StatelessWidget {
                                     ),
                                     10.heightBox,
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
                                       children: [
-                                        Image.asset(reviewsImage, width: 20),
-                                        5.widthBox,
-                                        txt18Size(
-                                          context: context,
-                                          title: _formatPassengerRating(booking),
-                                        ),
+                                        if (passengerAverageRating == null ||
+                                            passengerAverageRating == 0) ...[
+                                          txt18Size(
+                                            context: context,
+                                            title: controller.labelTextDetail[
+                                                    'no_reviews_label'] ??
+                                                "No review yet",
+                                          ),
+                                        ] else ...[
+                                          Image.asset(reviewsImage, width: 20),
+                                          5.widthBox,
+                                          txt18Size(
+                                            context: context,
+                                            title:
+                                                _formatPassengerRating(booking),
+                                          ),
+                                        ]
                                       ],
                                     )
                                   ],
@@ -120,8 +140,7 @@ class ReviewPassengerPage extends StatelessWidget {
                                   ? booking['rating']['id']
                                   : null;
                               if (rid != null) {
-                                Get.toNamed(
-                                    '/review_detail/$rid/to/passenger');
+                                Get.toNamed('/review_detail/$rid/to/passenger');
                               }
                             },
                             child: textWithUnderLine(
@@ -178,4 +197,3 @@ class ReviewPassengerPage extends StatelessWidget {
     );
   }
 }
-

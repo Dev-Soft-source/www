@@ -4,17 +4,19 @@
             <div class="px-4">
                 <div class="sm:flex sm:items-center">
                     <div class="sm:flex-auto">
-                        <h3 class="can-exp-h2 text-primary text-center sm:text-left" v-if="verify_phones">Verify Phone numbers <small v-if="verify_phones">({{ verify_phones.length }})</small></h3>
+                        <h3 class="can-exp-h2 text-primary text-center sm:text-left" v-if="verify_phones">Verify Phone
+                            numbers <small v-if="verify_phones">({{ verify_phones.length }})</small></h3>
                     </div>
                 </div>
                 <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row items-center justify-between gap-4 py-4">
                     <div>
                         show
-                       <select class="rounded-md px-3 pr-8 py-1" v-model="limit" @input="updateLimit($event.target.value)">
+                        <select class="rounded-md px-3 pr-8 py-1" v-model="limit"
+                            @input="updateLimit($event.target.value)">
                             <option value="10">10</option>
                             <option value="25">25</option>
                             <option value="50">50</option>
-                             <option value="100">100</option>
+                            <option value="100">100</option>
                         </select>
                         verify phone numbers
                     </div>
@@ -33,10 +35,11 @@
                             placeholder="Search for verify phone numbers" v-model="quickSearch" />
                     </div>
                 </div>
-                <div class="container space-y-8 mx-auto">
+                <div class="space-y-8 mx-auto">
                     <div class="space-y-2">
                         <div class="bg-white shadow-lg hover:shadow-xl rounded-md overflow-x-auto">
-                            <table class="table overflow-x-auto table-auto w-full leading-normal text-base md:text-base lg:text-lg">
+                            <table
+                                class="table overflow-x-auto table-auto w-full leading-normal text-base md:text-base lg:text-lg">
                                 <thead class="text-white">
                                     <tr class="hidden md:table-row">
                                         <th
@@ -63,13 +66,12 @@
                                         <td class="p-2 md:p-3 border-b md:border-none relative">
                                             <div class="flex justify-between items-center">
                                                 <div>
-                                                    <label
-                                                        class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
+                                                    <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                         for="">#ID</label>
                                                 </div>
                                             </div>
                                             <div class="font-medium text-gray-900 flex mt-1 items-center gap-1">
-                                                <span>{{verify_bank.random_id}}</span>
+                                                <span>{{ verify_bank.random_id }}</span>
                                             </div>
                                         </td>
                                         <td class="p-2 md:p-3 md:border-none">
@@ -80,9 +82,10 @@
                                         <td class="p-2 md:p-3 border-b md:border-none">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Verification code</label>
-                                            <div class="">{{ verify_bank . verification_code }}</div>
+                                            <div class="">{{ verify_bank.verification_code }}</div>
                                         </td>
-                                        <td class="p-2 md:p-3 gap-2 justify-center items-center hidden md:block space-y-2 space-x-2">
+                                        <td
+                                            class="p-2 md:p-3 gap-2 justify-center items-center hidden md:block space-y-2 space-x-2">
                                             <div class="flex items-center space-x-2">
                                                 <a href="#"
                                                     class="inline-flex items-center bg-blue-500 hover:bg-blue-600 button-exp-fill cursor-pointer border-blue-500"
@@ -138,40 +141,43 @@
                                     </div>
                                 </div>
                             </div> -->
-                            <div class="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6" v-if="pagination && pagination.links && pagination.links.length">
-                            <div class="flex flex-col sm:flex-col md:flex-row gap-4 justify-between items-center w-full">
-                                <div>
-                                    <p class="text-sm text-gray-700" v-if="pagination.current_page">
-                                        Page {{ pagination.current_page }} of {{ pagination.last_page }}
-                                    </p>
-                                </div>
-                                <div>
-                                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                        <a href="#"
-                                            class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50"
-                                            :class="{ 'opacity-50 cursor-not-allowed': !pagination.prev_page_url }"
-                                            @click.prevent="pagination.prev_page_url && fetchVerifyPhones(pagination.prev_page_url)">
-                                            Previous
-                                        </a>
-                                        <template v-for="(link, index) in pagination.links" :key="index">
-                                            <a v-if="link.url && !link.label.includes('Previous') && !link.label.includes('Next')"
-                                                href="#"
-                                                class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium"
-                                                :class="{ 'bg-primary text-white': link.active, 'bg-white text-gray-800': !link.active }"
-                                                @click.prevent="fetchVerifyPhones(link.url)">
-                                                <span v-html="link.label"></span>
+                            <div class="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6"
+                                v-if="pagination && pagination.links && pagination.links.length">
+                                <div
+                                    class="flex flex-col sm:flex-col md:flex-row gap-4 justify-between items-center w-full">
+                                    <div>
+                                        <p class="text-sm text-gray-700" v-if="pagination.current_page">
+                                            Page {{ pagination.current_page }} of {{ pagination.last_page }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                                            aria-label="Pagination">
+                                            <a href="#"
+                                                class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50"
+                                                :class="{ 'opacity-50 cursor-not-allowed': !pagination.prev_page_url }"
+                                                @click.prevent="pagination.prev_page_url && fetchVerifyPhones(pagination.prev_page_url)">
+                                                Previous
                                             </a>
-                                        </template>
-                                        <a href="#"
-                                            class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50"
-                                            :class="{ 'opacity-50 cursor-not-allowed': !pagination.next_page_url }"
-                                            @click.prevent="pagination.next_page_url && fetchVerifyPhones(pagination.next_page_url)">
-                                            Next
-                                        </a>
-                                    </nav>
+                                            <template v-for="(link, index) in pagination.links" :key="index">
+                                                <a v-if="link.url && !link.label.includes('Previous') && !link.label.includes('Next')"
+                                                    href="#"
+                                                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium"
+                                                    :class="{ 'bg-primary text-white': link.active, 'bg-white text-gray-800': !link.active }"
+                                                    @click.prevent="fetchVerifyPhones(link.url)">
+                                                    <span v-html="link.label"></span>
+                                                </a>
+                                            </template>
+                                            <a href="#"
+                                                class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50"
+                                                :class="{ 'opacity-50 cursor-not-allowed': !pagination.next_page_url }"
+                                                @click.prevent="pagination.next_page_url && fetchVerifyPhones(pagination.next_page_url)">
+                                                Next
+                                            </a>
+                                        </nav>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
                         </div>
                     </div>
                 </div>
@@ -197,13 +203,13 @@ export default {
             validationErros: (state) => state.verify_phones.validationErros,
         }),
         limit: {
-      get() {
-        return this.$store.state.verify_phones.limit;
-      },
-      set(value) {
-        this.$store.commit('verify_phones/setLimit', value);
-      }
-    }
+            get() {
+                return this.$store.state.verify_phones.limit;
+            },
+            set(value) {
+                this.$store.commit('verify_phones/setLimit', value);
+            }
+        }
     },
     data() {
         return {
@@ -234,12 +240,12 @@ export default {
         }, 500),
         rejectWithdrawal(verify_bank) {
             this.$store.dispatch("verify_phones/rejectWithdrawal", {
-                    id: verify_bank.id,
-                }).then(() => {
-                    this.$store.dispatch("verify_phones/fetchVerifyPhones");
-                }).catch((error) => {
-                    console.error("Error rejecting withdrawal:", error);
-                });
+                id: verify_bank.id,
+            }).then(() => {
+                this.$store.dispatch("verify_phones/fetchVerifyPhones");
+            }).catch((error) => {
+                console.error("Error rejecting withdrawal:", error);
+            });
         },
     },
     created() {
@@ -257,13 +263,13 @@ export default {
 };
 </script>
 <style>
-    .swal2-styled.swal2-cancel {
-        border: 0;
-        border-radius: .25em;
-        background: initial;
-        background-color: #6e7881;
-        color: #fff;
-        font-size: 1em;
-        width: fit-content !important;
-    }
+.swal2-styled.swal2-cancel {
+    border: 0;
+    border-radius: .25em;
+    background: initial;
+    background-color: #6e7881;
+    color: #fff;
+    font-size: 1em;
+    width: fit-content !important;
+}
 </style>

@@ -38,7 +38,7 @@
                             v-model="quickSearch" />
                     </div>
                 </div>
-                <div class="container space-y-8 mx-auto">
+                <div class="space-y-8 mx-auto">
                     <div class="space-y-2">
                         <div class="bg-white shadow-lg hover:shadow-xl rounded-md overflow-x-auto">
                             <table
@@ -80,8 +80,7 @@
                                                 <span>Edit</span>
                                             </a>
 
-                                            <a type="button"
-                                                class="inline-flex items-center bg-red-500 hover:bg-red-600 button-exp-fill cursor-pointer border-red-500 hover:border-red-500"
+                                            <a type="button" class="inline-flex items-center button-exp-red-fill"
                                                 @click.prevent="deletevideo(video)">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                     stroke-width="1.5" stroke="currentColor"

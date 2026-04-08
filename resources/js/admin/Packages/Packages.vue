@@ -39,7 +39,7 @@
                             placeholder="Search for packages" v-model="quickSearch" />
                     </div>
                 </div>
-                <div class="container space-y-8 mx-auto">
+                <div class="space-y-8 mx-auto">
                     <div class="space-y-2">
                         <div class="bg-white shadow-lg hover:shadow-xl rounded-md overflow-x-auto">
                             <table
@@ -73,14 +73,16 @@
                                             </div> -->
                                             <div class="font-medium text-gray-900 flex mt-1 items-center gap-1">
                                                 <span v-if="pack?.package_detail && pack.package_detail.length > 0">{{
-                                                    pack . package_detail[0] . name }}</span>
+                                                    pack.package_detail[0].name }}</span>
                                             </div>
                                         </td>
                                         <td class="py-2 md:p-3 md:border-none">
                                             <!-- <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Price</label> -->
-                                            <div >
-                                                <span class="font-medium" :class="{ 'p-2 rounded  bg-green-200': pack?.is_default }">{{ pack?.price }}</span>
+                                            <div>
+                                                <span class="font-medium"
+                                                    :class="{ 'p-2 rounded  bg-green-200': pack?.is_default }">{{
+                                                        pack?.price }}</span>
                                             </div>
                                         </td>
                                         <td class="p-2 md:p-3 gap-2 justify-center items-center hidden md:flex">
@@ -107,8 +109,7 @@
                                                 <span>Edit</span>
                                             </a>
 
-                                            <a href="#"
-                                                class="inline-flex items-center bg-red-500 hover:bg-red-600 button-exp-fill cursor-pointer border-red-500 hover:border-red-500"
+                                            <a href="#" class="inline-flex items-center button-exp-red-fill"
                                                 @click.prevent="deletePackage(pack?.id)">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                                     stroke-width="1.5" stroke="currentColor"

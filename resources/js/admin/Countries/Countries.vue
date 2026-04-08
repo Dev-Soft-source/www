@@ -261,7 +261,7 @@ export default {
                     showCloseButton: true,
                     customClass: {
                         confirmButton: 'inline-flex items-center button-exp-fill',
-                        cancelButton: 'inline-flex items-center bg-red-500 hover:bg-red-600 button-exp-fill cursor-pointer border-red-500 hover:border-red-500',
+                        cancelButton: 'inline-flex items-center button-exp-red-fill',
                     },
                     didOpen: () => {
 

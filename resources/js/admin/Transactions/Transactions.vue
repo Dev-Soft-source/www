@@ -4,17 +4,19 @@
             <div class="px-4">
                 <div class="sm:flex sm:items-center">
                     <div class="sm:flex-auto">
-                        <h3 class="can-exp-h2 text-primary text-center sm:text-left" v-if="transactions">All transactions <small v-if="transactions">({{ transactions.length }})</small></h3>
+                        <h3 class="can-exp-h2 text-primary text-center sm:text-left" v-if="transactions">All
+                            transactions <small v-if="transactions">({{ transactions.length }})</small></h3>
                     </div>
                 </div>
                 <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row items-center justify-between gap-4 py-4">
                     <div>
                         show
-                       <select class="rounded-md px-3 pr-8 py-1" v-model="limit" @input="updateLimit($event.target.value)">
+                        <select class="rounded-md px-3 pr-8 py-1" v-model="limit"
+                            @input="updateLimit($event.target.value)">
                             <option value="10">10</option>
                             <option value="25">25</option>
                             <option value="50">50</option>
-                             <option value="100">100</option>
+                            <option value="100">100</option>
                         </select>
                         transactions
                     </div>
@@ -33,10 +35,11 @@
                             placeholder="Search for transactions" v-model="quickSearch" />
                     </div>
                 </div>
-                <div class="container space-y-8 mx-auto">
+                <div class="space-y-8 mx-auto">
                     <div class="space-y-2">
                         <div class="bg-white shadow-lg hover:shadow-xl rounded-md overflow-x-auto">
-                            <table class="table overflow-x-auto table-auto w-full leading-normal text-base md:text-base lg:text-lg">
+                            <table
+                                class="table overflow-x-auto table-auto w-full leading-normal text-base md:text-base lg:text-lg">
                                 <thead class="text-white">
                                     <tr class="hidden md:table-row">
                                         <th
@@ -71,45 +74,47 @@
                                         <td class="p-2 md:p-3 border-b md:border-none relative">
                                             <div class="flex justify-between items-center">
                                                 <div>
-                                                    <label
-                                                        class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
+                                                    <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                         for="">#ID</label>
                                                 </div>
                                             </div>
                                             <div class="font-medium text-gray-900 flex mt-1 items-center gap-1">
-                                                <router-link
-                                                    v-if="transaction.ride_id"
-                                                    :to="{ name: 'admin.ride.index', params: { id: transaction.ride_id } }"
-                                                >
+                                                <router-link v-if="transaction.ride_id"
+                                                    :to="{ name: 'admin.ride.index', params: { id: transaction.ride_id } }">
                                                     {{ transaction.random_id }}
                                                 </router-link>
                                                 <span v-else>{{ transaction.random_id }}</span>
                                             </div>
                                         </td>
                                         <td class="p-2 md:p-3 md:border-none">
-                                            <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
-                                                for="">From user</label>
-                                            <div>{{ transaction . passenger_first_name }} {{ transaction . passenger_last_name }} (passenger)<br><small>{{ transaction . passenger_email }}</small> </div>
+                                            <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl" for="">From
+                                                user</label>
+                                            <div>{{ transaction.passenger_first_name }} {{ transaction.
+                                                passenger_last_name }} (passenger)<br><small>{{ transaction.
+                                                    passenger_email }}</small> </div>
                                         </td>
                                         <td class="p-2 md:p-3 border-b md:border-none">
-                                            <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
-                                                for="">To user</label>
-                                            <div class="">{{ transaction . driver_first_name }} {{ transaction . driver_last_name }} (driver)<br><small>{{ transaction . driver_email }}</small> </div>
+                                            <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl" for="">To
+                                                user</label>
+                                            <div class="">{{ transaction.driver_first_name }} {{ transaction.
+                                                driver_last_name }} (driver)<br><small>{{ transaction.driver_email
+                                                    }}</small> </div>
                                         </td>
                                         <td class="p-2 md:p-3 md:border-none">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Transaction details</label>
-                                            <div>{{ getTransactionDetail(transaction . type) }} ({{ transaction.ride_id }})</div>
+                                            <div>{{ getTransactionDetail(transaction.type) }} ({{ transaction.ride_id
+                                                }})</div>
                                         </td>
                                         <td class="p-2 md:p-3 md:border-none">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Amount</label>
-                                            <div>{{ transaction . price }}</div>
+                                            <div>{{ transaction.price }}</div>
                                         </td>
                                         <td class="p-2 md:p-3 md:border-none">
-                                            <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
-                                                for="">On date</label>
-                                            <div>{{ transaction . on_date }}</div>
+                                            <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl" for="">On
+                                                date</label>
+                                            <div>{{ transaction.on_date }}</div>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -158,17 +163,20 @@
                                     </div>
                                 </div>
                             </div> -->
-                            
+
                         </div>
-                        <div class="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6" v-if="pagination && pagination.links && pagination.links.length">
-                            <div class="flex flex-col sm:flex-col md:flex-row gap-4 justify-between items-center w-full">
+                        <div class="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6"
+                            v-if="pagination && pagination.links && pagination.links.length">
+                            <div
+                                class="flex flex-col sm:flex-col md:flex-row gap-4 justify-between items-center w-full">
                                 <div>
                                     <p class="text-sm text-gray-700" v-if="pagination.current_page">
                                         Page {{ pagination.current_page }} of {{ pagination.last_page }}
                                     </p>
                                 </div>
                                 <div>
-                                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                                        aria-label="Pagination">
                                         <a href="#"
                                             class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50"
                                             :class="{ 'opacity-50 cursor-not-allowed': !pagination.prev_page_url }"
@@ -217,13 +225,13 @@ export default {
             loading: (state) => state.transactions.loading,
         }),
         limit: {
-      get() {
-        return this.$store.state.transactions.limit;
-      },
-      set(value) {
-        this.$store.commit('transactions/setLimit', value);
-      }
-    }
+            get() {
+                return this.$store.state.transactions.limit;
+            },
+            set(value) {
+                this.$store.commit('transactions/setLimit', value);
+            }
+        }
     },
     data() {
         return {

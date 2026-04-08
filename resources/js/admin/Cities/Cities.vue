@@ -39,7 +39,7 @@
                             v-model="quickSearch" />
                     </div>
                 </div>
-                <div class="container space-y-8 mx-auto">
+                <div class="space-y-8 mx-auto">
                     <div class="space-y-2">
                         <div class="bg-white shadow-lg hover:shadow-xl rounded-md overflow-x-auto">
                             <table
@@ -274,7 +274,7 @@ export default {
                     showCloseButton: true,
                     customClass: {
                         confirmButton: 'inline-flex items-center button-exp-fill',
-                        cancelButton: 'inline-flex items-center bg-red-500 hover:bg-red-600 button-exp-fill cursor-pointer border-red-500 hover:border-red-500',
+                        cancelButton: 'inline-flex items-center button-exp-red-fill',
                     },
                     didOpen: () => {
 

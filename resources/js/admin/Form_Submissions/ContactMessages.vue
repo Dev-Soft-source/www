@@ -10,11 +10,12 @@
                 <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row items-center justify-between gap-4 py-4">
                     <div>
                         show
-                       <select class="rounded-md px-3 pr-8 py-1" v-model="limit" @input="updateLimit($event.target.value)">
+                        <select class="rounded-md px-3 pr-8 py-1" v-model="limit"
+                            @input="updateLimit($event.target.value)">
                             <option value="10">10</option>
                             <option value="25">25</option>
                             <option value="50">50</option>
-                             <option value="100">100</option>
+                            <option value="100">100</option>
                         </select>
                         messages
                     </div>
@@ -29,14 +30,15 @@
                             </svg>
                         </div>
                         <input type="text" id="table-search-messages"
-                            class="block pl-10 w-full md:w-80 bg-white can-exp-input"
-                            placeholder="Search for messages" v-model="quickSearch" />
+                            class="block pl-10 w-full md:w-80 bg-white can-exp-input" placeholder="Search for messages"
+                            v-model="quickSearch" />
                     </div>
                 </div>
-                <div class="container space-y-8 mx-auto">
+                <div class="space-y-8 mx-auto">
                     <div class="space-y-2">
                         <div class="bg-white shadow-lg hover:shadow-xl rounded-md overflow-x-auto">
-                            <table class="table overflow-x-auto table-auto w-full leading-normal text-base md:text-base lg:text-lg">
+                            <table
+                                class="table overflow-x-auto table-auto w-full leading-normal text-base md:text-base lg:text-lg">
                                 <thead class="text-white">
                                     <tr class="hidden md:table-row">
                                         <th
@@ -51,19 +53,27 @@
                                             class="sticky top-0 z-10 bg-primary backdrop-blur backdrop-filter py-3.5 pl-3 pr-3 text-left font-FuturaMdCnBT text-white lg:text-xl md:text-lg text-lg font-normal">
                                             Message
                                         </th>
-                                        <th
-                                            class="sticky top-0 z-10 bg-primary backdrop-blur backdrop-filter py-3.5 pl-3 pr-3 text-left font-FuturaMdCnBT text-white lg:text-xl md:text-lg text-lg font-normal cursor-pointer hover:opacity-90 select-none"
+                                        <th class="sticky top-0 z-10 bg-primary backdrop-blur backdrop-filter py-3.5 pl-3 pr-3 text-left font-FuturaMdCnBT text-white lg:text-xl md:text-lg text-lg font-normal cursor-pointer hover:opacity-90 select-none"
                                             @click="sortByDate">
                                             <div class="flex items-center gap-2">
                                                 <span>Send date</span>
-                                                <svg v-if="sortBy === 'created_at' && sortType === 'asc'" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                                                <svg v-if="sortBy === 'created_at' && sortType === 'asc'"
+                                                    class="w-4 h-4 text-white" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M5 15l7-7 7 7" />
                                                 </svg>
-                                                <svg v-else-if="sortBy === 'created_at' && sortType === 'desc'" class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                                <svg v-else-if="sortBy === 'created_at' && sortType === 'desc'"
+                                                    class="w-4 h-4 text-white" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M19 9l-7 7-7-7" />
                                                 </svg>
-                                                <svg v-else class="w-4 h-4 text-white opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                                                <svg v-else class="w-4 h-4 text-white opacity-50" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                                                 </svg>
                                             </div>
                                         </th>
@@ -75,23 +85,23 @@
                                         <td class="py-2 md:p-3 md:border-none">
                                             <!-- <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Sender</label> -->
-                                            <div class="">{{ message . name }}</div>
-                                            <div class=""><small>{{ message . email }}</small></div>
+                                            <div class="">{{ message.name }}</div>
+                                            <div class=""><small>{{ message.email }}</small></div>
                                         </td>
                                         <td class="py-2 md:p-3 md:border-none">
                                             <!-- <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Phone</label> -->
-                                            <div class="">{{ message . phone }}</div>
+                                            <div class="">{{ message.phone }}</div>
                                         </td>
                                         <td class="py-2 md:p-3 md:border-none">
                                             <!-- <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Message</label> -->
-                                            <div>{{ message . message }}</div>
+                                            <div>{{ message.message }}</div>
                                         </td>
                                         <td class="py-2 md:p-3 md:border-none">
                                             <!-- <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Send date</label> -->
-                                            <div>{{ message . created_at }}</div>
+                                            <div>{{ message.created_at }}</div>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -141,40 +151,43 @@
                                     </div>
                                 </div>
                             </div> -->
-                            <div class="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6" v-if="pagination && pagination.links && pagination.links.length">
-                            <div class="flex flex-col sm:flex-col md:flex-row gap-4 justify-between items-center w-full">
-                                <div>
-                                    <p class="text-sm text-gray-700" v-if="pagination.current_page">
-                                        Page {{ pagination.current_page }} of {{ pagination.last_page }}
-                                    </p>
-                                </div>
-                                <div>
-                                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                        <a href="#"
-                                            class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50"
-                                            :class="{ 'opacity-50 cursor-not-allowed': !pagination.prev_page_url }"
-                                            @click.prevent="pagination.prev_page_url && fetchMessages(pagination.prev_page_url)">
-                                            Previous
-                                        </a>
-                                        <template v-for="(link, index) in pagination.links" :key="index">
-                                            <a v-if="link.url && !link.label.includes('Previous') && !link.label.includes('Next')"
-                                                href="#"
-                                                class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium"
-                                                :class="{ 'bg-primary text-white': link.active, 'bg-white text-gray-800': !link.active }"
-                                                @click.prevent="fetchMessages(link.url)">
-                                                <span v-html="link.label"></span>
+                            <div class="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6"
+                                v-if="pagination && pagination.links && pagination.links.length">
+                                <div
+                                    class="flex flex-col sm:flex-col md:flex-row gap-4 justify-between items-center w-full">
+                                    <div>
+                                        <p class="text-sm text-gray-700" v-if="pagination.current_page">
+                                            Page {{ pagination.current_page }} of {{ pagination.last_page }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                                            aria-label="Pagination">
+                                            <a href="#"
+                                                class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50"
+                                                :class="{ 'opacity-50 cursor-not-allowed': !pagination.prev_page_url }"
+                                                @click.prevent="pagination.prev_page_url && fetchMessages(pagination.prev_page_url)">
+                                                Previous
                                             </a>
-                                        </template>
-                                        <a href="#"
-                                            class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50"
-                                            :class="{ 'opacity-50 cursor-not-allowed': !pagination.next_page_url }"
-                                            @click.prevent="pagination.next_page_url && fetchMessages(pagination.next_page_url)">
-                                            Next
-                                        </a>
-                                    </nav>
+                                            <template v-for="(link, index) in pagination.links" :key="index">
+                                                <a v-if="link.url && !link.label.includes('Previous') && !link.label.includes('Next')"
+                                                    href="#"
+                                                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium"
+                                                    :class="{ 'bg-primary text-white': link.active, 'bg-white text-gray-800': !link.active }"
+                                                    @click.prevent="fetchMessages(link.url)">
+                                                    <span v-html="link.label"></span>
+                                                </a>
+                                            </template>
+                                            <a href="#"
+                                                class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50"
+                                                :class="{ 'opacity-50 cursor-not-allowed': !pagination.next_page_url }"
+                                                @click.prevent="pagination.next_page_url && fetchMessages(pagination.next_page_url)">
+                                                Next
+                                            </a>
+                                        </nav>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
                         </div>
                     </div>
                 </div>
@@ -202,10 +215,10 @@ export default {
         }),
         limit: {
             get() {
-              return this.$store.state.messages.limit;
+                return this.$store.state.messages.limit;
             },
             set(value) {
-              this.$store.commit('messages/setLimit', value);
+                this.$store.commit('messages/setLimit', value);
             }
         }
     },

@@ -34,7 +34,7 @@
                             placeholder="Search for no shows" v-model="quickSearch" />
                     </div>
                 </div>
-                <div class="container space-y-8 mx-auto">
+                <div class="space-y-8 mx-auto">
                     <div class="space-y-2">
                         <div class="bg-white shadow-lg hover:shadow-xl rounded-md overflow-x-auto">
                             <table
@@ -71,23 +71,34 @@
                                         <td class="p-2 md:p-3 border-b md:border-none">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Ride</label>
-                                            <div v-if="no_show?.ride?.ride_detail?.length">{{ no_show.ride.ride_detail[0]?.departure }} to {{ no_show.ride.ride_detail[0]?.destination }}</div>
+                                            <div v-if="no_show?.ride?.ride_detail?.length">{{
+                                                no_show.ride.ride_detail[0]?.departure }} to {{
+                                                    no_show.ride.ride_detail[0]?.destination }}</div>
                                             <div v-else>-</div>
                                         </td>
                                         <td class="p-2 md:p-3 md:border-none">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Ride's date</label>
                                             <div>
-                                                {{ no_show?.ride?.date || '-' }}<br><small>{{ no_show?.ride?.time || '' }}</small>
+                                                {{ no_show?.ride?.date || '-' }}<br><small>{{ no_show?.ride?.time || ''
+                                                }}</small>
                                             </div>
                                         </td>
                                         <td
                                             class="p-2 md:p-3 gap-2 justify-center items-center hidden md:block space-y-2 space-x-2">
-                                            <div v-if="no_show.status == '1'" class="flex justify-center flex-col items-center space-x-2">
-                                                <div v-if="no_show?.user?.admin_deactive_account == '1'">Deactivate user account</div>
-                                                <div v-if="no_show?.user?.block_booking == '1' && $route.query.type == 'passengers'">Block booking</div>
-                                                <div v-if="no_show?.user?.block_post_ride == '1' && $route.query.type == 'drivers'">Block post ride</div>
-                                                <div v-if="no_show?.user?.block_review_rating == '1' && $route.query.type == 'drivers'">Block review rating</div>
+                                            <div v-if="no_show.status == '1'"
+                                                class="flex justify-center flex-col items-center space-x-2">
+                                                <div v-if="no_show?.user?.admin_deactive_account == '1'">Deactivate user
+                                                    account</div>
+                                                <div
+                                                    v-if="no_show?.user?.block_booking == '1' && $route.query.type == 'passengers'">
+                                                    Block booking</div>
+                                                <div
+                                                    v-if="no_show?.user?.block_post_ride == '1' && $route.query.type == 'drivers'">
+                                                    Block post ride</div>
+                                                <div
+                                                    v-if="no_show?.user?.block_review_rating == '1' && $route.query.type == 'drivers'">
+                                                    Block review rating</div>
                                                 <button class="inline-flex items-center button-exp-fill cursor-pointer"
                                                     type="button" @click.prevent="undoRejectWithdrawal(no_show)">
                                                     Undo Action
@@ -119,26 +130,26 @@
                                     <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
                                         aria-label="Pagination">
                                         <a href="#"
-                                                class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50"
-                                                :class="{ 'opacity-50 cursor-not-allowed': !pagination.prev_page_url }"
-                                                @click.prevent="pagination.prev_page_url && fetchNoShows(pagination.prev_page_url)">
-                                                Previous
+                                            class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50"
+                                            :class="{ 'opacity-50 cursor-not-allowed': !pagination.prev_page_url }"
+                                            @click.prevent="pagination.prev_page_url && fetchNoShows(pagination.prev_page_url)">
+                                            Previous
+                                        </a>
+                                        <template v-for="(link, index) in pagination.links" :key="index">
+                                            <a v-if="link.url && !link.label.includes('Previous') && !link.label.includes('Next')"
+                                                href="#"
+                                                class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium"
+                                                :class="{ 'bg-primary text-white': link.active, 'bg-white text-gray-800': !link.active }"
+                                                @click.prevent="fetchNoShows(link.url)">
+                                                <span v-html="link.label"></span>
                                             </a>
-                                            <template v-for="(link, index) in pagination.links" :key="index">
-                                                <a v-if="link.url && !link.label.includes('Previous') && !link.label.includes('Next')"
-                                                    href="#"
-                                                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium"
-                                                    :class="{ 'bg-primary text-white': link.active, 'bg-white text-gray-800': !link.active }"
-                                                    @click.prevent="fetchNoShows(link.url)">
-                                                    <span v-html="link.label"></span>
-                                                </a>
-                                            </template>
-                                            <a href="#"
-                                                class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50"
-                                                :class="{ 'opacity-50 cursor-not-allowed': !pagination.next_page_url }"
-                                                @click.prevent="pagination.next_page_url && fetchNoShows(pagination.next_page_url)">
-                                                Next
-                                            </a>
+                                        </template>
+                                        <a href="#"
+                                            class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50"
+                                            :class="{ 'opacity-50 cursor-not-allowed': !pagination.next_page_url }"
+                                            @click.prevent="pagination.next_page_url && fetchNoShows(pagination.next_page_url)">
+                                            Next
+                                        </a>
                                     </nav>
                                 </div>
                             </div>
@@ -169,7 +180,8 @@
                         <select v-model="rejectionReason" required>
                             <option value="" disabled>Select an action</option>
                             <option value="1">Deactive user account</option>
-                            <option v-if="$route.query.type == 'passengers'" value="2">Prevent from booking, but allow posting
+                            <option v-if="$route.query.type == 'passengers'" value="2">Prevent from booking, but allow
+                                posting
                             </option>
                             <option v-if="$route.query.type == 'drivers'" value="3">Cannot post a ride but book a ride
                             </option>
@@ -268,7 +280,7 @@ export default {
                     showCloseButton: true,
                     customClass: {
                         confirmButton: 'inline-flex items-center button-exp-fill',
-                        cancelButton: 'inline-flex items-center bg-red-500 hover:bg-red-600 button-exp-fill cursor-pointer border-red-500 hover:border-red-500',
+                        cancelButton: 'inline-flex items-center button-exp-red-fill',
                     },
                     didOpen: () => {
 
@@ -298,7 +310,7 @@ export default {
                     showCloseButton: true,
                     customClass: {
                         confirmButton: 'inline-flex items-center button-exp-fill',
-                        cancelButton: 'inline-flex items-center bg-red-500 hover:bg-red-600 button-exp-fill cursor-pointer border-red-500 hover:border-red-500',
+                        cancelButton: 'inline-flex items-center button-exp-red-fill',
                     },
                     didOpen: () => {
 
@@ -327,7 +339,7 @@ export default {
                     showCloseButton: true,
                     customClass: {
                         confirmButton: 'inline-flex items-center button-exp-fill',
-                        cancelButton: 'inline-flex items-center bg-red-500 hover:bg-red-600 button-exp-fill cursor-pointer border-red-500 hover:border-red-500',
+                        cancelButton: 'inline-flex items-center button-exp-red-fill',
                     },
                     didOpen: () => {
 
@@ -357,7 +369,7 @@ export default {
                     showCloseButton: true,
                     customClass: {
                         confirmButton: 'inline-flex items-center button-exp-fill',
-                        cancelButton: 'inline-flex items-center bg-red-500 hover:bg-red-600 button-exp-fill cursor-pointer border-red-500 hover:border-red-500',
+                        cancelButton: 'inline-flex items-center button-exp-red-fill',
                     },
                     didOpen: () => {
 
@@ -423,7 +435,7 @@ export default {
                     showCloseButton: true,
                     customClass: {
                         confirmButton: 'inline-flex items-center button-exp-fill',
-                        cancelButton: 'inline-flex items-center bg-red-500 hover:bg-red-600 button-exp-fill cursor-pointer border-red-500 hover:border-red-500',
+                        cancelButton: 'inline-flex items-center button-exp-red-fill',
                     },
                     didOpen: () => {
 
@@ -474,13 +486,13 @@ export default {
 };
 </script>
 <style>
-    .swal2-styled.swal2-cancel {
-        border: 0;
-        border-radius: .25em;
-        background: initial;
-        background-color: #6e7881;
-        color: #fff;
-        font-size: 1em;
-        width: fit-content !important;
-    }
+.swal2-styled.swal2-cancel {
+    border: 0;
+    border-radius: .25em;
+    background: initial;
+    background-color: #6e7881;
+    color: #fff;
+    font-size: 1em;
+    width: fit-content !important;
+}
 </style>

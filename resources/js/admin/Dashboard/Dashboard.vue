@@ -28,6 +28,7 @@
                         <div>
                             <p class="text-gray-500 text-sm font-medium">Drivers</p>
                             <p class="text-2xl font-bold text-gray-900">{{ formatNumber(stats.kpi?.drivers || 0) }}</p>
+                            <p class="text-xs text-yellow-600 mt-1">Pending: {{ formatNumber(stats.kpi?.drivers_pending || 0) }}</p>
                         </div>
                         <div class="bg-green-100 rounded-full p-3">
                             <svg class="w-6 h-6 text-green-600" viewBox="0 0 48 48" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -49,6 +50,7 @@
                         <div>
                             <p class="text-gray-500 text-sm font-medium">Passengers</p>
                             <p class="text-2xl font-bold text-gray-900">{{ formatNumber(stats.kpi?.passengers || 0) }}</p>
+                            <p class="text-xs text-yellow-600 mt-1">Pending: {{ formatNumber(stats.kpi?.passengers_pending || 0) }}</p>
                         </div>
                         <div class="bg-purple-100 rounded-full p-3">
                             <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,6 +65,7 @@
                         <div>
                             <p class="text-gray-500 text-sm font-medium">Students</p>
                             <p class="text-2xl font-bold text-gray-900">{{ formatNumber(stats.kpi?.students || 0) }}</p>
+                            <p class="text-xs text-yellow-600 mt-1">Pending: {{ formatNumber(stats.kpi?.students_pending || 0) }}</p>
                         </div>
                         <div class="bg-yellow-100 rounded-full p-3">
                             <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -33,7 +33,7 @@
                             placeholder="Search for bookings" v-model="quickSearch" />
                     </div>
                 </div>
-                <div class="container space-y-8 mx-auto">
+                <div class="space-y-8 mx-auto">
                     <div class="space-y-2">
                         <div class="bg-white shadow-lg hover:shadow-xl rounded-md overflow-x-auto">
                             <table class="table overflow-x-auto table-auto w-full leading-normal text-base md:text-base lg:text-lg">
@@ -71,25 +71,38 @@
                                         <td class="p-2 md:p-3 border-b md:border-none">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Ride</label>
-                                            <div v-if="booking.departure_city || booking.destination_city">{{ booking . departure_city }} to {{ booking . destination_city }}
+                                            <div class="flex flex-col gap-2" v-if="booking.departure_city || booking.destination_city">
+                                                <b>{{ booking . departure_city }} → {{ booking . destination_city }}</b>
 
                                                 {{ booking . pink_ride }}
                                                 {{ booking . extra_care_ride }}
-                                                <span>Seats available: {{ booking . extra_care_ride }}</span>
-                                                <span>Seats booked: {{ booking . extra_care_ride }}</span>
-
+                                                <span>Seats available: {{ booking . ride_seats - booking . ride_booked_seats}}</span>
+                                                <span>Seats booked: {{ booking . ride_booked_seats }}</span>
                                             </div>
                                         </td>
                                         <td class="p-2 md:p-3 md:border-none">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Driver</label>
-                                            <div>{{ booking . driver_first_name }} {{ booking . driver_last_name }} <span v-if="booking.driver_gender == 'male'">(M)</span><span v-if="booking.driver_gender == 'female'">(F)</span><span v-if="booking.driver_gender =='prefer not to say'">()</span><br>{{ booking . driver_average_rating }}<br>{{ booking . driver_email }}<br><span v-if="booking.driver_suspand == '1'">Suspended</span></div>
+                                            <div>{{ booking . driver_first_name }} {{ booking . driver_last_name }} 
+                                                <span v-if="booking.driver_gender == 'male'">(M)</span>
+                                                <span v-if="booking.driver_gender == 'female'">(F)</span>
+                                                <span v-if="booking.driver_gender =='prefer not to say'">()</span><br>
+                                                Review: {{ booking . driver_average_rating }}<br>
+                                                {{ booking . driver_email }}<br>
+                                                <span v-if="booking.driver_suspand == '1'">Suspended</span>
+                                            </div>
                                         </td>
                                         <td class="p-2 md:p-3 md:border-none">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Passenger</label>
                                             <div>
-                                                {{ booking . passenger_first_name }} {{ booking . passenger_last_name }} <span v-if="booking.passenger_gender == 'male'">(M)</span><span v-if="booking.passenger_gender == 'female'">(F)</span><span v-if="booking.passenger_gender =='prefer not to say'">()</span><br>{{ booking . passenger_average_rating }}<br>{{ booking . passenger_email }}<br><span v-if="booking.passenger_suspand == '1'">Suspended</span></div>
+                                                {{ booking . passenger_first_name }} {{ booking . passenger_last_name }} 
+                                                <span v-if="booking.passenger_gender == 'male'">(M)</span>
+                                                <span v-if="booking.passenger_gender == 'female'">(F)</span>
+                                                <span v-if="booking.passenger_gender =='prefer not to say'">()</span><br>
+                                                Review: {{ booking . passenger_average_rating }}<br>
+                                                {{ booking . passenger_email }}<br>
+                                                <span v-if="booking.passenger_suspand == '1'">Suspended</span></div>
                                         </td>
                                         <td class="p-2 md:p-3 md:border-none">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"

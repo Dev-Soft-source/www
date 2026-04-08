@@ -29,6 +29,13 @@ class DashboardController extends Controller
             $drivers = User::where('driver', '1')->where('deleted', '0')->count();
             $passengers = User::where('driver', '0')->where('student', '0')->where('deleted', '0')->count();
             $students = User::where('student', '1')->where('deleted', '0')->count();
+            $driversPending = User::where('driver', '2')->where('deleted', '0')->count();
+            $passengersPending = User::where('driver', '0')
+                ->where('student', '0')
+                ->where('email_verified', '0')
+                ->where('deleted', '0')
+                ->count();
+            $studentsPending = User::where('student', '2')->where('deleted', '0')->count();
 
             // Active Rides (rides with status = 1 or upcoming)
             $activeRides = Ride::where('status', '1')
@@ -344,8 +351,11 @@ class DashboardController extends Controller
                     'kpi' => [
                         'total_users' => $totalUsers,
                         'drivers' => $drivers,
+                        'drivers_pending' => $driversPending,
                         'passengers' => $passengers,
+                        'passengers_pending' => $passengersPending,
                         'students' => $students,
+                        'students_pending' => $studentsPending,
                         'active_rides' => $activeRides,
                         'bookings_today' => $bookingsToday,
                         'completed_today' => $completedToday,

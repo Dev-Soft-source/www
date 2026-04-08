@@ -4,17 +4,19 @@
             <div class="px-4">
                 <div class="sm:flex sm:items-center">
                     <div class="sm:flex-auto">
-                        <h3 class="can-exp-h2 text-primary text-center sm:text-left" v-if="claim_rewards">Claim reward requests <small v-if="claim_rewards">({{ claim_rewards.length }})</small></h3>
+                        <h3 class="can-exp-h2 text-primary text-center sm:text-left" v-if="claim_rewards">Claim reward
+                            requests <small v-if="claim_rewards">({{ claim_rewards.length }})</small></h3>
                     </div>
                 </div>
                 <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row items-center justify-between gap-4 py-4">
                     <div>
                         show
-                       <select class="rounded-md px-3 pr-8 py-1" v-model="limit" @input="updateLimit($event.target.value)">
+                        <select class="rounded-md px-3 pr-8 py-1" v-model="limit"
+                            @input="updateLimit($event.target.value)">
                             <option value="10">10</option>
                             <option value="25">25</option>
                             <option value="50">50</option>
-                             <option value="100">100</option>
+                            <option value="100">100</option>
                         </select>
                         claim reward requests
                     </div>
@@ -33,10 +35,11 @@
                             placeholder="Search for claim reward requests" v-model="quickSearch" />
                     </div>
                 </div>
-                <div class="container space-y-8 mx-auto">
+                <div class="space-y-8 mx-auto">
                     <div class="space-y-2">
                         <div class="bg-white shadow-lg hover:shadow-xl rounded-md overflow-x-auto">
-                            <table class="table overflow-x-auto table-auto w-full leading-normal text-base md:text-base lg:text-lg">
+                            <table
+                                class="table overflow-x-auto table-auto w-full leading-normal text-base md:text-base lg:text-lg">
                                 <thead class="text-white">
                                     <tr class="hidden md:table-row">
                                         <th
@@ -67,8 +70,7 @@
                                         <td class="p-2 md:p-3 border-b md:border-none relative">
                                             <div class="flex justify-between items-center">
                                                 <div>
-                                                    <label
-                                                        class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
+                                                    <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                         for="">#ID</label>
                                                 </div>
                                             </div>
@@ -79,19 +81,20 @@
                                         <td class="p-2 md:p-3 md:border-none">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Type</label>
-                                            <div>{{ claim_reward . type }}</div>
+                                            <div>{{ claim_reward.type }}</div>
                                         </td>
                                         <td class="p-2 md:p-3 border-b md:border-none">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Point</label>
-                                            <div class="">{{ claim_reward . point }}</div>
+                                            <div class="">{{ claim_reward.point }}</div>
                                         </td>
                                         <td class="p-2 md:p-3 border-b md:border-none">
                                             <label class="text-gray-500 font-FuturaMdCnBT md:hidden text-xl"
                                                 for="">Request date</label>
-                                            <div class="">{{ claim_reward . request_date }}</div>
+                                            <div class="">{{ claim_reward.request_date }}</div>
                                         </td>
-                                        <td v-if="claim_reward . status == 'request'" class="p-2 md:p-3 gap-2 justify-center items-center hidden md:block space-y-2 space-x-2">
+                                        <td v-if="claim_reward.status == 'request'"
+                                            class="p-2 md:p-3 gap-2 justify-center items-center hidden md:block space-y-2 space-x-2">
                                             <div class="flex items-center space-x-2">
                                                 <a href="#"
                                                     class="inline-flex items-center bg-blue-500 hover:bg-blue-600 button-exp-fill cursor-pointer border-blue-500"
@@ -100,9 +103,10 @@
                                                 </a>
                                             </div>
                                         </td>
-                                        <td v-else class="p-2 md:p-3 gap-2 justify-center items-center hidden md:block space-y-2 space-x-2">
-                                            <div>{{ capitalizeFirst(claim_reward . status) }}</div>
-                                            <div>{{ claim_reward . approved_date }}</div>
+                                        <td v-else
+                                            class="p-2 md:p-3 gap-2 justify-center items-center hidden md:block space-y-2 space-x-2">
+                                            <div>{{ capitalizeFirst(claim_reward.status) }}</div>
+                                            <div>{{ claim_reward.approved_date }}</div>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -151,40 +155,43 @@
                                     </div>
                                 </div>
                             </div> -->
-                            <div class="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6" v-if="pagination && pagination.links && pagination.links.length">
-                            <div class="flex flex-col sm:flex-col md:flex-row gap-4 justify-between items-center w-full">
-                                <div>
-                                    <p class="text-sm text-gray-700" v-if="pagination.current_page">
-                                        Page {{ pagination.current_page }} of {{ pagination.last_page }}
-                                    </p>
-                                </div>
-                                <div>
-                                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                        <a href="#"
-                                            class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50"
-                                            :class="{ 'opacity-50 cursor-not-allowed': !pagination.prev_page_url }"
-                                            @click.prevent="pagination.prev_page_url && fetchClaimRewards(pagination.prev_page_url)">
-                                            Previous
-                                        </a>
-                                        <template v-for="(link, index) in pagination.links" :key="index">
-                                            <a v-if="link.url && !link.label.includes('Previous') && !link.label.includes('Next')"
-                                                href="#"
-                                                class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium"
-                                                :class="{ 'bg-primary text-white': link.active, 'bg-white text-gray-800': !link.active }"
-                                                @click.prevent="fetchClaimRewards(link.url)">
-                                                <span v-html="link.label"></span>
+                            <div class="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6"
+                                v-if="pagination && pagination.links && pagination.links.length">
+                                <div
+                                    class="flex flex-col sm:flex-col md:flex-row gap-4 justify-between items-center w-full">
+                                    <div>
+                                        <p class="text-sm text-gray-700" v-if="pagination.current_page">
+                                            Page {{ pagination.current_page }} of {{ pagination.last_page }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                                            aria-label="Pagination">
+                                            <a href="#"
+                                                class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50"
+                                                :class="{ 'opacity-50 cursor-not-allowed': !pagination.prev_page_url }"
+                                                @click.prevent="pagination.prev_page_url && fetchClaimRewards(pagination.prev_page_url)">
+                                                Previous
                                             </a>
-                                        </template>
-                                        <a href="#"
-                                            class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50"
-                                            :class="{ 'opacity-50 cursor-not-allowed': !pagination.next_page_url }"
-                                            @click.prevent="pagination.next_page_url && fetchClaimRewards(pagination.next_page_url)">
-                                            Next
-                                        </a>
-                                    </nav>
+                                            <template v-for="(link, index) in pagination.links" :key="index">
+                                                <a v-if="link.url && !link.label.includes('Previous') && !link.label.includes('Next')"
+                                                    href="#"
+                                                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium"
+                                                    :class="{ 'bg-primary text-white': link.active, 'bg-white text-gray-800': !link.active }"
+                                                    @click.prevent="fetchClaimRewards(link.url)">
+                                                    <span v-html="link.label"></span>
+                                                </a>
+                                            </template>
+                                            <a href="#"
+                                                class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-800 hover:bg-gray-50"
+                                                :class="{ 'opacity-50 cursor-not-allowed': !pagination.next_page_url }"
+                                                @click.prevent="pagination.next_page_url && fetchClaimRewards(pagination.next_page_url)">
+                                                Next
+                                            </a>
+                                        </nav>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
                         </div>
                     </div>
                 </div>
@@ -211,10 +218,10 @@ export default {
         }),
         limit: {
             get() {
-              return this.$store.state.claim_rewards.limit;
+                return this.$store.state.claim_rewards.limit;
             },
             set(value) {
-              this.$store.commit('claim_rewards/setLimit', value);
+                this.$store.commit('claim_rewards/setLimit', value);
             }
         }
     },
@@ -237,12 +244,12 @@ export default {
         }, 500),
         approveReward(claim_reward) {
             this.$store.dispatch("claim_rewards/approveReward", {
-                    id: claim_reward.id,
-                }).then(() => {
-                    this.$store.dispatch("claim_rewards/fetchClaimRewards");
-                }).catch((error) => {
-                    console.error("Error rejecting withdrawal:", error);
-                });
+                id: claim_reward.id,
+            }).then(() => {
+                this.$store.dispatch("claim_rewards/fetchClaimRewards");
+            }).catch((error) => {
+                console.error("Error rejecting withdrawal:", error);
+            });
         },
         capitalizeFirst(str) {
             if (!str) return '';
@@ -264,13 +271,13 @@ export default {
 };
 </script>
 <style>
-    .swal2-styled.swal2-cancel {
-        border: 0;
-        border-radius: .25em;
-        background: initial;
-        background-color: #6e7881;
-        color: #fff;
-        font-size: 1em;
-        width: fit-content !important;
-    }
+.swal2-styled.swal2-cancel {
+    border: 0;
+    border-radius: .25em;
+    background: initial;
+    background-color: #6e7881;
+    color: #fff;
+    font-size: 1em;
+    width: fit-content !important;
+}
 </style>
