@@ -542,12 +542,8 @@ class HomeController extends Controller
 
                 // Payment Element returns pm_…; legacy flow used tok_…
                 $stripeCredential = (string) $request->stripeToken;
+                $isPaymentMethodFromElement = str_starts_with($stripeCredential, 'pm_');
                 if (str_starts_with($stripeCredential, 'pm_')) {
-                    if ($request->filled('name_on_card')) {
-                        PaymentMethod::update($stripeCredential, [
-                            'billing_details' => ['name' => $request->name_on_card],
-                        ]);
-                    }
                     $paymentMethods = PaymentMethod::retrieve($stripeCredential);
                 } else {
                     $paymentMethods = PaymentMethod::create([
@@ -571,6 +567,13 @@ class HomeController extends Controller
 
                 // Attach a payment method to the customer
                 $paymentMethods->attach(['customer' => $stripe_customer_id]);
+
+                // For Payment Element `pm_...`, update billing details only after attachment.
+                if ($isPaymentMethodFromElement && $request->filled('name_on_card')) {
+                    PaymentMethod::update($paymentMethods->id, [
+                        'billing_details' => ['name' => $request->name_on_card],
+                    ]);
+                }
 
                 // Set the attached payment method as the default for the customer
                 Customer::update($stripe_customer_id, [
