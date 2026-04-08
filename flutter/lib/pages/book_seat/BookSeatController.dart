@@ -10,7 +10,6 @@ import 'package:proximaride_app/helpers/ride_feature_ids.dart';
 import 'package:proximaride_app/consts/payment_config.dart';
 import 'package:proximaride_app/pages/book_seat/BookSeatProvider.dart';
 import 'package:proximaride_app/pages/edit_profile/EditProfileProvider.dart';
-import 'package:proximaride_app/pages/my_trips/MyTripController.dart';
 import 'package:proximaride_app/pages/my_wallet/MyWalletController.dart';
 import 'package:proximaride_app/pages/navigation/NavigationController.dart';
 import 'package:proximaride_app/pages/payment_options/PaymentOptionsProvider.dart';
@@ -66,8 +65,15 @@ class BookSeatController extends GetxController {
   var cancellationOptionLabelList = [].obs;
   var cancellationOptionToolTipList = [].obs;
   var bookedSeatIds = [].obs;
+
+  /// Blocks overlapping seat hold/remove API calls when the user taps the same seat quickly.
+  final Set<dynamic> _seatHoldInFlight = {};
   var coffeeFromWall = false.obs;
   var coffeeDisable = false.obs;
+
+  /// Coffee-from-wall applies only when enabled and the ride is not short-distance.
+  bool get coffeeFromWallApplies =>
+      coffeeFromWall.value == true && ride['isShortDistanceRide'] != true;
   var withOutCoffeeTransaction = 0.0;
   var agreeTerms = false.obs;
   var firmAgreeTerms = false.obs;
@@ -470,10 +476,13 @@ class BookSeatController extends GetxController {
               if (ride['pending_seat_detail'][i]['user_id'] ==
                       serviceController.loginUserDetail['id'] &&
                   ride['pending_seat_detail'][i]['status'] == "hold") {
-                seatAvailable.value = seatAvailable.value + 1;
-                bookedSeatIds.add(ride['pending_seat_detail'][i]['id']);
+                final sid = ride['pending_seat_detail'][i]['id'];
+                if (!bookedSeatIds.contains(sid)) {
+                  bookedSeatIds.add(sid);
+                }
               }
             }
+            seatAvailable.value = bookedSeatIds.length;
 
             logger.info(
                 "Current User Booked Seat: ${currentUserBookedSeat.value}");
@@ -906,7 +915,7 @@ class BookSeatController extends GetxController {
         if (ride['payment_method_slug'] == "cash") {
           paypalPaymentMinor = payableBookingCreditMinor + payableTaxMinor;
         } else {
-          if (coffeeFromWall.value == true) {
+          if (coffeeFromWallApplies) {
             payableBookingCreditMinor = 0;
           }
 
@@ -915,7 +924,7 @@ class BookSeatController extends GetxController {
               payableTaxMinor;
         }
       } else {
-        if (coffeeFromWall.value == false) {
+        if (!coffeeFromWallApplies) {
           if (ride['payment_method_slug'] == "cash") {
             paypalPaymentMinor = onlinePaymentMinor + taxAmountMinor;
           } else {
@@ -1052,7 +1061,7 @@ class BookSeatController extends GetxController {
       }
 
       if (ride['payment_method_slug'] == "cash") {
-        if (coffeeFromWall.value == true) {
+        if (coffeeFromWallApplies) {
           paymentMethod = "cash";
           onlinePayment = 0;
         } else {
@@ -1063,7 +1072,7 @@ class BookSeatController extends GetxController {
           }
         }
       } else {
-        if (coffeeFromWall.value == true) {
+        if (coffeeFromWallApplies) {
           if (balanceAmt >= double.parse(onlinePayment.toString()) &&
               balanceAmt != 0.0) {
             bookedByWallet.value = true;
@@ -1118,7 +1127,7 @@ class BookSeatController extends GetxController {
               captureId,
               policyTypeId.value,
               bookedByWallet.value,
-              coffeeFromWall.value,
+              coffeeFromWallApplies,
               bookedSeatIds,
               taxPercentage,
               deductType,
@@ -1140,6 +1149,7 @@ class BookSeatController extends GetxController {
         if (resp['status'] != null && resp['status'] == "Error") {
           serviceController.showDialogue(resp['message'].toString(),
               type: "error");
+          isOverlayLoading(false);
         } else if (resp['status'] != null && resp['status'] == "Success") {
           if (bookedByWallet.value == true) {
             bool isMyWalletControllerRegistered =
@@ -1156,12 +1166,33 @@ class BookSeatController extends GetxController {
           if (Get.isRegistered<NavigationController>()) {
             Get.find<NavigationController>().currentNavIndex.value = 1;
           }
-          if (Get.isRegistered<MyTripController>()) {
-            Get.find<MyTripController>().openDefaultTabForCurrentUser();
-          }
-          Get.offAllNamed('/navigation');
+          // After navigation, [MyTripController.loadInitialData] respects this flag so drivers land on Passenger trips, not My Rides.
+          serviceController.forcePassengerTripsTabAfterBooking.value = true;
+
+          isOverlayLoading(false);
+
+          final rawMsg = resp['message'];
+          final String successMessage = (rawMsg != null &&
+                  rawMsg.toString().trim().isNotEmpty)
+              ? rawMsg.toString().trim()
+              : 'Your booking was completed successfully.';
+
+          final dynamic titleRaw = labelTextDetail['booking_success_dialog_title'];
+          final String successTitle =
+              (titleRaw != null && titleRaw.toString().trim().isNotEmpty)
+                  ? titleRaw.toString().trim()
+                  : 'Success';
+
+          await serviceController.showDialogue(
+            successMessage,
+            type: "success",
+            title: successTitle,
+            off: 1,
+            path: '/navigation',
+          );
+        } else {
+          isOverlayLoading(false);
         }
-        isOverlayLoading(false);
       }, onError: (error) {
         isOverlayLoading(false);
         serviceController.showDialogue(error.toString(), type: "error");
@@ -1179,52 +1210,63 @@ class BookSeatController extends GetxController {
           errors.firstWhereOrNull((element) => element['title'] == "seats"));
     }
 
+    if (_seatHoldInFlight.contains(seatId)) {
+      return;
+    }
+    _seatHoldInFlight.add(seatId);
+
     try {
       var type = "add";
       if (bookedSeatIds.contains(seatId)) {
         type = "remove";
       }
-      await BookSeatProvider()
-          .seatOnHold(serviceController.token, seatId, type)
-          .then((resp) async {
-        errorList.clear();
-        if (resp['status'] != null && resp['status'] == "Error") {
-          serviceController.showDialogue(resp['message'].toString(),
-              type: "error");
-        } else if (resp['status'] != null && resp['status'] == "Success") {
-          if (type == "add") {
-            final shouldShowSeatHoldWarning =
-                bookedSeatIds.isEmpty && hasShownSeatHoldWarning.value == false;
+      final resp = await BookSeatProvider()
+          .seatOnHold(serviceController.token, seatId, type);
+      errorList.clear();
+      if (resp['status'] != null && resp['status'] == "Error") {
+        serviceController.showDialogue(resp['message'].toString(),
+            type: "error");
+      } else if (resp['status'] != null && resp['status'] == "Success") {
+        if (type == "add") {
+          final shouldShowSeatHoldWarning =
+              bookedSeatIds.isEmpty && hasShownSeatHoldWarning.value == false;
+          if (!bookedSeatIds.contains(seatId)) {
             bookedSeatIds.add(seatId);
-            ride['pending_seat_detail'][index - 1]['status'] = "hold";
-            seatAvailable.value = bookedSeatIds.length;
-            if (shouldShowSeatHoldWarning) {
-              final seatHoldMessage =
-                  labelTextDetail['seat_hold_message'] ??
-                      "Your selected seat(s) will be held for 10 minutes. If the booking isn't completed within that time, the seat(s) will be released and made available to others.";
-              hasShownSeatHoldWarning.value = true;
-              serviceController.showDialogue(
-                seatHoldMessage.toString(),
-                type: "info",
-              );
-            }
-          } else {
-            bookedSeatIds.remove(seatId);
-            ride['pending_seat_detail'][index - 1]['status'] = "pending";
-            seatAvailable.value = bookedSeatIds.length;
-            if (bookedSeatIds.isEmpty) {
-              hasShownSeatHoldWarning.value = false;
-            }
+          }
+          ride['pending_seat_detail'][index - 1]['status'] = "hold";
+          seatAvailable.value = bookedSeatIds.length;
+          if (shouldShowSeatHoldWarning) {
+            final seatHoldMessage =
+                labelTextDetail['seat_hold_message'] ??
+                    "Your selected seat(s) will be held for 10 minutes. If the booking isn't completed within that time, the seat(s) will be released and made available to others.";
+            hasShownSeatHoldWarning.value = true;
+            serviceController.showDialogue(
+              seatHoldMessage.toString(),
+              type: "info",
+            );
+          }
+        } else {
+          bookedSeatIds.remove(seatId);
+          ride['pending_seat_detail'][index - 1]['status'] = "pending";
+          seatAvailable.value = bookedSeatIds.length;
+          if (bookedSeatIds.isEmpty) {
+            hasShownSeatHoldWarning.value = false;
           }
         }
-        isOverlayLoading(false);
-      }, onError: (error) {
-        isOverlayLoading(false);
-        serviceController.showDialogue(error.toString(), type: "error");
-      });
-    } catch (exception) {
+      }
       isOverlayLoading(false);
-      serviceController.showDialogue(exception.toString(), type: "error");
+    } catch (error) {
+      isOverlayLoading(false);
+      if (error is Map &&
+          error.containsKey('type') &&
+          error.containsKey('message')) {
+        serviceController.showDialogue(error['message'].toString(),
+            type: "error");
+      } else {
+        serviceController.showDialogue(error.toString(), type: "error");
+      }
+    } finally {
+      _seatHoldInFlight.remove(seatId);
     }
   }
 

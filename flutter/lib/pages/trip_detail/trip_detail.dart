@@ -63,7 +63,10 @@ class TripDetailPage extends StatelessWidget {
       TripDetailController controller, Map<String, dynamic> ride) {
     final pink = ride['isPink'] == true;
     final extraCare = ride['isExtraCare'] == true;
-
+    final shortDistance = ride['isShortDistanceRide'] == true;
+    if (shortDistance) {
+      return "This is a Short-Distance Ride, and ProximaRide does not apply any Booking Fee.";
+    }
     if (pink && extraCare) {
       return "This is a Pink and an Extra-Care Ride";
     }
@@ -437,8 +440,8 @@ class TripDetailPage extends StatelessWidget {
                                                         .ride['bookings']
                                                         .length >
                                                     0) {
-                                              Get.toNamed(
-                                                  '/cancel_booking/ride');
+                                              controller
+                                                  .openDriverCancelBooking();
                                             } else {
                                               await controller
                                                   .cancelRideByDriver();
@@ -491,8 +494,7 @@ class TripDetailPage extends StatelessWidget {
                           child: controller.type == "findRide"
                               ? elevatedButtonWidget(
                                   textWidget: controller.ride[
-                                              'booking_method_id'] ==
-                                          "31"
+                                              'isInstantBooking'] == true
                                       ? txt22Size(
                                           title:
                                               "${controller.labelTextDetail['instant_btn_label'] ?? "Instant booking"}",
@@ -536,6 +538,8 @@ class TripDetailPage extends StatelessWidget {
                                           "${controller.labelTextDetail['no_show_driver_label'] ?? "No show driver"}",
                                       fromStopId: controller.fromStopId,
                                       toStopId: controller.toStopId,
+                                      onCancelBooking:
+                                          controller.openPassengerCancelBooking,
                                       onPressed: () async {
                                         await controller.noShowDriverData();
                                       },

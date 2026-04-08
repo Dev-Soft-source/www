@@ -81,6 +81,7 @@ import 'package:proximaride_app/pages/stages/stage_one.dart';
 import 'package:proximaride_app/pages/stages/stage_three.dart';
 import 'package:proximaride_app/pages/stages/stage_two.dart';
 import 'package:proximaride_app/pages/student_card/student_card.dart';
+import 'package:proximaride_app/pages/booking_policy/booking_policy_page.dart';
 import 'package:proximaride_app/pages/term_condition/term_condition.dart';
 import 'package:proximaride_app/pages/terms_of_use/terms_of_use.dart';
 import 'package:proximaride_app/pages/disclaimer/disclaimer.dart';
@@ -294,6 +295,7 @@ class MyAppState extends State<MyApp> {
     '/my_passenger/:rideId',
     '/remove_passenger/:rideId',
     '/review_passenger/:rideId',
+    '/booking_policy_page',
     '/term_condition',
     '/term_of_use',
     '/disclaimer',
@@ -687,6 +689,11 @@ class MyAppState extends State<MyApp> {
             if (!Get.isRegistered<MyTripController>()) {
               Get.lazyPut<MyTripController>(() => MyTripController());
             }
+            final c = Get.find<MyTripController>();
+            final pt = Get.parameters['pageType'];
+            if (pt == 'trip' || pt == 'ride') {
+              c.pageType = pt!;
+            }
           }),
         ),
         GetPage(
@@ -700,7 +707,15 @@ class MyAppState extends State<MyApp> {
         GetPage(
           name: '/review_passenger/:rideId',
           page: () => const ReviewPassengerPage(),
+          binding: BindingsBuilder(() {
+            if (!Get.isRegistered<MyTripController>()) {
+              Get.lazyPut<MyTripController>(() => MyTripController());
+            }
+          }),
         ),
+        GetPage(
+            name: '/booking_policy_page',
+            page: () => const BookingPolicyPage()),
         GetPage(name: '/term_condition', page: () => const TermConditionPage()),
         GetPage(name: '/term_of_use', page: () => const TermsOfUsePage()),
         GetPage(name: '/disclaimer', page: () => const DisclaimerPage()),

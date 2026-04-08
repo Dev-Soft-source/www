@@ -124,6 +124,20 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
     rideTabController.index = 0;
   }
 
+  /// Passenger trips tab (not driver rides), upcoming sub-tab; reload all trip & ride lists.
+  Future<void> openMyTripsTabAndRefresh() async {
+    tabController.index = 0;
+    tripTabController.index = 0;
+    rideTabController.index = 0;
+    if (tripPageController.hasClients) {
+      tripPageController.jumpToPage(0);
+    }
+    if (ridePageController.hasClients) {
+      ridePageController.jumpToPage(0);
+    }
+    await updateMyTrips();
+  }
+
   @override
   void onInit() async {
     super.onInit();
@@ -173,14 +187,18 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
       // Safely get driver info with null checks
       final driverLicense =
           serviceController.loginUserDetail['driver_liscense'];
-      final isDriver = serviceController.loginUserDetail['driver'];
 
       if (driverLicense != null && driverLicense != "null") {
         // Licensed driver: Check rides and trips
         tabController.index = 1;
 
-        await getAllRides();
-        await getAllTrips();
+        if (serviceController.forcePassengerTripsTabAfterBooking.value) {
+          // Full reset + refetch so seat counts and booking rows match the new booking.
+          await updateMyTrips();
+        } else {
+          await getAllRides();
+          await getAllTrips();
+        }
 
         final hasTrips =
             upComingTripList.isNotEmpty || completedTripList.isNotEmpty;
@@ -196,7 +214,11 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
         }
       } else {
         // Normal user: Check trips first
-        await getAllTrips();
+        if (serviceController.forcePassengerTripsTabAfterBooking.value) {
+          await updateMyTrips();
+        } else {
+          await getAllTrips();
+        }
 
         final hasTrips =
             upComingTripList.isNotEmpty || completedTripList.isNotEmpty;
@@ -204,8 +226,10 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
         if (hasTrips) {
           tabController.index = 0;
         } else {
-          // Check rides only if no trips
-          await getAllRides();
+          // Check rides only if no trips (already loaded when post-booking refresh ran)
+          if (!serviceController.forcePassengerTripsTabAfterBooking.value) {
+            await getAllRides();
+          }
           final hasRides =
               upComingRideList.isNotEmpty || completedRideList.isNotEmpty;
           tabController.index = hasRides ? 1 : 0;
@@ -222,7 +246,22 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
 
       logger.info("Driver: ${serviceController.loginUserDetail['driver']}");
 
-      openDefaultTabForCurrentUser();
+      if (serviceController.forcePassengerTripsTabAfterBooking.value) {
+        serviceController.forcePassengerTripsTabAfterBooking.value = false;
+        tabController.index = 0;
+        tripTabController.index = 0;
+        rideTabController.index = 0;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (tripPageController.hasClients) {
+            tripPageController.jumpToPage(0);
+          }
+          if (ridePageController.hasClients) {
+            ridePageController.jumpToPage(0);
+          }
+        });
+      } else {
+        openDefaultTabForCurrentUser();
+      }
       logger.info("Tab Index: ${tabController.index}");
 
       errorStateManager.setSuccess();
@@ -763,6 +802,61 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
     isOverlayLoading(false);
   }
 
+  /// Sets [cancelRideInfo] and [pageType] for passenger cancel opened from trip detail (API ride payload).
+  void preparePassengerCancelFromTripDetail(Map<String, dynamic> ride) {
+    errorList.clear();
+    errors.clear();
+    cancelRideInfo.clear();
+    reviewTextEditingController.clear();
+    tripCancelTextEditingController.clear();
+    confirmRideCheckBox.value = false;
+    pageType = "trip";
+
+    final uid = serviceController.loginUserDetail['id']?.toString();
+    final bookings = ride['bookings'];
+    Map<String, dynamic>? bookingMap;
+    if (bookings is List) {
+      for (final b in bookings) {
+        if (b is Map) {
+          final bm = Map<String, dynamic>.from(b);
+          if (bm['user_id']?.toString() == uid) {
+            bookingMap = bm;
+            break;
+          }
+        }
+      }
+      bookingMap ??= bookings.isNotEmpty && bookings.first is Map
+          ? Map<String, dynamic>.from(bookings.first as Map)
+          : null;
+    }
+    if (bookingMap != null) {
+      if (bookingMap['ride'] == null || bookingMap['ride'] is! Map) {
+        bookingMap['ride'] = <String, dynamic>{
+          'date': ride['date'],
+          'time': ride['time'],
+        };
+      }
+      cancelRideInfo.addAll(bookingMap);
+      rideId =
+          (bookingMap['ride_id'] ?? ride['id'])?.toString() ?? "";
+    }
+    cancelRideInfo.refresh();
+  }
+
+  /// Sets [cancelRideInfo] and [pageType] for driver cancel opened from trip detail.
+  void prepareDriverCancelFromTripDetail(Map<String, dynamic> ride) {
+    errorList.clear();
+    errors.clear();
+    cancelRideInfo.clear();
+    reviewTextEditingController.clear();
+    tripCancelTextEditingController.clear();
+    confirmRideCheckBox.value = false;
+    pageType = "ride";
+    cancelRideInfo.addAll(ride);
+    rideId = ride['id']?.toString() ?? "";
+    cancelRideInfo.refresh();
+  }
+
   getTripDetail(bookingId) async {
     errorList.clear();
     cancelRideInfo.clear();
@@ -891,6 +985,10 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
           "Are you sure you want to cancel this booking?";
       var getBooking = upComingTripList
           .firstWhereOrNull((element) => element['id'].toString() == bookingId);
+      if (getBooking == null &&
+          cancelRideInfo['id']?.toString() == bookingId.toString()) {
+        getBooking = Map<String, dynamic>.from(cancelRideInfo);
+      }
       if (getBooking != null) {
         String rideDate = getBooking['ride']['date'];
         String rideTime = getBooking['ride']['time'];
@@ -1278,5 +1376,6 @@ class MyTripController extends GetxController with GetTickerProviderStateMixin {
     rideType.value = "upcoming";
     firstTimePage = 0;
     await getAllTrips();
+    await getAllRides();
   }
 }

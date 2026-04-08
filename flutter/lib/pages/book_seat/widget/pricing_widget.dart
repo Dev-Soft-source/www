@@ -78,8 +78,6 @@ Widget pricingWidget({context, controller, screenWidth}){
   final bool isCashPayment = controller.ride['payment_method_slug'] == "cash";
   var total = isCashPayment ? bookingFee + taxAmt : amount + bookingFee + taxAmt;
 
-
-
   var payableAmount = controller.rideUnitPrice() * payableSeatCount;
   var payableBookingFee =
       controller.bookingFeeAmountMinorForSeatCount(payableSeatCount) / 100;
@@ -115,7 +113,7 @@ Widget pricingWidget({context, controller, screenWidth}){
     controller.coffeeDisable.value = false;
   }
 
-  if(controller.coffeeFromWall.value == true){
+  if(controller.coffeeFromWallApplies){
     total = total - bookingFee;
     payableTotal = payableTotal - payableBookingFee;
 
@@ -224,7 +222,7 @@ Widget pricingWidget({context, controller, screenWidth}){
                 ),
                 10.heightBox,
               ],
-              if(controller.coffeeFromWall.value == true)...[
+              if(controller.coffeeFromWallApplies)...[
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -297,7 +295,7 @@ Widget pricingWidget({context, controller, screenWidth}){
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         infoTooltipButton("${controller.labelTextDetail['coffee_from_wall_tooltip'] ?? "Coffee from the wall"}"),
-                        if(controller.coffeeFromWall.value == true)...[
+                        if(controller.coffeeFromWallApplies)...[
                           4.widthBox,
                           txt20Size(context: context, title: "-\$${bookingFee.toStringAsFixed(2)}", textColor: Colors.red)
                         ]
@@ -338,8 +336,9 @@ Widget _coffeeWallToggle({
   required BuildContext context,
   required BookSeatController controller,
 }) {
-  final disabled = controller.coffeeDisable.value;
-  final wallOn = controller.coffeeFromWall.value;
+  final shortDistance = controller.ride['isShortDistanceRide'] == true;
+  final disabled = controller.coffeeDisable.value || shortDistance;
+  final wallOn = !shortDistance && controller.coffeeFromWall.value;
   final fontSize = getValueForScreenType<double>(
     context: context,
     mobile: 18.0,
@@ -349,6 +348,15 @@ Widget _coffeeWallToggle({
   final label = (controller.labelTextDetail['coffee_from_wall_label'] ??
           'Coffee from the wall');
       // .replaceFirst(' from ', '\nfrom ');
+
+  final Color fillColor = disabled
+      ? Colors.grey.shade200
+      : (wallOn ? primaryColor : Colors.white);
+  final Color borderColor = disabled
+      ? Colors.grey.shade400
+      : (wallOn ? primaryColor : Colors.grey.shade500);
+  final Color labelColor =
+      disabled ? Colors.grey.shade600 : (wallOn ? Colors.white : textColor);
 
   return Material(
     color: Colors.transparent,
@@ -372,11 +380,11 @@ Widget _coffeeWallToggle({
         curve: Curves.easeInOut,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         decoration: BoxDecoration(
-          color: wallOn ? primaryColor : Colors.white,
+          color: fillColor,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: wallOn ? primaryColor : Colors.grey.shade500,
-            width: wallOn ? 2 : 1,
+            color: borderColor,
+            width: wallOn && !disabled ? 2 : 1,
           ),
         ),
         alignment: Alignment.center,
@@ -389,8 +397,8 @@ Widget _coffeeWallToggle({
           style: TextStyle(
             fontSize: fontSize,
             fontFamily: regular,
-            fontWeight: wallOn ? FontWeight.w500 : FontWeight.w500,
-            color: wallOn ? Colors.white : textColor,
+            fontWeight: FontWeight.w500,
+            color: labelColor,
             height: 1.2,
           ),
         ),

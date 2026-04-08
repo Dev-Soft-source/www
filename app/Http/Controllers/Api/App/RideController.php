@@ -1032,6 +1032,9 @@ class RideController extends Controller
             $ride->isPink = $ride->isPinkRide();
             $ride->isExtraCare = $ride->isExtraCareRide();
             $ride->isPinkExtraCare = $ride->isPinkExtraCareRide();
+            $ride->isShortDistanceRide = $ride->isShortDistanceRide();
+            $ride->isInstantBooking = $ride->bookingMethodId() == Ride::INSTANT_BOOKING;
+            $ride->isRequestBooking = $ride->bookingMethodId() == Ride::REQUEST_BOOKING;
 
             $features = [];
             $rideFeatures = collect($ride->features)
@@ -1165,10 +1168,15 @@ class RideController extends Controller
         $rideDetailPage = RideDetailPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         if ($rideDetailPage) {
-            $rideDetailPage->cancellation_policy_tooltip_url = route('firm_cancellation_policy', [
-                'lang' => app()->getLocale(),
-                'type' => 'firm',
-            ]);
+            if($ride->isFirmCancellation()){
+                $rideDetailPage->cancellation_policy_tooltip_url = route('firm_cancellation_policy', [
+                    'lang' => app()->getLocale(),
+                ]);
+            }else{
+                $rideDetailPage->cancellation_policy_tooltip_url = route('cancellation_policy', [
+                    'lang' => app()->getLocale(),
+                ]);
+            }
         }
 
         $tripsPage = TripsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);

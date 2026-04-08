@@ -527,6 +527,26 @@ class TripDetailController extends GetxController {
     }
   }
 
+  void openPassengerCancelBooking() {
+    if (!Get.isRegistered<MyTripController>()) {
+      Get.put(MyTripController());
+    }
+    final tripCtrl = Get.find<MyTripController>();
+    tripCtrl.preparePassengerCancelFromTripDetail(
+        Map<String, dynamic>.from(ride));
+    Get.toNamed('/cancel_booking/trip');
+  }
+
+  void openDriverCancelBooking() {
+    if (!Get.isRegistered<MyTripController>()) {
+      Get.put(MyTripController());
+    }
+    final tripCtrl = Get.find<MyTripController>();
+    tripCtrl.prepareDriverCancelFromTripDetail(
+        Map<String, dynamic>.from(ride));
+    Get.toNamed('/cancel_booking/ride');
+  }
+
   cancelRideByDriver() async {
     bool isConfirmed = await serviceController.showConfirmationDialog(
         labelTextDetail['cancel_ride_confirmation'] ??

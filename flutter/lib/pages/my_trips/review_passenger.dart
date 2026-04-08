@@ -33,7 +33,9 @@ class ReviewPassengerPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var controller = Get.find<MyTripController>();
+    final MyTripController controller = Get.isRegistered<MyTripController>()
+        ? Get.find<MyTripController>()
+        : Get.put(MyTripController());
 
     return Scaffold(
       appBar: AppBar(
@@ -41,137 +43,138 @@ class ReviewPassengerPage extends StatelessWidget {
         title: Obx(() => secondAppBarWidget(context: context, title: "${controller.labelTextTripDetail['review_passengers_heading'] ?? "Review passengers"}")),
         backgroundColor: primaryColor,
       ),
-      body: Obx(() =>
-          Stack(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(15.0),
-                child: ListView.separated(
-                  itemCount: controller.cancelRideInfo['bookings'].length,
-                  itemBuilder: (context, index){
+      body: Obx(() {
+        final rawBookings = controller.cancelRideInfo['bookings'];
+        final List<dynamic> bookings =
+            rawBookings is List ? rawBookings : <dynamic>[];
 
-                    return Container(
-                      padding: const EdgeInsets.all(15.0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Colors.grey.shade200
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                circleImageWidget(
-                                    width: 60.0,
-                                    height: 60.0,
-                                    imagePath: controller.cancelRideInfo['bookings'] !=
-                                                null &&
-                                            controller.cancelRideInfo['bookings']
-                                                    [index]['passenger'] !=
-                                                null
-                                        ? controller.cancelRideInfo['bookings']
-                                                    [index]['passenger']
-                                                ['profile_image'] ??
-                                            ""
-                                        : "",
-                                    imageType: "network",
-                                    context: context,
-                                    borderRadius: 60.0),
-                                10.widthBox,
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      txt22SizeCapitalized(
+        return Stack(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(15.0),
+              child: ListView.separated(
+                itemCount: bookings.length,
+                itemBuilder: (context, index) {
+                  final booking = bookings[index];
+                  final passenger = booking is Map ? booking['passenger'] : null;
+
+                  return Container(
+                    padding: const EdgeInsets.all(15.0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5.0),
+                      color: Colors.grey.shade200,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              circleImageWidget(
+                                width: 60.0,
+                                height: 60.0,
+                                imagePath: passenger != null
+                                    ? (passenger['profile_image'] ?? "").toString()
+                                    : "",
+                                imageType: "network",
+                                context: context,
+                                borderRadius: 60.0,
+                              ),
+                              10.widthBox,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    txt22SizeCapitalized(
+                                      context: context,
+                                      title:
+                                          "${passenger != null ? passenger['first_name'] ?? '' : ''} ${passenger != null ? passenger['last_name'] ?? '' : ''}",
+                                    ),
+                                    10.heightBox,
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Image.asset(reviewsImage, width: 20),
+                                        5.widthBox,
+                                        txt18Size(
                                           context: context,
-                                          title:
-                                              "${controller.cancelRideInfo['bookings'] != null && controller.cancelRideInfo['bookings'][index]['passenger'] != null ? controller.cancelRideInfo['bookings'][index]['passenger']['first_name'] : ""} ${controller.cancelRideInfo['bookings'] != null && controller.cancelRideInfo['bookings'][index]['passenger'] != null ? controller.cancelRideInfo['bookings'][index]['passenger']['last_name'] : ""}"),
-                                      10.heightBox,
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Image.asset(reviewsImage, width: 20),
-                                          5.widthBox,
-                                          txt18Size(
-                                              context: context,
-                                              title: _formatPassengerRating(
-                                                  controller.cancelRideInfo[
-                                                      'bookings'][index])),
-                                        ],
-                                      )
-                                    ],
-                                  ),
+                                          title: _formatPassengerRating(booking),
+                                        ),
+                                      ],
+                                    )
+                                  ],
                                 ),
-                              ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (booking is Map && booking['rating'] != null) ...[
+                          5.widthBox,
+                          InkWell(
+                            onTap: () {
+                              final rid = booking['rating'] is Map
+                                  ? booking['rating']['id']
+                                  : null;
+                              if (rid != null) {
+                                Get.toNamed(
+                                    '/review_detail/$rid/to/passenger');
+                              }
+                            },
+                            child: textWithUnderLine(
+                              title:
+                                  "${controller.labelTextTripDetail['review_passengers_i_review_label'] ?? "I reviewed"}",
+                              context: context,
+                              fontFamily: bold,
+                              textColor: primaryColor,
+                              decorationColor: primaryColor,
+                              textSize: 16.0,
                             ),
                           ),
-                          if(controller.cancelRideInfo['bookings'][index]['rating'] != null)...[
-                            5.widthBox,
-                            InkWell(
-                              onTap: (){
-                                Get.toNamed('/review_detail/${controller.cancelRideInfo['bookings'][index]['rating']['id']}/to/passenger');
+                        ] else ...[
+                          15.widthBox,
+                          SizedBox(
+                            width: 120,
+                            child: elevatedButtonWidget(
+                              textWidget:
+                                  "${controller.labelTextTripDetail['review_passengers_review_label'] ?? "Review"}",
+                              buttonFontSize: 20.0,
+                              context: context,
+                              onPressed: () async {
+                                await controller.addPassengerReview(
+                                  controller.cancelRideInfo['id'],
+                                  "passenger",
+                                  passenger != null
+                                      ? (passenger['profile_image'] ?? "")
+                                          .toString()
+                                      : "",
+                                  "${passenger != null ? passenger['first_name'] ?? '' : ''} ${passenger != null ? passenger['last_name'] ?? '' : ''}",
+                                  booking is Map
+                                      ? booking['id'].toString()
+                                      : "",
+                                );
                               },
-                              child: textWithUnderLine(
-                                  title: "${controller.labelTextTripDetail['review_passengers_i_review_label'] ??"I reviewed"}",
-                                  context: context,
-                                  fontFamily: bold,
-                                  textColor: primaryColor,
-                                  decorationColor: primaryColor,
-                                  textSize: 16.0
-                              ),
                             ),
-                          ]else...[
-                            15.widthBox,
-                            SizedBox(
-                              width: 120,
-                              child: elevatedButtonWidget(
-                                textWidget:
-                                    "${controller.labelTextTripDetail['review_passengers_review_label'] ?? "Review"}",
-                                buttonFontSize: 20.0,
-                                context: context,
-                                onPressed: () async{
-
-                                  await controller.addPassengerReview(
-                                      controller.cancelRideInfo['id'],
-                                      "passenger",
-                                      controller.cancelRideInfo['bookings'] != null &&
-                                          controller.cancelRideInfo['bookings'][index]['passenger'] != null ?
-                                      controller.cancelRideInfo['bookings'][index]['passenger']['profile_image'] : "",
-                                      "${controller.cancelRideInfo['bookings'] != null &&
-                                          controller.cancelRideInfo['bookings'][index]['passenger'] != null ?
-                                      controller.cancelRideInfo['bookings'][index]['passenger']['first_name'] : ""} ${controller.cancelRideInfo['bookings'] != null &&
-                                          controller.cancelRideInfo['bookings'][index]['passenger'] != null ?
-                                      controller.cancelRideInfo['bookings'][index]['passenger']['last_name'] : ""}",
-                                      controller.cancelRideInfo['bookings'] != null ?
-                                      controller.cancelRideInfo['bookings'][index]['id'].toString() : ""
-                                  );
-                                }
-                              ),
-                            )
-                          ],
-
+                          )
                         ],
-                      ),
-                    );
-                  },
-                  separatorBuilder: (context, index){
-                    return 10.heightBox;
-                  },
-                ),
+                      ],
+                    ),
+                  );
+                },
+                separatorBuilder: (context, index) {
+                  return 10.heightBox;
+                },
               ),
-              if(controller.isOverlayLoading.value == true)...[
-                overlayWidget(context),
-              ]
-            ],
-          )
-      ),
+            ),
+            if (controller.isOverlayLoading.value == true) ...[
+              overlayWidget(context),
+            ]
+          ],
+        );
+      }),
     );
   }
 }

@@ -214,7 +214,7 @@ class _RequestBookingCardState extends State<_RequestBookingCard>
                     ),
                     context: widget.context,
                     onPressed: widget.onPressedReject,
-                    btnColor: primaryColor,
+                    btnColor: Colors.red,
                   ),
                 ),
                 8.widthBox,

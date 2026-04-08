@@ -69,6 +69,9 @@ class Service extends GetxService {
 
   var navigationIndex = 0.obs;
 
+  /// Set true before navigating home after a booking; [MyTripController.loadInitialData] opens Passenger trips (tab 0) instead of My Rides for drivers.
+  var forcePassengerTripsTabAfterBooking = false.obs;
+
   var originalImagePath = "".obs;
   var originalImageName = "".obs;
   var showImage = "".obs;

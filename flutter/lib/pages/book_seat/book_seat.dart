@@ -170,9 +170,15 @@ class BookSeatPage extends StatelessWidget {
                                 ],
                               ),
                             )),
-                        3.heightBox,
+                        15.heightBox,
                         Container(
                           key: controller.termsSectionKey,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 10),
                           child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,7 +247,14 @@ class BookSeatPage extends StatelessWidget {
                         ),
                         if (controller.policyTypeId.value == "37") ...[
                           3.heightBox,
-                          Row(
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 10),
+                            child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -310,8 +323,16 @@ class BookSeatPage extends StatelessWidget {
                               ),
                             ],
                           ),
+                          ),
                           3.heightBox,
-                          Row(
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 10),
+                            child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -398,10 +419,18 @@ class BookSeatPage extends StatelessWidget {
                               ),
                             ],
                           ),
+                          ),
                         ],
                         if (controller.showPinkCheckBox.value == true) ...[
                           3.heightBox,
-                          Row(
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 10),
+                            child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -470,10 +499,18 @@ class BookSeatPage extends StatelessWidget {
                               ),
                             ],
                           ),
+                          ),
                         ],
                         if (controller.showExtraCareCheckBox.value == true) ...[
                           3.heightBox,
-                          Row(
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 10),
+                            child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -493,7 +530,7 @@ class BookSeatPage extends StatelessWidget {
                                               "extra_agree_terms"));
                                     } else {
                                       var err = {
-                                        'title': "pink_agree_terms",
+                                        'title': "extra_agree_terms",
                                         'eList': ['Please select agree terms']
                                       };
                                       controller.errors.add(err);
@@ -526,7 +563,7 @@ class BookSeatPage extends StatelessWidget {
                                               "extra_agree_terms"));
                                     } else {
                                       var err = {
-                                        'title': "pink_agree_terms",
+                                        'title': "extra_agree_terms",
                                         'eList': ['Please select agree terms']
                                       };
                                       controller.errors.add(err);
@@ -545,6 +582,54 @@ class BookSeatPage extends StatelessWidget {
                               ),
                             ],
                           ),
+                          ),
+                        ],
+                        if (controller.errors.firstWhereOrNull(
+                                (element) =>
+                                    element['title'] == "agree_terms") !=
+                            null) ...[
+                          toolTip(
+                              tip: controller.errors.firstWhereOrNull(
+                                  (element) =>
+                                      element['title'] == "agree_terms"))
+                        ],
+                        if (controller.errors.firstWhereOrNull(
+                                (element) =>
+                                    element['title'] == "firm_agree_terms") !=
+                            null) ...[
+                          toolTip(
+                              tip: controller.errors.firstWhereOrNull(
+                                  (element) =>
+                                      element['title'] == "firm_agree_terms"))
+                        ],
+                        if (controller.errors.firstWhereOrNull(
+                                (element) =>
+                                    element['title'] ==
+                                    "firm_cancellation_understand") !=
+                            null) ...[
+                          toolTip(
+                              tip: controller.errors.firstWhereOrNull(
+                                  (element) =>
+                                      element['title'] ==
+                                      "firm_cancellation_understand"))
+                        ],
+                        if (controller.errors.firstWhereOrNull(
+                                (element) =>
+                                    element['title'] == "pink_agree_terms") !=
+                            null) ...[
+                          toolTip(
+                              tip: controller.errors.firstWhereOrNull(
+                                  (element) =>
+                                      element['title'] == "pink_agree_terms"))
+                        ],
+                        if (controller.errors.firstWhereOrNull(
+                                (element) =>
+                                    element['title'] == "extra_agree_terms") !=
+                            null) ...[
+                          toolTip(
+                              tip: controller.errors.firstWhereOrNull(
+                                  (element) =>
+                                      element['title'] == "extra_agree_terms"))
                         ],
                         10.heightBox,
                         if ((controller.ride['payment_method_slug'] == "cash" &&
@@ -561,19 +646,14 @@ class BookSeatPage extends StatelessWidget {
                                     fontFamily: regular,
                                     textColor: Colors.white,
                                     context: context),
-                                onPressed: controller.agreeTerms.value !=
-                                            true &&
-                                        controller.firmAgreeTerms.value !=
-                                            true &&
-                                        controller
-                                                .firmCancellationUnderstandChecked
-                                                .value !=
-                                            true
-                                    ? null
-                                    : () async {
-                                        await controller.bookingRidePaymentType(
-                                            paymentType: "cash");
-                                      },
+                                onPressed: () async {
+                                  if (!controller
+                                      .validateBookingPrerequisites()) {
+                                    return;
+                                  }
+                                  await controller.bookingRidePaymentType(
+                                      paymentType: "cash");
+                                },
                                 context: context,
                                 btnRadius: 5.0,
                               ),
@@ -581,7 +661,7 @@ class BookSeatPage extends StatelessWidget {
                           ),
                         ] else if (controller.ride['payment_method_slug'] ==
                                 "cash" &&
-                            controller.coffeeFromWall.value == true) ...[
+                            controller.coffeeFromWallApplies) ...[
                           Align(
                             alignment: Alignment.bottomCenter,
                             child: SizedBox(
@@ -593,23 +673,14 @@ class BookSeatPage extends StatelessWidget {
                                     fontFamily: regular,
                                     textColor: Colors.white,
                                     context: context),
-                                onPressed: controller.agreeTerms.value !=
-                                            true &&
-                                        controller.firmAgreeTerms.value !=
-                                            true &&
-                                        controller
-                                                .firmCancellationUnderstandChecked
-                                                .value !=
-                                            true &&
-                                        controller.pinkAgreeTerms.value !=
-                                            true &&
-                                        controller.extraCareAgreeTerms.value !=
-                                            true
-                                    ? null
-                                    : () async {
-                                        await controller.bookingRidePaymentType(
-                                            paymentType: "cash");
-                                      },
+                                onPressed: () async {
+                                  if (!controller
+                                      .validateBookingPrerequisites()) {
+                                    return;
+                                  }
+                                  await controller.bookingRidePaymentType(
+                                      paymentType: "cash");
+                                },
                                 context: context,
                                 btnRadius: 5.0,
                               ),

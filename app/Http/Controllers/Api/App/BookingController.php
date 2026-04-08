@@ -94,6 +94,8 @@ class BookingController extends Controller
 
             $ride = $this->makeDetailOfRide($ride, $from_stop_id, $to_stop_id);
 
+            $ride->isShortDistanceRide = $ride->isShortDistanceRide();
+
             if ($ride->isCashPayment()) {
                 $ride->payment_method_slug = 'cash';
             } elseif ($ride->isSecureCashPayment()) {

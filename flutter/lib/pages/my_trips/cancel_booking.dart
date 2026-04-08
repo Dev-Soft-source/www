@@ -21,14 +21,20 @@ class CancelBookingPage extends StatelessWidget {
         ? Get.find<MyTripController>()
         : Get.put(MyTripController());
 
+    // Route segment is the source of truth; [MyTripController.pageType] can be stale if a previous cancel screen set it.
+    final mode = Get.parameters['pageType'] ?? controller.pageType;
+    final isTripCancel = mode == 'trip';
+    final isRideCancel = mode == 'ride';
+
     return Scaffold(
       appBar: AppBar(
         leading: safeBackButton(context),
         title: Obx(() => secondAppBarWidget(
             context: context,
-            title: controller.pageType == "trip"
+            title: isTripCancel
                 ? "${controller.labelTextTripDetail['cancel_booking_main_heading1'] ?? controller.labelTextTripDetail['booking_cancel_btn_label'] ?? "Cancel booking"}"
-                : "${controller.labelTextTripDetail['cancel_ride_setting'] ?? "Cancel ride"}")),
+                : "${controller.labelTextTripDetail['cancel_ride_setting'] ?? "Cancel ride"}",
+            )),
         backgroundColor: primaryColor,
       ),
       body: Obx(() => Stack(
@@ -53,7 +59,7 @@ class CancelBookingPage extends StatelessWidget {
                               imageType: "local",
                               imagePath: crossImage,
                               context: context),
-                          if (controller.pageType == "trip") ...[
+                          if (isTripCancel) ...[
                             10.heightBox,
                             txt25SizeCenter(
                                 title:
@@ -95,7 +101,7 @@ class CancelBookingPage extends StatelessWidget {
                             ),
                             10.heightBox,
                           ],
-                          if (controller.pageType == "trip") ...[
+                          if (isTripCancel) ...[
                             Container(
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(5.0),
@@ -181,7 +187,7 @@ class CancelBookingPage extends StatelessWidget {
                             ),
                             10.heightBox,
                           ],
-                          if(controller.pageType == "trip")...[
+                          if(isTripCancel)...[
                             Align(
                               alignment: Alignment.topLeft,
                               child: txt18Size(
@@ -190,7 +196,7 @@ class CancelBookingPage extends StatelessWidget {
                             ),
                             10.heightBox,
                           ],
-                          if(controller.pageType == "ride")...[
+                          if(isRideCancel)...[
                             Align(
                               alignment: Alignment.topLeft,
                               child: txt18Size(
@@ -221,7 +227,7 @@ class CancelBookingPage extends StatelessWidget {
                                   }
                                 }
                               },
-                              placeHolder: controller.pageType == "trip" ?
+                              placeHolder: isTripCancel ?
                               "${controller.labelTextTripDetail['cancel_booking_trip_placeholder'] ?? "Please provide as many details as you want as to why you want to cancel this booking\nYour driver will receive a copy of this message"}" :
                               "${controller.labelTextTripDetail['cancel_ride_placeholder'] ?? "Provide as many details as you want as to why you want to cancel this ride\nYour passengers will receive a copy of this message ProximaRide will investigate each cancellation"}"),
                           if(controller.errors.firstWhereOrNull((element) => element['title'] == "review") != null) ...[
@@ -231,7 +237,7 @@ class CancelBookingPage extends StatelessWidget {
                             toolTip(tip: controller.errors.firstWhereOrNull((element) => element['title'] == "message"))
                           ],
                           10.heightBox,
-                          if(controller.pageType == "ride")...[
+                          if(isRideCancel)...[
                             Align(
                               alignment: Alignment.topLeft,
                               child: txt18Size(
@@ -302,7 +308,7 @@ class CancelBookingPage extends StatelessWidget {
                                     title: "${controller.labelTextTripDetail['booking_cancel_btn_label'] ?? "Cancel ride"}",
                                     context: context,
                                     textColor: Colors.white),
-                                onPressed: controller.pageType == "ride" &&
+                                onPressed: isRideCancel &&
                                         controller.confirmRideCheckBox.value ==
                                             false
                                     ? null

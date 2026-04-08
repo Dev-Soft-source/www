@@ -14,109 +14,31 @@ class CancellationPolicyController extends Controller
 {
     public function index($lang = null)
     {
-        $languages = Language::getAllCached();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        $cancellationPolicyPage = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
+        
+        $notificationPage = ChatsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $successMessage = $this->successMessage;
+        $cancellationPolicyPage = CancellationPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-            if ($selectedLanguage) {
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
-                // Retrieve the HomePageSettingDetail associated with the selected language
-                $cancellationPolicyPage = CancellationPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
-                $cancellationPolicyPage = CancellationPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        }
 
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0');
-            $notifications = $notifications->where(function ($query) use ($user_id) {
-                $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
-                    $query->where('added_by', $user_id);
-                })
-                    ->orWhere(function ($query) use ($user_id) {
-                        $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-                    })
-                    ->orWhere(function ($query) use ($user_id) {
-                        $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                            $query->where('id', $user_id);
-                        });
-                    });
-            })
-                ->orderBy('id', 'desc')
-                ->get();
-        }
-        return view('cancellation_policy', ['notificationPage' => $notificationPage, 'successMessage' => $successMessage, 'cancellationPolicyPage' => $cancellationPolicyPage, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
+        
+        return view('cancellation_policy', ['notificationPage' => $notificationPage, 
+        'successMessage' => $successMessage, 'cancellationPolicyPage' => $cancellationPolicyPage]);
     }
 
 
 
     public function firmCancellation($lang = null)
     {
-        $languages = Language::getAllCached();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        $cancellationPolicyPage = null;
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
+        
+        $notificationPage = ChatsPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $successMessage = $this->successMessage;
+        $cancellationPolicyPage = FirmCancellationPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-            if ($selectedLanguage) {
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
-                // Retrieve the HomePageSettingDetail associated with the selected language
-                $cancellationPolicyPage = FirmCancellationPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $notificationPage = ChatsPageSettingDetail::where('language_id', $selectedLanguage->id)->select('notification_delete_text')->first();
-                $successMessage = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('cancel_button', 'delete_button')->first();
-                $cancellationPolicyPage = FirmCancellationPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-            }
-        }
-
-        $notifications = null;
-        if (auth()->user()) {
-            $user_id = auth()->user()->id;
-            $notifications = Notification::where('is_delete', '0');
-            $notifications = $notifications->where(function ($query) use ($user_id) {
-                $query->where('type', '1')->whereHas('ride', function ($query) use ($user_id) {
-                    $query->where('added_by', $user_id);
-                })
-                    ->orWhere(function ($query) use ($user_id) {
-                        $query->where('type', '2')->whereHas('booking', function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        });
-                    })
-                    ->orWhere(function ($query) use ($user_id) {
-                        $query->where('type', null)->whereHas('receiver', function ($query) use ($user_id) {
-                            $query->where('id', $user_id);
-                        });
-                    });
-            })
-                ->orderBy('id', 'desc')
-                ->get();
-        }
-        return view('firm_cancellation_policy', ['notificationPage' => $notificationPage, 'successMessage' => $successMessage, 'cancellationPolicyPage' => $cancellationPolicyPage, 'notifications' => $notifications, 'languages' => $languages, 'selectedLanguage' => $selectedLanguage]);
+       
+        return view('firm_cancellation_policy', [
+            'notificationPage' => $notificationPage, 
+            'successMessage' => $successMessage, 
+            'cancellationPolicyPage' => $cancellationPolicyPage, 
+            ]);
     }
 }

@@ -3,7 +3,6 @@ import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/pages/widgets/card_shadow_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import 'package:proximaride_app/pages/post_ride/widget/post_ride_widget.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class CancellationPolicyWidget extends StatefulWidget {
   final context;
@@ -37,26 +36,14 @@ class _CancellationPolicyWidgetState extends State<CancellationPolicyWidget> {
   final GlobalKey<TooltipState> _tooltipKey = GlobalKey<TooltipState>();
   bool _isTooltipVisible = false;
 
-  Future<void> _openCancellationPolicy() async {
-    try {
-      final Uri url = Uri.parse(widget.cancellationPolicyUrl);
-      final bool opened = await launchUrl(
-        url,
-        mode: LaunchMode.externalApplication,
-      );
-
-      if (!opened && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open cancellation policy')),
-        );
-      }
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open cancellation policy')),
-        );
-      }
-    }
+  void _openCancellationPolicy() {
+    Get.toNamed(
+      '/booking_policy_page',
+      arguments: <String, String>{
+        'url': widget.cancellationPolicyUrl.trim(),
+        'title': widget.heading,
+      },
+    );
   }
 
   void _toggleTooltip() {
@@ -68,6 +55,11 @@ class _CancellationPolicyWidgetState extends State<CancellationPolicyWidget> {
         _tooltipKey.currentState?.deactivate();
       }
     });
+  }
+
+  bool get _hasCancellationPolicyUrl {
+    final u = widget.cancellationPolicyUrl.trim();
+    return u.isNotEmpty && u != 'null';
   }
 
   @override
@@ -115,10 +107,7 @@ class _CancellationPolicyWidgetState extends State<CancellationPolicyWidget> {
               ),
               showDuration: const Duration(days: 100),
               waitDuration: Duration.zero,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: _toggleTooltip,
-                child: Container(
+              child: Container(
                   padding: EdgeInsets.fromLTRB(
                       getValueForScreenType<double>(
                         context: widget.context,
@@ -143,36 +132,42 @@ class _CancellationPolicyWidgetState extends State<CancellationPolicyWidget> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          if (widget.bookingTypeSlug == "firm" &&
-                              widget.cancellationPolicyUrl != "") ...[
-                            InkWell(
-                              onTap: _openCancellationPolicy,
-                              child: Row(
-                                children: [
-                                  txt20SizeCapitalize(
-                                      context: widget.context,
-                                      title: widget.policyType,
-                                      textColor: primaryColor),
-                                  txt20Size(
-                                      context: widget.context,
-                                      title:
-                                          ' (${widget.discountLabel} ${widget.policyRate}%)',
-                                      textColor: primaryColor),
-                                ],
+                      Expanded(
+                        child: Row(
+                          children: [
+                            if (_hasCancellationPolicyUrl) ...[
+                              InkWell(
+                                onTap: _openCancellationPolicy,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    txt20SizeCapitalize(
+                                        context: widget.context,
+                                        title: widget.policyType,
+                                        textColor: primaryColor),
+                                    if (widget.bookingTypeSlug == "firm") ...[
+                                      txt20Size(
+                                          context: widget.context,
+                                          title:
+                                              ' (${widget.discountLabel} ${widget.policyRate}%)',
+                                          textColor: primaryColor),
+                                    ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          ] else ...[
-                            txt20SizeCapitalize(
-                                context: widget.context, title: widget.policyType),
-                            if (widget.bookingTypeSlug == "firm") ...[
-                              txt20Size(
+                            ] else ...[
+                              txt20SizeCapitalize(
                                   context: widget.context,
-                                  title: ' (${widget.discountLabel} ${widget.policyRate}%)'),
+                                  title: widget.policyType),
+                              if (widget.bookingTypeSlug == "firm") ...[
+                                txt20Size(
+                                    context: widget.context,
+                                    title:
+                                        ' (${widget.discountLabel} ${widget.policyRate}%)'),
+                              ],
                             ]
-                          ]
-                        ],
+                          ],
+                        ),
                       ),
                       GestureDetector(
                         onTap: _toggleTooltip,
@@ -193,7 +188,6 @@ class _CancellationPolicyWidgetState extends State<CancellationPolicyWidget> {
                       ),
                     ],
                   )),
-              ),
             ),
         ],
       ));
