@@ -7,6 +7,10 @@ import 'package:proximaride_app/pages/widgets/progress_circular_widget.dart';
 import 'package:proximaride_app/pages/widgets/second_appbar_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 
+/// Segmented tab bar styling (light gray track, teal selected pill).
+const Color _postRideAgainTabTrackColor = Color(0xFFEBEBEB);
+const Color _postRideAgainTabSelectedColor = Color(0xFF00A896);
+
 class PostRideAgainPage extends StatelessWidget {
   const PostRideAgainPage({super.key});
 
@@ -39,35 +43,91 @@ class PostRideAgainPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          txt20Size(
-                              title: "Select the ride you want to repost.",
-                              context: context),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEFF6FF),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: const Color(0xFFBFDBFE),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  Icons.info_outline_rounded,
+                                  color: primaryColor,
+                                  size: 22,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: txt16Size(
+                                    title:
+                                        "Select the ride you want to repost.",
+                                    context: context,
+                                    fontFamily: regular,
+                                    textColor: textColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                           10.heightBox,
-                          TabBar(
-                            onTap: (index) async {
-                              await controller.getTabIndex(index);
-                            },
-                            indicatorColor: primaryColor,
-                            indicatorSize: TabBarIndicatorSize.tab,
-                            controller: controller.tabController,
-                            //isScrollable: true,
-                            tabs: [
-                              Tab(
-                                  child: txt20Size(
-                                      title:
-                                          "${controller.labelTextDetail['upcoming_label'] ?? "Upcoming"}",
-                                      context: context)),
-                              Tab(
-                                  child: txt20Size(
-                                      title:
-                                          "${controller.labelTextDetail['completed_label'] ?? "Completed"}",
-                                      context: context)),
-                              Tab(
-                                  child: txt20Size(
-                                      title:
-                                          "${controller.labelTextDetail['cancelled_label'] ?? "Cancelled"}",
-                                      context: context)),
-                            ],
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: _postRideAgainTabTrackColor,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: TabBar(
+                              onTap: (index) async {
+                                await controller.getTabIndex(index);
+                              },
+                              controller: controller.tabController,
+                              dividerColor: Colors.transparent,
+                              dividerHeight: 0,
+                              indicator: BoxDecoration(
+                                color: _postRideAgainTabSelectedColor,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              indicatorSize: TabBarIndicatorSize.tab,
+                              labelColor: Colors.white,
+                              unselectedLabelColor: textColor,
+                              labelStyle: const TextStyle(
+                                fontFamily: bold,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              unselectedLabelStyle: const TextStyle(
+                                fontFamily: regular,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              splashFactory: NoSplash.splashFactory,
+                              overlayColor:
+                                  WidgetStateProperty.all(Colors.transparent),
+                              // labelPadding: const EdgeInsets.symmetric(
+                              //     horizontal: 8, vertical: 0),
+                              tabs: [
+                                Tab(
+                                  text:
+                                      "${controller.labelTextDetail['upcoming_label'] ?? "Upcoming"}",
+                                ),
+                                Tab(
+                                  text:
+                                      "${controller.labelTextDetail['completed_label'] ?? "Completed"}",
+                                ),
+                                Tab(
+                                  text:
+                                      "${controller.labelTextDetail['cancelled_label'] ?? "Cancelled"}",
+                                ),
+                              ],
+                            ),
                           ),
                           10.heightBox,
                           Expanded(

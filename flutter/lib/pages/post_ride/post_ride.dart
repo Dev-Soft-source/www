@@ -51,41 +51,19 @@ class PostRidePage extends StatefulWidget {
 }
 
 class _PostRidePageState extends State<PostRidePage> {
-  bool _controllerReady = false;
-
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      if (Get.isRegistered<PostRideController>()) {
-        Get.delete<PostRideController>(force: true);
-      }
-      Get.put(PostRideController());
-      if (mounted) {
-        setState(() => _controllerReady = true);
-      }
-    });
+    // Register synchronously so nested routes (e.g. StopFormPage) always find
+    // [PostRideController]; a post-frame callback left a window where Get.find failed.
+    if (Get.isRegistered<PostRideController>()) {
+      Get.delete<PostRideController>(force: true);
+    }
+    Get.put(PostRideController());
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_controllerReady) {
-      return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: primaryColor,
-          title: secondAppBarWidget(
-            title: 'Post a ride',
-            context: context,
-          ),
-          leading: safeBackButton(context),
-        ),
-        body: SafeArea(
-          child: Center(child: progressCircularWidget(context)),
-        ),
-      );
-    }
     return const _PostRideScaffold();
   }
 }
@@ -299,57 +277,75 @@ class _PostRideScaffold extends StatelessWidget {
                                         ? false
                                         : true;
                               },
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Checkbox(
-                                    value: controller.disclaimer.value,
-                                    activeColor: primaryColor,
-                                    side: BorderSide(
-                                      color: controller.errors.any((element) =>
-                                              element['title'] ==
-                                              "agree_terms")
-                                          ? Colors.red
-                                          : Colors.grey.shade500,
-                                    ),
-                                    onChanged: (_) {
-                                      if (controller.errors.firstWhereOrNull(
-                                              (element) =>
-                                                  element['title'] ==
-                                                  "agree_terms") !=
-                                          null) {
-                                        controller.errors.remove(controller
-                                            .errors
-                                            .firstWhereOrNull((element) =>
-                                                element['title'] ==
-                                                "agree_terms"));
-                                      }
-                                      controller.disclaimer.value =
-                                          !controller.disclaimer.value;
-                                    },
+                              borderRadius: BorderRadius.circular(10),
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 5, vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(5),
+                                  border: Border.all(
+                                    color: Colors.grey.shade300,
+                                    width: 1,
                                   ),
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(top: 5.0),
-                                      child: AppHtmlText(
-                                        data: _agreeTermsHtmlWithRequiredStar(
-                                          controller.labelTextDetail[
-                                                  'agree_terms_label']
-                                              ?.toString(),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 0),
+                                      child: Checkbox(
+                                        value: controller.disclaimer.value,
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                        visualDensity: VisualDensity.compact,
+                                        activeColor: primaryColor,
+                                        side: BorderSide(
+                                          color: controller.errors.any((element) =>
+                                                  element['title'] ==
+                                                  "agree_terms")
+                                              ? Colors.red
+                                              : Colors.grey.shade500,
                                         ),
-                                        fontSize: 20,
-                                        fontFamily: bold,
-                                        fontWeight: FontWeight.w400,
-                                        textColor: textColor,
-                                        linkColor: primaryColor,
-                                        lineHeight: 1.4,
-                                        openLinksExternally: false,
-                                        onLinkTapCallback:
-                                            _handleAgreementLinkTap,
+                                        onChanged: (_) {
+                                        if (controller.errors.firstWhereOrNull(
+                                                (element) =>
+                                                    element['title'] ==
+                                                    "agree_terms") !=
+                                            null) {
+                                          controller.errors.remove(controller
+                                              .errors
+                                              .firstWhereOrNull((element) =>
+                                                  element['title'] ==
+                                                  "agree_terms"));
+                                        }
+                                        controller.disclaimer.value =
+                                            !controller.disclaimer.value;
+                                      },
                                       ),
                                     ),
-                                  ),
-                                ],
+                                    Expanded(
+                                      child: AppHtmlText(
+                                          data: _agreeTermsHtmlWithRequiredStar(
+                                            controller.labelTextDetail[
+                                                    'agree_terms_label']
+                                                ?.toString(),
+                                          ),
+                                          fontSize: 20,
+                                          fontFamily: bold,
+                                          fontWeight: FontWeight.w400,
+                                          textColor: textColor,
+                                          linkColor: primaryColor,
+                                          lineHeight: 1.4,
+                                          openLinksExternally: false,
+                                          onLinkTapCallback:
+                                              _handleAgreementLinkTap,
+                                        ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                             10.heightBox,

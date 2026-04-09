@@ -39,7 +39,7 @@ class StopFormPage extends StatefulWidget {
 
 class _StopFormPageState extends State<StopFormPage> {
   final serviceController = Get.find<Service>();
-  final postRideController = Get.find<PostRideController>();
+  late final PostRideController postRideController;
 
   late final TextEditingController stopController;
   late final TextEditingController pickupOffController;
@@ -49,6 +49,10 @@ class _StopFormPageState extends State<StopFormPage> {
   @override
   void initState() {
     super.initState();
+    if (!Get.isRegistered<PostRideController>()) {
+      Get.put(PostRideController());
+    }
+    postRideController = Get.find<PostRideController>();
     stopController = TextEditingController(text: widget.initialStop);
     pickupOffController = TextEditingController(text: widget.initialPickupOff);
     dateController = TextEditingController(text: widget.initialDate);
