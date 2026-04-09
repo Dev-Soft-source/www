@@ -356,20 +356,38 @@ class SignupController extends Controller
             'social_auth_intent' => $request->query('intent') === 'login' ? 'login' : 'signup',
         ]);
 
+        // Apple (and Socialite) require a non-empty redirect_uri on the authorize request.
+        // Relying only on env('APPLE_REDIRECT') breaks when the var is missing or config is cached empty.
+        $redirectUrl = $this->socialRedirectUrl($lang, $provider);
+
         Log::info('social_oauth.redirect', [
             'provider' => $provider,
             'lang' => $lang,
             'intent' => session('social_auth_intent'),
+            'oauth_redirect_uri' => $redirectUrl,
             'has_apple_private_key_config' => $provider === 'apple'
                 ? (bool) (config('services.apple.private_key') ?? config('services.apple.client_secret'))
                 : null,
         ]);
 
+        $social = Socialite::driver($provider)->redirectUrl($redirectUrl);
+
         if ($provider === 'linkedin') {
-            return Socialite::driver($provider)->scopes(['openid', 'profile', 'email'])->redirect();
+            return $social->scopes(['openid', 'profile', 'email'])->redirect();
         }
 
-        return Socialite::driver($provider)->redirect();
+        return $social->redirect();
+    }
+
+    /**
+     * OAuth callback URL for this app; must match the Return URL registered with Apple / Google / etc.
+     */
+    private function socialRedirectUrl(string $lang, string $provider): string
+    {
+        return route('signup.handleProviderCallback', [
+            'lang' => $lang,
+            'provider' => $provider,
+        ], true);
     }
 
     public function handleProviderCallback($lang, $provider)
@@ -429,7 +447,10 @@ class SignupController extends Controller
                 return redirect()->route('login', ['lang' => $selectedLanguage->abbreviation]);
             }
 
-            $providerUser = Socialite::driver($provider)->user();
+            $oauthRedirect = $this->socialRedirectUrl($lang, $provider);
+            $providerUser = Socialite::driver($provider)
+                ->redirectUrl($oauthRedirect)
+                ->user();
             $authIntent = session()->pull('social_auth_intent', 'signup');
 
             $normalizedName = trim((string) ($providerUser->name ?? ''));
