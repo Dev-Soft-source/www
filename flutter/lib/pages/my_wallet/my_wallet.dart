@@ -336,6 +336,9 @@ class MyWallet extends StatelessWidget {
                                                           fontFamily: bold),
                                                       10.heightBox,
                                                       Table(
+                                                        defaultVerticalAlignment:
+                                                            TableCellVerticalAlignment
+                                                                .middle,
                                                         border: TableBorder.all(
                                                             color: Colors
                                                                 .grey.shade400,

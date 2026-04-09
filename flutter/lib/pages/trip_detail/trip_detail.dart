@@ -283,13 +283,41 @@ class TripDetailPage extends StatelessWidget {
                             if (controller.ride['seats_left'] != null &&
                                 controller.ride['seats_left'] <= 0) ...[
                               10.heightBox,
-                              Center(
-                                  child: txt20Size(
-                                      title:
-                                          "${controller.labelTextDetail['all_seats_booked_label'] ?? "This ride is fully booked"}",
-                                      fontFamily: regular,
-                                      context: context,
-                                      textColor: Colors.red)),
+                              Container(
+                                width: double.infinity,
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 12),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFEF2F2),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: const Color(0xFFFCA5A5),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Icon(
+                                      Icons.warning_amber_rounded,
+                                      color: Color(0xFFDC2626),
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: txt16Size(
+                                        title:
+                                            "${controller.labelTextDetail['all_seats_booked_label'] ?? "This ride is fully booked"}",
+                                        fontFamily: regular,
+                                        context: context,
+                                        textColor: const Color(0xFFB91C1C),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ],
                             10.heightBox,
                             pickupDropoffInfoWidget(

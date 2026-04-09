@@ -9,25 +9,29 @@ TableRow tableRowWidget({
   bool isHeader = false,
 }) {
   Widget buildCell(String title) {
-    Widget content = Padding(
+    final content = Container(
+      alignment: Alignment.center,
+      constraints: const BoxConstraints(minHeight: 44),
       padding: const EdgeInsets.all(8.0),
-      child: txt20Size(context: context, title: title),
+      child: txt20SizeAlignCenter(context: context, title: title),
     );
 
-    if (onTap != null && !isHeader) {
-      return InkWell(
-        onTap: onTap,
-        child: content,
-      );
-    }
-    return content;
+    return TableCell(
+      verticalAlignment: TableCellVerticalAlignment.middle,
+      child: onTap != null && !isHeader
+          ? InkWell(
+              onTap: onTap,
+              child: content,
+            )
+          : content,
+    );
   }
 
   return TableRow(
     decoration: isHeader ? BoxDecoration(color: Colors.grey.shade300) : null,
     children: [
-      Column(children: [buildCell(cell1)]),
-      Column(children: [buildCell(cell2)]),
+      buildCell(cell1),
+      buildCell(cell2),
     ],
   );
 }
