@@ -22,6 +22,7 @@ Widget securedCashWidget({context, bookingList, double screenWidth = 0.0, contro
   }
 
   return cardShadowWidget(
+      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       context: context,
       widgetChild: Column(
         children: [

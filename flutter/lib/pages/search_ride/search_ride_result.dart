@@ -291,6 +291,14 @@ class SearchRideResultPage extends StatelessWidget {
                                         cancelStatusLabel:
                                             "${controller.labelTextDetail['card_section_cancelled'] ?? 'Cancelled'}",
                                         totalSeat: totalSeats,
+                                        bookingMethodLabel: controller.rides[index]['booking_method'].toString(),
+                                        bookingMethodId: int.tryParse(
+                                                controller.rides[index]
+                                                        ['booking_method_id']
+                                                    ?.toString() ??
+                                                    '') ??
+                                            0,
+                                        bookingMethodIcon: controller.rides[index]['booking_method_image'].toString(),
                                         firmPrice: firmPrice,
                                       ),
                                       tripCardFromToWidget(
@@ -302,13 +310,6 @@ class SearchRideResultPage extends StatelessWidget {
                                         seatsLeft: seatsLeft,
                                         pickup: pickup,
                                         dropOff: dropOff,
-                                        bookingMethodLabel: controller.rides[index]['booking_method'].toString(),
-                                        bookingMethodId: int.tryParse(
-                                                controller.rides[index]
-                                                        ['booking_method_id']
-                                                    ?.toString() ??
-                                                    '') ??
-                                            0,
                                         fromLabel:
                                             "${controller.labelTextDetail['card_section_from_label'] ?? 'From'}",
                                         toLabel:
@@ -428,6 +429,7 @@ class SearchRideResultPage extends StatelessWidget {
                                                       imageType: "network",
                                                       context: context),
                                                 ),
+                                                2.widthBox,
                                               ],
                                               
                                               if (controller.rides[index][
@@ -662,10 +664,12 @@ class SearchRideResultPage extends StatelessWidget {
                                                                   .shade400)),
                                                       5.widthBox,
                                                       txt16Size(
+                                                        textColor: Vx.gray700,
                                                           title:
                                                               "${controller.labelTextDetail['card_section_age'] ?? "Age"}: ",
                                                           context: context),
                                                       txt16Size(
+                                                        textColor: Vx.gray700,
                                                           title:
                                                               "${controller.rides[index]['driver_age']}",
                                                           context: context),
@@ -678,6 +682,7 @@ class SearchRideResultPage extends StatelessWidget {
                                                                   .shade400)),
                                                       5.widthBox,
                                                         txt16Size(
+                                                          textColor: Vx.gray700,
                                                             title:
                                                                 "${controller.rides[index]['gender_label']}",
                                                             context: context),
@@ -688,10 +693,12 @@ class SearchRideResultPage extends StatelessWidget {
                                                         MainAxisAlignment.start,
                                                     children: [
                                                       txt16Size(
+                                                        textColor: Vx.gray700,
                                                           title:
                                                               "${controller.labelTextDetail['card_section_driven'] ?? "Driven"}: ",
                                                           context: context),
                                                       txt16Size(
+                                                        textColor: Vx.gray700,
                                                           title: "${controller.rides[index]['driven_count']}",
                                                               // "${controller.rides[index]['driven_count']} ${controller.labelTextDetail['card_section_passengers'] ?? "passengers"}",
                                                           context: context),
@@ -704,10 +711,12 @@ class SearchRideResultPage extends StatelessWidget {
                                                                   .shade400)),
                                                       5.widthBox,
                                                       txt16Size(
+                                                        textColor: Vx.gray700,
                                                           title:
                                                               "${controller.labelTextDetail['card_section_review'] ?? "Review"}: ",
                                                           context: context),
                                                       txt16Size(
+                                                        textColor: Vx.gray700,
                                                           //
                                                           title: controller.rides[
                                                                           index]
@@ -717,10 +726,10 @@ class SearchRideResultPage extends StatelessWidget {
                                                               ? "${(controller.rides[index]['driver_average_rating']).toStringAsFixed(1)}"
                                                               : "${controller.labelTextDetail['card_section_no_review'] ?? 'No reviews'}",
                                                           context: context),
-                                                      5.widthBox,
+                                                      // 5.widthBox,
                                                     ],
                                                   ),
-                                                  10.heightBox,
+                                                  5.heightBox,
                                                 ],
                                               )
                                             ],

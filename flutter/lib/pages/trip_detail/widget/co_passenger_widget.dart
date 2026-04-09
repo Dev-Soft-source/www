@@ -12,6 +12,7 @@ Widget coPassengerWidget({context, coPassengerList, String tripId = "", double s
     },
     child: cardShadowWidget(
         context: context,
+        margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         widgetChild: Column(
           crossAxisAlignment: CrossAxisAlignment.center ,
           children: [

@@ -20,6 +20,8 @@ Widget tripCardDateTimeWidget(
     String completedStatusLabel = "Completed",
     String cancelStatusLabel = "Cancelled",
     String totalSeat = "",
+    String bookingMethodLabel = "", int bookingMethodId = 0, 
+    String bookingMethodIcon = "",
     double firmPrice = 0.0}) {
   var seatLabel = "seat";
   totalSeat = totalSeat.toString() == "" ? "0" : totalSeat.toString();
@@ -30,18 +32,18 @@ Widget tripCardDateTimeWidget(
       padding: EdgeInsets.fromLTRB(
           getValueForScreenType<double>(
             context: context,
-            mobile: 12.0,
-            tablet: 12.0,
+            mobile: 10.0,
+            tablet: 10.0,
           ),
           getValueForScreenType<double>(
             context: context,
-            mobile: 15.0,
-            tablet: 15.0,
+            mobile: 10.0,
+            tablet: 10.0,
           ),
           getValueForScreenType<double>(
             context: context,
-            mobile: 12.0,
-            tablet: 12.0,
+            mobile: 10.0,
+            tablet: 10.0,
           ),
           getValueForScreenType<double>(
             context: context,
@@ -55,72 +57,14 @@ Widget tripCardDateTimeWidget(
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              txt16Size(title: date, context: context),
+              txt16Size(title: date, context: context, textColor: Colors.grey.shade800),
               3.widthBox,
-              txt16Size(title: atLabel, context: context),
+              txt16Size(title: atLabel, context: context, textColor: Colors.grey.shade800),
               3.widthBox,
-              txt16Size(title: time, context: context),
+              txt16Size(title: time, context: context, textColor: Colors.grey.shade800),
             ],
           ),
-          // if (seatLeft != "") ...[
-          //   txt16Size(title: "$seatLeft $seatLeftLabel", context: context)
-          // ],
-          // if (totalSeat != "" && totalSeat != "0") ...[
-          //   Column(
-          //     crossAxisAlignment: CrossAxisAlignment.start,
-          //     children: [
-          //       txt16Size(
-          //           title: "Total $totalSeat $seatLabel", context: context),
-          //       if (firmPrice != 0.0) ...[
-          //         Row(
-          //           mainAxisAlignment: MainAxisAlignment.start,
-          //           children: [
-          //             txt16SizeLineThrough(
-          //                 title: formatCurrency(price), context: context),
-          //             6.widthBox,
-          //             txt16Size(
-          //               title: "->",
-          //               context: context,
-          //               fontFamily: bold,
-          //             ),
-          //             6.widthBox,
-          //             Row(
-          //               mainAxisSize: MainAxisSize.min,
-          //               children: [
-          //                 txt24Size(
-          //                     title: formatCurrency(firmPrice),
-          //                     context: context,
-          //                     textColor: textColor),
-          //                 txt16Size(
-          //                   title: perSeatLabel,
-          //                   context: context,
-          //                   fontFamily: bold,
-          //                   textColor: textColor,
-          //                 ),
-          //               ],
-          //             ),
-          //           ],
-          //         )
-          //       ] else if (tripStatus == "search") ...[
-          //         Row(
-          //           mainAxisSize: MainAxisSize.min,
-          //           children: [
-          //             txt24Size(
-          //                 title: formatCurrency(price),
-          //                 context: context,
-          //                 textColor: textColor),
-          //             txt16Size(
-          //               title: perSeatLabel,
-          //               context: context,
-          //               fontFamily: bold,
-          //               textColor: textColor,
-          //             ),
-          //           ],
-          //         ),
-          //       ],
-          //     ],
-          //   )
-          // ],
+          
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -164,6 +108,29 @@ Widget tripCardDateTimeWidget(
                   )
                 ],
               ]),
+              
+              if (bookingMethodLabel != "" && bookingMethodLabel.isNotEmpty) ...[
+            6.heightBox,
+            (() {
+              final isInstant = bookingMethodId == 31;
+              final badgeColor = isInstant ? Colors.green : primaryColor;
+              return Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                decoration: BoxDecoration(
+                  color: badgeColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(5),
+                  border: Border.all(color: badgeColor.withOpacity(0.35)),
+                ),
+                child: txt14Size(
+                  title: bookingMethodLabel,
+                  context: context,
+                  fontFamily: bold,
+                  textColor: badgeColor,
+                ),
+              );
+            })(),
+          ],
               if (seatLeft != "") ...[
                 Row(children: [
                   txt16Size(title: "$seatLeft $seatLeftLabel", context: context)
@@ -188,41 +155,45 @@ Widget tripCardDateTimeWidget(
                             ),
                           ]),
                           // 5.heightBox,
-                          Row(
+                          Column(
                             mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               txt24Size(
                                   title: formatCurrency(firmPrice),
                                   context: context,
                                   textColor: primaryColor),
-                                  5.widthBox,
+                              2.heightBox,
                               txt16Size(
                                 title: perSeatLabel,
                                 context: context,
                                 fontFamily: bold,
-                                textColor: primaryColor,
+                                textColor: placeHolderColor,
                               ),
                             ],
                           ),
                         ],
                       )
-                    ] else if (tripStatus == "search") ...[
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          txt24Size(
-                              title: formatCurrency(price),
-                              context: context,
-                              textColor: primaryColor),
-                          txt16Size(
-                            title: perSeatLabel,
-                            context: context,
-                            fontFamily: bold,
-                            textColor: primaryColor,
-                          ),
-                        ],
-                      ),
-                    ],
+                    ]
+                    //  else if (tripStatus == "search") ...[
+                    //   Column(
+                    //     mainAxisSize: MainAxisSize.min,
+                    //     crossAxisAlignment: CrossAxisAlignment.start,
+                    //     children: [
+                    //       txt24Size(
+                    //           title: formatCurrency(price),
+                    //           context: context,
+                    //           textColor: primaryColor),
+                    //       2.heightBox,
+                    //       txt16Size(
+                    //         title: perSeatLabel,
+                    //         context: context,
+                    //         fontFamily: bold,
+                    //         textColor: placeHolderColor,
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ],
                   ],
                 ),
               ],

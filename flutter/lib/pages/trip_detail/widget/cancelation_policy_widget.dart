@@ -66,6 +66,7 @@ class _CancellationPolicyWidgetState extends State<CancellationPolicyWidget> {
   Widget build(BuildContext context) {
     return cardShadowWidget(
         context: widget.context,
+        margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         widgetChild: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,

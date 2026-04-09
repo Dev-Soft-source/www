@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/helpers/ride_departure_display.dart';
@@ -38,7 +39,7 @@ Widget tripCardWidget(
   final hasDriverReview = tripDetail['driver'] != null &&
       tripDetail['driver']['average_rating'] != null;
 
-  return InkWell(
+  return _inkWellOrGestureWeb(
     onTap: onTapTripCard,
     child: Card(
       surfaceTintColor: cardBgColor,
@@ -335,4 +336,15 @@ Widget tripCardWidget(
       ),
     ),
   );
+}
+
+Widget _inkWellOrGestureWeb({VoidCallback? onTap, required Widget child}) {
+  if (kIsWeb) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: child,
+    );
+  }
+  return InkWell(onTap: onTap, child: child);
 }

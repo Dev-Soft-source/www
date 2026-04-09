@@ -6,6 +6,7 @@ import 'package:proximaride_app/pages/post_ride/widget/post_ride_widget.dart';
 Widget chatDriverWidget({context, double screenWidth = 0.0 , driverId, rideId, String heading = "Chat with the driver", String label = "Ask the driver any questions you want, especially if you have extra luggage, kids, or if you need a custom pick-up, or custom drop-off"}) {
   return cardShadowWidget(
       context: context,
+      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       widgetChild: Column(
         children: [
           postRideWidget(title: heading, screenWidth: screenWidth, context: context),

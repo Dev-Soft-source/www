@@ -23,8 +23,8 @@ Widget seatBookedRowWidget({context, String title = "", String value = ""}){
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        txt18Size(title: title, context: context),
-        txt18Size(title: value, context: context)
+        txt18Size(title: title, context: context, textColor: Colors.grey.shade800),
+        txt18Size(title: value, context: context, textColor: primaryColor)
       ],
     ),
   );

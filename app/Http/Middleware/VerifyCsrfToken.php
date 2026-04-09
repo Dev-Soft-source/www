@@ -14,6 +14,9 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         'stripe/*',
         'twilio/callback',
-        'twilio/callback/conservation'
+        'twilio/callback/conservation',
+        // Apple OAuth callback is a server-side POST (form_post); CSRF token is not sent by Apple.
+        '*/signup/*/callback',
+        'signup/*/callback',
     ];
 }

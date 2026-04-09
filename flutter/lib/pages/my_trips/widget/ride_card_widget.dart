@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/helpers/ride_departure_display.dart';
@@ -49,7 +50,7 @@ Widget rideCardWidget(
       : 0;
   final bookedSeats = int.tryParse("${tripDetail['booked_seats'] ?? 0}") ?? 0;
 
-  return InkWell(
+  return _inkWellOrGestureWeb(
     onTap: onTapRideCard,
     child: Card(
       surfaceTintColor: cardBgColor,
@@ -172,7 +173,7 @@ Widget rideCardWidget(
                           "${tripDetail['vehicle'] != null ? tripDetail['vehicle']['image'] : tripDetail['car_image']}",
                       imageType: "network",
                       context: context),
-
+                  2.widthBox,
                   if (tripDetail['payment_method_image'] != null) ...[
                     circleIconWidget(
                         width: 30.0,
@@ -233,7 +234,7 @@ Widget rideCardWidget(
           ),
           if (tripDetail['bookings'].isNotEmpty) ...[
             const Divider(),
-            InkWell(
+            _inkWellOrGestureWeb(
               onTap: onTapReviewPassenger,
               child: Container(
                 padding: EdgeInsets.fromLTRB(
@@ -315,4 +316,18 @@ Widget rideCardWidget(
       ),
     ),
   );
+}
+
+/// [InkWell] drives extra mouse-region work on Flutter web and can contribute to
+/// `mouse_tracker.dart` assertions when combined with list rebuilds. Use a plain
+/// [GestureDetector] on web; keep material ink elsewhere.
+Widget _inkWellOrGestureWeb({VoidCallback? onTap, required Widget child}) {
+  if (kIsWeb) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: child,
+    );
+  }
+  return InkWell(onTap: onTap, child: child);
 }

@@ -82,6 +82,80 @@ class TripDetailPage extends StatelessWidget {
         : "${controller.labelTextDetail['my_trip_page_heading_label'] ?? "This is your trip page. You can review and edit your trip details here."}";
   }
 
+  ({Color background, Color border, Color icon}) _tripDetailIntroBadgeTheme(
+      Map<String, dynamic> ride) {
+    final pink = ride['isPink'] == true;
+    final extraCare = ride['isExtraCare'] == true;
+    final shortDistance = ride['isShortDistanceRide'] == true;
+    if (shortDistance) {
+      return (
+        background: const Color(0xFFDBEAFE),
+        border: const Color(0xFF1E40AF),
+        icon: const Color(0xFF1E3A8A),
+      );
+    }
+    if (pink && extraCare) {
+      return (
+        background: const Color(0xFFFDF2F8),
+        border: const Color(0xFFFBCFE8),
+        icon: const Color(0xFFDB2777),
+      );
+    }
+    if (pink) {
+      return (
+        background: const Color(0xFFFDF2F8),
+        border: const Color(0xFFFBCFE8),
+        icon: const Color(0xFFE91E63),
+      );
+    }
+    if (extraCare) {
+      return (
+        background: const Color(0xFFF0FDF4),
+        border: const Color(0xFFBBF7D0),
+        icon: const Color(0xFF16A34A),
+      );
+    }
+    return (
+      background: const Color(0xFFEFF6FF),
+      border: const Color(0xFFBFDBFE),
+      icon: primaryColor,
+    );
+  }
+
+  Widget _tripDetailIntroBadgeBar(
+    BuildContext context,
+    TripDetailController controller,
+    Map<String, dynamic> ride,
+  ) {
+    final message = _tripDetailIntroHeading(controller, ride);
+    final theme = _tripDetailIntroBadgeTheme(ride);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      margin: EdgeInsets.fromLTRB(12,12,12,0),
+      decoration: BoxDecoration(
+        color: theme.background,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.border, width: 1),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.info_outline_rounded, color: theme.icon, size: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: txt16Size(
+              title: message,
+              context: context,
+              fontFamily: regular,
+              textColor: textColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final TripDetailController controller = Get.isRegistered<TripDetailController>()
@@ -136,27 +210,25 @@ class TripDetailPage extends StatelessWidget {
                   dateTime.add(Duration(hours: cancelHours));
               DateTime currentDateTime = DateTime.now();
 
-              logger.info('controller.ride ${controller.ride['features']}');
+              // logger.info('controller.ride ${controller.ride['features']}');
 
               return Stack(
                 children: [
                   Container(
                       padding: EdgeInsets.all(getValueForScreenType<double>(
                         context: context,
-                        mobile: 15.0,
-                        tablet: 15.0,
+                        mobile: 2.0,
+                        tablet: 2.0,
                       )),
                       child: SingleChildScrollView(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            txt20Size(
-                                title: _tripDetailIntroHeading(
-                                    controller,
-                                    Map<String, dynamic>.from(
-                                        controller.ride)),
-                                context: context,
-                                fontFamily: bold),
+                            _tripDetailIntroBadgeBar(
+                              context,
+                              controller,
+                              Map<String, dynamic>.from(controller.ride),
+                            ),
                             10.heightBox,
                             if (controller
                                     .ride['booking_requests'].isNotEmpty &&
@@ -178,6 +250,14 @@ class TripDetailPage extends StatelessWidget {
                                       .toString(),
                                   to: (selectedRideDetail['destination'] ??
                                           controller.ride['destination'] ??
+                                          '')
+                                      .toString(),
+                                  pickup: (selectedRideDetail['pickup'] ??
+                                          controller.ride['pickup'] ??
+                                          '')
+                                      .toString(),
+                                  dropOff: (selectedRideDetail['dropoff'] ??
+                                          controller.ride['dropoff'] ??
                                           '')
                                       .toString(),
                                   date: tripDate,
@@ -405,61 +485,12 @@ class TripDetailPage extends StatelessWidget {
                               10.heightBox,
                             ],
                             if (controller.type == "ride" &&
-                                controller.status == "upcoming") ...[
-                              Container(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 5.0),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: elevatedButtonWidget(
-                                        context: context,
-                                        onPressed: () {
-                                          Get.toNamed(
-                                              "/post_ride/${controller.ride['id']}/update");
-                                        },
-                                        textWidget: txt22SizeAlignCenter(
-                                          title:
-                                              "${controller.labelTextDetail['edit_ride_btn_label'] ?? "Edit ride"}",
-                                          textColor: Colors.white,
-                                          context: context,
-                                        ),
-                                      ),
-                                    ),
-                                    if (cancelDateTime
-                                        .isAfter(currentDateTime)) ...[
-                                      10.widthBox,
-                                      Expanded(
-                                        child: elevatedButtonWidget(
-                                          context: context,
-                                          btnColor: Colors.red,
-                                          onPressed: () async {
-                                            if (controller.ride['bookings'] !=
-                                                    null &&
-                                                controller
-                                                        .ride['bookings']
-                                                        .length >
-                                                    0) {
-                                              controller
-                                                  .openDriverCancelBooking();
-                                            } else {
-                                              await controller
-                                                  .cancelRideByDriver();
-                                            }
-                                          },
-                                          textWidget: txt22SizeAlignCenter(
-                                            title:
-                                                "${controller.labelTextDetail['cancel_ride_btn_label'] ?? "Cancel ride"}",
-                                            textColor: Colors.white,
-                                            context: context,
-                                          ),
-                                        ),
-                                      )
-                                    ],
-                                  ],
-                                ),
-                              ),
-                            ] else ...[
+                                controller.status == "upcoming")
+                              SizedBox(
+                                height: _bottomActionBarHeight +
+                                    MediaQuery.of(context).padding.bottom,
+                              )
+                            else ...[
                               if (controller.type == "ride") ...[
                                 10.heightBox,
                               ] else if (controller.type == "findRide") ...[
@@ -472,15 +503,70 @@ class TripDetailPage extends StatelessWidget {
                                 160.heightBox,
                               ]
                             ],
-                            // if (controller.type != "ride") ...[
-                            //   SizedBox(
-                            //     height: _bottomActionBarHeight +
-                            //         MediaQuery.of(context).padding.bottom,
-                            //   ),
-                            // ],
                           ],
                         ),
                       )),
+                  if (controller.type == "ride" &&
+                      controller.status == "upcoming")
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: SafeArea(
+                        top: false,
+                        child: Container(
+                          padding: const EdgeInsets.only(
+                              left: 15.0, right: 15.0, top: 10, bottom: 10),
+                          color: Colors.grey.shade100,
+                          width: context.screenWidth,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: elevatedButtonWidget(
+                                  context: context,
+                                  onPressed: () {
+                                    Get.toNamed(
+                                        "/post_ride/${controller.ride['id']}/update");
+                                  },
+                                  textWidget: txt22SizeAlignCenter(
+                                    title:
+                                        "${controller.labelTextDetail['edit_ride_btn_label'] ?? "Edit ride"}",
+                                    textColor: Colors.white,
+                                    context: context,
+                                  ),
+                                ),
+                              ),
+                              if (cancelDateTime
+                                  .isAfter(currentDateTime)) ...[
+                                10.widthBox,
+                                Expanded(
+                                  child: elevatedButtonWidget(
+                                    context: context,
+                                    btnColor: Colors.red,
+                                    onPressed: () async {
+                                      if (controller.ride['bookings'] !=
+                                              null &&
+                                          controller.ride['bookings'].length >
+                                              0) {
+                                        controller.openDriverCancelBooking();
+                                      } else {
+                                        await controller.cancelRideByDriver();
+                                      }
+                                    },
+                                    textWidget: txt22SizeAlignCenter(
+                                      title:
+                                          "${controller.labelTextDetail['cancel_ride_btn_label'] ?? "Cancel ride"}",
+                                      textColor: Colors.white,
+                                      context: context,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   if (controller.type != "ride") ...[
                     Positioned(
                       bottom: 0,

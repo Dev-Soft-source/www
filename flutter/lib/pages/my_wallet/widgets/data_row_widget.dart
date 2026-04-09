@@ -16,7 +16,7 @@ Widget dataRowWidget({
         children: [
           Expanded(
               child: txt20Size(
-                  title: '$title', fontFamily: regular, context: context)),
+                  title: '$title', fontFamily: regular, context: context, textColor: Colors.grey.shade800)),
           if (onTap != null) ...[
             InkWell(
               onTap: onTap,

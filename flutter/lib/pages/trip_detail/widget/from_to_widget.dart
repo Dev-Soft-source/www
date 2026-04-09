@@ -1,14 +1,17 @@
-import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:proximaride_app/consts/constFileLink.dart';
 import 'package:proximaride_app/pages/widgets/card_shadow_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
+import 'package:proximaride_app/pages/widgets/trip_route_from_to_rail.dart';
+
 Widget fromToWidget({context, String from = "", String to = "", String date = "", String time = "", String leftSeat = "", String perSeat = "",
+  String pickup = "", String dropOff = "",
   String fromLabel = "From", String toLabel = "To", String atLabel = "at" , String perSeatLabel = "per seat" , String seatLeftLabel = "seat left",
   String type = "",  moreSpots}){
 
   return cardShadowWidget(
       context: context,
+      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       widgetChild: Column(
         children: [
           Container(
@@ -43,79 +46,29 @@ Widget fromToWidget({context, String from = "", String to = "", String date = ""
                           title: date,
                           context: context,
                           fontFamily: bold,
-                          textColor: textColor),
+                          textColor: Colors.grey.shade800),
                       txt18Size(
                           title: " $atLabel ",
                           context: context,
                           fontFamily: bold,
-                          textColor: textColor),
+                          textColor: Colors.grey.shade800),
                       txt18Size(
                           title: time,
                           context: context,
                           fontFamily: bold,
-                          textColor: textColor),
+                          textColor: Colors.grey.shade800),
                     ],
                   ),
                 ),
                 8.heightBox,
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        5.heightBox,
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(50),
-                              color: primaryColor
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 50,
-                          child: Padding(
-                            padding: EdgeInsets.only(left: 9),
-                            child: DottedLine(
-                              direction: Axis.vertical,
-                              alignment: WrapAlignment.center,
-                              lineLength: double.infinity,
-                              lineThickness: 1.0,
-                              dashLength: 2.0,
-                              dashColor: Colors.black,
-                              dashRadius: 0.0,
-                              dashGapLength: 1.0,
-                              dashGapColor: Colors.transparent,
-                              dashGapRadius: 0.0,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(50),
-                              color: Colors.grey.shade400
-                          ),
-                        ),
-                      ],
-                    ),
-                    10.widthBox,
-                    Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            txt20Size(title: fromLabel, context: context),
-                            txt20Size(title: from, context: context, fontFamily: bold),
-                            10.heightBox,
-                            txt20Size(title: toLabel, context: context),
-                            txt20Size(title: to, context: context, fontFamily: bold),
-                          ],
-                        )
-                    ),
-                  ],
+                TripRouteFromToRail(
+                  showTopSpacer: false,
+                  from: from,
+                  // pickup: pickup,
+                  to: to,
+                  // dropOff: dropOff,
+                  gapBeforeToBlock : 28.0,
+                  connectorGutterHeight : 26.0,
                 ),
               ],
             ),
@@ -145,63 +98,10 @@ Widget fromToWidget({context, String from = "", String to = "", String date = ""
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                width: 20,
-                                height: 20,
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(50),
-                                    color: primaryColor
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 50,
-                                child: Padding(
-                                  padding: EdgeInsets.only(left: 9),
-                                  child: DottedLine(
-                                    direction: Axis.vertical,
-                                    alignment: WrapAlignment.center,
-                                    lineLength: double.infinity,
-                                    lineThickness: 1.0,
-                                    dashLength: 2.0,
-                                    dashColor: Colors.black,
-                                    dashRadius: 0.0,
-                                    dashGapLength: 1.0,
-                                    dashGapColor: Colors.transparent,
-                                    dashGapRadius: 0.0,
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                width: 20,
-                                height: 20,
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(50),
-                                    color: Colors.grey.shade400
-                                ),
-                              ),
-                            ],
-                          ),
-                          10.widthBox,
-                          Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  txt20Size(title: fromLabel, context: context),
-                                  txt20Size(title: moreSpots[i]['departure'].toString(), context: context, fontFamily: bold),
-                                  5.heightBox,
-                                  txt20Size(title: toLabel, context: context),
-                                  txt20Size(title: moreSpots[i]['destination'].toString(), context: context, fontFamily: bold),
-                                ],
-                              )
-                          ),
-                        ],
+                      TripRouteFromToRail(
+                        from: moreSpots[i]['departure'].toString(),
+                        to: moreSpots[i]['destination'].toString(),
+                        showTopSpacer: false,
                       ),
                     ],
                   ),

@@ -269,7 +269,8 @@ Route::get('{lang?}/coffee-on-the-wall', [HomeController::class, 'coffeeOnWall']
 Route::post('{lang?}/coffee-on-the-wall/setup-intent', [HomeController::class, 'coffeeOnWallCreateSetupIntent'])->name('coffee_on_wall.setup_intent');
 Route::get('{lang?}/signup', [SignupController::class, 'create'])->middleware('guest')->name('signup');
 Route::get('{lang?}/signup/{provider}', [SignupController::class, 'redirectToProvider'])->name('signup.redirectToProvider');
-Route::get('{lang?}/signup/{provider}/callback', [SignupController::class, 'handleProviderCallback'])->name('signup.handleProviderCallback');
+// Apple Sign In uses response_mode=form_post; callback must accept POST (and GET for other providers).
+Route::match(['get', 'post'], '{lang?}/signup/{provider}/callback', [SignupController::class, 'handleProviderCallback'])->name('signup.handleProviderCallback');
 Route::get('send-email-verify/{email}', [SignupController::class, 'sendEmailVerify'])->middleware('guest')->name('sendEmailVerify');
 Route::get('{lang?}/forgot-password', [ForgotPasswordController::class, 'create'])->middleware('guest')->name('forgot.password');
 Route::get('{lang?}/reset-password/{token}', [ResetPasswordController::class, 'create'])->middleware('guest')->name('reset.password');

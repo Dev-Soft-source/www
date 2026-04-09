@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:proximaride_app/helpers/currency_formatter.dart';
 import 'package:proximaride_app/pages/my_wallet/widgets/data_row_widget.dart';
+import 'package:velocity_x/velocity_x.dart';
 
 Widget myBalanceWidget({context, required data, controller, bool changeColor = false}) {
 
@@ -54,6 +55,7 @@ Widget myBalanceWidget({context, required data, controller, bool changeColor = f
             title: "${controller.labelTextDetail['balance_date_label'] ?? 'Date'}",
             data: tripDate,
         ),
+        8.heightBox
       ],
     ),
   );

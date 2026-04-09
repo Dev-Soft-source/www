@@ -55,6 +55,9 @@ return [
         'client_id' => env('APPLE_CLIENT_ID'),
         'client_secret' => env('APPLE_CLIENT_SECRET'),
         'redirect' => env('APPLE_REDIRECT'),
+        // Path to .p8 key or raw key contents; used by socialiteproviders/apple to mint JWT client_secret.
+        'private_key' => env('APPLE_PRIVATE_KEY'),
+        'passphrase' => env('APPLE_PRIVATE_KEY_PASSPHRASE'),
     ],
     'tiktok' => [
         'client_id' => env('TIKTOK_CLIENT_ID'),

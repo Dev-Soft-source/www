@@ -1,22 +1,17 @@
-import 'dart:developer' as developer;
-import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:proximaride_app/helpers/currency_formatter.dart';
 import 'package:proximaride_app/pages/widgets/button_Widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
+import 'package:proximaride_app/pages/widgets/trip_route_from_to_rail.dart';
 import '../../consts/constFileLink.dart';
 
 
 
 Widget tripCardFromToWidget({String from = "", String to = "", String pickup = "", String dropOff = "", String price = "",  context,
-  String tripStatus = "", String bookingMethodLabel = "", int bookingMethodId = 0, onTapReview, bool isRating = false,bool showReviewButton = true, String seatsLeft = "",
+  String tripStatus = "", onTapReview, bool isRating = false,bool showReviewButton = true, String seatsLeft = "",
   Map? labelTextDetail,
   String fromLabel = "From", String toLabel = "To", String perSeatLabel = "per seat", String seatLeftLabel = "seats left",
   String reviewedLabel = "Reviewed", String reviewDriverLabel = "Review your driver"}){
-  final resolvedFromLabel =
-      labelTextDetail?['from_label']?.toString() ?? fromLabel;
-  final resolvedToLabel =
-      labelTextDetail?['to_label']?.toString() ?? toLabel;
   final resolvedPerSeatLabel =
       labelTextDetail?['per_seat_label']?.toString() ?? perSeatLabel;
   final resolvedSeatLeftLabel =
@@ -27,81 +22,7 @@ Widget tripCardFromToWidget({String from = "", String to = "", String pickup = "
   final resolvedReviewDriverLabel =
       labelTextDetail?['trips_card_section_review_driver']?.toString() ??
           reviewDriverLabel;
-  developer.log(
-    'labelTextDetail: $labelTextDetail',
-    name: 'tripCardFromToWidget',
-  );
-  Widget routeMarker() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 20,
-          height: 20,
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(50), color: primaryColor),
-        ),
-        const SizedBox(
-          height: 50,
-          child: Padding(
-            padding: EdgeInsets.only(left: 9),
-            child: DottedLine(
-              direction: Axis.vertical,
-              alignment: WrapAlignment.center,
-              lineLength: double.infinity,
-              lineThickness: 1.0,
-              dashLength: 2.0,
-              dashColor: Colors.black,
-              dashRadius: 0.0,
-              dashGapLength: 1.0,
-              dashGapColor: Colors.transparent,
-              dashGapRadius: 0.0,
-            ),
-          ),
-        ),
-        Container(
-          width: 20,
-          height: 20,
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(50),
-              color: Colors.grey.shade400),
-        ),
-      ],
-    );
-  }
-
-  Widget routeText() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            txt18Size(title: "$resolvedFromLabel: ", context: context),
-            Expanded(
-              child: txt16Size(
-                  title: from, context: context, fontFamily: bold),
-            ),
-          ],
-        ),
-        2.heightBox,
-        txt16Size(title: pickup, context: context, fontFamily: bold),
-        20.heightBox,
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            txt18Size(title: "$resolvedToLabel: ", context: context),
-            Expanded(
-              child:
-                  txt16Size(title: to, context: context, fontFamily: bold),
-            ),
-          ],
-        ),
-        2.heightBox,
-        txt16Size(title: dropOff, context: context, fontFamily: bold),
-      ],
-    );
-  }
+  final seatsLeftParsed = int.tryParse(seatsLeft.toString()) ?? 0;
 
   Widget trailingSummary({required bool isNarrow}) {
     return Align(
@@ -110,66 +31,53 @@ Widget tripCardFromToWidget({String from = "", String to = "", String pickup = "
       crossAxisAlignment:
           CrossAxisAlignment.end,
       children: [
-        if (tripStatus != 'search') ...[
-          Row(
+        // if (tripStatus != 'search') ...[
+          Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               txt24Size(
                   title: formatCurrency(price),
                   context: context,
                   textColor: primaryColor),
-              txt16Size(
-                title: " $resolvedPerSeatLabel",
-                context: context,
-                fontFamily: bold,
-                textColor: primaryColor,
+              Transform.translate(
+                offset: const Offset(0, -4),
+                child: txt14Size(
+                  title: resolvedPerSeatLabel,
+                  context: context,
+                  fontFamily: bold,
+                  textColor: placeHolderColor,
+                ),
               ),
             ],
           ),
-        ],
+        // ],
         if (tripStatus == "search") ...[
-          Row(
+          Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               txt24Size(
                 title: seatsLeft,
                 context: context,
-                textColor: int.parse(seatsLeft.toString()) <= 0
+                textColor: seatsLeftParsed <= 0
                     ? Colors.red
                     : textColor,
               ),
-              txt16Size(
-                title: " $resolvedSeatLeftLabel",
-                context: context,
-                fontFamily: bold,
-                textColor: int.parse(seatsLeft.toString()) <= 0
-                    ? Colors.red
-                    : textColor,
+              Transform.translate(
+                offset: const Offset(0, -4),
+                child: txt14Size(
+                  title: resolvedSeatLeftLabel,
+                  context: context,
+                  fontFamily: bold,
+                  textColor: seatsLeftParsed <= 0
+                      ? Colors.red
+                      : placeHolderColor,
+                ),
               ),
             ],
           ),
-          if (bookingMethodLabel != "" && bookingMethodLabel.isNotEmpty) ...[
-            6.heightBox,
-            (() {
-              final isInstant = bookingMethodId == 31;
-              final badgeColor = isInstant ? Colors.green : primaryColor;
-              return Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: badgeColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: badgeColor.withOpacity(0.35)),
-                ),
-                child: txt14Size(
-                  title: bookingMethodLabel,
-                  context: context,
-                  fontFamily: bold,
-                  textColor: badgeColor,
-                ),
-              );
-            })(),
-          ],
+          
         ],
       ],
     ),
@@ -192,39 +100,39 @@ Widget tripCardFromToWidget({String from = "", String to = "", String pickup = "
     padding: EdgeInsets.fromLTRB(
         getValueForScreenType<double>(
           context: context,
-          mobile: 15.0,
-          tablet: 15.0,
+          mobile: 10.0,
+          tablet: 10.0,
         ),
         getValueForScreenType<double>(
           context: context,
-          mobile: 15.0,
-          tablet: 15.0,
+          mobile: 10.0,
+          tablet: 10.0,
         ),
         getValueForScreenType<double>(
           context: context,
-          mobile: 15.0,
-          tablet: 15.0,
+          mobile: 10.0,
+          tablet: 10.0,
         ),
         getValueForScreenType<double>(
           context: context,
           mobile: 0.0,
           tablet: 0.0,
         )),
-    child: LayoutBuilder(
-      builder: (context, constraints) {
-
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            routeMarker(),
-            10.widthBox,
-            Expanded(child: routeText()),
-            5.widthBox,
-            trailingSummary(isNarrow: false),
-          ],
-        );
-      },
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: TripRouteFromToRail(
+            from: from,
+            pickup: pickup,
+            to: to,
+            dropOff: dropOff,
+          ),
+        ),
+        5.widthBox,
+        trailingSummary(isNarrow: false),
+      ],
     ),
   );
 }

@@ -110,6 +110,7 @@ class ReviewPassengerPage extends StatelessWidget {
                                         if (passengerAverageRating == null ||
                                             passengerAverageRating == 0) ...[
                                           txt18Size(
+                                            textColor: Colors.grey.shade800,
                                             context: context,
                                             title: controller.labelTextDetail[
                                                     'no_reviews_label'] ??

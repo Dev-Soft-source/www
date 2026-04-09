@@ -6,6 +6,7 @@ import 'package:proximaride_app/pages/post_ride/widget/post_ride_widget.dart';
 Widget seatBookedWidget({context, String booked = "", String fare = "", String fee = "", String totalAmount = "",  double screenWidth = 0.0, controller}){
   return cardShadowWidget(
       context: context,
+      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       widgetChild: Column(
         children: [
           postRideWidget(title: "${controller.labelTextDetail['mobile_seat_booked_heading'] ?? "Seats booked"}", screenWidth: screenWidth, context: context),

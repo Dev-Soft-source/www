@@ -57,6 +57,7 @@ class _RideFeatureWidgetState extends State<RideFeatureWidget> {
   Widget build(BuildContext context) {
     return cardShadowWidget(
         context: widget.context,
+        margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         widgetChild: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

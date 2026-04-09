@@ -13,6 +13,7 @@ Widget vehicleInfoWidget({context, String vehicleDetail = "", String vehicleImag
   return InkWell(
     child: cardShadowWidget(
         context: context,
+        margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         widgetChild: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

@@ -25,6 +25,7 @@ Widget myCoPassengerWidget({context, coPassengerList, controller, String tripId 
       }
     },
     child: cardShadowWidget(
+      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         context: context,
         widgetChild: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

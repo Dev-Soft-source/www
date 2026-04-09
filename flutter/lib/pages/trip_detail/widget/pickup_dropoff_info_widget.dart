@@ -50,6 +50,7 @@ Widget pickupDropoffInfoWidget(
 
   return cardShadowWidget(
       context: context,
+      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       widgetChild: Column(
         children: [
           postRideWidget(

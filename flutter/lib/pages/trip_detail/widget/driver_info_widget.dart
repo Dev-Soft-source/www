@@ -13,6 +13,7 @@ Widget driverInfoWidget({context, String driverName = "", String driverRating = 
     },
     child: cardShadowWidget(
         context: context,
+        margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         widgetChild: Column(
           children: [
             postRideWidget(title: heading, screenWidth: screenWidth, context: context),

@@ -98,14 +98,22 @@ class MyPassengerPage extends StatelessWidget {
                                 value:
                                     "${controller.myPassengers[index]['seats']}",
                                 context: context),
-                            const Divider(),
+                            Divider(
+                              color: Colors.grey.shade200,
+                              height: 20,
+                              thickness: 1,
+                            ),
                             seatBookedRowWidget(
                                 title:
                                     "${controller.labelTextDetail['my_fare_label'] ?? "My fare"}",
                                 value: formatCurrency(
                                     controller.myPassengers[index]['fare'] ?? 0),
                                 context: context),
-                            const Divider(),
+                            Divider(
+                              color: Colors.grey.shade200,
+                              height: 20,
+                              thickness: 1,
+                            ),
                             seatBookedRowWidget(
                                 title:
                                     "${controller.labelTextDetail['booking_fee_label'] ?? "Booking fee"}",
@@ -113,7 +121,11 @@ class MyPassengerPage extends StatelessWidget {
                                     .myPassengers[index]['booking_credit']
                                     .toString())),
                                 context: context),
-                            const Divider(),
+                            Divider(
+                              color: Colors.grey.shade200,
+                              height: 20,
+                              thickness: 1,
+                            ),
                             seatBookedRowWidget(
                                 title:
                                     "${controller.labelTextDetail['total_amount_label'] ?? "Total amount"}",
@@ -131,7 +143,11 @@ class MyPassengerPage extends StatelessWidget {
                                                 : '0'))
                                     ),
                                 context: context),
-                            const Divider(),
+                            Divider(
+                              color: Colors.grey.shade200,
+                              height: 20,
+                              thickness: 1,
+                            ),
                             10.heightBox,
                             Padding(
                               padding: EdgeInsets.fromLTRB(

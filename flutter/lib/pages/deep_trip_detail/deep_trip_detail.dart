@@ -83,6 +83,10 @@ class DeepTripDetailPage extends StatelessWidget {
                                     .toString(),
                                 to: (selectedRideDetail['destination'] ?? '')
                                     .toString(),
+                                pickup:
+                                    (selectedRideDetail['pickup'] ?? '').toString(),
+                                dropOff:
+                                    (selectedRideDetail['dropoff'] ?? '').toString(),
                                 date: tripDate,
                                 time: tripTime,
                                 perSeat: formatCurrencyValue(

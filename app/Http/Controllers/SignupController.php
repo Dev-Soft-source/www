@@ -356,8 +356,20 @@ class SignupController extends Controller
             'social_auth_intent' => $request->query('intent') === 'login' ? 'login' : 'signup',
         ]);
 
-        return Socialite::driver($provider)
-            ->redirect();
+        Log::info('social_oauth.redirect', [
+            'provider' => $provider,
+            'lang' => $lang,
+            'intent' => session('social_auth_intent'),
+            'has_apple_private_key_config' => $provider === 'apple'
+                ? (bool) (config('services.apple.private_key') ?? config('services.apple.client_secret'))
+                : null,
+        ]);
+
+        if ($provider === 'linkedin') {
+            return Socialite::driver($provider)->scopes(['openid', 'profile', 'email'])->redirect();
+        }
+
+        return Socialite::driver($provider)->redirect();
     }
 
     public function handleProviderCallback($lang, $provider)
@@ -378,22 +390,40 @@ class SignupController extends Controller
         }
 
         try {
-            // Check for Facebook error parameters in the request
-            if ($provider === 'facebook' && request()->has('error')) {
+            Log::info('social_oauth.callback', [
+                'provider' => $provider,
+                'method' => request()->method(),
+                'has_code' => request()->filled('code'),
+                'has_error' => request()->has('error'),
+                'error' => request()->get('error'),
+                'state_present' => request()->filled('state'),
+            ]);
+
+            // OAuth providers return ?error= on cancel or misconfiguration (Facebook, some others use query; Apple may POST body).
+            if (request()->has('error')) {
                 $error = request()->get('error');
-                $errorDescription = request()->get('error_description', '');
+                $errorDescription = (string) request()->get('error_description', '');
                 $errorReason = request()->get('error_reason', '');
 
-                // Handle specific Facebook errors
-                if ($error === 'access_denied' || $errorReason === 'user_denied') {
-                    Session::flash('error', 'Facebook login was cancelled. Please try again or use another login method.');
-                } elseif (
-                    str_contains(strtolower($errorDescription), 'app not active') ||
-                    str_contains(strtolower($errorDescription), 'app is not accessible')
-                ) {
-                    Session::flash('error', 'This Facebook app is not accessible right now. The app developer is aware of the issue. You will be able to log in when the app is reactivated. Please try using another login method in the meantime.');
+                if ($provider === 'facebook') {
+                    if ($error === 'access_denied' || $errorReason === 'user_denied') {
+                        Session::flash('error', 'Facebook login was cancelled. Please try again or use another login method.');
+                    } elseif (
+                        str_contains(strtolower($errorDescription), 'app not active') ||
+                        str_contains(strtolower($errorDescription), 'app is not accessible')
+                    ) {
+                        Session::flash('error', 'This Facebook app is not accessible right now. The app developer is aware of the issue. You will be able to log in when the app is reactivated. Please try using another login method in the meantime.');
+                    } else {
+                        Session::flash('error', 'Unable to login using Facebook. ' . ($errorDescription ?: 'Please try again or use another login method.'));
+                    }
+                } elseif (in_array($error, ['access_denied', 'user_cancelled_authorize', 'user_denied'], true)) {
+                    Session::flash('error', ucfirst($provider) . ' login was cancelled. Please try again or use another login method.');
                 } else {
-                    Session::flash('error', 'Unable to login using Facebook. ' . ($errorDescription ?: 'Please try again or use another login method.'));
+                    Session::flash(
+                        'error',
+                        'Unable to login using ' . ucfirst($provider) . '. '
+                        . ($errorDescription ?: ($error ?: 'Please try again or use another login method.'))
+                    );
                 }
 
                 return redirect()->route('login', ['lang' => $selectedLanguage->abbreviation]);
@@ -402,24 +432,32 @@ class SignupController extends Controller
             $providerUser = Socialite::driver($provider)->user();
             $authIntent = session()->pull('social_auth_intent', 'signup');
 
-            Log::info("social login attempt", [
+            $normalizedName = trim((string) ($providerUser->name ?? ''));
+            if ($normalizedName === '') {
+                $normalizedName = $providerUser->email
+                    ? (strstr($providerUser->email, '@', true) ?: 'Member')
+                    : 'Member';
+            }
+
+            Log::info('social_oauth.user_received', [
                 'provider' => $provider,
-                'email' => $providerUser->email ?? 'not provided',
+                'email_present' => !empty($providerUser->email),
+                'has_name' => !empty(trim((string) ($providerUser->name ?? ''))),
                 'has_token' => !empty($providerUser->token ?? null),
+                'provider_user_id' => $providerUser->id ?? null,
                 'intent' => $authIntent,
             ]);
 
-            // Validate that required fields are present
-            if (empty($providerUser->email)) {
-                throw new \Exception("Email address is required from {$provider} provider");
-            }
+            $existingUser = $this->findUserForSocialLogin($provider, $providerUser);
 
-            if (empty($providerUser->name)) {
-                throw new \Exception("Name is required from {$provider} provider");
+            if (!$existingUser && empty($providerUser->email)) {
+                throw new \Exception(
+                    "No email from {$provider} and no existing account matched this sign-in. "
+                    . 'For Apple, email is only sent on first authorization; use the same Apple ID or sign in with email/password.'
+                );
             }
 
             // Check if the user is already registered
-            $existingUser = User::where('email', $providerUser->email)->first();
 
             if ($existingUser) {
                 if ($existingUser->closed === '1') {
@@ -450,6 +488,10 @@ class SignupController extends Controller
 
                 // Log in the existing user
                 Auth::login($existingUser);
+                Log::info('social_oauth.login_existing', [
+                    'provider' => $provider,
+                    'user_id' => $existingUser->id,
+                ]);
                 $userLang = $existingUser->fresh()->lang ?: $selectedLanguage->abbreviation;
                 session(['selectedLanguage' => $userLang]);
 
@@ -466,10 +508,10 @@ class SignupController extends Controller
                 return redirect()->route('home', ['lang' => $userLang]);
             }
 
-            // Split the full name into first and last names
-            $nameParts = explode(' ', $providerUser->name, 2); // Split into two parts
+            // Split the full name into first and last names (Apple often omits name after first authorization)
+            $nameParts = explode(' ', $normalizedName, 2);
             $firstName = $nameParts[0];
-            $lastName = isset($nameParts[1]) ? $nameParts[1] : ''; // Set to empty string if no last name
+            $lastName = isset($nameParts[1]) ? $nameParts[1] : '';
 
             $ip = request()->ip();
             $location = geoip()->getLocation($ip);
@@ -533,19 +575,54 @@ class SignupController extends Controller
             Auth::login($newUser);
             session(['selectedLanguage' => $newUser->lang]);
 
+            Log::info('social_oauth.signup_complete', [
+                'provider' => $provider,
+                'user_id' => $newUser->id,
+            ]);
+
             return redirect()->route('step1to5', ['lang' => $newUser->lang]);
-        } catch (\Exception $e) {
-            // Check if it's a Facebook-specific error
+        } catch (\Throwable $e) {
             $errorMessage = $e->getMessage();
-            Log::info("social login error:" . $errorMessage);
+            Log::error('social_oauth.failed', [
+                'provider' => $provider,
+                'exception' => get_class($e),
+                'message' => $errorMessage,
+                'code' => $e->getCode(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
             if ($provider === 'facebook' && (str_contains(strtolower($errorMessage), 'app not active') ||
                 str_contains(strtolower($errorMessage), 'app is not accessible'))) {
                 Session::flash('error', 'This Facebook app is not accessible right now. The app developer is aware of the issue. You will be able to log in when the app is reactivated. Please try using another login method in the meantime.');
             } else {
-                Session::flash('error', "Unable to login using " . $provider . ". Please try again or use another login method.");
+                Session::flash('error', 'Unable to login using ' . $provider . '. Please try again or use another login method.');
             }
 
             return redirect()->route('login', ['lang' => $selectedLanguage->abbreviation]);
         }
+    }
+
+    /**
+     * Match by email first, then by provider + provider_id (Apple may omit email on later sign-ins).
+     */
+    private function findUserForSocialLogin(string $provider, $providerUser): ?User
+    {
+        $email = $providerUser->email ?? null;
+        if (!empty($email)) {
+            $byEmail = User::where('email', $email)->first();
+            if ($byEmail) {
+                return $byEmail;
+            }
+        }
+
+        $pid = $providerUser->id ?? null;
+        if ($pid === null || $pid === '') {
+            return null;
+        }
+
+        return User::where('provider', $provider)
+            ->where('provider_id', (string) $pid)
+            ->first();
     }
 }
