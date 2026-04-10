@@ -61,12 +61,12 @@ class HomeController extends Controller
             // $token = FCMToken::where('user_id', auth()->user()->id)->pluck('token')->first();
             $token = auth()->user()->createToken('auth_token')->plainTextToken;
 
-            // // from step5 with skip -> update step5 to 1 (no validations)
-            // if (request()->has('skip')) {
-            //     User::whereId(auth()->user()->id)->update([
-            //         'step5' => 2
-            //     ]);
-            // }
+            // from step5 with skip -> update step5 to 1 (no validations)
+            if (request()->has('skip')) {
+                User::whereId(auth()->user()->id)->update([
+                    'step' => 5
+                ]);
+            }
         }
 
 
@@ -347,7 +347,7 @@ class HomeController extends Controller
                 'clientSecret' => $setupIntent->client_secret,
             ]);
         } catch (\Throwable $e) {
-            Log::error('Coffee wall SetupIntent error: '.$e->getMessage());
+            Log::error('Coffee wall SetupIntent error: ' . $e->getMessage());
 
             return response()->json(['error' => 'Failed to create setup intent'], 500);
         }
