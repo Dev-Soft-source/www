@@ -200,13 +200,13 @@ class LoginController extends Controller
 
             // Redirect logic (user is already authenticated from attempt above)
             // Use authenticated user for redirect logic
-            if ($authenticatedUser->step == '1') {
+            if ($authenticatedUser->step === '1') {
                 $redirectUrl = route('step1to5', ['lang' => $selectedLanguage->abbreviation]);
-            } elseif ($authenticatedUser->step == '2') {
+            } elseif ($authenticatedUser->step === '2') {
                 $redirectUrl = route('step2to5', ['lang' => $selectedLanguage->abbreviation]);
-            } elseif ($authenticatedUser->step == '3') {
+            } elseif ($authenticatedUser->step === '3') {
                 $redirectUrl = route('step3to5', ['lang' => $selectedLanguage->abbreviation]);
-            } elseif ($authenticatedUser->step == '4') {
+            } elseif ($authenticatedUser->step === '4') {
                 $redirectUrl = route('step4to5', ['lang' => $selectedLanguage->abbreviation]);
             } else {
                 // Use route helper instead of manual URL construction
@@ -301,13 +301,13 @@ class LoginController extends Controller
 
         $user = User::where('email', $email)->first();
 
-        if ($user->step == '1') {
+        if ($user->step === '1') {
             return redirect()->route('step1to5', ['lang' => $selectedLanguage->abbreviation]);
-        } elseif ($user->step == '2') {
+        } elseif ($user->step === '2') {
             return redirect()->route('step2to5', ['lang' => $selectedLanguage->abbreviation]);
-        } elseif ($user->step == '3') {
+        } elseif ($user->step === '3') {
             return redirect()->route('step3to5', ['lang' => $selectedLanguage->abbreviation]);
-        } elseif ($user->step == '4') {
+        } elseif ($user->step === '4') {
             return redirect()->route('step4to5', ['lang' => $selectedLanguage->abbreviation]);
         }
 
@@ -319,7 +319,7 @@ class LoginController extends Controller
      */
     public function showWelcomeMessage($lang = null)
     {
-        
+
 
         $user = auth()->user();
         $data = [
@@ -342,7 +342,7 @@ class LoginController extends Controller
 
         $result = DB::table('password_resets')->where('token', $token)->where('type', 'verify_email')->first();
         $user = User::where('email', $email)->first();
-        
+
         $message = $this->successMessage;
 
         if (isset($user) && !empty($user)) {

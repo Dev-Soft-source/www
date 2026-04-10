@@ -32,20 +32,20 @@ class ProfileController extends Controller
         if (auth()->check()) {
 
             $user = auth()->user();
-            if ($user->step == '1') {
+            if ($user->step === '1') {
                 // personal information
                 return redirect()->route('step1to5', ['lang' => $lang]);
-            } elseif ($user->step == '2') {
+            } elseif ($user->step === '2') {
                 // profile image
                 return redirect()->route('step2to5', ['lang' => $lang]);
-            } elseif ($user->step == '3') {
+            } elseif ($user->step === '3') {
                 // my vehicle information
                 return redirect()->route('step3to5', ['lang' => $lang]);
-            } elseif ($user->step == '4') {
+            } elseif ($user->step === '4') {
                 // driver license information
                 return redirect()->route('step4to5', ['lang' => $lang]);
             }
-            
+
             $editProfilePage = EditProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
             $ProfilePage = ProfilePageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
             $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
@@ -124,7 +124,7 @@ class ProfileController extends Controller
 
     public function driverInfo($lang = null, $id)
     {
-       
+
 
         // Support both: driver user ID (added_by) from ride_detail, or ride ID from other callers
         $ride = Ride::where('added_by', $id)->with('driver')->first();
@@ -160,7 +160,7 @@ class ProfileController extends Controller
             ->orderBy('id', 'desc')
             ->get();
 
-        
+
         $driverPage = DriverPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         return view('driver_info', [

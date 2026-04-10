@@ -46,15 +46,15 @@ class SignupController extends Controller
 
     public function signupWithReferral($lang = null, $uuid)
     {
-                
+
         $signupPage = SignupPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
-       
+
         return view('signup', ['signupPage' => $signupPage, 'uuid' => $uuid]);
     }
 
     public function store(Request $request)
     {
-        
+
         $signupPage = SignupPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $messages = $this->successMessage;
 
@@ -323,8 +323,8 @@ class SignupController extends Controller
 
         $messages = $languageId
             ? SuccessMessagesSettingDetail::where('language_id', $languageId)
-                ->select('email_sent_message')
-                ->first()
+            ->select('email_sent_message')
+            ->first()
             : null;
 
         $emailSentMessage = $messages->email_sent_message ?? 'We\'ve sent you a verification email. Please check your inbox.';
@@ -445,7 +445,7 @@ class SignupController extends Controller
                     Session::flash(
                         'error',
                         'Unable to login using ' . ucfirst($provider) . '. '
-                        . ($errorDescription ?: ($error ?: 'Please try again or use another login method.'))
+                            . ($errorDescription ?: ($error ?: 'Please try again or use another login method.'))
                     );
                 }
 
@@ -477,7 +477,7 @@ class SignupController extends Controller
             if (!$existingUser && empty($providerUser->email)) {
                 throw new \Exception(
                     "No email from {$provider} and no existing account matched this sign-in. "
-                    . 'For Apple, email is only sent on first authorization; use the same Apple ID or sign in with email/password.'
+                        . 'For Apple, email is only sent on first authorization; use the same Apple ID or sign in with email/password.'
                 );
             }
 
@@ -519,13 +519,13 @@ class SignupController extends Controller
                 $userLang = $existingUser->fresh()->lang ?: $selectedLanguage->abbreviation;
                 session(['selectedLanguage' => $userLang]);
 
-                if ($existingUser->step == '1') {
+                if ($existingUser->step === '1') {
                     return redirect()->route('step1to5', ['lang' => $userLang]);
-                } elseif ($existingUser->step == '2') {
+                } elseif ($existingUser->step === '2') {
                     return redirect()->route('step2to5', ['lang' => $userLang]);
-                } elseif ($existingUser->step == '3') {
+                } elseif ($existingUser->step === '3') {
                     return redirect()->route('step3to5', ['lang' => $userLang]);
-                } elseif ($existingUser->step == '4') {
+                } elseif ($existingUser->step === '4') {
                     return redirect()->route('step4to5', ['lang' => $userLang]);
                 }
 
