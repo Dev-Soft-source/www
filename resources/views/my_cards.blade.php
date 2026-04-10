@@ -385,7 +385,7 @@
     let paymentElement;
     let isAppleDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     let paypalSDKLoaded = false;
-    const paypalClientId = '{{ env('PAYPAL_CLIENT_ID') }}';
+    const paypalClientId = '{{ config('paypal.paypal_client_id') ?? env('PAYPAL_CLIENT_ID') }}';
     
     function openAddPaymentMethodModal() {
         const modal = document.getElementById('add-payment-method-modal');

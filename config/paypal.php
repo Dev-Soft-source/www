@@ -22,4 +22,6 @@ return [
     'notify_url'     => env('PAYPAL_NOTIFY_URL', ''), // Change this accordingly for your application.
     'locale'         => env('PAYPAL_LOCALE', 'en_US'), // force gateway language  i.e. it_IT, es_ES, en_US ... (for express checkout only)
     'validate_ssl'   => env('PAYPAL_VALIDATE_SSL', true), // Validate SSL when creating api client.
+
+    'paypal_client_id' => env('PAYPAL_CLIENT_ID'),
 ];
