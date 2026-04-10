@@ -16,6 +16,14 @@ import 'package:proximaride_app/helpers/error_state_manager.dart';
 import 'package:proximaride_app/services/connectivity_service.dart';
 
 class EditProfileController extends GetxController {
+  /// Minimum age for Stage One (date of birth).
+  static const int minimumProfileAgeYears = 18;
+
+  static DateTime latestBirthDateForMinimumAge(int minYears) {
+    final n = DateTime.now();
+    return DateTime(n.year - minYears, n.month, n.day);
+  }
+  
   final serviceController = Get.find<Service>();
   late final ConnectivityService connectivityService;
   final errorStateManager = ErrorStateManager();

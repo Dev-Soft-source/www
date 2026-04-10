@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:proximaride_app/pages/widgets/language_bottom_sheet.dart';
 import 'package:proximaride_app/pages/widgets/network_cache_image_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
+import 'package:proximaride_app/pages/post_ride/PostRideController.dart';
 import '../../consts/constFileLink.dart';
 
 Widget mainAppBarWidget(
     context1, langId, langIcon, screeWidth, serviceController) {
+  var postController = Get.put(PostRideController());
   return SizedBox(
     height: kToolbarHeight,
     child: Row(
@@ -88,8 +90,9 @@ Widget mainAppBarWidget(
             5.widthBox,
             iconGrid(
                 imagePath: headerPostImage,
-                onTap: () {
-                  Get.toNamed("/post_ride/0/new");
+                onTap: () async {
+                  await postController.checkPosting();
+                  // Get.toNamed("/post_ride/0/new");
                 },
                 context: context1),
           ],

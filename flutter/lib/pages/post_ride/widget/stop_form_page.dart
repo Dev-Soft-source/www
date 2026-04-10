@@ -176,9 +176,22 @@ class _StopFormPageState extends State<StopFormPage> {
                       fontFamily: regular,
                       fontSize: 16.0,
                       onTap: () async {
+                        DateTime? initialDate;
+                        DateFormat dateFormat = DateFormat.yMMMMd();
+                        if (dateController.text
+                            .isNotEmpty) {
+                          try {
+                            initialDate = dateFormat.parse(dateController.text);
+                          } catch (e) {
+                            initialDate = DateTime.now();
+                          }
+                        } else {
+                          initialDate = DateTime.now();
+                        }
                         DateTime? pickedDate = await serviceController.datePicker(
                           context,
                           allowPast: false,
+                          initialDate: initialDate
                         );
                         if (pickedDate == null) return;
                         dateController.text =

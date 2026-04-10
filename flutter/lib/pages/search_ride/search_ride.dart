@@ -210,11 +210,25 @@ class SearchRidePage extends StatelessWidget {
                           fontFamily: regular,
                           fontSize: 18.0,
                           onTap: () async {
-                            DateTime? dobDate = await controller
-                                .serviceController
-                                .datePicker(context);
-                            if (dobDate == null) return;
-                            DateFormat dateFormat = DateFormat.yMMMMd();
+                            DateTime? initialDate;
+                                DateFormat dateFormat = DateFormat.yMMMMd();
+                                if (controller.dateTextEditingController.text
+                                    .isNotEmpty) {
+                                  try {
+                                    initialDate = dateFormat.parse(controller
+                                        .dateTextEditingController.text);
+                                  } catch (e) {
+                                    initialDate = DateTime.now();
+                                  }
+                                } else {
+                                  initialDate = DateTime.now();
+                                }
+                                DateTime? dobDate = await controller
+                                    .serviceController
+                                    .datePicker(context,
+                                        allowPast: false,
+                                        initialDate: initialDate);
+                                if (dobDate == null) return;
                             controller.dateTextEditingController.text =
                                 dateFormat.format(dobDate);
                           },

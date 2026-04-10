@@ -28,7 +28,7 @@ use App\Models\MyPassengerSettingDetail;
 use App\Models\NoShowHistory;
 use App\Models\PostRidePageError;
 use App\Models\Step1PageSettingDetail;
-use App\Models\SeatDetail;
+use App\Models\SiteTextDetail;
 use App\Models\User;
 use App\Services\FCMService;
 use App\Services\RidePostService;
@@ -1200,11 +1200,14 @@ class RideController extends Controller
         $user = Auth::guard('sanctum')->user();
         $user_id = $user->id;
 
-        $selectedLanguage = $this->resolveApiLanguage();
-        $message = $this->getApiSuccessMessageFields(['block_booking_message'], $selectedLanguage);
+        $message = $this->getApiSuccessMessageFields(['block_booking_message']);
 
         if ($user->block_booking == '1') {
             return $this->apiErrorResponse(strip_tags($message->block_booking_message ?? null), 200);
+        }
+
+        if (!$user->hasPhone()) {
+            return $this->apiErrorResponse('To book a ride, you must have a phone number on profile.', 200);
         }
 
         $hasBooking = Booking::where('ride_id', $request->id)
@@ -1224,6 +1227,24 @@ class RideController extends Controller
         }
 
         $data = ['hasBooking' => $hasBooking, 'seats' => $seats];
+        return $this->successResponse($data, 'Success');
+    }
+
+    public function checkPosting(Request $request)
+    {
+        $user = Auth::guard('sanctum')->user();
+        $user_id = $user->id;
+
+        if (!$user->hasPhone() || !$user->hasVerifiedPhone()) {
+            return $this->apiErrorResponse('To post a ride, you must have a phone number on profile.', 200);
+        }
+        
+        if (!$user->hasDriverLicenseUpload()) {
+            return $this->apiErrorResponse('To post a ride, you must have your driver license on profile.', 200);
+        }
+
+
+        $data = [];
         return $this->successResponse($data, 'Success');
     }
 
@@ -2253,10 +2274,10 @@ class RideController extends Controller
     {
         $mapped = $errors;
 
-        if (isset($mapped['origin'])) {
-            $mapped['from'] = $mapped['origin'];
-            unset($mapped['origin']);
-        }
+        // if (isset($mapped['origin'])) {
+        //     $mapped['from'] = $mapped['origin'];
+        //     unset($mapped['origin']);
+        // }
 
         if (isset($mapped['origin.label'])) {
             $mapped['from'] = array_merge($mapped['from'] ?? [], $mapped['origin.label']);
@@ -2268,10 +2289,10 @@ class RideController extends Controller
             unset($mapped['origin.city_id']);
         }
 
-        if (isset($mapped['destination'])) {
-            $mapped['to'] = $mapped['destination'];
-            unset($mapped['destination']);
-        }
+        // if (isset($mapped['destination'])) {
+        //     $mapped['to'] = $mapped['destination'];
+        //     unset($mapped['destination']);
+        // }
 
         if (isset($mapped['destination.label'])) {
             $mapped['to'] = array_merge($mapped['to'] ?? [], $mapped['destination.label']);

@@ -1190,6 +1190,12 @@ class BookSeatController extends GetxController {
             off: 1,
             path: '/navigation',
           );
+
+          // // update upcoming trips
+          // final MyTripController tripController = Get.isRegistered<MyTripController>()
+          //   ? Get.find<MyTripController>()
+          //   : Get.put(MyTripController());
+          // await tripController.updateTripPageValue(0);
         } else {
           isOverlayLoading(false);
         }

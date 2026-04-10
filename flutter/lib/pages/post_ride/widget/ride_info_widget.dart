@@ -280,27 +280,43 @@ Widget rideInfoWidget(
                         onTap: bookingCheck == true
                             ? null
                             : () async {
+                                DateTime? initialDate;
+                                DateFormat dateFormat = DateFormat.yMMMMd();
+                                if (controller.dateTextEditingController.text
+                                    .isNotEmpty) {
+                                  try {
+                                    initialDate = dateFormat.parse(controller
+                                        .dateTextEditingController.text);
+                                  } catch (e) {
+                                    initialDate = DateTime.now();
+                                  }
+                                } else {
+                                  initialDate = DateTime.now();
+                                }
                                 DateTime? dobDate = await controller
                                     .serviceController
-                                    .datePicker(context, allowPast: false);
+                                    .datePicker(context,
+                                        allowPast: false,
+                                        initialDate: initialDate);
                                 if (dobDate == null) return;
-                                DateFormat dateFormat = DateFormat.yMMMMd();
                                 controller.dateTextEditingController.text =
                                     dateFormat.format(dobDate);
-                                final returnRideValidationMessage = controller
-                                    .validateReturnRideDateTime(
-                                  dateText: controller
-                                      .dateTextEditingController.text,
-                                  timeText: controller
-                                      .timeTextEditingController.text,
+                                final returnRideValidationMessage =
+                                    controller.validateReturnRideDateTime(
+                                  dateText:
+                                      controller.dateTextEditingController.text,
+                                  timeText:
+                                      controller.timeTextEditingController.text,
                                 );
                                 if (returnRideValidationMessage != null) {
                                   controller.serviceController.showDialogue(
                                     returnRideValidationMessage,
                                     type: "error",
                                   );
-                                  controller.dateTextEditingController.text = "";
-                                  controller.timeTextEditingController.text = "";
+                                  controller.dateTextEditingController.text =
+                                      "";
+                                  controller.timeTextEditingController.text =
+                                      "";
                                   return;
                                 }
                                 if (controller.errors
@@ -374,12 +390,12 @@ Widget rideInfoWidget(
                                     DateFormat('HH:mm');
                                 controller.timeTextEditingController.text =
                                     formatter.format(dateTime);
-                                final returnRideValidationMessage = controller
-                                    .validateReturnRideDateTime(
-                                  dateText: controller
-                                      .dateTextEditingController.text,
-                                  timeText: controller
-                                      .timeTextEditingController.text,
+                                final returnRideValidationMessage =
+                                    controller.validateReturnRideDateTime(
+                                  dateText:
+                                      controller.dateTextEditingController.text,
+                                  timeText:
+                                      controller.timeTextEditingController.text,
                                 );
                                 if (returnRideValidationMessage != null) {
                                   controller.serviceController.showDialogue(

@@ -15,11 +15,34 @@ import 'package:proximaride_app/pages/widgets/second_appbar_widget.dart';
 import 'package:proximaride_app/pages/widgets/textWidget.dart';
 import 'package:proximaride_app/pages/widgets/text_area_widget.dart';
 import 'package:proximaride_app/pages/widgets/error_state_widget.dart';
+
 import '../widgets/network_cache_image_widget.dart';
 import '../widgets/tool_tip.dart';
 
 class EditProfilePage extends StatelessWidget {
   const EditProfilePage({super.key});
+
+
+
+  DateTime? _parseDobInitialDate(String rawDob) {
+    final trimmedDob = rawDob.trim();
+    if (trimmedDob.isEmpty) return null;
+
+    for (final pattern in [
+      'MMMM d, y',
+      'MMMM dd, y',
+      'y-MM-dd',
+      'yyyy-MM-dd',
+    ]) {
+      try {
+        return DateFormat(pattern).parseStrict(trimmedDob);
+      } catch (_) {
+        // Try the next known format.
+      }
+    }
+
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -248,9 +271,20 @@ class EditProfilePage extends StatelessWidget {
                                     fontFamily: regular,
                                     fontSize: 18.0,
                                     onTap: () async {
+                                      final initialDob = _parseDobInitialDate(
+                                        controller.dobTextEditingController.text,
+                                      );
+                                      final lastBirthDate = EditProfileController
+                                        .latestBirthDateForMinimumAge(
+                                            EditProfileController
+                                                .minimumProfileAgeYears);
                                       DateTime? dobDate = await controller
                                           .serviceController
-                                          .datePicker(context);
+                                          .datePicker(
+                                        context,
+                                        lastDate: lastBirthDate,
+                                        initialDate: initialDob,
+                                      );
                                       if (dobDate == null) return;
                                       DateFormat dateFormat =
                                           DateFormat.yMMMMd();

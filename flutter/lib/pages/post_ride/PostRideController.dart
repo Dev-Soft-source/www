@@ -962,6 +962,47 @@ class PostRideController extends GetxController {
     });
   }
 
+  Future<void> checkPosting() async {
+    try {
+      PostRideProvider().checkPosting(serviceController.token).then(
+          (resp) async {
+        if (resp['status'] != null && resp['status'] == "Error") {
+          serviceController.showDialogue(resp['message'].toString());
+        } else if (resp['status'] != null && resp['status'] == "Success") {
+          Get.toNamed("/post_ride/0/new");
+        }
+      }, onError: (error) {
+        if (error is Map &&
+            error.containsKey('type') &&
+            error.containsKey('message')) {
+          serviceController.showDialogue(error['message'], type: "error");
+        } else if (error is Map &&
+            error.containsKey('type') &&
+            error['type'] == 'network') {
+          serviceController.showDialogue(
+              "No internet connection. Please check your network and try again.",
+              type: "error");
+        } else {
+          serviceController.showDialogue(error.toString(), type: "error");
+        }
+      });
+    } catch (exception) {
+      if (exception is Map &&
+          exception.containsKey('type') &&
+          exception.containsKey('message')) {
+        serviceController.showDialogue(exception['message'], type: "error");
+      } else if (exception is Map &&
+          exception.containsKey('type') &&
+          exception['type'] == 'network') {
+        serviceController.showDialogue(
+            "No internet connection. Please check your network and try again.",
+            type: "error");
+      } else {
+        serviceController.showDialogue(exception.toString(), type: "error");
+      }
+    }
+  }
+
   Future<void> fetchRouteDistanceEstimates() async {
     final pointLabels = getOrderedRouteLabels();
     if (pointLabels.length < 2) {
@@ -1423,34 +1464,34 @@ class PostRideController extends GetxController {
         validationMessageDetail['required'],
         "This field is required.",
       );
-      if (fieldName == "from") {
-        message = stringOrFallback(labelTextDetail['origin'], "Origin is required.");
-      } else if (fieldName == "to") {
-        message = stringOrFallback(labelTextDetail['destination'], "Destination is required.");
-      } else if (fieldName == "pickup") {
-        message = stringOrFallback(labelTextDetail['pickup'], "Pickup is required.");
-      } else if (fieldName == "dropoff") {
-        message = stringOrFallback(labelTextDetail['dropoff'], "Dropoff is required.");
-      } else if (fieldName == "details") {
-        message = stringOrFallback(labelTextDetail['details'], "Details are required.");
-      } else if (fieldName == "make") {
-        message = message.replaceAll(
-            ":Attribute", labelTextDetail['make_error'] ?? "Make");
-      } else if (fieldName == "model") {
-        message = message.replaceAll(
-            ":Attribute", labelTextDetail['model_error'] ?? "Model");
-      } else if (fieldName == "license_no") {
-        message = message.replaceAll(
-            ":Attribute", labelTextDetail['license_error'] ?? "License no");
-      } else if (fieldName == "color") {
-        message = message.replaceAll(
-            ":Attribute", labelTextDetail['color_error'] ?? "Color");
-      } else if (fieldName == "year") {
-        message = message.replaceAll(
-            ":Attribute", labelTextDetail['year_error'] ?? "Year");
-      } else if (fieldName == "price") {
-        message = labelTextDetail['price'];
-      }
+      // if (fieldName == "from") {
+      //   // message = stringOrFallback(labelTextDetail['origin'], "Origin is required.");
+      // } else if (fieldName == "to") {
+      //   // message = stringOrFallback(labelTextDetail['destination'], "Destination is required.");
+      // } else if (fieldName == "pickup") {
+      //   message = stringOrFallback(labelTextDetail['pickup'], "Pickup is required.");
+      // } else if (fieldName == "dropoff") {
+      //   message = stringOrFallback(labelTextDetail['dropoff'], "Dropoff is required.");
+      // } else if (fieldName == "details") {
+      //   message = stringOrFallback(labelTextDetail['details'], "Details are required.");
+      // } else if (fieldName == "make") {
+      //   message = message.replaceAll(
+      //       ":Attribute", labelTextDetail['make_error'] ?? "Make");
+      // } else if (fieldName == "model") {
+      //   message = message.replaceAll(
+      //       ":Attribute", labelTextDetail['model_error'] ?? "Model");
+      // } else if (fieldName == "license_no") {
+      //   message = message.replaceAll(
+      //       ":Attribute", labelTextDetail['license_error'] ?? "License no");
+      // } else if (fieldName == "color") {
+      //   message = message.replaceAll(
+      //       ":Attribute", labelTextDetail['color_error'] ?? "Color");
+      // } else if (fieldName == "year") {
+      //   message = message.replaceAll(
+      //       ":Attribute", labelTextDetail['year_error'] ?? "Year");
+      // } else if (fieldName == "price") {
+      //   message = labelTextDetail['price'];
+      // }
       errorList.add(message);
       errors.add({
         'title': fieldName,
@@ -3329,4 +3370,6 @@ class PostRideController extends GetxController {
     spotsCount.refresh();
     rebuildRoutePriceEntries();
   }
+
+  
 }

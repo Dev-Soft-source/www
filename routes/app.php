@@ -140,6 +140,7 @@ Route::group(['prefix' => 'app/v1', 'middleware' => ['auth:sanctum']], function 
     Route::get('search-ride', [RideController::class, 'SearchRide'])->name('app.auth.search_ride');
     Route::get('search-ride-bootstrap', [RideController::class, 'searchRideBootstrap'])->name('app.auth.search_ride_bootstrap');
     Route::get('check-booking', [RideController::class, 'checkBooking'])->name('app.auth.check_booking');
+    Route::get('check-posting', [RideController::class, 'checkPosting'])->name('app.auth.check_posting');
     Route::get('secured/booking-number-check', [BookingController::class, 'bookingNumberCheck'])->name('app.auth.booking-number-check');
     Route::post('create-payment-intent', [BookingController::class, 'createPaymentIntent'])->name('app.auth.create_payment_intent');
     

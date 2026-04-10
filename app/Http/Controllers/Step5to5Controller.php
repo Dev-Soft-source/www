@@ -30,7 +30,7 @@ class Step5to5Controller extends Controller
         // Update step
         if (request()->has('skip')) {
             User::whereId($user->id)->update([
-                'step4' => 2
+                'step' => 4
             ]);
         }
 

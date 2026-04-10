@@ -18,11 +18,11 @@ class Step4to5Controller extends Controller
         $step4Page = Step4PageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
         // from step3 with skip -> update step3 to 1 and stay on step4 page (no validations)
-        // if (request()->has('skip')) {
-        //     User::whereId($user->id)->update([
-        //         'step3' => 2
-        //     ]);
-        // }
+        if (request()->has('skip')) {
+            User::whereId($user->id)->update([
+                'step' => 3
+            ]);
+        }
 
         return view('step4to5', [
             'step4Page' => $step4Page,

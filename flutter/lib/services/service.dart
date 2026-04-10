@@ -923,20 +923,26 @@ class Service extends GetxService {
   }
 
   datePicker(context,
-      {bool allowPast = true, DateTime? firstDate, DateTime? lastDate}) async {
+      {bool allowPast = true,
+      DateTime? firstDate,
+      DateTime? lastDate,
+      DateTime? initialDate}) async {
     final now = DateTime.now();
     final effectiveFirst = firstDate ?? (allowPast ? DateTime(1900) : now);
     final effectiveLast = lastDate ?? DateTime(2100);
-    DateTime initial = now;
+    DateTime initial = initialDate ?? now;
     if (initial.isAfter(effectiveLast)) {
       initial = effectiveLast;
     }
     if (initial.isBefore(effectiveFirst)) {
       initial = effectiveFirst;
     }
-    return showDialog<DateTime>(
+    return showDatePicker(
       context: context,
-      builder: (dialogContext) {
+      initialDate: initial,
+      firstDate: effectiveFirst,
+      lastDate: effectiveLast,
+      builder: (dialogContext, child) {
         return Theme(
           data: ThemeData.light().copyWith(
             colorScheme: const ColorScheme.light(
@@ -947,61 +953,7 @@ class Service extends GetxService {
             ),
             dialogTheme: const DialogThemeData(backgroundColor: Colors.white),
           ),
-          child: Dialog(
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(28),
-            ),
-            child: SizedBox(
-              width: 360,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Select date",
-                        style: Theme.of(dialogContext)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(color: Colors.black87),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        DateFormat("EEE, MMM d").format(initial),
-                        style: Theme.of(dialogContext)
-                            .textTheme
-                            .headlineMedium
-                            ?.copyWith(color: Colors.black),
-                      ),
-                    ),
-                  ),
-                  CalendarDatePicker(
-                    initialDate: initial,
-                    firstDate: effectiveFirst,
-                    lastDate: effectiveLast,
-                    onDateChanged: (date) {
-                      Navigator.of(dialogContext).pop(date);
-                    },
-                  ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () => Navigator.of(dialogContext).pop(),
-                      child: const Text("Cancel"),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          child: child ?? const SizedBox.shrink(),
         );
       },
     );
