@@ -350,13 +350,13 @@
                             <h4 class="text-black text-xl xl:text-2xl">
                                 {{ $rideDetailPage->booking_price_label ?? 'Booking Price' }}:
                             </h4>
-                            <p class="flex items-center gap-2 text-primary justify-end">
+                            <p class="flex flex-wrap items-center gap-2 text-lg font-normal text-left text-primary md:justify-end">
                                 @if (isset($firm_cancellation_discount) && $firm_cancellation_discount != '' && $ride->isFirmCancellation())
                                     <span class="line-through">
                                         ${{ number_format((float) $seatPrice, 2) }}
                                     </span>
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="h-6">
+                                        stroke-width="1.5" stroke="currentColor" class="h-5 w-5 shrink-0 md:h-6 md:w-6">
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
                                     </svg>
