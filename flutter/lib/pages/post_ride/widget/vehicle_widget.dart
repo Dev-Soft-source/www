@@ -476,9 +476,9 @@ Widget vehicleWidget(
                             i < controller.vehicleTypeList.length;
                             i++) ...[
                           DropdownMenuItem(
-                            value: controller.vehicleTypeList[i].toString(),
+                            value: controller.vehicleTypeList[i],
                             child: controller.vehicleType.value ==
-                                    controller.vehicleTypeList[i].toString()
+                                    controller.vehicleTypeList[i]
                                 ? Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,

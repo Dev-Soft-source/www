@@ -1577,6 +1577,10 @@ class PostRideController extends GetxController {
             logger.info(
                 "Post Ride Page: ${resp['data']['postRidePage']['add_spot_button_label'].toString()}");
             labelTextDetail.addAll(resp['data']['postRidePage']);
+
+            // vehicleTypeLabelList = resp['data']['vehicleLabels'];
+            // vehicleTypeList = resp['data']['vehicleOptions'];
+
             vehicleTypeLabelList.add(
                 labelTextDetail['vehicle_type_convertible_text'] ??
                     "Convertable");
@@ -1609,6 +1613,7 @@ class PostRideController extends GetxController {
             vehicleTypeLabelList
                 .add(labelTextDetail['vehicle_type_van_text'] ?? "Van");
             vehicleTypeList.add(labelTextDetail['vehicle_type_van_value']);
+
           }
           if (resp['data'] != null && resp['data']['messages'] != null) {
             popupTextDetail.addAll(resp['data']['messages']);
@@ -1899,46 +1904,22 @@ class PostRideController extends GetxController {
             await _refreshPostRideUserInfo(data['user']);
           }
 
+          // ? // Setup vehicle type lists
+          if (data['vehicleOptions'] != null) {
+            if (data['vehicleOptions']['vehicleOptions'] != null) {
+              vehicleTypeList
+                  .addAll(data['vehicleOptions']['vehicleOptions']);
+            }
+            if (data['vehicleOptions']['vehicleLabels'] != null) {
+              vehicleTypeLabelList
+                  .addAll(data['vehicleOptions']['vehicleLabels']);
+            }
+          }
+
           // 1. Parse labels
           if (data['labels'] != null) {
             if (data['labels']['postRidePage'] != null) {
               labelTextDetail.addAll(data['labels']['postRidePage']);
-
-              // Setup vehicle type lists
-              vehicleTypeLabelList.add(
-                  labelTextDetail['vehicle_type_convertible_text'] ??
-                      "Convertable");
-              vehicleTypeList
-                  .add(labelTextDetail['vehicle_type_convertible_value']);
-              vehicleTypeLabelList
-                  .add(labelTextDetail['vehicle_type_coupe_text'] ?? "Coupe");
-              vehicleTypeList.add(labelTextDetail['vehicle_type_coupe_value']);
-              vehicleTypeLabelList.add(
-                  labelTextDetail['vehicle_type_hatchback_text'] ??
-                      "Hatchback");
-              vehicleTypeList
-                  .add(labelTextDetail['vehicle_type_hatchback_value']);
-              vehicleTypeLabelList.add(
-                  labelTextDetail['vehicle_type_minivan_text'] ?? "Minivan");
-              vehicleTypeList
-                  .add(labelTextDetail['vehicle_type_minivan_value']);
-              vehicleTypeLabelList
-                  .add(labelTextDetail['vehicle_type_sedan_text'] ?? "Sedan");
-              vehicleTypeList.add(labelTextDetail['vehicle_type_sedan_value']);
-              vehicleTypeLabelList.add(
-                  labelTextDetail['vehicle_type_station_wagon_text'] ??
-                      "Station wagon");
-              vehicleTypeList
-                  .add(labelTextDetail['vehicle_type_station_wagon_value']);
-              vehicleTypeLabelList
-                  .add(labelTextDetail['vehicle_type_suv_text'] ?? "SUV");
-              vehicleTypeList.add(labelTextDetail['vehicle_type_suv_value']);
-              vehicleTypeLabelList
-                  .add(labelTextDetail['vehicle_type_truck_text'] ?? "Truck");
-              vehicleTypeList.add(labelTextDetail['vehicle_type_truck_value']);
-              vehicleTypeLabelList
-                  .add(labelTextDetail['vehicle_type_van_text'] ?? "Van");
-              vehicleTypeList.add(labelTextDetail['vehicle_type_van_value']);
             }
             if (data['labels']['messages'] != null) {
               popupTextDetail.addAll(data['labels']['messages']);

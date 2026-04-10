@@ -1379,6 +1379,7 @@ class RideController extends Controller
 
         $webRide = $this->webRidePersistence();
         $webRide->normalizePostRideRequest($request, $existingRide);
+        // syncronize request because web and app have different input fields now
         $this->normalizeAppPostRideRequest($request, $existingRide);
 
         $validator = $webRide->buildPostRideStoreValidator($request, $ride_id);
@@ -1733,7 +1734,21 @@ class RideController extends Controller
             $postRidePageData['indicates_required_field_text'] = $postRidePage->indicates_required_field_text;
         }
 
-        $data = ['postRidePage' => $postRidePageData, 'messages' => $messages, 'validationMessages' => $validationMessages];
+        // vehicle type list
+        $vehiclesTypes = collect($this->getRideFeatureOptionGroups()->get('vehicle_type', collect()))
+            ->sortBy('id')
+            ->values();
+        $vehicleOptions = $vehiclesTypes
+            ->pluck('features_setting_id')
+            ->values()
+            ->all();
+        $vehicleLabels = $vehiclesTypes
+            ->pluck('name')
+            ->values()
+            ->all();
+
+
+        $data = ['postRidePage' => $postRidePageData, 'vehicleOptions'=>$vehicleOptions, 'vehicleLabels'=>$vehicleLabels, 'messages' => $messages, 'validationMessages' => $validationMessages];
         return $this->successResponse($data, 'Post ride page get successfully');
     }
 
@@ -2172,6 +2187,8 @@ class RideController extends Controller
                 $merge['vehicle_mode'] = 'skip';
             } elseif ($this->isTruthyAppValue($request->input('add_vehicle'))) {
                 $merge['vehicle_mode'] = 'add_new';
+                $merge['vehicle_image'] = $request->file('image');
+
             } elseif ($this->isTruthyAppValue($request->input('added_vehicle')) || $request->filled('vehicle_id')) {
                 $merge['vehicle_mode'] = 'existing';
             } else {

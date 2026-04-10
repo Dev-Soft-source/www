@@ -86,6 +86,8 @@ class PostRideInitController extends Controller
 
                 // 11. Payment options
                 'paymentOptions' => $this->getPaymentOptionsData($langId),
+
+                'vehicleOptions' => $this->getVehicleOptionsData($langId),
             ];
 
             // Conditional: Get ride data if ride_id is provided
@@ -484,6 +486,33 @@ class PostRideInitController extends Controller
                 ->values()
                 ->all(),
             'paymentTooltips' => $paymentOptions
+                ->pluck('tooltip')
+                ->values()
+                ->all(),
+        ];
+    }
+    
+    /**
+     * Get vehicle options data
+     */
+    private function getVehicleOptionsData($langId)
+    {
+        // vehicle type list
+        $vehiclesTypes = collect($this->getRideFeatureOptionGroups($langId)->get('vehicle_type', collect()))
+            ->sortBy('id')
+            ->values();
+
+        return [
+            'vehicleOptions' => $vehiclesTypes
+                ->pluck('features_setting_id')
+                ->map(fn($id) => (string) $id)
+                ->values()
+                ->all(),
+            'vehicleLabels' => $vehiclesTypes
+                ->pluck('name')
+                ->values()
+                ->all(),
+            'vehicleTooltips' => $vehiclesTypes
                 ->pluck('tooltip')
                 ->values()
                 ->all(),
