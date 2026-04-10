@@ -618,11 +618,11 @@
                             </a>
                         @elseif ($link && \Illuminate\Support\Facades\Route::has($link))
                             @php
-                                $navUser = auth()->user();
-                                $profileIncomplete = $navUser && $navUser->email_verified == '1' && $navUser->step1 == 0;
-                                $navTargetRoute = $profileIncomplete ? 'step1to5' : $link;
+                                // $navUser = auth()->user();
+                                // $profileIncomplete = $navUser && $navUser->email_verified == '1' && $navUser->step1 == 0;
+                                // $navTargetRoute = $profileIncomplete ? 'step1to5' : $link;
                             @endphp
-                            <a href="{{ route($navTargetRoute, ['lang' => $langAbbr]) }}"
+                            <a href="{{ route($link, ['lang' => $langAbbr]) }}"
                                 class="flex gap-2 items-center px-4 py-2 hover:bg-gray-100">
                                 @if ($link === 'profile')
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
