@@ -329,7 +329,7 @@ class ProfileVehicleController extends Controller
                 'first_name' => $user->first_name,
             ];
             if (isset($user->email_notification) && $user->email_notification == 1) {
-                Mail::to($user->email)->send(new VehicleRemovedEmail($emailData));
+                Mail::to($user->email)->queue(new VehicleRemovedEmail($emailData));
             }
 
             $notification = Notification::create([
@@ -365,21 +365,7 @@ class ProfileVehicleController extends Controller
                 }
             }
 
-            $selectedLanguage = app()->getLocale();
-            if ($selectedLanguage) {
-                // Find the language by abbreviation
-                $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-
-                if ($selectedLanguage) {
-                    // Retrieve the HomePageSettingDetail associated with the selected language
-                    $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('vehicle_removed_message', 'general_error_message')->first();
-                }
-            } else {
-                $selectedLanguage = Language::where('is_default', 1)->first();
-                if ($selectedLanguage) {
-                    $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('vehicle_removed_message', 'general_error_message')->first();
-                }
-            }
+            $message = $this->successMessage;
 
             return $this->successResponse([], strip_tags($message->vehicle_removed_message));
         }
