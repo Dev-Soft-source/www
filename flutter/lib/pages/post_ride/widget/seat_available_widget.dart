@@ -21,9 +21,20 @@ Future<void> _showSeatsWarningModal(context, controller) async {
 
   await Get.dialog(
     AlertDialog(
-      title: Text(title),
+      title: Text(
+        title,
+        textAlign: TextAlign.center,
+      ),
+      titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+      titleTextStyle: const TextStyle(
+        fontFamily: carlito,
+        fontSize: 22,
+        fontWeight: FontWeight.w700,
+        color: textColor,
+      ),
       content: Text(
         description,
+        textAlign: TextAlign.justify,
         style: const TextStyle(
           fontFamily: carlito,
           fontSize: 16,
@@ -31,9 +42,18 @@ Future<void> _showSeatsWarningModal(context, controller) async {
           color: textColor,
         ),
       ),
+      actionsAlignment: MainAxisAlignment.center,
       actions: [
-        TextButton(
+        ElevatedButton(
           onPressed: () => Get.back(),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: successColor,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(5),
+            ),
+          ),
+          
           child: Text(gotItLabel),
         ),
       ],
@@ -54,7 +74,7 @@ Future<void> _setSeatAvailable({
     controller.errors.removeWhere((error) => error['title'] == "seats");
   }
 
-  if (seatCount > 5 && previousSeatCount <= 5) {
+  if (seatCount > 4 && previousSeatCount <= 4) {
     await _showSeatsWarningModal(context, controller);
   }
 }
