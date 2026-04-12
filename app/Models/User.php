@@ -222,10 +222,6 @@ class User extends Authenticatable
             return false;
         }
 
-        // Explicitly enabled by admin flag.
-        // if ((string) $this->pink_ride === '1') {
-        //     return true;
-        // }
         // Fallback to the same business rules used to build the tooltip/error message.
         return $this->pinkRideEligibilityError($pinkRideSetting) === null;
     }
@@ -242,56 +238,7 @@ class User extends Authenticatable
             return false;
         }
 
-        // if ((string) $this->folks_ride === '1') {
-        //     return true;
-        // }
-
-        $folkRideSetting = $folkRideSetting ?: FolkRideSetting::getCached();
-
-        if (!$folkRideSetting) {
-            return true;
-        }
-
-        $overallRating = $overallRating ?? $this->driverOverallRating();
-        $totalRides = $totalRides ?? $this->completedRideCount();
-        $noShowsCount = $noShowsCount ?? $this->recentDriverNoShowsCount();
-        $cancellationCount = $cancellationCount ?? $this->recentDriverCancellationCount();
-        $noshows = $noshows ?? $this->recentAnyDriverNoShowsCount();
-        $age = $this->age();
-
-        if ($folkRideSetting->requiresVerifiedPhone() && !$this->hasVerifiedPhone()) {
-            return false;
-        }
-
-        if ($folkRideSetting->requiresVerifiedEmail() && (string) $this->email_verified !== '1') {
-            return false;
-        }
-
-        if ($folkRideSetting->requiresDriverLicense() && (string) $this->driver !== '1') {
-            return false;
-        }
-
-        if (empty($this->government_issued_id) || empty($this->address)) {
-            return false;
-        }
-
-        if ($overallRating < (float) ($folkRideSetting->average_rating ?? 0)) {
-            return false;
-        }
-
-        if ($age < (int) ($folkRideSetting->driver_age ?? 0)) {
-            return false;
-        }
-
-        if ($totalRides < (int) ($folkRideSetting->extra_rides_trip_limit ?? 0)) {
-            return false;
-        }
-
-        if ($noShowsCount > 0 || $cancellationCount > 0 || $noshows > 0) {
-            return false;
-        }
-
-        return true;
+        return $this->extraRideEligibilityError($folkRideSetting) === null;
     }
 
     public function extraRideEligibilityError(
@@ -302,12 +249,9 @@ class User extends Authenticatable
         ?int $cancellationCount = null,
         ?int $noshows = null
     ): ?string {
+
         if ((string) $this->folks_ride === '0') {
             return 'You are not allowed to post Extra Care Rides. Please contact support if you believe this is an error.';
-        }
-
-        if ((string) $this->folks_ride === '1') {
-            return null;
         }
 
         $folkRideSetting = $folkRideSetting ?: FolkRideSetting::getCached();
@@ -323,53 +267,52 @@ class User extends Authenticatable
         $noshows = $noshows ?? $this->recentAnyDriverNoShowsCount();
         $age = $this->age();
 
-        if ($folkRideSetting->requiresVerifiedPhone() && !$this->hasVerifiedPhone()) {
-            return 'A verified phone number is required to post Extra Care Rides.';
-        }
-
-        if ($folkRideSetting->requiresVerifiedEmail() && (string) $this->email_verified !== '1') {
-            return 'A verified email is required to post Extra Care Rides.';
-        }
-
-        if ($folkRideSetting->requiresDriverLicense()) {
-            if ((string) $this->driver !== '1') {
-                return 'Driver verification is required to post Extra Care Rides.';
+        if ($this->folks_ride == ''){ 
+            if ($folkRideSetting->requiresVerifiedPhone() && !$this->hasVerifiedPhone()) {
+                return 'A verified phone number is required to post Extra Care Rides.';
             }
 
-            if (!$this->hasDriverLicenseUpload()) {
-                return 'A government-issued photo ID (driver\'s license) is required to post Extra Care Rides. Please upload your driver\'s license in your profile.';
+            if ($folkRideSetting->requiresVerifiedEmail() && (string) $this->email_verified !== '1') {
+                return 'A verified email is required to post Extra Care Rides.';
             }
-        }
 
-        if (empty($this->government_issued_id ?? $this->government_id ?? null) || empty($this->address ?? '')) {
-            return 'A complete address and government-issued ID are required to post Extra Care Rides.';
-        }
+            if ($folkRideSetting->requiresDriverLicense()) {
+                if ((string) $this->driver !== '1') {
+                    return 'Driver verification is required to post Extra Care Rides.';
+                }
 
-        if ($noShowsCount > 0) {
-            return 'Drivers with recent no-shows cannot post Extra Care Rides.';
-        }
+                if (!$this->hasDriverLicenseUpload()) {
+                    return 'A government-issued photo ID (driver\'s license) is required to post Extra Care Rides. Please upload your driver\'s license in your profile.';
+                }
+            }
 
-        if ($cancellationCount > 0 || $noshows > 0) {
-            return 'Drivers with recent cancellations cannot post Extra Care Rides.';
-        }
+            if (empty($this->government_issued_id ?? $this->government_id ?? null) || empty($this->address ?? '')) {
+                return 'A complete address and government-issued ID are required to post Extra Care Rides.';
+            }
 
-        $minRating = (float) ($folkRideSetting->average_rating ?? 0);
-        if ($overallRating < $minRating) {
-            return 'Extra Care Rides require a minimum driver rating of ' . $minRating . ' stars. Your current rating is ' . number_format((float) $overallRating, 1) . '.';
-        }
+            if ($noShowsCount > 0) {
+                return 'Drivers with recent no-shows cannot post Extra Care Rides.';
+            }
 
-        $minAge = (int) ($folkRideSetting->driver_age ?? 0);
-        if ($minAge > 0 && $age < $minAge) {
-            return 'Extra Care Rides require drivers to be at least ' . $minAge . ' years old.';
-        }
+            if ($cancellationCount > 0 || $noshows > 0) {
+                return 'Drivers with recent cancellations cannot post Extra Care Rides.';
+            }
 
-        $rideLimit = (int) ($folkRideSetting->extra_rides_trip_limit ?? 0);
-        if ($rideLimit > 0 && $totalRides < $rideLimit) {
-            return 'Extra Care Rides require at least ' . $rideLimit . ' completed rides.';
-        }
+            $minRating = (float) ($folkRideSetting->average_rating ?? 0);
+            if ($overallRating < $minRating) {
+                return 'Extra Care Rides require a minimum driver rating of ' . $minRating . ' stars. Your current rating is ' . number_format((float) $overallRating, 1) . '.';
+            }
 
-        if ($this->address == '') {
-            return 'You have to address.';
+            $minAge = (int) ($folkRideSetting->driver_age ?? 0);
+            if ($minAge > 0 && $age < $minAge) {
+                return 'Extra Care Rides require drivers to be at least ' . $minAge . ' years old.';
+            }
+
+            $rideLimit = (int) ($folkRideSetting->extra_rides_trip_limit ?? 0);
+            if ($rideLimit > 0 && $totalRides < $rideLimit) {
+                return 'Extra Care Rides require at least ' . $rideLimit . ' completed rides.';
+            }
+
         }
 
         return null;
@@ -382,9 +325,10 @@ class User extends Authenticatable
         if (!$pinkRideSetting) {
             return null;
         }
+
+        if ($this->pink_ride == ''){
         
-        if ($pinkRideSetting->requiresFemaleDriver()) {
-            if ((string) $this->pink_ride !== '1') {
+            if ($pinkRideSetting->requiresFemaleDriver()) {
                 if ($this->isPinkRideDisabled()) {
                     return 'You are not allowed to post Pink Rides. Please contact support if you believe this is an error.';
                 }
@@ -393,17 +337,27 @@ class User extends Authenticatable
                     return 'Only female drivers can post Pink Rides.';
                 }
             }
+
+            if ($pinkRideSetting->requiresDriverLicense() && !$this->hasDriverLicenseUpload()) {
+                return 'A government-issued photo ID (driver\'s license) is required to post Pink Rides. Please upload your driver\'s license in your profile.';
+            }
+            
+            if ($pinkRideSetting->requiresVerifiedEmail() && !$this->hasVerifiedEmail()) {
+                return 'You have to verified email';
+            }
+            
+            if ($pinkRideSetting->requiresVerifiedPhone() && !$this->hasVerifiedPhone()) {
+                return 'You have to verified phone number';
+            }
+
+            if (empty($this->address)) {
+                return 'You have to address.';
+            }
+
+            if (empty($this->government_issued_id)) {
+                return 'You have to government-issued photo ID.';
+            }
         }
-
-        if ($pinkRideSetting->requiresDriverLicense() && !$this->hasDriverLicenseUpload()) {
-            return 'A government-issued photo ID (driver\'s license) is required to post Pink Rides. Please upload your driver\'s license in your profile.';
-        }
-
-        if ($this->address == '') {
-            return 'You have to address.';
-        }
-
-
 
         return null;
     }
@@ -448,6 +402,14 @@ class User extends Authenticatable
             $parts[] = $postRidePage->pink_ride_tooltip_driver_license_text ?? '';
         }
 
+        if (empty($this->address)) {
+            $parts[] = 'and a valid address';
+        }
+
+        if (empty($this->government_issued_id)) {
+            $parts[] = 'and government-issued photo ID';
+        }
+
         $parts[] = $postRidePage->pink_ride_tooltip_verified_text ?? '';
         $parts[] = $postRidePage->pink_ride_tooltip_select_this_ride_text ?? '';
 
@@ -476,16 +438,15 @@ class User extends Authenticatable
 
         $parts = [
             $postRidePage->extra_care_tooltip_driver_review_text ?? '',
-            $folkRideSetting->average_rating ?? '0',
-            $postRidePage->extra_care_tooltip_greater_age_text ?? '',
             $folkRideSetting->driver_age ?? '0',
+            $postRidePage->extra_care_tooltip_greater_age_text ?? '',
+            $folkRideSetting->average_rating ?? '0',
             $postRidePage->extra_care_tooltip_greater_text ?? '',
         ];
 
-        if ($folkRideSetting->profile_complete === '1') {
-            $parts[] = $postRidePage->extra_care_tooltip_complete_profile_text ?? '';
+        if ($folkRideSetting->requiresDriverLicense() && (string) $this->driver !== '1') {
+            $parts[] = $postRidePage->extra_care_tooltip_driver_license_text ?? '';
         }
-
         if ($folkRideSetting->requiresVerifiedPhone() && !$this->hasVerifiedPhone()) {
             $parts[] = $postRidePage->extra_care_tooltip_phone_number_text ?? '';
         }
@@ -493,18 +454,26 @@ class User extends Authenticatable
         if ($folkRideSetting->requiresVerifiedEmail() && (string) $this->email_verified !== '1') {
             $parts[] = $postRidePage->extra_care_tooltip_email_text ?? '';
         }
-
-        if ($folkRideSetting->requiresDriverLicense() && (string) $this->driver !== '1') {
-            $parts[] = $postRidePage->extra_care_tooltip_driver_license_text ?? '';
+        if ($folkRideSetting->profile_complete === '1') {
+            $parts[] = $postRidePage->extra_care_tooltip_complete_profile_text ?? '';
         }
 
-        if (
-            $folkRideSetting->requiresVerifiedPhone() ||
-            $folkRideSetting->requiresVerifiedEmail() ||
-            $folkRideSetting->requiresDriverLicense()
-        ) {
-            $parts[] = $postRidePage->extra_care_tooltip_verified_text ?? '';
+
+        if (empty($this->address)) {
+            $parts[] = 'and a valid address';
         }
+
+        if (empty($this->government_issued_id)) {
+            $parts[] = 'and government-issued photo ID';
+        }
+
+        // if (
+        //     $folkRideSetting->requiresVerifiedPhone() ||
+        //     $folkRideSetting->requiresVerifiedEmail() ||
+        //     $folkRideSetting->requiresDriverLicense()
+        // ) {
+        //     $parts[] = $postRidePage->extra_care_tooltip_verified_text ?? '';
+        // }
 
         $parts[] = $postRidePage->extra_care_tooltip_eligible_text ?? '';
 

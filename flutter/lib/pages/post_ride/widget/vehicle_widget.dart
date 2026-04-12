@@ -476,9 +476,9 @@ Widget vehicleWidget(
                             i < controller.vehicleTypeList.length;
                             i++) ...[
                           DropdownMenuItem(
-                            value: controller.vehicleTypeList[i],
+                            value: controller.vehicleTypeList[i].toString(),
                             child: controller.vehicleType.value ==
-                                    controller.vehicleTypeList[i]
+                                    controller.vehicleTypeList[i].toString()
                                 ? Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
@@ -500,7 +500,7 @@ Widget vehicleWidget(
                         ],
                       ],
                       onChanged: (data) {
-                        controller.vehicleType.value = data!;
+                        controller.vehicleType.value = data?.toString() ?? "";
                         if (controller.errors.any(
                             (element) => element['title'] == "vehicle_type")) {
                           controller.errors.removeWhere(

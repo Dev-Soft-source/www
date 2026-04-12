@@ -570,7 +570,16 @@ class MyAppState extends State<MyApp> {
         GetPage(name: '/show-ride', page: () => const ShowRidePage()),
         GetPage(name: '/login', page: () => const LoginPage()),
         GetPage(name: '/signup', page: () => const SignupPage()),
-        GetPage(name: '/navigation', page: () => const NavigationPage()),
+        GetPage(
+          name: '/navigation',
+          page: () => const NavigationPage(),
+          binding: BindingsBuilder(() {
+            if (Get.isRegistered<MyTripController>()) {
+              final tripController = Get.find<MyTripController>();
+              Future.microtask(() => tripController.loadInitialData());
+            }
+          }),
+        ),
         GetPage(name: '/my_profile', page: () => const MyProfilePage()),
         GetPage(
           name: '/profile_detail/:type/:id/:pageType',

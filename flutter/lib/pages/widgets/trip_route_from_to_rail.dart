@@ -109,7 +109,7 @@ class TripRouteFromToRail extends StatelessWidget {
                     txt14Size(
                       title: pickup,
                       context: context,
-                      textColor: placeHolderColor,
+                      textColor: secondTextColor,
                       fontFamily: regular,
                     ),
                 ],
@@ -131,7 +131,7 @@ class TripRouteFromToRail extends StatelessWidget {
                 txt14Size(
                   title: dropOff,
                   context: context,
-                  textColor: placeHolderColor,
+                  textColor: secondTextColor,
                   fontFamily: regular,
                 ),
             ],

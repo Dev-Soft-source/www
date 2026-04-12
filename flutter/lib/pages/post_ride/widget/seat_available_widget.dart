@@ -7,6 +7,58 @@ import 'package:proximaride_app/pages/post_ride/widget/post_ride_widget.dart';
 
 import '../../widgets/tool_tip.dart';
 
+Future<void> _showSeatsWarningModal(context, controller) async {
+  final title = (controller.labelTextDetail['seats_warning_modal_heading'] ??
+          'Heads up for 5+ seats')
+      .toString();
+  final description =
+      (controller.labelTextDetail['seats_warning_modal_paragraph'] ??
+              'Please note that for large vehicles, your total trip collection must stay within non-commercial limits. To keep this a standard carpool, we suggest a lower price per seat. By law, total contributions cannot exceed the standard reimbursement limit (\$0.72/km).')
+          .toString();
+  final gotItLabel =
+      (controller.labelTextDetail['seats_warning_modal_got_it_btn'] ?? 'Got it')
+          .toString();
+
+  await Get.dialog(
+    AlertDialog(
+      title: Text(title),
+      content: Text(
+        description,
+        style: const TextStyle(
+          fontFamily: carlito,
+          fontSize: 16,
+          height: 1.4,
+          color: textColor,
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Get.back(),
+          child: Text(gotItLabel),
+        ),
+      ],
+    ),
+    barrierDismissible: true,
+  );
+}
+
+Future<void> _setSeatAvailable({
+  required context,
+  required controller,
+  required int seatCount,
+}) async {
+  final previousSeatCount = controller.seatAvailable.value;
+  controller.seatAvailable.value = seatCount;
+
+  if (controller.errors.any((error) => error['title'] == "seats")) {
+    controller.errors.removeWhere((error) => error['title'] == "seats");
+  }
+
+  if (seatCount > 5 && previousSeatCount <= 5) {
+    await _showSeatsWarningModal(context, controller);
+  }
+}
+
 Widget seatAvailableWidget(
     {context, controller, screenWidth, bool bookingCheck = false, error}) {
   return Container(
@@ -39,12 +91,11 @@ Widget seatAvailableWidget(
                         context: context,
                         onTap: bookingCheck == true
                             ? null
-                            : () {
-                                controller.seatAvailable.value = 1;
-                                if (controller.errors.any((error) => error['title'] == "seats")) {
-                                  controller.errors.removeWhere((error) => error['title'] == "seats");
-                                }
-                              },
+                            : () => _setSeatAvailable(
+                                context: context,
+                                controller: controller,
+                                seatCount: 1,
+                              ),
                         isActive:
                             controller.seatAvailable.value >= 1 ? true : false,
                         isError: controller.errors
@@ -54,12 +105,13 @@ Widget seatAvailableWidget(
                       5.widthBox,
                       seatImageWidget(
                         context: context,
-                        onTap: () {
-                          controller.seatAvailable.value = 2;
-                          if (controller.errors.any((error) => error['title'] == "seats")) {
-                            controller.errors.removeWhere((error) => error['title'] == "seats");
-                          }
-                        },
+                        onTap: bookingCheck == true
+                            ? null
+                            : () => _setSeatAvailable(
+                                  context: context,
+                                  controller: controller,
+                                  seatCount: 2,
+                                ),
                         isActive:
                             controller.seatAvailable.value >= 2 ? true : false,
                         isError: controller.errors
@@ -69,56 +121,61 @@ Widget seatAvailableWidget(
                       5.widthBox,
                       seatImageWidget(
                           context: context,
-                          onTap: () {
-                            controller.seatAvailable.value = 3;
-                            if (controller.errors.any((error) => error['title'] == "seats")) {
-                              controller.errors.removeWhere((error) => error['title'] == "seats");
-                            }
-                          },
+                          onTap: bookingCheck == true
+                              ? null
+                              : () => _setSeatAvailable(
+                                    context: context,
+                                    controller: controller,
+                                    seatCount: 3,
+                                  ),
                           isActive:
                               controller.seatAvailable.value >= 3 ? true : false),
                       5.widthBox,
                       seatImageWidget(
                           context: context,
-                          onTap: () {
-                            controller.seatAvailable.value = 4;
-                            if (controller.errors.any((error) => error['title'] == "seats")) {
-                              controller.errors.removeWhere((error) => error['title'] == "seats");
-                            }
-                          },
+                          onTap: bookingCheck == true
+                              ? null
+                              : () => _setSeatAvailable(
+                                    context: context,
+                                    controller: controller,
+                                    seatCount: 4,
+                                  ),
                           isActive:
                               controller.seatAvailable.value >= 4 ? true : false),
                       5.widthBox,
                       seatImageWidget(
                           context: context,
-                          onTap: () {
-                            controller.seatAvailable.value = 5;
-                            if (controller.errors.any((error) => error['title'] == "seats")) {
-                              controller.errors.removeWhere((error) => error['title'] == "seats");
-                            }
-                          },
+                          onTap: bookingCheck == true
+                              ? null
+                              : () => _setSeatAvailable(
+                                    context: context,
+                                    controller: controller,
+                                    seatCount: 5,
+                                  ),
                           isActive:
                               controller.seatAvailable.value >= 5 ? true : false),
                       5.widthBox,
                       seatImageWidget(
                           context: context,
-                          onTap: () {
-                            controller.seatAvailable.value = 6;
-                            if (controller.errors.any((error) => error['title'] == "seats")) {
-                              controller.errors.removeWhere((error) => error['title'] == "seats");
-                            }
-                          },
+                          onTap: bookingCheck == true
+                              ? null
+                              : () => _setSeatAvailable(
+                                    context: context,
+                                    controller: controller,
+                                    seatCount: 6,
+                                  ),
                           isActive:
                               controller.seatAvailable.value >= 6 ? true : false),
                       5.widthBox,
                       seatImageWidget(
                           context: context,
-                          onTap: () {
-                            controller.seatAvailable.value = 7;
-                            if (controller.errors.any((error) => error['title'] == "seats")) {
-                              controller.errors.removeWhere((error) => error['title'] == "seats");
-                            }
-                          },
+                          onTap: bookingCheck == true
+                              ? null
+                              : () => _setSeatAvailable(
+                                    context: context,
+                                    controller: controller,
+                                    seatCount: 7,
+                                  ),
                           isActive:
                               controller.seatAvailable.value >= 7 ? true : false),
                     ],

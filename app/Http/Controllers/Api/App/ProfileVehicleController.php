@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\App;
 
 use App\Http\Controllers\Controller;
-use App\Mail\NewVehicleAddedMail;
-use App\Mail\VehicleRemovedEmail;
+use App\Jobs\NotifyVehicleAddedJob;
+use App\Jobs\NotifyVehicleRemovedJob;
 use App\Services\FCMService;
 use App\Models\FCMToken;
 use App\Models\Language;
@@ -18,7 +18,6 @@ use App\Models\MyVehicleSettingDetail;
 use App\Models\Notification;
 use App\Models\SiteTextDetail;
 use App\Models\SuccessMessagesSettingDetail;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class ProfileVehicleController extends Controller
@@ -124,43 +123,7 @@ class ProfileVehicleController extends Controller
             'primary_vehicle' => $primaryVehicle
         ]);
 
-        if ($user->email_notification == 1) {
-            $emailData = [
-                'first_name' => $user->first_name,
-            ];
-            Mail::to($user->email)->queue(new NewVehicleAddedMail($emailData));
-        }
-        $notification = Notification::create([
-            'type' => null,
-            'receiver_id' => $user->id,
-            'posted_by' => $user->id,
-            'message' => getNotificationMessageText(
-                'vehicle_added_to_profile',
-                $user,
-                [],
-                'A new vehicle added to your profile'
-            ),
-            'status' => 'completed',
-            'notification_type' => 'vehicle'
-        ]);
-
-        // Send push notification
-        $fcmService = new FCMService();
-        $fcm_tokens = FCMToken::where('user_id', $user->id)->get();
-        $body = $notification->message;
-
-        $fcmToken = $user->mobile_fcm_token;
-        if ($fcmToken) {
-            $fcmService->sendNotification($fcmToken, $body);
-        }
-
-        foreach ($fcm_tokens as $fcm_token) {
-            try {
-                $fcmService->sendNotification($fcm_token->token, $body);
-            } catch (\Exception $e) {
-                Log::error("FCM Notification failed for token: $fcm_token->token, Error: " . $e->getMessage());
-            }
-        }
+        NotifyVehicleAddedJob::dispatch($user->id);
 
         $data = ['vehicle' => $vehicle];
         return $this->successResponse($data, strip_tags($message->vehicle_add_message));
@@ -265,22 +228,7 @@ class ProfileVehicleController extends Controller
             ]);
         }
 
-        $message = null;
-        $selectedLanguage = app()->getLocale();
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-
-            if ($selectedLanguage) {
-                // Retrieve the HomePageSettingDetail associated with the selected language
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('vehicle_update_message')->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('vehicle_update_message')->first();
-            }
-        }
+        $message = $this->successMessage;
 
         $vehicle = Vehicle::whereId($request->id)->first();
         $data = ['vehicle' => $vehicle];
@@ -310,46 +258,7 @@ class ProfileVehicleController extends Controller
             }
 
             $user = Auth::guard('sanctum')->user();
-
-            $emailData = [
-                'first_name' => $user->first_name,
-            ];
-            if (isset($user->email_notification) && $user->email_notification == 1) {
-                Mail::to($user->email)->queue(new VehicleRemovedEmail($emailData));
-            }
-
-            $notification = Notification::create([
-                'type' => null,
-                'category' => 'system',
-                'receiver_id' => $user->id,
-                'posted_by' => $user->id,
-                'message' => getNotificationMessageText(
-                    'vehicle_removed_from_profile',
-                    $user,
-                    [],
-                    'Vehicle removed from your profile'
-                ),
-                'status' => 'completed',
-                'notification_type' => 'vehicle'
-            ]);
-
-            // Send push notification
-            $fcmService = new FCMService();
-            $fcm_tokens = FCMToken::where('user_id', $user->id)->get();
-            $body = $notification->message;
-
-            $fcmToken = $user->mobile_fcm_token;
-            if ($fcmToken) {
-                $fcmService->sendNotification($fcmToken, $body);
-            }
-
-            foreach ($fcm_tokens as $fcm_token) {
-                try {
-                    $fcmService->sendNotification($fcm_token->token, $body);
-                } catch (\Exception $e) {
-                    Log::error("FCM Notification failed for token: $fcm_token->token, Error: " . $e->getMessage());
-                }
-            }
+            NotifyVehicleRemovedJob::dispatch($user->id);
 
             $message = $this->successMessage;
 

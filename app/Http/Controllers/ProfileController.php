@@ -289,9 +289,6 @@ class ProfileController extends Controller
         $country = Country::whereId($user->country)->first();
         $admin = Admin::first();
 
-
-        $defaultLangId = Language::where('is_default', '1')->value('id');
-
         $data = [
             'username' => $admin->username,
             'first_name' => $user->first_name,
@@ -300,27 +297,15 @@ class ProfileController extends Controller
             'phone' => $user->phone,
             'country' => $country->name,
             'lang_id' => $user->lang_id,
-            'defaultLangId' => $defaultLangId,
+            'defaultLangId' => $this->defaultLang->id,
             'upload_date' => \Carbon\Carbon::now()->format('M d, Y H:i:s'),
         ];
         // Send upload email
         Mail::to($admin->admin_email)->queue(new GovernmentIssuedIdUploadMail($data));
 
-        $message = null;
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('profile_update_message')->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('profile_update_message')->first();
-            }
-        }
+        
+        $message = $this->successMessage;
 
-        return redirect()->route('profile', ['lang' => $selectedLanguage->abbreviation])->with('message', $message->profile_update_message);
+        return redirect()->route('profile', ['lang' => $this->selectedLanguage->abbreviation])->with('message', $message->profile_update_message);
     }
 }

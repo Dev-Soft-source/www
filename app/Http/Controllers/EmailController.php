@@ -44,13 +44,7 @@ class EmailController extends Controller
 
     public function update($userId, Request $request)
     {
-        // Get language for redirects
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-        }
+        
         Log::info("User with ID {$userId} is attempting to update their email address.");
         try {
             $validated = $request->validate([
@@ -59,7 +53,7 @@ class EmailController extends Controller
                 'email' => 'required|email|string|unique:users,email,NULL,id,deleted_at,NULL|confirmed',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return redirect()->route('email', ['lang' => $selectedLanguage->abbreviation])
+            return redirect()->route('email', ['lang' => $this->selectedLanguage->abbreviation])
                 ->withErrors($e->errors())
                 ->withInput();
         }
@@ -146,23 +140,13 @@ class EmailController extends Controller
         Mail::to($user->email)->queue(new EmailAddressUpdatedEmail($verificationData));
         // Mail::to($user->email)->queue(new UserEmailVerification($verificationData));
 
-        $successMessages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)
-            ->select('email_update_verify_message', 'email_update_message')
-            ->first();
+        $successMessages = $this->successMessage;
 
-        if (!$successMessages) {
-            $defaultLang = Language::where('is_default', 1)->first();
-            $successMessages = $defaultLang
-                ? SuccessMessagesSettingDetail::where('language_id', $defaultLang->id)
-                    ->select('email_update_verify_message', 'email_update_message')
-                    ->first()
-                : null;
-        }
 
         $successMessage = ($successMessages?->email_update_verify_message ?? $successMessages?->email_update_message)
             ?? 'Email updated successfully. Please verify your new email address.';
 
-        return redirect()->route('email', ['lang' => $selectedLanguage->abbreviation])
+        return redirect()->route('email', ['lang' => $this->selectedLanguage->abbreviation])
             ->with('success', $successMessage);
     }
 }

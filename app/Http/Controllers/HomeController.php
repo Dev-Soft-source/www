@@ -82,13 +82,6 @@ class HomeController extends Controller
         $rides = Ride::limit(2)->get();
 
         foreach ($rides as $ride) {
-            // $ride->mapMultipleOptionColumnsToDetails(
-            //     ['luggage', 'payment_method', 'booking_type', 'animal_friendly', 'booking_method'],
-            //     $this->selectedLanguage->id,
-            //     $this->defaultLang->id,
-            //     false
-            // );
-
             $ride = $this->makeDetailOfRide($ride);
         }
 
@@ -369,15 +362,7 @@ class HomeController extends Controller
             'card_element' => 'required_if:payment_method,stripe',
         ]);
 
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('coffee_wall_heading_success_message', 'coffee_wall_text_success_message')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('coffee_wall_heading_success_message', 'coffee_wall_text_success_message')->first();
-        }
+        $messages = $this->successMessage;
 
         if ($request->package) {
             $package = Package::whereId($request->package)->first();
@@ -629,7 +614,7 @@ class HomeController extends Controller
                         'package_id' => $package->id ?? null,
                         'frequency' => $request->frequency,
                     ]);
-                    return redirect()->route('coffee_on_wall', ['lang' => $selectedLanguage->abbreviation])
+                    return redirect()->route('coffee_on_wall', ['lang' => $this->selectedLanguage->abbreviation])
                         ->with(['message' => 'Subscription creation failed. Error: PayPal plan is not configured for this package.']);
                 }
 
@@ -726,12 +711,12 @@ class HomeController extends Controller
                 }
 
                 if ($paypalResponse['status'] == 'Error') {
-                    return redirect()->route('coffee_on_wall', ['lang' => $selectedLanguage->abbreviation])
+                    return redirect()->route('coffee_on_wall', ['lang' => $this->selectedLanguage->abbreviation])
                         ->with(['message' => $paypalResponse['message']]);
                 } else if ($paypalResponse['status'] == 'Success') {
                     return redirect()->to($paypalResponse['redirect_url']);
                 }
-                return redirect()->route('coffee_on_wall', ['lang' => $selectedLanguage->abbreviation])->with(['message' => "Amount not processed"]);
+                return redirect()->route('coffee_on_wall', ['lang' => $this->selectedLanguage->abbreviation])->with(['message' => "Amount not processed"]);
             }
 
             // Handle designation array - convert to comma-separated string
@@ -813,7 +798,7 @@ class HomeController extends Controller
                 Mail::to($admin->admin_email)->queue(new AdminCoffeeOnWallDonationMail($adminData));
             }
 
-            return redirect()->route('coffee_on_wall', ['lang' => $selectedLanguage->abbreviation])->with(['message' => $messages->coffee_wall_text_success_message ?? "Thank you for your generosity. Please accept our best wishes"])->with('heading', $messages->coffee_wall_heading_success_message ?? 'Payment successful');
+            return redirect()->route('coffee_on_wall', ['lang' => $this->selectedLanguage->abbreviation])->with(['message' => $messages->coffee_wall_text_success_message ?? "Thank you for your generosity. Please accept our best wishes"])->with('heading', $messages->coffee_wall_heading_success_message ?? 'Payment successful');
         } catch (\Exception $e) {
             return $e->getMessage();
         }
@@ -872,30 +857,17 @@ class HomeController extends Controller
         ];
 
         if ($email) {
-            Mail::to($email)->send(new CoffeeOnWallReceiptMail($data));
-        }
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('coffee_wall_heading_success_message', 'coffee_wall_text_success_message')->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('coffee_wall_heading_success_message', 'coffee_wall_text_success_message')->first();
+            Mail::to($email)->queue(new CoffeeOnWallReceiptMail($data));
         }
 
-        return redirect()->route('coffee_on_wall', ['lang' => $selectedLanguage->abbreviation])->with(['message' => $messages->coffee_wall_text_success_message ?? "Thank you for your generosity. Please accept our best wishes"])->with('heading', $messages->coffee_wall_heading_success_message ?? 'Payment successful');
+        $messages = $this->successMessage;
+            
+        return redirect()->route('coffee_on_wall', ['lang' => $this->selectedLanguage->abbreviation])->with(['message' => $messages->coffee_wall_text_success_message ?? "Thank you for your generosity. Please accept our best wishes"])->with('heading', $messages->coffee_wall_heading_success_message ?? 'Payment successful');
     }
 
     public function getPackages(Request $request)
     {
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-        }
+        $selectedLanguage = $this->selectedLanguage;
 
         $data['packages'] = Package::with(['PackageDetail' => function ($query) use ($selectedLanguage) {
             $query->where('language_id', $selectedLanguage->id);

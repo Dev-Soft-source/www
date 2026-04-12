@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\NewVehicleAddedMail;
+use App\Jobs\NotifyVehicleAddedJob;
+use App\Jobs\NotifyVehicleRemovedJob;
 use App\Services\FCMService;
 use App\Models\FCMToken;
 use App\Models\FeaturesSettingDetail;
-use App\Mail\VehicleRemovedEmail;
 use App\Models\Language;
 use App\Models\MyVehicleSettingDetail;
 use App\Models\Notification;
@@ -19,7 +19,6 @@ use App\Models\SuccessMessagesSettingDetail;
 use App\Models\Vehicle;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
@@ -57,7 +56,7 @@ class ProfileVehicleController extends Controller
         $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $myVehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-        // $myVehiclePage = $this->mapVehicleTypeFields($myVehiclePage, $postRidePage);
+
         $userVehicleCount = 0;
         if (auth()->user()) {
             $user_id = auth()->user()->id;
@@ -142,49 +141,9 @@ class ProfileVehicleController extends Controller
             'remove_image' => $remove_image,
         ]);
         $user = auth()->user();
-        if ($user->email_notification == 1) {
-            $emailData = [
-                'first_name' => $user->first_name,
-            ];
-            Mail::to($user->email)->queue(new NewVehicleAddedMail($emailData));
-        }
 
-        // User::whereId($user->id)->update([
-        //     'step3' => 1
-        // ]);
 
-        $notification = Notification::create([
-            'type' => null,
-            'category' => 'system',
-            'receiver_id' => $user->id,
-            'posted_by' => $user->id,
-            'message' => getNotificationMessageText(
-                'vehicle_added_to_profile',
-                $user,
-                [],
-                'A new vehicle added to your profile'
-            ),
-            'status' => 'completed',
-            'notification_type' => 'vehicle'
-        ]);
-
-        // Send push notification
-        $fcmService = new FCMService();
-        $fcm_tokens = FCMToken::where('user_id', $user->id)->get();
-        $body = $notification->message;
-
-        $fcmToken = $user->mobile_fcm_token;
-        if ($fcmToken) {
-            $fcmService->sendNotification($fcmToken, $body);
-        }
-
-        foreach ($fcm_tokens as $fcm_token) {
-            try {
-                $fcmService->sendNotification($fcm_token->token, $body);
-            } catch (\Exception $e) {
-                Log::error("FCM Notification failed for token: $fcm_token->token, Error: " . $e->getMessage());
-            }
-        }
+        NotifyVehicleAddedJob::dispatch($user->id);
 
         return redirect()->route('profile.vehicle', ['lang' => $this->selectedLanguage->abbreviation])->with('message', $message->vehicle_add_message);
     }
@@ -199,7 +158,6 @@ class ProfileVehicleController extends Controller
         $ProfileSetting = ProfileSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
         $reviewSetting = MyReviewSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
 
-        // $myVehiclePage = $this->mapVehicleTypeFields($myVehiclePage, $postRidePage);
 
         $vehicle = Vehicle::findOrFail($id);
 
@@ -318,51 +276,20 @@ class ProfileVehicleController extends Controller
             }
         }
 
-        $message = null;
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('vehicle_update_message')->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('vehicle_update_message')->first();
-            }
-        }
-        return redirect()->route('profile.vehicle', ['lang' => $selectedLanguage->abbreviation])->with('message', $message->vehicle_update_message);
+        $message = $this->successMessage;
+
+        return redirect()->route('profile.vehicle', ['lang' => $this->selectedLanguage->abbreviation])->with('message', $message->vehicle_update_message);
     }
 
     public function destroy($lang = null, $id)
     {
         // todo: if the vehicle is primary and there are other vehicles, set the first remaining vehicle as primary after deletion
-        // todo: if there is no vehicle left after deletion, do step3 = 0 for the user
 
         // $user_id = auth()->user()->id;
         $user = auth()->user();
         $user_id = $user->id;
 
-        $message = null;
-        $languages = Language::getAllCached();
-        // Store the selected language in the session
-        if ($lang && in_array($lang, $languages->pluck('abbreviation')->toArray())) {
-            session(['selectedLanguage' => $lang]);
-        }
-        $selectedLanguage = session('selectedLanguage');
-        if ($selectedLanguage) {
-            // Find the language by abbreviation
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('vehicle_removed_message')->first();
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $message = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)->select('vehicle_removed_message')->first();
-            }
-        }
+        $message = $this->successMessage;
 
         $today = now()->toDateString();
         $currentTime = now()->toTimeString();
@@ -379,10 +306,9 @@ class ProfileVehicleController extends Controller
             ->exists();
 
         if ($hasUpcomingRide) {
-            $defaultLang = Language::where('is_default', 1)->first();
-            $myVehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($selectedLanguage->id, $defaultLang?->id ?? $selectedLanguage->id);
+            $myVehiclePage = MyVehicleSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
             $cannotDeleteMessage = $myVehiclePage->cannot_delete_vehicle_upcoming_ride_message ?? "You can't delete this vehicle because this vehicle is used in an upcoming ride";
-            return redirect()->route('profile.vehicle', ['lang' => $selectedLanguage->abbreviation])->with('message', $cannotDeleteMessage);
+            return redirect()->route('profile.vehicle', ['lang' => $this->selectedLanguage->abbreviation])->with('message', $cannotDeleteMessage);
         }
 
         // Check if we're deleting the primary vehicle
@@ -400,46 +326,9 @@ class ProfileVehicleController extends Controller
                     $firstRemainingVehicle->update(['primary_vehicle' => '1']);
                 }
             }
-            $emailData = [
-                'first_name' => $user->first_name,
-            ];
-            if (isset($user->email_notification) && $user->email_notification == 1) {
-                Mail::to($user->email)->send(new VehicleRemovedEmail($emailData));
-            }
+            NotifyVehicleRemovedJob::dispatch($user->id);
 
-            $notification = Notification::create([
-                'type' => null,
-                'receiver_id' => $user->id,
-                'posted_by' => $user->id,
-                'message' => getNotificationMessageText(
-                    'vehicle_removed_from_profile',
-                    $user,
-                    [],
-                    'Vehicle removed from your profile'
-                ),
-                'status' => 'completed',
-                'notification_type' => 'vehicle'
-            ]);
-
-            // Send push notification
-            $fcmService = new FCMService();
-            $fcm_tokens = FCMToken::where('user_id', $user->id)->get();
-            $body = $notification->message;
-
-            $fcmToken = $user->mobile_fcm_token;
-            if ($fcmToken) {
-                $fcmService->sendNotification($fcmToken, $body);
-            }
-
-            foreach ($fcm_tokens as $fcm_token) {
-                try {
-                    $fcmService->sendNotification($fcm_token->token, $body);
-                } catch (\Exception $e) {
-                    Log::error("FCM Notification failed for token: $fcm_token->token, Error: " . $e->getMessage());
-                }
-            }
-
-            return redirect()->route('profile.vehicle', ['lang' => $selectedLanguage->abbreviation])->with('message', $message->vehicle_removed_message);
+            return redirect()->route('profile.vehicle', ['lang' => $this->selectedLanguage->abbreviation])->with('message', $message->vehicle_removed_message);
         }
     }
 }

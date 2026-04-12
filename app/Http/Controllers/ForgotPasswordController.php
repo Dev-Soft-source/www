@@ -27,40 +27,14 @@ class ForgotPasswordController extends Controller
     }
 
     public function store(Request $request) {
-        $niceNames = [];
-        $messages = null;
-        $forgotPasswordPage = null;
-        $loginPage = null;
-        $selectedLanguage = session('selectedLanguage');
         
-        // Fetch language and messages
-        if ($selectedLanguage) {
-            $selectedLanguage = Language::where('abbreviation', $selectedLanguage)->first();
-            if ($selectedLanguage) {
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)
-                    ->select('no_user_found_message', 'reset_password_message')
-                    ->first();
+        $messages = $this->successMessage;
 
-                $forgotPasswordPage = ForgotPasswordPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $loginPage = LoginPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $niceNames = [
-                    'email' => isset($forgotPasswordPage) && isset($forgotPasswordPage->email_error) ? $forgotPasswordPage->email_error : '',
-                ];
-            }
-        } else {
-            $selectedLanguage = Language::where('is_default', 1)->first();
-            if ($selectedLanguage) {
-                $messages = SuccessMessagesSettingDetail::where('language_id', $selectedLanguage->id)
-                    ->select('no_user_found_message', 'reset_password_message')
-                    ->first();
-
-                $forgotPasswordPage = ForgotPasswordPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $loginPage = LoginPageSettingDetail::where('language_id', $selectedLanguage->id)->first();
-                $niceNames = [
-                    'email' => isset($forgotPasswordPage) && isset($forgotPasswordPage->email_error) ? $forgotPasswordPage->email_error : '',
-                ];
-            }
-        }
+        $forgotPasswordPage = ForgotPasswordPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $loginPage = LoginPageSettingDetail::getByLanguageWithFallback($this->selectedLanguage->id, $this->defaultLang->id);
+        $niceNames = [
+            'email' => isset($forgotPasswordPage) && isset($forgotPasswordPage->email_error) ? $forgotPasswordPage->email_error : '',
+        ];
 
         // Validate the form data with AJAX support
         try {
@@ -146,11 +120,11 @@ class ForgotPasswordController extends Controller
             'created_at' => Carbon::now()
         ]);
 
-        $data = ['token' => $token, 'first_name' => $user->first_name, 'lang' => $selectedLanguage->abbreviation];
+        $data = ['token' => $token, 'first_name' => $user->first_name, 'lang' => $this->selectedLanguage->abbreviation];
 
         // Send reset password mail
         try {
-            Mail::to($request->email)->send(new UserForgotPassword($data));
+            Mail::to($request->email)->queue(new UserForgotPassword($data));
         } catch (\Exception $e) {
             \Log::error('Forgot password email failed: ' . $e->getMessage());
             $errorMsg = isset($forgotPasswordPage) && isset($forgotPasswordPage->fail_send) ? $forgotPasswordPage->fail_send : 'Failed to send reset password email.';
@@ -174,7 +148,7 @@ class ForgotPasswordController extends Controller
             ]);
         }
 
-        return redirect()->route('forgot.password', ['lang' => $selectedLanguage->abbreviation])
+        return redirect()->route('forgot.password', ['lang' => $this->selectedLanguage->abbreviation])
                         ->with(['message' => $successMessage]);
     }
 }

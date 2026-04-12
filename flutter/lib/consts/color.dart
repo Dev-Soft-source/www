@@ -6,6 +6,7 @@ const Color inputColor = Color(0xFFEFEFEF);
 const Color tabBgColor = Color(0xFFF9F9F9);
 const Color reviewCardColor = Color(0xFFF9F9F9);
 const Color textColor = Color(0xFF000000);
+const Color secondTextColor = Color.fromARGB(255, 92, 92, 92);
 const Color placeHolderColor = Color(0xFF9AA3AF);
 const Color paymentCardColor = Color(0XFFF6F6F6);
 const Color btnPrimaryColor = Color(0XFF00A99D);
