@@ -101,11 +101,11 @@
                                 viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
-                            {{ $notificationsPageSetting->mark_all_as_read_button_label }}
+                            <label>{{ $notificationsPageSetting->mark_all_as_read_button_label }}</label>
                         </button>
-                        <span
+                        <label
                             class="text-gray-800 text-[1.3125rem] bg-blue-600 text-white px-2 py-1 rounded-lg font-medium">{{ $unreadNotificationsOnly->count() }}
-                            {{ $notificationsPageSetting->unread_label }}</span>
+                            {{ $notificationsPageSetting->unread_label }}</label>
                     </div>
                 @endif
             </div>
@@ -116,7 +116,7 @@
             <button type="button" onclick="toggleNotificationsInfoBar()"
                 class="w-full flex items-center justify-between gap-3 px-4 py-3 text-left transition-colors cursor-pointer"
                 aria-expanded="false" aria-controls="notifications-info-bar-content">
-                <span class="font-medium text-xl">{{ $notificationsPageSetting->info_bar_title }}</span>
+                <label class="font-medium text-xl">{{ $notificationsPageSetting->info_bar_title }}</label>
                 <svg id="notifications-info-bar-icon"
                     class="w-5 h-5 flex-shrink-0 transition-transform duration-300 ease-in-out" fill="none"
                     viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -228,10 +228,10 @@
                                                 </span>
                                             </div>
                                             <div class="flex-1 min-w-0">
-                                                <p
+                                                <label
                                                     class="font-medium text-gray-900 {{ $hasUnreadChat ? 'font-semibold' : '' }}">
                                                     {{ data_get($counterpart, 'first_name', '') }}
-                                                    {{ data_get($counterpart, 'last_name', '') }}</p>
+                                                    {{ data_get($counterpart, 'last_name', '') }}</label>
                                                 <p class="text-gray-600 mt-1 {{ $hasUnreadChat ? 'text-gray-800' : '' }}">
                                                     {{ data_get($notification, 'message') }}</p>
                                                 <p class="text-sm text-gray-400 mt-2 flex items-center">
@@ -411,14 +411,14 @@ if (
                                                 @endif
                                             </div>
                                             <div class="flex-1 min-w-0">
-                                                <p
+                                                <label
                                                     class="font-medium text-gray-900 {{ data_get($notification, 'is_read') == 0 ? 'font-semibold' : '' }}">
                                                     @if (data_get($notification, 'category') == 'system')
                                                         {{ config('app.name') }}
                                                     @else
                                                         {{ data_get($notification, 'sender') ? data_get($notification, 'sender.first_name') : 'System' }}
                                                     @endif
-                                                </p>
+                                            </label>
                                                 <p
                                                     class="text-gray-600 mt-1 {{ data_get($notification, 'is_read') == 0 ? 'text-gray-800' : '' }}">
                                                     {{ data_get($notification, 'message') }}</p>
