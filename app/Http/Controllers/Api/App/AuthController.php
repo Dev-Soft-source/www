@@ -336,6 +336,7 @@ class AuthController extends Controller
             'profile_image' => $request->photourl,
             'provider' => $request->type,
             'provider_id' => $request->type_id,
+            'referral_uuid' => bin2hex(random_bytes(16)),
             'lang_id' => $defaultLangId
         ]);
 
