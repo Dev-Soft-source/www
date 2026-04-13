@@ -95,15 +95,15 @@
         <form method="POST" action="{{ route('profile.update',$user->id) }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')
-            <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mt-4">
-                <div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div class="min-w-0">
                     <label for="">{{ $editProfilePage->first_name_label ?? 'First name' }} <span class="text-red-500">*</span></label>
                     <input type="text" name="first_name" placeholder="{{ $editProfilePage->first_name_placeholder ?? 'Enter your first name' }}" value="{{ old('first_name', $user->first_name) }}" class=" block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('first_name') ? 'border-red-500' : '' }}">
                     @error('first_name')
                       <div class="tooltip-error shadow-lg">{{ $message }}</div>
                     @enderror
                 </div>
-                <div>
+                <div class="min-w-0">
                     <label for="">{{ $editProfilePage->last_name_label ?? 'Last name' }} <span class="text-red-500">*</span></label>
                     <input type="text" name="last_name" placeholder="{{ $editProfilePage->last_name_placeholder ?? 'Enter your last name' }}" value="{{ old('last_name', $user->last_name) }}" class=" block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('last_name') ? 'border-red-500' : '' }}">
                     @error('last_name')
@@ -111,12 +111,12 @@
                     @enderror
                 </div>
 
-                <div>
+                <div class="min-w-0">
                     <label for="">{{ $editProfilePage->email_label ?? 'Email' }} <span class="text-red-500">*</span></label>
                     <input type="text" name="email" value="{{ old('email', $user->email) }}" disabled class=" block mt-1 border p-1.5 w-full text-base lg:text-lg rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('email') ? 'border-red-500' : '' }}">
                 </div>
 
-                <div>
+                <div class="min-w-0">
                     <label for="">{{ $editProfilePage->dob_label ?? 'Date of birth' }} <span class="text-red-500">*</span></label>
                     <input type="text" id="dateInput" name="dob" value="{{ old('dob', $user->dob) ? \Carbon\Carbon::parse($user->dob)->format('Y-m-d') : '' }}"
                         placeholder="{{ $editProfilePage->dob_placeholder ?? 'Select date of birth' }}"
@@ -129,20 +129,20 @@
                     </div>
                 </div>
 
-                <div class="md:col-span-2">
+                <div class="min-w-0">
                     <label for="">{{ $editProfilePage->gender_label ?? 'Gender' }} <span class="text-red-500">*</span></label>
-                    <div class="flex gap-4 md:justify-normal justify-between md:gap-x-8 items-center">
-                        <div>
+                    <div class="mt-2 flex flex-wrap gap-4">
+                        <div class="inline-flex items-center gap-2 whitespace-nowrap">
                             <input id="bordered-radio-1" type="radio" value="male" name="gender" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none" {{ old('gender', $user->gender) === 'male' ? 'checked' : '' }}>
-                            <label for="bordered-radio-1">{{ $editProfilePage->male_label ?? 'Male' }}</label>
+                            <label for="bordered-radio-1" class="leading-5">{{ $editProfilePage->male_label ?? 'Male' }}</label>
                         </div>
-                        <div>
+                        <div class="inline-flex items-center gap-2 whitespace-nowrap">
                             <input id="bordered-radio-2" type="radio" value="female" name="gender" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none" {{ old('gender', $user->gender) === 'female' ? 'checked' : '' }}>
-                            <label for="bordered-radio-2">{{ $editProfilePage->female_label ?? 'Female' }}</label>
+                            <label for="bordered-radio-2" class="leading-5">{{ $editProfilePage->female_label ?? 'Female' }}</label>
                         </div>
-                        <div>
+                        <div class="inline-flex items-center gap-2 whitespace-nowrap">
                             <input id="bordered-radio-3" type="radio" value="prefer not to say" name="gender" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-none" {{ old('gender', $user->gender) === 'prefer not to say' ? 'checked' : '' }}>
-                            <label for="bordered-radio-3">{{ $editProfilePage->prefer_no_to_say_label ?? 'Prefer not to say' }}</label>
+                            <label for="bordered-radio-3" class="leading-5">{{ $editProfilePage->prefer_no_to_say_label ?? 'Prefer not to say' }}</label>
                         </div>
                     </div>
                     @error('gender')
@@ -150,7 +150,7 @@
                     @enderror
                 </div>
 
-                <div class="md:col-span-2">
+                <div class="min-w-0">
                     <label for="">{{ $editProfilePage->country_label ?? 'Country' }} <span class="text-red-500">*</span></label>
                     <select name="country" id="country-dropdown" class="bg-white text-base lg:text-lg block mt-1 border p-1.5 w-full rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 placeholder:text-gray-900 {{ $errors->has('country') ? 'border-red-500' : '' }}">
                         <option value="">{{ $editProfilePage->country_placeholder ?? 'Select country' }}</option>
@@ -165,7 +165,7 @@
                     @enderror
                 </div>
 
-                <div>
+                <div class="min-w-0">
                     <label for="">{{ $editProfilePage->state_label ?? 'State/Province' }} <span class="text-red-500">*</span></label>
                     <select name="state" id="state-dropdown" class="bg-white block mt-1 text-base lg:text-lg border p-1.5 w-full rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 placeholder:text-gray-900 {{ $errors->has('country') ? 'border-red-500' : '' }}">
                     </select>
@@ -174,7 +174,7 @@
                     @enderror
                 </div>
 
-                <div>
+                <div class="min-w-0">
                     <label for="">{{ $editProfilePage->city_label ?? 'City' }} <span class="text-red-500">*</span></label>
                     <select name="city" id="city-dropdown" class="bg-white block text-base lg:text-lg mt-1 border p-1.5 w-full rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 placeholder:text-gray-900 {{ $errors->has('country') ? 'border-red-500' : '' }}">
                     </select>
@@ -183,7 +183,7 @@
                     @enderror
                 </div>
 
-                <div>
+                <div class="min-w-0">
                     <label for="">{{ $editProfilePage->address_label ?? 'Address' }}</label>
                     <input type="text" name="address" placeholder="{{ $editProfilePage->address_placeholder ?? 'Enter your address' }}" value="{{ old('address', $user->address) }}" class=" block mt-1 text-base lg:text-lg border p-1.5 w-full rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('address') ? 'border-red-500' : '' }}">
                     @error('address')
@@ -191,7 +191,7 @@
                     @enderror
                 </div>
 
-                <div>
+                <div class="min-w-0">
                     <label for="">{{ $editProfilePage->zip_label ?? 'Postal/Zip code' }} <span class="text-red-500">*</span></label>
                     <input type="text" name="zipcode" maxlength="7" value="{{ old('zipcode', $user->zipcode) }}" class=" block text-base lg:text-lg mt-1 border p-1.5 w-full rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('zipcode') ? 'border-red-500' : '' }}">
                     @error('zipcode')
@@ -199,9 +199,9 @@
                     @enderror
                 </div>
 
-                <div class="col-span-2">
+                <div class="md:col-span-2 min-w-0">
                     <label for="">{{ $editProfilePage->notification_label ?? 'Notifications' }}</label>
-                    <div class="flex flex-col sm:flex-col md:flex-row lg:flex-row items-center gap-6">
+                    <div class="mt-2 flex flex-col sm:flex-row sm:flex-wrap items-start gap-4 sm:gap-6">
                         @php
                             $emailNotifChecked = old('email_notification') !== null ? (old('email_notification') === 'on' || old('email_notification') == 1) : ($user->email_notification == 1);
                             $smsNotifChecked = old('sms_notification') !== null ? (old('sms_notification') === 'on' || old('sms_notification') == 1) : ($user->sms_notification == 1);
@@ -218,7 +218,7 @@
 
                 </div>
 
-                <div class= "mt-12 text-center md:text-left md:col-span-2">                  
+                <div class= "mt-12 text-center md:text-left md:col-span-2 min-w-0">                  
                     
                     <div class="bg-white rounded-lg overflow-hidden shadow-3xl">
                         <h3 class="text-2xl bg-primary text-white py-2 px-4">
@@ -268,7 +268,7 @@
                   
                
 
-                <div class="md:col-span-2 mt-8">
+                <div class="md:col-span-2 mt-8 min-w-0">
                     <label for="">{{ $editProfilePage->mini_bio_label ?? 'Mini bio' }} <span class="text-red-500">*</span></label>
                     <textarea id="message" rows="5" name="bio" class=" block mt-1 text-base lg:text-lg border p-1.5 w-full rounded border-gray-300 focus:ring-none focus:outline-none focus:border-blue-600 {{ $errors->has('bio') ? 'border-red-500' : '' }}">{{ old('bio', $user->about) }}</textarea>
                     @error('bio')
