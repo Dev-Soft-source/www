@@ -22,7 +22,7 @@
                                     @if (!empty($cancelledRides) && count($cancelledRides) > 0)
                                         @foreach ($cancelledRides as $ride)
                                             @php
-                                                $defaultDetail = $ride->rideDetail->first();
+                                                $defaultDetail = $ride->rideDetail()->first();
                                                 $from = optional($defaultDetail)->departure;
                                                 $to = optional($defaultDetail)->destination;
                                             @endphp

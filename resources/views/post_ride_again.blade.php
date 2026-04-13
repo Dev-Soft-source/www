@@ -35,7 +35,7 @@
                                     @if (!empty($rides) && count($rides) > 0)
                                         @foreach ($rides as $ride)
                                             @php
-                                                $firstDetail = $ride->rideDetail->first();
+                                                $firstDetail = $ride->rideDetail()->first();
                                                 $from = $firstDetail?->departure ?? '';
                                                 $to = $firstDetail?->destination ?? '';
                                             @endphp

@@ -32,9 +32,10 @@
                                                     <div class="rounded-lg shadow-3xl border-[3px] border-solid  border-gray-100 " id="ride-29">
                                                         <div class="flex items-center justify-between pb-0 p-4">
                                                             @php
+                                                                $rideDetail = $booking->ride->rideDetail;
                                                                 $bookingSegment = $booking->ride_detail_id
-                                                                    ? $booking->ride->rideDetail->firstWhere('id', $booking->ride_detail_id)
-                                                                    : $booking->ride->rideDetail->first(fn($d) => (string) $d->departure === (string) $booking->departure);
+                                                                    ? (($rideDetail && (string) $rideDetail->id === (string) $booking->ride_detail_id) ? $rideDetail : null)
+                                                                    : (($rideDetail && (string) $rideDetail->departure === (string) $booking->departure) ? $rideDetail : null);
                                                                 $displayDt = $bookingSegment
                                                                     ? (($bookingSegment->date ?? $booking->ride->date) . ' ' . ($bookingSegment->time ?? $booking->ride->time ?? '00:00'))
                                                                     : ($booking->ride->date . ' ' . ($booking->ride->time ?? '00:00'));

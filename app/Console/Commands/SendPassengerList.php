@@ -78,7 +78,7 @@ class SendPassengerList extends Command
                         'message' => 'Your passenger list ',
                         'status' => 'upcoming',
                         'notification_type' => 'upcoming',
-                        'ride_detail_id' => $ride->rideDetail->first()->id ?? null, // Assuming RideDetail has a first() method
+                        'ride_detail_id' => $ride->rideDetail()->first()->id ?? null, // Assuming RideDetail has a first() method
                         'departure' => $ride->departure,
                         'destination' => $ride->destination,
                     ]);

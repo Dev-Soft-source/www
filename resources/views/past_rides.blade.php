@@ -42,7 +42,7 @@
                                             @if (!empty($pastRides) && count($pastRides) > 0)
                                                 @foreach ($pastRides as $ride)
                                                     @php
-                                                        $defaultDetail = $ride->rideDetail->first();
+                                                        $defaultDetail = $ride->rideDetail()->first();
                                                         $from = optional($defaultDetail)->departure;
                                                         $to = optional($defaultDetail)->destination;
                                                     @endphp

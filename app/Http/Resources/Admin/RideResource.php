@@ -16,7 +16,7 @@ class RideResource extends JsonResource
             return [];
         }
 
-        $defaultRideDetail = $this->rideDetail->first();
+        $defaultRideDetail = $this->rideDetail()->first();
         $paymentMethodName = FeaturesSettingDetail::where('features_setting_id', $this->payment_method)
             ->first()?->name;
 
