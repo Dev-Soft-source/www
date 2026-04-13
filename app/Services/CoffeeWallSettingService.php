@@ -59,44 +59,6 @@ class CoffeeWallSettingService
                 $errorMessages = array_merge($errorMessages, ['designation_option3.designation_option3_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
                 $validationRule = array_merge($validationRule, ['designation_option4.designation_option4_' . $language->id => ['required', 'string']]);
                 $errorMessages = array_merge($errorMessages, ['designation_option4.designation_option4_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['contact_infomation_label.contact_infomation_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['contact_infomation_label.contact_infomation_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['faq_donors_label.faq_donors_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['faq_donors_label.faq_donors_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['faq_donors_1_question.faq_donors_1_question_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['faq_donors_1_question.faq_donors_1_question_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['faq_donors_1_answer.faq_donors_1_answer_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['faq_donors_1_answer.faq_donors_1_answer_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['faq_donors_2_question.faq_donors_2_question_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['faq_donors_2_question.faq_donors_2_question_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['faq_donors_2_answer.faq_donors_2_answer_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['faq_donors_2_answer.faq_donors_2_answer_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['faq_donors_3_question.faq_donors_3_question_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['faq_donors_3_question.faq_donors_3_question_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['faq_donors_3_answer.faq_donors_3_answer_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['faq_donors_3_answer.faq_donors_3_answer_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['faq_donors_4_question.faq_donors_4_question_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['faq_donors_4_question.faq_donors_4_question_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['faq_donors_4_answer.faq_donors_4_answer_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['faq_donors_4_answer.faq_donors_4_answer_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['faq_beneficiary_label.faq_beneficiary_label_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['faq_beneficiary_label.faq_beneficiary_label_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['faq_beneficiary_1_question.faq_beneficiary_1_question_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['faq_beneficiary_1_question.faq_beneficiary_1_question_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['faq_beneficiary_1_answer.faq_beneficiary_1_answer_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['faq_beneficiary_1_answer.faq_beneficiary_1_answer_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['faq_beneficiary_2_question.faq_beneficiary_2_question_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['faq_beneficiary_2_question.faq_beneficiary_2_question_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['faq_beneficiary_2_answer.faq_beneficiary_2_answer_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['faq_beneficiary_2_answer.faq_beneficiary_2_answer_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['faq_beneficiary_3_question.faq_beneficiary_3_question_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['faq_beneficiary_3_question.faq_beneficiary_3_question_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['faq_beneficiary_3_answer.faq_beneficiary_3_answer_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['faq_beneficiary_3_answer.faq_beneficiary_3_answer_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['faq_beneficiary_4_question.faq_beneficiary_4_question_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['faq_beneficiary_4_question.faq_beneficiary_4_question_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
-                $validationRule = array_merge($validationRule, ['faq_beneficiary_4_answer.faq_beneficiary_4_answer_' . $language->id => ['required', 'string']]);
-                $errorMessages = array_merge($errorMessages, ['faq_beneficiary_4_answer.faq_beneficiary_4_answer_' . $language->id . '.required' => 'This field in ' . $language->name . ' is required.']);
             }
         }
         return ['validation_rules' => $validationRule, 'error_messages' => $errorMessages, 'nice_names' => $niceNames];
@@ -131,25 +93,6 @@ class CoffeeWallSettingService
             'designation_option2' => $this->data($request, $language, 'designation_option2'),
             'designation_option3' => $this->data($request, $language, 'designation_option3'),
             'designation_option4' => $this->data($request, $language, 'designation_option4'),
-            'contact_infomation_label' => $this->data($request, $language, 'contact_infomation_label'),
-            'faq_donors_label' => $this->data($request, $language, 'faq_donors_label'),
-            'faq_donors_1_question' => $this->data($request, $language, 'faq_donors_1_question'),
-            'faq_donors_1_answer' => $this->data($request, $language, 'faq_donors_1_answer'),
-            'faq_donors_2_question' => $this->data($request, $language, 'faq_donors_2_question'),
-            'faq_donors_2_answer' => $this->data($request, $language, 'faq_donors_2_answer'),
-            'faq_donors_3_question' => $this->data($request, $language, 'faq_donors_3_question'),
-            'faq_donors_3_answer' => $this->data($request, $language, 'faq_donors_3_answer'),
-            'faq_donors_4_question' => $this->data($request, $language, 'faq_donors_4_question'),
-            'faq_donors_4_answer' => $this->data($request, $language, 'faq_donors_4_answer'),
-            'faq_beneficiary_label' => $this->data($request, $language, 'faq_beneficiary_label'),
-            'faq_beneficiary_1_question' => $this->data($request, $language, 'faq_beneficiary_1_question'),
-            'faq_beneficiary_1_answer' => $this->data($request, $language, 'faq_beneficiary_1_answer'),
-            'faq_beneficiary_2_question' => $this->data($request, $language, 'faq_beneficiary_2_question'),
-            'faq_beneficiary_2_answer' => $this->data($request, $language, 'faq_beneficiary_2_answer'),
-            'faq_beneficiary_3_question' => $this->data($request, $language, 'faq_beneficiary_3_question'),
-            'faq_beneficiary_3_answer' => $this->data($request, $language, 'faq_beneficiary_3_answer'),
-            'faq_beneficiary_4_question' => $this->data($request, $language, 'faq_beneficiary_4_question'),
-            'faq_beneficiary_4_answer' => $this->data($request, $language, 'faq_beneficiary_4_answer'),
             'monthly_label' => $this->data($request, $language, 'monthly_label'),
             'quarterly_label' => $this->data($request, $language, 'quarterly_label'),
             'semi_annually_label' => $this->data($request, $language, 'semi_annually_label'),
